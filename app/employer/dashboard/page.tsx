@@ -24,16 +24,7 @@ export default function EmployerDashboardPage() {
   const [department, setDepartment] = useState("");
   const [experienceLevel, setExperienceLevel] = useState("Early Career (0-2 Yrs)");
   const [skillsNeeded, setSkillsNeeded] = useState<string[]>([]);
-  const [roles, setRoles] = useState<JobPosting[]>([
-    {
-      id: "role-1",
-      title: "Backend Engineer (Go / Distributed Systems)",
-      department: "Core Infrastructure",
-      skills: ["Go", "PostgreSQL", "Docker", "gRPC"],
-      experienceLevel: "0-2 Yrs",
-      status: "active",
-    },
-  ]);
+  const [roles, setRoles] = useState<JobPosting[]>([]);
 
   const [formSuccess, setFormSuccess] = useState(false);
 
