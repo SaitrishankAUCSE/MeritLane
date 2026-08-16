@@ -1,50 +1,95 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { createUserWithEmailAndPassword, signInWithPopup, GoogleAuthProvider } from "firebase/auth";
 import { auth } from "@/lib/firebase/config";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
+import { useAuth } from "@/lib/auth/AuthContext";
+import { createUserProfile, Role } from "@/lib/firebase/users";
+import RoleSelector from "@/components/RoleSelector";
+import { Users, Briefcase } from "lucide-react";
 
 export default function SignupPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [role, setRole] = useState<Role | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [loadingAction, setLoadingAction] = useState(false);
+  const [showRoleSelector, setShowRoleSelector] = useState(false);
+  
+  const { user, role: userRole, loading: authLoading, profileLoading, refreshProfile } = useAuth();
   const router = useRouter();
+
+  // Redirect if already logged in and has a role
+  useEffect(() => {
+    if (!authLoading && !profileLoading && user) {
+      if (userRole) {
+        router.push(userRole === "candidate" ? "/candidate/profile" : "/employer/dashboard");
+      } else {
+        // Logged in via Google but no role selected yet
+        setShowRoleSelector(true);
+      }
+    }
+  }, [user, userRole, authLoading, profileLoading, router]);
 
   const handleEmailSignup = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
+    if (!role) {
+      setError("Please select a role before signing up.");
+      return;
+    }
+    
+    setLoadingAction(true);
     setError(null);
     try {
-      await createUserWithEmailAndPassword(auth, email, password);
-      router.push("/candidate/profile");
+      const userCred = await createUserWithEmailAndPassword(auth, email, password);
+      await createUserProfile(userCred.user.uid, {
+        email: userCred.user.email || email,
+        role: role,
+        displayName: "",
+        authProvider: "password"
+      });
+      await refreshProfile();
+      // Route change handled by useEffect when profile loads
     } catch (err: any) {
-      setError(err.message || "Failed to create an account.");
-    } finally {
-      setLoading(false);
+      if (err.code === "auth/email-already-in-use") {
+        setError("An account already exists with this email. Log in instead.");
+      } else {
+        setError(err.message || "Failed to create an account.");
+      }
+      setLoadingAction(false);
     }
   };
 
   const handleGoogleSignup = async () => {
-    setLoading(true);
+    setLoadingAction(true);
     setError(null);
     try {
       const provider = new GoogleAuthProvider();
+      // signInWithPopup creates an account if it doesn't exist
       await signInWithPopup(auth, provider);
-      router.push("/candidate/profile");
+      // Wait for AuthContext to pick up the user, which will trigger fetchUserProfile
+      // If they have no role, the useEffect will show RoleSelector.
+      // If they do have a role, the useEffect will redirect them.
     } catch (err: any) {
       setError(err.message || "Failed to sign up with Google.");
-    } finally {
-      setLoading(false);
+      setLoadingAction(false);
     }
   };
 
+  if (authLoading || profileLoading || (user && userRole)) {
+    return <div className="min-h-[80vh]"></div>; // Skeleton/blank while resolving auth
+  }
+
+  if (showRoleSelector) {
+    return <RoleSelector />;
+  }
+
   return (
-    <div className="flex min-h-[80vh] items-center justify-center px-4">
+    <div className="flex min-h-[80vh] items-center justify-center px-4 py-12">
       <div className="w-full max-w-md rounded-lg border border-zinc-200 bg-white p-6 sm:p-8 shadow-sm">
         <h1 className="text-2xl font-semibold tracking-tight text-zinc-900 text-center">
           Join Meritlane
@@ -59,7 +104,37 @@ export default function SignupPage() {
           </div>
         )}
 
-        <form onSubmit={handleEmailSignup} className="mt-6 space-y-4">
+        <form onSubmit={handleEmailSignup} className="mt-6 space-y-5">
+          <div className="space-y-3">
+            <label className="text-sm font-medium text-zinc-900">Select your role</label>
+            <div className="grid grid-cols-2 gap-3">
+              <button
+                type="button"
+                onClick={() => setRole("candidate")}
+                className={`flex flex-col items-center gap-2 rounded-lg border-2 p-3 text-sm font-medium transition-colors ${
+                  role === "candidate"
+                    ? "border-zinc-900 bg-zinc-50 text-zinc-900"
+                    : "border-zinc-200 text-zinc-500 hover:border-zinc-300"
+                }`}
+              >
+                <Users className="h-5 w-5" />
+                Candidate
+              </button>
+              <button
+                type="button"
+                onClick={() => setRole("employer")}
+                className={`flex flex-col items-center gap-2 rounded-lg border-2 p-3 text-sm font-medium transition-colors ${
+                  role === "employer"
+                    ? "border-blue-600 bg-blue-50 text-blue-700"
+                    : "border-zinc-200 text-zinc-500 hover:border-zinc-300"
+                }`}
+              >
+                <Briefcase className="h-5 w-5" />
+                Employer
+              </button>
+            </div>
+          </div>
+
           <Input
             label="Email Address"
             type="email"
@@ -77,8 +152,8 @@ export default function SignupPage() {
             required
             helperText="Must be at least 6 characters long."
           />
-          <Button type="submit" className="w-full" disabled={loading} variant="primary">
-            {loading ? "Creating account..." : "Sign Up"}
+          <Button type="submit" className="w-full" disabled={loadingAction} variant="primary">
+            {loadingAction ? "Creating account..." : "Sign Up"}
           </Button>
         </form>
 
@@ -93,7 +168,7 @@ export default function SignupPage() {
           onClick={handleGoogleSignup}
           className="mt-4 w-full"
           variant="outline"
-          disabled={loading}
+          disabled={loadingAction}
         >
           <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24">
             <path

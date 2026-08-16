@@ -1,50 +1,83 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider } from "firebase/auth";
 import { auth } from "@/lib/firebase/config";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
+import { useAuth } from "@/lib/auth/AuthContext";
+import { updateLastLogin } from "@/lib/firebase/users";
+import RoleSelector from "@/components/RoleSelector";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [loadingAction, setLoadingAction] = useState(false);
+  const [showRoleSelector, setShowRoleSelector] = useState(false);
+  
+  const { user, role: userRole, loading: authLoading, profileLoading, refreshProfile } = useAuth();
   const router = useRouter();
+
+  // Redirect if already logged in and has a role
+  useEffect(() => {
+    if (!authLoading && !profileLoading && user) {
+      if (userRole) {
+        updateLastLogin(user.uid).catch(console.error);
+        router.push(userRole === "candidate" ? "/candidate/profile" : "/employer/dashboard");
+      } else {
+        // Logged in via Google but no role selected yet
+        setShowRoleSelector(true);
+      }
+    }
+  }, [user, userRole, authLoading, profileLoading, router]);
 
   const handleEmailLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
+    setLoadingAction(true);
     setError(null);
     try {
       await signInWithEmailAndPassword(auth, email, password);
-      router.push("/candidate/profile");
+      // Wait for AuthContext to pick up the user and updateLastLogin in useEffect
     } catch (err: any) {
-      setError(err.message || "Failed to sign in. Please check your credentials.");
-    } finally {
-      setLoading(false);
+      if (err.code === "auth/invalid-credential") {
+        setError("No account found with those credentials. Sign up first.");
+      } else if (err.code === "auth/user-not-found") {
+        setError("No account found. Sign up first.");
+      } else {
+        setError(err.message || "Failed to sign in. Please check your credentials.");
+      }
+      setLoadingAction(false);
     }
   };
 
   const handleGoogleLogin = async () => {
-    setLoading(true);
+    setLoadingAction(true);
     setError(null);
     try {
       const provider = new GoogleAuthProvider();
       await signInWithPopup(auth, provider);
-      router.push("/candidate/profile");
+      // Wait for AuthContext to pick up the user, which will trigger fetchUserProfile
+      // If they have no role, the useEffect will show RoleSelector.
+      // If they do have a role, the useEffect will redirect them.
     } catch (err: any) {
       setError(err.message || "Failed to sign in with Google.");
-    } finally {
-      setLoading(false);
+      setLoadingAction(false);
     }
   };
 
+  if (authLoading || profileLoading || (user && userRole)) {
+    return <div className="min-h-[80vh]"></div>; // Skeleton/blank while resolving auth
+  }
+
+  if (showRoleSelector) {
+    return <RoleSelector />;
+  }
+
   return (
-    <div className="flex min-h-[80vh] items-center justify-center px-4">
+    <div className="flex min-h-[80vh] items-center justify-center px-4 py-12">
       <div className="w-full max-w-md rounded-lg border border-zinc-200 bg-white p-6 sm:p-8 shadow-sm">
         <h1 className="text-2xl font-semibold tracking-tight text-zinc-900 text-center">
           Sign In to Meritlane
@@ -76,8 +109,8 @@ export default function LoginPage() {
             placeholder="••••••••"
             required
           />
-          <Button type="submit" className="w-full" disabled={loading} variant="primary">
-            {loading ? "Signing in..." : "Sign In"}
+          <Button type="submit" className="w-full" disabled={loadingAction} variant="primary">
+            {loadingAction ? "Signing in..." : "Sign In"}
           </Button>
         </form>
 
@@ -92,7 +125,7 @@ export default function LoginPage() {
           onClick={handleGoogleLogin}
           className="mt-4 w-full"
           variant="outline"
-          disabled={loading}
+          disabled={loadingAction}
         >
           <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24">
             <path

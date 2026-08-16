@@ -6,6 +6,9 @@ import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
 import { TagInput } from "@/components/ui/TagInput";
 import { Badge } from "@/components/ui/Badge";
+import { useAuth } from "@/lib/auth/AuthContext";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 
 interface JobPosting {
   id: string;
@@ -17,6 +20,22 @@ interface JobPosting {
 }
 
 export default function EmployerDashboardPage() {
+  const { user, role: userRole, loading: authLoading, profileLoading } = useAuth();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!authLoading && !user) {
+      router.push("/login");
+      return;
+    }
+
+    if (!authLoading && !profileLoading && user) {
+      if (userRole && userRole !== "employer") {
+        router.push("/candidate/profile");
+      }
+    }
+  }, [user, userRole, authLoading, profileLoading, router]);
+
   const [activeTab, setActiveTab] = useState<"candidates" | "post-role">("candidates");
 
   // Post Role Form State

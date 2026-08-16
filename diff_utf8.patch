@@ -1,0 +1,873 @@
+﻿diff --git a/app/candidate/profile/page.tsx b/app/candidate/profile/page.tsx
+index e09fcb3..9bfd7ba 100644
+--- a/app/candidate/profile/page.tsx
++++ b/app/candidate/profile/page.tsx
+@@ -11,7 +11,7 @@ import { useRouter } from "next/navigation";
+ import { fetchCandidateProfile, saveCandidateProfile, ProjectEntry } from "@/lib/firebase/candidate";
+ 
+ export default function CandidateProfilePage() {
+-  const { user, loading: authLoading } = useAuth();
++  const { user, role: userRole, loading: authLoading, profileLoading } = useAuth();
+   const router = useRouter();
+   const [dataLoading, setDataLoading] = useState(true);
+   const [saving, setSaving] = useState(false);
+@@ -32,7 +32,12 @@ export default function CandidateProfilePage() {
+       return;
+     }
+ 
+-    if (user) {
++    if (!authLoading && !profileLoading && user) {
++      if (userRole && userRole !== "candidate") {
++        router.push("/employer/dashboard");
++        return;
++      }
++      
+       fetchCandidateProfile(user.uid)
+         .then((profile) => {
+           if (profile) {
+@@ -54,7 +59,7 @@ export default function CandidateProfilePage() {
+           setDataLoading(false);
+         });
+     }
+-  }, [user, authLoading, router]);
++  }, [user, userRole, authLoading, profileLoading, router]);
+ 
+   const addProject = () => {
+     const newProject: ProjectEntry = {
+diff --git a/app/employer/dashboard/page.tsx b/app/employer/dashboard/page.tsx
+index 451c26a..e0afcf3 100644
+--- a/app/employer/dashboard/page.tsx
++++ b/app/employer/dashboard/page.tsx
+@@ -6,6 +6,9 @@ import { Input } from "@/components/ui/Input";
+ import { Button } from "@/components/ui/Button";
+ import { TagInput } from "@/components/ui/TagInput";
+ import { Badge } from "@/components/ui/Badge";
++import { useAuth } from "@/lib/auth/AuthContext";
++import { useRouter } from "next/navigation";
++import { useEffect } from "react";
+ 
+ interface JobPosting {
+   id: string;
+@@ -17,6 +20,22 @@ interface JobPosting {
+ }
+ 
+ export default function EmployerDashboardPage() {
++  const { user, role: userRole, loading: authLoading, profileLoading } = useAuth();
++  const router = useRouter();
++
++  useEffect(() => {
++    if (!authLoading && !user) {
++      router.push("/login");
++      return;
++    }
++
++    if (!authLoading && !profileLoading && user) {
++      if (userRole && userRole !== "employer") {
++        router.push("/candidate/profile");
++      }
++    }
++  }, [user, userRole, authLoading, profileLoading, router]);
++
+   const [activeTab, setActiveTab] = useState<"candidates" | "post-role">("candidates");
+ 
+   // Post Role Form State
+diff --git a/app/login/page.tsx b/app/login/page.tsx
+index 24b1159..474e430 100644
+--- a/app/login/page.tsx
++++ b/app/login/page.tsx
+@@ -1,50 +1,83 @@
+ "use client";
+ 
+-import React, { useState } from "react";
++import React, { useState, useEffect } from "react";
+ import { signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider } from "firebase/auth";
+ import { auth } from "@/lib/firebase/config";
+ import { useRouter } from "next/navigation";
+ import Link from "next/link";
+ import { Input } from "@/components/ui/Input";
+ import { Button } from "@/components/ui/Button";
++import { useAuth } from "@/lib/auth/AuthContext";
++import { updateLastLogin } from "@/lib/firebase/users";
++import RoleSelector from "@/components/RoleSelector";
+ 
+ export default function LoginPage() {
+   const [email, setEmail] = useState("");
+   const [password, setPassword] = useState("");
+   const [error, setError] = useState<string | null>(null);
+-  const [loading, setLoading] = useState(false);
++  const [loadingAction, setLoadingAction] = useState(false);
++  const [showRoleSelector, setShowRoleSelector] = useState(false);
++  
++  const { user, role: userRole, loading: authLoading, profileLoading, refreshProfile } = useAuth();
+   const router = useRouter();
+ 
++  // Redirect if already logged in and has a role
++  useEffect(() => {
++    if (!authLoading && !profileLoading && user) {
++      if (userRole) {
++        updateLastLogin(user.uid).catch(console.error);
++        router.push(userRole === "candidate" ? "/candidate/profile" : "/employer/dashboard");
++      } else {
++        // Logged in via Google but no role selected yet
++        setShowRoleSelector(true);
++      }
++    }
++  }, [user, userRole, authLoading, profileLoading, router]);
++
+   const handleEmailLogin = async (e: React.FormEvent) => {
+     e.preventDefault();
+-    setLoading(true);
++    setLoadingAction(true);
+     setError(null);
+     try {
+       await signInWithEmailAndPassword(auth, email, password);
+-      router.push("/candidate/profile");
++      // Wait for AuthContext to pick up the user and updateLastLogin in useEffect
+     } catch (err: any) {
+-      setError(err.message || "Failed to sign in. Please check your credentials.");
+-    } finally {
+-      setLoading(false);
++      if (err.code === "auth/invalid-credential") {
++        setError("No account found with those credentials. Sign up first.");
++      } else if (err.code === "auth/user-not-found") {
++        setError("No account found. Sign up first.");
++      } else {
++        setError(err.message || "Failed to sign in. Please check your credentials.");
++      }
++      setLoadingAction(false);
+     }
+   };
+ 
+   const handleGoogleLogin = async () => {
+-    setLoading(true);
++    setLoadingAction(true);
+     setError(null);
+     try {
+       const provider = new GoogleAuthProvider();
+       await signInWithPopup(auth, provider);
+-      router.push("/candidate/profile");
++      // Wait for AuthContext to pick up the user, which will trigger fetchUserProfile
++      // If they have no role, the useEffect will show RoleSelector.
++      // If they do have a role, the useEffect will redirect them.
+     } catch (err: any) {
+       setError(err.message || "Failed to sign in with Google.");
+-    } finally {
+-      setLoading(false);
++      setLoadingAction(false);
+     }
+   };
+ 
++  if (authLoading || profileLoading || (user && userRole)) {
++    return <div className="min-h-[80vh]"></div>; // Skeleton/blank while resolving auth
++  }
++
++  if (showRoleSelector) {
++    return <RoleSelector />;
++  }
++
+   return (
+-    <div className="flex min-h-[80vh] items-center justify-center px-4">
++    <div className="flex min-h-[80vh] items-center justify-center px-4 py-12">
+       <div className="w-full max-w-md rounded-lg border border-zinc-200 bg-white p-6 sm:p-8 shadow-sm">
+         <h1 className="text-2xl font-semibold tracking-tight text-zinc-900 text-center">
+           Sign In to Meritlane
+@@ -76,8 +109,8 @@ export default function LoginPage() {
+             placeholder="ΓÇóΓÇóΓÇóΓÇóΓÇóΓÇóΓÇóΓÇó"
+             required
+           />
+-          <Button type="submit" className="w-full" disabled={loading} variant="primary">
+-            {loading ? "Signing in..." : "Sign In"}
++          <Button type="submit" className="w-full" disabled={loadingAction} variant="primary">
++            {loadingAction ? "Signing in..." : "Sign In"}
+           </Button>
+         </form>
+ 
+@@ -92,7 +125,7 @@ export default function LoginPage() {
+           onClick={handleGoogleLogin}
+           className="mt-4 w-full"
+           variant="outline"
+-          disabled={loading}
++          disabled={loadingAction}
+         >
+           <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24">
+             <path
+diff --git a/app/page.tsx b/app/page.tsx
+index f7b2022..761cc9d 100644
+--- a/app/page.tsx
++++ b/app/page.tsx
+@@ -1,7 +1,22 @@
++"use client";
++
+ import Link from "next/link";
+ import { ArrowRight, Code2, Cpu, CheckCircle2, ShieldCheck } from "lucide-react";
++import { useAuth } from "@/lib/auth/AuthContext";
++import { useRouter } from "next/navigation";
+ 
+ export default function HomePage() {
++  const { user, role } = useAuth();
++  const router = useRouter();
++
++  const handleCtaClick = (e: React.MouseEvent<HTMLAnchorElement>, targetRole: "candidate" | "employer") => {
++    e.preventDefault();
++    if (user && role) {
++      router.push(role === "candidate" ? "/candidate/profile" : "/employer/dashboard");
++    } else {
++      router.push("/signup");
++    }
++  };
+   return (
+     <div className="flex flex-col">
+       {/* Hero Section */}
+@@ -29,6 +44,7 @@ export default function HomePage() {
+           <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row sm:gap-4">
+             <Link
+               href="/candidate/profile"
++              onClick={(e) => handleCtaClick(e, "candidate")}
+               className="inline-flex w-full items-center justify-center gap-2 rounded border border-zinc-900 bg-zinc-900 px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-zinc-800 sm:w-auto"
+             >
+               I&apos;m a candidate
+@@ -36,6 +52,7 @@ export default function HomePage() {
+             </Link>
+             <Link
+               href="/employer/dashboard"
++              onClick={(e) => handleCtaClick(e, "employer")}
+               className="inline-flex w-full items-center justify-center gap-2 rounded border border-zinc-300 bg-white px-5 py-2.5 text-sm font-medium text-zinc-900 transition-colors hover:bg-zinc-50 sm:w-auto"
+             >
+               I&apos;m hiring
+@@ -156,6 +173,7 @@ export default function HomePage() {
+             <div className="mt-5 flex justify-center">
+               <Link
+                 href="/candidate/profile"
++                onClick={(e) => handleCtaClick(e, "candidate")}
+                 className="rounded border border-zinc-900 bg-zinc-900 px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-zinc-800"
+               >
+                 Set up Candidate Profile
+diff --git a/app/settings/page.tsx b/app/settings/page.tsx
+new file mode 100644
+index 0000000..9984b20
+--- /dev/null
++++ b/app/settings/page.tsx
+@@ -0,0 +1,92 @@
++"use client";
++
++import React, { useEffect } from "react";
++import { useAuth } from "@/lib/auth/AuthContext";
++import { auth } from "@/lib/firebase/config";
++import { signOut } from "firebase/auth";
++import { useRouter } from "next/navigation";
++import { Button } from "@/components/ui/Button";
++import { LogOut, User as UserIcon } from "lucide-react";
++
++export default function SettingsPage() {
++  const { user, userProfile, loading, profileLoading } = useAuth();
++  const router = useRouter();
++
++  useEffect(() => {
++    if (!loading && !profileLoading && !user) {
++      router.push("/login");
++    }
++  }, [user, loading, profileLoading, router]);
++
++  const handleSignOut = async () => {
++    try {
++      await signOut(auth);
++      router.push("/");
++    } catch (error) {
++      console.error("Error signing out:", error);
++    }
++  };
++
++  if (loading || profileLoading || !user) {
++    return <div className="min-h-[50vh]"></div>;
++  }
++
++  return (
++    <div className="mx-auto max-w-3xl px-4 py-10 sm:px-6">
++      <div className="border-b border-zinc-200 pb-5">
++        <h1 className="text-2xl font-semibold tracking-tight text-zinc-900">
++          Settings
++        </h1>
++        <p className="mt-1 text-sm text-zinc-500">
++          Manage your account preferences and session.
++        </p>
++      </div>
++
++      <div className="mt-8 space-y-8">
++        <section className="rounded border border-zinc-200 bg-white p-5 sm:p-6">
++          <h2 className="text-sm font-semibold text-zinc-900 mb-4">Account Details</h2>
++          <div className="space-y-4">
++            <div>
++              <label className="text-xs font-medium text-zinc-500">Email Address</label>
++              <div className="mt-1 text-sm text-zinc-900 font-medium">{user.email}</div>
++            </div>
++            
++            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
++              <div>
++                <label className="text-xs font-medium text-zinc-500">Account Role</label>
++                <div className="mt-1 inline-flex items-center gap-1.5 rounded bg-zinc-100 px-2.5 py-1 text-xs font-medium text-zinc-700 capitalize">
++                  <UserIcon className="h-3.5 w-3.5" />
++                  {userProfile?.role || "Unknown"}
++                </div>
++              </div>
++              
++              <div>
++                <label className="text-xs font-medium text-zinc-500">Authentication Method</label>
++                <div className="mt-1 text-sm text-zinc-900 capitalize">
++                  {userProfile?.authProvider || "password"}
++                </div>
++              </div>
++            </div>
++          </div>
++        </section>
++
++        <section className="rounded border border-red-200 bg-red-50/50 p-5 sm:p-6">
++          <h2 className="text-sm font-semibold text-red-900">Session</h2>
++          <p className="mt-1 text-xs text-red-700">
++            Securely sign out of your Meritlane account.
++          </p>
++          <div className="mt-4">
++            <Button
++              variant="outline"
++              onClick={handleSignOut}
++              className="border-red-200 text-red-700 hover:bg-red-100 hover:text-red-900"
++            >
++              <LogOut className="mr-2 h-4 w-4" />
++              Sign Out
++            </Button>
++          </div>
++        </section>
++      </div>
++    </div>
++  );
++}
+diff --git a/app/signup/page.tsx b/app/signup/page.tsx
+index f7a5c31..9e3a6e0 100644
+--- a/app/signup/page.tsx
++++ b/app/signup/page.tsx
+@@ -1,50 +1,95 @@
+ "use client";
+ 
+-import React, { useState } from "react";
++import React, { useState, useEffect } from "react";
+ import { createUserWithEmailAndPassword, signInWithPopup, GoogleAuthProvider } from "firebase/auth";
+ import { auth } from "@/lib/firebase/config";
+ import { useRouter } from "next/navigation";
+ import Link from "next/link";
+ import { Input } from "@/components/ui/Input";
+ import { Button } from "@/components/ui/Button";
++import { useAuth } from "@/lib/auth/AuthContext";
++import { createUserProfile, Role } from "@/lib/firebase/users";
++import RoleSelector from "@/components/RoleSelector";
++import { Users, Briefcase } from "lucide-react";
+ 
+ export default function SignupPage() {
+   const [email, setEmail] = useState("");
+   const [password, setPassword] = useState("");
++  const [role, setRole] = useState<Role | null>(null);
+   const [error, setError] = useState<string | null>(null);
+-  const [loading, setLoading] = useState(false);
++  const [loadingAction, setLoadingAction] = useState(false);
++  const [showRoleSelector, setShowRoleSelector] = useState(false);
++  
++  const { user, role: userRole, loading: authLoading, profileLoading, refreshProfile } = useAuth();
+   const router = useRouter();
+ 
++  // Redirect if already logged in and has a role
++  useEffect(() => {
++    if (!authLoading && !profileLoading && user) {
++      if (userRole) {
++        router.push(userRole === "candidate" ? "/candidate/profile" : "/employer/dashboard");
++      } else {
++        // Logged in via Google but no role selected yet
++        setShowRoleSelector(true);
++      }
++    }
++  }, [user, userRole, authLoading, profileLoading, router]);
++
+   const handleEmailSignup = async (e: React.FormEvent) => {
+     e.preventDefault();
+-    setLoading(true);
++    if (!role) {
++      setError("Please select a role before signing up.");
++      return;
++    }
++    
++    setLoadingAction(true);
+     setError(null);
+     try {
+-      await createUserWithEmailAndPassword(auth, email, password);
+-      router.push("/candidate/profile");
++      const userCred = await createUserWithEmailAndPassword(auth, email, password);
++      await createUserProfile(userCred.user.uid, {
++        email: userCred.user.email || email,
++        role: role,
++        displayName: "",
++        authProvider: "password"
++      });
++      await refreshProfile();
++      // Route change handled by useEffect when profile loads
+     } catch (err: any) {
+-      setError(err.message || "Failed to create an account.");
+-    } finally {
+-      setLoading(false);
++      if (err.code === "auth/email-already-in-use") {
++        setError("An account already exists with this email. Log in instead.");
++      } else {
++        setError(err.message || "Failed to create an account.");
++      }
++      setLoadingAction(false);
+     }
+   };
+ 
+   const handleGoogleSignup = async () => {
+-    setLoading(true);
++    setLoadingAction(true);
+     setError(null);
+     try {
+       const provider = new GoogleAuthProvider();
++      // signInWithPopup creates an account if it doesn't exist
+       await signInWithPopup(auth, provider);
+-      router.push("/candidate/profile");
++      // Wait for AuthContext to pick up the user, which will trigger fetchUserProfile
++      // If they have no role, the useEffect will show RoleSelector.
++      // If they do have a role, the useEffect will redirect them.
+     } catch (err: any) {
+       setError(err.message || "Failed to sign up with Google.");
+-    } finally {
+-      setLoading(false);
++      setLoadingAction(false);
+     }
+   };
+ 
++  if (authLoading || profileLoading || (user && userRole)) {
++    return <div className="min-h-[80vh]"></div>; // Skeleton/blank while resolving auth
++  }
++
++  if (showRoleSelector) {
++    return <RoleSelector />;
++  }
++
+   return (
+-    <div className="flex min-h-[80vh] items-center justify-center px-4">
++    <div className="flex min-h-[80vh] items-center justify-center px-4 py-12">
+       <div className="w-full max-w-md rounded-lg border border-zinc-200 bg-white p-6 sm:p-8 shadow-sm">
+         <h1 className="text-2xl font-semibold tracking-tight text-zinc-900 text-center">
+           Join Meritlane
+@@ -59,7 +104,37 @@ export default function SignupPage() {
+           </div>
+         )}
+ 
+-        <form onSubmit={handleEmailSignup} className="mt-6 space-y-4">
++        <form onSubmit={handleEmailSignup} className="mt-6 space-y-5">
++          <div className="space-y-3">
++            <label className="text-sm font-medium text-zinc-900">Select your role</label>
++            <div className="grid grid-cols-2 gap-3">
++              <button
++                type="button"
++                onClick={() => setRole("candidate")}
++                className={`flex flex-col items-center gap-2 rounded-lg border-2 p-3 text-sm font-medium transition-colors ${
++                  role === "candidate"
++                    ? "border-zinc-900 bg-zinc-50 text-zinc-900"
++                    : "border-zinc-200 text-zinc-500 hover:border-zinc-300"
++                }`}
++              >
++                <Users className="h-5 w-5" />
++                Candidate
++              </button>
++              <button
++                type="button"
++                onClick={() => setRole("employer")}
++                className={`flex flex-col items-center gap-2 rounded-lg border-2 p-3 text-sm font-medium transition-colors ${
++                  role === "employer"
++                    ? "border-blue-600 bg-blue-50 text-blue-700"
++                    : "border-zinc-200 text-zinc-500 hover:border-zinc-300"
++                }`}
++              >
++                <Briefcase className="h-5 w-5" />
++                Employer
++              </button>
++            </div>
++          </div>
++
+           <Input
+             label="Email Address"
+             type="email"
+@@ -77,8 +152,8 @@ export default function SignupPage() {
+             required
+             helperText="Must be at least 6 characters long."
+           />
+-          <Button type="submit" className="w-full" disabled={loading} variant="primary">
+-            {loading ? "Creating account..." : "Sign Up"}
++          <Button type="submit" className="w-full" disabled={loadingAction} variant="primary">
++            {loadingAction ? "Creating account..." : "Sign Up"}
+           </Button>
+         </form>
+ 
+@@ -93,7 +168,7 @@ export default function SignupPage() {
+           onClick={handleGoogleSignup}
+           className="mt-4 w-full"
+           variant="outline"
+-          disabled={loading}
++          disabled={loadingAction}
+         >
+           <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24">
+             <path
+diff --git a/components/Navbar.tsx b/components/Navbar.tsx
+index 8e93650..d814eeb 100644
+--- a/components/Navbar.tsx
++++ b/components/Navbar.tsx
+@@ -1,24 +1,15 @@
+ "use client";
+ 
+ import Link from "next/link";
+-import { ShieldCheck } from "lucide-react";
++import { ShieldCheck, User as UserIcon, Settings } from "lucide-react";
+ import { useAuth } from "@/lib/auth/AuthContext";
+-import { auth } from "@/lib/firebase/config";
+-import { signOut } from "firebase/auth";
+ import { useRouter } from "next/navigation";
+ 
+ export default function Navbar() {
+-  const { user, loading } = useAuth();
++  const { user, userProfile, loading, profileLoading } = useAuth();
+   const router = useRouter();
+ 
+-  const handleSignOut = async () => {
+-    try {
+-      await signOut(auth);
+-      router.push("/");
+-    } catch (error) {
+-      console.error("Error signing out:", error);
+-    }
+-  };
++  const isResolvingAuth = loading || (user && profileLoading);
+ 
+   return (
+     <header className="sticky top-0 z-50 w-full border-b border-zinc-200 bg-white/90 backdrop-blur-sm">
+@@ -47,36 +38,39 @@ export default function Navbar() {
+         </nav>
+ 
+         <div className="flex items-center gap-3">
+-          {!loading && (
+-            user ? (
+-              <>
+-                <span className="hidden text-xs text-zinc-500 sm:inline-block">
+-                  {user.email}
+-                </span>
+-                <button
+-                  type="button"
+-                  onClick={handleSignOut}
+-                  className="text-sm font-medium text-zinc-600 hover:text-zinc-900"
+-                >
+-                  Sign out
+-                </button>
+-              </>
+-            ) : (
+-              <>
+-                <Link
+-                  href="/login"
+-                  className="hidden text-sm font-medium text-zinc-600 hover:text-zinc-900 sm:inline-flex"
+-                >
+-                  Sign in
+-                </Link>
+-                <Link
+-                  href="/signup"
+-                  className="rounded border border-zinc-900 bg-zinc-900 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-zinc-800 sm:text-sm"
+-                >
+-                  Get Started
+-                </Link>
+-              </>
+-            )
++          {isResolvingAuth ? (
++            <div className="flex gap-2">
++              <div className="h-8 w-16 animate-pulse rounded bg-zinc-100"></div>
++              <div className="h-8 w-24 animate-pulse rounded bg-zinc-100"></div>
++            </div>
++          ) : user ? (
++            <div className="flex items-center gap-3">
++              <span className="hidden text-xs font-medium text-zinc-700 sm:inline-block">
++                {userProfile?.displayName || user.email}
++              </span>
++              <Link
++                href="/settings"
++                className="flex h-8 w-8 items-center justify-center rounded-full border border-zinc-200 bg-zinc-50 text-zinc-600 transition-colors hover:border-zinc-300 hover:text-zinc-900"
++                title="Settings"
++              >
++                <Settings className="h-4 w-4" />
++              </Link>
++            </div>
++          ) : (
++            <>
++              <Link
++                href="/login"
++                className="hidden text-sm font-medium text-zinc-600 hover:text-zinc-900 sm:inline-flex"
++              >
++                Sign in
++              </Link>
++              <Link
++                href="/signup"
++                className="rounded border border-zinc-900 bg-zinc-900 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-zinc-800 sm:text-sm"
++              >
++                Get Started
++              </Link>
++            </>
+           )}
+         </div>
+       </div>
+diff --git a/components/RoleSelector.tsx b/components/RoleSelector.tsx
+new file mode 100644
+index 0000000..a4fecd5
+--- /dev/null
++++ b/components/RoleSelector.tsx
+@@ -0,0 +1,92 @@
++"use client";
++
++import React, { useState } from "react";
++import { Users, Briefcase, Loader2 } from "lucide-react";
++import { createUserProfile } from "@/lib/firebase/users";
++import { useAuth } from "@/lib/auth/AuthContext";
++import { useRouter } from "next/navigation";
++
++export default function RoleSelector() {
++  const { user, refreshProfile } = useAuth();
++  const [loading, setLoading] = useState(false);
++  const router = useRouter();
++
++  const handleSelectRole = async (role: "candidate" | "employer") => {
++    if (!user) return;
++    setLoading(true);
++    try {
++      await createUserProfile(user.uid, {
++        email: user.email || "",
++        role,
++        displayName: user.displayName || "",
++        authProvider: "google",
++      });
++      await refreshProfile();
++      if (role === "candidate") {
++        router.push("/candidate/profile");
++      } else {
++        router.push("/employer/dashboard");
++      }
++    } catch (error) {
++      console.error("Error setting role:", error);
++      alert("Failed to save your role. Please try again.");
++      setLoading(false);
++    }
++  };
++
++  if (loading) {
++    return (
++      <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-white">
++        <Loader2 className="h-8 w-8 animate-spin text-zinc-900" />
++        <p className="mt-4 text-sm font-medium text-zinc-600">Setting up your account...</p>
++      </div>
++    );
++  }
++
++  return (
++    <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#fafafa] px-4">
++      <div className="w-full max-w-2xl text-center">
++        <h1 className="text-2xl font-semibold tracking-tight text-zinc-900 sm:text-3xl">
++          Choose your role
++        </h1>
++        <p className="mt-3 text-sm text-zinc-500">
++          How will you be using Meritlane? This selection is permanent.
++        </p>
++
++        <div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2">
++          {/* Candidate Card */}
++          <button
++            onClick={() => handleSelectRole("candidate")}
++            className="group relative flex flex-col items-center justify-center gap-4 rounded-xl border-2 border-zinc-200 bg-white p-8 text-center transition-all hover:border-zinc-900 hover:shadow-sm"
++          >
++            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-zinc-100 text-zinc-600 group-hover:bg-zinc-900 group-hover:text-white transition-colors">
++              <Users className="h-5 w-5" />
++            </div>
++            <div>
++              <h3 className="text-lg font-semibold text-zinc-900">I'm a Candidate</h3>
++              <p className="mt-2 text-sm text-zinc-500">
++                I want to submit projects, pass verification, and get hired.
++              </p>
++            </div>
++          </button>
++
++          {/* Employer Card */}
++          <button
++            onClick={() => handleSelectRole("employer")}
++            className="group relative flex flex-col items-center justify-center gap-4 rounded-xl border-2 border-zinc-200 bg-white p-8 text-center transition-all hover:border-blue-600 hover:shadow-sm"
++          >
++            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-blue-50 text-blue-600 group-hover:bg-blue-600 group-hover:text-white transition-colors">
++              <Briefcase className="h-5 w-5" />
++            </div>
++            <div>
++              <h3 className="text-lg font-semibold text-zinc-900">I'm Hiring</h3>
++              <p className="mt-2 text-sm text-zinc-500">
++                I want to source and hire verified engineering talent.
++              </p>
++            </div>
++          </button>
++        </div>
++      </div>
++    </div>
++  );
++}
+diff --git a/diff.patch b/diff.patch
+new file mode 100644
+index 0000000..8c9e6b6
+Binary files /dev/null and b/diff.patch differ
+diff --git a/firestore.rules b/firestore.rules
+index d4a41db..d835416 100644
+--- a/firestore.rules
++++ b/firestore.rules
+@@ -1,8 +1,17 @@
+ rules_version = '2';
+ service cloud.firestore {
+   match /databases/{database}/documents {
++    // User profile docs ΓÇö only the owner can read/write
++    match /users/{userId} {
++      allow read, write: if request.auth != null && request.auth.uid == userId;
++    }
++    // Candidate-specific data ΓÇö only the owner
+     match /candidates/{userId} {
+       allow read, write: if request.auth != null && request.auth.uid == userId;
+     }
++    // Employer-specific data ΓÇö only the owner
++    match /employers/{userId} {
++      allow read, write: if request.auth != null && request.auth.uid == userId;
++    }
+   }
+ }
+diff --git a/lib/auth/AuthContext.tsx b/lib/auth/AuthContext.tsx
+index 3923b6e..6f9b7d3 100644
+--- a/lib/auth/AuthContext.tsx
++++ b/lib/auth/AuthContext.tsx
+@@ -1,34 +1,73 @@
+ "use client";
+ 
+-import React, { createContext, useContext, useEffect, useState } from "react";
++import React, { createContext, useContext, useEffect, useState, useCallback } from "react";
+ import { User, onAuthStateChanged } from "firebase/auth";
+ import { auth } from "@/lib/firebase/config";
++import { fetchUserProfile, UserProfile, Role } from "@/lib/firebase/users";
+ 
+ interface AuthContextType {
+   user: User | null;
++  role: Role | null;
++  userProfile: UserProfile | null;
+   loading: boolean;
++  profileLoading: boolean;
++  refreshProfile: () => Promise<void>;
+ }
+ 
+ const AuthContext = createContext<AuthContextType>({
+   user: null,
++  role: null,
++  userProfile: null,
+   loading: true,
++  profileLoading: true,
++  refreshProfile: async () => {},
+ });
+ 
+ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
+   const [user, setUser] = useState<User | null>(null);
++  const [role, setRole] = useState<Role | null>(null);
++  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
+   const [loading, setLoading] = useState(true);
++  const [profileLoading, setProfileLoading] = useState(true);
++
++  const loadProfile = useCallback(async (uid: string) => {
++    setProfileLoading(true);
++    const profile = await fetchUserProfile(uid);
++    if (profile) {
++      setUserProfile(profile);
++      setRole(profile.role);
++    } else {
++      setUserProfile(null);
++      setRole(null);
++    }
++    setProfileLoading(false);
++  }, []);
++
++  const refreshProfile = useCallback(async () => {
++    if (user) {
++      await loadProfile(user.uid);
++    }
++  }, [user, loadProfile]);
+ 
+   useEffect(() => {
+-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
++    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
+       setUser(currentUser);
+       setLoading(false);
++      
++      if (currentUser) {
++        await loadProfile(currentUser.uid);
++      } else {
++        setUserProfile(null);
++        setRole(null);
++        setProfileLoading(false);
++      }
+     });
+ 
+     return () => unsubscribe();
+-  }, []);
++  }, [loadProfile]);
+ 
+   return (
+-    <AuthContext.Provider value={{ user, loading }}>
++    <AuthContext.Provider value={{ user, role, userProfile, loading, profileLoading, refreshProfile }}>
+       {children}
+     </AuthContext.Provider>
+   );
+diff --git a/lib/firebase/users.ts b/lib/firebase/users.ts
+new file mode 100644
+index 0000000..3c137f9
+--- /dev/null
++++ b/lib/firebase/users.ts
+@@ -0,0 +1,45 @@
++import { doc, getDoc, setDoc, serverTimestamp, updateDoc } from "firebase/firestore";
++import { db } from "./config";
++
++export type Role = "candidate" | "employer";
++
++export interface UserProfile {
++  email: string;
++  role: Role;
++  displayName: string;
++  authProvider: "password" | "google";
++  createdAt: any; // serverTimestamp
++  lastLoginAt?: any; // serverTimestamp
++}
++
++export const fetchUserProfile = async (uid: string): Promise<UserProfile | null> => {
++  try {
++    const docRef = doc(db, "users", uid);
++    const docSnap = await getDoc(docRef);
++    if (docSnap.exists()) {
++      return docSnap.data() as UserProfile;
++    }
++    return null;
++  } catch (error) {
++    console.error("Error fetching user profile:", error);
++    return null;
++  }
++};
++
++export const createUserProfile = async (
++  uid: string,
++  data: Omit<UserProfile, "createdAt">
++): Promise<void> => {
++  const docRef = doc(db, "users", uid);
++  await setDoc(docRef, {
++    ...data,
++    createdAt: serverTimestamp(),
++  });
++};
++
++export const updateLastLogin = async (uid: string): Promise<void> => {
++  const docRef = doc(db, "users", uid);
++  await updateDoc(docRef, {
++    lastLoginAt: serverTimestamp(),
++  });
++};

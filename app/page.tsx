@@ -1,7 +1,22 @@
+"use client";
+
 import Link from "next/link";
 import { ArrowRight, Code2, Cpu, CheckCircle2, ShieldCheck } from "lucide-react";
+import { useAuth } from "@/lib/auth/AuthContext";
+import { useRouter } from "next/navigation";
 
 export default function HomePage() {
+  const { user, role } = useAuth();
+  const router = useRouter();
+
+  const handleCtaClick = (e: React.MouseEvent<HTMLAnchorElement>, targetRole: "candidate" | "employer") => {
+    e.preventDefault();
+    if (user && role) {
+      router.push(role === "candidate" ? "/candidate/profile" : "/employer/dashboard");
+    } else {
+      router.push("/signup");
+    }
+  };
   return (
     <div className="flex flex-col">
       {/* Hero Section */}
@@ -29,6 +44,7 @@ export default function HomePage() {
           <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row sm:gap-4">
             <Link
               href="/candidate/profile"
+              onClick={(e) => handleCtaClick(e, "candidate")}
               className="inline-flex w-full items-center justify-center gap-2 rounded border border-zinc-900 bg-zinc-900 px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-zinc-800 sm:w-auto"
             >
               I&apos;m a candidate
@@ -36,6 +52,7 @@ export default function HomePage() {
             </Link>
             <Link
               href="/employer/dashboard"
+              onClick={(e) => handleCtaClick(e, "employer")}
               className="inline-flex w-full items-center justify-center gap-2 rounded border border-zinc-300 bg-white px-5 py-2.5 text-sm font-medium text-zinc-900 transition-colors hover:bg-zinc-50 sm:w-auto"
             >
               I&apos;m hiring
@@ -156,6 +173,7 @@ export default function HomePage() {
             <div className="mt-5 flex justify-center">
               <Link
                 href="/candidate/profile"
+                onClick={(e) => handleCtaClick(e, "candidate")}
                 className="rounded border border-zinc-900 bg-zinc-900 px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-zinc-800"
               >
                 Set up Candidate Profile

@@ -11,7 +11,7 @@ import { useRouter } from "next/navigation";
 import { fetchCandidateProfile, saveCandidateProfile, ProjectEntry } from "@/lib/firebase/candidate";
 
 export default function CandidateProfilePage() {
-  const { user, loading: authLoading } = useAuth();
+  const { user, role: userRole, loading: authLoading, profileLoading } = useAuth();
   const router = useRouter();
   const [dataLoading, setDataLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -32,7 +32,12 @@ export default function CandidateProfilePage() {
       return;
     }
 
-    if (user) {
+    if (!authLoading && !profileLoading && user) {
+      if (userRole && userRole !== "candidate") {
+        router.push("/employer/dashboard");
+        return;
+      }
+      
       fetchCandidateProfile(user.uid)
         .then((profile) => {
           if (profile) {
@@ -54,7 +59,7 @@ export default function CandidateProfilePage() {
           setDataLoading(false);
         });
     }
-  }, [user, authLoading, router]);
+  }, [user, userRole, authLoading, profileLoading, router]);
 
   const addProject = () => {
     const newProject: ProjectEntry = {

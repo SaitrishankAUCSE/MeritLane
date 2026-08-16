@@ -1,24 +1,15 @@
 "use client";
 
 import Link from "next/link";
-import { ShieldCheck } from "lucide-react";
+import { ShieldCheck, User as UserIcon, Settings } from "lucide-react";
 import { useAuth } from "@/lib/auth/AuthContext";
-import { auth } from "@/lib/firebase/config";
-import { signOut } from "firebase/auth";
 import { useRouter } from "next/navigation";
 
 export default function Navbar() {
-  const { user, loading } = useAuth();
+  const { user, userProfile, loading, profileLoading } = useAuth();
   const router = useRouter();
 
-  const handleSignOut = async () => {
-    try {
-      await signOut(auth);
-      router.push("/");
-    } catch (error) {
-      console.error("Error signing out:", error);
-    }
-  };
+  const isResolvingAuth = loading || (user && profileLoading);
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-zinc-200 bg-white/90 backdrop-blur-sm">
@@ -47,36 +38,39 @@ export default function Navbar() {
         </nav>
 
         <div className="flex items-center gap-3">
-          {!loading && (
-            user ? (
-              <>
-                <span className="hidden text-xs text-zinc-500 sm:inline-block">
-                  {user.email}
-                </span>
-                <button
-                  type="button"
-                  onClick={handleSignOut}
-                  className="text-sm font-medium text-zinc-600 hover:text-zinc-900"
-                >
-                  Sign out
-                </button>
-              </>
-            ) : (
-              <>
-                <Link
-                  href="/login"
-                  className="hidden text-sm font-medium text-zinc-600 hover:text-zinc-900 sm:inline-flex"
-                >
-                  Sign in
-                </Link>
-                <Link
-                  href="/signup"
-                  className="rounded border border-zinc-900 bg-zinc-900 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-zinc-800 sm:text-sm"
-                >
-                  Get Started
-                </Link>
-              </>
-            )
+          {isResolvingAuth ? (
+            <div className="flex gap-2">
+              <div className="h-8 w-16 animate-pulse rounded bg-zinc-100"></div>
+              <div className="h-8 w-24 animate-pulse rounded bg-zinc-100"></div>
+            </div>
+          ) : user ? (
+            <div className="flex items-center gap-3">
+              <span className="hidden text-xs font-medium text-zinc-700 sm:inline-block">
+                {userProfile?.displayName || user.email}
+              </span>
+              <Link
+                href="/settings"
+                className="flex h-8 w-8 items-center justify-center rounded-full border border-zinc-200 bg-zinc-50 text-zinc-600 transition-colors hover:border-zinc-300 hover:text-zinc-900"
+                title="Settings"
+              >
+                <Settings className="h-4 w-4" />
+              </Link>
+            </div>
+          ) : (
+            <>
+              <Link
+                href="/login"
+                className="hidden text-sm font-medium text-zinc-600 hover:text-zinc-900 sm:inline-flex"
+              >
+                Sign in
+              </Link>
+              <Link
+                href="/signup"
+                className="rounded border border-zinc-900 bg-zinc-900 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-zinc-800 sm:text-sm"
+              >
+                Get Started
+              </Link>
+            </>
           )}
         </div>
       </div>
