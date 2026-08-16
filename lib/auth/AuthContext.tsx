@@ -32,15 +32,22 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const loadProfile = useCallback(async (uid: string) => {
     setProfileLoading(true);
-    const profile = await fetchUserProfile(uid);
-    if (profile) {
-      setUserProfile(profile);
-      setRole(profile.role);
-    } else {
+    try {
+      const profile = await fetchUserProfile(uid);
+      if (profile) {
+        setUserProfile(profile);
+        setRole(profile.role);
+      } else {
+        setUserProfile(null);
+        setRole(null);
+      }
+    } catch (error) {
+      console.error("Failed to load user profile:", error);
       setUserProfile(null);
       setRole(null);
+    } finally {
+      setProfileLoading(false);
     }
-    setProfileLoading(false);
   }, []);
 
   const refreshProfile = useCallback(async () => {
