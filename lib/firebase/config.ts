@@ -1,7 +1,6 @@
-/**
- * Meritlane Firebase Client Configuration
- * Connected to project: meritlane
- */
+import { initializeApp, getApps, getApp } from "firebase/app";
+import { getAuth } from "firebase/auth";
+import { getFirestore } from "firebase/firestore";
 
 export const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY || "AIzaSyAqoOSesm43txwsnprxhsY4RG7PSVRfeyw",
@@ -12,3 +11,10 @@ export const firebaseConfig = {
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID || "1:591024444735:web:e4c75c2c96cb406d0b6f8a",
   measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID || "G-BS1DB89WPZ",
 };
+
+// Initialize Firebase for SSR and Client-side safety
+const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+export { app, auth, db };
