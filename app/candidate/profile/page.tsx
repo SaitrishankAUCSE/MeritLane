@@ -122,7 +122,20 @@ export default function CandidateProfilePage() {
     }
   };
 
-  if (authLoading || dataLoading) {
+  if (authLoading) {
+    return (
+      <div className="flex min-h-[50vh] items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-zinc-400" />
+      </div>
+    );
+  }
+
+  // Early return if not logged in, wait for router.push to take effect
+  if (!user) {
+    return null;
+  }
+
+  if (dataLoading) {
     return (
       <div className="flex min-h-[50vh] items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-zinc-400" />
