@@ -86,8 +86,14 @@ export default function CandidateProfilePage() {
   const handleSave = async (status: "draft" | "pending") => {
     if (!user) return;
     setSaving(true);
+    
+    // Create a timeout promise to prevent infinite hanging
+    const timeoutPromise = new Promise((_, reject) => 
+      setTimeout(() => reject(new Error("Timeout: Could not connect to Firebase. Check your network or disable Adblockers.")), 8000)
+    );
+
     try {
-      await saveCandidateProfile(user.uid, {
+      const savePromise = saveCandidateProfile(user.uid, {
         name,
         college,
         branch,
@@ -98,11 +104,14 @@ export default function CandidateProfilePage() {
         projects,
         verificationStatus: status,
       });
+
+      await Promise.race([savePromise, timeoutPromise]);
+      
       setVerificationStatus(status);
       alert(`Profile ${status === "draft" ? "saved as draft" : "submitted for verification"}!`);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error saving profile:", error);
-      alert("Failed to save profile. Please try again.");
+      alert(error.message || "Failed to save profile. Please try again.");
     } finally {
       setSaving(false);
     }
