@@ -12,18 +12,19 @@ export default function Navbar() {
           <span className="text-base font-semibold">Meritlane</span>
         </Link>
 
-        <nav className="flex items-center gap-6 text-sm">
+        {/* Nav links hidden on mobile to prevent overflow */}
+        <nav className="hidden items-center gap-6 text-sm sm:flex">
           <Link
             href="/candidate/profile"
             className="text-zinc-600 transition-colors hover:text-zinc-950"
           >
-            Candidate Profile
+            Candidates
           </Link>
           <Link
             href="/employer/dashboard"
             className="text-zinc-600 transition-colors hover:text-zinc-950"
           >
-            Employer Dashboard
+            Employers
           </Link>
         </nav>
 
@@ -31,15 +32,15 @@ export default function Navbar() {
           {/* Non-functional placeholder auth buttons */}
           <button
             type="button"
-            className="text-xs font-medium text-zinc-600 hover:text-zinc-900 sm:text-sm px-2.5 py-1.5 rounded"
-            title="Authentication will be enabled in future phase"
+            className="hidden text-sm font-medium text-zinc-600 hover:text-zinc-900 sm:inline-flex"
+            title="Authentication will be enabled in a future mission"
           >
             Sign in
           </button>
           <button
             type="button"
             className="rounded border border-zinc-900 bg-zinc-900 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-zinc-800 sm:text-sm"
-            title="Authentication will be enabled in future phase"
+            title="Authentication will be enabled in a future mission"
           >
             Get Started
           </button>

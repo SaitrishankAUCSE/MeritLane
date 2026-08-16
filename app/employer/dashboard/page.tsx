@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { Briefcase, Users, Plus, CheckCircle2, ShieldCheck, Sparkles } from "lucide-react";
+import { Users, Plus, CheckCircle2, ShieldCheck } from "lucide-react";
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
 import { TagInput } from "@/components/ui/TagInput";
