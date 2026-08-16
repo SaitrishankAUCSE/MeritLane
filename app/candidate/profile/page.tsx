@@ -1,21 +1,22 @@
 "use client";
 
-import React, { useState } from "react";
-import { Plus, Trash2, AlertCircle } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { Plus, Trash2, AlertCircle, Loader2 } from "lucide-react";
 import { Badge } from "@/components/ui/Badge";
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
 import { TagInput } from "@/components/ui/TagInput";
-
-interface ProjectEntry {
-  id: string;
-  title: string;
-  repoUrl: string;
-  liveUrl: string;
-  description: string;
-}
+import { useAuth } from "@/lib/auth/AuthContext";
+import { useRouter } from "next/navigation";
+import { fetchCandidateProfile, saveCandidateProfile, ProjectEntry } from "@/lib/firebase/candidate";
 
 export default function CandidateProfilePage() {
+  const { user, loading: authLoading } = useAuth();
+  const router = useRouter();
+  const [dataLoading, setDataLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [verificationStatus, setVerificationStatus] = useState<"draft" | "pending" | "verified">("draft");
+
   const [name, setName] = useState<string>("");
   const [college, setCollege] = useState<string>("");
   const [branch, setBranch] = useState<string>("");
@@ -23,8 +24,31 @@ export default function CandidateProfilePage() {
   const [githubUrl, setGithubUrl] = useState<string>("");
   const [resumeUrl, setResumeUrl] = useState<string>("");
   const [skills, setSkills] = useState<string[]>([]);
-
   const [projects, setProjects] = useState<ProjectEntry[]>([]);
+
+  useEffect(() => {
+    if (!authLoading && !user) {
+      router.push("/login");
+      return;
+    }
+
+    if (user) {
+      fetchCandidateProfile(user.uid).then((profile) => {
+        if (profile) {
+          setName(profile.name || "");
+          setCollege(profile.college || "");
+          setBranch(profile.branch || "");
+          setGradYear(profile.gradYear || "");
+          setGithubUrl(profile.githubUrl || "");
+          setResumeUrl(profile.resumeUrl || "");
+          setSkills(profile.skills || []);
+          setProjects(profile.projects || []);
+          setVerificationStatus(profile.verificationStatus || "draft");
+        }
+        setDataLoading(false);
+      });
+    }
+  }, [user, authLoading, router]);
 
   const addProject = () => {
     const newProject: ProjectEntry = {
@@ -53,6 +77,39 @@ export default function CandidateProfilePage() {
     setProjects((prev) => prev.filter((p: ProjectEntry) => p.id !== id));
   };
 
+  const handleSave = async (status: "draft" | "pending") => {
+    if (!user) return;
+    setSaving(true);
+    try {
+      await saveCandidateProfile(user.uid, {
+        name,
+        college,
+        branch,
+        gradYear,
+        githubUrl,
+        resumeUrl,
+        skills,
+        projects,
+        verificationStatus: status,
+      });
+      setVerificationStatus(status);
+      alert(`Profile ${status === "draft" ? "saved as draft" : "submitted for verification"}!`);
+    } catch (error) {
+      console.error("Error saving profile:", error);
+      alert("Failed to save profile. Please try again.");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  if (authLoading || dataLoading) {
+    return (
+      <div className="flex min-h-[50vh] items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-zinc-400" />
+      </div>
+    );
+  }
+
   return (
     <div className="mx-auto max-w-3xl px-4 py-10 sm:px-6">
       {/* Header & Verification Status */}
@@ -62,11 +119,12 @@ export default function CandidateProfilePage() {
             <h1 className="text-xl font-semibold tracking-tight text-zinc-900 sm:text-2xl">
               Candidate Profile
             </h1>
-            <Badge variant="locked" />
+            <Badge variant={verificationStatus === 'verified' ? 'verified' : verificationStatus === 'pending' ? 'locked' : 'neutral'}>
+              {verificationStatus === 'verified' ? 'Verified' : verificationStatus === 'pending' ? 'Verification Pending' : 'Unverified'}
+            </Badge>
           </div>
           <p className="mt-1 text-xs text-zinc-500">
             Fill in your details and submit projects for verification.
-            Auth &amp; persistence will be enabled in a future update.
           </p>
         </div>
 
@@ -74,18 +132,16 @@ export default function CandidateProfilePage() {
           <Button
             variant="outline"
             size="sm"
-            onClick={() =>
-              alert("Save functionality will connect to Firestore in a future mission.")
-            }
+            onClick={() => handleSave("draft")}
+            disabled={saving || verificationStatus === "verified"}
           >
-            Save Draft
+            {saving ? "Saving..." : "Save Draft"}
           </Button>
           <Button
             variant="primary"
             size="sm"
-            onClick={() =>
-              alert("Verification submissions open once assessments go live.")
-            }
+            onClick={() => handleSave("pending")}
+            disabled={saving || verificationStatus === "pending" || verificationStatus === "verified" || projects.length === 0}
           >
             Submit for Verification
           </Button>

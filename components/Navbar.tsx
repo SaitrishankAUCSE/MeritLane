@@ -1,7 +1,25 @@
+"use client";
+
 import Link from "next/link";
 import { ShieldCheck } from "lucide-react";
+import { useAuth } from "@/lib/auth/AuthContext";
+import { auth } from "@/lib/firebase/config";
+import { signOut } from "firebase/auth";
+import { useRouter } from "next/navigation";
 
 export default function Navbar() {
+  const { user, loading } = useAuth();
+  const router = useRouter();
+
+  const handleSignOut = async () => {
+    try {
+      await signOut(auth);
+      router.push("/");
+    } catch (error) {
+      console.error("Error signing out:", error);
+    }
+  };
+
   return (
     <header className="sticky top-0 z-50 w-full border-b border-zinc-200 bg-white/90 backdrop-blur-sm">
       <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-4 sm:px-6">
@@ -29,21 +47,37 @@ export default function Navbar() {
         </nav>
 
         <div className="flex items-center gap-3">
-          {/* Non-functional placeholder auth buttons */}
-          <button
-            type="button"
-            className="hidden text-sm font-medium text-zinc-600 hover:text-zinc-900 sm:inline-flex"
-            title="Authentication will be enabled in a future mission"
-          >
-            Sign in
-          </button>
-          <button
-            type="button"
-            className="rounded border border-zinc-900 bg-zinc-900 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-zinc-800 sm:text-sm"
-            title="Authentication will be enabled in a future mission"
-          >
-            Get Started
-          </button>
+          {!loading && (
+            user ? (
+              <>
+                <span className="hidden text-xs text-zinc-500 sm:inline-block">
+                  {user.email}
+                </span>
+                <button
+                  type="button"
+                  onClick={handleSignOut}
+                  className="text-sm font-medium text-zinc-600 hover:text-zinc-900"
+                >
+                  Sign out
+                </button>
+              </>
+            ) : (
+              <>
+                <Link
+                  href="/login"
+                  className="hidden text-sm font-medium text-zinc-600 hover:text-zinc-900 sm:inline-flex"
+                >
+                  Sign in
+                </Link>
+                <Link
+                  href="/signup"
+                  className="rounded border border-zinc-900 bg-zinc-900 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-zinc-800 sm:text-sm"
+                >
+                  Get Started
+                </Link>
+              </>
+            )
+          )}
         </div>
       </div>
     </header>
