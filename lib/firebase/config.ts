@@ -46,7 +46,7 @@ try {
   // Initialize Firebase for SSR and Client-side safety
   app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
   auth = getAuth(app);
-  db = getFirestore(app);
+  db = getFirestore(app, "default");
 } catch (error) {
   console.error("FATAL ERROR: Failed to initialize Firebase App or Auth.", error);
 }
