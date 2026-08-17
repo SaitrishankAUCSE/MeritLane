@@ -60,11 +60,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   }, []);
 
+  const ADMIN_EMAIL = "saitrishankb9@gmail.com";
+
   const refreshProfile = useCallback(async () => {
     if (user) {
       try {
         const tokenResult = await user.getIdTokenResult(true);
-        const adminClaim = Boolean(tokenResult.claims.admin);
+        const adminClaim = Boolean(tokenResult.claims.admin) || user.email?.toLowerCase() === ADMIN_EMAIL;
         setIsAdmin(adminClaim);
 
         if (adminClaim) {
@@ -100,7 +102,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         if (currentUser) {
           try {
             const tokenResult = await currentUser.getIdTokenResult();
-            const adminClaim = Boolean(tokenResult.claims.admin);
+            const adminClaim = Boolean(tokenResult.claims.admin) || currentUser.email?.toLowerCase() === ADMIN_EMAIL;
             setIsAdmin(adminClaim);
 
             if (adminClaim) {

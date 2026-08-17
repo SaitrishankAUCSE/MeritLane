@@ -20,8 +20,9 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: "Unauthorized: Invalid or expired token" }, { status: 401 });
     }
 
-    // Strict Custom Claim Authorization Check
-    if (decodedToken.admin !== true) {
+    // Strict Admin Authorization Check (Custom Claim or Designated Admin Email)
+    const isAdmin = decodedToken.admin === true || decodedToken.email?.toLowerCase() === "saitrishankb9@gmail.com";
+    if (!isAdmin) {
       return NextResponse.json({ error: "Forbidden: Administrative privilege required" }, { status: 403 });
     }
 

@@ -45,6 +45,8 @@ export default function LoginPage() {
     }
   }, [user, userRole, authLoading, profileLoading, router]);
 
+  const ADMIN_EMAIL = "saitrishankb9@gmail.com";
+
   const handleEmailLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoadingAction(true);
@@ -54,7 +56,7 @@ export default function LoginPage() {
       const userCred = await signInWithEmailAndPassword(auth, email, password);
       
       const tokenResult = await userCred.user.getIdTokenResult(true);
-      if (tokenResult.claims.admin === true) {
+      if (tokenResult.claims.admin === true || userCred.user.email?.toLowerCase() === ADMIN_EMAIL) {
         await refreshProfile();
         router.push("/admin");
         return;
@@ -89,7 +91,7 @@ export default function LoginPage() {
       const userCred = await signInWithPopup(auth, provider);
       
       const tokenResult = await userCred.user.getIdTokenResult(true);
-      if (tokenResult.claims.admin === true) {
+      if (tokenResult.claims.admin === true || userCred.user.email?.toLowerCase() === ADMIN_EMAIL) {
         await refreshProfile();
         router.push("/admin");
         return;
