@@ -3,8 +3,10 @@
 import React, { useEffect, useState } from "react";
 import { useAuth } from "@/lib/auth/AuthContext";
 import { useRouter } from "next/navigation";
-import { Loader2, CheckCircle2, Clock } from "lucide-react";
+import { Loader2, CheckCircle2, Clock, ArrowRight } from "lucide-react";
 import { fetchCandidateProfile } from "@/lib/firebase/candidate";
+import { Card, CardContent } from "@/components/ui/Card";
+import { Button } from "@/components/ui/Button";
 
 export default function CandidateDashboardPage() {
   const { user, role, loading } = useAuth();
@@ -39,59 +41,65 @@ export default function CandidateDashboardPage() {
   }
 
   return (
-    <div className="mx-auto max-w-4xl px-4 py-12">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold tracking-tight text-zinc-900">Candidate Dashboard</h1>
-        <p className="mt-2 text-zinc-500">Track your application status and opportunities.</p>
-      </div>
-
-      <div className="rounded-xl border border-zinc-200 bg-white p-6 shadow-sm">
-        <h2 className="text-lg font-semibold text-zinc-900">Verification Status</h2>
-        
-        <div className="mt-4 flex items-start gap-4">
-          {profileStatus === "verified" ? (
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-emerald-100 text-emerald-600">
-              <CheckCircle2 className="h-6 w-6" />
-            </div>
-          ) : (
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-amber-100 text-amber-600">
-              <Clock className="h-6 w-6" />
-            </div>
-          )}
-          
-          <div>
-            <h3 className="font-medium text-zinc-900">
-              {profileStatus === "verified" ? "Profile Verified" : 
-               profileStatus === "pending" ? "Verification Pending" : 
-               "Action Required"}
-            </h3>
-            <p className="mt-1 text-sm text-zinc-500">
-              {profileStatus === "verified" 
-                ? "Your profile has been verified. You are now visible to top employers."
-                : profileStatus === "pending"
-                ? "Your profile is complete! The final step is to pass the Skill Assessment to get verified."
-                : "Your profile is incomplete or saved as a draft. Please submit it before taking the assessment."}
-            </p>
-            
-            {(profileStatus === "draft" || profileStatus === "missing") && (
-              <button 
-                onClick={() => router.push("/candidate/profile")}
-                className="mt-4 inline-flex items-center justify-center rounded-md bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-800"
-              >
-                Complete Profile
-              </button>
-            )}
-
-            {profileStatus === "pending" && (
-              <button 
-                onClick={() => router.push("/candidate/assessment")}
-                className="mt-4 inline-flex items-center justify-center rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700"
-              >
-                Start Skill Assessment
-              </button>
-            )}
-          </div>
+    <div className="min-h-screen bg-[#fafafa] pb-24 pt-10">
+      <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
+        <div className="mb-8 border-b border-zinc-200 pb-6">
+          <h1 className="text-2xl font-bold tracking-tight text-zinc-900 sm:text-3xl">Candidate Dashboard</h1>
+          <p className="mt-2 text-sm text-zinc-500">Track your application status and opportunities.</p>
         </div>
+
+        <Card>
+          <CardContent className="p-6 sm:p-8">
+            <h2 className="text-base font-semibold text-zinc-900 mb-6">Verification Status</h2>
+            
+            <div className="flex flex-col sm:flex-row items-start gap-5">
+              {profileStatus === "verified" ? (
+                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-emerald-100 text-emerald-600">
+                  <CheckCircle2 className="h-6 w-6" />
+                </div>
+              ) : (
+                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-amber-100 text-amber-600">
+                  <Clock className="h-6 w-6" />
+                </div>
+              )}
+              
+              <div className="flex-1">
+                <h3 className="text-base font-semibold text-zinc-900">
+                  {profileStatus === "verified" ? "Profile Verified" : 
+                   profileStatus === "pending" ? "Verification Pending" : 
+                   "Action Required"}
+                </h3>
+                <p className="mt-1 text-sm leading-relaxed text-zinc-500">
+                  {profileStatus === "verified" 
+                    ? "Your profile has been verified. You are now visible to top employers."
+                    : profileStatus === "pending"
+                    ? "Your profile is complete! The final step is to pass the Skill Assessment to get verified."
+                    : "Your profile is incomplete or saved as a draft. Please submit it before taking the assessment."}
+                </p>
+                
+                <div className="mt-6">
+                  {(profileStatus === "draft" || profileStatus === "missing") && (
+                    <Button 
+                      variant="primary"
+                      onClick={() => router.push("/candidate/profile")}
+                    >
+                      Complete Profile <ArrowRight className="ml-2 h-4 w-4" />
+                    </Button>
+                  )}
+
+                  {profileStatus === "pending" && (
+                    <Button 
+                      variant="primary"
+                      onClick={() => router.push("/candidate/assessment")}
+                    >
+                      Start Skill Assessment <ArrowRight className="ml-2 h-4 w-4" />
+                    </Button>
+                  )}
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );

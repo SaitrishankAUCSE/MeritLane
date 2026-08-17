@@ -1,14 +1,16 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Plus, Trash2, AlertCircle, Loader2 } from "lucide-react";
+import { Plus, Trash2, AlertCircle, Loader2, Check } from "lucide-react";
 import { Badge } from "@/components/ui/Badge";
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
 import { TagInput } from "@/components/ui/TagInput";
+import { Card, CardHeader, CardContent } from "@/components/ui/Card";
 import { useAuth } from "@/lib/auth/AuthContext";
 import { useRouter } from "next/navigation";
 import { fetchCandidateProfile, saveCandidateProfile, ProjectEntry } from "@/lib/firebase/candidate";
+import { logFunnelEvent } from "@/lib/analytics/logEvent";
 
 export default function CandidateProfilePage() {
   const { user, role: userRole, loading: authLoading, profileLoading } = useAuth();
@@ -26,6 +28,8 @@ export default function CandidateProfilePage() {
   const [skills, setSkills] = useState<string[]>([]);
   const [projects, setProjects] = useState<ProjectEntry[]>([]);
   const [notification, setNotification] = useState<{type: "success" | "error", message: string} | null>(null);
+  
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
 
   useEffect(() => {
     if (notification) {
@@ -96,7 +100,6 @@ export default function CandidateProfilePage() {
     if (!user) return;
     setSaving(true);
     
-    // Create a timeout promise to prevent infinite hanging
     const timeoutPromise = new Promise((_, reject) => 
       setTimeout(() => reject(new Error("Timeout: Could not connect to Firebase. Check your network or disable Adblockers.")), 8000)
     );
@@ -118,8 +121,10 @@ export default function CandidateProfilePage() {
       
       setVerificationStatus(status);
       if (status === "pending") {
-        router.push("/candidate/dashboard");
-      } else {
+        logFunnelEvent("profile_submitted", { projectCount: projects.length });
+        setShowSuccessModal(true);
+      } else if (status === "draft") {
+        logFunnelEvent("profile_draft_saved", { projectCount: projects.length });
         setNotification({ type: "success", message: "Profile saved as draft!" });
       }
     } catch (error: any) {
@@ -130,7 +135,6 @@ export default function CandidateProfilePage() {
     }
   };
 
-  // Auth States Handled Explicitly
   if (authLoading || (user && profileLoading)) {
     return (
       <div className="flex min-h-[50vh] items-center justify-center">
@@ -140,7 +144,7 @@ export default function CandidateProfilePage() {
   }
 
   if (!user || !userRole || userRole !== "candidate") {
-    return null; // Wait for useEffect redirect
+    return null; 
   }
 
   if (dataLoading) {
@@ -152,266 +156,258 @@ export default function CandidateProfilePage() {
   }
 
   return (
-    <div className="min-h-screen bg-zinc-50 pb-20 pt-8">
+    <div className="min-h-screen bg-[#fafafa] pb-24 pt-10">
       {notification && (
-        <div className={`fixed top-4 right-4 z-50 rounded-md px-4 py-3 shadow-lg ${
-          notification.type === 'success' ? 'bg-emerald-50 text-emerald-900 border border-emerald-200' : 'bg-red-50 text-red-900 border border-red-200'
+        <div className={`fixed top-6 right-6 z-50 rounded-lg px-4 py-3 shadow-lg border ${
+          notification.type === 'success' ? 'bg-emerald-50 text-emerald-900 border-emerald-200' : 'bg-red-50 text-red-900 border-red-200'
         }`}>
           <p className="text-sm font-medium">{notification.message}</p>
         </div>
       )}
       
       <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
-        <div className="mb-8 flex flex-col justify-between gap-4 border-b border-zinc-200 pb-6 sm:flex-row sm:items-center">
-        <div>
+        <div className="mb-8 flex flex-col justify-between gap-6 border-b border-zinc-200 pb-6 sm:flex-row sm:items-end">
+          <div>
+            <div className="flex items-center gap-3">
+              <h1 className="text-2xl font-bold tracking-tight text-zinc-900 sm:text-3xl">
+                Candidate Profile
+              </h1>
+              <Badge variant={verificationStatus === 'verified' ? 'verified' : verificationStatus === 'pending' ? 'locked' : 'neutral'}>
+                {verificationStatus === 'verified' ? 'Verified' : verificationStatus === 'pending' ? 'Verification Pending' : 'Unverified'}
+              </Badge>
+            </div>
+            <p className="mt-2 text-sm text-zinc-500">
+              Complete your profile and submit projects for technical verification.
+            </p>
+          </div>
+
           <div className="flex items-center gap-3">
-            <h1 className="text-xl font-semibold tracking-tight text-zinc-900 sm:text-2xl">
-              Candidate Profile
-            </h1>
-            <Badge variant={verificationStatus === 'verified' ? 'verified' : verificationStatus === 'pending' ? 'locked' : 'neutral'}>
-              {verificationStatus === 'verified' ? 'Verified' : verificationStatus === 'pending' ? 'Verification Pending' : 'Unverified'}
-            </Badge>
-          </div>
-          <p className="mt-1 text-xs text-zinc-500">
-            Fill in your details and submit projects for verification.
-          </p>
-        </div>
-
-        <div className="flex items-center gap-2">
-          {verificationStatus === "draft" ? (
-            <>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => handleSave("draft")}
-                disabled={saving}
-              >
-                {saving ? "Saving..." : "Save Draft"}
-              </Button>
-              <Button
-                variant="primary"
-                size="sm"
-                onClick={() => handleSave("pending")}
-                disabled={saving || projects.length === 0}
-              >
-                Submit for Verification
-              </Button>
-            </>
-          ) : (
-            <Button
-              variant="primary"
-              size="sm"
-              onClick={() => handleSave(verificationStatus)}
-              disabled={saving}
-            >
-              {saving ? "Saving..." : "Update Profile"}
-            </Button>
-          )}
-        </div>
-      </div>
-
-      <div className="mt-8 space-y-8">
-        {/* Section 1: Academic & Identity */}
-        <section className="rounded border border-zinc-200 bg-white p-5 sm:p-6">
-          <div className="border-b border-zinc-100 pb-3">
-            <h2 className="text-sm font-semibold text-zinc-900">
-              Academic &amp; Identity
-            </h2>
-            <p className="mt-0.5 text-xs text-zinc-500">
-              Verification evaluates code independently of institution tier.
-            </p>
-          </div>
-
-          <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <Input
-              label="Full Name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="e.g. Rahul Verma"
-            />
-            <Input
-              label="College / Institute"
-              value={college}
-              onChange={(e) => setCollege(e.target.value)}
-              placeholder="e.g. Government Engineering College, Thrissur"
-            />
-            <Input
-              label="Engineering Branch"
-              value={branch}
-              onChange={(e) => setBranch(e.target.value)}
-              placeholder="e.g. Computer Science & Engineering"
-            />
-            <Input
-              label="Graduation Year"
-              value={gradYear}
-              onChange={(e) => setGradYear(e.target.value)}
-              placeholder="e.g. 2026"
-            />
-          </div>
-        </section>
-
-        {/* Section 2: Skills & Links */}
-        <section className="rounded border border-zinc-200 bg-white p-5 sm:p-6">
-          <div className="border-b border-zinc-100 pb-3">
-            <h2 className="text-sm font-semibold text-zinc-900">
-              Skills &amp; Profiles
-            </h2>
-            <p className="mt-0.5 text-xs text-zinc-500">
-              Public links for audit and skill tags for employer discovery.
-            </p>
-          </div>
-
-          <div className="mt-4 space-y-4">
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-              <Input
-                label="GitHub Profile URL"
-                value={githubUrl}
-                onChange={(e) => setGithubUrl(e.target.value)}
-                placeholder="https://github.com/username"
-              />
-              <Input
-                label="Resume URL (Optional)"
-                value={resumeUrl}
-                onChange={(e) => setResumeUrl(e.target.value)}
-                placeholder="Link to your resume"
-                helperText="Optional — codebase verification is the primary signal."
-              />
-            </div>
-
-            <TagInput
-              label="Technical Skills"
-              tags={skills}
-              onChange={setSkills}
-              placeholder="Add skill (e.g. PostgreSQL, Go, Docker)..."
-              helperText="Press Enter or comma to add."
-            />
-          </div>
-        </section>
-
-        {/* Section 3: Verified Projects — the core product */}
-        <section className="rounded border border-zinc-200 bg-white p-5 sm:p-6">
-          <div className="flex flex-col justify-between gap-2 border-b border-zinc-100 pb-3 sm:flex-row sm:items-center">
-            <div>
-              <div className="flex items-center gap-2">
-                <h2 className="text-sm font-semibold text-zinc-900">
-                  Verified Project Submissions
-                </h2>
-                <span className="rounded bg-blue-50 px-2 py-0.5 text-[11px] font-semibold text-blue-700">
-                  Primary Signal
-                </span>
-              </div>
-              <p className="mt-0.5 text-xs text-zinc-500">
-                Your repositories are what employers evaluate — this is the
-                product, not decoration.
-              </p>
-            </div>
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={addProject}
-              className="self-start sm:self-auto"
-            >
-              <Plus className="h-3.5 w-3.5" />
-              Add Project
-            </Button>
-          </div>
-
-          <div className="mt-5 space-y-5">
-            {projects.length === 0 ? (
-              <div className="rounded border border-dashed border-zinc-300 p-8 text-center">
-                <AlertCircle className="mx-auto h-7 w-7 text-zinc-400" />
-                <h3 className="mt-2 text-sm font-semibold text-zinc-900">
-                  No projects submitted yet
-                </h3>
-                <p className="mx-auto mt-1 max-w-sm text-xs leading-relaxed text-zinc-500">
-                  Meritlane operates on proof of skill. Attach at least one
-                  production-grade project repository to qualify for
-                  verification.
-                </p>
+            {verificationStatus === "draft" ? (
+              <>
+                <Button
+                  variant="outline"
+                  onClick={() => handleSave("draft")}
+                  disabled={saving}
+                >
+                  {saving ? "Saving..." : "Save Draft"}
+                </Button>
                 <Button
                   variant="primary"
-                  size="sm"
-                  onClick={addProject}
-                  className="mt-4"
+                  onClick={() => handleSave("pending")}
+                  disabled={saving || projects.length === 0}
                 >
-                  <Plus className="h-3.5 w-3.5" />
-                  Add First Project
+                  Submit for Verification
                 </Button>
-              </div>
+              </>
             ) : (
-              projects.map((project: ProjectEntry, index: number) => (
-                <div
-                  key={project.id}
-                  className="rounded border border-zinc-200 bg-zinc-50/60 p-4 sm:p-5"
-                >
-                  <div className="flex items-center justify-between border-b border-zinc-200/80 pb-3">
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs font-semibold text-zinc-500">
-                        Project #{index + 1}
-                      </span>
-                      <Badge variant="locked">Audit Pending</Badge>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => removeProject(project.id)}
-                      className="text-zinc-400 transition-colors hover:text-red-600"
-                      title="Remove Project"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </button>
-                  </div>
-
-                  <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
-                    <Input
-                      label="Project Title"
-                      value={project.title}
-                      onChange={(e) =>
-                        updateProject(project.id, "title", e.target.value)
-                      }
-                      placeholder="e.g. Distributed Key-Value Store"
-                    />
-                    <Input
-                      label="GitHub Repository URL"
-                      value={project.repoUrl}
-                      onChange={(e) =>
-                        updateProject(project.id, "repoUrl", e.target.value)
-                      }
-                      placeholder="https://github.com/user/repo"
-                    />
-                  </div>
-
-                  <div className="mt-3">
-                    <Input
-                      label="Live Demo URL (Optional)"
-                      value={project.liveUrl}
-                      onChange={(e) =>
-                        updateProject(project.id, "liveUrl", e.target.value)
-                      }
-                      placeholder="https://demo.example.com"
-                    />
-                  </div>
-
-                  <div className="mt-3 flex flex-col gap-1.5">
-                    <label className="text-xs font-medium text-zinc-700">
-                      Architecture &amp; Implementation Summary
-                    </label>
-                    <textarea
-                      rows={3}
-                      value={project.description}
-                      onChange={(e) =>
-                        updateProject(project.id, "description", e.target.value)
-                      }
-                      placeholder="Describe architectural choices, concurrency handling, database optimizations, or benchmark results..."
-                      className="w-full rounded border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 placeholder:text-zinc-400 transition-colors focus:border-zinc-900 focus:outline-none focus:ring-1 focus:ring-zinc-900"
-                    />
-                  </div>
-                </div>
-              ))
+              <Button
+                variant="primary"
+                onClick={() => handleSave(verificationStatus)}
+                disabled={saving}
+              >
+                {saving ? "Saving..." : "Update Profile"}
+              </Button>
             )}
           </div>
-        </section>
+        </div>
+
+        <div className="space-y-8">
+          {/* Section 1: Academic & Identity */}
+          <Card>
+            <CardHeader>
+              <h2 className="text-base font-semibold text-zinc-900">Academic &amp; Identity</h2>
+              <p className="mt-1 text-sm text-zinc-500">Verification evaluates code independently of institution tier.</p>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+                <Input
+                  label="Full Name"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="e.g. Rahul Verma"
+                />
+                <Input
+                  label="College / Institute"
+                  value={college}
+                  onChange={(e) => setCollege(e.target.value)}
+                  placeholder="e.g. Government Engineering College, Thrissur"
+                />
+                <Input
+                  label="Engineering Branch"
+                  value={branch}
+                  onChange={(e) => setBranch(e.target.value)}
+                  placeholder="e.g. Computer Science & Engineering"
+                />
+                <Input
+                  label="Graduation Year"
+                  value={gradYear}
+                  onChange={(e) => setGradYear(e.target.value)}
+                  placeholder="e.g. 2026"
+                />
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Section 2: Skills & Links */}
+          <Card>
+            <CardHeader>
+              <h2 className="text-base font-semibold text-zinc-900">Skills &amp; Profiles</h2>
+              <p className="mt-1 text-sm text-zinc-500">Public links for audit and skill tags for employer discovery.</p>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-6">
+                <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+                  <Input
+                    label="GitHub Profile URL"
+                    value={githubUrl}
+                    onChange={(e) => setGithubUrl(e.target.value)}
+                    placeholder="https://github.com/username"
+                  />
+                  <Input
+                    label="Resume URL (Optional)"
+                    value={resumeUrl}
+                    onChange={(e) => setResumeUrl(e.target.value)}
+                    placeholder="Link to your resume"
+                    helperText="Optional — codebase verification is the primary signal."
+                  />
+                </div>
+
+                <TagInput
+                  label="Technical Skills"
+                  tags={skills}
+                  onChange={setSkills}
+                  placeholder="Add skill (e.g. PostgreSQL, Go, Docker)..."
+                  helperText="Press Enter or comma to add."
+                />
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Section 3: Verified Projects */}
+          <Card>
+            <CardHeader className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div>
+                <div className="flex items-center gap-2">
+                  <h2 className="text-base font-semibold text-zinc-900">Verified Project Submissions</h2>
+                  <span className="rounded-full bg-indigo-50 px-2.5 py-0.5 text-xs font-semibold text-indigo-700">Primary Signal</span>
+                </div>
+                <p className="mt-1 text-sm text-zinc-500">Your repositories are what employers evaluate.</p>
+              </div>
+              <Button type="button" variant="outline" size="sm" onClick={addProject}>
+                <Plus className="mr-2 h-4 w-4" /> Add Project
+              </Button>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-6">
+                {projects.length === 0 ? (
+                  <div className="rounded-lg border border-dashed border-zinc-200 bg-zinc-50/50 p-10 text-center">
+                    <AlertCircle className="mx-auto h-8 w-8 text-zinc-400" />
+                    <h3 className="mt-4 text-sm font-semibold text-zinc-900">No projects submitted yet</h3>
+                    <p className="mx-auto mt-2 max-w-md text-sm text-zinc-500">
+                      Meritlane operates on proof of skill. Attach at least one production-grade project repository to qualify for verification.
+                    </p>
+                    <Button variant="primary" onClick={addProject} className="mt-6">
+                      <Plus className="mr-2 h-4 w-4" /> Add First Project
+                    </Button>
+                  </div>
+                ) : (
+                  projects.map((project: ProjectEntry, index: number) => (
+                    <div key={project.id} className="rounded-lg border border-zinc-200 bg-white p-6 shadow-sm">
+                      <div className="flex items-center justify-between border-b border-zinc-100 pb-4">
+                        <div className="flex items-center gap-3">
+                          <span className="text-sm font-semibold text-zinc-900">Project #{index + 1}</span>
+                          <Badge variant="locked">Audit Pending</Badge>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => removeProject(project.id)}
+                          className="text-zinc-400 transition-colors hover:text-red-600"
+                          title="Remove Project"
+                        >
+                          <Trash2 className="h-4.5 w-4.5" />
+                        </button>
+                      </div>
+
+                      <div className="mt-5 grid grid-cols-1 gap-5 sm:grid-cols-2">
+                        <Input
+                          label="Project Title"
+                          value={project.title}
+                          onChange={(e) => updateProject(project.id, "title", e.target.value)}
+                          placeholder="e.g. Distributed Key-Value Store"
+                        />
+                        <Input
+                          label="GitHub Repository URL"
+                          value={project.repoUrl}
+                          onChange={(e) => updateProject(project.id, "repoUrl", e.target.value)}
+                          placeholder="https://github.com/user/repo"
+                        />
+                      </div>
+
+                      <div className="mt-5">
+                        <Input
+                          label="Live Demo URL (Optional)"
+                          value={project.liveUrl}
+                          onChange={(e) => updateProject(project.id, "liveUrl", e.target.value)}
+                          placeholder="https://demo.example.com"
+                        />
+                      </div>
+
+                      <div className="mt-5 flex flex-col gap-2">
+                        <label className="text-sm font-medium text-zinc-900">Architecture &amp; Implementation Summary</label>
+                        <textarea
+                          rows={4}
+                          value={project.description}
+                          onChange={(e) => updateProject(project.id, "description", e.target.value)}
+                          placeholder="Describe architectural choices, concurrency handling, database optimizations, or benchmark results..."
+                          className="w-full rounded-md border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-900 placeholder:text-zinc-400 shadow-sm transition-colors focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                        />
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
       </div>
+
+      {showSuccessModal && (
+        <div 
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/45"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="modal-title"
+          aria-describedby="modal-description"
+        >
+          <div className="w-full max-w-md rounded-xl border border-zinc-200 bg-white p-6 shadow-xl sm:p-8 animate-in fade-in zoom-in-95 duration-200">
+            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-emerald-50 border border-emerald-100 mb-5">
+              <Check className="h-6 w-6 text-emerald-600" aria-hidden="true" />
+            </div>
+            
+            <div className="text-center">
+              <h3 id="modal-title" className="text-lg font-semibold text-zinc-900">
+                Profile submitted
+              </h3>
+              <p id="modal-description" className="mt-3 text-sm leading-relaxed text-zinc-600">
+                Your profile has been submitted for verification. We'll update your verification status when the review is complete.
+              </p>
+            </div>
+            
+            <div className="mt-8 flex justify-center">
+              <Button 
+                variant="primary" 
+                className="w-full sm:w-auto px-8"
+                onClick={() => {
+                  setShowSuccessModal(false);
+                  router.push("/candidate/dashboard");
+                }}
+              >
+                Continue
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

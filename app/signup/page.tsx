@@ -11,6 +11,7 @@ import { useAuth } from "@/lib/auth/AuthContext";
 import { createUserProfile, Role } from "@/lib/firebase/users";
 import RoleSelector from "@/components/RoleSelector";
 import { Users, Briefcase, Loader2 } from "lucide-react";
+import { logFunnelEvent } from "@/lib/analytics/logEvent";
 
 export default function SignupPage() {
   const [email, setEmail] = useState("");
@@ -39,6 +40,7 @@ export default function SignupPage() {
     
     setLoadingAction(true);
     setError(null);
+    logFunnelEvent("signup_started", { method: "email", role });
     try {
       const userCred = await createUserWithEmailAndPassword(auth, email, password);
       
@@ -57,6 +59,7 @@ export default function SignupPage() {
       ]);
 
       await refreshProfile();
+      logFunnelEvent("signup_completed", { method: "email", role });
       // Route change handled by useEffect when profile loads
     } catch (err: any) {
       if (err.code === "auth/email-already-in-use") {
@@ -71,10 +74,12 @@ export default function SignupPage() {
   const handleGoogleSignup = async () => {
     setLoadingAction(true);
     setError(null);
+    logFunnelEvent("signup_started", { method: "google" });
     try {
       const provider = new GoogleAuthProvider();
       // signInWithPopup creates an account if it doesn't exist
       await signInWithPopup(auth, provider);
+      logFunnelEvent("signup_completed", { method: "google" });
       // Wait for AuthContext to pick up the user, which will trigger fetchUserProfile
       // If they have no role, the explicit render block below will show RoleSelector.
       // If they do have a role, the useEffect will redirect them.

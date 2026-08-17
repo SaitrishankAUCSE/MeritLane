@@ -44,11 +44,11 @@ export function TagInput({
   return (
     <div className="flex flex-col gap-1.5 w-full">
       {label && <label className="text-xs font-medium text-zinc-700">{label}</label>}
-      <div className="flex min-h-[42px] flex-wrap items-center gap-1.5 rounded border border-zinc-300 bg-white p-1.5 focus-within:border-zinc-900 focus-within:ring-1 focus-within:ring-zinc-900 transition-colors">
+      <div className="flex min-h-[42px] flex-wrap items-center gap-1.5 rounded-md border border-zinc-200 bg-white p-1.5 shadow-sm focus-within:border-indigo-500 focus-within:ring-1 focus-within:ring-indigo-500 transition-colors">
         {tags.map((tag, idx) => (
           <span
             key={idx}
-            className="inline-flex items-center gap-1 rounded bg-zinc-100 px-2 py-1 text-xs font-medium text-zinc-800 border border-zinc-200"
+            className="inline-flex items-center gap-1 rounded-full bg-zinc-100 px-2.5 py-1 text-xs font-medium text-zinc-800 border border-zinc-200"
           >
             {tag}
             <button

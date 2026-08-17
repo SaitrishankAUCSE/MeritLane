@@ -1,7 +1,8 @@
-import * as admin from 'firebase-admin';
+import { initializeApp, getApps, cert } from 'firebase-admin/app';
+import { getFirestore } from 'firebase-admin/firestore';
+import { getAuth } from 'firebase-admin/auth';
 
-// Protect against multiple initialization in development
-if (!admin.apps.length) {
+if (!getApps().length) {
   try {
     const serviceAccountJson = process.env.FIREBASE_SERVICE_ACCOUNT_KEY;
     
@@ -11,13 +12,13 @@ if (!admin.apps.length) {
 
     const serviceAccount = JSON.parse(serviceAccountJson);
     
-    admin.initializeApp({
-      credential: admin.credential.cert(serviceAccount),
+    initializeApp({
+      credential: cert(serviceAccount),
     });
   } catch (error) {
     console.error("Firebase Admin Initialization Error", error);
   }
 }
 
-export const adminDb = admin.apps.length ? admin.firestore() : null;
-export const adminAuth = admin.apps.length ? admin.auth() : null;
+export const adminDb = getApps().length ? getFirestore() : null;
+export const adminAuth = getApps().length ? getAuth() : null;

@@ -13,5 +13,10 @@ service cloud.firestore {
     match /employers/{userId} {
       allow read, write: if request.auth != null && request.auth.uid == userId;
     }
+    // Funnel events — write-only telemetry from the client
+    match /funnel_events/{eventId} {
+      allow create: if true;
+      allow read, update, delete: if false;
+    }
   }
 }

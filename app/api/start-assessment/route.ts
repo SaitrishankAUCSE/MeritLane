@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { adminAuth, adminDb } from "@/lib/firebase/admin";
-import * as admin from 'firebase-admin';
+import { FieldValue } from 'firebase-admin/firestore';
 
 export async function POST(req: NextRequest) {
   try {
@@ -64,13 +64,13 @@ export async function POST(req: NextRequest) {
       } else {
         // Attempt expired! Mark as failure and enforce cooldown immediately
         await userRef.update({
-          lastFailedAssessmentAt: admin.firestore.FieldValue.serverTimestamp(),
-          assessmentStartedAt: admin.firestore.FieldValue.delete(),
-          assessmentVariant: admin.firestore.FieldValue.delete()
+          lastFailedAssessmentAt: FieldValue.serverTimestamp(),
+          assessmentStartedAt: FieldValue.delete(),
+          assessmentVariant: FieldValue.delete()
         });
         
         return NextResponse.json({ 
-          error: \`Cooldown active. You can try again in 14 days.\`,
+          error: `Cooldown active. You can try again in 14 days.`,
           cooldownDays: 14 
         }, { status: 403 });
       }
@@ -81,7 +81,7 @@ export async function POST(req: NextRequest) {
 
     // Start a fresh session
     await userRef.update({
-      assessmentStartedAt: admin.firestore.FieldValue.serverTimestamp(),
+      assessmentStartedAt: FieldValue.serverTimestamp(),
       assessmentVariant: newVariant
     });
 

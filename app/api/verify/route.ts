@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { adminAuth, adminDb } from "@/lib/firebase/admin";
-import * as admin from 'firebase-admin';
+import { FieldValue } from 'firebase-admin/firestore';
 
 // Variant A: Filter COMPLETED, sum valid amounts
 const TEST_WRAPPER_A = `
@@ -194,9 +194,9 @@ export async function POST(req: NextRequest) {
     if (now - startedMs > (fortyFiveMinsMs + gracePeriodMs)) {
       // Time expired
       await userRef.update({
-        lastFailedAssessmentAt: admin.firestore.FieldValue.serverTimestamp(),
-        assessmentStartedAt: admin.firestore.FieldValue.delete(),
-        assessmentVariant: admin.firestore.FieldValue.delete()
+        lastFailedAssessmentAt: FieldValue.serverTimestamp(),
+        assessmentStartedAt: FieldValue.delete(),
+        assessmentVariant: FieldValue.delete()
       });
       return NextResponse.json({ error: "Assessment time expired" }, { status: 400 });
     }
@@ -249,7 +249,7 @@ export async function POST(req: NextRequest) {
     // Count passing tokens
     let passedTests = 0;
     for (let i = 1; i <= 5; i++) {
-      if (stdout.includes(\`TOKEN_PASS_\${i}\`)) {
+      if (stdout.includes(`TOKEN_PASS_${i}`)) {
         passedTests++;
       }
     }
@@ -259,7 +259,7 @@ export async function POST(req: NextRequest) {
       // Filter stdout to only show public tests (1 and 2) or errors
       const publicOutput = stdout
         .split("\\n")
-        .filter(line => !line.startsWith("TOKEN_PASS_") || line.includes("TOKEN_PASS_1") || line.includes("TOKEN_PASS_2"))
+        .filter((line: string) => !line.startsWith("TOKEN_PASS_") || line.includes("TOKEN_PASS_1") || line.includes("TOKEN_PASS_2"))
         .join("\\n");
         
       return NextResponse.json({
@@ -279,12 +279,12 @@ export async function POST(req: NextRequest) {
       await userRef.update({
         verifiedBadge: true,
         assessmentScores: {
-          [\`python_\${variant}\`]: passedTests
+          [`python_${variant}`]: passedTests
         },
-        assessmentDate: admin.firestore.FieldValue.serverTimestamp(),
+        assessmentDate: FieldValue.serverTimestamp(),
         // Clear active session
-        assessmentStartedAt: admin.firestore.FieldValue.delete(),
-        assessmentVariant: admin.firestore.FieldValue.delete()
+        assessmentStartedAt: FieldValue.delete(),
+        assessmentVariant: FieldValue.delete()
       });
 
       return NextResponse.json({
@@ -296,17 +296,17 @@ export async function POST(req: NextRequest) {
     } else {
       // Failed - Enforce cooldown
       await userRef.update({
-        lastFailedAssessmentAt: admin.firestore.FieldValue.serverTimestamp(),
+        lastFailedAssessmentAt: FieldValue.serverTimestamp(),
         // Clear active session
-        assessmentStartedAt: admin.firestore.FieldValue.delete(),
-        assessmentVariant: admin.firestore.FieldValue.delete()
+        assessmentStartedAt: FieldValue.delete(),
+        assessmentVariant: FieldValue.delete()
       });
 
       return NextResponse.json({
         success: true,
         passed: false,
         score: passedTests,
-        message: \`Assessment failed. You passed \${passedTests} out of 5 tests. You can retry in 14 days.\`
+        message: `Assessment failed. You passed ${passedTests} out of 5 tests. You can retry in 14 days.`
       });
     }
 
