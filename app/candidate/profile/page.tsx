@@ -123,13 +123,10 @@ export default function CandidateProfilePage() {
   const fetchColleges = async (query: string): Promise<string[]> => {
     if (!query || query.length < 2) return [];
     try {
-      const response = await fetch(`http://universities.hipolabs.com/search?country=India&name=${encodeURIComponent(query)}`);
+      const response = await fetch(`/api/colleges?q=${encodeURIComponent(query)}`);
       if (!response.ok) throw new Error("Failed to fetch");
       const data = await response.json();
-      // Hipolabs returns an array of { name: string, ... }
-      const names = data.map((item: any) => item.name);
-      // Remove duplicates
-      return Array.from(new Set(names)) as string[];
+      return data.results || [];
     } catch (err) {
       console.error(err);
       return [];
