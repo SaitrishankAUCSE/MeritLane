@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { Users, Briefcase, Loader2 } from "lucide-react";
+import { Users, Briefcase, Loader2, ShieldCheck, AlertCircle } from "lucide-react";
 import { createUserProfile } from "@/lib/firebase/users";
 import { useAuth } from "@/lib/auth/AuthContext";
 import { useRouter } from "next/navigation";
@@ -9,11 +9,13 @@ import { useRouter } from "next/navigation";
 export default function RoleSelector() {
   const { user, refreshProfile } = useAuth();
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const router = useRouter();
 
   const handleSelectRole = async (role: "candidate" | "employer") => {
     if (!user) return;
     setLoading(true);
+    setError(null);
     try {
       await createUserProfile(user.uid, {
         email: user.email || "",
@@ -27,9 +29,9 @@ export default function RoleSelector() {
       } else {
         router.push("/employer/dashboard");
       }
-    } catch (error) {
-      console.error("Error setting role:", error);
-      alert("Failed to save your role. Please try again.");
+    } catch (err: any) {
+      console.error("Error setting role:", err);
+      setError("Failed to save your role. Please try again.");
       setLoading(false);
     }
   };
@@ -37,55 +39,64 @@ export default function RoleSelector() {
   if (loading) {
     return (
       <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-white">
-        <Loader2 className="h-8 w-8 animate-spin text-zinc-900" />
-        <p className="mt-4 text-sm font-medium text-zinc-600">Setting up your account...</p>
+        <Loader2 className="h-8 w-8 animate-spin text-indigo-600" />
+        <p className="mt-4 text-sm font-medium text-zinc-600">Setting up your profile...</p>
       </div>
     );
   }
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#fafafa] px-4">
-      <div className="w-full max-w-2xl text-center">
-        <h1 className="text-2xl font-semibold tracking-tight text-zinc-900 sm:text-3xl">
+      <div className="w-full max-w-xl text-center">
+        <div className="mx-auto mb-4 flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600 shadow-sm">
+          <ShieldCheck className="h-5 w-5" />
+        </div>
+
+        <h1 className="text-2xl font-bold tracking-tight text-zinc-900 sm:text-3xl">
           Choose your role
         </h1>
-        <p className="mt-3 text-sm text-zinc-500">
-          How will you be using Meritlane? This selection is permanent.
-          <br />
-          <span className="text-xs text-zinc-400 mt-1 block">
-            If you already had an account, we just need to set up your profile role.
-          </span>
+        <p className="mt-2 text-sm text-zinc-500">
+          How will you be using Meritlane? This selection configures your verified workspace.
         </p>
+
+        {error && (
+          <div className="mt-5 flex items-center justify-center gap-2 rounded-xl border border-red-200 bg-red-50 p-3.5 text-xs font-medium text-red-700">
+            <AlertCircle className="h-4 w-4 shrink-0 text-red-600" />
+            <span>{error}</span>
+          </div>
+        )}
 
         <div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2">
           {/* Candidate Card */}
           <button
+            type="button"
             onClick={() => handleSelectRole("candidate")}
-            className="group relative flex flex-col items-center justify-center gap-4 rounded-xl border-2 border-zinc-200 bg-white p-8 text-center transition-all hover:border-zinc-900 hover:shadow-sm"
+            className="group relative flex flex-col items-center justify-center gap-4 rounded-2xl border border-zinc-200 bg-white p-8 text-center shadow-sm transition-all duration-150 hover:border-indigo-600 hover:shadow-md active:scale-[0.98]"
           >
-            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-zinc-100 text-zinc-600 group-hover:bg-zinc-900 group-hover:text-white transition-colors">
+            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600 group-hover:bg-indigo-600 group-hover:text-white transition-colors duration-150">
               <Users className="h-5 w-5" />
             </div>
             <div>
-              <h3 className="text-lg font-semibold text-zinc-900">I'm a Candidate</h3>
-              <p className="mt-2 text-sm text-zinc-500">
-                I want to submit projects, pass verification, and get hired.
+              <h3 className="text-base font-bold text-zinc-900">I&apos;m a Candidate</h3>
+              <p className="mt-1.5 text-xs text-zinc-500 leading-relaxed">
+                I want to submit projects, pass code verification, and get discovered by top teams.
               </p>
             </div>
           </button>
 
           {/* Employer Card */}
           <button
+            type="button"
             onClick={() => handleSelectRole("employer")}
-            className="group relative flex flex-col items-center justify-center gap-4 rounded-xl border-2 border-zinc-200 bg-white p-8 text-center transition-all hover:border-blue-600 hover:shadow-sm"
+            className="group relative flex flex-col items-center justify-center gap-4 rounded-2xl border border-zinc-200 bg-white p-8 text-center shadow-sm transition-all duration-150 hover:border-indigo-600 hover:shadow-md active:scale-[0.98]"
           >
-            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-blue-50 text-blue-600 group-hover:bg-blue-600 group-hover:text-white transition-colors">
+            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-zinc-100 text-zinc-700 group-hover:bg-indigo-600 group-hover:text-white transition-colors duration-150">
               <Briefcase className="h-5 w-5" />
             </div>
             <div>
-              <h3 className="text-lg font-semibold text-zinc-900">I'm Hiring</h3>
-              <p className="mt-2 text-sm text-zinc-500">
-                I want to source and hire verified engineering talent.
+              <h3 className="text-base font-bold text-zinc-900">I&apos;m Hiring</h3>
+              <p className="mt-1.5 text-xs text-zinc-500 leading-relaxed">
+                I want to source and evaluate verified engineering talent without pedigree bias.
               </p>
             </div>
           </button>

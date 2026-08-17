@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/Button";
 import { useAuth } from "@/lib/auth/AuthContext";
 import { createUserProfile, fetchUserProfile, Role } from "@/lib/firebase/users";
 import RoleSelector from "@/components/RoleSelector";
-import { Users, Briefcase, Loader2 } from "lucide-react";
+import { Users, Briefcase, Loader2, ShieldCheck, AlertCircle, Check } from "lucide-react";
 import { logFunnelEvent } from "@/lib/analytics/logEvent";
 
 export default function SignupPage() {
@@ -33,7 +33,7 @@ export default function SignupPage() {
   const handleEmailSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!role) {
-      setError("Please select a role before signing up.");
+      setError("Please select whether you are a candidate or employer.");
       return;
     }
     
@@ -75,7 +75,7 @@ export default function SignupPage() {
 
   const handleGoogleSignup = async () => {
     if (!role) {
-      setError("Please select a role before signing up with Google.");
+      setError("Please select whether you are a candidate or employer before signing up with Google.");
       return;
     }
 
@@ -113,7 +113,7 @@ export default function SignupPage() {
   // Auth States Handled Explicitly
   if (authLoading || (user && profileLoading)) {
     return (
-      <div className="flex min-h-[80vh] flex-col items-center justify-center space-y-4">
+      <div className="flex min-h-[80vh] flex-col items-center justify-center space-y-3">
         <Loader2 className="h-8 w-8 animate-spin text-zinc-400" />
         <p className="text-sm font-medium text-zinc-500">Setting up your account...</p>
       </div>
@@ -126,7 +126,7 @@ export default function SignupPage() {
 
   if (user && userRole) {
     return (
-      <div className="flex min-h-[80vh] flex-col items-center justify-center space-y-4">
+      <div className="flex min-h-[80vh] flex-col items-center justify-center space-y-3">
         <Loader2 className="h-8 w-8 animate-spin text-zinc-400" />
         <p className="text-sm font-medium text-zinc-500">Redirecting to your dashboard...</p>
       </div>
@@ -134,48 +134,56 @@ export default function SignupPage() {
   }
 
   return (
-    <div className="flex min-h-[80vh] items-center justify-center px-4 py-12">
-      <div className="w-full max-w-md rounded-lg border border-zinc-200 bg-white p-6 sm:p-8 shadow-sm">
-        <h1 className="text-2xl font-semibold tracking-tight text-zinc-900 text-center">
-          Join Meritlane
-        </h1>
-        <p className="mt-2 text-sm text-zinc-500 text-center">
-          Create an account to build your verified profile.
-        </p>
+    <div className="flex min-h-[85vh] items-center justify-center px-4 py-12">
+      <div className="w-full max-w-md rounded-2xl border border-zinc-200/90 bg-white p-8 sm:p-10 shadow-[0_4px_24px_rgba(0,0,0,0.03)]">
+        <div className="text-center">
+          <div className="mx-auto mb-4 flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600 shadow-sm">
+            <ShieldCheck className="h-5 w-5" />
+          </div>
+          <h1 className="text-2xl font-bold tracking-tight text-zinc-900">
+            Join Meritlane
+          </h1>
+          <p className="mt-2 text-sm text-zinc-500">
+            Create an account to build your verified engineering track record.
+          </p>
+        </div>
 
         {error && (
-          <div className="mt-4 rounded border border-red-200 bg-red-50 p-3 text-sm text-red-600">
-            {error}
+          <div className="mt-5 flex items-start gap-2.5 rounded-lg border border-red-200 bg-red-50/80 p-3.5 text-xs text-red-700 animate-in fade-in duration-150">
+            <AlertCircle className="h-4 w-4 shrink-0 text-red-600 mt-0.5" />
+            <span className="leading-relaxed">{error}</span>
           </div>
         )}
 
         <form onSubmit={handleEmailSignup} className="mt-6 space-y-5">
-          <div className="space-y-3">
-            <label className="text-sm font-medium text-zinc-900">Select your role</label>
+          <div className="space-y-2 text-left">
+            <label className="text-xs font-semibold uppercase tracking-wider text-zinc-700">
+              Select Your Role <span className="text-red-500">*</span>
+            </label>
             <div className="grid grid-cols-2 gap-3">
               <button
                 type="button"
                 onClick={() => setRole("candidate")}
-                className={`flex flex-col items-center gap-2 rounded-lg border-2 p-3 text-sm font-medium transition-colors ${
+                className={`flex flex-col items-center gap-2 rounded-xl border p-3.5 text-sm font-medium transition-all duration-150 select-none ${
                   role === "candidate"
-                    ? "border-zinc-900 bg-zinc-50 text-zinc-900"
-                    : "border-zinc-200 text-zinc-500 hover:border-zinc-300"
+                    ? "border-indigo-600 bg-indigo-50/70 text-indigo-950 ring-1 ring-indigo-600 shadow-sm"
+                    : "border-zinc-200 bg-white text-zinc-600 hover:border-zinc-300 hover:bg-zinc-50/50"
                 }`}
               >
-                <Users className="h-5 w-5" />
-                Candidate
+                <Users className={`h-5 w-5 ${role === "candidate" ? "text-indigo-600" : "text-zinc-400"}`} />
+                <span>Candidate</span>
               </button>
               <button
                 type="button"
                 onClick={() => setRole("employer")}
-                className={`flex flex-col items-center gap-2 rounded-lg border-2 p-3 text-sm font-medium transition-colors ${
+                className={`flex flex-col items-center gap-2 rounded-xl border p-3.5 text-sm font-medium transition-all duration-150 select-none ${
                   role === "employer"
-                    ? "border-blue-600 bg-blue-50 text-blue-700"
-                    : "border-zinc-200 text-zinc-500 hover:border-zinc-300"
+                    ? "border-indigo-600 bg-indigo-50/70 text-indigo-950 ring-1 ring-indigo-600 shadow-sm"
+                    : "border-zinc-200 bg-white text-zinc-600 hover:border-zinc-300 hover:bg-zinc-50/50"
                 }`}
               >
-                <Briefcase className="h-5 w-5" />
-                Employer
+                <Briefcase className={`h-5 w-5 ${role === "employer" ? "text-indigo-600" : "text-zinc-400"}`} />
+                <span>Employer</span>
               </button>
             </div>
           </div>
@@ -197,25 +205,30 @@ export default function SignupPage() {
             required
             helperText="Must be at least 6 characters long."
           />
-          <Button type="submit" className="w-full" disabled={loadingAction} variant="primary">
-            {loadingAction ? "Creating account..." : "Sign Up"}
+          <Button 
+            type="submit" 
+            className="w-full mt-2" 
+            loading={loadingAction} 
+            variant="primary"
+          >
+            Create Account
           </Button>
         </form>
 
         <div className="relative mt-6 flex items-center py-2">
           <div className="flex-grow border-t border-zinc-200"></div>
-          <span className="shrink-0 px-4 text-xs font-medium text-zinc-400">OR</span>
+          <span className="shrink-0 px-4 text-xs font-semibold text-zinc-400 uppercase tracking-wider">OR</span>
           <div className="flex-grow border-t border-zinc-200"></div>
         </div>
 
         <Button
           type="button"
           onClick={handleGoogleSignup}
-          className="mt-4 w-full"
+          className="mt-2 w-full"
           variant="outline"
           disabled={loadingAction}
         >
-          <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24">
+          <svg className="mr-2.5 h-4 w-4 shrink-0" viewBox="0 0 24 24">
             <path
               fill="currentColor"
               d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
@@ -236,9 +249,9 @@ export default function SignupPage() {
           Continue with Google
         </Button>
 
-        <p className="mt-6 text-center text-sm text-zinc-500">
+        <p className="mt-8 text-center text-sm text-zinc-500">
           Already have an account?{" "}
-          <Link href="/login" className="font-semibold text-zinc-900 hover:underline">
+          <Link href="/login" className="font-semibold text-zinc-900 hover:text-indigo-600 transition-colors underline-offset-4 hover:underline">
             Sign in
           </Link>
         </p>

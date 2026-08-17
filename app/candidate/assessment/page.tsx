@@ -1,14 +1,12 @@
 "use client";
 
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState } from "react";
 import { useAuth } from "@/lib/auth/AuthContext";
 import { useRouter } from "next/navigation";
-import { Loader2, Play, CheckCircle2, Clock, AlertTriangle, TerminalSquare, FileCode2 } from "lucide-react";
-import { fetchCandidateProfile } from "@/lib/firebase/candidate";
+import { Loader2, Play, CheckCircle2, Clock, AlertTriangle, TerminalSquare, FileCode2, ShieldAlert } from "lucide-react";
 import { logFunnelEvent } from "@/lib/analytics/logEvent";
 
-const VARIANT_A_INSTRUCTIONS = `
-Write a Python function named process_transactions(csv_string) that takes a multiline CSV string of financial transactions.
+const VARIANT_A_INSTRUCTIONS = `Write a Python function named process_transactions(csv_string) that takes a multiline CSV string of financial transactions.
 
 Columns: transaction_id, user_id, amount, status
 
@@ -16,11 +14,9 @@ Requirements:
 1. Filter out any transaction where status is not "COMPLETED".
 2. Ignore any malformed rows (e.g., missing columns, invalid floats).
 3. Sum the total valid amount per user_id.
-4. Return a Python dictionary mapping user_id to their total spend.
-`;
+4. Return a Python dictionary mapping user_id to their total spend.`;
 
-const VARIANT_B_INSTRUCTIONS = `
-Write a Python function named calculate_aov(csv_string) that takes a multiline CSV string of orders.
+const VARIANT_B_INSTRUCTIONS = `Write a Python function named calculate_aov(csv_string) that takes a multiline CSV string of orders.
 
 Columns: order_id, user_id, amount, status
 
@@ -28,8 +24,7 @@ Requirements:
 1. Filter out any order where status is not "SUCCESS".
 2. Ignore any malformed rows (e.g., missing columns, invalid floats).
 3. Sum the total valid amount per user_id.
-4. Return a Python dictionary mapping user_id to their total spend (acting as AOV since it's total).
-`;
+4. Return a Python dictionary mapping user_id to their total spend (acting as AOV since it's total).`;
 
 export default function AssessmentPage() {
   const { user, role, loading } = useAuth();
@@ -179,16 +174,16 @@ export default function AssessmentPage() {
 
   if (errorMsg) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-zinc-50 p-4">
-        <div className="w-full max-w-md rounded-xl border border-red-200 bg-red-50 p-8 shadow-sm text-center">
-          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-red-100 text-red-600 mb-4">
+      <div className="flex min-h-screen items-center justify-center bg-[#fafafa] p-4">
+        <div className="w-full max-w-md rounded-2xl border border-red-200 bg-white p-8 shadow-sm text-center">
+          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-red-50 text-red-600 border border-red-100 mb-4">
             <AlertTriangle className="h-6 w-6" />
           </div>
-          <h2 className="text-lg font-bold text-red-900">Assessment Unavailable</h2>
-          <p className="mt-2 text-sm text-red-800 leading-relaxed">{errorMsg}</p>
+          <h2 className="text-lg font-bold text-zinc-900">Assessment Unavailable</h2>
+          <p className="mt-2 text-sm text-zinc-600 leading-relaxed">{errorMsg}</p>
           <button 
             onClick={() => router.push("/candidate/dashboard")}
-            className="mt-6 w-full rounded-md bg-red-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-red-700 transition-colors shadow-sm"
+            className="mt-6 w-full rounded-lg bg-zinc-900 px-4 py-2.5 text-sm font-semibold text-white hover:bg-zinc-800 transition-colors shadow-sm"
           >
             Return to Dashboard
           </button>
@@ -204,15 +199,19 @@ export default function AssessmentPage() {
   };
 
   return (
-    <div className="flex h-screen flex-col bg-[#0d0d0d] text-zinc-100 font-sans">
+    <div className="flex h-screen flex-col bg-[#09090b] text-zinc-100 font-sans">
       {/* Header */}
-      <header className="flex items-center justify-between border-b border-zinc-800/50 bg-[#111] px-6 py-3.5 shadow-sm">
+      <header className="flex items-center justify-between border-b border-zinc-800/80 bg-[#121215] px-6 py-3 shadow-xs">
         <div className="flex items-center gap-3">
           <div className="flex h-7 w-7 items-center justify-center rounded-md bg-indigo-600 font-bold text-xs text-white shadow-sm">M</div>
-          <span className="text-sm font-semibold tracking-wide text-zinc-100 uppercase tracking-wider">Meritlane Technical Audit</span>
+          <span className="text-xs font-bold tracking-wider text-zinc-200 uppercase">Meritlane Technical Audit</span>
         </div>
-        <div className={`flex items-center gap-2 rounded-md px-3.5 py-1.5 text-sm font-bold tracking-widest tabular-nums border ${timeLeft < 300 ? 'border-red-900/50 bg-red-950/30 text-red-400 shadow-[0_0_15px_rgba(248,113,113,0.1)]' : 'border-zinc-800 bg-zinc-900/50 text-zinc-300'}`}>
-          <Clock className="h-4 w-4 opacity-70" />
+        <div className={`flex items-center gap-2 rounded-md px-3.5 py-1.5 text-xs font-bold tracking-widest tabular-nums border transition-all ${
+          timeLeft < 300 
+            ? 'border-red-500/50 bg-red-950/40 text-red-400 shadow-[0_0_15px_rgba(239,68,68,0.15)] animate-pulse' 
+            : 'border-zinc-800 bg-zinc-900/60 text-zinc-300'
+        }`}>
+          <Clock className="h-3.5 w-3.5 opacity-70" />
           {formatTime(timeLeft)}
         </div>
       </header>
@@ -221,54 +220,55 @@ export default function AssessmentPage() {
       <div className="flex flex-1 overflow-hidden">
         
         {/* Left Panel: Instructions */}
-        <div className="w-[35%] border-r border-zinc-800/50 bg-[#111] flex flex-col z-10 shadow-lg">
-          <div className="flex items-center gap-2 border-b border-zinc-800/50 px-5 py-3.5 bg-zinc-900/20">
+        <div className="w-[35%] border-r border-zinc-800/80 bg-[#121215] flex flex-col z-10 shadow-lg">
+          <div className="flex items-center gap-2 border-b border-zinc-800/80 px-5 py-3.5 bg-zinc-900/30">
             <FileCode2 className="h-4 w-4 text-indigo-400" />
-            <h2 className="text-xs font-semibold text-zinc-300 uppercase tracking-wider">Task Overview</h2>
+            <h2 className="text-xs font-bold text-zinc-300 uppercase tracking-wider">Problem Specification</h2>
           </div>
           <div className="flex-1 overflow-auto p-6 scrollbar-thin scrollbar-thumb-zinc-700 scrollbar-track-transparent">
-            <pre className="whitespace-pre-wrap font-mono text-sm leading-relaxed text-zinc-300 bg-zinc-900/30 p-5 rounded-lg border border-zinc-800">
-              {variant === "A" ? VARIANT_A_INSTRUCTIONS : VARIANT_B_INSTRUCTIONS}
-            </pre>
+            <div className="rounded-xl border border-zinc-800 bg-zinc-900/40 p-5">
+              <pre className="whitespace-pre-wrap font-mono text-xs leading-relaxed text-zinc-300">
+                {variant === "A" ? VARIANT_A_INSTRUCTIONS : VARIANT_B_INSTRUCTIONS}
+              </pre>
+            </div>
             
-            <div className="mt-6 rounded-lg border border-amber-900/30 bg-amber-900/10 p-5 shadow-sm">
+            <div className="mt-6 rounded-xl border border-amber-900/40 bg-amber-950/20 p-5 shadow-sm">
               <div className="flex items-center gap-2 mb-2">
-                <AlertTriangle className="h-4 w-4 text-amber-500" />
-                <h3 className="text-xs font-bold uppercase tracking-wider text-amber-500">Security Warning</h3>
+                <ShieldAlert className="h-4 w-4 text-amber-500" />
+                <h3 className="text-xs font-bold uppercase tracking-wider text-amber-400">Security &amp; Integrity Notice</h3>
               </div>
               <p className="text-xs leading-relaxed text-amber-200/70">
-                You have exactly 1 attempt. If you navigate away or refresh this page, the timer continues running server-side. Expiration is recorded as a failure and enforces a strict 14-day cooldown period.
+                You have exactly 1 attempt. Navigating away or refreshing does not pause the server timer. Expiration triggers an automatic score calculation and enforces a 14-day cooldown.
               </p>
             </div>
           </div>
         </div>
 
         {/* Right Panel: Editor & Console */}
-        <div className="flex w-[65%] flex-col bg-[#161616]">
+        <div className="flex w-[65%] flex-col bg-[#18181b]">
           {/* Editor Area */}
           <div className="flex-1 overflow-auto relative">
-            <div className="absolute top-0 left-0 right-0 h-4 bg-gradient-to-b from-black/20 to-transparent pointer-events-none z-10" />
             <textarea
               value={code}
               onChange={(e) => setCode(e.target.value)}
               spellCheck={false}
-              className="h-full w-full resize-none bg-transparent font-mono text-[14px] leading-loose text-zinc-300 outline-none p-6 pb-20 selection:bg-indigo-500/30"
-              placeholder="Write your Python code here..."
+              className="h-full w-full resize-none bg-transparent font-mono text-[13.5px] leading-relaxed text-zinc-200 outline-none p-6 pb-20 selection:bg-indigo-500/30"
+              placeholder="Write your Python implementation here..."
             />
           </div>
 
           {/* Console Area */}
-          <div className="h-[35%] flex flex-col border-t border-zinc-800/80 bg-[#111] shadow-[0_-4px_15px_rgba(0,0,0,0.2)] z-20">
-            <div className="flex items-center justify-between border-b border-zinc-800/50 px-4 py-2.5 bg-zinc-900/40">
+          <div className="h-[38%] flex flex-col border-t border-zinc-800 bg-[#121215] shadow-[0_-4px_20px_rgba(0,0,0,0.3)] z-20">
+            <div className="flex items-center justify-between border-b border-zinc-800/80 px-4 py-2.5 bg-zinc-900/40">
               <div className="flex items-center gap-2">
-                <TerminalSquare className="h-4 w-4 text-zinc-500" />
-                <span className="text-xs font-semibold uppercase tracking-wider text-zinc-400">Execution Output</span>
+                <TerminalSquare className="h-4 w-4 text-zinc-400" />
+                <span className="text-xs font-bold uppercase tracking-wider text-zinc-400">Console &amp; Test Suite</span>
               </div>
               <div className="flex gap-2">
                 <button
                   onClick={() => handleTest(false)}
                   disabled={evaluating || timeLeft <= 0}
-                  className="flex items-center gap-1.5 rounded-md bg-zinc-800 px-4 py-1.5 text-xs font-semibold text-zinc-300 hover:bg-zinc-700 disabled:opacity-50 transition-colors border border-zinc-700 shadow-sm"
+                  className="flex items-center gap-1.5 rounded-md bg-zinc-800 px-3.5 py-1.5 text-xs font-semibold text-zinc-200 hover:bg-zinc-700 active:scale-95 disabled:opacity-50 transition-all border border-zinc-700 shadow-sm"
                 >
                   {evaluating ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Play className="h-3.5 w-3.5" />}
                   Run Tests
@@ -276,16 +276,16 @@ export default function AssessmentPage() {
                 <button
                   onClick={() => handleTest(true)}
                   disabled={evaluating || timeLeft <= 0}
-                  className="flex items-center gap-1.5 rounded-md bg-indigo-600 px-4 py-1.5 text-xs font-semibold text-white hover:bg-indigo-500 disabled:opacity-50 transition-colors shadow-sm"
+                  className="flex items-center gap-1.5 rounded-md bg-indigo-600 px-4 py-1.5 text-xs font-semibold text-white hover:bg-indigo-500 active:scale-95 disabled:opacity-50 transition-all shadow-sm"
                 >
                   <CheckCircle2 className="h-3.5 w-3.5" />
-                  Submit Solution
+                  Submit Assessment
                 </button>
               </div>
             </div>
-            <div className="flex-1 overflow-auto p-5 bg-[#0a0a0a]">
-              <pre className="font-mono text-[13px] leading-relaxed text-zinc-400 whitespace-pre-wrap">
-                {output || "System ready. Awaiting execution..."}
+            <div className="flex-1 overflow-auto p-4.5 bg-[#09090b]">
+              <pre className="font-mono text-xs leading-relaxed text-zinc-300 whitespace-pre-wrap">
+                {output || "System initialized. Click 'Run Tests' to validate your solution against public test cases."}
               </pre>
             </div>
           </div>

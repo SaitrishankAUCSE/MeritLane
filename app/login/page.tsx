@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
 import { useAuth } from "@/lib/auth/AuthContext";
 import { updateLastLogin, fetchUserProfile } from "@/lib/firebase/users";
+import { ShieldCheck, AlertCircle, CheckCircle2, Loader2 } from "lucide-react";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -27,7 +28,6 @@ export default function LoginPage() {
       const msg = params.get("message");
       if (msg) {
         setSuccessMessage(msg);
-        // Clear the URL to avoid showing it on refresh
         window.history.replaceState({}, document.title, window.location.pathname);
       }
     }
@@ -113,28 +113,39 @@ export default function LoginPage() {
 
   // Prevent UI flash while evaluating an existing valid session
   if (authLoading || (user && profileLoading) || (user && userRole)) {
-    return <div className="min-h-[80vh]"></div>; 
+    return (
+      <div className="flex min-h-[80vh] items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-zinc-400" />
+      </div>
+    ); 
   }
 
   return (
-    <div className="flex min-h-[80vh] items-center justify-center px-4 py-12">
-      <div className="w-full max-w-md rounded-lg border border-zinc-200 bg-white p-6 sm:p-8 shadow-sm">
-        <h1 className="text-2xl font-semibold tracking-tight text-zinc-900 text-center">
-          Sign In to Meritlane
-        </h1>
-        <p className="mt-2 text-sm text-zinc-500 text-center">
-          Welcome back. Please sign in to continue.
-        </p>
+    <div className="flex min-h-[85vh] items-center justify-center px-4 py-12">
+      <div className="w-full max-w-md rounded-2xl border border-zinc-200/90 bg-white p-8 sm:p-10 shadow-[0_4px_24px_rgba(0,0,0,0.03)]">
+        <div className="text-center">
+          <div className="mx-auto mb-4 flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600 shadow-sm">
+            <ShieldCheck className="h-5 w-5" />
+          </div>
+          <h1 className="text-2xl font-bold tracking-tight text-zinc-900">
+            Sign In to Meritlane
+          </h1>
+          <p className="mt-2 text-sm text-zinc-500">
+            Welcome back. Please sign in to access your verified profile.
+          </p>
+        </div>
 
         {error && (
-          <div className="mt-4 rounded border border-red-200 bg-red-50 p-3 text-sm text-red-600">
-            {error}
+          <div className="mt-5 flex items-start gap-2.5 rounded-lg border border-red-200 bg-red-50/80 p-3.5 text-xs text-red-700 animate-in fade-in duration-150">
+            <AlertCircle className="h-4 w-4 shrink-0 text-red-600 mt-0.5" />
+            <span className="leading-relaxed">{error}</span>
           </div>
         )}
 
         {successMessage && (
-          <div className="mt-4 rounded border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-700">
-            {successMessage}
+          <div className="mt-5 flex items-start gap-2.5 rounded-lg border border-emerald-200 bg-emerald-50/80 p-3.5 text-xs text-emerald-800 animate-in fade-in duration-150">
+            <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-600 mt-0.5" />
+            <span className="leading-relaxed">{successMessage}</span>
           </div>
         )}
 
@@ -155,25 +166,30 @@ export default function LoginPage() {
             placeholder="••••••••"
             required
           />
-          <Button type="submit" className="w-full" disabled={loadingAction} variant="primary">
-            {loadingAction ? "Signing in..." : "Sign In"}
+          <Button 
+            type="submit" 
+            className="w-full mt-2" 
+            loading={loadingAction} 
+            variant="primary"
+          >
+            Sign In
           </Button>
         </form>
 
         <div className="relative mt-6 flex items-center py-2">
           <div className="flex-grow border-t border-zinc-200"></div>
-          <span className="shrink-0 px-4 text-xs font-medium text-zinc-400">OR</span>
+          <span className="shrink-0 px-4 text-xs font-semibold text-zinc-400 uppercase tracking-wider">OR</span>
           <div className="flex-grow border-t border-zinc-200"></div>
         </div>
 
         <Button
           type="button"
           onClick={handleGoogleLogin}
-          className="mt-4 w-full"
+          className="mt-2 w-full"
           variant="outline"
           disabled={loadingAction}
         >
-          <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24">
+          <svg className="mr-2.5 h-4 w-4 shrink-0" viewBox="0 0 24 24">
             <path
               fill="currentColor"
               d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
@@ -194,9 +210,9 @@ export default function LoginPage() {
           Continue with Google
         </Button>
 
-        <p className="mt-6 text-center text-sm text-zinc-500">
+        <p className="mt-8 text-center text-sm text-zinc-500">
           Don&apos;t have an account?{" "}
-          <Link href="/signup" className="font-semibold text-zinc-900 hover:underline">
+          <Link href="/signup" className="font-semibold text-zinc-900 hover:text-indigo-600 transition-colors underline-offset-4 hover:underline">
             Sign up
           </Link>
         </p>

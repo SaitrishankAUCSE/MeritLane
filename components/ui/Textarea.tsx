@@ -1,13 +1,13 @@
 import React from "react";
 import { AlertCircle } from "lucide-react";
 
-export interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
+export interface TextareaProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
   label?: string;
   helperText?: string;
   error?: string;
 }
 
-export function Input({
+export function Textarea({
   label,
   helperText,
   error,
@@ -15,29 +15,29 @@ export function Input({
   className = "",
   disabled,
   ...props
-}: InputProps) {
-  const inputId = id || (label ? label.toLowerCase().replace(/\s+/g, "-") : undefined);
+}: TextareaProps) {
+  const textareaId = id || (label ? label.toLowerCase().replace(/\s+/g, "-") : undefined);
 
   return (
     <div className="flex flex-col gap-1.5 w-full text-left">
       {label && (
-        <label htmlFor={inputId} className="text-xs font-semibold uppercase tracking-wider text-zinc-700">
+        <label htmlFor={textareaId} className="text-xs font-semibold uppercase tracking-wider text-zinc-700">
           {label}
         </label>
       )}
       <div className="relative">
-        <input
-          id={inputId}
+        <textarea
+          id={textareaId}
           disabled={disabled}
-          className={`w-full rounded-md border border-zinc-200 bg-white px-3.5 py-2 text-sm text-zinc-900 placeholder:text-zinc-400 shadow-sm transition-all duration-150 ease-out hover:border-zinc-300 focus:border-zinc-900 focus:outline-none focus:ring-2 focus:ring-zinc-900/10 disabled:opacity-50 disabled:bg-zinc-50 ${
+          className={`w-full rounded-md border border-zinc-200 bg-white px-3.5 py-2.5 text-sm text-zinc-900 placeholder:text-zinc-400 shadow-sm transition-all duration-150 ease-out hover:border-zinc-300 focus:border-zinc-900 focus:outline-none focus:ring-2 focus:ring-zinc-900/10 disabled:opacity-50 disabled:bg-zinc-50 ${
             error
-              ? "border-red-500 hover:border-red-600 focus:border-red-500 focus:ring-red-500/10 text-red-900 pr-10"
+              ? "border-red-500 hover:border-red-600 focus:border-red-500 focus:ring-red-500/10 text-red-900"
               : ""
           } ${className}`}
           {...props}
         />
         {error && (
-          <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
+          <div className="pointer-events-none absolute top-3 right-3 flex items-center">
             <AlertCircle className="h-4 w-4 text-red-500" aria-hidden="true" />
           </div>
         )}

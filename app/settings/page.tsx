@@ -6,7 +6,9 @@ import { auth } from "@/lib/firebase/config";
 import { signOut } from "firebase/auth";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
-import { LogOut, User as UserIcon } from "lucide-react";
+import { Card, CardHeader, CardContent } from "@/components/ui/Card";
+import { Badge } from "@/components/ui/Badge";
+import { LogOut, User as UserIcon, ShieldCheck, Mail, Key } from "lucide-react";
 import RoleSelector from "@/components/RoleSelector";
 
 export default function SettingsPage() {
@@ -42,60 +44,67 @@ export default function SettingsPage() {
   }
 
   return (
-    <div className="mx-auto max-w-3xl px-4 py-10 sm:px-6">
-      <div className="border-b border-zinc-200 pb-5">
-        <h1 className="text-2xl font-semibold tracking-tight text-zinc-900">
-          Settings
+    <div className="mx-auto max-w-3xl px-4 py-10 sm:px-6 lg:px-8 space-y-8">
+      <div className="border-b border-zinc-200/80 pb-5">
+        <h1 className="text-2xl font-bold tracking-tight text-zinc-900 sm:text-3xl">
+          Account Settings
         </h1>
-        <p className="mt-1 text-sm text-zinc-500">
-          Manage your account preferences and session.
+        <p className="mt-1.5 text-sm text-zinc-500">
+          Manage your account preferences and session credentials.
         </p>
       </div>
 
-      <div className="mt-8 space-y-8">
-        <section className="rounded border border-zinc-200 bg-white p-5 sm:p-6">
-          <h2 className="text-sm font-semibold text-zinc-900 mb-4">Account Details</h2>
-          <div className="space-y-4">
-            <div>
-              <label className="text-xs font-medium text-zinc-500">Email Address</label>
-              <div className="mt-1 text-sm text-zinc-900 font-medium">{user.email}</div>
-            </div>
-            
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <label className="text-xs font-medium text-zinc-500">Account Role</label>
-                <div className="mt-1 inline-flex items-center gap-1.5 rounded bg-zinc-100 px-2.5 py-1 text-xs font-medium text-zinc-700 capitalize">
-                  <UserIcon className="h-3.5 w-3.5" />
-                  {userProfile?.role || "Unknown"}
-                </div>
+      <div className="space-y-6">
+        <Card>
+          <CardHeader>
+            <h2 className="text-base font-bold text-zinc-900">Profile &amp; Credentials</h2>
+            <p className="mt-0.5 text-xs text-zinc-500">Your verified identity details on Meritlane.</p>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4 text-xs">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 border-b border-zinc-100 pb-3.5">
+                <span className="font-semibold text-zinc-500 flex items-center gap-1.5">
+                  <Mail className="h-3.5 w-3.5" /> Email Address
+                </span>
+                <span className="font-medium text-zinc-900 sm:text-right">{user.email}</span>
               </div>
               
-              <div>
-                <label className="text-xs font-medium text-zinc-500">Authentication Method</label>
-                <div className="mt-1 text-sm text-zinc-900 capitalize">
-                  {userProfile?.authProvider || "password"}
-                </div>
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 border-b border-zinc-100 pb-3.5">
+                <span className="font-semibold text-zinc-500 flex items-center gap-1.5">
+                  <UserIcon className="h-3.5 w-3.5" /> Workspace Role
+                </span>
+                <span className="capitalize font-semibold text-zinc-900">{userProfile?.role || "Candidate"}</span>
+              </div>
+              
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+                <span className="font-semibold text-zinc-500 flex items-center gap-1.5">
+                  <Key className="h-3.5 w-3.5" /> Authentication Method
+                </span>
+                <span className="capitalize font-medium text-zinc-900">{userProfile?.authProvider || "password"}</span>
               </div>
             </div>
-          </div>
-        </section>
+          </CardContent>
+        </Card>
 
-        <section className="rounded border border-red-200 bg-red-50/50 p-5 sm:p-6">
-          <h2 className="text-sm font-semibold text-red-900">Session</h2>
-          <p className="mt-1 text-xs text-red-700">
-            Securely sign out of your Meritlane account.
-          </p>
-          <div className="mt-4">
+        <Card className="border-red-200/80 bg-red-50/30">
+          <CardHeader>
+            <h2 className="text-base font-bold text-red-950">Active Session</h2>
+            <p className="mt-0.5 text-xs text-red-800">
+              Terminate your current session on this browser.
+            </p>
+          </CardHeader>
+          <CardContent>
             <Button
               variant="outline"
+              size="sm"
               onClick={handleSignOut}
-              className="border-red-200 text-red-700 hover:bg-red-100 hover:text-red-900"
+              className="border-red-200 text-red-700 hover:bg-red-50 hover:border-red-300"
+              leftIcon={<LogOut className="h-3.5 w-3.5" />}
             >
-              <LogOut className="mr-2 h-4 w-4" />
               Sign Out
             </Button>
-          </div>
-        </section>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );

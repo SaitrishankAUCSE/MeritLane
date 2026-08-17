@@ -1,9 +1,9 @@
 "use client";
 
 import React, { useState, KeyboardEvent } from "react";
-import { X, Plus } from "lucide-react";
+import { X } from "lucide-react";
 
-interface TagInputProps {
+export interface TagInputProps {
   label?: string;
   tags: string[];
   onChange: (tags: string[]) => void;
@@ -42,19 +42,24 @@ export function TagInput({
   };
 
   return (
-    <div className="flex flex-col gap-1.5 w-full">
-      {label && <label className="text-xs font-medium text-zinc-700">{label}</label>}
-      <div className="flex min-h-[42px] flex-wrap items-center gap-1.5 rounded-md border border-zinc-200 bg-white p-1.5 shadow-sm focus-within:border-indigo-500 focus-within:ring-1 focus-within:ring-indigo-500 transition-colors">
+    <div className="flex flex-col gap-1.5 w-full text-left">
+      {label && (
+        <label className="text-xs font-semibold uppercase tracking-wider text-zinc-700">
+          {label}
+        </label>
+      )}
+      <div className="flex min-h-[42px] flex-wrap items-center gap-1.5 rounded-md border border-zinc-200 bg-white px-2.5 py-1.5 shadow-sm transition-all duration-150 ease-out hover:border-zinc-300 focus-within:border-zinc-900 focus-within:ring-2 focus-within:ring-zinc-900/10">
         {tags.map((tag, idx) => (
           <span
             key={idx}
-            className="inline-flex items-center gap-1 rounded-full bg-zinc-100 px-2.5 py-1 text-xs font-medium text-zinc-800 border border-zinc-200"
+            className="inline-flex items-center gap-1 rounded-md bg-zinc-100 px-2 py-0.5 text-xs font-medium text-zinc-800 border border-zinc-200/80 select-none animate-in fade-in zoom-in-95 duration-100"
           >
             {tag}
             <button
               type="button"
               onClick={() => removeTag(idx)}
               className="text-zinc-400 hover:text-zinc-700 focus:outline-none"
+              aria-label={`Remove ${tag}`}
             >
               <X className="h-3 w-3" />
             </button>
@@ -68,7 +73,7 @@ export function TagInput({
             onKeyDown={handleKeyDown}
             onBlur={addTag}
             placeholder={tags.length === 0 ? placeholder : "Add more..."}
-            className="w-full bg-transparent px-2 py-1 text-sm text-zinc-900 placeholder:text-zinc-400 focus:outline-none"
+            className="w-full bg-transparent px-1.5 py-1 text-sm text-zinc-900 placeholder:text-zinc-400 focus:outline-none"
           />
         </div>
       </div>
