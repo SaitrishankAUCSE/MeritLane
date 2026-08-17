@@ -2,6 +2,7 @@
 
 import React from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { ArrowRight, Code2, Cpu, CheckCircle2, ShieldCheck, Briefcase, ChevronRight, Layers, Activity, Sparkles, Check } from "lucide-react";
 import { useAuth } from "@/lib/auth/AuthContext";
 import { useRouter } from "next/navigation";
@@ -23,35 +24,34 @@ export default function HomePage() {
   };
 
   return (
-    <div className="flex flex-col bg-[#fafafa]">
+    <div className="flex flex-col bg-[var(--color-background)]">
       
       {/* SECTION 1: HERO */}
-      <section className="relative overflow-hidden pt-20 pb-16 sm:pt-28 sm:pb-24 border-b border-zinc-200/60">
+      <section className="relative overflow-hidden pt-20 pb-16 sm:pt-28 sm:pb-24 border-b border-[#0A192F]/10">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 text-center relative z-10">
           <div className="mb-6 flex justify-center">
-            <span className="inline-flex items-center gap-2 rounded-full border border-indigo-100 bg-indigo-50/70 px-3.5 py-1 text-xs font-semibold text-indigo-700 shadow-sm">
-              <ShieldCheck className="h-3.5 w-3.5" />
+            <span className="inline-flex items-center gap-2 border border-[#D4AF37]/50 bg-[#F0EAD6] px-4 py-1.5 text-xs font-bold uppercase tracking-widest text-[#0A192F] shadow-sm">
+              <ShieldCheck className="h-4 w-4 text-[#D4AF37]" />
               Verified Technical Hiring
             </span>
           </div>
 
-          <h1 className="mx-auto max-w-4xl text-4xl font-extrabold tracking-tight text-zinc-900 sm:text-5xl md:text-6xl lg:text-[64px] lg:leading-[1.08]">
-            Proof of skill beats
-            <br className="hidden sm:block" />
-            college pedigree.
+          <h1 className="mx-auto max-w-4xl text-4xl font-serif font-black tracking-tight text-[#0A192F] sm:text-5xl md:text-6xl lg:text-[64px] lg:leading-[1.08]">
+            Proof of skill beats <br className="hidden sm:block" />
+            <span className="sm:hidden"> </span>college pedigree.
           </h1>
 
-          <p className="mx-auto mt-6 max-w-2xl text-base leading-relaxed text-zinc-600 sm:text-lg">
+          <p className="mx-auto mt-6 max-w-2xl text-base leading-relaxed text-[#0A192F]/80 sm:text-lg">
             Meritlane helps engineering talent prove what they can build, so employers can evaluate real ability beyond college brand.
           </p>
 
-          <div className="mt-9 flex flex-col items-center justify-center gap-3.5 sm:flex-row">
+          <div className="mt-9 flex flex-col items-center justify-center gap-4 sm:flex-row">
             <Link
               href="/candidate/profile"
               onClick={(e) => handleCtaClick(e, "candidate")}
               className="w-full sm:w-auto"
             >
-              <Button size="lg" variant="primary" className="w-full sm:w-auto" rightIcon={<ArrowRight className="h-4 w-4" />}>
+              <Button size="lg" className="w-full sm:w-auto bg-[#0A192F] text-white hover:bg-[#0A192F]/90 rounded-none border border-[#0A192F]" rightIcon={<ArrowRight className="h-4 w-4" />}>
                 Prove your skills
               </Button>
             </Link>
@@ -60,19 +60,20 @@ export default function HomePage() {
               onClick={(e) => handleCtaClick(e, "employer")}
               className="w-full sm:w-auto"
             >
-              <Button size="lg" variant="outline" className="w-full sm:w-auto">
+              <Button size="lg" variant="outline" className="w-full sm:w-auto rounded-none border-[#0A192F] text-[#0A192F] hover:bg-[#F0EAD6]">
                 Hire with proof
               </Button>
             </Link>
           </div>
 
-          {/* Verification UI Preview */}
-          <div className="mx-auto mt-14 max-w-4xl rounded-2xl border border-zinc-200/90 bg-white p-2.5 shadow-[0_4px_20px_rgba(0,0,0,0.04)] ring-1 ring-zinc-900/5">
-            <div className="overflow-hidden rounded-xl border border-zinc-100">
-              <img 
+          <div className="mx-auto mt-16 max-w-4xl border-4 border-[#0A192F] bg-white p-2 shadow-xl">
+            <div className="overflow-hidden border border-[#0A192F]/20 relative aspect-[1200/630]">
+              <Image 
                 src="/images/verification-preview.jpg" 
-                alt="Meritlane Candidate Profile Preview" 
-                className="w-full h-auto object-cover"
+                alt="Meritlane Candidate Profile Preview"
+                fill
+                priority
+                className="object-cover grayscale hover:grayscale-0 transition-all duration-500"
               />
             </div>
           </div>

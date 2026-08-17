@@ -16,7 +16,7 @@ service cloud.firestore {
 
     // User profile documents
     match /users/{userId} {
-      allow read: if isOwner(userId) || isAdmin();
+      allow read: if isOwner(userId) || isAdmin() || resource.data.verifiedBadge == true;
       allow create: if isOwner(userId);
       // Owner cannot modify verifiedBadge or admin claims directly
       allow update: if (isOwner(userId) && (
@@ -27,7 +27,7 @@ service cloud.firestore {
 
     // Candidate profile documents
     match /candidates/{userId} {
-      allow read: if isOwner(userId) || isAdmin();
+      allow read: if isOwner(userId) || isAdmin() || resource.data.verificationStatus == 'verified';
       // Candidates can create profile with draft or pending status, but cannot set admin audit fields
       allow create: if (isOwner(userId) && (
         !request.resource.data.keys().hasAny(['verifiedBy', 'verifiedByUid', 'verifiedByEmail', 'verifiedAt']) &&
@@ -35,6 +35,7 @@ service cloud.firestore {
       )) || isAdmin();
       // Candidates can update profile (draft or pending) but cannot self-verify or tamper with audit fields
       allow update: if (isOwner(userId) && (
+        resource.data.verificationStatus != 'verified' &&
         !request.resource.data.diff(resource.data).affectedKeys().hasAny(['verifiedBy', 'verifiedByUid', 'verifiedByEmail', 'verifiedAt']) &&
         (request.resource.data.verificationStatus in ['draft', 'pending'])
       )) || isAdmin();

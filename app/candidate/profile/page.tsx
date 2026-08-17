@@ -214,7 +214,15 @@ export default function CandidateProfilePage() {
           </div>
 
           <div className="flex items-center gap-2.5">
-            {verificationStatus === "draft" || verificationStatus === "changes_required" || verificationStatus === "rejected" ? (
+            {verificationStatus === "verified" ? null : verificationStatus === "pending" ? (
+              <Button
+                variant="primary"
+                onClick={() => handleSave(verificationStatus)}
+                loading={saving}
+              >
+                Update Profile
+              </Button>
+            ) : (
               <>
                 <Button
                   variant="outline"
@@ -232,17 +240,22 @@ export default function CandidateProfilePage() {
                   Submit for Verification
                 </Button>
               </>
-            ) : (
-              <Button
-                variant="primary"
-                onClick={() => handleSave(verificationStatus)}
-                loading={saving}
-              >
-                Update Profile
-              </Button>
             )}
           </div>
         </div>
+
+        {/* Verified Profile Lock Banner */}
+        {verificationStatus === "verified" && (
+          <div className="rounded-xl border border-emerald-200 bg-emerald-50/50 p-5 shadow-sm">
+            <div className="flex items-center gap-2 mb-1.5">
+              <Check className="h-4.5 w-4.5 text-emerald-600" />
+              <h3 className="text-sm font-semibold text-emerald-900">Your profile is verified and locked.</h3>
+            </div>
+            <p className="text-xs text-emerald-800 leading-relaxed max-w-3xl">
+              Your verified profile cannot be edited because changes to verified information could affect the credibility of your Meritlane verification.
+            </p>
+          </div>
+        )}
 
         {/* Feedback Alert for Changes Required */}
         {verificationStatus === "changes_required" && verificationReason && (
@@ -271,24 +284,28 @@ export default function CandidateProfilePage() {
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder="e.g. Rahul Verma"
+                  disabled={verificationStatus === "verified"}
                 />
                 <Input
                   label="College / Institute"
                   value={college}
                   onChange={(e) => setCollege(e.target.value)}
                   placeholder="e.g. Government Engineering College"
+                  disabled={verificationStatus === "verified"}
                 />
                 <Input
                   label="Engineering Branch"
                   value={branch}
                   onChange={(e) => setBranch(e.target.value)}
                   placeholder="e.g. Computer Science & Engineering"
+                  disabled={verificationStatus === "verified"}
                 />
                 <Input
                   label="Graduation Year"
                   value={gradYear}
                   onChange={(e) => setGradYear(e.target.value)}
                   placeholder="e.g. 2026"
+                  disabled={verificationStatus === "verified"}
                 />
               </div>
             </CardContent>
@@ -308,6 +325,7 @@ export default function CandidateProfilePage() {
                     value={githubUrl}
                     onChange={(e) => setGithubUrl(e.target.value)}
                     placeholder="https://github.com/username"
+                    disabled={verificationStatus === "verified"}
                   />
                   <Input
                     label="Resume URL (Optional)"
@@ -315,6 +333,7 @@ export default function CandidateProfilePage() {
                     onChange={(e) => setResumeUrl(e.target.value)}
                     placeholder="https://drive.google.com/..."
                     helperText="Optional — codebase verification is the primary signal."
+                    disabled={verificationStatus === "verified"}
                   />
                 </div>
 
@@ -324,6 +343,7 @@ export default function CandidateProfilePage() {
                   onChange={setSkills}
                   placeholder="Add skill (e.g. PostgreSQL, Python, Docker)..."
                   helperText="Press Enter or comma to add."
+                  disabled={verificationStatus === "verified"}
                 />
               </div>
             </CardContent>
@@ -341,7 +361,7 @@ export default function CandidateProfilePage() {
                 </div>
                 <p className="mt-0.5 text-xs text-zinc-500">Your repositories are what employers and reviewers evaluate.</p>
               </div>
-              <Button type="button" variant="outline" size="sm" onClick={addProject} leftIcon={<Plus className="h-4 w-4" />}>
+              <Button type="button" variant="outline" size="sm" onClick={addProject} leftIcon={<Plus className="h-4 w-4" />} disabled={verificationStatus === "verified"}>
                 Add Project
               </Button>
             </CardHeader>
@@ -356,7 +376,7 @@ export default function CandidateProfilePage() {
                     <p className="mx-auto mt-1.5 max-w-md text-xs text-zinc-500 leading-relaxed">
                       Meritlane operates on proof of skill. Attach at least one production-grade project repository to qualify for verification.
                     </p>
-                    <Button variant="primary" size="sm" onClick={addProject} className="mt-5" leftIcon={<Plus className="h-4 w-4" />}>
+                    <Button variant="primary" size="sm" onClick={addProject} className="mt-5" leftIcon={<Plus className="h-4 w-4" />} disabled={verificationStatus === "verified"}>
                       Add First Project
                     </Button>
                   </div>
@@ -368,14 +388,16 @@ export default function CandidateProfilePage() {
                           <span className="text-sm font-bold text-zinc-900">Project #{index + 1}</span>
                           <Badge variant="locked" size="sm">Audit Pending</Badge>
                         </div>
-                        <button
-                          type="button"
-                          onClick={() => removeProject(project.id)}
-                          className="flex h-7 w-7 items-center justify-center rounded-md text-zinc-400 transition-colors hover:bg-red-50 hover:text-red-600"
-                          title="Remove Project"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </button>
+                        {verificationStatus !== "verified" && (
+                          <button
+                            type="button"
+                            onClick={() => removeProject(project.id)}
+                            className="flex h-7 w-7 items-center justify-center rounded-md text-zinc-400 transition-colors hover:bg-red-50 hover:text-red-600"
+                            title="Remove Project"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </button>
+                        )}
                       </div>
 
                       <div className="mt-5 grid grid-cols-1 gap-5 sm:grid-cols-2">
@@ -384,12 +406,14 @@ export default function CandidateProfilePage() {
                           value={project.title}
                           onChange={(e) => updateProject(project.id, "title", e.target.value)}
                           placeholder="e.g. Distributed Key-Value Store"
+                          disabled={verificationStatus === "verified"}
                         />
                         <Input
                           label="GitHub Repository URL"
                           value={project.repoUrl}
                           onChange={(e) => updateProject(project.id, "repoUrl", e.target.value)}
                           placeholder="https://github.com/user/repo"
+                          disabled={verificationStatus === "verified"}
                         />
                       </div>
 
@@ -399,6 +423,7 @@ export default function CandidateProfilePage() {
                           value={project.liveUrl}
                           onChange={(e) => updateProject(project.id, "liveUrl", e.target.value)}
                           placeholder="https://demo.example.com"
+                          disabled={verificationStatus === "verified"}
                         />
                       </div>
 
@@ -409,6 +434,7 @@ export default function CandidateProfilePage() {
                           value={project.description}
                           onChange={(e) => updateProject(project.id, "description", e.target.value)}
                           placeholder="Describe architectural choices, concurrency handling, database optimizations, or benchmark results..."
+                          disabled={verificationStatus === "verified"}
                         />
                       </div>
                     </div>
