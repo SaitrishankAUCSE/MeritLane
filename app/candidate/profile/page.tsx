@@ -92,7 +92,7 @@ export default function CandidateProfilePage() {
     setProjects((prev) => prev.filter((p: ProjectEntry) => p.id !== id));
   };
 
-  const handleSave = async (status: "draft" | "pending") => {
+  const handleSave = async (status: "draft" | "pending" | "verified") => {
     if (!user) return;
     setSaving(true);
     
@@ -178,22 +178,35 @@ export default function CandidateProfilePage() {
         </div>
 
         <div className="flex items-center gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => handleSave("draft")}
-            disabled={saving || verificationStatus === "verified"}
-          >
-            {saving ? "Saving..." : "Save Draft"}
-          </Button>
-          <Button
-            variant="primary"
-            size="sm"
-            onClick={() => handleSave("pending")}
-            disabled={saving || verificationStatus === "pending" || verificationStatus === "verified" || projects.length === 0}
-          >
-            Submit for Verification
-          </Button>
+          {verificationStatus === "draft" ? (
+            <>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => handleSave("draft")}
+                disabled={saving}
+              >
+                {saving ? "Saving..." : "Save Draft"}
+              </Button>
+              <Button
+                variant="primary"
+                size="sm"
+                onClick={() => handleSave("pending")}
+                disabled={saving || projects.length === 0}
+              >
+                Submit for Verification
+              </Button>
+            </>
+          ) : (
+            <Button
+              variant="primary"
+              size="sm"
+              onClick={() => handleSave(verificationStatus)}
+              disabled={saving}
+            >
+              {saving ? "Saving..." : "Update Profile"}
+            </Button>
+          )}
         </div>
       </div>
 
