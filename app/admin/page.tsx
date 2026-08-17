@@ -28,7 +28,10 @@ import {
   Building2,
   Filter,
   History,
-  Lock
+  RotateCcw,
+  Sparkles,
+  Zap,
+  CheckCheck
 } from "lucide-react";
 
 interface ProjectEntry {
@@ -61,6 +64,14 @@ interface CandidateAdminRecord {
   assessmentDate: any;
 }
 
+const FEEDBACK_PRESETS = [
+  "README lacks architectural overview, API schema, and local execution instructions.",
+  "Project repositories are set to private and cannot be evaluated by reviewers.",
+  "Codebase lacks automated unit test coverage or CI/CD workflow configuration.",
+  "Monolithic repository with single commit; requires genuine git development history.",
+  "Projects demonstrate superficial tutorials; submit an original production system."
+];
+
 export default function AdminDashboardPage() {
   const { user } = useAuth();
   const [candidates, setCandidates] = useState<CandidateAdminRecord[]>([]);
@@ -77,6 +88,7 @@ export default function AdminDashboardPage() {
   const [actionLoading, setActionLoading] = useState(false);
   const [actionError, setActionError] = useState<string | null>(null);
   const [successToast, setSuccessToast] = useState<string | null>(null);
+  const [resetLoading, setResetLoading] = useState(false);
 
   // Filter state
   const [statusFilter, setStatusFilter] = useState<string>("all");
@@ -125,7 +137,7 @@ export default function AdminDashboardPage() {
     if (!selectedCandidate || !effectiveActionType || !user) return;
 
     if ((effectiveActionType === "changes_required" || effectiveActionType === "rejected") && !actionReason.trim()) {
-      setActionError("Please provide a reason for this verification decision.");
+      setActionError("Please provide a reason or select a preset for this verification decision.");
       return;
     }
 
@@ -189,6 +201,34 @@ export default function AdminDashboardPage() {
     }
   };
 
+  const handleResetCooldown = async (candidateId: string) => {
+    if (!user) return;
+    setResetLoading(true);
+    try {
+      const idToken = await user.getIdToken();
+      const res = await fetch("/api/admin/reset-cooldown", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${idToken}`,
+        },
+        body: JSON.stringify({ candidateId }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || "Failed to reset cooldown");
+      }
+
+      setSuccessToast("Candidate cooldown reset. They can re-take the assessment immediately.");
+    } catch (err: any) {
+      console.error(err);
+      setActionError(err.message || "Could not reset cooldown.");
+    } finally {
+      setResetLoading(false);
+    }
+  };
+
   // Metrics from real data
   const pendingCount = candidates.filter((c) => c.verificationStatus === "pending").length;
   const verifiedCount = candidates.filter((c) => c.verificationStatus === "verified").length;
@@ -245,7 +285,7 @@ export default function AdminDashboardPage() {
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement("a");
     link.setAttribute("href", encodedUri);
-    link.setAttribute("download", `meritlane_candidates_${Date.now()}.csv`);
+    link.setAttribute("download", `meritlane_talent_dossier_${Date.now()}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -302,7 +342,7 @@ export default function AdminDashboardPage() {
               onClick={exportToCSV}
               leftIcon={<Download className="h-3.5 w-3.5" />}
             >
-              Export CSV
+              Export Talent Dossier
             </Button>
             <Button 
               variant="outline" 
@@ -325,7 +365,7 @@ export default function AdminDashboardPage() {
                 <Clock className="h-4 w-4 text-amber-500" />
               </div>
               <p className="mt-2 text-3xl font-bold tracking-tight text-zinc-900">{pendingCount}</p>
-              <p className="mt-1 text-[11px] text-zinc-400">Awaiting code review</p>
+              <p className="mt-1 text-[11px] text-zinc-400">Awaiting codebase review</p>
             </CardContent>
           </Card>
 
@@ -358,7 +398,7 @@ export default function AdminDashboardPage() {
                 <Layers className="h-4 w-4 text-indigo-600" />
               </div>
               <p className="mt-2 text-3xl font-bold tracking-tight text-zinc-900">{totalCount}</p>
-              <p className="mt-1 text-[11px] text-zinc-400">Candidate profiles</p>
+              <p className="mt-1 text-[11px] text-zinc-400">Candidate portfolios</p>
             </CardContent>
           </Card>
         </div>
@@ -798,9 +838,22 @@ export default function AdminDashboardPage() {
                 </div>
               </div>
 
-              {/* Assessment Signal */}
-              <div className="rounded-xl border border-zinc-200/90 bg-white p-4">
-                <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-500 mb-2">Technical Assessment Signal</h3>
+              {/* Assessment Signal & Admin Cooldown Override */}
+              <div className="rounded-xl border border-zinc-200/90 bg-white p-4 space-y-3">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-500">Technical Assessment Signal</h3>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="xs"
+                    loading={resetLoading}
+                    onClick={() => handleResetCooldown(selectedCandidate.uid)}
+                    leftIcon={<RotateCcw className="h-3 w-3" />}
+                    title="Reset 14-day cooldown so candidate can re-test immediately"
+                  >
+                    Reset Cooldown
+                  </Button>
+                </div>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     {selectedCandidate.verifiedBadge ? (
@@ -879,17 +932,32 @@ export default function AdminDashboardPage() {
                   <label className="block text-xs font-bold uppercase tracking-wider text-zinc-700">
                     Reason for {actionType === "changes_required" ? "Requesting Changes" : "Rejection"} <span className="text-red-500">*</span>
                   </label>
+                  
+                  {/* Preset quick buttons */}
+                  <div className="space-y-1.5">
+                    <span className="text-[11px] font-semibold text-zinc-500">Quick Presets:</span>
+                    <div className="flex flex-wrap gap-1.5">
+                      {FEEDBACK_PRESETS.map((preset, idx) => (
+                        <button
+                          key={idx}
+                          type="button"
+                          onClick={() => setActionReason(preset)}
+                          className="rounded bg-white border border-zinc-200 px-2 py-1 text-[11px] text-zinc-700 hover:border-zinc-400 hover:bg-zinc-100 transition-colors text-left"
+                        >
+                          {preset.slice(0, 45)}...
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
                   <textarea
                     rows={3}
                     value={actionReason}
                     onChange={(e) => setActionReason(e.target.value)}
-                    placeholder={
-                      actionType === "changes_required"
-                        ? "e.g. Please add detailed architecture documentation, clean up git history, and verify repo accessibility..."
-                        : "e.g. Project repositories are inaccessible or code lacks substantive architectural engineering..."
-                    }
+                    placeholder="Enter specific audit remarks or click a preset above..."
                     className="w-full rounded-md border border-zinc-300 bg-white p-2.5 text-xs text-zinc-900 placeholder:text-zinc-400 focus:border-zinc-900 focus:outline-none focus:ring-2 focus:ring-zinc-900/10"
                   />
+                  
                   <div className="flex justify-end gap-2">
                     <Button 
                       type="button" 
