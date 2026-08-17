@@ -41,19 +41,39 @@ export async function GET(request: Request) {
   const lowerQuery = query.toLowerCase();
   
   // Filter colleges matching the query (either by college name or university name)
-  const filtered = colleges
-    .filter(item => 
-      item.college?.toLowerCase().includes(lowerQuery) || 
-      item.university?.toLowerCase().includes(lowerQuery)
-    )
-    // Extract just the clean college name (remove the Id: C-1234 part)
+  const filteredAndScored = colleges
+    .filter(item => {
+      const cName = item.college?.toLowerCase() || "";
+      const uName = item.university?.toLowerCase() || "";
+      return cName.includes(lowerQuery) || uName.includes(lowerQuery);
+    })
     .map(item => {
-      const name = item.college || "";
-      return name.replace(/\s*\(Id:\s*C-\d+\)\s*/i, "");
-    });
+      const cName = item.college?.toLowerCase() || "";
+      const uName = item.university?.toLowerCase() || "";
+      let score = 0;
+      
+      // Clean up names
+      const cleanName = item.college?.replace(/\s*\(Id:\s*C-\d+\)\s*/i, "") || "";
+      
+      if (cName === lowerQuery) score = 100;
+      else if (cName.startsWith(lowerQuery)) score = 80;
+      else if (cName.includes(lowerQuery)) score = 50;
+      else if (uName.includes(lowerQuery)) score = 10;
+      
+      let formattedName = cleanName;
+      if (item.district && item.state) {
+        formattedName += `, ${item.district}, ${item.state}`;
+      } else if (item.state) {
+        formattedName += `, ${item.state}`;
+      }
+
+      return { name: formattedName, score };
+    })
+    .sort((a, b) => b.score - a.score);
     
   // Remove duplicates and return top 50 results
-  const uniqueResults = Array.from(new Set(filtered)).slice(0, 50);
+  const uniqueNames = Array.from(new Set(filteredAndScored.map(item => item.name)));
+  const uniqueResults = uniqueNames.slice(0, 50);
 
   return NextResponse.json({ results: uniqueResults });
 }
