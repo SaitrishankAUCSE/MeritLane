@@ -12,9 +12,17 @@ export const firebaseConfig = {
   measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID || "G-BS1DB89WPZ",
 };
 
-// Initialize Firebase for SSR and Client-side safety
-const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
-const auth = getAuth(app);
-const db = getFirestore(app);
+let app: any;
+let auth: any;
+let db: any;
+
+try {
+  // Initialize Firebase for SSR and Client-side safety
+  app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
+  auth = getAuth(app);
+  db = getFirestore(app);
+} catch (error) {
+  console.error("FATAL ERROR: Failed to initialize Firebase App or Auth.", error);
+}
 
 export { app, auth, db };
