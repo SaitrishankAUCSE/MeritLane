@@ -7,11 +7,32 @@ import { Input } from "@/components/ui/Input";
 import { Textarea } from "@/components/ui/Textarea";
 import { Button } from "@/components/ui/Button";
 import { TagInput } from "@/components/ui/TagInput";
+import { Autocomplete } from "@/components/ui/Autocomplete";
 import { Card, CardHeader, CardContent } from "@/components/ui/Card";
 import { useAuth } from "@/lib/auth/AuthContext";
 import { useRouter } from "next/navigation";
 import { fetchCandidateProfile, saveCandidateProfile, ProjectEntry, VerificationStatus } from "@/lib/firebase/candidate";
 import { logFunnelEvent } from "@/lib/analytics/logEvent";
+
+const ENGINEERING_BRANCHES = [
+  "Computer Science and Engineering",
+  "Information Technology",
+  "Electronics and Communication Engineering",
+  "Electrical and Electronics Engineering",
+  "Mechanical Engineering",
+  "Civil Engineering",
+  "Chemical Engineering",
+  "Aerospace Engineering",
+  "Biotechnology",
+  "Artificial Intelligence and Data Science",
+  "Cyber Security",
+  "Robotics and Automation",
+  "Mechatronics",
+  "Metallurgical Engineering",
+  "Automobile Engineering"
+];
+
+const PASSING_YEARS = Array.from({ length: 15 }, (_, i) => (new Date().getFullYear() - 5 + i).toString());
 
 export default function CandidateProfilePage() {
   const { user, role: userRole, loading: authLoading, profileLoading } = useAuth();
@@ -97,6 +118,22 @@ export default function CandidateProfilePage() {
 
   const removeProject = (id: string) => {
     setProjects((prev) => prev.filter((p: ProjectEntry) => p.id !== id));
+  };
+
+  const fetchColleges = async (query: string): Promise<string[]> => {
+    if (!query || query.length < 2) return [];
+    try {
+      const response = await fetch(`http://universities.hipolabs.com/search?country=India&name=${encodeURIComponent(query)}`);
+      if (!response.ok) throw new Error("Failed to fetch");
+      const data = await response.json();
+      // Hipolabs returns an array of { name: string, ... }
+      const names = data.map((item: any) => item.name);
+      // Remove duplicates
+      return Array.from(new Set(names)) as string[];
+    } catch (err) {
+      console.error(err);
+      return [];
+    }
   };
 
   const handleSave = async (status: VerificationStatus) => {
@@ -286,26 +323,29 @@ export default function CandidateProfilePage() {
                   placeholder="e.g. Rahul Verma"
                   disabled={verificationStatus === "verified"}
                 />
-                <Input
+                <Autocomplete
                   label="College / Institute"
                   value={college}
-                  onChange={(e) => setCollege(e.target.value)}
+                  onChange={setCollege}
                   placeholder="e.g. Government Engineering College"
                   disabled={verificationStatus === "verified"}
+                  fetchOptions={fetchColleges}
                 />
-                <Input
+                <Autocomplete
                   label="Engineering Branch"
                   value={branch}
-                  onChange={(e) => setBranch(e.target.value)}
+                  onChange={setBranch}
                   placeholder="e.g. Computer Science & Engineering"
                   disabled={verificationStatus === "verified"}
+                  options={ENGINEERING_BRANCHES}
                 />
-                <Input
+                <Autocomplete
                   label="Graduation Year"
                   value={gradYear}
-                  onChange={(e) => setGradYear(e.target.value)}
+                  onChange={setGradYear}
                   placeholder="e.g. 2026"
                   disabled={verificationStatus === "verified"}
+                  options={PASSING_YEARS}
                 />
               </div>
             </CardContent>
