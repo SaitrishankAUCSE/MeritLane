@@ -34,6 +34,15 @@ let auth: any;
 let db: any;
 
 try {
+  if (typeof window !== "undefined") {
+    console.log("RUNTIME FIREBASE CONFIG:", {
+      apiKey: firebaseConfig.apiKey ? firebaseConfig.apiKey.slice(0, 6) + "..." : "MISSING",
+      authDomain: firebaseConfig.authDomain || "MISSING",
+      projectId: firebaseConfig.projectId || "MISSING",
+      storageBucket: firebaseConfig.storageBucket || "MISSING",
+    });
+  }
+
   // Initialize Firebase for SSR and Client-side safety
   app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
   auth = getAuth(app);
