@@ -1,250 +1,89 @@
 "use client";
 
-import React, { useState } from "react";
-import { Users, Plus, CheckCircle2, ShieldCheck, Briefcase, Sparkles, Building2, Code2, Layers } from "lucide-react";
-import { Input } from "@/components/ui/Input";
-import { Button } from "@/components/ui/Button";
-import { TagInput } from "@/components/ui/TagInput";
+import { FormEvent, useState } from "react";
+import { BriefcaseBusiness, Check, ChevronDown, Plus, Search, ShieldCheck } from "lucide-react";
 import { Badge } from "@/components/ui/Badge";
-import { Card, CardHeader, CardContent } from "@/components/ui/Card";
+import { Button } from "@/components/ui/Button";
+import { Card, CardContent, CardHeader } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
+import { Input } from "@/components/ui/Input";
+import { TagInput } from "@/components/ui/TagInput";
 import { useAuth } from "@/lib/auth/AuthContext";
-import { useRouter } from "next/navigation";
 
-interface JobPosting {
+type Tab = "candidates" | "role";
+
+type JobPosting = {
   id: string;
   title: string;
   department: string;
   skills: string[];
   experienceLevel: string;
-  status: "active" | "draft";
-}
+};
 
 export default function EmployerDashboardPage() {
-  const { user, role: userRole, loading: authLoading, profileLoading } = useAuth();
-  const router = useRouter();
-
-  const [activeTab, setActiveTab] = useState<"candidates" | "post-role">("candidates");
-
-  const [roleTitle, setRoleTitle] = useState("");
+  const { loading, profileLoading } = useAuth();
+  const [tab, setTab] = useState<Tab>("candidates");
+  const [title, setTitle] = useState("");
   const [department, setDepartment] = useState("");
-  const [experienceLevel, setExperienceLevel] = useState("Early Career (0-2 Yrs)");
-  const [skillsNeeded, setSkillsNeeded] = useState<string[]>([]);
+  const [skills, setSkills] = useState<string[]>([]);
+  const [experience, setExperience] = useState("Early career");
   const [roles, setRoles] = useState<JobPosting[]>([]);
+  const [error, setError] = useState("");
+  const [saved, setSaved] = useState(false);
 
-  const [formSuccess, setFormSuccess] = useState(false);
-
-  if (authLoading || (user && profileLoading)) {
-    return (
-      <div className="flex min-h-[50vh] items-center justify-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-zinc-300 border-t-indigo-600"></div>
-      </div>
-    );
+  if (loading || profileLoading) {
+    return <div className="flex min-h-[60vh] items-center justify-center"><div className="size-8 animate-spin rounded-full border-2 border-border border-t-primary" /></div>;
   }
 
-  const handlePostRole = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!roleTitle.trim()) return;
-
-    const newRole: JobPosting = {
-      id: `role-${Date.now()}`,
-      title: roleTitle,
-      department: department || "Engineering",
-      skills: skillsNeeded,
-      experienceLevel,
-      status: "active",
-    };
-
-    setRoles([newRole, ...roles]);
-    setRoleTitle("");
-    setDepartment("");
-    setSkillsNeeded([]);
-    setFormSuccess(true);
-    setTimeout(() => {
-      setFormSuccess(false);
-      setActiveTab("candidates");
-    }, 1200);
-  };
+  function submitRole(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!title.trim() || !department.trim() || skills.length === 0) {
+      setError("Add a role title, department, and at least one required skill.");
+      return;
+    }
+    setRoles((current) => [{ id: crypto.randomUUID(), title: title.trim(), department: department.trim(), skills, experienceLevel: experience }, ...current]);
+    setTitle(""); setDepartment(""); setSkills([]); setError(""); setSaved(true);
+    window.setTimeout(() => setSaved(false), 2400);
+  }
 
   return (
-    <div className="min-h-screen bg-[#fafafa] pb-24 pt-10">
-      <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 space-y-8">
-        {/* Header */}
-        <div className="flex flex-col justify-between gap-6 border-b border-zinc-200/80 pb-6 sm:flex-row sm:items-end">
-          <div>
-            <div className="flex items-center gap-3">
-              <h1 className="text-2xl font-bold tracking-tight text-zinc-900 sm:text-3xl">
-                Employer Dashboard
-              </h1>
-              <span className="rounded-md border border-zinc-200 bg-zinc-100 px-2.5 py-0.5 text-xs font-semibold text-zinc-700">
-                Technical Recruiter
-              </span>
-            </div>
-            <p className="mt-1.5 text-sm text-zinc-500">
-              Source high-calibre engineering talent pre-verified by code quality.
-            </p>
+    <main className="min-h-screen bg-background pb-16">
+      <div className="mx-auto flex max-w-6xl flex-col gap-8 px-4 py-8 sm:px-6 lg:px-8">
+        <header className="flex flex-col gap-5 border-b border-border pb-6 sm:flex-row sm:items-end sm:justify-between">
+          <div className="flex flex-col gap-2">
+            <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Employer workspace</p>
+            <h1 className="text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">Hiring overview</h1>
+            <p className="max-w-xl text-sm leading-6 text-muted-foreground">Review candidates with verified technical evidence and define the roles your team needs.</p>
           </div>
-
-          <div className="flex items-center gap-2.5">
-            <Button
-              variant={activeTab === "candidates" ? "primary" : "outline"}
-              size="sm"
-              onClick={() => setActiveTab("candidates")}
-              leftIcon={<Users className="h-4 w-4" />}
-            >
-              Verified Pipeline
-            </Button>
-            <Button
-              variant={activeTab === "post-role" ? "primary" : "outline"}
-              size="sm"
-              onClick={() => setActiveTab("post-role")}
-              leftIcon={<Plus className="h-4 w-4" />}
-            >
-              Post a Role
-            </Button>
+          <div className="flex rounded-lg border border-border bg-card p-1" role="tablist" aria-label="Employer dashboard sections">
+            <button type="button" role="tab" aria-selected={tab === "candidates"} onClick={() => setTab("candidates")} className={`rounded-md px-3 py-2 text-sm font-medium transition-colors ${tab === "candidates" ? "bg-muted text-foreground" : "text-muted-foreground hover:text-foreground"}`}>Browse Candidates</button>
+            <button type="button" role="tab" aria-selected={tab === "role"} onClick={() => setTab("role")} className={`rounded-md px-3 py-2 text-sm font-medium transition-colors ${tab === "role" ? "bg-muted text-foreground" : "text-muted-foreground hover:text-foreground"}`}>Post a Role</button>
           </div>
-        </div>
+        </header>
 
-        {/* Main Content Area */}
-        <div className="space-y-8">
-          {activeTab === "candidates" ? (
-            <>
-              {/* Overview Metrics Bar */}
-              <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
-                <Card>
-                  <CardContent className="p-6">
-                    <span className="text-xs font-bold uppercase tracking-wider text-zinc-500">Active Roles</span>
-                    <p className="mt-2 text-3xl font-bold tracking-tight text-zinc-900">{roles.length}</p>
-                  </CardContent>
-                </Card>
-                <Card>
-                  <CardContent className="p-6">
-                    <span className="text-xs font-bold uppercase tracking-wider text-zinc-500">Verified Talent Pool</span>
-                    <p className="mt-2 text-3xl font-bold tracking-tight text-zinc-900">0</p>
-                  </CardContent>
-                </Card>
-                <Card>
-                  <CardContent className="p-6">
-                    <span className="text-xs font-bold uppercase tracking-wider text-zinc-500">Assessment Status</span>
-                    <p className="mt-3 text-sm font-semibold text-indigo-600">Pending Live Cohort</p>
-                  </CardContent>
-                </Card>
-              </div>
-
-              {/* Verified Candidates Empty State */}
-              <EmptyState 
-                icon={<ShieldCheck className="h-6 w-6 text-indigo-600" />}
-                title="Verified candidates will appear here soon"
-                description="We are currently onboarding candidate portfolios and running repository audits. You will receive signal-ranked profiles directly in this pipeline."
-                action={
-                  <Button variant="outline" size="sm" onClick={() => setActiveTab("post-role")} leftIcon={<Plus className="h-4 w-4" />}>
-                    Define Next Role
-                  </Button>
-                }
-              />
-
-              {/* Posted Roles */}
-              {roles.length > 0 && (
-                <Card>
-                  <CardHeader>
-                    <h3 className="text-base font-bold text-zinc-900">Posted Roles ({roles.length})</h3>
-                  </CardHeader>
-                  <CardContent className="p-0">
-                    <div className="divide-y divide-zinc-100">
-                      {roles.map((role) => (
-                        <div key={role.id} className="flex flex-col justify-between gap-4 p-6 sm:flex-row sm:items-center hover:bg-zinc-50/50 transition-colors">
-                          <div>
-                            <h4 className="text-base font-semibold text-zinc-900">{role.title}</h4>
-                            <div className="mt-1.5 flex flex-wrap items-center gap-3 text-xs text-zinc-500">
-                              <span className="flex items-center gap-1.5"><Briefcase className="h-3.5 w-3.5 text-zinc-400" /> {role.department}</span>
-                              <span className="text-zinc-300">•</span>
-                              <span>{role.experienceLevel}</span>
-                            </div>
-                          </div>
-                          <div className="flex flex-wrap gap-1.5 sm:justify-end">
-                            {role.skills.map((s, idx) => (
-                              <Badge key={idx} size="sm">{s}</Badge>
-                            ))}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
-              )}
-            </>
-          ) : (
-            /* Post a Role Form */
-            <div className="mx-auto max-w-3xl">
-              <Card>
-                <CardHeader>
-                  <h2 className="text-base font-bold text-zinc-900">Post an Engineering Role</h2>
-                  <p className="mt-0.5 text-xs text-zinc-500">
-                    Define technical requirements. Candidate matches will be ranked by verified repository audits.
-                  </p>
-                </CardHeader>
-                <CardContent>
-                  {formSuccess && (
-                    <div className="mb-6 flex items-center gap-3 rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-xs font-semibold text-emerald-800 animate-in fade-in duration-150">
-                      <CheckCircle2 className="h-4.5 w-4.5 text-emerald-600" />
-                      Role created successfully! Redirecting to pipeline...
-                    </div>
-                  )}
-
-                  <form onSubmit={handlePostRole} className="space-y-6">
-                    <Input
-                      label="Role Title"
-                      value={roleTitle}
-                      onChange={(e) => setRoleTitle(e.target.value)}
-                      placeholder="e.g. Junior Backend Engineer (Go / Distributed Systems)"
-                      required
-                    />
-
-                    <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-                      <Input
-                        label="Department / Team"
-                        value={department}
-                        onChange={(e) => setDepartment(e.target.value)}
-                        placeholder="e.g. Platform Infrastructure"
-                      />
-
-                      <div className="flex flex-col gap-1.5 text-left">
-                        <label className="text-xs font-semibold uppercase tracking-wider text-zinc-700">Target Experience</label>
-                        <select
-                          value={experienceLevel}
-                          onChange={(e) => setExperienceLevel(e.target.value)}
-                          className="w-full rounded-md border border-zinc-200 bg-white px-3.5 py-2 text-sm text-zinc-900 shadow-sm transition-all hover:border-zinc-300 focus:border-zinc-900 focus:outline-none focus:ring-2 focus:ring-zinc-900/10"
-                        >
-                          <option>Early Career (0-1 Yr / 2026 Grad)</option>
-                          <option>Junior Engineer (1-2 Yrs)</option>
-                          <option>Mid-Level Engineer (2-4 Yrs)</option>
-                        </select>
-                      </div>
-                    </div>
-
-                    <TagInput
-                      label="Required Skills & Technologies"
-                      tags={skillsNeeded}
-                      onChange={setSkillsNeeded}
-                      placeholder="Type skill and press Enter (e.g. Go, PostgreSQL, Redis)..."
-                      helperText="Profiles with verified projects matching these skills will be surfaced first."
-                    />
-
-                    <div className="flex justify-end gap-2.5 pt-6 border-t border-zinc-100">
-                      <Button type="button" variant="outline" onClick={() => setActiveTab("candidates")}>
-                        Cancel
-                      </Button>
-                      <Button type="submit" variant="primary">
-                        Publish Role Requirements
-                      </Button>
-                    </div>
-                  </form>
-                </CardContent>
-              </Card>
-            </div>
-          )}
-        </div>
+        {tab === "candidates" ? (
+          <section className="flex flex-col gap-6" aria-labelledby="candidates-heading">
+            <div className="flex items-center justify-between gap-4"><div><h2 id="candidates-heading" className="text-lg font-semibold text-foreground">Verified candidate pool</h2><p className="mt-1 text-sm text-muted-foreground">Candidates appear here after the assessment program is live.</p></div><Button variant="outline" size="sm" onClick={() => setTab("role")}><Plus data-icon="inline-start" /> Post a role</Button></div>
+            <EmptyState icon={<Search className="size-5 text-muted-foreground" />} title="Verified candidates will appear here once assessments go live" description="There are no candidate profiles to review yet. Post a role to clarify the signal you are hiring for, and we will surface verified profiles when they become available." action={undefined} />
+          </section>
+        ) : (
+          <section className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(300px,0.75fr)]" aria-labelledby="role-heading">
+            <Card>
+              <CardHeader><div className="flex items-start gap-3"><span className="flex size-9 items-center justify-center rounded-md bg-primary/10 text-primary"><BriefcaseBusiness className="size-4" /></span><div><h2 id="role-heading" className="text-lg font-semibold text-foreground">Post a role</h2><p className="mt-1 text-sm leading-6 text-muted-foreground">Define the requirements that will guide candidate matching.</p></div></div></CardHeader>
+              <CardContent><form onSubmit={submitRole} className="flex flex-col gap-6" noValidate>
+                {error && <p className="rounded-md border border-destructive/30 bg-destructive/5 px-3 py-2 text-sm text-destructive" role="alert">{error}</p>}
+                <Input label="Role title" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="e.g. Backend Engineer" aria-invalid={Boolean(error && !title)} />
+                <Input label="Department" value={department} onChange={(e) => setDepartment(e.target.value)} placeholder="e.g. Platform Engineering" aria-invalid={Boolean(error && !department)} />
+                <TagInput label="Required skills" tags={skills} onChange={setSkills} placeholder="Add a skill and press Enter" helperText="Use the technologies that are essential to the role." />
+                <div className="flex flex-col gap-2"><label htmlFor="experience" className="text-sm font-medium text-foreground">Experience level</label><div className="relative"><select id="experience" value={experience} onChange={(e) => setExperience(e.target.value)} className="w-full appearance-none rounded-md border border-border bg-card px-3 py-2.5 pr-9 text-sm text-foreground outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/15"><option>Early career</option><option>Mid-level</option><option>Senior</option><option>Lead / Staff</option></select><ChevronDown className="pointer-events-none absolute right-3 top-3 size-4 text-muted-foreground" /></div></div>
+                <div className="flex items-center justify-between gap-3 border-t border-border pt-5"><p className="text-sm text-muted-foreground">You can update these requirements later.</p><Button type="submit"><Check data-icon="inline-start" /> Publish role</Button></div>
+                {saved && <p className="text-sm text-emerald-700" role="status">Role added to this workspace.</p>}
+              </form></CardContent>
+            </Card>
+            <Card><CardHeader><h2 className="text-base font-semibold text-foreground">Previously posted roles</h2><p className="mt-1 text-sm text-muted-foreground">Your role history will be listed here.</p></CardHeader><CardContent>{roles.length === 0 ? <div className="flex flex-col items-center gap-3 rounded-md border border-dashed border-border px-5 py-10 text-center"><BriefcaseBusiness className="size-5 text-muted-foreground" /><p className="text-sm font-medium text-foreground">No roles posted yet</p><p className="max-w-xs text-sm leading-6 text-muted-foreground">Published roles will appear here for reference.</p></div> : <div className="flex flex-col divide-y divide-border">{roles.map((role) => <article key={role.id} className="flex flex-col gap-3 py-4 first:pt-0"><div><h3 className="font-medium text-foreground">{role.title}</h3><p className="mt-1 text-sm text-muted-foreground">{role.department} · {role.experienceLevel}</p></div><div className="flex flex-wrap gap-1.5">{role.skills.map((skill) => <Badge key={skill}>{skill}</Badge>)}</div></article>)}</div>}</CardContent></Card>
+          </section>
+        )}
       </div>
-    </div>
+    </main>
   );
 }
