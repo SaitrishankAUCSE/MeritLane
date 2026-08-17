@@ -24,28 +24,12 @@ export default function EmployerDashboardPage() {
   const { user, role: userRole, loading: authLoading, profileLoading } = useAuth();
   const router = useRouter();
 
-  useEffect(() => {
-    if (!authLoading && !profileLoading) {
-      if (!user) {
-        router.push("/login");
-      } else if (!userRole) {
-        router.push("/login");
-      } else if (userRole !== "employer") {
-        router.push("/candidate/profile");
-      }
-    }
-  }, [user, userRole, authLoading, profileLoading, router]);
-
   if (authLoading || (user && profileLoading)) {
     return (
       <div className="flex min-h-[50vh] items-center justify-center">
         <div className="h-8 w-8 animate-spin rounded-full border-4 border-zinc-200 border-t-indigo-600"></div>
       </div>
     );
-  }
-
-  if (!user || !userRole || userRole !== "employer") {
-    return null; 
   }
 
   const [activeTab, setActiveTab] = useState<"candidates" | "post-role">("candidates");

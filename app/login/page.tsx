@@ -1,27 +1,39 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider } from "firebase/auth";
+import { signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, signOut } from "firebase/auth";
 import { auth } from "@/lib/firebase/config";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
 import { useAuth } from "@/lib/auth/AuthContext";
-import { updateLastLogin } from "@/lib/firebase/users";
-import RoleSelector from "@/components/RoleSelector";
+import { updateLastLogin, fetchUserProfile } from "@/lib/firebase/users";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [loadingAction, setLoadingAction] = useState(false);
-  const [showRoleSelector, setShowRoleSelector] = useState(false);
   
   const { user, role: userRole, loading: authLoading, profileLoading, refreshProfile } = useAuth();
   const router = useRouter();
 
-  // We let useEffect handle the actual router.push redirect for users who have a role.
+  useEffect(() => {
+    // Client-side extraction of URL params to avoid Next.js static generation Suspense boundary issues
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      const msg = params.get("message");
+      if (msg) {
+        setSuccessMessage(msg);
+        // Clear the URL to avoid showing it on refresh
+        window.history.replaceState({}, document.title, window.location.pathname);
+      }
+    }
+  }, []);
+
+  // Redirect authenticated users with valid profiles
   useEffect(() => {
     if (!authLoading && !profileLoading && user && userRole) {
       updateLastLogin(user.uid).catch(console.error);
@@ -33,16 +45,25 @@ export default function LoginPage() {
     e.preventDefault();
     setLoadingAction(true);
     setError(null);
+    setSuccessMessage(null);
     try {
-      await signInWithEmailAndPassword(auth, email, password);
-      // Wait for AuthContext to pick up the user and updateLastLogin in useEffect
+      const userCred = await signInWithEmailAndPassword(auth, email, password);
+      
+      const profile = await fetchUserProfile(userCred.user.uid);
+      if (!profile) {
+        await signOut(auth);
+        setError("Account doesn't exist. Please sign up first.");
+        setLoadingAction(false);
+        return;
+      }
+      
+      await refreshProfile();
+      // useEffect redirects automatically
     } catch (err: any) {
-      if (err.code === "auth/invalid-credential") {
-        setError("No account found with those credentials. Sign up first.");
-      } else if (err.code === "auth/user-not-found") {
-        setError("No account found. Sign up first.");
+      if (err.code === "auth/invalid-credential" || err.code === "auth/user-not-found") {
+        setError("Incorrect email or password.");
       } else {
-        setError(err.message || "Failed to sign in. Please check your credentials.");
+        setError("Unable to sign in with these credentials.");
       }
       setLoadingAction(false);
     }
@@ -51,29 +72,30 @@ export default function LoginPage() {
   const handleGoogleLogin = async () => {
     setLoadingAction(true);
     setError(null);
+    setSuccessMessage(null);
     try {
       const provider = new GoogleAuthProvider();
-      await signInWithPopup(auth, provider);
-      // Wait for AuthContext to pick up the user, which will trigger fetchUserProfile
-      // If they have no role, the explicit render block below will show RoleSelector.
-      // If they do have a role, the useEffect will redirect them.
+      const userCred = await signInWithPopup(auth, provider);
+      
+      const profile = await fetchUserProfile(userCred.user.uid);
+      if (!profile) {
+        await signOut(auth);
+        setError("Account doesn't exist. Please sign up first.");
+        setLoadingAction(false);
+        return;
+      }
+
+      await refreshProfile();
+      // useEffect redirects automatically
     } catch (err: any) {
       setError(err.message || "Failed to sign in with Google.");
       setLoadingAction(false);
     }
   };
 
-  // Auth States Handled Explicitly
-  if (authLoading || (user && profileLoading)) {
-    return <div className="min-h-[80vh]"></div>; // Skeleton while resolving auth/profile
-  }
-
-  if (user && !userRole) {
-    return <RoleSelector />; // Logged in via Google but no role selected yet
-  }
-
-  if (user && userRole) {
-    return <div className="min-h-[80vh]"></div>; // Skeleton while useEffect redirects
+  // Prevent UI flash while evaluating an existing valid session
+  if (authLoading || (user && profileLoading) || (user && userRole)) {
+    return <div className="min-h-[80vh]"></div>; 
   }
 
   return (
@@ -89,6 +111,12 @@ export default function LoginPage() {
         {error && (
           <div className="mt-4 rounded border border-red-200 bg-red-50 p-3 text-sm text-red-600">
             {error}
+          </div>
+        )}
+
+        {successMessage && (
+          <div className="mt-4 rounded border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-700">
+            {successMessage}
           </div>
         )}
 

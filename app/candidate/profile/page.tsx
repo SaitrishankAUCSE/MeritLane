@@ -39,35 +39,29 @@ export default function CandidateProfilePage() {
   }, [notification]);
 
   useEffect(() => {
-    if (!authLoading && !profileLoading) {
-      if (!user || !userRole) {
-        router.push("/login");
-      } else if (userRole !== "candidate") {
-        router.push("/employer/dashboard");
-      } else {
-        fetchCandidateProfile(user.uid)
-          .then((profile) => {
-            if (profile) {
-              setName(profile.name || "");
-              setCollege(profile.college || "");
-              setBranch(profile.branch || "");
-              setGradYear(profile.gradYear || "");
-              setGithubUrl(profile.githubUrl || "");
-              setResumeUrl(profile.resumeUrl || "");
-              setSkills(profile.skills || []);
-              setProjects(profile.projects || []);
-              setVerificationStatus(profile.verificationStatus || "draft");
-            }
-          })
-          .catch((error) => {
-            console.error("Error fetching profile:", error);
-          })
-          .finally(() => {
-            setDataLoading(false);
-          });
-      }
+    if (!authLoading && !profileLoading && user && userRole === "candidate") {
+      fetchCandidateProfile(user.uid)
+        .then((profile) => {
+          if (profile) {
+            setName(profile.name || "");
+            setCollege(profile.college || "");
+            setBranch(profile.branch || "");
+            setGradYear(profile.gradYear || "");
+            setGithubUrl(profile.githubUrl || "");
+            setResumeUrl(profile.resumeUrl || "");
+            setSkills(profile.skills || []);
+            setProjects(profile.projects || []);
+            setVerificationStatus(profile.verificationStatus || "draft");
+          }
+        })
+        .catch((error) => {
+          console.error("Error fetching profile:", error);
+        })
+        .finally(() => {
+          setDataLoading(false);
+        });
     }
-  }, [user, userRole, authLoading, profileLoading, router]);
+  }, [user, userRole, authLoading, profileLoading]);
 
   const addProject = () => {
     const newProject: ProjectEntry = {
@@ -141,10 +135,6 @@ export default function CandidateProfilePage() {
         <Loader2 className="h-8 w-8 animate-spin text-zinc-400" />
       </div>
     );
-  }
-
-  if (!user || !userRole || userRole !== "candidate") {
-    return null; 
   }
 
   if (dataLoading) {

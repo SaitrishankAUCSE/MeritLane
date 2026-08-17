@@ -47,11 +47,7 @@ export default function AssessmentPage() {
   const [output, setOutput] = useState("");
 
   useEffect(() => {
-    if (loading) return;
-    if (!user || role !== "candidate") {
-      router.push("/login");
-      return;
-    }
+    if (loading || !user) return;
 
     const startSession = async () => {
       try {

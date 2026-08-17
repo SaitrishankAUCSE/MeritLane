@@ -14,23 +14,17 @@ export default function CandidateDashboardPage() {
   const [profileStatus, setProfileStatus] = useState<string>("loading");
 
   useEffect(() => {
-    if (!loading) {
-      if (!user) {
-        router.push("/login");
-      } else if (role !== "candidate") {
-        router.push("/employer/dashboard");
-      } else {
-        // Fetch profile to see verification status
-        fetchCandidateProfile(user.uid).then(profile => {
-          if (profile) {
-            setProfileStatus(profile.verificationStatus || "draft");
-          } else {
-            setProfileStatus("missing");
-          }
-        });
-      }
+    if (!loading && user) {
+      // Fetch profile to see verification status
+      fetchCandidateProfile(user.uid).then(profile => {
+        if (profile) {
+          setProfileStatus(profile.verificationStatus || "draft");
+        } else {
+          setProfileStatus("missing");
+        }
+      });
     }
-  }, [user, role, loading, router]);
+  }, [user, loading]);
 
   if (loading || profileStatus === "loading") {
     return (

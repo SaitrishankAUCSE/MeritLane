@@ -62,13 +62,13 @@ export default function Navbar() {
               <div className="h-9 w-20 animate-pulse rounded-md bg-zinc-100"></div>
               <div className="h-9 w-24 animate-pulse rounded-md bg-zinc-100"></div>
             </div>
-          ) : user ? (
+          ) : (user && userProfile) ? (
             <div className="hidden md:flex items-center gap-4">
               <div className="flex flex-col text-right">
                 <span className="text-sm font-medium text-zinc-900 leading-tight">
-                  {userProfile?.displayName || user.email?.split('@')[0]}
+                  {userProfile.displayName || user.email?.split('@')[0]}
                 </span>
-                <span className="text-xs text-zinc-500 capitalize">{userProfile?.role}</span>
+                <span className="text-xs text-zinc-500 capitalize">{userProfile.role}</span>
               </div>
               <button
                 onClick={handleSignOut}
@@ -102,13 +102,13 @@ export default function Navbar() {
       {/* Mobile Nav */}
       {mobileMenuOpen && (
         <div className="md:hidden border-t border-zinc-200 bg-white px-4 py-4 space-y-4">
-          {!isResolvingAuth && user && (
+          {!isResolvingAuth && (user && userProfile) && (
             <nav className="flex flex-col gap-4">
               {navLinks()}
               <button onClick={handleSignOut} className="text-left text-sm font-medium text-red-600">Sign out</button>
             </nav>
           )}
-          {!isResolvingAuth && !user && (
+          {!isResolvingAuth && !(user && userProfile) && (
             <div className="flex flex-col gap-3">
               <Link href="/login">
                 <Button variant="outline" className="w-full justify-center">Sign in</Button>

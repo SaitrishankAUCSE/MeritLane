@@ -1,14 +1,14 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { createUserWithEmailAndPassword, signInWithPopup, GoogleAuthProvider } from "firebase/auth";
+import { createUserWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, signOut } from "firebase/auth";
 import { auth } from "@/lib/firebase/config";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
 import { useAuth } from "@/lib/auth/AuthContext";
-import { createUserProfile, Role } from "@/lib/firebase/users";
+import { createUserProfile, fetchUserProfile, Role } from "@/lib/firebase/users";
 import RoleSelector from "@/components/RoleSelector";
 import { Users, Briefcase, Loader2 } from "lucide-react";
 import { logFunnelEvent } from "@/lib/analytics/logEvent";
@@ -19,12 +19,11 @@ export default function SignupPage() {
   const [role, setRole] = useState<Role | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loadingAction, setLoadingAction] = useState(false);
-  const [showRoleSelector, setShowRoleSelector] = useState(false);
   
   const { user, role: userRole, loading: authLoading, profileLoading, refreshProfile } = useAuth();
   const router = useRouter();
 
-  // We let useEffect handle the actual router.push redirect for users who have a role.
+  // Redirect authenticated users with valid profiles away from signup
   useEffect(() => {
     if (!authLoading && !profileLoading && user && userRole) {
       router.push(userRole === "candidate" ? "/candidate/profile" : "/employer/dashboard");
@@ -58,12 +57,15 @@ export default function SignupPage() {
         timeoutPromise
       ]);
 
-      await refreshProfile();
       logFunnelEvent("signup_completed", { method: "email", role });
-      // Route change handled by useEffect when profile loads
+      
+      // Sign out immediately so they are forced to log in manually
+      await signOut(auth);
+      router.push("/login?message=Account+created+successfully.+Please+sign+in+to+continue.");
+      
     } catch (err: any) {
       if (err.code === "auth/email-already-in-use") {
-        setError("An account already exists with this email. Log in instead.");
+        setError("An account with this email already exists. Please sign in.");
       } else {
         setError(err.message || "Failed to create an account.");
       }
@@ -72,17 +74,36 @@ export default function SignupPage() {
   };
 
   const handleGoogleSignup = async () => {
+    if (!role) {
+      setError("Please select a role before signing up with Google.");
+      return;
+    }
+
     setLoadingAction(true);
     setError(null);
-    logFunnelEvent("signup_started", { method: "google" });
+    logFunnelEvent("signup_started", { method: "google", role });
     try {
       const provider = new GoogleAuthProvider();
-      // signInWithPopup creates an account if it doesn't exist
-      await signInWithPopup(auth, provider);
-      logFunnelEvent("signup_completed", { method: "google" });
-      // Wait for AuthContext to pick up the user, which will trigger fetchUserProfile
-      // If they have no role, the explicit render block below will show RoleSelector.
-      // If they do have a role, the useEffect will redirect them.
+      const userCred = await signInWithPopup(auth, provider);
+      
+      const existingProfile = await fetchUserProfile(userCred.user.uid);
+      if (existingProfile) {
+        await signOut(auth);
+        setError("An account already exists. Please sign in.");
+        setLoadingAction(false);
+        return;
+      }
+
+      await createUserProfile(userCred.user.uid, {
+        email: userCred.user.email || "",
+        role: role,
+        displayName: userCred.user.displayName || "",
+        authProvider: "google"
+      });
+
+      await refreshProfile();
+      logFunnelEvent("signup_completed", { method: "google", role });
+      // Role routing is handled by the useEffect above when profile loads
     } catch (err: any) {
       setError(err.message || "Failed to sign up with Google.");
       setLoadingAction(false);
