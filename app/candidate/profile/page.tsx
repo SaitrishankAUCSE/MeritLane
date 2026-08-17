@@ -9,7 +9,7 @@ import { TagInput } from "@/components/ui/TagInput";
 import { Card, CardHeader, CardContent } from "@/components/ui/Card";
 import { useAuth } from "@/lib/auth/AuthContext";
 import { useRouter } from "next/navigation";
-import { fetchCandidateProfile, saveCandidateProfile, ProjectEntry } from "@/lib/firebase/candidate";
+import { fetchCandidateProfile, saveCandidateProfile, ProjectEntry, VerificationStatus } from "@/lib/firebase/candidate";
 import { logFunnelEvent } from "@/lib/analytics/logEvent";
 
 export default function CandidateProfilePage() {
@@ -17,7 +17,8 @@ export default function CandidateProfilePage() {
   const router = useRouter();
   const [dataLoading, setDataLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [verificationStatus, setVerificationStatus] = useState<"draft" | "pending" | "verified">("draft");
+  const [verificationStatus, setVerificationStatus] = useState<VerificationStatus>("draft");
+  const [verificationReason, setVerificationReason] = useState<string | null>(null);
 
   const [name, setName] = useState<string>("");
   const [college, setCollege] = useState<string>("");
@@ -52,6 +53,7 @@ export default function CandidateProfilePage() {
             setSkills(profile.skills || []);
             setProjects(profile.projects || []);
             setVerificationStatus(profile.verificationStatus || "draft");
+            setVerificationReason(profile.verificationReason || null);
           }
         })
         .catch((error) => {
@@ -90,7 +92,7 @@ export default function CandidateProfilePage() {
     setProjects((prev) => prev.filter((p: ProjectEntry) => p.id !== id));
   };
 
-  const handleSave = async (status: "draft" | "pending" | "verified") => {
+  const handleSave = async (status: VerificationStatus) => {
     if (!user) return;
     setSaving(true);
     
@@ -120,6 +122,8 @@ export default function CandidateProfilePage() {
       } else if (status === "draft") {
         logFunnelEvent("profile_draft_saved", { projectCount: projects.length });
         setNotification({ type: "success", message: "Profile saved as draft!" });
+      } else {
+        setNotification({ type: "success", message: "Profile updated successfully!" });
       }
     } catch (error: any) {
       console.error("Error saving profile:", error);
@@ -145,6 +149,21 @@ export default function CandidateProfilePage() {
     );
   }
 
+  const renderStatusBadge = () => {
+    switch (verificationStatus) {
+      case "verified":
+        return <Badge variant="verified">Verified</Badge>;
+      case "pending":
+        return <Badge variant="locked">Verification Pending</Badge>;
+      case "changes_required":
+        return <span className="inline-flex items-center rounded-full bg-amber-50 px-2.5 py-0.5 text-xs font-semibold text-amber-700 border border-amber-200">Needs Changes</span>;
+      case "rejected":
+        return <span className="inline-flex items-center rounded-full bg-red-50 px-2.5 py-0.5 text-xs font-semibold text-red-700 border border-red-200">Not Verified</span>;
+      default:
+        return <Badge variant="neutral">Unverified</Badge>;
+    }
+  };
+
   return (
     <div className="min-h-screen bg-[#fafafa] pb-24 pt-10">
       {notification && (
@@ -162,9 +181,7 @@ export default function CandidateProfilePage() {
               <h1 className="text-2xl font-bold tracking-tight text-zinc-900 sm:text-3xl">
                 Candidate Profile
               </h1>
-              <Badge variant={verificationStatus === 'verified' ? 'verified' : verificationStatus === 'pending' ? 'locked' : 'neutral'}>
-                {verificationStatus === 'verified' ? 'Verified' : verificationStatus === 'pending' ? 'Verification Pending' : 'Unverified'}
-              </Badge>
+              {renderStatusBadge()}
             </div>
             <p className="mt-2 text-sm text-zinc-500">
               Complete your profile and submit projects for technical verification.
@@ -172,7 +189,7 @@ export default function CandidateProfilePage() {
           </div>
 
           <div className="flex items-center gap-3">
-            {verificationStatus === "draft" ? (
+            {verificationStatus === "draft" || verificationStatus === "changes_required" || verificationStatus === "rejected" ? (
               <>
                 <Button
                   variant="outline"
@@ -200,6 +217,19 @@ export default function CandidateProfilePage() {
             )}
           </div>
         </div>
+
+        {/* Feedback Alert for Changes Required */}
+        {verificationStatus === "changes_required" && verificationReason && (
+          <div className="mb-8 rounded-lg border border-amber-200 bg-amber-50 p-4 shadow-sm">
+            <div className="flex items-center gap-2 mb-1.5">
+              <AlertCircle className="h-4 w-4 text-amber-700" />
+              <h3 className="text-sm font-semibold text-amber-900">Feedback from Meritlane</h3>
+            </div>
+            <p className="text-xs text-amber-800 leading-relaxed">
+              {verificationReason}
+            </p>
+          </div>
+        )}
 
         <div className="space-y-8">
           {/* Section 1: Academic & Identity */}
@@ -379,7 +409,7 @@ export default function CandidateProfilePage() {
                 Profile submitted
               </h3>
               <p id="modal-description" className="mt-3 text-sm leading-relaxed text-zinc-600">
-                Your profile has been submitted for verification. We'll update your verification status when the review is complete.
+                Your profile has been successfully submitted to Meritlane for verification. We&apos;ll review your information and update your verification status once the review is complete.
               </p>
             </div>
             
@@ -392,7 +422,7 @@ export default function CandidateProfilePage() {
                   router.push("/candidate/dashboard");
                 }}
               >
-                Continue
+                Continue to Dashboard
               </Button>
             </div>
           </div>

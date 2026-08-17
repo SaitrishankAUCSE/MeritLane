@@ -36,8 +36,12 @@ export default function LoginPage() {
   // Redirect authenticated users with valid profiles
   useEffect(() => {
     if (!authLoading && !profileLoading && user && userRole) {
-      updateLastLogin(user.uid).catch(console.error);
-      router.push(userRole === "candidate" ? "/candidate/profile" : "/employer/dashboard");
+      if (userRole === "admin") {
+        router.push("/admin");
+      } else {
+        updateLastLogin(user.uid).catch(console.error);
+        router.push(userRole === "candidate" ? "/candidate/profile" : "/employer/dashboard");
+      }
     }
   }, [user, userRole, authLoading, profileLoading, router]);
 
@@ -49,6 +53,13 @@ export default function LoginPage() {
     try {
       const userCred = await signInWithEmailAndPassword(auth, email, password);
       
+      const tokenResult = await userCred.user.getIdTokenResult(true);
+      if (tokenResult.claims.admin === true) {
+        await refreshProfile();
+        router.push("/admin");
+        return;
+      }
+
       const profile = await fetchUserProfile(userCred.user.uid);
       if (!profile) {
         await signOut(auth);
@@ -77,6 +88,13 @@ export default function LoginPage() {
       const provider = new GoogleAuthProvider();
       const userCred = await signInWithPopup(auth, provider);
       
+      const tokenResult = await userCred.user.getIdTokenResult(true);
+      if (tokenResult.claims.admin === true) {
+        await refreshProfile();
+        router.push("/admin");
+        return;
+      }
+
       const profile = await fetchUserProfile(userCred.user.uid);
       if (!profile) {
         await signOut(auth);

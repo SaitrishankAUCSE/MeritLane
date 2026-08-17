@@ -1,0 +1,695 @@
+"use client";
+
+import React, { useEffect, useState, useCallback } from "react";
+import { useAuth } from "@/lib/auth/AuthContext";
+import { Card, CardHeader, CardContent } from "@/components/ui/Card";
+import { Badge } from "@/components/ui/Badge";
+import { Button } from "@/components/ui/Button";
+import { 
+  ShieldCheck, 
+  CheckCircle2, 
+  AlertTriangle, 
+  XCircle, 
+  Clock, 
+  RefreshCw, 
+  ExternalLink, 
+  Code,
+  FileText, 
+  Loader2, 
+  Eye, 
+  Check, 
+  X, 
+  Search 
+} from "lucide-react";
+
+interface ProjectEntry {
+  id: string;
+  title: string;
+  repoUrl: string;
+  liveUrl?: string;
+  description: string;
+}
+
+interface CandidateAdminRecord {
+  uid: string;
+  name: string;
+  email: string;
+  college: string;
+  branch: string;
+  gradYear: string;
+  githubUrl: string;
+  resumeUrl: string;
+  skills: string[];
+  projects: ProjectEntry[];
+  verificationStatus: "draft" | "pending" | "verified" | "changes_required" | "rejected";
+  verificationReason: string | null;
+  verifiedAt: number | null;
+  verifiedByUid: string | null;
+  verifiedByEmail: string | null;
+  updatedAt: number | null;
+  verifiedBadge: boolean;
+  assessmentScores: Record<string, any> | null;
+  assessmentDate: any;
+}
+
+export default function AdminDashboardPage() {
+  const { user } = useAuth();
+  const [candidates, setCandidates] = useState<CandidateAdminRecord[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [selectedCandidate, setSelectedCandidate] = useState<CandidateAdminRecord | null>(null);
+
+  // Action dialog states
+  const [actionType, setActionType] = useState<"verified" | "changes_required" | "rejected" | null>(null);
+  const [actionReason, setActionReason] = useState("");
+  const [actionLoading, setActionLoading] = useState(false);
+  const [actionError, setActionError] = useState<string | null>(null);
+  const [successToast, setSuccessToast] = useState<string | null>(null);
+
+  // Filter state
+  const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const fetchCandidates = useCallback(async () => {
+    if (!user) return;
+    setLoading(true);
+    setError(null);
+    try {
+      const idToken = await user.getIdToken();
+      const res = await fetch("/api/admin/candidates", {
+        headers: {
+          Authorization: `Bearer ${idToken}`,
+        },
+      });
+
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error || `Error ${res.status}: Failed to fetch candidates`);
+      }
+
+      const data = await res.json();
+      setCandidates(data.candidates || []);
+    } catch (err: any) {
+      console.error("Failed to load candidates:", err);
+      setError(err.message || "Unable to load candidate data. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  }, [user]);
+
+  useEffect(() => {
+    fetchCandidates();
+  }, [fetchCandidates]);
+
+  useEffect(() => {
+    if (successToast) {
+      const timer = setTimeout(() => setSuccessToast(null), 4000);
+      return () => clearTimeout(timer);
+    }
+  }, [successToast]);
+
+  const handleExecuteAction = async (directType?: "verified" | "changes_required" | "rejected") => {
+    const effectiveActionType = directType || actionType;
+    if (!selectedCandidate || !effectiveActionType || !user) return;
+
+    if ((effectiveActionType === "changes_required" || effectiveActionType === "rejected") && !actionReason.trim()) {
+      setActionError("Please provide a reason for this verification decision.");
+      return;
+    }
+
+    setActionLoading(true);
+    setActionError(null);
+
+    try {
+      const idToken = await user.getIdToken();
+      const res = await fetch("/api/admin/verify-candidate", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${idToken}`,
+        },
+        body: JSON.stringify({
+          candidateId: selectedCandidate.uid,
+          status: effectiveActionType,
+          reason: actionReason.trim(),
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || "Failed to update verification status");
+      }
+
+      // Success messages
+      if (effectiveActionType === "verified") {
+        setSuccessToast("Candidate verified successfully.");
+      } else if (effectiveActionType === "changes_required") {
+        setSuccessToast("Changes request submitted.");
+      } else if (effectiveActionType === "rejected") {
+        setSuccessToast("Candidate rejected.");
+      }
+
+      // Update local records
+      setCandidates((prev) =>
+        prev.map((c) =>
+          c.uid === selectedCandidate.uid
+            ? {
+                ...c,
+                verificationStatus: effectiveActionType,
+                verificationReason: actionReason.trim() || null,
+                verifiedByEmail: user.email,
+                verifiedByUid: user.uid,
+                verifiedBadge: effectiveActionType === "verified",
+              }
+            : c
+        )
+      );
+
+      // Close modal
+      setActionType(null);
+      setActionReason("");
+      setSelectedCandidate(null);
+    } catch (err: any) {
+      setActionError(err.message || "Operation failed. Please try again.");
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  // Metrics from real data
+  const pendingCount = candidates.filter((c) => c.verificationStatus === "pending").length;
+  const verifiedCount = candidates.filter((c) => c.verificationStatus === "verified").length;
+  const changesCount = candidates.filter((c) => c.verificationStatus === "changes_required").length;
+
+  // Filtered list
+  const filteredCandidates = candidates.filter((c) => {
+    const matchesStatus = statusFilter === "all" || c.verificationStatus === statusFilter;
+    const q = searchQuery.toLowerCase().trim();
+    const matchesSearch =
+      !q ||
+      c.name.toLowerCase().includes(q) ||
+      c.email.toLowerCase().includes(q) ||
+      c.college.toLowerCase().includes(q) ||
+      c.skills.some((s) => s.toLowerCase().includes(q));
+    return matchesStatus && matchesSearch;
+  });
+
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case "verified":
+        return <Badge variant="verified">Verified</Badge>;
+      case "pending":
+        return <Badge variant="locked">Pending</Badge>;
+      case "changes_required":
+        return <span className="inline-flex items-center rounded-full bg-amber-50 px-2.5 py-0.5 text-xs font-semibold text-amber-700 border border-amber-200">Needs Changes</span>;
+      case "rejected":
+        return <span className="inline-flex items-center rounded-full bg-red-50 px-2.5 py-0.5 text-xs font-semibold text-red-700 border border-red-200">Rejected</span>;
+      default:
+        return <Badge variant="neutral">Draft</Badge>;
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-[#fafafa] pb-24 pt-8">
+      {/* Toast Notification */}
+      {successToast && (
+        <div className="fixed top-20 right-6 z-50 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-900 shadow-md animate-in fade-in slide-in-from-top-2 duration-200">
+          <div className="flex items-center gap-2">
+            <CheckCircle2 className="h-4 w-4 text-emerald-600" />
+            <span>{successToast}</span>
+          </div>
+        </div>
+      )}
+
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        {/* Header */}
+        <div className="mb-8 flex flex-col justify-between gap-4 border-b border-zinc-200 pb-6 sm:flex-row sm:items-center">
+          <div>
+            <div className="flex items-center gap-3">
+              <h1 className="text-2xl font-bold tracking-tight text-zinc-900 sm:text-3xl">
+                Admin Verification Portal
+              </h1>
+              <span className="rounded-md border border-zinc-200 bg-zinc-100 px-2.5 py-1 text-xs font-semibold text-zinc-700">
+                Meritlane Operations
+              </span>
+            </div>
+            <p className="mt-2 text-sm text-zinc-500">
+              Evaluate candidate submissions, inspect codebase proofs, and maintain verification integrity.
+            </p>
+          </div>
+
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={fetchCandidates} 
+            disabled={loading}
+            className="self-start sm:self-auto"
+          >
+            <RefreshCw className={`mr-2 h-4 w-4 ${loading ? "animate-spin" : ""}`} />
+            Refresh Data
+          </Button>
+        </div>
+
+        {/* Overview Stats */}
+        <div className="mb-10 grid grid-cols-1 gap-5 sm:grid-cols-3">
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-medium text-zinc-500">Pending Verification</span>
+                <Clock className="h-4 w-4 text-amber-500" />
+              </div>
+              <p className="mt-3 text-3xl font-bold tracking-tight text-zinc-900">{pendingCount}</p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-medium text-zinc-500">Verified Candidates</span>
+                <ShieldCheck className="h-4 w-4 text-emerald-600" />
+              </div>
+              <p className="mt-3 text-3xl font-bold tracking-tight text-zinc-900">{verifiedCount}</p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-medium text-zinc-500">Needs Changes</span>
+                <AlertTriangle className="h-4 w-4 text-amber-600" />
+              </div>
+              <p className="mt-3 text-3xl font-bold tracking-tight text-zinc-900">{changesCount}</p>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Candidate Verification Section */}
+        <div id="verification" className="space-y-6">
+          <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
+            <div>
+              <h2 className="text-lg font-bold text-zinc-900">Candidate Verification Queue</h2>
+              <p className="text-sm text-zinc-500">Review project repositories and technical evidence submitted by candidates.</p>
+            </div>
+
+            {/* Filter controls */}
+            <div className="flex flex-wrap items-center gap-3">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-400" />
+                <input
+                  type="text"
+                  placeholder="Search candidate or skill..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="rounded-md border border-zinc-200 bg-white py-1.5 pl-9 pr-3 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                />
+              </div>
+
+              <select
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
+                className="rounded-md border border-zinc-200 bg-white px-3 py-1.5 text-sm text-zinc-900 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+              >
+                <option value="all">All Statuses</option>
+                <option value="pending">Pending</option>
+                <option value="verified">Verified</option>
+                <option value="changes_required">Needs Changes</option>
+                <option value="rejected">Rejected</option>
+                <option value="draft">Draft</option>
+              </select>
+            </div>
+          </div>
+
+          {/* Table / List */}
+          <Card>
+            <CardContent className="p-0">
+              {loading ? (
+                <div className="flex min-h-[300px] flex-col items-center justify-center space-y-3 p-12">
+                  <Loader2 className="h-8 w-8 animate-spin text-zinc-400" />
+                  <p className="text-sm font-medium text-zinc-500">Loading candidates...</p>
+                </div>
+              ) : error ? (
+                <div className="flex min-h-[300px] flex-col items-center justify-center space-y-4 p-12 text-center">
+                  <div className="rounded-full bg-red-50 p-3 text-red-600 border border-red-100">
+                    <AlertTriangle className="h-6 w-6" />
+                  </div>
+                  <p className="text-sm text-red-600">{error}</p>
+                  <Button variant="outline" size="sm" onClick={fetchCandidates}>
+                    Try Again
+                  </Button>
+                </div>
+              ) : filteredCandidates.length === 0 ? (
+                <div className="flex min-h-[300px] flex-col items-center justify-center space-y-3 p-12 text-center">
+                  <ShieldCheck className="h-10 w-10 text-zinc-300" />
+                  <p className="text-base font-semibold text-zinc-900">
+                    {candidates.length === 0 ? "No candidates awaiting verification." : "No candidates match the selected filter."}
+                  </p>
+                  <p className="text-sm text-zinc-500 max-w-sm">
+                    Candidate portfolios submitted for verification will appear in this administrative queue.
+                  </p>
+                </div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left text-sm text-zinc-600">
+                    <thead className="border-b border-zinc-200 bg-zinc-50/75 text-xs font-semibold uppercase text-zinc-500">
+                      <tr>
+                        <th className="px-6 py-3.5">Candidate</th>
+                        <th className="px-6 py-3.5">College &amp; Branch</th>
+                        <th className="px-6 py-3.5">Skills</th>
+                        <th className="px-6 py-3.5">Status</th>
+                        <th className="px-6 py-3.5">Submitted Projects</th>
+                        <th className="px-6 py-3.5 text-right">Action</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-zinc-200">
+                      {filteredCandidates.map((c) => (
+                        <tr key={c.uid} className="hover:bg-zinc-50/50 transition-colors">
+                          <td className="px-6 py-4">
+                            <div className="font-semibold text-zinc-900">{c.name || "Unnamed Candidate"}</div>
+                            <div className="text-xs text-zinc-500">{c.email || c.uid.slice(0, 12) + "..."}</div>
+                          </td>
+                          <td className="px-6 py-4">
+                            <div className="text-zinc-900 font-medium">{c.college || "—"}</div>
+                            <div className="text-xs text-zinc-500">{c.branch || "—"} {c.gradYear ? `(${c.gradYear})` : ""}</div>
+                          </td>
+                          <td className="px-6 py-4">
+                            <div className="flex flex-wrap gap-1 max-w-xs">
+                              {c.skills && c.skills.length > 0 ? (
+                                c.skills.slice(0, 3).map((s, i) => (
+                                  <span key={i} className="inline-block rounded bg-zinc-100 px-2 py-0.5 text-xs text-zinc-700">
+                                    {s}
+                                  </span>
+                                ))
+                              ) : (
+                                <span className="text-zinc-400 text-xs">—</span>
+                              )}
+                              {c.skills && c.skills.length > 3 && (
+                                <span className="text-xs text-zinc-400">+{c.skills.length - 3}</span>
+                              )}
+                            </div>
+                          </td>
+                          <td className="px-6 py-4">
+                            {getStatusBadge(c.verificationStatus)}
+                          </td>
+                          <td className="px-6 py-4">
+                            <span className="text-sm font-medium text-zinc-900">
+                              {c.projects?.length || 0} {c.projects?.length === 1 ? "project" : "projects"}
+                            </span>
+                          </td>
+                          <td className="px-6 py-4 text-right">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => {
+                                setSelectedCandidate(c);
+                                setActionType(null);
+                                setActionReason("");
+                                setActionError(null);
+                              }}
+                            >
+                              <Eye className="mr-1.5 h-3.5 w-3.5" />
+                              Review
+                            </Button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+
+      {/* Candidate Review Modal */}
+      {selectedCandidate && (
+        <div 
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/45 overflow-y-auto"
+          role="dialog"
+          aria-modal="true"
+        >
+          <div className="my-8 w-full max-w-3xl rounded-xl border border-zinc-200 bg-white p-6 shadow-xl sm:p-8 animate-in fade-in zoom-in-95 duration-150">
+            {/* Header */}
+            <div className="flex items-start justify-between border-b border-zinc-200 pb-5">
+              <div>
+                <div className="flex items-center gap-3">
+                  <h2 className="text-xl font-bold text-zinc-900">{selectedCandidate.name || "Candidate Review"}</h2>
+                  {getStatusBadge(selectedCandidate.verificationStatus)}
+                </div>
+                <p className="mt-1 text-sm text-zinc-500">
+                  {selectedCandidate.email} • UID: <code className="text-xs font-mono text-zinc-600">{selectedCandidate.uid}</code>
+                </p>
+              </div>
+              <button 
+                onClick={() => setSelectedCandidate(null)}
+                className="rounded-md p-1.5 text-zinc-400 hover:bg-zinc-100 hover:text-zinc-600 transition-colors"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            {/* Content Area */}
+            <div className="mt-6 space-y-6 max-h-[60vh] overflow-y-auto pr-2">
+              {/* Academic & Background */}
+              <div className="rounded-lg border border-zinc-100 bg-zinc-50/75 p-4">
+                <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-500 mb-3">Academic Identity</h3>
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-3 text-sm">
+                  <div>
+                    <span className="text-xs text-zinc-400 block">College / University</span>
+                    <span className="font-medium text-zinc-900">{selectedCandidate.college || "Not specified"}</span>
+                  </div>
+                  <div>
+                    <span className="text-xs text-zinc-400 block">Branch</span>
+                    <span className="font-medium text-zinc-900">{selectedCandidate.branch || "Not specified"}</span>
+                  </div>
+                  <div>
+                    <span className="text-xs text-zinc-400 block">Graduation Year</span>
+                    <span className="font-medium text-zinc-900">{selectedCandidate.gradYear || "Not specified"}</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Skills & External Links */}
+              <div>
+                <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-500 mb-3">Skills &amp; Profiles</h3>
+                <div className="space-y-3">
+                  <div className="flex flex-wrap gap-1.5">
+                    {selectedCandidate.skills && selectedCandidate.skills.length > 0 ? (
+                      selectedCandidate.skills.map((skill, idx) => (
+                        <span key={idx} className="rounded-md bg-indigo-50 border border-indigo-100 px-2.5 py-1 text-xs font-medium text-indigo-700">
+                          {skill}
+                        </span>
+                      ))
+                    ) : (
+                      <span className="text-xs text-zinc-400">No skills specified</span>
+                    )}
+                  </div>
+
+                  <div className="flex flex-wrap gap-4 pt-2 text-sm">
+                    {selectedCandidate.githubUrl && (
+                      <a 
+                        href={selectedCandidate.githubUrl} 
+                        target="_blank" 
+                        rel="noreferrer"
+                        className="inline-flex items-center gap-1.5 text-indigo-600 hover:text-indigo-800 font-medium"
+                      >
+                        <Code className="h-4 w-4" /> GitHub Profile <ExternalLink className="h-3.5 w-3.5" />
+                      </a>
+                    )}
+                    {selectedCandidate.resumeUrl && (
+                      <a 
+                        href={selectedCandidate.resumeUrl} 
+                        target="_blank" 
+                        rel="noreferrer"
+                        className="inline-flex items-center gap-1.5 text-indigo-600 hover:text-indigo-800 font-medium"
+                      >
+                        <FileText className="h-4 w-4" /> View Resume <ExternalLink className="h-3.5 w-3.5" />
+                      </a>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* Assessment Signal */}
+              <div className="rounded-lg border border-zinc-200 bg-white p-4">
+                <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-500 mb-2">Technical Assessment Signal</h3>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    {selectedCandidate.verifiedBadge ? (
+                      <CheckCircle2 className="h-5 w-5 text-emerald-600" />
+                    ) : (
+                      <Clock className="h-5 w-5 text-zinc-400" />
+                    )}
+                    <span className="text-sm font-medium text-zinc-900">
+                      {selectedCandidate.verifiedBadge ? "Passed Code Assessment" : "Assessment Pending / Incomplete"}
+                    </span>
+                  </div>
+                  {selectedCandidate.assessmentScores && (
+                    <span className="text-xs font-mono bg-zinc-100 px-2.5 py-1 rounded text-zinc-700">
+                      Score: {JSON.stringify(selectedCandidate.assessmentScores)}
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              {/* Project Submissions */}
+              <div>
+                <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-500 mb-3">
+                  Submitted Codebases ({selectedCandidate.projects?.length || 0})
+                </h3>
+                {selectedCandidate.projects && selectedCandidate.projects.length > 0 ? (
+                  <div className="space-y-4">
+                    {selectedCandidate.projects.map((proj, idx) => (
+                      <div key={proj.id || idx} className="rounded-lg border border-zinc-200 bg-white p-4 space-y-2">
+                        <div className="flex items-center justify-between">
+                          <h4 className="font-semibold text-zinc-900 text-sm">{proj.title || `Project #${idx + 1}`}</h4>
+                          <div className="flex items-center gap-3 text-xs">
+                            {proj.repoUrl && (
+                              <a href={proj.repoUrl} target="_blank" rel="noreferrer" className="text-indigo-600 hover:underline inline-flex items-center gap-1 font-medium">
+                                <Code className="h-3.5 w-3.5" /> Repository <ExternalLink className="h-3 w-3" />
+                              </a>
+                            )}
+                            {proj.liveUrl && (
+                              <a href={proj.liveUrl} target="_blank" rel="noreferrer" className="text-zinc-600 hover:underline inline-flex items-center gap-1">
+                                Demo <ExternalLink className="h-3 w-3" />
+                              </a>
+                            )}
+                          </div>
+                        </div>
+                        <p className="text-xs text-zinc-600 leading-relaxed">{proj.description || "No architecture description provided."}</p>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-xs text-zinc-400 italic">No projects submitted yet.</p>
+                )}
+              </div>
+
+              {/* Existing Feedback / Reason if any */}
+              {selectedCandidate.verificationReason && (
+                <div className="rounded-lg border border-amber-200 bg-amber-50/70 p-4">
+                  <span className="text-xs font-bold uppercase tracking-wider text-amber-800 block mb-1">Previous Verification Feedback</span>
+                  <p className="text-xs text-amber-900">{selectedCandidate.verificationReason}</p>
+                  {selectedCandidate.verifiedByEmail && (
+                    <span className="text-[11px] text-amber-700/80 block mt-2">
+                      Reviewed by: {selectedCandidate.verifiedByEmail}
+                    </span>
+                  )}
+                </div>
+              )}
+
+              {/* Action Error */}
+              {actionError && (
+                <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-xs text-red-600">
+                  {actionError}
+                </div>
+              )}
+
+              {/* Action Form (if Changes Required or Reject is clicked) */}
+              {actionType && actionType !== "verified" && (
+                <div className="rounded-lg border border-zinc-200 bg-zinc-50 p-4 space-y-3 animate-in fade-in duration-150">
+                  <label className="block text-xs font-bold uppercase tracking-wider text-zinc-700">
+                    Reason for {actionType === "changes_required" ? "Requesting Changes" : "Rejection"} <span className="text-red-500">*</span>
+                  </label>
+                  <textarea
+                    rows={3}
+                    value={actionReason}
+                    onChange={(e) => setActionReason(e.target.value)}
+                    placeholder={
+                      actionType === "changes_required"
+                        ? "e.g. Please add detailed README architecture documentation and unit test coverage..."
+                        : "e.g. Project repositories are private or do not meet minimum engineering standards..."
+                    }
+                    className="w-full rounded-md border border-zinc-300 bg-white p-2.5 text-xs text-zinc-900 placeholder:text-zinc-400 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                  />
+                  <div className="flex justify-end gap-2">
+                    <Button 
+                      type="button" 
+                      variant="ghost" 
+                      size="sm" 
+                      onClick={() => {
+                        setActionType(null);
+                        setActionReason("");
+                        setActionError(null);
+                      }}
+                      disabled={actionLoading}
+                    >
+                      Cancel
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="primary"
+                      size="sm"
+                      onClick={() => handleExecuteAction()}
+                      disabled={actionLoading}
+                      className={actionType === "rejected" ? "bg-red-600 hover:bg-red-700 text-white" : ""}
+                    >
+                      {actionLoading ? <Loader2 className="h-3.5 w-3.5 animate-spin mr-1" /> : null}
+                      Submit Decision
+                    </Button>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Footer Action Buttons */}
+            {!actionType && (
+              <div className="mt-6 flex flex-wrap items-center justify-between gap-3 border-t border-zinc-200 pt-5">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={() => setSelectedCandidate(null)}
+                >
+                  Close
+                </Button>
+
+                <div className="flex items-center gap-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="border-red-200 text-red-700 hover:bg-red-50"
+                    onClick={() => {
+                      setActionType("rejected");
+                      setActionReason("");
+                      setActionError(null);
+                    }}
+                  >
+                    <XCircle className="mr-1.5 h-4 w-4" /> Reject
+                  </Button>
+
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="border-amber-200 text-amber-800 hover:bg-amber-50"
+                    onClick={() => {
+                      setActionType("changes_required");
+                      setActionReason("");
+                      setActionError(null);
+                    }}
+                  >
+                    <AlertTriangle className="mr-1.5 h-4 w-4" /> Request Changes
+                  </Button>
+
+                  <Button
+                    type="button"
+                    variant="primary"
+                    size="sm"
+                    disabled={actionLoading}
+                    onClick={() => {
+                      handleExecuteAction("verified");
+                    }}
+                  >
+                    <CheckCircle2 className="mr-1.5 h-4 w-4" /> Verify Candidate
+                  </Button>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}

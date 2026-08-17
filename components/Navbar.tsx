@@ -10,19 +10,37 @@ import { Button } from "@/components/ui/Button";
 import { useState } from "react";
 
 export default function Navbar() {
-  const { user, userProfile, loading, profileLoading } = useAuth();
+  const { user, userProfile, isAdmin, loading, profileLoading } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  const isResolvingAuth = loading || (user && profileLoading);
+  const isResolvingAuth = loading || (!isAdmin && user && profileLoading);
 
   const handleSignOut = async () => {
     await signOut(auth);
-    router.push("/");
+    router.push("/login");
   };
 
   const navLinks = () => {
+    if (isAdmin) {
+      return (
+        <>
+          <Link 
+            href="/admin" 
+            className={`text-sm font-medium transition-colors hover:text-indigo-600 ${pathname === "/admin" ? "text-indigo-600" : "text-zinc-600"}`}
+          >
+            Dashboard
+          </Link>
+          <Link 
+            href="/admin#verification" 
+            className="text-sm font-medium transition-colors text-zinc-600 hover:text-indigo-600"
+          >
+            Verification
+          </Link>
+        </>
+      );
+    }
     if (userProfile?.role === "candidate") {
       return (
         <>
@@ -39,20 +57,27 @@ export default function Navbar() {
     return null;
   };
 
+  const isAuthenticated = user && (isAdmin || userProfile);
+
   return (
     <header className="sticky top-0 z-50 w-full border-b border-zinc-200 bg-white/90 backdrop-blur-md">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
         <div className="flex items-center gap-8">
-          <Link href="/" className="flex items-center gap-2.5 font-medium tracking-tight text-zinc-900 group">
+          <Link href={isAdmin ? "/admin" : "/"} className="flex items-center gap-2.5 font-medium tracking-tight text-zinc-900 group">
             <span className="flex h-8 w-8 items-center justify-center rounded-md bg-indigo-600 text-white shadow-sm transition-transform group-hover:scale-105">
               <ShieldCheck className="h-4.5 w-4.5" />
             </span>
             <span className="text-lg font-bold tracking-tight">Meritlane</span>
+            {isAdmin && (
+              <span className="rounded bg-zinc-900 px-2 py-0.5 text-xs font-semibold text-white">
+                Admin
+              </span>
+            )}
           </Link>
 
           {/* Desktop Nav */}
           <nav className="hidden md:flex items-center gap-6">
-            {!isResolvingAuth && user && navLinks()}
+            {!isResolvingAuth && isAuthenticated && navLinks()}
           </nav>
         </div>
 
@@ -62,13 +87,15 @@ export default function Navbar() {
               <div className="h-9 w-20 animate-pulse rounded-md bg-zinc-100"></div>
               <div className="h-9 w-24 animate-pulse rounded-md bg-zinc-100"></div>
             </div>
-          ) : (user && userProfile) ? (
+          ) : isAuthenticated ? (
             <div className="hidden md:flex items-center gap-4">
               <div className="flex flex-col text-right">
                 <span className="text-sm font-medium text-zinc-900 leading-tight">
-                  {userProfile.displayName || user.email?.split('@')[0]}
+                  {isAdmin ? user.email : (userProfile?.displayName || user.email?.split('@')[0])}
                 </span>
-                <span className="text-xs text-zinc-500 capitalize">{userProfile.role}</span>
+                <span className="text-xs font-medium text-zinc-500 capitalize">
+                  {isAdmin ? "Administrator" : userProfile?.role}
+                </span>
               </div>
               <button
                 onClick={handleSignOut}
@@ -102,13 +129,13 @@ export default function Navbar() {
       {/* Mobile Nav */}
       {mobileMenuOpen && (
         <div className="md:hidden border-t border-zinc-200 bg-white px-4 py-4 space-y-4">
-          {!isResolvingAuth && (user && userProfile) && (
+          {!isResolvingAuth && isAuthenticated && (
             <nav className="flex flex-col gap-4">
               {navLinks()}
               <button onClick={handleSignOut} className="text-left text-sm font-medium text-red-600">Sign out</button>
             </nav>
           )}
-          {!isResolvingAuth && !(user && userProfile) && (
+          {!isResolvingAuth && !isAuthenticated && (
             <div className="flex flex-col gap-3">
               <Link href="/login">
                 <Button variant="outline" className="w-full justify-center">Sign in</Button>

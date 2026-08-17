@@ -9,6 +9,8 @@ export interface ProjectEntry {
   description: string;
 }
 
+export type VerificationStatus = "draft" | "pending" | "verified" | "changes_required" | "rejected";
+
 export interface CandidateProfile {
   name: string;
   college: string;
@@ -18,7 +20,11 @@ export interface CandidateProfile {
   resumeUrl: string;
   skills: string[];
   projects: ProjectEntry[];
-  verificationStatus: "draft" | "pending" | "verified";
+  verificationStatus: VerificationStatus;
+  verificationReason?: string;
+  verifiedByUid?: string;
+  verifiedByEmail?: string;
+  verifiedAt?: number;
   updatedAt: number;
 }
 

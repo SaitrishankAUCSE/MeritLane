@@ -10,33 +10,53 @@ import { signOut } from "firebase/auth";
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
-  allowedRoles?: Role[];
+  allowedRoles?: (Role | "admin")[];
 }
 
 export default function ProtectedRoute({ children, allowedRoles }: ProtectedRouteProps) {
-  const { user, userProfile, loading, profileLoading } = useAuth();
+  const { user, userProfile, isAdmin, loading, profileLoading } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
   const [isAuthorized, setIsAuthorized] = useState(false);
 
   useEffect(() => {
-    // Wait until Firebase authentication and Firestore profile fetch have completed
+    // Wait until Firebase authentication and profile resolution have completed
     if (loading || profileLoading) return;
 
     const enforceAuth = async () => {
-      // 1. Missing Firebase Session OR Missing Firestore Profile
-      if (!user || !userProfile) {
-        if (user && !userProfile) {
-          // Edge case: Firebase session exists, but Meritlane profile doesn't. Destroy the session.
-          await signOut(auth);
-        }
+      // 1. Not authenticated with Firebase
+      if (!user) {
         router.push(`/login?redirect=${encodeURIComponent(pathname)}`);
         return;
       }
 
-      // 2. Role-based Authorization
+      // 2. Admin User Routing
+      if (isAdmin) {
+        if (allowedRoles?.includes("admin")) {
+          setIsAuthorized(true);
+        } else {
+          router.push("/admin");
+        }
+        return;
+      }
+
+      // 3. Normal User Routing (Non-Admin)
+      // If a non-admin attempts to access an admin-only route
+      if (allowedRoles?.includes("admin") && !isAdmin) {
+        const dest = userProfile?.role === "employer" ? "/employer/dashboard" : "/candidate/dashboard";
+        router.push(dest);
+        return;
+      }
+
+      // If user has no Firestore profile
+      if (!userProfile) {
+        await signOut(auth);
+        router.push(`/login?redirect=${encodeURIComponent(pathname)}`);
+        return;
+      }
+
+      // Role-based authorization for candidate/employer routes
       if (allowedRoles && !allowedRoles.includes(userProfile.role)) {
-        // Correctly authenticated, but trying to access a route meant for another role
         router.push(userProfile.role === "candidate" ? "/candidate/dashboard" : "/employer/dashboard");
         return;
       }
@@ -46,7 +66,7 @@ export default function ProtectedRoute({ children, allowedRoles }: ProtectedRout
     };
 
     enforceAuth();
-  }, [user, userProfile, loading, profileLoading, router, pathname, allowedRoles]);
+  }, [user, userProfile, isAdmin, loading, profileLoading, router, pathname, allowedRoles]);
 
   if (!isAuthorized) {
     return (

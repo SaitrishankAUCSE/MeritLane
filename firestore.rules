@@ -1,22 +1,56 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // User profile docs — only the owner can read/write
+
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return isAuthenticated() && request.auth.token.admin == true;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    // User profile documents
     match /users/{userId} {
-      allow read, write: if request.auth != null && request.auth.uid == userId;
+      allow read: if isOwner(userId) || isAdmin();
+      allow create: if isOwner(userId);
+      // Owner cannot modify verifiedBadge or admin claims directly
+      allow update: if (isOwner(userId) && (
+        !request.resource.data.diff(resource.data).affectedKeys().hasAny(['admin', 'verifiedBadge', 'verificationDate'])
+      )) || isAdmin();
+      allow delete: if isAdmin();
     }
-    // Candidate-specific data — only the owner
+
+    // Candidate profile documents
     match /candidates/{userId} {
-      allow read, write: if request.auth != null && request.auth.uid == userId;
+      allow read: if isOwner(userId) || isAdmin();
+      // Candidates can create profile with draft or pending status, but cannot set admin audit fields
+      allow create: if (isOwner(userId) && (
+        !request.resource.data.keys().hasAny(['verifiedBy', 'verifiedByUid', 'verifiedByEmail', 'verifiedAt']) &&
+        (request.resource.data.verificationStatus in ['draft', 'pending'])
+      )) || isAdmin();
+      // Candidates can update profile (draft or pending) but cannot self-verify or tamper with audit fields
+      allow update: if (isOwner(userId) && (
+        !request.resource.data.diff(resource.data).affectedKeys().hasAny(['verifiedBy', 'verifiedByUid', 'verifiedByEmail', 'verifiedAt']) &&
+        (request.resource.data.verificationStatus in ['draft', 'pending'])
+      )) || isAdmin();
+      allow delete: if isAdmin();
     }
-    // Employer-specific data — only the owner
+
+    // Employer profile documents
     match /employers/{userId} {
-      allow read, write: if request.auth != null && request.auth.uid == userId;
+      allow read, write: if isOwner(userId) || isAdmin();
     }
-    // Funnel events — write-only telemetry from the client
+
+    // Funnel events — write-only telemetry from client, read-only for admin
     match /funnel_events/{eventId} {
       allow create: if true;
-      allow read, update, delete: if false;
+      allow read: if isAdmin();
+      allow update, delete: if false;
     }
   }
 }

@@ -7,8 +7,9 @@ import { fetchUserProfile, UserProfile, Role } from "@/lib/firebase/users";
 
 interface AuthContextType {
   user: User | null;
-  role: Role | null;
+  role: Role | "admin" | null;
   userProfile: UserProfile | null;
+  isAdmin: boolean;
   loading: boolean;
   profileLoading: boolean;
   refreshProfile: () => Promise<void>;
@@ -18,6 +19,7 @@ const AuthContext = createContext<AuthContextType>({
   user: null,
   role: null,
   userProfile: null,
+  isAdmin: false,
   loading: true,
   profileLoading: true,
   refreshProfile: async () => {},
@@ -25,8 +27,9 @@ const AuthContext = createContext<AuthContextType>({
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
-  const [role, setRole] = useState<Role | null>(null);
+  const [role, setRole] = useState<Role | "admin" | null>(null);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
   const [profileLoading, setProfileLoading] = useState(true);
 
@@ -59,6 +62,21 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const refreshProfile = useCallback(async () => {
     if (user) {
+      try {
+        const tokenResult = await user.getIdTokenResult(true);
+        const adminClaim = Boolean(tokenResult.claims.admin);
+        setIsAdmin(adminClaim);
+
+        if (adminClaim) {
+          setRole("admin");
+          setUserProfile(null);
+          setProfileLoading(false);
+          return;
+        }
+      } catch (e) {
+        console.error("Error refreshing token claims:", e);
+      }
+
       await loadProfile(user.uid);
     }
   }, [user, loadProfile]);
@@ -80,10 +98,26 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         setLoading(false);
         
         if (currentUser) {
+          try {
+            const tokenResult = await currentUser.getIdTokenResult();
+            const adminClaim = Boolean(tokenResult.claims.admin);
+            setIsAdmin(adminClaim);
+
+            if (adminClaim) {
+              setRole("admin");
+              setUserProfile(null);
+              setProfileLoading(false);
+              return;
+            }
+          } catch (e) {
+            console.error("Error checking user token claims:", e);
+          }
+
           await loadProfile(currentUser.uid);
         } else {
           setUserProfile(null);
           setRole(null);
+          setIsAdmin(false);
           setProfileLoading(false);
         }
       }, (error) => {
@@ -125,7 +159,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   }
 
   return (
-    <AuthContext.Provider value={{ user, role, userProfile, loading, profileLoading, refreshProfile }}>
+    <AuthContext.Provider value={{ user, role, userProfile, isAdmin, loading, profileLoading, refreshProfile }}>
       {children}
     </AuthContext.Provider>
   );
