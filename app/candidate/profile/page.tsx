@@ -41,6 +41,12 @@ export default function CandidateProfilePage() {
   }, [notification]);
 
   useEffect(() => {
+    if (!authLoading && user?.email?.toLowerCase() === "saitrishankb9@gmail.com") {
+      router.replace("/admin");
+    }
+  }, [user, authLoading, router]);
+
+  useEffect(() => {
     if (!authLoading && !profileLoading && user && userRole === "candidate") {
       fetchCandidateProfile(user.uid)
         .then((profile) => {

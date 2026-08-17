@@ -30,6 +30,12 @@ export default function CandidateDashboardPage() {
     }
   }, [user, loading]);
 
+  useEffect(() => {
+    if (!loading && user?.email?.toLowerCase() === "saitrishankb9@gmail.com") {
+      router.replace("/admin");
+    }
+  }, [user, loading, router]);
+
   if (loading || dataLoading) {
     return (
       <div className="flex min-h-[60vh] flex-col items-center justify-center space-y-3">

@@ -64,9 +64,18 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const refreshProfile = useCallback(async () => {
     if (user) {
+      const isSuperadmin = user.email?.toLowerCase() === ADMIN_EMAIL;
+      if (isSuperadmin) {
+        setIsAdmin(true);
+        setRole("admin");
+        setUserProfile(null);
+        setProfileLoading(false);
+        return;
+      }
+
       try {
         const tokenResult = await user.getIdTokenResult(true);
-        const adminClaim = Boolean(tokenResult.claims.admin) || user.email?.toLowerCase() === ADMIN_EMAIL;
+        const adminClaim = Boolean(tokenResult.claims.admin);
         setIsAdmin(adminClaim);
 
         if (adminClaim) {
@@ -100,9 +109,18 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         setLoading(false);
         
         if (currentUser) {
+          const isSuperadmin = currentUser.email?.toLowerCase() === ADMIN_EMAIL;
+          if (isSuperadmin) {
+            setIsAdmin(true);
+            setRole("admin");
+            setUserProfile(null);
+            setProfileLoading(false);
+            return;
+          }
+
           try {
             const tokenResult = await currentUser.getIdTokenResult();
-            const adminClaim = Boolean(tokenResult.claims.admin) || currentUser.email?.toLowerCase() === ADMIN_EMAIL;
+            const adminClaim = Boolean(tokenResult.claims.admin);
             setIsAdmin(adminClaim);
 
             if (adminClaim) {
