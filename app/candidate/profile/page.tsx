@@ -25,6 +25,14 @@ export default function CandidateProfilePage() {
   const [resumeUrl, setResumeUrl] = useState<string>("");
   const [skills, setSkills] = useState<string[]>([]);
   const [projects, setProjects] = useState<ProjectEntry[]>([]);
+  const [notification, setNotification] = useState<{type: "success" | "error", message: string} | null>(null);
+
+  useEffect(() => {
+    if (notification) {
+      const timer = setTimeout(() => setNotification(null), 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [notification]);
 
   useEffect(() => {
     if (!authLoading && !profileLoading) {
@@ -109,10 +117,14 @@ export default function CandidateProfilePage() {
       await Promise.race([savePromise, timeoutPromise]);
       
       setVerificationStatus(status);
-      alert(`Profile ${status === "draft" ? "saved as draft" : "submitted for verification"}!`);
+      if (status === "pending") {
+        router.push("/candidate/dashboard");
+      } else {
+        setNotification({ type: "success", message: "Profile saved as draft!" });
+      }
     } catch (error: any) {
       console.error("Error saving profile:", error);
-      alert(error.message || "Failed to save profile. Please try again.");
+      setNotification({ type: "error", message: error.message || "Failed to save profile. Please try again." });
     } finally {
       setSaving(false);
     }
@@ -140,9 +152,17 @@ export default function CandidateProfilePage() {
   }
 
   return (
-    <div className="mx-auto max-w-3xl px-4 py-10 sm:px-6">
-      {/* Header & Verification Status */}
-      <div className="flex flex-col justify-between gap-4 border-b border-zinc-200 pb-6 sm:flex-row sm:items-center">
+    <div className="min-h-screen bg-zinc-50 pb-20 pt-8">
+      {notification && (
+        <div className={`fixed top-4 right-4 z-50 rounded-md px-4 py-3 shadow-lg ${
+          notification.type === 'success' ? 'bg-emerald-50 text-emerald-900 border border-emerald-200' : 'bg-red-50 text-red-900 border border-red-200'
+        }`}>
+          <p className="text-sm font-medium">{notification.message}</p>
+        </div>
+      )}
+      
+      <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
+        <div className="mb-8 flex flex-col justify-between gap-4 border-b border-zinc-200 pb-6 sm:flex-row sm:items-center">
         <div>
           <div className="flex items-center gap-3">
             <h1 className="text-xl font-semibold tracking-tight text-zinc-900 sm:text-2xl">
