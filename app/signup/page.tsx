@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/Button";
 import { useAuth } from "@/lib/auth/AuthContext";
 import { createUserProfile, Role } from "@/lib/firebase/users";
 import RoleSelector from "@/components/RoleSelector";
-import { Users, Briefcase } from "lucide-react";
+import { Users, Briefcase, Loader2 } from "lucide-react";
 
 export default function SignupPage() {
   const [email, setEmail] = useState("");
@@ -86,7 +86,12 @@ export default function SignupPage() {
 
   // Auth States Handled Explicitly
   if (authLoading || (user && profileLoading)) {
-    return <div className="min-h-[80vh]"></div>; // Skeleton while resolving auth/profile
+    return (
+      <div className="flex min-h-[80vh] flex-col items-center justify-center space-y-4">
+        <Loader2 className="h-8 w-8 animate-spin text-zinc-400" />
+        <p className="text-sm font-medium text-zinc-500">Setting up your account...</p>
+      </div>
+    );
   }
 
   if (user && !userRole) {
@@ -94,7 +99,12 @@ export default function SignupPage() {
   }
 
   if (user && userRole) {
-    return <div className="min-h-[80vh]"></div>; // Skeleton while useEffect redirects
+    return (
+      <div className="flex min-h-[80vh] flex-col items-center justify-center space-y-4">
+        <Loader2 className="h-8 w-8 animate-spin text-zinc-400" />
+        <p className="text-sm font-medium text-zinc-500">Redirecting to your dashboard...</p>
+      </div>
+    );
   }
 
   return (
