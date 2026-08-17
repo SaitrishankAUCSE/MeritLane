@@ -41,12 +41,21 @@ export default function SignupPage() {
     setError(null);
     try {
       const userCred = await createUserWithEmailAndPassword(auth, email, password);
-      await createUserProfile(userCred.user.uid, {
-        email: userCred.user.email || email,
-        role: role,
-        displayName: "",
-        authProvider: "password"
-      });
+      
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error("Database connection timed out. Check your network or adblocker.")), 8000)
+      );
+
+      await Promise.race([
+        createUserProfile(userCred.user.uid, {
+          email: userCred.user.email || email,
+          role: role,
+          displayName: "",
+          authProvider: "password"
+        }),
+        timeoutPromise
+      ]);
+
       await refreshProfile();
       // Route change handled by useEffect when profile loads
     } catch (err: any) {

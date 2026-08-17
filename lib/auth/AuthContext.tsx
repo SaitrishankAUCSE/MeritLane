@@ -35,7 +35,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const loadProfile = useCallback(async (uid: string) => {
     setProfileLoading(true);
     try {
-      const profile = await fetchUserProfile(uid);
+      const timeoutPromise = new Promise<null>((_, reject) => 
+        setTimeout(() => reject(new Error("Firestore connection timed out. Check your network or adblocker.")), 8000)
+      );
+      const profile = await Promise.race([fetchUserProfile(uid), timeoutPromise]);
+      
       if (profile) {
         setUserProfile(profile);
         setRole(profile.role);
@@ -43,8 +47,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         setUserProfile(null);
         setRole(null);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Failed to load user profile:", error);
+      setAuthError("Failed to load user profile: " + error.message);
       setUserProfile(null);
       setRole(null);
     } finally {
