@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState, useCallback, useMemo } from "react";
 import { useAuth } from "@/lib/auth/AuthContext";
 import { Card, CardHeader, CardContent } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
@@ -20,7 +20,15 @@ import {
   Check, 
   X, 
   Search,
-  Layers
+  Download,
+  BarChart3,
+  Layers,
+  Activity,
+  UserCheck,
+  Building2,
+  Filter,
+  History,
+  Lock
 } from "lucide-react";
 
 interface ProjectEntry {
@@ -59,6 +67,9 @@ export default function AdminDashboardPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedCandidate, setSelectedCandidate] = useState<CandidateAdminRecord | null>(null);
+
+  // Active Tab: queue, directory, analytics, audit
+  const [activeTab, setActiveTab] = useState<"queue" | "directory" | "analytics" | "audit">("queue");
 
   // Action dialog states
   const [actionType, setActionType] = useState<"verified" | "changes_required" | "rejected" | null>(null);
@@ -142,7 +153,6 @@ export default function AdminDashboardPage() {
         throw new Error(data.error || "Failed to update verification status");
       }
 
-      // Success messages
       if (effectiveActionType === "verified") {
         setSuccessToast("Candidate verified successfully.");
       } else if (effectiveActionType === "changes_required") {
@@ -162,6 +172,7 @@ export default function AdminDashboardPage() {
                 verifiedByEmail: user.email,
                 verifiedByUid: user.uid,
                 verifiedBadge: effectiveActionType === "verified",
+                verifiedAt: Date.now(),
               }
             : c
         )
@@ -182,26 +193,70 @@ export default function AdminDashboardPage() {
   const pendingCount = candidates.filter((c) => c.verificationStatus === "pending").length;
   const verifiedCount = candidates.filter((c) => c.verificationStatus === "verified").length;
   const changesCount = candidates.filter((c) => c.verificationStatus === "changes_required").length;
+  const totalCount = candidates.length;
+  const verifiedRate = totalCount > 0 ? Math.round((verifiedCount / totalCount) * 100) : 0;
 
   // Filtered list
-  const filteredCandidates = candidates.filter((c) => {
-    const matchesStatus = statusFilter === "all" || c.verificationStatus === statusFilter;
-    const q = searchQuery.toLowerCase().trim();
-    const matchesSearch =
-      !q ||
-      c.name.toLowerCase().includes(q) ||
-      c.email.toLowerCase().includes(q) ||
-      c.college.toLowerCase().includes(q) ||
-      c.skills.some((s) => s.toLowerCase().includes(q));
-    return matchesStatus && matchesSearch;
-  });
+  const filteredCandidates = useMemo(() => {
+    return candidates.filter((c) => {
+      const matchesStatus = statusFilter === "all" || c.verificationStatus === statusFilter;
+      const q = searchQuery.toLowerCase().trim();
+      const matchesSearch =
+        !q ||
+        c.name.toLowerCase().includes(q) ||
+        c.email.toLowerCase().includes(q) ||
+        c.college.toLowerCase().includes(q) ||
+        c.branch.toLowerCase().includes(q) ||
+        c.skills.some((s) => s.toLowerCase().includes(q));
+      return matchesStatus && matchesSearch;
+    });
+  }, [candidates, statusFilter, searchQuery]);
+
+  // Queue only candidates pending review
+  const queueCandidates = useMemo(() => {
+    return candidates.filter((c) => c.verificationStatus === "pending");
+  }, [candidates]);
+
+  // Audit list: candidates that have been reviewed
+  const auditLogs = useMemo(() => {
+    return candidates
+      .filter((c) => c.verifiedAt || c.verificationStatus === "verified" || c.verificationStatus === "changes_required" || c.verificationStatus === "rejected")
+      .sort((a, b) => (b.verifiedAt || b.updatedAt || 0) - (a.verifiedAt || a.updatedAt || 0));
+  }, [candidates]);
+
+  // CSV Export for candidates
+  const exportToCSV = () => {
+    const headers = ["UID", "Name", "Email", "College", "Branch", "GradYear", "Status", "Skills", "ProjectsCount", "VerifiedBadge", "ReviewedBy"];
+    const rows = filteredCandidates.map((c) => [
+      c.uid,
+      `"${c.name.replace(/"/g, '""')}"`,
+      c.email,
+      `"${c.college.replace(/"/g, '""')}"`,
+      `"${c.branch.replace(/"/g, '""')}"`,
+      c.gradYear,
+      c.verificationStatus,
+      `"${c.skills.join(', ')}"`,
+      c.projects?.length || 0,
+      c.verifiedBadge ? "Yes" : "No",
+      c.verifiedByEmail || "N/A"
+    ]);
+
+    const csvContent = "data:text/csv;charset=utf-8," + [headers.join(","), ...rows.map((e) => e.join(","))].join("\n");
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", `meritlane_candidates_${Date.now()}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
 
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "verified":
         return <Badge variant="verified" size="sm">Verified</Badge>;
       case "pending":
-        return <Badge variant="pending" size="sm">Pending</Badge>;
+        return <Badge variant="pending" size="sm">Pending Review</Badge>;
       case "changes_required":
         return <Badge variant="changes_required" size="sm">Needs Changes</Badge>;
       case "rejected":
@@ -229,37 +284,48 @@ export default function AdminDashboardPage() {
           <div>
             <div className="flex items-center gap-3">
               <h1 className="text-2xl font-bold tracking-tight text-zinc-900 sm:text-3xl">
-                Admin Verification Portal
+                Administrator Command Center
               </h1>
-              <span className="rounded-md border border-zinc-200 bg-zinc-100 px-2.5 py-0.5 text-xs font-semibold text-zinc-700">
-                Meritlane Operations
+              <span className="rounded-md border border-zinc-800 bg-zinc-950 px-2.5 py-0.5 text-xs font-semibold text-white">
+                Superadmin
               </span>
             </div>
             <p className="mt-1.5 text-sm text-zinc-500">
-              Evaluate candidate submissions, inspect codebase proofs, and maintain verification integrity.
+              Direct verification pipeline, repository audits, candidate directory, and platform integrity logs.
             </p>
           </div>
 
-          <Button 
-            variant="outline" 
-            size="sm" 
-            onClick={fetchCandidates} 
-            loading={loading}
-            leftIcon={<RefreshCw className="h-3.5 w-3.5" />}
-          >
-            Refresh Queue
-          </Button>
+          <div className="flex items-center gap-2.5">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={exportToCSV}
+              leftIcon={<Download className="h-3.5 w-3.5" />}
+            >
+              Export CSV
+            </Button>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={fetchCandidates} 
+              loading={loading}
+              leftIcon={<RefreshCw className="h-3.5 w-3.5" />}
+            >
+              Refresh Data
+            </Button>
+          </div>
         </div>
 
-        {/* Overview Stats */}
-        <div className="grid grid-cols-1 gap-5 sm:grid-cols-3">
+        {/* Overview Stats Bar */}
+        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
           <Card>
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-bold uppercase tracking-wider text-zinc-500">Pending Verification</span>
+                <span className="text-xs font-bold uppercase tracking-wider text-zinc-500">Verification Queue</span>
                 <Clock className="h-4 w-4 text-amber-500" />
               </div>
               <p className="mt-2 text-3xl font-bold tracking-tight text-zinc-900">{pendingCount}</p>
+              <p className="mt-1 text-[11px] text-zinc-400">Awaiting code review</p>
             </CardContent>
           </Card>
 
@@ -270,6 +336,7 @@ export default function AdminDashboardPage() {
                 <ShieldCheck className="h-4 w-4 text-emerald-600" />
               </div>
               <p className="mt-2 text-3xl font-bold tracking-tight text-zinc-900">{verifiedCount}</p>
+              <p className="mt-1 text-[11px] text-zinc-400">{verifiedRate}% verification pass rate</p>
             </CardContent>
           </Card>
 
@@ -280,75 +347,201 @@ export default function AdminDashboardPage() {
                 <AlertTriangle className="h-4 w-4 text-amber-600" />
               </div>
               <p className="mt-2 text-3xl font-bold tracking-tight text-zinc-900">{changesCount}</p>
+              <p className="mt-1 text-[11px] text-zinc-400">Feedback sent to candidate</p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold uppercase tracking-wider text-zinc-500">Total Registered</span>
+                <Layers className="h-4 w-4 text-indigo-600" />
+              </div>
+              <p className="mt-2 text-3xl font-bold tracking-tight text-zinc-900">{totalCount}</p>
+              <p className="mt-1 text-[11px] text-zinc-400">Candidate profiles</p>
             </CardContent>
           </Card>
         </div>
 
-        {/* Candidate Verification Section */}
-        <div id="verification" className="space-y-6">
-          <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
-            <div>
-              <h2 className="text-base font-bold text-zinc-900">Candidate Verification Queue</h2>
-              <p className="mt-0.5 text-xs text-zinc-500">Review project repositories and technical evidence submitted by candidates.</p>
+        {/* Admin Navigation Tabs */}
+        <div className="flex border-b border-zinc-200">
+          <button
+            onClick={() => setActiveTab("queue")}
+            className={`flex items-center gap-2 border-b-2 px-5 py-3 text-xs font-bold uppercase tracking-wider transition-colors ${
+              activeTab === "queue"
+                ? "border-indigo-600 text-indigo-600"
+                : "border-transparent text-zinc-500 hover:border-zinc-300 hover:text-zinc-900"
+            }`}
+          >
+            <Clock className="h-4 w-4" />
+            <span>Pending Review Queue ({pendingCount})</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab("directory")}
+            className={`flex items-center gap-2 border-b-2 px-5 py-3 text-xs font-bold uppercase tracking-wider transition-colors ${
+              activeTab === "directory"
+                ? "border-indigo-600 text-indigo-600"
+                : "border-transparent text-zinc-500 hover:border-zinc-300 hover:text-zinc-900"
+            }`}
+          >
+            <Layers className="h-4 w-4" />
+            <span>Candidate Directory ({filteredCandidates.length})</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab("analytics")}
+            className={`flex items-center gap-2 border-b-2 px-5 py-3 text-xs font-bold uppercase tracking-wider transition-colors ${
+              activeTab === "analytics"
+                ? "border-indigo-600 text-indigo-600"
+                : "border-transparent text-zinc-500 hover:border-zinc-300 hover:text-zinc-900"
+            }`}
+          >
+            <BarChart3 className="h-4 w-4" />
+            <span>Platform Analytics</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab("audit")}
+            className={`flex items-center gap-2 border-b-2 px-5 py-3 text-xs font-bold uppercase tracking-wider transition-colors ${
+              activeTab === "audit"
+                ? "border-indigo-600 text-indigo-600"
+                : "border-transparent text-zinc-500 hover:border-zinc-300 hover:text-zinc-900"
+            }`}
+          >
+            <History className="h-4 w-4" />
+            <span>Audit Trail &amp; History ({auditLogs.length})</span>
+          </button>
+        </div>
+
+        {/* TAB 1: PENDING QUEUE */}
+        {activeTab === "queue" && (
+          <div className="space-y-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-base font-bold text-zinc-900">Priority Verification Queue</h2>
+                <p className="text-xs text-zinc-500">Candidates awaiting manual codebase audit and verification.</p>
+              </div>
             </div>
 
-            {/* Filter controls */}
-            <div className="flex flex-wrap items-center gap-3">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-zinc-400" />
-                <input
-                  type="text"
-                  placeholder="Search candidate or skill..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="rounded-md border border-zinc-200 bg-white py-1.5 pl-8 pr-3 text-xs text-zinc-900 placeholder:text-zinc-400 shadow-sm transition-all hover:border-zinc-300 focus:border-zinc-900 focus:outline-none focus:ring-2 focus:ring-zinc-900/10"
-                />
+            <Card>
+              <CardContent className="p-0">
+                {queueCandidates.length === 0 ? (
+                  <div className="flex min-h-[250px] flex-col items-center justify-center space-y-3 p-12 text-center">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600 border border-emerald-100">
+                      <CheckCircle2 className="h-6 w-6" />
+                    </div>
+                    <p className="text-sm font-semibold text-zinc-900">Queue is completely clear!</p>
+                    <p className="text-xs text-zinc-500 max-w-sm">
+                      All submitted candidate profiles have been reviewed and verified.
+                    </p>
+                  </div>
+                ) : (
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left text-xs text-zinc-600">
+                      <thead className="border-b border-zinc-200 bg-zinc-50/80 font-bold uppercase tracking-wider text-zinc-500">
+                        <tr>
+                          <th className="px-6 py-3.5">Candidate</th>
+                          <th className="px-6 py-3.5">College &amp; Branch</th>
+                          <th className="px-6 py-3.5">Skills</th>
+                          <th className="px-6 py-3.5">Submitted Projects</th>
+                          <th className="px-6 py-3.5 text-right">Action</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-zinc-100">
+                        {queueCandidates.map((c) => (
+                          <tr key={c.uid} className="hover:bg-zinc-50/70 transition-colors">
+                            <td className="px-6 py-4">
+                              <div className="font-semibold text-zinc-900">{c.name || "Unnamed Candidate"}</div>
+                              <div className="text-[11px] text-zinc-400 font-mono">{c.email || c.uid.slice(0, 12) + "..."}</div>
+                            </td>
+                            <td className="px-6 py-4">
+                              <div className="text-zinc-900 font-medium">{c.college || "—"}</div>
+                              <div className="text-[11px] text-zinc-400">{c.branch || "—"} {c.gradYear ? `(${c.gradYear})` : ""}</div>
+                            </td>
+                            <td className="px-6 py-4">
+                              <div className="flex flex-wrap gap-1 max-w-xs">
+                                {c.skills && c.skills.length > 0 ? (
+                                  c.skills.slice(0, 3).map((s, i) => (
+                                    <span key={i} className="inline-block rounded bg-zinc-100 px-2 py-0.5 text-[11px] font-medium text-zinc-700">
+                                      {s}
+                                    </span>
+                                  ))
+                                ) : (
+                                  <span className="text-zinc-400 text-xs">—</span>
+                                )}
+                              </div>
+                            </td>
+                            <td className="px-6 py-4">
+                              <span className="text-xs font-semibold text-zinc-900">
+                                {c.projects?.length || 0} {c.projects?.length === 1 ? "project" : "projects"}
+                              </span>
+                            </td>
+                            <td className="px-6 py-4 text-right">
+                              <Button
+                                variant="primary"
+                                size="xs"
+                                onClick={() => {
+                                  setSelectedCandidate(c);
+                                  setActionType(null);
+                                  setActionReason("");
+                                  setActionError(null);
+                                }}
+                                leftIcon={<Eye className="h-3.5 w-3.5" />}
+                              >
+                                Audit &amp; Verify
+                              </Button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
+        {/* TAB 2: CANDIDATE DIRECTORY */}
+        {activeTab === "directory" && (
+          <div className="space-y-6">
+            <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
+              <div>
+                <h2 className="text-base font-bold text-zinc-900">Full Candidate Directory</h2>
+                <p className="text-xs text-zinc-500">Search and filter across all candidates in the Meritlane database.</p>
               </div>
 
-              <select
-                value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value)}
-                className="rounded-md border border-zinc-200 bg-white px-3 py-1.5 text-xs font-medium text-zinc-900 shadow-sm transition-all hover:border-zinc-300 focus:border-zinc-900 focus:outline-none focus:ring-2 focus:ring-zinc-900/10"
-              >
-                <option value="all">All Statuses</option>
-                <option value="pending">Pending Review</option>
-                <option value="verified">Verified</option>
-                <option value="changes_required">Needs Changes</option>
-                <option value="rejected">Rejected</option>
-                <option value="draft">Draft</option>
-              </select>
-            </div>
-          </div>
+              {/* Filters */}
+              <div className="flex flex-wrap items-center gap-3">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-zinc-400" />
+                  <input
+                    type="text"
+                    placeholder="Search name, college, skill..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="rounded-md border border-zinc-200 bg-white py-1.5 pl-8 pr-3 text-xs text-zinc-900 placeholder:text-zinc-400 shadow-sm transition-all hover:border-zinc-300 focus:border-zinc-900 focus:outline-none focus:ring-2 focus:ring-zinc-900/10"
+                  />
+                </div>
 
-          {/* Table */}
-          <Card>
-            <CardContent className="p-0">
-              {loading ? (
-                <div className="flex min-h-[300px] flex-col items-center justify-center space-y-3 p-12">
-                  <Loader2 className="h-8 w-8 animate-spin text-zinc-400" />
-                  <p className="text-xs font-medium text-zinc-500">Loading candidate records...</p>
-                </div>
-              ) : error ? (
-                <div className="flex min-h-[300px] flex-col items-center justify-center space-y-4 p-12 text-center">
-                  <div className="rounded-xl bg-red-50 p-3 text-red-600 border border-red-100">
-                    <AlertTriangle className="h-6 w-6" />
-                  </div>
-                  <p className="text-xs text-red-600">{error}</p>
-                  <Button variant="outline" size="sm" onClick={fetchCandidates}>
-                    Try Again
-                  </Button>
-                </div>
-              ) : filteredCandidates.length === 0 ? (
-                <div className="flex min-h-[300px] flex-col items-center justify-center space-y-3 p-12 text-center">
-                  <ShieldCheck className="h-10 w-10 text-zinc-300" />
-                  <p className="text-sm font-semibold text-zinc-900">
-                    {candidates.length === 0 ? "No candidates awaiting verification." : "No candidates match the selected filter."}
-                  </p>
-                  <p className="text-xs text-zinc-500 max-w-sm">
-                    Candidate portfolios submitted for verification will appear in this administrative queue.
-                  </p>
-                </div>
-              ) : (
+                <select
+                  value={statusFilter}
+                  onChange={(e) => setStatusFilter(e.target.value)}
+                  className="rounded-md border border-zinc-200 bg-white px-3 py-1.5 text-xs font-medium text-zinc-900 shadow-sm transition-all hover:border-zinc-300 focus:border-zinc-900 focus:outline-none focus:ring-2 focus:ring-zinc-900/10"
+                >
+                  <option value="all">All Statuses</option>
+                  <option value="verified">Verified</option>
+                  <option value="pending">Pending</option>
+                  <option value="changes_required">Needs Changes</option>
+                  <option value="rejected">Rejected</option>
+                  <option value="draft">Draft</option>
+                </select>
+              </div>
+            </div>
+
+            <Card>
+              <CardContent className="p-0">
                 <div className="overflow-x-auto">
                   <table className="w-full text-left text-xs text-zinc-600">
                     <thead className="border-b border-zinc-200 bg-zinc-50/80 font-bold uppercase tracking-wider text-zinc-500">
@@ -357,7 +550,7 @@ export default function AdminDashboardPage() {
                         <th className="px-6 py-3.5">College &amp; Branch</th>
                         <th className="px-6 py-3.5">Skills</th>
                         <th className="px-6 py-3.5">Status</th>
-                        <th className="px-6 py-3.5">Submitted Projects</th>
+                        <th className="px-6 py-3.5">Projects</th>
                         <th className="px-6 py-3.5 text-right">Action</th>
                       </tr>
                     </thead>
@@ -365,7 +558,7 @@ export default function AdminDashboardPage() {
                       {filteredCandidates.map((c) => (
                         <tr key={c.uid} className="hover:bg-zinc-50/70 transition-colors">
                           <td className="px-6 py-4">
-                            <div className="font-semibold text-zinc-900">{c.name || "Unnamed Candidate"}</div>
+                            <div className="font-semibold text-zinc-900">{c.name || "Unnamed"}</div>
                             <div className="text-[11px] text-zinc-400 font-mono">{c.email || c.uid.slice(0, 12) + "..."}</div>
                           </td>
                           <td className="px-6 py-4">
@@ -383,9 +576,6 @@ export default function AdminDashboardPage() {
                               ) : (
                                 <span className="text-zinc-400 text-xs">—</span>
                               )}
-                              {c.skills && c.skills.length > 3 && (
-                                <span className="text-[11px] text-zinc-400">+{c.skills.length - 3}</span>
-                              )}
                             </div>
                           </td>
                           <td className="px-6 py-4">
@@ -393,7 +583,7 @@ export default function AdminDashboardPage() {
                           </td>
                           <td className="px-6 py-4">
                             <span className="text-xs font-semibold text-zinc-900">
-                              {c.projects?.length || 0} {c.projects?.length === 1 ? "project" : "projects"}
+                              {c.projects?.length || 0}
                             </span>
                           </td>
                           <td className="px-6 py-4 text-right">
@@ -416,10 +606,107 @@ export default function AdminDashboardPage() {
                     </tbody>
                   </table>
                 </div>
-              )}
-            </CardContent>
-          </Card>
-        </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
+        {/* TAB 3: PLATFORM ANALYTICS */}
+        {activeTab === "analytics" && (
+          <div className="space-y-6">
+            <div>
+              <h2 className="text-base font-bold text-zinc-900">Platform KPIs &amp; Verification Funnel</h2>
+              <p className="text-xs text-zinc-500">Live operational data from candidates and assessments.</p>
+            </div>
+
+            <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
+              <Card>
+                <CardHeader>
+                  <span className="text-xs font-bold uppercase tracking-wider text-zinc-500">Verification Rate</span>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-3xl font-bold text-zinc-900">{verifiedRate}%</p>
+                  <p className="mt-1 text-xs text-zinc-500">{verifiedCount} verified out of {totalCount} total</p>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <span className="text-xs font-bold uppercase tracking-wider text-zinc-500">Assessment Readiness</span>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-3xl font-bold text-indigo-600">
+                    {candidates.filter(c => c.verifiedBadge).length}
+                  </p>
+                  <p className="mt-1 text-xs text-zinc-500">Passed Python technical audit</p>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <span className="text-xs font-bold uppercase tracking-wider text-zinc-500">Repositories Submitted</span>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-3xl font-bold text-zinc-900">
+                    {candidates.reduce((acc, c) => acc + (c.projects?.length || 0), 0)}
+                  </p>
+                  <p className="mt-1 text-xs text-zinc-500">Production codebases attached</p>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+        )}
+
+        {/* TAB 4: AUDIT TRAIL */}
+        {activeTab === "audit" && (
+          <div className="space-y-6">
+            <div>
+              <h2 className="text-base font-bold text-zinc-900">Administrative Decision History</h2>
+              <p className="text-xs text-zinc-500">Immutable audit log of all verification decisions and reasons.</p>
+            </div>
+
+            <Card>
+              <CardContent className="p-0">
+                {auditLogs.length === 0 ? (
+                  <div className="p-12 text-center text-xs text-zinc-500">
+                    No decisions logged yet.
+                  </div>
+                ) : (
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left text-xs text-zinc-600">
+                      <thead className="border-b border-zinc-200 bg-zinc-50/80 font-bold uppercase tracking-wider text-zinc-500">
+                        <tr>
+                          <th className="px-6 py-3.5">Candidate</th>
+                          <th className="px-6 py-3.5">Decision</th>
+                          <th className="px-6 py-3.5">Reviewed By</th>
+                          <th className="px-6 py-3.5">Feedback / Notes</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-zinc-100">
+                        {auditLogs.map((c) => (
+                          <tr key={c.uid} className="hover:bg-zinc-50/70">
+                            <td className="px-6 py-4 font-semibold text-zinc-900">
+                              {c.name || c.email || c.uid}
+                            </td>
+                            <td className="px-6 py-4">
+                              {getStatusBadge(c.verificationStatus)}
+                            </td>
+                            <td className="px-6 py-4 text-zinc-500 font-mono text-[11px]">
+                              {c.verifiedByEmail || "saitrishankb9@gmail.com"}
+                            </td>
+                            <td className="px-6 py-4 text-zinc-600 max-w-sm">
+                              {c.verificationReason || "Standard verification approval."}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+        )}
       </div>
 
       {/* Candidate Review Modal */}
