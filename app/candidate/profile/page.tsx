@@ -110,6 +110,7 @@ export default function CandidateProfilePage() {
     try {
       const savePromise = saveCandidateProfile(user.uid, {
         name,
+        email: user.email || "",
         college,
         branch,
         gradYear,

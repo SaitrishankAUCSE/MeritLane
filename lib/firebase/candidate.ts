@@ -13,6 +13,7 @@ export type VerificationStatus = "draft" | "pending" | "verified" | "changes_req
 
 export interface CandidateProfile {
   name: string;
+  email?: string;
   college: string;
   branch: string;
   gradYear: string;

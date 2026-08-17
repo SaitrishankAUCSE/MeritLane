@@ -34,6 +34,9 @@ import {
   CheckCheck
 } from "lucide-react";
 
+import { collection, onSnapshot, doc, updateDoc, serverTimestamp } from "firebase/firestore";
+import { db } from "@/lib/firebase/config";
+
 interface ProjectEntry {
   id: string;
   title: string;
@@ -112,18 +115,71 @@ export default function AdminDashboardPage() {
       }
 
       const data = await res.json();
-      setCandidates(data.candidates || []);
+      if (data.candidates && data.candidates.length > 0) {
+        setCandidates(data.candidates);
+      }
     } catch (err: any) {
-      console.error("Failed to load candidates:", err);
-      setError(err.message || "Unable to load candidate data. Please try again.");
+      console.error("API fallback fetchCandidates notice:", err);
     } finally {
       setLoading(false);
     }
   }, [user]);
 
+  // Real-time Firestore snapshot listener for instant live updates
   useEffect(() => {
-    fetchCandidates();
-  }, [fetchCandidates]);
+    if (!user) return;
+    setLoading(true);
+
+    const unsubscribeCandidates = onSnapshot(
+      collection(db, "candidates"),
+      (candSnapshot) => {
+        const candidateRecords: CandidateAdminRecord[] = [];
+
+        candSnapshot.forEach((docSnap) => {
+          const candidateData = docSnap.data();
+          const uid = docSnap.id;
+
+          candidateRecords.push({
+            uid,
+            name: candidateData.name || "",
+            email: candidateData.email || "",
+            college: candidateData.college || "",
+            branch: candidateData.branch || "",
+            gradYear: candidateData.gradYear || "",
+            githubUrl: candidateData.githubUrl || "",
+            resumeUrl: candidateData.resumeUrl || "",
+            skills: candidateData.skills || [],
+            projects: candidateData.projects || [],
+            verificationStatus: candidateData.verificationStatus || "draft",
+            verificationReason: candidateData.verificationReason || null,
+            verifiedAt: candidateData.verifiedAt || null,
+            verifiedByUid: candidateData.verifiedByUid || null,
+            verifiedByEmail: candidateData.verifiedByEmail || null,
+            updatedAt: candidateData.updatedAt || null,
+            verifiedBadge: candidateData.verificationStatus === "verified",
+            assessmentScores: candidateData.assessmentScores || null,
+            assessmentDate: candidateData.assessmentDate || null,
+          });
+        });
+
+        // Sort: pending first, then by updatedAt descending
+        candidateRecords.sort((a, b) => {
+          if (a.verificationStatus === "pending" && b.verificationStatus !== "pending") return -1;
+          if (b.verificationStatus === "pending" && a.verificationStatus !== "pending") return 1;
+          return (b.updatedAt || 0) - (a.updatedAt || 0);
+        });
+
+        setCandidates(candidateRecords);
+        setLoading(false);
+      },
+      (error) => {
+        console.warn("Firestore onSnapshot error, using API fallback:", error);
+        fetchCandidates();
+      }
+    );
+
+    return () => unsubscribeCandidates();
+  }, [user, fetchCandidates]);
 
   useEffect(() => {
     if (successToast) {
@@ -145,24 +201,43 @@ export default function AdminDashboardPage() {
     setActionError(null);
 
     try {
-      const idToken = await user.getIdToken();
-      const res = await fetch("/api/admin/verify-candidate", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${idToken}`,
-        },
-        body: JSON.stringify({
-          candidateId: selectedCandidate.uid,
-          status: effectiveActionType,
-          reason: actionReason.trim(),
-        }),
-      });
+      // 1. Direct Firestore write for instant real-time sync
+      try {
+        const candidateRef = doc(db, "candidates", selectedCandidate.uid);
+        await updateDoc(candidateRef, {
+          verificationStatus: effectiveActionType,
+          verificationReason: actionReason.trim() || null,
+          verifiedByEmail: user.email,
+          verifiedByUid: user.uid,
+          verifiedAt: Date.now(),
+          updatedAt: Date.now(),
+        });
 
-      const data = await res.json();
+        const userRef = doc(db, "users", selectedCandidate.uid);
+        await updateDoc(userRef, {
+          verifiedBadge: effectiveActionType === "verified",
+          verificationDate: serverTimestamp(),
+        }).catch(() => {});
+      } catch (directErr) {
+        console.warn("Direct Firestore update fallback, using API route:", directErr);
+        const idToken = await user.getIdToken();
+        const res = await fetch("/api/admin/verify-candidate", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${idToken}`,
+          },
+          body: JSON.stringify({
+            candidateId: selectedCandidate.uid,
+            status: effectiveActionType,
+            reason: actionReason.trim(),
+          }),
+        });
 
-      if (!res.ok) {
-        throw new Error(data.error || "Failed to update verification status");
+        const data = await res.json();
+        if (!res.ok) {
+          throw new Error(data.error || "Failed to update verification status");
+        }
       }
 
       if (effectiveActionType === "verified") {
@@ -172,23 +247,6 @@ export default function AdminDashboardPage() {
       } else if (effectiveActionType === "rejected") {
         setSuccessToast("Candidate rejected.");
       }
-
-      // Update local records
-      setCandidates((prev) =>
-        prev.map((c) =>
-          c.uid === selectedCandidate.uid
-            ? {
-                ...c,
-                verificationStatus: effectiveActionType,
-                verificationReason: actionReason.trim() || null,
-                verifiedByEmail: user.email,
-                verifiedByUid: user.uid,
-                verifiedBadge: effectiveActionType === "verified",
-                verifiedAt: Date.now(),
-              }
-            : c
-        )
-      );
 
       // Close modal
       setActionType(null);
