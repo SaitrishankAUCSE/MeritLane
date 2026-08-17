@@ -1,9 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { ShieldCheck, LogOut, Menu } from "lucide-react";
+import { Menu, ShieldCheck, X, LogOut } from "lucide-react";
 import { useAuth } from "@/lib/auth/AuthContext";
-import { useRouter, usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { auth } from "@/lib/firebase/config";
 import { signOut } from "firebase/auth";
 import { Button } from "@/components/ui/Button";
@@ -13,113 +13,33 @@ export default function Navbar() {
   const { user, userProfile, loading, profileLoading } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [open, setOpen] = useState(false);
+  const resolving = loading || (Boolean(user) && profileLoading);
+  const links = userProfile?.role === "candidate"
+    ? [{ href: "/candidate/dashboard", label: "Workspace" }, { href: "/candidate/profile", label: "Profile" }]
+    : userProfile?.role === "employer"
+      ? [{ href: "/employer/dashboard", label: "Hiring workspace" }]
+      : [{ href: "/#model", label: "How it works" }, { href: "/#employers", label: "For employers" }];
 
-  const isResolvingAuth = loading || (user && profileLoading);
-
-  const handleSignOut = async () => {
-    await signOut(auth);
-    router.push("/");
-  };
-
-  const navLinks = () => {
-    if (userProfile?.role === "candidate") {
-      return (
-        <>
-          <Link href="/candidate/dashboard" className={`text-sm font-medium transition-colors hover:text-indigo-600 ${pathname === "/candidate/dashboard" ? "text-indigo-600" : "text-zinc-600"}`}>Dashboard</Link>
-          <Link href="/candidate/profile" className={`text-sm font-medium transition-colors hover:text-indigo-600 ${pathname === "/candidate/profile" ? "text-indigo-600" : "text-zinc-600"}`}>Profile</Link>
-        </>
-      );
-    }
-    if (userProfile?.role === "employer") {
-      return (
-        <Link href="/employer/dashboard" className={`text-sm font-medium transition-colors hover:text-indigo-600 ${pathname === "/employer/dashboard" ? "text-indigo-600" : "text-zinc-600"}`}>Dashboard</Link>
-      );
-    }
-    return null;
-  };
+  const close = () => setOpen(false);
+  const logout = async () => { await signOut(auth); close(); router.push("/"); };
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-zinc-200 bg-white/90 backdrop-blur-md">
-      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center gap-8">
-          <Link href="/" className="flex items-center gap-2.5 font-medium tracking-tight text-zinc-900 group">
-            <span className="flex h-8 w-8 items-center justify-center rounded-md bg-indigo-600 text-white shadow-sm transition-transform group-hover:scale-105">
-              <ShieldCheck className="h-4.5 w-4.5" />
-            </span>
-            <span className="text-lg font-bold tracking-tight">Meritlane</span>
-          </Link>
-
-          {/* Desktop Nav */}
-          <nav className="hidden md:flex items-center gap-6">
-            {!isResolvingAuth && user && navLinks()}
-          </nav>
+    <header className="sticky top-0 z-50 border-b bg-card/95 backdrop-blur">
+      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-5 lg:px-8">
+        <Link href="/" className="flex items-center gap-2.5" onClick={close}>
+          <span className="flex size-8 items-center justify-center rounded-md bg-primary text-primary-foreground"><ShieldCheck aria-hidden="true" /></span>
+          <span className="text-lg font-semibold tracking-tight">Meritlane</span>
+        </Link>
+        <nav className="hidden items-center gap-7 md:flex" aria-label="Primary navigation">
+          {!resolving && links.map((link) => <Link key={link.href} href={link.href} className={`text-sm font-medium transition-colors hover:text-primary ${pathname === link.href ? "text-primary" : "text-muted-foreground"}`}>{link.label}</Link>)}
+        </nav>
+        <div className="hidden items-center gap-3 md:flex">
+          {!resolving && user && userProfile ? <><span className="text-right text-xs text-muted-foreground"><strong className="block text-sm text-foreground">{userProfile.displayName || user.email?.split("@")[0]}</strong><span className="capitalize">{userProfile.role}</span></span><Button variant="outline" size="sm" onClick={logout}><LogOut data-icon="inline-start" /> Sign out</Button></> : !resolving && <><Link href="/login"><Button variant="ghost" size="sm">Sign in</Button></Link><Link href="/signup"><Button size="sm">Get started</Button></Link></>}
         </div>
-
-        <div className="flex items-center gap-4">
-          {isResolvingAuth ? (
-            <div className="flex gap-3">
-              <div className="h-9 w-20 animate-pulse rounded-md bg-zinc-100"></div>
-              <div className="h-9 w-24 animate-pulse rounded-md bg-zinc-100"></div>
-            </div>
-          ) : (user && userProfile) ? (
-            <div className="hidden md:flex items-center gap-4">
-              <div className="flex flex-col text-right">
-                <span className="text-sm font-medium text-zinc-900 leading-tight">
-                  {userProfile.displayName || user.email?.split('@')[0]}
-                </span>
-                <span className="text-xs text-zinc-500 capitalize">{userProfile.role}</span>
-              </div>
-              <button
-                onClick={handleSignOut}
-                className="flex h-9 w-9 items-center justify-center rounded-full border border-zinc-200 bg-zinc-50 text-zinc-600 transition-colors hover:border-zinc-300 hover:text-red-600"
-                title="Sign out"
-              >
-                <LogOut className="h-4 w-4" />
-              </button>
-            </div>
-          ) : (
-            <div className="hidden md:flex items-center gap-3">
-              <Link href="/login">
-                <Button variant="ghost">Sign in</Button>
-              </Link>
-              <Link href="/signup">
-                <Button variant="primary">Get Started</Button>
-              </Link>
-            </div>
-          )}
-
-          {/* Mobile Menu Toggle */}
-          <button 
-            className="md:hidden flex items-center justify-center h-10 w-10 text-zinc-600"
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-          >
-            <Menu className="h-6 w-6" />
-          </button>
-        </div>
+        <button type="button" className="flex size-10 items-center justify-center rounded-md border md:hidden" aria-label={open ? "Close menu" : "Open menu"} aria-expanded={open} onClick={() => setOpen((value) => !value)}>{open ? <X aria-hidden="true" /> : <Menu aria-hidden="true" />}</button>
       </div>
-
-      {/* Mobile Nav */}
-      {mobileMenuOpen && (
-        <div className="md:hidden border-t border-zinc-200 bg-white px-4 py-4 space-y-4">
-          {!isResolvingAuth && (user && userProfile) && (
-            <nav className="flex flex-col gap-4">
-              {navLinks()}
-              <button onClick={handleSignOut} className="text-left text-sm font-medium text-red-600">Sign out</button>
-            </nav>
-          )}
-          {!isResolvingAuth && !(user && userProfile) && (
-            <div className="flex flex-col gap-3">
-              <Link href="/login">
-                <Button variant="outline" className="w-full justify-center">Sign in</Button>
-              </Link>
-              <Link href="/signup">
-                <Button variant="primary" className="w-full justify-center">Get Started</Button>
-              </Link>
-            </div>
-          )}
-        </div>
-      )}
+      {open && <div className="border-t bg-card px-5 py-5 md:hidden"><nav className="flex flex-col gap-4" aria-label="Mobile navigation">{!resolving && links.map((link) => <Link key={link.href} href={link.href} onClick={close} className="text-sm font-medium">{link.label}</Link>)}{!resolving && user ? <button className="text-left text-sm font-medium text-primary" onClick={logout}>Sign out</button> : !resolving && <div className="flex flex-col gap-3 pt-2"><Link href="/login" onClick={close}><Button variant="outline" className="w-full">Sign in</Button></Link><Link href="/signup" onClick={close}><Button className="w-full">Get started</Button></Link></div>}</nav></div>}
     </header>
   );
 }

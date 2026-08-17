@@ -1,100 +1,17 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
+import { ArrowRight, CheckCircle2, Clock3, Loader2, PencilLine, ShieldCheck } from "lucide-react";
 import { useAuth } from "@/lib/auth/AuthContext";
 import { useRouter } from "next/navigation";
-import { Loader2, CheckCircle2, Clock, ArrowRight } from "lucide-react";
 import { fetchCandidateProfile } from "@/lib/firebase/candidate";
-import { Card, CardContent } from "@/components/ui/Card";
+import { Card, CardContent, CardHeader } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 
 export default function CandidateDashboardPage() {
-  const { user, role, loading } = useAuth();
-  const router = useRouter();
-  const [profileStatus, setProfileStatus] = useState<string>("loading");
-
-  useEffect(() => {
-    if (!loading && user) {
-      // Fetch profile to see verification status
-      fetchCandidateProfile(user.uid).then(profile => {
-        if (profile) {
-          setProfileStatus(profile.verificationStatus || "draft");
-        } else {
-          setProfileStatus("missing");
-        }
-      });
-    }
-  }, [user, loading]);
-
-  if (loading || profileStatus === "loading") {
-    return (
-      <div className="flex min-h-[50vh] items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-zinc-400" />
-      </div>
-    );
-  }
-
-  return (
-    <div className="min-h-screen bg-[#fafafa] pb-24 pt-10">
-      <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
-        <div className="mb-8 border-b border-zinc-200 pb-6">
-          <h1 className="text-2xl font-bold tracking-tight text-zinc-900 sm:text-3xl">Candidate Dashboard</h1>
-          <p className="mt-2 text-sm text-zinc-500">Track your application status and opportunities.</p>
-        </div>
-
-        <Card>
-          <CardContent className="p-6 sm:p-8">
-            <h2 className="text-base font-semibold text-zinc-900 mb-6">Verification Status</h2>
-            
-            <div className="flex flex-col sm:flex-row items-start gap-5">
-              {profileStatus === "verified" ? (
-                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-emerald-100 text-emerald-600">
-                  <CheckCircle2 className="h-6 w-6" />
-                </div>
-              ) : (
-                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-amber-100 text-amber-600">
-                  <Clock className="h-6 w-6" />
-                </div>
-              )}
-              
-              <div className="flex-1">
-                <h3 className="text-base font-semibold text-zinc-900">
-                  {profileStatus === "verified" ? "Profile Verified" : 
-                   profileStatus === "pending" ? "Verification Pending" : 
-                   "Action Required"}
-                </h3>
-                <p className="mt-1 text-sm leading-relaxed text-zinc-500">
-                  {profileStatus === "verified" 
-                    ? "Your profile has been verified. You are now visible to top employers."
-                    : profileStatus === "pending"
-                    ? "Your profile is complete! The final step is to pass the Skill Assessment to get verified."
-                    : "Your profile is incomplete or saved as a draft. Please submit it before taking the assessment."}
-                </p>
-                
-                <div className="mt-6">
-                  {(profileStatus === "draft" || profileStatus === "missing") && (
-                    <Button 
-                      variant="primary"
-                      onClick={() => router.push("/candidate/profile")}
-                    >
-                      Complete Profile <ArrowRight className="ml-2 h-4 w-4" />
-                    </Button>
-                  )}
-
-                  {profileStatus === "pending" && (
-                    <Button 
-                      variant="primary"
-                      onClick={() => router.push("/candidate/assessment")}
-                    >
-                      Start Skill Assessment <ArrowRight className="ml-2 h-4 w-4" />
-                    </Button>
-                  )}
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-    </div>
-  );
+  const { user, loading } = useAuth(); const router = useRouter(); const [status, setStatus] = useState<string>("loading"); const [profile, setProfile] = useState<Awaited<ReturnType<typeof fetchCandidateProfile>>>(null);
+  useEffect(() => { if (!loading && user) fetchCandidateProfile(user.uid).then((value) => { setProfile(value); setStatus(value?.verificationStatus || "missing"); }).catch(() => setStatus("error")); }, [user, loading]);
+  if (loading || status === "loading") return <div className="flex min-h-[60vh] items-center justify-center"><Loader2 className="animate-spin text-primary" /></div>;
+  const name = profile?.name || user?.email?.split("@")[0] || "there"; const verified = status === "verified"; const pending = status === "pending"; const projectCount = profile?.projects?.length || 0; const skillCount = profile?.skills?.length || 0;
+  return <div className="mx-auto max-w-7xl px-5 py-10 lg:px-8 lg:py-14"><div className="flex flex-col justify-between gap-6 border-b pb-8 sm:flex-row sm:items-end"><div><p className="font-mono text-xs uppercase tracking-[0.16em] text-primary">Candidate workspace</p><h1 className="mt-3 text-3xl font-semibold tracking-tight">Good to see you, {name}.</h1><p className="mt-2 text-muted-foreground">Keep your proof current and make your ability easy to evaluate.</p></div><Button variant="outline" onClick={() => router.push("/candidate/profile")}><PencilLine data-icon="inline-start" /> Edit profile</Button></div><div className="mt-8 grid gap-5 lg:grid-cols-[1.15fr_.85fr]"><Card><CardHeader><div className="flex items-center justify-between gap-4"><div><p className="text-sm font-medium text-muted-foreground">Verification status</p><h2 className="mt-2 text-2xl font-semibold">{verified ? "Profile verified" : pending ? "Verification pending" : "Profile needs attention"}</h2></div><span className={`flex size-12 items-center justify-center rounded-full ${verified ? "bg-emerald-50 text-emerald-600" : "bg-secondary text-primary"}`}>{verified ? <CheckCircle2 aria-hidden="true" /> : <Clock3 aria-hidden="true" />}</span></div></CardHeader><CardContent><p className="max-w-xl text-sm leading-6 text-muted-foreground">{verified ? "Your assessment signal is active. Keep adding evidence as your work grows." : pending ? "Your profile is ready for assessment. Complete the next step to establish your technical signal." : "Add your identity, skills, and at least one project before submitting for verification."}</p><Button className="mt-6" onClick={() => router.push(verified ? "/candidate/profile" : pending ? "/candidate/assessment" : "/candidate/profile")}>{verified ? "Review profile" : pending ? "Start assessment" : "Complete profile"}<ArrowRight data-icon="inline-end" /></Button></CardContent></Card><Card><CardHeader><h2 className="font-semibold">Proof checklist</h2><p className="text-sm text-muted-foreground">Your record at a glance.</p></CardHeader><CardContent><div className="flex flex-col gap-4">{[[Boolean(profile?.name),"Identity details"],[skillCount > 0,"Technical skills"],[projectCount > 0,"Project evidence"],[verified,"Assessment verified"]].map(([done,label]) => <div key={label as string} className="flex items-center justify-between text-sm"><span className={done ? "text-foreground" : "text-muted-foreground"}>{label as string}</span>{done ? <CheckCircle2 className="text-emerald-600" aria-label="Complete" /> : <span className="font-mono text-xs text-muted-foreground">Open</span>}</div>)}</div></CardContent></Card></div><div className="mt-5 grid gap-5 sm:grid-cols-3"><Card><CardContent className="p-6"><p className="text-xs uppercase tracking-wide text-muted-foreground">Projects</p><p className="mt-3 text-3xl font-semibold">{projectCount}</p><p className="mt-1 text-sm text-muted-foreground">Submitted for review</p></CardContent></Card><Card><CardContent className="p-6"><p className="text-xs uppercase tracking-wide text-muted-foreground">Skills</p><p className="mt-3 text-3xl font-semibold">{skillCount}</p><p className="mt-1 text-sm text-muted-foreground">Listed on your profile</p></CardContent></Card><Card><CardContent className="p-6"><p className="text-xs uppercase tracking-wide text-muted-foreground">Signal</p><p className="mt-3 flex items-center gap-2 text-lg font-semibold"><ShieldCheck className="text-primary" /> {verified ? "Active" : "In progress"}</p><p className="mt-1 text-sm text-muted-foreground">Based on current status</p></CardContent></Card></div></div>;
 }

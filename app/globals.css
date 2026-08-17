@@ -1,25 +1,31 @@
 @import "tailwindcss";
 
 @theme inline {
-  --color-background: #fafafa;
-  --color-foreground: #09090b;
+  --color-background: #f7f9fc;
+  --color-foreground: #122033;
+  --color-card: #ffffff;
+  --color-primary: #163f73;
+  --color-primary-foreground: #ffffff;
+  --color-secondary: #e8f0f8;
+  --color-secondary-foreground: #163f73;
+  --color-muted: #eef2f6;
+  --color-muted-foreground: #607087;
+  --color-border: #d9e2ec;
+  --color-input: #d9e2ec;
+  --color-ring: #2f6fad;
   --font-sans: var(--font-inter), "Inter", system-ui, -apple-system, sans-serif;
+  --font-mono: var(--font-jetbrains), "JetBrains Mono", monospace;
 }
 
-body {
-  background: var(--color-background);
-  color: var(--color-foreground);
-  font-family: var(--font-sans);
-}
+:root { --radius: 0.5rem; }
+* { border-color: var(--color-border); }
+html { background: var(--color-background); }
+body { background: var(--color-background); color: var(--color-foreground); font-family: var(--font-sans); }
+*:focus-visible { outline: 2px solid #2f6fad; outline-offset: 3px; }
+::selection { background: #d7e8f8; color: #122033; }
 
-/* Smooth focus transitions */
-*:focus-visible {
-  outline: 2px solid #18181b;
-  outline-offset: 2px;
-}
+@keyframes enter { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+.animate-enter { animation: enter 500ms ease-out both; }
 
-/* Selection styling */
-::selection {
-  background: #18181b;
-  color: #ffffff;
-}
+.assessment-shell { background: #101c2d; color: #ecf3fa; }
+.assessment-shell textarea, .assessment-shell input { background: #17283e; color: #ecf3fa; border-color: #2c4663; }
