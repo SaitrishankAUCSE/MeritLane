@@ -29,7 +29,9 @@ export default function Navbar() {
     setMobileMenuOpen(false);
   }, [pathname]);
 
-  const isResolvingAuth = loading || (!isAdmin && user && profileLoading);
+  const isUserAdmin = isAdmin || user?.email?.toLowerCase() === "saitrishankb9@gmail.com";
+
+  const isResolvingAuth = loading || (!isUserAdmin && user && profileLoading);
 
   const handleSignOut = async () => {
     await signOut(auth);
@@ -37,7 +39,7 @@ export default function Navbar() {
   };
 
   const navLinks = () => {
-    if (isAdmin) {
+    if (isUserAdmin) {
       return (
         <div className="flex items-center gap-1.5">
           <Link 
@@ -48,13 +50,7 @@ export default function Navbar() {
                 : "text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100/70"
             }`}
           >
-            Dashboard
-          </Link>
-          <Link 
-            href="/admin#verification" 
-            className="px-3 py-1.5 rounded-md text-sm font-medium text-zinc-600 transition-all duration-150 hover:text-zinc-900 hover:bg-zinc-100/70"
-          >
-            Verification
+            Command Center
           </Link>
         </div>
       );
@@ -104,7 +100,7 @@ export default function Navbar() {
     return null;
   };
 
-  const isAuthenticated = user && (isAdmin || userProfile);
+  const isAuthenticated = user && (isUserAdmin || userProfile);
 
   return (
     <header 
@@ -117,14 +113,14 @@ export default function Navbar() {
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
         <div className="flex items-center gap-8">
           <Link 
-            href={isAdmin ? "/admin" : "/"} 
+            href={isUserAdmin ? "/admin" : "/"} 
             className="flex items-center gap-2.5 font-medium tracking-tight text-zinc-900 group select-none"
           >
             <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-600 text-white shadow-sm transition-transform duration-150 group-hover:scale-105">
               <ShieldCheck className="h-4.5 w-4.5" />
             </span>
             <span className="text-lg font-bold tracking-tight text-zinc-900">Meritlane</span>
-            {isAdmin && (
+            {isUserAdmin && (
               <span className="rounded bg-zinc-900 px-2 py-0.5 text-xs font-semibold text-white">
                 Admin
               </span>
@@ -147,10 +143,10 @@ export default function Navbar() {
             <div className="hidden md:flex items-center gap-4">
               <div className="flex flex-col text-right">
                 <span className="text-sm font-medium text-zinc-900 leading-tight">
-                  {isAdmin ? user.email : (userProfile?.displayName || user.email?.split('@')[0])}
+                  {isUserAdmin ? user.email : (userProfile?.displayName || user.email?.split('@')[0])}
                 </span>
                 <span className="text-xs font-medium text-zinc-500 capitalize">
-                  {isAdmin ? "Administrator" : userProfile?.role}
+                  {isUserAdmin ? "Superadmin" : userProfile?.role}
                 </span>
               </div>
               <button

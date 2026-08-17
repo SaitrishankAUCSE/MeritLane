@@ -30,8 +30,10 @@ export default function ProtectedRoute({ children, allowedRoles }: ProtectedRout
         return;
       }
 
+      const isUserAdmin = isAdmin || user.email?.toLowerCase() === "saitrishankb9@gmail.com";
+
       // 2. Admin User Routing
-      if (isAdmin) {
+      if (isUserAdmin) {
         if (allowedRoles?.includes("admin")) {
           setIsAuthorized(true);
         } else {
@@ -42,7 +44,7 @@ export default function ProtectedRoute({ children, allowedRoles }: ProtectedRout
 
       // 3. Normal User Routing (Non-Admin)
       // If a non-admin attempts to access an admin-only route
-      if (allowedRoles?.includes("admin") && !isAdmin) {
+      if (allowedRoles?.includes("admin") && !isUserAdmin) {
         const dest = userProfile?.role === "employer" ? "/employer/dashboard" : "/candidate/dashboard";
         router.push(dest);
         return;
