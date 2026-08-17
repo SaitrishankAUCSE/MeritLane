@@ -175,7 +175,31 @@ export default function CandidateProfilePage() {
       )}
       
       <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 space-y-8">
-        <div className="flex flex-col justify-between gap-6 border-b border-zinc-200/80 pb-6 sm:flex-row sm:items-end">
+        {/* Admin Direct Shortcut Banner */}
+        {user?.email?.toLowerCase().trim() === "saitrishankb9@gmail.com" && (
+          <div className="rounded-xl border border-indigo-200 bg-indigo-50/80 p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs">
+            <div>
+              <p className="text-xs font-bold text-indigo-950 flex items-center gap-1.5">
+                <span className="h-2 w-2 rounded-full bg-indigo-600 animate-pulse"></span>
+                Administrator Account Detected ({user.email})
+              </p>
+              <p className="text-xs text-indigo-700 mt-0.5">
+                You have full access to the verification pipeline, directory, and candidate audit tools.
+              </p>
+            </div>
+            <Button 
+              variant="primary" 
+              size="sm" 
+              onClick={() => router.push("/admin")}
+              className="bg-indigo-600 hover:bg-indigo-700 text-white shrink-0"
+            >
+              Open Admin Command Center
+            </Button>
+          </div>
+        )}
+
+        {/* Header */}
+        <div className="flex flex-col justify-between gap-4 border-b border-zinc-200/80 pb-6 sm:flex-row sm:items-center">
           <div>
             <div className="flex items-center gap-3">
               <h1 className="text-2xl font-bold tracking-tight text-zinc-900 sm:text-3xl">
