@@ -27,37 +27,33 @@ export default function CandidateProfilePage() {
   const [projects, setProjects] = useState<ProjectEntry[]>([]);
 
   useEffect(() => {
-    if (!authLoading && !user) {
-      router.push("/login");
-      return;
-    }
-
-    if (!authLoading && !profileLoading && user) {
-      if (userRole && userRole !== "candidate") {
+    if (!authLoading && !profileLoading) {
+      if (!user || !userRole) {
+        router.push("/login");
+      } else if (userRole !== "candidate") {
         router.push("/employer/dashboard");
-        return;
+      } else {
+        fetchCandidateProfile(user.uid)
+          .then((profile) => {
+            if (profile) {
+              setName(profile.name || "");
+              setCollege(profile.college || "");
+              setBranch(profile.branch || "");
+              setGradYear(profile.gradYear || "");
+              setGithubUrl(profile.githubUrl || "");
+              setResumeUrl(profile.resumeUrl || "");
+              setSkills(profile.skills || []);
+              setProjects(profile.projects || []);
+              setVerificationStatus(profile.verificationStatus || "draft");
+            }
+          })
+          .catch((error) => {
+            console.error("Error fetching profile:", error);
+          })
+          .finally(() => {
+            setDataLoading(false);
+          });
       }
-      
-      fetchCandidateProfile(user.uid)
-        .then((profile) => {
-          if (profile) {
-            setName(profile.name || "");
-            setCollege(profile.college || "");
-            setBranch(profile.branch || "");
-            setGradYear(profile.gradYear || "");
-            setGithubUrl(profile.githubUrl || "");
-            setResumeUrl(profile.resumeUrl || "");
-            setSkills(profile.skills || []);
-            setProjects(profile.projects || []);
-            setVerificationStatus(profile.verificationStatus || "draft");
-          }
-        })
-        .catch((error) => {
-          console.error("Error fetching profile:", error);
-        })
-        .finally(() => {
-          setDataLoading(false);
-        });
     }
   }, [user, userRole, authLoading, profileLoading, router]);
 
@@ -122,7 +118,8 @@ export default function CandidateProfilePage() {
     }
   };
 
-  if (authLoading) {
+  // Auth States Handled Explicitly
+  if (authLoading || (user && profileLoading)) {
     return (
       <div className="flex min-h-[50vh] items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-zinc-400" />
@@ -130,9 +127,8 @@ export default function CandidateProfilePage() {
     );
   }
 
-  // Early return if not logged in, wait for router.push to take effect
-  if (!user) {
-    return null;
+  if (!user || !userRole || userRole !== "candidate") {
+    return null; // Wait for useEffect redirect
   }
 
   if (dataLoading) {

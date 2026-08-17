@@ -21,16 +21,11 @@ export default function LoginPage() {
   const { user, role: userRole, loading: authLoading, profileLoading, refreshProfile } = useAuth();
   const router = useRouter();
 
-  // Redirect if already logged in and has a role
+  // We let useEffect handle the actual router.push redirect for users who have a role.
   useEffect(() => {
-    if (!authLoading && !profileLoading && user) {
-      if (userRole) {
-        updateLastLogin(user.uid).catch(console.error);
-        router.push(userRole === "candidate" ? "/candidate/profile" : "/employer/dashboard");
-      } else {
-        // Logged in via Google but no role selected yet
-        setShowRoleSelector(true);
-      }
+    if (!authLoading && !profileLoading && user && userRole) {
+      updateLastLogin(user.uid).catch(console.error);
+      router.push(userRole === "candidate" ? "/candidate/profile" : "/employer/dashboard");
     }
   }, [user, userRole, authLoading, profileLoading, router]);
 
@@ -60,7 +55,7 @@ export default function LoginPage() {
       const provider = new GoogleAuthProvider();
       await signInWithPopup(auth, provider);
       // Wait for AuthContext to pick up the user, which will trigger fetchUserProfile
-      // If they have no role, the useEffect will show RoleSelector.
+      // If they have no role, the explicit render block below will show RoleSelector.
       // If they do have a role, the useEffect will redirect them.
     } catch (err: any) {
       setError(err.message || "Failed to sign in with Google.");
@@ -68,12 +63,17 @@ export default function LoginPage() {
     }
   };
 
-  if (authLoading || profileLoading || (user && userRole)) {
-    return <div className="min-h-[80vh]"></div>; // Skeleton/blank while resolving auth
+  // Auth States Handled Explicitly
+  if (authLoading || (user && profileLoading)) {
+    return <div className="min-h-[80vh]"></div>; // Skeleton while resolving auth/profile
   }
 
-  if (showRoleSelector) {
-    return <RoleSelector />;
+  if (user && !userRole) {
+    return <RoleSelector />; // Logged in via Google but no role selected yet
+  }
+
+  if (user && userRole) {
+    return <div className="min-h-[80vh]"></div>; // Skeleton while useEffect redirects
   }
 
   return (

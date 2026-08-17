@@ -7,6 +7,7 @@ import { signOut } from "firebase/auth";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { LogOut, User as UserIcon } from "lucide-react";
+import RoleSelector from "@/components/RoleSelector";
 
 export default function SettingsPage() {
   const { user, userProfile, loading, profileLoading } = useAuth();
@@ -27,8 +28,17 @@ export default function SettingsPage() {
     }
   };
 
-  if (loading || profileLoading || !user) {
-    return <div className="min-h-[50vh]"></div>;
+  // Auth States Handled Explicitly
+  if (loading || (user && profileLoading)) {
+    return <div className="min-h-[50vh]"></div>; // Skeleton
+  }
+
+  if (!user) {
+    return null; // Wait for redirect
+  }
+
+  if (user && !userProfile?.role) {
+    return <RoleSelector />; // Logged in but missing role
   }
 
   return (
