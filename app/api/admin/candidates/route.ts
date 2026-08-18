@@ -20,19 +20,9 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: "Unauthorized: Invalid or expired token" }, { status: 401 });
     }
 
-    // Strict Admin Authorization Check (Custom Claim or Designated Admin Email)
-    const isAdmin = decodedToken.admin === true || decodedToken.email?.toLowerCase() === "saitrishankb9@gmail.com";
-    if (!isAdmin) {
+    // Strict Admin Authorization Check (Custom Claim ONLY)
+    if (decodedToken.admin !== true) {
       return NextResponse.json({ error: "Forbidden: Administrative privilege required" }, { status: 403 });
-    }
-
-    // Ensure { admin: true } custom claim is assigned on Firebase Auth user
-    if (!decodedToken.admin && decodedToken.email?.toLowerCase() === "saitrishankb9@gmail.com") {
-      try {
-        await adminAuth.setCustomUserClaims(decodedToken.uid, { admin: true });
-      } catch (claimErr) {
-        console.error("Auto-provision custom claim notice:", claimErr);
-      }
     }
 
     // Fetch real candidates from Firestore
@@ -53,6 +43,16 @@ export async function GET(req: NextRequest) {
           console.error(`Failed to fetch user doc for ${uid}:`, err);
         }
 
+        const safeDate = (val: any) => {
+          if (!val) return null;
+          if (typeof val.toDate === "function") return val.toDate().toISOString();
+          if (val instanceof Date) return val.toISOString();
+          if (typeof val === "string") return val;
+          if (typeof val === "number") return new Date(val).toISOString();
+          if (val._seconds) return new Date(val._seconds * 1000).toISOString();
+          return null;
+        };
+
         return {
           uid,
           name: candidateData.name || userData.displayName || "",
@@ -66,13 +66,13 @@ export async function GET(req: NextRequest) {
           projects: candidateData.projects || [],
           verificationStatus: candidateData.verificationStatus || "draft",
           verificationReason: candidateData.verificationReason || null,
-          verifiedAt: candidateData.verifiedAt || null,
+          verifiedAt: safeDate(candidateData.verifiedAt),
           verifiedByUid: candidateData.verifiedByUid || null,
           verifiedByEmail: candidateData.verifiedByEmail || null,
-          updatedAt: candidateData.updatedAt || null,
+          updatedAt: safeDate(candidateData.updatedAt),
           verifiedBadge: Boolean(userData.verifiedBadge),
           assessmentScores: userData.assessmentScores || null,
-          assessmentDate: userData.assessmentDate || null,
+          assessmentDate: safeDate(userData.assessmentDate),
         };
       })
     );
