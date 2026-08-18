@@ -30,9 +30,8 @@ export async function POST(request: Request) {
     
     // Strict admin check
     const callerEmail = decodedToken.email?.toLowerCase() || "";
-    const isAdmin = decodedToken.admin === true || callerEmail === ADMIN_EMAIL;
-    if (!isAdmin) {
-      return NextResponse.json({ success: false, error: `Forbidden: User ${callerEmail} is not authorized.` }, { status: 200 });
+    if (decodedToken.admin !== true) {
+      return NextResponse.json({ success: false, error: `Forbidden: Administrative privilege required.` }, { status: 200 });
     }
 
     let deletedAuthCount = 0;
