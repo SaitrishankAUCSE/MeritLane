@@ -1293,6 +1293,15 @@ export default function AdminDashboardPage() {
                         </div>
                       </div>
                     )}
+                    {wipeResult.warnings?.authError && (
+                      <div className="mt-3 rounded-lg bg-amber-50 p-2.5 border border-amber-200 text-xs text-amber-900">
+                        <div className="font-semibold flex items-center gap-1.5 text-amber-800 mb-1">
+                          <AlertTriangle className="h-3.5 w-3.5" />
+                          <span>Firebase Auth Note:</span>
+                        </div>
+                        <p>{wipeResult.warnings.authError}</p>
+                      </div>
+                    )}
                   </div>
                 </div>
               ) : (

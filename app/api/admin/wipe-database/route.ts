@@ -49,17 +49,24 @@ export async function POST(request: Request) {
         const listUsersResult = await adminAuth.listUsers(1000, pageToken);
         pageToken = listUsersResult.pageToken;
         
-        const uidsToDelete = listUsersResult.users
-          .filter(u => u.email?.toLowerCase() !== ADMIN_EMAIL)
-          .map(u => u.uid);
+        const nonAdminUsers = listUsersResult.users.filter(
+          (u) => u.email?.toLowerCase() !== ADMIN_EMAIL && u.uid !== decodedToken.uid
+        );
 
-        if (uidsToDelete.length > 0) {
-          const deleteResult = await adminAuth.deleteUsers(uidsToDelete);
-          deletedAuthCount += deleteResult.successCount;
+        for (const targetUser of nonAdminUsers) {
+          try {
+            await adminAuth.deleteUser(targetUser.uid);
+            deletedAuthCount++;
+          } catch (delErr: any) {
+            console.error(`Failed to delete user ${targetUser.email} (${targetUser.uid}):`, delErr);
+            if (!authError) {
+              authError = `Failed to delete ${targetUser.email}: ${delErr.message}`;
+            }
+          }
         }
       } while (pageToken);
     } catch (err: any) {
-      console.error("Auth deletion error:", err);
+      console.error("Auth listing/deletion error:", err);
       authError = err.message || "Failed to wipe Auth accounts";
     }
 
