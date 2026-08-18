@@ -8,23 +8,34 @@ function getAdminApp(): App | null {
   }
 
   try {
-    const rawKey = process.env.FIREBASE_SERVICE_ACCOUNT_KEY;
-    if (!rawKey) {
-      console.error("Missing FIREBASE_SERVICE_ACCOUNT_KEY environment variable");
-      return null;
-    }
-
     let serviceAccount: any;
-    try {
-      serviceAccount = JSON.parse(rawKey);
-    } catch {
+    const rawKey = process.env.FIREBASE_SERVICE_ACCOUNT_KEY;
+
+    if (rawKey) {
       try {
-        const decoded = Buffer.from(rawKey, 'base64').toString('utf8');
-        serviceAccount = JSON.parse(decoded);
-      } catch (b64Err) {
-        console.error("Failed to parse FIREBASE_SERVICE_ACCOUNT_KEY as JSON or Base64", b64Err);
-        return null;
+        serviceAccount = JSON.parse(rawKey);
+      } catch {
+        try {
+          const decoded = Buffer.from(rawKey, 'base64').toString('utf8');
+          serviceAccount = JSON.parse(decoded);
+        } catch (b64Err) {
+          console.error("Failed to parse FIREBASE_SERVICE_ACCOUNT_KEY as JSON or Base64", b64Err);
+          return null;
+        }
       }
+    } else if (
+      process.env.FIREBASE_PROJECT_ID &&
+      process.env.FIREBASE_CLIENT_EMAIL &&
+      process.env.FIREBASE_PRIVATE_KEY
+    ) {
+      serviceAccount = {
+        project_id: process.env.FIREBASE_PROJECT_ID,
+        client_email: process.env.FIREBASE_CLIENT_EMAIL,
+        private_key: process.env.FIREBASE_PRIVATE_KEY,
+      };
+    } else {
+      console.error("Missing Firebase Admin environment variables. Need either FIREBASE_SERVICE_ACCOUNT_KEY or (FIREBASE_PROJECT_ID, FIREBASE_CLIENT_EMAIL, FIREBASE_PRIVATE_KEY)");
+      return null;
     }
 
     if (serviceAccount && serviceAccount.private_key && typeof serviceAccount.private_key === 'string') {
