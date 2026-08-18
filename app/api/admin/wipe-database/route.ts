@@ -34,43 +34,51 @@ export async function POST(request: Request) {
       const listUsersResult = await adminAuth.listUsers(1000, pageToken);
       pageToken = listUsersResult.pageToken;
       
-      for (const authUser of listUsersResult.users) {
-        if (authUser.email?.toLowerCase() !== ADMIN_EMAIL) {
-          await adminAuth.deleteUser(authUser.uid);
-          deletedAuthCount++;
-        }
+      const uidsToDelete = listUsersResult.users
+        .filter(u => u.email?.toLowerCase() !== ADMIN_EMAIL)
+        .map(u => u.uid);
+
+      if (uidsToDelete.length > 0) {
+        const deleteResult = await adminAuth.deleteUsers(uidsToDelete);
+        deletedAuthCount += deleteResult.successCount;
       }
     } while (pageToken);
 
-    // 2. Delete from Firestore 'users' collection
-    const usersSnapshot = await adminDb.collection("users").get();
-    const batch1 = adminDb.batch();
-    usersSnapshot.forEach((doc) => {
-      const data = doc.data();
-      if (data.email?.toLowerCase() !== ADMIN_EMAIL) {
-        batch1.delete(doc.ref);
-        deletedFirestoreUsers++;
+    // Helper to delete collection in chunks of 500
+    const deleteCollection = async (collectionName: string, filterByEmail: boolean = false) => {
+      if (!adminDb) return 0;
+      const snapshot = await adminDb.collection(collectionName).get();
+      let count = 0;
+      const chunks = [];
+      let currentChunk = adminDb.batch();
+      let currentChunkSize = 0;
+
+      snapshot.forEach((doc) => {
+        const data = doc.data();
+        if (!filterByEmail || data.email?.toLowerCase() !== ADMIN_EMAIL) {
+          currentChunk.delete(doc.ref);
+          currentChunkSize++;
+          count++;
+
+          if (currentChunkSize === 500) {
+            chunks.push(currentChunk.commit());
+            currentChunk = adminDb!.batch();
+            currentChunkSize = 0;
+          }
+        }
+      });
+
+      if (currentChunkSize > 0) {
+        chunks.push(currentChunk.commit());
       }
-    });
-    if (deletedFirestoreUsers > 0) await batch1.commit();
+      
+      await Promise.all(chunks);
+      return count;
+    };
 
-    // 3. Delete from Firestore 'candidates' collection
-    const candidatesSnapshot = await adminDb.collection("candidates").get();
-    const batch2 = adminDb.batch();
-    candidatesSnapshot.forEach((doc) => {
-      batch2.delete(doc.ref);
-      deletedCandidates++;
-    });
-    if (deletedCandidates > 0) await batch2.commit();
-
-    // 4. Delete from Firestore 'employers' collection
-    const employersSnapshot = await adminDb.collection("employers").get();
-    const batch3 = adminDb.batch();
-    employersSnapshot.forEach((doc) => {
-      batch3.delete(doc.ref);
-      deletedEmployers++;
-    });
-    if (deletedEmployers > 0) await batch3.commit();
+    deletedFirestoreUsers = await deleteCollection("users", true);
+    deletedCandidates = await deleteCollection("candidates", false);
+    deletedEmployers = await deleteCollection("employers", false);
 
     return NextResponse.json({
       success: true,

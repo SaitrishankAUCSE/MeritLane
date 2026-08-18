@@ -295,7 +295,14 @@ export default function AdminDashboardPage() {
           "Authorization": `Bearer ${idToken}`
         }
       });
-      const data = await res.json();
+      
+      let data;
+      try {
+        data = await res.json();
+      } catch (parseError) {
+        throw new Error(`Server returned status ${res.status} without valid JSON. It may have timed out or crashed.`);
+      }
+
       if (res.ok) {
         setSuccessToast(`Wiped successfully: ${data.stats.deletedAuthCount} Auth users, ${data.stats.deletedFirestoreUsers} Firestore users.`);
         fetchCandidates();
