@@ -5,7 +5,7 @@ const ADMIN_EMAIL = "saitrishankb9@gmail.com";
 
 export async function POST(request: Request) {
   if (!adminAuth || !adminDb) {
-    return NextResponse.json({ error: "Firebase Admin not initialized." }, { status: 500 });
+    return NextResponse.json({ error: "Firebase Admin not initialized." }, { status: 400 });
   }
 
   try {
@@ -93,6 +93,6 @@ export async function POST(request: Request) {
 
   } catch (error: any) {
     console.error("Error wiping database:", error);
-    return NextResponse.json({ error: error.message || "Internal Server Error" }, { status: 500 });
+    return NextResponse.json({ error: error.message || "Internal Server Error" }, { status: 400 });
   }
 }
