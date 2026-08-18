@@ -280,15 +280,29 @@ export default function AdminDashboardPage() {
     }
   };
 
-  const handleWipeDatabase = async () => {
-    if (!user) return;
-    if (!window.confirm("WARNING: This will delete ALL users, candidates, and employers from both Firebase Auth and Firestore, EXCEPT the admin account. This action cannot be undone. Are you absolutely sure?")) {
-      return;
-    }
+  // Wipe Modal states
+  const [showWipeModal, setShowWipeModal] = useState(false);
+  const [wipeLoading, setWipeLoading] = useState(false);
+  const [wipeResult, setWipeResult] = useState<{
+    success: boolean;
+    message: string;
+    stats?: {
+      deletedAuthCount: number;
+      deletedFirestoreUsers: number;
+      deletedCandidates: number;
+      deletedEmployers: number;
+    };
+    warnings?: { authError?: string; firestoreError?: string };
+    error?: string;
+  } | null>(null);
 
-    setLoading(true);
+  const handleExecuteWipe = async () => {
+    if (!user) return;
+    setWipeLoading(true);
+    setWipeResult(null);
+
     try {
-      const idToken = await user.getIdToken();
+      const idToken = await user.getIdToken(true);
       const res = await fetch("/api/admin/wipe-database", {
         method: "POST",
         headers: {
@@ -296,24 +310,25 @@ export default function AdminDashboardPage() {
         }
       });
       
-      let data;
-      try {
-        data = await res.json();
-      } catch (parseError) {
-        throw new Error(`Server returned status ${res.status} without valid JSON. It may have timed out or crashed.`);
-      }
+      const data = await res.json().catch(() => ({
+        success: false,
+        error: "Server did not return valid JSON. Possible network interruption."
+      }));
 
-      if (res.ok) {
-        setSuccessToast(`Wiped successfully: ${data.stats.deletedAuthCount} Auth users, ${data.stats.deletedFirestoreUsers} Firestore users.`);
+      setWipeResult(data);
+      if (data.success) {
+        setSuccessToast("Platform database reset complete.");
         fetchCandidates();
-      } else {
-        throw new Error(data.error || "Failed to wipe database");
       }
     } catch (error: any) {
       console.error(error);
-      alert(error.message || "Error wiping database.");
+      setWipeResult({
+        success: false,
+        message: "Failed to communicate with wipe service.",
+        error: error.message || "Network request failed."
+      });
     } finally {
-      setLoading(false);
+      setWipeLoading(false);
     }
   };
 
@@ -427,7 +442,10 @@ export default function AdminDashboardPage() {
             <Button 
               variant="outline" 
               size="sm" 
-              onClick={handleWipeDatabase}
+              onClick={() => {
+                setWipeResult(null);
+                setShowWipeModal(true);
+              }}
               className="text-red-600 border-red-200 hover:bg-red-50 hover:text-red-700"
               leftIcon={<Trash2 className="h-3.5 w-3.5" />}
             >
@@ -1141,6 +1159,142 @@ export default function AdminDashboardPage() {
                 </div>
               </div>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* Custom Styled Wipe Test Users Confirmation & Result Modal */}
+      {showWipeModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-zinc-950/60 p-4 backdrop-blur-sm animate-in fade-in duration-150">
+          <div 
+            className="relative w-full max-w-lg rounded-2xl border border-zinc-200 bg-white p-6 shadow-2xl animate-in zoom-in-95 duration-150"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Modal Header */}
+            <div className="flex items-start justify-between">
+              <div className="flex items-center gap-3">
+                <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-red-50 text-red-600 border border-red-100">
+                  <Trash2 className="h-5 w-5" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-bold text-zinc-900">
+                    Reset Test Data & Users
+                  </h3>
+                  <p className="text-xs text-zinc-500">
+                    Admin Platform Purge Utility
+                  </p>
+                </div>
+              </div>
+
+              {!wipeLoading && (
+                <button
+                  type="button"
+                  onClick={() => setShowWipeModal(false)}
+                  className="rounded-lg p-1.5 text-zinc-400 hover:bg-zinc-100 hover:text-zinc-700 transition"
+                >
+                  <X className="h-5 w-5" />
+                </button>
+              )}
+            </div>
+
+            {/* Modal Body */}
+            <div className="mt-5 space-y-4">
+              {!wipeResult ? (
+                <>
+                  <p className="text-sm text-zinc-600 leading-relaxed">
+                    This action will reset the platform database to a <strong>zero-user clean state</strong>, allowing you to test fresh signups and onboarding without authentication conflicts.
+                  </p>
+
+                  <div className="rounded-xl border border-zinc-200 bg-zinc-50 p-3.5 space-y-2 text-xs">
+                    <p className="font-semibold text-zinc-800">What will be purged:</p>
+                    <ul className="space-y-1.5 text-zinc-600 list-disc list-inside">
+                      <li>All non-admin <strong>Firebase Authentication</strong> accounts (Google & Email)</li>
+                      <li>All Firestore <strong>candidates</strong> profiles, projects & scores</li>
+                      <li>All Firestore <strong>employers</strong> profiles & created roles</li>
+                      <li>All Firestore <strong>users</strong> collection profiles</li>
+                    </ul>
+                    <div className="pt-2 border-t border-zinc-200 flex items-center gap-1.5 text-emerald-700 font-medium">
+                      <ShieldCheck className="h-4 w-4 text-emerald-600" />
+                      <span>Admin account (<code>saitrishankb9@gmail.com</code>) will remain protected.</span>
+                    </div>
+                  </div>
+                </>
+              ) : wipeResult.success ? (
+                <div className="space-y-3">
+                  <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-4">
+                    <div className="flex items-center gap-2 text-emerald-900 font-semibold text-sm">
+                      <CheckCircle2 className="h-5 w-5 text-emerald-600" />
+                      <span>{wipeResult.message}</span>
+                    </div>
+                    {wipeResult.stats && (
+                      <div className="mt-3 grid grid-cols-2 gap-2 text-xs">
+                        <div className="rounded-lg bg-white/80 p-2.5 border border-emerald-100">
+                          <span className="text-zinc-500 block">Auth Accounts</span>
+                          <span className="text-base font-bold text-zinc-900">{wipeResult.stats.deletedAuthCount} purged</span>
+                        </div>
+                        <div className="rounded-lg bg-white/80 p-2.5 border border-emerald-100">
+                          <span className="text-zinc-500 block">User Profiles</span>
+                          <span className="text-base font-bold text-zinc-900">{wipeResult.stats.deletedFirestoreUsers} purged</span>
+                        </div>
+                        <div className="rounded-lg bg-white/80 p-2.5 border border-emerald-100">
+                          <span className="text-zinc-500 block">Candidates</span>
+                          <span className="text-base font-bold text-zinc-900">{wipeResult.stats.deletedCandidates} purged</span>
+                        </div>
+                        <div className="rounded-lg bg-white/80 p-2.5 border border-emerald-100">
+                          <span className="text-zinc-500 block">Employers</span>
+                          <span className="text-base font-bold text-zinc-900">{wipeResult.stats.deletedEmployers} purged</span>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ) : (
+                <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-xs text-red-900 space-y-1">
+                  <div className="flex items-center gap-2 font-bold text-sm text-red-700">
+                    <AlertTriangle className="h-4 w-4" />
+                    <span>Wipe Operation Notice</span>
+                  </div>
+                  <p>{wipeResult.error || wipeResult.message || "An unexpected error occurred."}</p>
+                </div>
+              )}
+            </div>
+
+            {/* Modal Actions */}
+            <div className="mt-6 flex items-center justify-end gap-2.5 border-t border-zinc-100 pt-4">
+              {!wipeResult ? (
+                <>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setShowWipeModal(false)}
+                    disabled={wipeLoading}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="primary"
+                    size="sm"
+                    onClick={handleExecuteWipe}
+                    loading={wipeLoading}
+                    className="bg-red-600 hover:bg-red-700 text-white border-transparent shadow-sm"
+                    leftIcon={<Trash2 className="h-4 w-4" />}
+                  >
+                    Confirm & Wipe All Test Users
+                  </Button>
+                </>
+              ) : (
+                <Button
+                  type="button"
+                  variant="primary"
+                  size="sm"
+                  onClick={() => setShowWipeModal(false)}
+                >
+                  Done
+                </Button>
+              )}
+            </div>
           </div>
         </div>
       )}
