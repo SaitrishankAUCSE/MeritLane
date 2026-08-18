@@ -31,7 +31,8 @@ import {
   RotateCcw,
   Sparkles,
   Zap,
-  CheckCheck
+  CheckCheck,
+  Trash2
 } from "lucide-react";
 
 import { collection, onSnapshot, doc, updateDoc, serverTimestamp } from "firebase/firestore";
@@ -279,6 +280,36 @@ export default function AdminDashboardPage() {
     }
   };
 
+  const handleWipeDatabase = async () => {
+    if (!user) return;
+    if (!window.confirm("WARNING: This will delete ALL users, candidates, and employers from both Firebase Auth and Firestore, EXCEPT the admin account. This action cannot be undone. Are you absolutely sure?")) {
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const idToken = await user.getIdToken();
+      const res = await fetch("/api/admin/wipe-database", {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${idToken}`
+        }
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setSuccessToast(`Wiped successfully: ${data.stats.deletedAuthCount} Auth users, ${data.stats.deletedFirestoreUsers} Firestore users.`);
+        fetchCandidates();
+      } else {
+        throw new Error(data.error || "Failed to wipe database");
+      }
+    } catch (error: any) {
+      console.error(error);
+      alert(error.message || "Error wiping database.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // Metrics from real data
   const pendingCount = candidates.filter((c) => c.verificationStatus === "pending").length;
   const verifiedCount = candidates.filter((c) => c.verificationStatus === "verified").length;
@@ -386,6 +417,15 @@ export default function AdminDashboardPage() {
           </div>
 
           <div className="flex items-center gap-2.5">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={handleWipeDatabase}
+              className="text-red-600 border-red-200 hover:bg-red-50 hover:text-red-700"
+              leftIcon={<Trash2 className="h-3.5 w-3.5" />}
+            >
+              Wipe Test Users
+            </Button>
             <Button 
               variant="outline" 
               size="sm" 
