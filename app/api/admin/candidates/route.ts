@@ -47,7 +47,7 @@ export async function GET(req: NextRequest) {
         return {
           uid,
           name: candidateData.name || userData.displayName || "",
-          email: userData.email || "",
+          email: candidateData.email || userData.email || "",
           college: candidateData.college || "",
           branch: candidateData.branch || "",
           gradYear: candidateData.gradYear || "",

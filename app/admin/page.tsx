@@ -115,11 +115,12 @@ export default function AdminDashboardPage() {
       }
 
       const data = await res.json();
-      if (data.candidates && data.candidates.length > 0) {
+      if (Array.isArray(data.candidates)) {
         setCandidates(data.candidates);
       }
     } catch (err: any) {
       console.error("API fallback fetchCandidates notice:", err);
+      setError(err.message || "Failed to fetch candidates from server");
     } finally {
       setLoading(false);
     }
@@ -517,6 +518,25 @@ export default function AdminDashboardPage() {
             </Button>
           </div>
         </div>
+
+        {/* Error Alert Banner */}
+        {error && (
+          <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-xs text-red-900 shadow-sm flex items-center justify-between">
+            <div className="flex items-center gap-2 font-medium">
+              <AlertTriangle className="h-4 w-4 text-red-600 shrink-0" />
+              <span>Failed to synchronize candidate records: {error}</span>
+            </div>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={fetchCandidates}
+              className="text-xs text-red-700 border-red-300 hover:bg-red-100"
+            >
+              Retry
+            </Button>
+          </div>
+        )}
 
         {/* Overview Stats Bar */}
         <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
