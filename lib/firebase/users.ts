@@ -8,6 +8,8 @@ export interface UserProfile {
   role: Role;
   displayName: string;
   authProvider: "password" | "google";
+  assessmentScores?: Record<string, number>;
+  assessmentDate?: any;
   createdAt?: string | FieldValue;
   lastLoginAt?: string | FieldValue;
 }

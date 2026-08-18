@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
 import { useAuth } from "@/lib/auth/AuthContext";
 import { updateLastLogin, fetchUserProfile } from "@/lib/firebase/users";
+import { fetchCandidateProfile } from "@/lib/firebase/candidate";
 import { ShieldCheck, AlertCircle, CheckCircle2, Loader2 } from "lucide-react";
 
 export default function LoginPage() {
@@ -38,9 +39,22 @@ export default function LoginPage() {
     if (!authLoading && !profileLoading && user && userRole) {
       if (userRole === "admin") {
         router.push("/admin");
-      } else {
+      } else if (userRole === "employer") {
         updateLastLogin(user.uid).catch(console.error);
-        router.push(userRole === "candidate" ? "/candidate/profile" : "/employer/dashboard");
+        router.push("/employer/dashboard");
+      } else if (userRole === "candidate") {
+        updateLastLogin(user.uid).catch(console.error);
+        
+        fetchCandidateProfile(user.uid).then((profile) => {
+          if (profile && (profile.name || (profile.skills && profile.skills.length > 0))) {
+            router.push("/candidate/dashboard");
+          } else {
+            router.push("/candidate/profile");
+          }
+        }).catch((err) => {
+          console.error("Error fetching candidate profile for routing:", err);
+          router.push("/candidate/profile"); // Fallback
+        });
       }
     }
   }, [user, userRole, authLoading, profileLoading, router]);

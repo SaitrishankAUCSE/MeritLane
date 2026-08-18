@@ -27,7 +27,7 @@ service cloud.firestore {
 
     // Candidate profile documents
     match /candidates/{userId} {
-      allow read: if isOwner(userId) || isAdmin() || resource.data.verificationStatus == 'verified';
+      allow read: if isOwner(userId) || isAdmin();
       // Candidates can create profile with draft or pending status, but cannot set admin audit fields
       allow create: if (isOwner(userId) && (
         !request.resource.data.keys().hasAny(['verifiedBy', 'verifiedByUid', 'verifiedByEmail', 'verifiedAt']) &&

@@ -3,14 +3,15 @@
 import React, { useEffect, useState } from "react";
 import { useAuth } from "@/lib/auth/AuthContext";
 import { useRouter } from "next/navigation";
-import { Loader2, CheckCircle2, Clock, AlertTriangle, XCircle, ArrowRight, Code2, Sparkles, FileText, Layers } from "lucide-react";
+import { Loader2, CheckCircle2, AlertTriangle, ArrowRight, ExternalLink } from "lucide-react";
 import { fetchCandidateProfile, CandidateProfile } from "@/lib/firebase/candidate";
 import { Card, CardHeader, CardContent } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
+import Link from "next/link";
 
 export default function CandidateDashboardPage() {
-  const { user, loading } = useAuth();
+  const { user, loading, userProfile } = useAuth();
   const router = useRouter();
   const [profile, setProfile] = useState<CandidateProfile | null>(null);
   const [dataLoading, setDataLoading] = useState(true);
@@ -39,193 +40,102 @@ export default function CandidateDashboardPage() {
   if (loading || dataLoading) {
     return (
       <div className="flex min-h-[60vh] flex-col items-center justify-center space-y-3">
-        <Loader2 className="h-8 w-8 animate-spin text-zinc-400" />
-        <p className="text-sm font-medium text-zinc-500">Loading your profile status...</p>
+        <Loader2 className="h-8 w-8 animate-spin text-slate-400" />
+        <p className="text-sm font-medium text-slate-500">Loading dashboard...</p>
       </div>
     );
   }
 
   const status = profile?.verificationStatus || "draft";
-
-  const getStatusIcon = () => {
-    switch (status) {
-      case "verified":
-        return (
-          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600 border border-emerald-200/80 shadow-sm">
-            <CheckCircle2 className="h-6 w-6" />
-          </div>
-        );
-      case "pending":
-        return (
-          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-amber-50 text-amber-600 border border-amber-200/80 shadow-sm">
-            <Clock className="h-6 w-6" />
-          </div>
-        );
-      case "changes_required":
-        return (
-          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-amber-50 text-amber-600 border border-amber-200/80 shadow-sm">
-            <AlertTriangle className="h-6 w-6" />
-          </div>
-        );
-      case "rejected":
-        return (
-          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-red-50 text-red-600 border border-red-200/80 shadow-sm">
-            <XCircle className="h-6 w-6" />
-          </div>
-        );
-      default:
-        return (
-          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-zinc-100 text-zinc-600 border border-zinc-200 shadow-sm">
-            <Clock className="h-6 w-6" />
-          </div>
-        );
-    }
-  };
-
-  const getStatusTitle = () => {
-    switch (status) {
-      case "verified":
-        return "Verified";
-      case "pending":
-        return "Verification Pending";
-      case "changes_required":
-        return "Action Required";
-      case "rejected":
-        return "Not Verified";
-      default:
-        return "Action Required";
-    }
-  };
-
-  const getStatusDescription = () => {
-    switch (status) {
-      case "verified":
-        return "Your Meritlane profile has been verified.";
-      case "pending":
-        return "Your profile is currently being reviewed by Meritlane.";
-      case "changes_required":
-        return "Please review the feedback and update your profile.";
-      case "rejected":
-        return profile?.verificationReason 
-          ? `Your profile was not verified: ${profile.verificationReason}` 
-          : "Your profile was not verified by Meritlane.";
-      default:
-        return "Your profile is incomplete or saved as a draft. Please submit it for verification.";
-    }
-  };
+  const isProfileComplete = profile && profile.name && profile.college && profile.skills && profile.skills.length > 0 && profile.projects && profile.projects.length > 0;
 
   return (
     <div className="min-h-screen bg-slate-50 pb-24 pt-10">
-      <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 space-y-8">
-        {/* Admin Direct Shortcut Banner */}
-        {user?.email?.toLowerCase().trim() === "saitrishankb9@gmail.com" && (
-          <div className="rounded-md border border-slate-300 bg-slate-100 p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-sm">
-            <div>
-              <p className="text-sm font-bold text-slate-900 flex items-center gap-1.5">
-                <span className="h-2 w-2 rounded-full bg-[#1a56db] animate-pulse"></span>
-                Administrator Account Detected ({user.email})
-              </p>
-              <p className="text-xs text-slate-600 mt-0.5">
-                You have full access to the verification pipeline, directory, and candidate audit tools.
-              </p>
-            </div>
-            <Button 
-              variant="primary" 
-              size="sm" 
-              onClick={() => router.push("/admin")}
-              className="shrink-0"
-            >
-              Open Admin Command Center
-            </Button>
-          </div>
-        )}
-
+      <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 space-y-6">
+        
         {/* Header */}
-        <div className="flex flex-col justify-between gap-4 border-b border-slate-200 pb-6 sm:flex-row sm:items-center">
-          <div>
-            <div className="flex items-center gap-3">
-              <h1 className="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
-                Candidate Dashboard
-              </h1>
-              <Badge variant={status === "verified" ? "verified" : status === "pending" ? "pending" : status === "changes_required" ? "changes_required" : status === "rejected" ? "rejected" : "neutral"}>
-                {getStatusTitle()}
-              </Badge>
-            </div>
-            <p className="mt-1 text-sm text-slate-600">
-              Manage your engineering profile and verification status.
-            </p>
-          </div>
-
+        <div className="flex items-center justify-between border-b border-slate-200 pb-4">
+          <h1 className="text-2xl font-bold text-slate-900">Candidate Dashboard</h1>
           <Button
             variant="outline"
             size="sm"
             onClick={() => router.push("/candidate/profile")}
-            className="shrink-0"
           >
             Edit Profile
           </Button>
         </div>
 
-        {/* Verification Status Card */}
-        <Card>
-          <CardContent className="p-6 sm:p-8">
-            <div className="flex flex-col sm:flex-row items-start gap-5">
-              {getStatusIcon()}
-              
-              <div className="flex-1">
-                <div className="flex items-center justify-between">
-                  <h2 className="text-base font-semibold text-zinc-900">
-                    {getStatusTitle()}
-                  </h2>
+        {/* Status Card */}
+        <Card className="border-slate-200 shadow-sm">
+          <CardContent className="p-6">
+            <div className="flex flex-col sm:flex-row gap-5 items-start">
+              {/* Icon */}
+              {status === "verified" ? (
+                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded bg-emerald-50 border border-emerald-200 text-emerald-700">
+                  <CheckCircle2 className="h-6 w-6" />
                 </div>
-                <p className="mt-1 text-sm leading-relaxed text-zinc-600">
-                  {getStatusDescription()}
-                </p>
+              ) : status === "changes_required" || status === "rejected" ? (
+                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded bg-amber-50 border border-amber-200 text-amber-700">
+                  <AlertTriangle className="h-6 w-6" />
+                </div>
+              ) : (
+                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded bg-slate-100 border border-slate-200 text-slate-600">
+                  <span className="font-semibold text-lg">!</span>
+                </div>
+              )}
 
-                {/* Feedback Box for Changes Required */}
+              {/* Content */}
+              <div className="flex-1 space-y-3">
+                <div>
+                  <div className="flex items-center gap-2 mb-1">
+                    <h2 className="text-lg font-bold text-slate-900">
+                      {status === "verified" ? "Profile Verified" :
+                       status === "pending" ? "Verification Pending" :
+                       status === "changes_required" ? "Action Required" :
+                       status === "rejected" ? "Verification Failed" :
+                       "Profile Incomplete"}
+                    </h2>
+                    <Badge variant={status === "verified" ? "verified" : status === "pending" ? "pending" : status === "changes_required" ? "changes_required" : status === "rejected" ? "rejected" : "neutral"}>
+                      {status.replace('_', ' ').toUpperCase()}
+                    </Badge>
+                  </div>
+                  <p className="text-sm text-slate-600">
+                    {status === "verified" ? "You have successfully passed the skill assessment. Your profile is now visible to employers in the Meritlane directory." :
+                     status === "pending" ? "Your profile has been submitted. The next step is to pass the technical skill assessment to prove your abilities." :
+                     status === "changes_required" ? "Your profile was reviewed but requires updates before you can proceed." :
+                     status === "rejected" ? "Your profile did not pass verification." :
+                     "Your profile is missing required information or has not been submitted for verification."}
+                  </p>
+                </div>
+
                 {status === "changes_required" && profile?.verificationReason && (
-                  <div className="mt-4 rounded-xl border border-amber-200 bg-amber-50/80 p-4.5">
-                    <div className="flex items-center gap-2 mb-1.5">
-                      <AlertTriangle className="h-4 w-4 text-amber-700" />
-                      <span className="text-xs font-bold uppercase tracking-wider text-amber-900">
-                        Feedback from Meritlane
-                      </span>
-                    </div>
-                    <p className="text-xs leading-relaxed text-amber-950 font-mono">
-                      {profile.verificationReason}
-                    </p>
+                  <div className="rounded border border-amber-200 bg-amber-50 p-3">
+                    <p className="text-sm font-medium text-amber-900 mb-1">Feedback:</p>
+                    <p className="text-sm text-amber-800">{profile.verificationReason}</p>
                   </div>
                 )}
-                
-                <div className="mt-6 flex flex-wrap gap-3">
-                  {(status === "draft" || !profile) && (
-                    <Button 
-                      variant="primary"
-                      onClick={() => router.push("/candidate/profile")}
-                      rightIcon={<ArrowRight className="h-4 w-4" />}
-                    >
-                      Complete Profile
-                    </Button>
-                  )}
 
-                  {status === "changes_required" && (
-                    <Button 
-                      variant="primary"
-                      onClick={() => router.push("/candidate/profile")}
-                      rightIcon={<ArrowRight className="h-4 w-4" />}
-                    >
-                      Update Profile
-                    </Button>
-                  )}
-
-                  {status === "pending" && (
-                    <Button 
-                      variant="primary"
-                      onClick={() => router.push("/candidate/assessment")}
-                      rightIcon={<ArrowRight className="h-4 w-4" />}
-                    >
-                      Start Skill Assessment
-                    </Button>
+                <div className="pt-2">
+                  {status === "verified" ? null : (
+                    <>
+                      {(!profile || !isProfileComplete || status === "draft") ? (
+                        <Button 
+                          variant="primary" 
+                          onClick={() => router.push("/candidate/profile")}
+                          rightIcon={<ArrowRight className="h-4 w-4" />}
+                        >
+                          Complete Your Profile
+                        </Button>
+                      ) : (
+                        <Button 
+                          variant="primary" 
+                          onClick={() => router.push("/candidate/assessment")}
+                          rightIcon={<ArrowRight className="h-4 w-4" />}
+                        >
+                          Take Skill Assessment
+                        </Button>
+                      )}
+                    </>
                   )}
                 </div>
               </div>
@@ -233,43 +143,70 @@ export default function CandidateDashboardPage() {
           </CardContent>
         </Card>
 
-        {/* Quick Summary Grid */}
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-          <Card>
-            <CardHeader className="flex items-center justify-between">
-              <span className="text-xs font-bold uppercase tracking-wider text-zinc-500">Project Portfolio</span>
-              <Layers className="h-4 w-4 text-zinc-400" />
+        {/* Verified Skills & Scores (Only shown if verified or has scores) */}
+        {userProfile?.assessmentScores && Object.keys(userProfile.assessmentScores).length > 0 && (
+          <Card className="border-slate-200 shadow-sm">
+            <CardHeader className="border-b border-slate-100 bg-slate-50/50 pb-4">
+              <h2 className="text-sm font-bold text-slate-900 uppercase tracking-wide">Verified Technical Skills</h2>
             </CardHeader>
-            <CardContent>
-              <p className="text-2xl font-bold tracking-tight text-zinc-900">
-                {profile?.projects?.length || 0}
-              </p>
-              <p className="mt-1 text-xs text-zinc-500">
-                {profile?.projects?.length === 1 ? "1 project submitted" : `${profile?.projects?.length || 0} projects submitted as code evidence`}
-              </p>
+            <CardContent className="p-0">
+              <ul className="divide-y divide-slate-100">
+                {Object.entries(userProfile.assessmentScores).map(([skill, score]) => (
+                  <li key={skill} className="flex items-center justify-between p-4 sm:px-6">
+                    <div>
+                      <p className="text-sm font-semibold text-slate-900">
+                        {skill.replace('python_', 'Python (Variant ').replace('_', ' ').toUpperCase() + (skill.startsWith('python_') ? ')' : '')}
+                      </p>
+                      <p className="text-xs text-slate-500 mt-0.5">Proctored Assessment Passed</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-sm font-bold text-slate-900">{score} / 5</p>
+                      <p className="text-xs text-slate-500">Score</p>
+                    </div>
+                  </li>
+                ))}
+              </ul>
             </CardContent>
           </Card>
+        )}
 
-          <Card>
-            <CardHeader className="flex items-center justify-between">
-              <span className="text-xs font-bold uppercase tracking-wider text-zinc-500">Skills Track</span>
-              <Code2 className="h-4 w-4 text-zinc-400" />
+        {/* Submitted Projects (Only shown if projects exist) */}
+        {profile?.projects && profile.projects.length > 0 && (
+          <Card className="border-slate-200 shadow-sm">
+            <CardHeader className="border-b border-slate-100 bg-slate-50/50 pb-4">
+              <h2 className="text-sm font-bold text-slate-900 uppercase tracking-wide">Submitted Projects</h2>
             </CardHeader>
-            <CardContent>
-              <div className="flex flex-wrap gap-1.5">
-                {profile?.skills && profile.skills.length > 0 ? (
-                  profile.skills.map((s) => (
-                    <span key={s} className="rounded-md bg-zinc-100 px-2.5 py-1 text-xs font-medium text-zinc-800">
-                      {s}
-                    </span>
-                  ))
-                ) : (
-                  <span className="text-xs text-zinc-400">No skills added yet</span>
-                )}
-              </div>
+            <CardContent className="p-0">
+              <ul className="divide-y divide-slate-100">
+                {profile.projects.map((project, index) => (
+                  <li key={project.id} className="p-4 sm:px-6">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                      <div>
+                        <h3 className="text-sm font-semibold text-slate-900">{project.title || `Project ${index + 1}`}</h3>
+                        {project.description && (
+                          <p className="mt-1 text-sm text-slate-600 line-clamp-2">{project.description}</p>
+                        )}
+                      </div>
+                      {project.repoUrl && (
+                        <div className="shrink-0">
+                          <a 
+                            href={project.repoUrl} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1.5 text-sm font-medium text-[#1a56db] hover:underline"
+                          >
+                            <ExternalLink className="h-4 w-4" />
+                            Repository
+                          </a>
+                        </div>
+                      )}
+                    </div>
+                  </li>
+                ))}
+              </ul>
             </CardContent>
           </Card>
-        </div>
+        )}
       </div>
     </div>
   );

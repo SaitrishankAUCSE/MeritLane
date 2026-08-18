@@ -36,6 +36,18 @@ export const fetchCandidateProfile = async (uid: string): Promise<CandidateProfi
   if (docSnap.exists()) {
     return docSnap.data() as CandidateProfile;
   }
+
+  // Fallback for legacy profiles saved in the users collection
+  const userRef = doc(db, "users", uid);
+  const userSnap = await getDoc(userRef);
+  if (userSnap.exists()) {
+    const userData = userSnap.data();
+    // If it has profile fields like college or branch, treat it as a profile
+    if (userData.college || userData.skills) {
+      return userData as CandidateProfile;
+    }
+  }
+
   return null;
 };
 
