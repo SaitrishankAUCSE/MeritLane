@@ -2,31 +2,45 @@ import { NextRequest, NextResponse } from "next/server";
 import { adminAuth, adminDb } from "@/lib/firebase/admin";
 
 export async function GET(req: NextRequest) {
+  let currentStage = "ADMIN_INIT";
   try {
     if (!adminAuth || !adminDb) {
-      return NextResponse.json({ error: "Server misconfiguration" }, { status: 500 });
+      return NextResponse.json({ error: "Server misconfiguration: Firebase Admin null", stage: currentStage }, { status: 500 });
     }
 
+    currentStage = "TOKEN_PARSE";
     const authHeader = req.headers.get("Authorization");
     if (!authHeader?.startsWith("Bearer ")) {
-      return NextResponse.json({ error: "Unauthorized: Missing or invalid token format" }, { status: 401 });
+      return NextResponse.json({ error: "Unauthorized: Missing or invalid token format", stage: currentStage }, { status: 401 });
     }
-
     const idToken = authHeader.split("Bearer ")[1];
+
+    currentStage = "TOKEN_VERIFY";
     let decodedToken;
     try {
       decodedToken = await adminAuth.verifyIdToken(idToken);
     } catch (e: any) {
-      return NextResponse.json({ error: "Unauthorized: Invalid or expired token" }, { status: 401 });
+      console.error("[Diagnostics] TOKEN_VERIFY error:", e);
+      return NextResponse.json({ error: "Unauthorized: Invalid or expired token", stage: currentStage }, { status: 401 });
     }
 
+    currentStage = "ADMIN_CLAIM";
     // Strict Admin Authorization Check (Custom Claim ONLY)
     if (decodedToken.admin !== true) {
-      return NextResponse.json({ error: "Forbidden: Administrative privilege required" }, { status: 403 });
+      return NextResponse.json({ error: "Forbidden: Administrative privilege required", stage: currentStage }, { status: 403 });
     }
 
+    currentStage = "FIRESTORE_QUERY";
     // Fetch real candidates from Firestore
-    const candidatesSnapshot = await adminDb.collection("candidates").get();
+    let candidatesSnapshot;
+    try {
+      candidatesSnapshot = await adminDb.collection("candidates").get();
+    } catch (e: any) {
+      console.error("[Diagnostics] FIRESTORE_QUERY error:", e);
+      return NextResponse.json({ error: "Failed to fetch candidates from Firestore", message: e.message, stage: currentStage }, { status: 500 });
+    }
+
+    currentStage = "CANDIDATE_TRANSFORM";
     const candidates = await Promise.all(
       candidatesSnapshot.docs.map(async (docSnap) => {
         const candidateData = docSnap.data();
@@ -40,7 +54,7 @@ export async function GET(req: NextRequest) {
             userData = userDoc.data() || {};
           }
         } catch (err) {
-          console.error(`Failed to fetch user doc for ${uid}:`, err);
+          console.error(`[Diagnostics] Failed to fetch user doc for ${uid}:`, err);
         }
 
         const safeDate = (val: any) => {
@@ -77,9 +91,14 @@ export async function GET(req: NextRequest) {
       })
     );
 
+    currentStage = "JSON_SERIALIZE";
     return NextResponse.json({ candidates });
   } catch (error: any) {
-    console.error("Error in admin candidates GET route:", error);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    console.error(`[Diagnostics] Exception in admin candidates GET route at stage ${currentStage}:`, error);
+    return NextResponse.json({ 
+      error: "Internal server error", 
+      stage: currentStage, 
+      message: error.message || "Unknown error" 
+    }, { status: 500 });
   }
 }
