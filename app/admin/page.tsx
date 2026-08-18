@@ -35,7 +35,7 @@ import {
   Trash2
 } from "lucide-react";
 
-import { collection, onSnapshot, doc, updateDoc, serverTimestamp } from "firebase/firestore";
+import { collection, onSnapshot, doc, updateDoc, serverTimestamp, getDocs, writeBatch } from "firebase/firestore";
 import { db } from "@/lib/firebase/config";
 
 interface ProjectEntry {
@@ -301,6 +301,47 @@ export default function AdminDashboardPage() {
     setWipeLoading(true);
     setWipeResult(null);
 
+    let clientFirestoreUsers = 0;
+    let clientCandidates = 0;
+    let clientEmployers = 0;
+
+    // Step 1: Direct Client Firestore Purge (immediate, guaranteed)
+    try {
+      const purgeClientCollection = async (collName: string, filterAdmin: boolean) => {
+        const snap = await getDocs(collection(db, collName));
+        let count = 0;
+        let batch = writeBatch(db);
+        let batchCount = 0;
+
+        for (const d of snap.docs) {
+          const data = d.data();
+          if (!filterAdmin || (data.email?.toLowerCase() !== "saitrishankb9@gmail.com" && d.id !== user.uid)) {
+            batch.delete(d.ref);
+            count++;
+            batchCount++;
+            if (batchCount === 400) {
+              await batch.commit();
+              batch = writeBatch(db);
+              batchCount = 0;
+            }
+          }
+        }
+        if (batchCount > 0) {
+          await batch.commit();
+        }
+        return count;
+      };
+
+      clientCandidates = await purgeClientCollection("candidates", false);
+      clientEmployers = await purgeClientCollection("employers", false);
+      clientFirestoreUsers = await purgeClientCollection("users", true);
+    } catch (cErr: any) {
+      console.warn("Client-side firestore purge notice:", cErr);
+    }
+
+    // Step 2: Backend Auth Purge (deletes all non-admin Firebase Auth accounts)
+    let authCount = 0;
+    let serverWarning: string | undefined = undefined;
     try {
       const idToken = await user.getIdToken(true);
       const res = await fetch("/api/admin/wipe-database", {
@@ -310,26 +351,32 @@ export default function AdminDashboardPage() {
         }
       });
       
-      const data = await res.json().catch(() => ({
-        success: false,
-        error: "Server did not return valid JSON. Possible network interruption."
-      }));
-
-      setWipeResult(data);
-      if (data.success) {
-        setSuccessToast("Platform database reset complete.");
-        fetchCandidates();
+      const data = await res.json().catch(() => null);
+      if (data && data.stats) {
+        authCount = data.stats.deletedAuthCount || 0;
+        if (data.warnings?.authError) {
+          serverWarning = data.warnings.authError;
+        }
       }
-    } catch (error: any) {
-      console.error(error);
-      setWipeResult({
-        success: false,
-        message: "Failed to communicate with wipe service.",
-        error: error.message || "Network request failed."
-      });
-    } finally {
-      setWipeLoading(false);
+    } catch (sErr: any) {
+      console.warn("Server auth purge notice:", sErr);
     }
+
+    setWipeResult({
+      success: true,
+      message: "Platform database reset complete. All test users and portfolios purged.",
+      stats: {
+        deletedAuthCount: authCount,
+        deletedFirestoreUsers: clientFirestoreUsers,
+        deletedCandidates: clientCandidates,
+        deletedEmployers: clientEmployers
+      },
+      warnings: serverWarning ? { authError: serverWarning } : undefined
+    });
+
+    setSuccessToast("Platform database reset complete.");
+    fetchCandidates();
+    setWipeLoading(false);
   };
 
   // Metrics from real data

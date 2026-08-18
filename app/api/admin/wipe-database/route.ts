@@ -1,6 +1,9 @@
 import { NextResponse } from "next/server";
 import { adminAuth, adminDb } from "@/lib/firebase/admin";
 
+export const dynamic = "force-dynamic";
+export const maxDuration = 60;
+
 const ADMIN_EMAIL = "saitrishankb9@gmail.com";
 
 export async function POST(request: Request) {
