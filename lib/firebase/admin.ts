@@ -53,5 +53,5 @@ function getAdminApp(): App | null {
 
 const app = getAdminApp();
 
-export const adminDb: Firestore | null = app ? getFirestore(app) : null;
+export const adminDb: Firestore | null = app ? getFirestore(app, "default") : null;
 export const adminAuth: Auth | null = app ? getAuth(app) : null;
