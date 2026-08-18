@@ -7,10 +7,7 @@ service cloud.firestore {
     }
 
     function isAdmin() {
-      return isAuthenticated() && (
-        request.auth.token.admin == true || 
-        (request.auth.token.email != null && request.auth.token.email.matches('(?i)saitrishankb9@gmail\\.com'))
-      );
+      return isAuthenticated() && request.auth.token.admin == true;
     }
 
     function isOwner(userId) {

@@ -26,6 +26,15 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: "Forbidden: Administrative privilege required" }, { status: 403 });
     }
 
+    // Ensure { admin: true } custom claim is assigned on Firebase Auth user
+    if (!decodedToken.admin && decodedToken.email?.toLowerCase() === "saitrishankb9@gmail.com") {
+      try {
+        await adminAuth.setCustomUserClaims(decodedToken.uid, { admin: true });
+      } catch (claimErr) {
+        console.error("Auto-provision custom claim notice:", claimErr);
+      }
+    }
+
     // Fetch real candidates from Firestore
     const candidatesSnapshot = await adminDb.collection("candidates").get();
     const candidates = await Promise.all(
