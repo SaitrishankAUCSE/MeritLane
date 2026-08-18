@@ -8,8 +8,8 @@ export interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
 export function Card({ children, interactive = false, className = "", ...props }: CardProps) {
   return (
     <div
-      className={`rounded-xl border border-zinc-200/80 bg-white shadow-[0_1px_3px_rgba(0,0,0,0.04),0_1px_2px_rgba(0,0,0,0.02)] ${
-        interactive ? "card-interactive cursor-pointer" : ""
+      className={`rounded-md border border-slate-200 bg-white ${
+        interactive ? "card-interactive cursor-pointer hover:border-[#1a56db]" : ""
       } ${className}`}
       {...props}
     >
@@ -20,7 +20,7 @@ export function Card({ children, interactive = false, className = "", ...props }
 
 export function CardHeader({ children, className = "", ...props }: React.HTMLAttributes<HTMLDivElement>) {
   return (
-    <div className={`border-b border-zinc-100/90 px-6 py-4 sm:px-8 sm:py-5 ${className}`} {...props}>
+    <div className={`border-b border-slate-200 px-4 py-3 sm:px-6 sm:py-4 ${className}`} {...props}>
       {children}
     </div>
   );
@@ -28,7 +28,7 @@ export function CardHeader({ children, className = "", ...props }: React.HTMLAtt
 
 export function CardContent({ children, className = "", ...props }: React.HTMLAttributes<HTMLDivElement>) {
   return (
-    <div className={`p-6 sm:p-8 ${className}`} {...props}>
+    <div className={`p-4 sm:p-6 ${className}`} {...props}>
       {children}
     </div>
   );
@@ -36,7 +36,7 @@ export function CardContent({ children, className = "", ...props }: React.HTMLAt
 
 export function CardFooter({ children, className = "", ...props }: React.HTMLAttributes<HTMLDivElement>) {
   return (
-    <div className={`border-t border-zinc-100/90 bg-zinc-50/50 px-6 py-4 sm:px-8 ${className}`} {...props}>
+    <div className={`border-t border-slate-200 bg-slate-50 px-4 py-3 sm:px-6 ${className}`} {...props}>
       {children}
     </div>
   );

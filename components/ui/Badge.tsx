@@ -19,12 +19,12 @@ export function Badge({
     md: "px-2.5 py-0.5 text-xs gap-1.5",
   };
 
-  const baseStyles = "inline-flex items-center font-medium rounded-full border select-none transition-colors";
+  const baseStyles = "inline-flex items-center font-medium rounded border select-none transition-colors";
 
   if (variant === "verified") {
     return (
       <span
-        className={`${baseStyles} ${sizeStyles[size]} border-emerald-200/80 bg-emerald-50 text-emerald-800 font-semibold ${className}`}
+        className={`${baseStyles} ${sizeStyles[size]} border-emerald-200 bg-emerald-50 text-emerald-800 font-semibold ${className}`}
       >
         <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600 shrink-0" />
         {children || "Verified"}
@@ -46,7 +46,7 @@ export function Badge({
   if (variant === "changes_required") {
     return (
       <span
-        className={`${baseStyles} ${sizeStyles[size]} border-amber-300 bg-amber-100/70 text-amber-900 font-medium ${className}`}
+        className={`${baseStyles} ${sizeStyles[size]} border-amber-300 bg-amber-100 text-amber-900 font-medium ${className}`}
       >
         <AlertTriangle className="h-3 w-3 text-amber-700 shrink-0" />
         {children || "Needs Changes"}
@@ -68,9 +68,9 @@ export function Badge({
   if (variant === "active") {
     return (
       <span
-        className={`${baseStyles} ${sizeStyles[size]} border-indigo-200 bg-indigo-50 text-indigo-700 font-medium ${className}`}
+        className={`${baseStyles} ${sizeStyles[size]} border-[#1a56db]/20 bg-[#1a56db]/10 text-[#1a56db] font-medium ${className}`}
       >
-        <span className="h-1.5 w-1.5 rounded-full bg-indigo-600 shrink-0" />
+        <span className="h-1.5 w-1.5 rounded-full bg-[#1a56db] shrink-0" />
         {children || "Active"}
       </span>
     );
@@ -78,7 +78,7 @@ export function Badge({
 
   return (
     <span
-      className={`${baseStyles} ${sizeStyles[size]} border-zinc-200 bg-zinc-100/70 text-zinc-700 ${className}`}
+      className={`${baseStyles} ${sizeStyles[size]} border-slate-200 bg-slate-100 text-slate-700 ${className}`}
     >
       {children}
     </span>

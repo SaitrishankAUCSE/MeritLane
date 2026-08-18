@@ -115,17 +115,17 @@ export default function CandidateDashboardPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#fafafa] pb-24 pt-10">
+    <div className="min-h-screen bg-slate-50 pb-24 pt-10">
       <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 space-y-8">
         {/* Admin Direct Shortcut Banner */}
         {user?.email?.toLowerCase().trim() === "saitrishankb9@gmail.com" && (
-          <div className="rounded-xl border border-indigo-200 bg-indigo-50/80 p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs">
+          <div className="rounded-md border border-slate-300 bg-slate-100 p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-sm">
             <div>
-              <p className="text-xs font-bold text-indigo-950 flex items-center gap-1.5">
-                <span className="h-2 w-2 rounded-full bg-indigo-600 animate-pulse"></span>
+              <p className="text-sm font-bold text-slate-900 flex items-center gap-1.5">
+                <span className="h-2 w-2 rounded-full bg-[#1a56db] animate-pulse"></span>
                 Administrator Account Detected ({user.email})
               </p>
-              <p className="text-xs text-indigo-700 mt-0.5">
+              <p className="text-xs text-slate-600 mt-0.5">
                 You have full access to the verification pipeline, directory, and candidate audit tools.
               </p>
             </div>
@@ -133,7 +133,7 @@ export default function CandidateDashboardPage() {
               variant="primary" 
               size="sm" 
               onClick={() => router.push("/admin")}
-              className="bg-indigo-600 hover:bg-indigo-700 text-white shrink-0"
+              className="shrink-0"
             >
               Open Admin Command Center
             </Button>
@@ -141,18 +141,18 @@ export default function CandidateDashboardPage() {
         )}
 
         {/* Header */}
-        <div className="flex flex-col justify-between gap-4 border-b border-zinc-200/80 pb-6 sm:flex-row sm:items-center">
+        <div className="flex flex-col justify-between gap-4 border-b border-slate-200 pb-6 sm:flex-row sm:items-center">
           <div>
             <div className="flex items-center gap-3">
-              <h1 className="text-2xl font-bold tracking-tight text-zinc-900 sm:text-3xl">
+              <h1 className="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
                 Candidate Dashboard
               </h1>
               <Badge variant={status === "verified" ? "verified" : status === "pending" ? "pending" : status === "changes_required" ? "changes_required" : status === "rejected" ? "rejected" : "neutral"}>
                 {getStatusTitle()}
               </Badge>
             </div>
-            <p className="mt-1.5 text-sm text-zinc-500">
-              Track your application status and technical proof of skill.
+            <p className="mt-1 text-sm text-slate-600">
+              Manage your engineering profile and verification status.
             </p>
           </div>
 
@@ -160,6 +160,7 @@ export default function CandidateDashboardPage() {
             variant="outline"
             size="sm"
             onClick={() => router.push("/candidate/profile")}
+            className="shrink-0"
           >
             Edit Profile
           </Button>

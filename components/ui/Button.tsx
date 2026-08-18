@@ -21,26 +21,26 @@ export function Button({
   ...props
 }: ButtonProps) {
   const baseStyles =
-    "inline-flex items-center justify-center font-medium transition-all duration-150 ease-out select-none focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-zinc-900 disabled:opacity-50 disabled:pointer-events-none active:scale-[0.98]";
+    "inline-flex items-center justify-center font-medium transition-all duration-150 ease-out select-none focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#1a56db] disabled:opacity-50 disabled:pointer-events-none active:scale-[0.98]";
 
   const sizeStyles = {
-    xs: "text-xs px-2.5 py-1 rounded gap-1",
+    xs: "text-xs px-2.5 py-1 rounded-md gap-1",
     sm: "text-xs px-3 py-1.5 rounded-md gap-1.5",
     md: "text-sm px-4 py-2 rounded-md gap-2",
-    lg: "text-base px-5 py-2.5 rounded-lg gap-2.5",
+    lg: "text-base px-5 py-2.5 rounded-md gap-2.5",
   };
 
   const variantStyles = {
     primary:
-      "bg-indigo-600 text-white hover:bg-indigo-700 active:bg-indigo-800 shadow-[0_1px_2px_rgba(0,0,0,0.06),0_0_0_1px_rgba(79,70,229,0.1)] border border-indigo-500/30",
+      "bg-[#1a56db] text-white hover:bg-[#1e40af] active:bg-[#1e3a8a] border border-transparent font-semibold",
     secondary:
-      "bg-zinc-900 text-white hover:bg-zinc-800 active:bg-zinc-950 shadow-sm border border-zinc-800",
+      "bg-slate-100 text-slate-900 hover:bg-slate-200 active:bg-slate-300 border border-transparent font-semibold",
     outline:
-      "border border-zinc-200 bg-white text-zinc-900 hover:bg-zinc-50 hover:border-zinc-300 active:bg-zinc-100 shadow-sm",
+      "border border-slate-300 bg-white text-slate-700 hover:bg-slate-50 hover:text-slate-900 active:bg-slate-100 font-semibold",
     ghost:
-      "text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100/80 active:bg-zinc-200/60 border border-transparent",
+      "text-slate-600 hover:text-slate-900 hover:bg-slate-100 active:bg-slate-200 border border-transparent font-semibold",
     danger:
-      "bg-red-600 text-white hover:bg-red-700 active:bg-red-800 shadow-sm border border-red-500/30",
+      "bg-red-600 text-white hover:bg-red-700 active:bg-red-800 border border-transparent font-semibold",
   };
 
   return (

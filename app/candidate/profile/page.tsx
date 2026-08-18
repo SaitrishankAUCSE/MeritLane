@@ -200,10 +200,10 @@ export default function CandidateProfilePage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#fafafa] pb-24 pt-10">
+    <div className="min-h-screen bg-slate-50 pb-24 pt-10">
       {notification && (
-        <div className={`fixed top-6 right-6 z-50 rounded-xl px-4 py-3 shadow-lg border animate-in fade-in duration-150 ${
-          notification.type === 'success' ? 'bg-emerald-50 text-emerald-900 border-emerald-200' : 'bg-red-50 text-red-900 border-red-200'
+        <div className={`fixed top-6 right-6 z-50 rounded-md px-4 py-3 shadow-lg border animate-in fade-in duration-150 ${
+          notification.type === 'success' ? 'bg-white text-slate-900 border-slate-200' : 'bg-red-50 text-red-900 border-red-200'
         }`}>
           <p className="text-sm font-medium">{notification.message}</p>
         </div>
@@ -212,13 +212,13 @@ export default function CandidateProfilePage() {
       <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 space-y-8">
         {/* Admin Direct Shortcut Banner */}
         {user?.email?.toLowerCase().trim() === "saitrishankb9@gmail.com" && (
-          <div className="rounded-xl border border-indigo-200 bg-indigo-50/80 p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs">
+          <div className="rounded-md border border-slate-300 bg-slate-100 p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-sm">
             <div>
-              <p className="text-xs font-bold text-indigo-950 flex items-center gap-1.5">
-                <span className="h-2 w-2 rounded-full bg-indigo-600 animate-pulse"></span>
+              <p className="text-sm font-bold text-slate-900 flex items-center gap-1.5">
+                <span className="h-2 w-2 rounded-full bg-[#1a56db] animate-pulse"></span>
                 Administrator Account Detected ({user.email})
               </p>
-              <p className="text-xs text-indigo-700 mt-0.5">
+              <p className="text-xs text-slate-600 mt-0.5">
                 You have full access to the verification pipeline, directory, and candidate audit tools.
               </p>
             </div>
@@ -226,7 +226,7 @@ export default function CandidateProfilePage() {
               variant="primary" 
               size="sm" 
               onClick={() => router.push("/admin")}
-              className="bg-indigo-600 hover:bg-indigo-700 text-white shrink-0"
+              className="shrink-0"
             >
               Open Admin Command Center
             </Button>
@@ -234,15 +234,15 @@ export default function CandidateProfilePage() {
         )}
 
         {/* Header */}
-        <div className="flex flex-col justify-between gap-4 border-b border-zinc-200/80 pb-6 sm:flex-row sm:items-center">
+        <div className="flex flex-col justify-between gap-4 border-b border-slate-200 pb-6 sm:flex-row sm:items-center">
           <div>
             <div className="flex items-center gap-3">
-              <h1 className="text-2xl font-bold tracking-tight text-zinc-900 sm:text-3xl">
+              <h1 className="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
                 Candidate Profile
               </h1>
               {renderStatusBadge()}
             </div>
-            <p className="mt-1.5 text-sm text-zinc-500">
+            <p className="mt-1.5 text-sm text-slate-600">
               Complete your profile and submit production project repositories for verification.
             </p>
           </div>
@@ -308,8 +308,8 @@ export default function CandidateProfilePage() {
           {/* Section 1: Academic & Identity */}
           <Card>
             <CardHeader>
-              <h2 className="text-base font-semibold text-zinc-900">Academic &amp; Identity</h2>
-              <p className="mt-0.5 text-xs text-zinc-500">Verification evaluates code independently of institution pedigree.</p>
+              <h2 className="text-base font-semibold text-slate-900">Academic &amp; Identity</h2>
+              <p className="mt-0.5 text-xs text-slate-600">Verification evaluates code independently of institution pedigree.</p>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
@@ -351,8 +351,8 @@ export default function CandidateProfilePage() {
           {/* Section 2: Skills & Links */}
           <Card>
             <CardHeader>
-              <h2 className="text-base font-semibold text-zinc-900">Skills &amp; Profiles</h2>
-              <p className="mt-0.5 text-xs text-zinc-500">Public links for audit and skill tags for recruiter discovery.</p>
+              <h2 className="text-base font-semibold text-slate-900">Skills &amp; Profiles</h2>
+              <p className="mt-0.5 text-xs text-slate-600">Public links for audit and skill tags for recruiter discovery.</p>
             </CardHeader>
             <CardContent>
               <div className="space-y-6">
@@ -391,12 +391,12 @@ export default function CandidateProfilePage() {
             <CardHeader className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div>
                 <div className="flex items-center gap-2">
-                  <h2 className="text-base font-semibold text-zinc-900">Verified Project Submissions</h2>
-                  <span className="rounded-full bg-indigo-50 px-2.5 py-0.5 text-xs font-semibold text-indigo-700 border border-indigo-100">
+                  <h2 className="text-base font-semibold text-slate-900">Verified Project Submissions</h2>
+                  <span className="rounded bg-blue-50 px-2 py-0.5 text-xs font-semibold text-[#1a56db] border border-blue-100">
                     Primary Signal
                   </span>
                 </div>
-                <p className="mt-0.5 text-xs text-zinc-500">Your repositories are what employers and reviewers evaluate.</p>
+                <p className="mt-0.5 text-xs text-slate-600">Your repositories are what employers and reviewers evaluate.</p>
               </div>
               <Button type="button" variant="outline" size="sm" onClick={addProject} leftIcon={<Plus className="h-4 w-4" />} disabled={verificationStatus === "verified"}>
                 Add Project
@@ -405,12 +405,12 @@ export default function CandidateProfilePage() {
             <CardContent>
               <div className="space-y-6">
                 {projects.length === 0 ? (
-                  <div className="rounded-xl border border-dashed border-zinc-200 bg-zinc-50/60 p-10 text-center">
-                    <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-zinc-100 text-zinc-400">
+                  <div className="rounded-md border border-dashed border-slate-300 bg-slate-50 p-10 text-center">
+                    <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-md bg-white text-slate-400 shadow-sm border border-slate-200">
                       <Layers className="h-6 w-6" />
                     </div>
-                    <h3 className="mt-4 text-sm font-semibold text-zinc-900">No projects submitted yet</h3>
-                    <p className="mx-auto mt-1.5 max-w-md text-xs text-zinc-500 leading-relaxed">
+                    <h3 className="mt-4 text-sm font-semibold text-slate-900">No projects submitted yet</h3>
+                    <p className="mx-auto mt-1.5 max-w-md text-xs text-slate-500 leading-relaxed">
                       Meritlane operates on proof of skill. Attach at least one production-grade project repository to qualify for verification.
                     </p>
                     <Button variant="primary" size="sm" onClick={addProject} className="mt-5" leftIcon={<Plus className="h-4 w-4" />} disabled={verificationStatus === "verified"}>
@@ -419,17 +419,17 @@ export default function CandidateProfilePage() {
                   </div>
                 ) : (
                   projects.map((project: ProjectEntry, index: number) => (
-                    <div key={project.id} className="rounded-xl border border-zinc-200/90 bg-white p-6 shadow-sm">
-                      <div className="flex items-center justify-between border-b border-zinc-100 pb-4">
+                    <div key={project.id} className="rounded-md border border-slate-200 bg-white p-6 shadow-sm">
+                      <div className="flex items-center justify-between border-b border-slate-100 pb-4">
                         <div className="flex items-center gap-3">
-                          <span className="text-sm font-bold text-zinc-900">Project #{index + 1}</span>
+                          <span className="text-sm font-bold text-slate-900">Project #{index + 1}</span>
                           <Badge variant="locked" size="sm">Audit Pending</Badge>
                         </div>
                         {verificationStatus !== "verified" && (
                           <button
                             type="button"
                             onClick={() => removeProject(project.id)}
-                            className="flex h-7 w-7 items-center justify-center rounded-md text-zinc-400 transition-colors hover:bg-red-50 hover:text-red-600"
+                            className="flex h-7 w-7 items-center justify-center rounded-sm text-slate-400 transition-colors hover:bg-red-50 hover:text-red-600"
                             title="Remove Project"
                           >
                             <Trash2 className="h-4 w-4" />
@@ -485,22 +485,20 @@ export default function CandidateProfilePage() {
 
       {showSuccessModal && (
         <div 
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-xs"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm"
           role="dialog"
           aria-modal="true"
-          aria-labelledby="modal-title"
-          aria-describedby="modal-description"
         >
-          <div className="w-full max-w-md rounded-2xl border border-zinc-200 bg-white p-6 sm:p-8 shadow-xl animate-in fade-in zoom-in-95 duration-150">
-            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-emerald-50 border border-emerald-100 text-emerald-600 mb-5">
+          <div className="w-full max-w-md rounded-lg border border-slate-200 bg-white p-6 sm:p-8 shadow-xl animate-in fade-in zoom-in-95 duration-150">
+            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-md bg-emerald-50 border border-emerald-100 text-emerald-600 mb-5">
               <Check className="h-6 w-6" aria-hidden="true" />
             </div>
             
             <div className="text-center">
-              <h3 id="modal-title" className="text-lg font-bold text-zinc-900">
+              <h3 id="modal-title" className="text-lg font-bold text-slate-900">
                 Profile submitted
               </h3>
-              <p id="modal-description" className="mt-3 text-sm leading-relaxed text-zinc-600">
+              <p id="modal-description" className="mt-3 text-sm leading-relaxed text-slate-600">
                 Your profile has been successfully submitted to Meritlane for verification. We&apos;ll review your information and update your verification status once the review is complete.
               </p>
             </div>
