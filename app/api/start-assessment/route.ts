@@ -29,9 +29,13 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
+    const candidateRef = adminDb.collection("candidates").doc(uid);
+    const candidateDoc = await candidateRef.get();
+    const candidateData = candidateDoc.exists ? candidateDoc.data() : {};
+
     const userData = userDoc.data() || {};
 
-    if (userData.verifiedBadge) {
+    if (candidateData?.verificationStatus === "verified") {
       return NextResponse.json({ error: "Already verified" }, { status: 400 });
     }
 

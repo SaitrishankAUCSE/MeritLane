@@ -62,7 +62,6 @@ interface CandidateAdminRecord {
   verifiedByUid: string | null;
   verifiedByEmail: string | null;
   updatedAt: number | null;
-  verifiedBadge: boolean;
   assessmentScores: Record<string, any> | null;
   assessmentDate: any;
 }
@@ -156,7 +155,6 @@ export default function AdminDashboardPage() {
             verifiedByUid: candidateData.verifiedByUid || null,
             verifiedByEmail: candidateData.verifiedByEmail || null,
             updatedAt: candidateData.updatedAt || null,
-            verifiedBadge: candidateData.verificationStatus === "verified",
             assessmentScores: candidateData.assessmentScores || null,
             assessmentDate: candidateData.assessmentDate || null,
           });
@@ -212,12 +210,6 @@ export default function AdminDashboardPage() {
           verifiedAt: Date.now(),
           updatedAt: Date.now(),
         });
-
-        const userRef = doc(db, "users", selectedCandidate.uid);
-        await updateDoc(userRef, {
-          verifiedBadge: effectiveActionType === "verified",
-          verificationDate: serverTimestamp(),
-        }).catch(() => {});
       } catch (directErr) {
         console.warn("Direct Firestore update fallback, using API route:", directErr);
         const idToken = await user.getIdToken();
@@ -335,7 +327,7 @@ export default function AdminDashboardPage() {
       c.verificationStatus,
       `"${c.skills.join(', ')}"`,
       c.projects?.length || 0,
-      c.verifiedBadge ? "Yes" : "No",
+      c.verificationStatus === 'verified' ? "Yes" : "No",
       c.verifiedByEmail || "N/A"
     ]);
 
@@ -734,7 +726,7 @@ export default function AdminDashboardPage() {
                 </CardHeader>
                 <CardContent>
                   <p className="text-3xl font-bold text-indigo-600">
-                    {candidates.filter(c => c.verifiedBadge).length}
+                    {candidates.filter(c => c.verificationStatus === 'verified').length}
                   </p>
                   <p className="mt-1 text-xs text-zinc-500">Passed Python technical audit</p>
                 </CardContent>
@@ -914,13 +906,13 @@ export default function AdminDashboardPage() {
                 </div>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    {selectedCandidate.verifiedBadge ? (
+                    {selectedCandidate.verificationStatus === 'verified' ? (
                       <CheckCircle2 className="h-4.5 w-4.5 text-emerald-600" />
                     ) : (
                       <Clock className="h-4.5 w-4.5 text-zinc-400" />
                     )}
                     <span className="text-xs font-semibold text-zinc-900">
-                      {selectedCandidate.verifiedBadge ? "Passed Code Assessment (Full Score)" : "Assessment Pending / Incomplete"}
+                      {selectedCandidate.verificationStatus === 'verified' ? "Passed Code Assessment (Full Score)" : "Assessment Pending / Incomplete"}
                     </span>
                   </div>
                   {selectedCandidate.assessmentScores && (

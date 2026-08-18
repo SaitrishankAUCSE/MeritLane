@@ -176,9 +176,13 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
+    const candidateRef = adminDb.collection("candidates").doc(uid);
+    const candidateDoc = await candidateRef.get();
+    const candidateData = candidateDoc.exists ? candidateDoc.data() : {};
+
     const userData = userDoc.data() || {};
 
-    if (userData.verifiedBadge) {
+    if (candidateData?.verificationStatus === "verified") {
       return NextResponse.json({ error: "Already verified" }, { status: 400 });
     }
 
@@ -276,16 +280,22 @@ export async function POST(req: NextRequest) {
     const passed = passedTests >= threshold;
 
     if (passed) {
-      await userRef.update({
-        verifiedBadge: true,
-        assessmentScores: {
-          [`python_${variant}`]: passedTests
-        },
-        assessmentDate: FieldValue.serverTimestamp(),
-        // Clear active session
-        assessmentStartedAt: FieldValue.delete(),
-        assessmentVariant: FieldValue.delete()
-      });
+      await Promise.all([
+        userRef.update({
+          assessmentScores: {
+            [`python_${variant}`]: passedTests
+          },
+          assessmentDate: FieldValue.serverTimestamp(),
+          // Clear active session
+          assessmentStartedAt: FieldValue.delete(),
+          assessmentVariant: FieldValue.delete()
+        }),
+        candidateRef.set({
+          verificationStatus: "verified",
+          verifiedAt: FieldValue.serverTimestamp(),
+          updatedAt: Date.now()
+        }, { merge: true })
+      ]);
 
       return NextResponse.json({
         success: true,

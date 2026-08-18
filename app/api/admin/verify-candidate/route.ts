@@ -65,22 +65,6 @@ export async function POST(req: NextRequest) {
 
     await candidateRef.update(candidateUpdate);
 
-    // Synchronize verifiedBadge on user document
-    const userRef = adminDb.collection("users").doc(candidateId);
-    const userDoc = await userRef.get();
-    if (userDoc.exists) {
-      if (status === "verified") {
-        await userRef.update({
-          verifiedBadge: true,
-          verificationDate: FieldValue.serverTimestamp(),
-        });
-      } else {
-        await userRef.update({
-          verifiedBadge: false,
-        });
-      }
-    }
-
     return NextResponse.json({
       success: true,
       message: `Candidate verification status updated to ${status}`,
