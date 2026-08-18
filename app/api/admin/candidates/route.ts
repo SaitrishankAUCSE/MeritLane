@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { adminAuth, adminDb } from "@/lib/firebase/admin";
 
+export const runtime = "nodejs";
+
 export async function GET(req: NextRequest) {
   let currentStage = "ADMIN_INIT";
   try {

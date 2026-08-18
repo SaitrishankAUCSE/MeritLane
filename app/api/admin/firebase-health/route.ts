@@ -1,0 +1,1 @@
+import { adminDb, adminAuth } from "@/lib/firebase/admin"; export const runtime = "nodejs"; export async function GET() { return Response.json({ ok: true, firebaseAdmin: !!adminDb && !!adminAuth }); }
