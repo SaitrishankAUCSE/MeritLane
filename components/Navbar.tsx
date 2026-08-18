@@ -131,11 +131,11 @@ export default function Navbar() {
           </Link>
 
           {/* Desktop Public Nav */}
-          {(!isAuthenticated || !isResolvingAuth) && renderPublicLinks()}
+          {(!user || !isResolvingAuth) && renderPublicLinks()}
 
           {/* Desktop Dashboard Nav */}
           <nav className="hidden md:flex items-center">
-            {!isResolvingAuth && isAuthenticated && navLinks()}
+            {!isResolvingAuth && user && navLinks()}
           </nav>
         </div>
 
@@ -145,11 +145,11 @@ export default function Navbar() {
               <div className="h-8 w-20 animate-pulse rounded bg-slate-100"></div>
               <div className="h-8 w-24 animate-pulse rounded bg-slate-100"></div>
             </div>
-          ) : isAuthenticated ? (
+          ) : user ? (
             <div className="hidden md:flex items-center gap-4">
               <div className="flex flex-col text-right">
                 <span className="text-sm font-medium text-slate-900 leading-tight">
-                  {isUserAdmin ? user.email : (userProfile?.displayName || user.email?.split('@')[0])}
+                  {isUserAdmin ? user?.email : (userProfile?.displayName || user?.email?.split('@')[0])}
                 </span>
                 <span className="text-xs font-medium text-slate-500 capitalize">
                   {isUserAdmin ? "Superadmin" : userProfile?.role}
@@ -192,11 +192,11 @@ export default function Navbar() {
       {/* Mobile Nav */}
       {mobileMenuOpen && (
         <div className="md:hidden border-t border-slate-200 bg-white px-4 py-5 shadow-lg">
-          {!isResolvingAuth && isAuthenticated && (
+          {!isResolvingAuth && user && (
             <div className="space-y-4">
               <div className="border-b border-slate-100 pb-3">
                 <p className="text-sm font-semibold text-slate-900">
-                  {isAdmin ? user.email : (userProfile?.displayName || user.email?.split('@')[0])}
+                  {isAdmin ? user?.email : (userProfile?.displayName || user?.email?.split('@')[0])}
                 </p>
                 <p className="text-xs text-slate-500 capitalize">
                   {isAdmin ? "Administrator" : userProfile?.role}
@@ -215,7 +215,7 @@ export default function Navbar() {
               </nav>
             </div>
           )}
-          {!isResolvingAuth && !isAuthenticated && (
+          {!isResolvingAuth && !user && (
             <div className="flex flex-col gap-2.5">
               <Link href="/login">
                 <Button variant="outline" className="w-full justify-center">Log in</Button>
