@@ -102,10 +102,7 @@ export default function Navbar() {
 
   const renderPublicLinks = () => (
     <div className="hidden lg:flex items-center gap-6 text-sm font-medium text-slate-600">
-      <Link href="#" className="hover:text-[#1a56db]">For Candidates</Link>
-      <Link href="#" className="hover:text-[#1a56db]">For Employers</Link>
-      <Link href="#" className="hover:text-[#1a56db]">How Verification Works</Link>
-      <Link href="#" className="hover:text-[#1a56db]">Success Stories</Link>
+      {/* Intentionally left blank - no dead links allowed */}
     </div>
   );
 
@@ -204,8 +201,6 @@ export default function Navbar() {
               </div>
               <nav className="flex flex-col gap-2">
                 {navLinks()}
-                <Link href="#" className="py-2 text-sm font-medium text-slate-600">For Candidates</Link>
-                <Link href="#" className="py-2 text-sm font-medium text-slate-600">For Employers</Link>
                 <button 
                   onClick={handleSignOut} 
                   className="flex items-center gap-2 pt-2 text-left text-sm font-medium text-red-600 hover:text-red-700"

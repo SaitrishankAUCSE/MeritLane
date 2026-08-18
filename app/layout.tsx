@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
+import Link from "next/link";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
 import { AuthProvider } from "@/lib/auth/AuthContext";
@@ -75,40 +76,25 @@ export default function RootLayout({
                 <div>
                   <h3 className="text-sm font-semibold text-slate-900">For Candidates</h3>
                   <ul className="mt-4 space-y-3 text-sm text-slate-600">
-                    <li><a href="#" className="hover:text-[#1a56db]">Create Profile</a></li>
-                    <li><a href="#" className="hover:text-[#1a56db]">Browse Jobs</a></li>
-                    <li><a href="#" className="hover:text-[#1a56db]">How Verification Works</a></li>
-                    <li><a href="#" className="hover:text-[#1a56db]">Career Advice</a></li>
-                    <li><a href="#" className="hover:text-[#1a56db]">Success Stories</a></li>
+                    <li><Link href="/signup" className="hover:text-[#1a56db]">Create Profile</Link></li>
                   </ul>
                 </div>
                 <div>
                   <h3 className="text-sm font-semibold text-slate-900">For Employers</h3>
                   <ul className="mt-4 space-y-3 text-sm text-slate-600">
-                    <li><a href="#" className="hover:text-[#1a56db]">Post a Job</a></li>
-                    <li><a href="#" className="hover:text-[#1a56db]">Search Candidates</a></li>
-                    <li><a href="#" className="hover:text-[#1a56db]">Verification API</a></li>
-                    <li><a href="#" className="hover:text-[#1a56db]">Pricing</a></li>
-                    <li><a href="#" className="hover:text-[#1a56db]">Hiring Resources</a></li>
+                    <li><Link href="/employer/dashboard" className="hover:text-[#1a56db]">Post a Job</Link></li>
+                    <li><Link href="/" className="hover:text-[#1a56db]">Search Candidates</Link></li>
                   </ul>
                 </div>
                 <div>
                   <h3 className="text-sm font-semibold text-slate-900">Company</h3>
                   <ul className="mt-4 space-y-3 text-sm text-slate-600">
-                    <li><a href="#" className="hover:text-[#1a56db]">About Us</a></li>
-                    <li><a href="#" className="hover:text-[#1a56db]">Contact</a></li>
-                    <li><a href="#" className="hover:text-[#1a56db]">Privacy Policy</a></li>
-                    <li><a href="#" className="hover:text-[#1a56db]">Terms of Service</a></li>
-                    <li><a href="#" className="hover:text-[#1a56db]">Trust & Safety</a></li>
+                    <li><Link href="/" className="hover:text-[#1a56db]">About Us</Link></li>
                   </ul>
                 </div>
               </div>
               <div className="mt-12 border-t border-slate-200 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
                 <p className="text-xs text-slate-500">&copy; {new Date().getFullYear()} Meritlane Inc. All rights reserved.</p>
-                <div className="flex gap-4 text-xs text-slate-500">
-                  <a href="#" className="hover:text-slate-900">Twitter</a>
-                  <a href="#" className="hover:text-slate-900">LinkedIn</a>
-                </div>
               </div>
             </div>
           </footer>
