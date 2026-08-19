@@ -8,6 +8,7 @@ import { Card, CardContent } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { getPlatformStats, getVerifiedCandidates } from "@/lib/firebase/home";
 import { CandidateProfile } from "@/lib/firebase/candidate";
+import { MeritlaneIntro } from "@/components/landing/MeritlaneIntro";
 
 export default function HomePage() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -66,6 +67,7 @@ export default function HomePage() {
 
   return (
     <div className="flex flex-col bg-white">
+      <MeritlaneIntro />
       {/* HERO: Functional Search-First */}
       <section className="bg-[#1a56db] px-4 py-12 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-5xl">
