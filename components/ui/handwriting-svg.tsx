@@ -132,6 +132,13 @@ export function HandwritingSvg({
   }
 
   const svgViewBox = pathProp ? `0 0 ${width} ${height}` : viewBox;
+  
+  // Split the compound path into individual segments (by 'M' or 'm' command) 
+  // to avoid browser bugs with getTotalLength() on compound paths
+  const segments = d.split(/(?=[Mm])/g).filter(s => s.trim().length > 0);
+  
+  // Calculate timing for sequential drawing
+  const segmentDuration = duration / (segments.length || 1);
 
   return (
     <svg
@@ -142,19 +149,29 @@ export function HandwritingSvg({
       aria-hidden={true}
     >
       <title>Handwriting SVG</title>
-      <motion.path
-        d={d}
-        fill="none"
-        stroke="currentColor"
-        strokeWidth={strokeWidth}
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        className={strokeClassName}
-        initial={{ pathLength: 0 }}
-        animate={{ pathLength: 1 }}
-        transition={{ delay, duration, ease }}
-        onAnimationComplete={onAnimationComplete}
-      />
+      {segments.map((segment, index) => {
+        const isLast = index === segments.length - 1;
+        return (
+          <motion.path
+            key={index}
+            d={segment}
+            fill="none"
+            stroke="currentColor"
+            strokeWidth={strokeWidth}
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className={strokeClassName}
+            initial={{ pathLength: 0 }}
+            animate={{ pathLength: 1 }}
+            transition={{ 
+              delay: delay + (index * segmentDuration), 
+              duration: segmentDuration, 
+              ease: "linear" 
+            }}
+            onAnimationComplete={isLast ? onAnimationComplete : undefined}
+          />
+        );
+      })}
     </svg>
   );
 }
