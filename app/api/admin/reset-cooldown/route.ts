@@ -23,9 +23,8 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Unauthorized: Invalid token" }, { status: 401 });
     }
 
-    // Strict Admin Authorization
-    const isAdmin = decodedToken.admin === true || decodedToken.email?.toLowerCase() === ADMIN_EMAIL;
-    if (!isAdmin) {
+    // Strict Admin Authorization (Custom Claim ONLY)
+    if (decodedToken.admin !== true) {
       return NextResponse.json({ error: "Forbidden: Administrative privilege required" }, { status: 403 });
     }
 

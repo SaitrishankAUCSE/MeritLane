@@ -4,6 +4,23 @@ import { CandidateProfile } from "@/lib/firebase/candidate";
 import { JobPosting } from "@/lib/firebase/employer";
 import { UserProfile } from "@/lib/firebase/users";
 
+const normalizeSkill = (val: string) => val.trim().toLowerCase().replace(/\s+/g, ' ');
+
+const skillAliases: Record<string, string> = {
+  "nodejs": "node",
+  "node.js": "node",
+  "reactjs": "react",
+  "vuejs": "vue",
+  "postgres": "postgresql"
+};
+
+const canonicalize = (val: string) => {
+  const norm = normalizeSkill(val);
+  return skillAliases[norm] || norm;
+};
+
+const escapeRegExp = (string: string) => string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
 export async function POST(req: NextRequest) {
   try {
     // 1. Authenticate Token
@@ -90,31 +107,28 @@ export async function POST(req: NextRequest) {
       let matchedRequiredSkillCount = 0;
 
       for (const reqSkill of requiredSkills) {
-        const lowerSkill = reqSkill.trim().toLowerCase();
-        if (lowerSkill.length === 0) continue;
+        const canonicalReq = canonicalize(reqSkill);
+        if (canonicalReq.length === 0) continue;
         
         let matched = false;
 
-        // 1. Check verified skills
-        if (candidateSkills.some(s => {
-          const sLower = s.trim().toLowerCase();
-          return sLower.length > 0 && (lowerSkill.includes(sLower) || sLower.includes(lowerSkill));
-        })) {
+        // 1. Check verified skills (Exact match on canonicalized string)
+        if (candidateSkills.some(s => canonicalize(s) === canonicalReq)) {
           matchReasons.push(`${reqSkill.trim()} — verified`);
           matched = true;
         }
 
-        // 2. Check assessments
-        if (!matched && Object.keys(assessmentScores).some(k => {
-          const kLower = k.trim().toLowerCase();
-          return kLower.length > 0 && (lowerSkill.includes(kLower) || kLower.includes(lowerSkill));
-        })) {
+        // 2. Check assessments (Exact match on canonicalized string)
+        if (!matched && Object.keys(assessmentScores).some(k => canonicalize(k) === canonicalReq)) {
           matchReasons.push(`${reqSkill.trim()} — assessment completed`);
           matched = true;
         }
 
-        // 3. Check projects
-        if (!matched && projects.some(p => p.title?.trim().toLowerCase().includes(lowerSkill) || p.description?.trim().toLowerCase().includes(lowerSkill))) {
+        // 3. Check projects (Word boundary regex match on text fields)
+        if (!matched && projects.some(p => {
+          const regex = new RegExp(`(^|\\W)${escapeRegExp(canonicalReq)}($|\\W)`, 'i');
+          return (p.title && regex.test(p.title)) || (p.description && regex.test(p.description));
+        })) {
           matchReasons.push(`${reqSkill.trim()} — demonstrated in project`);
           matched = true;
         }
@@ -133,8 +147,10 @@ export async function POST(req: NextRequest) {
       // Add general project count reason
       const relevantProjectsCount = projects.filter(p => 
         requiredSkills.some(s => {
-          const lowerSkill = s.trim().toLowerCase();
-          return p.title?.trim().toLowerCase().includes(lowerSkill) || p.description?.trim().toLowerCase().includes(lowerSkill);
+          const canonicalReq = canonicalize(s);
+          if (canonicalReq.length === 0) return false;
+          const regex = new RegExp(`(^|\\W)${escapeRegExp(canonicalReq)}($|\\W)`, 'i');
+          return (p.title && regex.test(p.title)) || (p.description && regex.test(p.description));
         })
       ).length;
 
@@ -143,7 +159,7 @@ export async function POST(req: NextRequest) {
       }
 
       // Skip candidates with no matches if skills are required
-      const isIncluded = !(requiredSkills.length > 0 && matchedRequiredSkillCount === 0 && relevantProjectsCount === 0 && testNames.length === 0);
+      const isIncluded = requiredSkills.length === 0 || matchedRequiredSkillCount > 0;
 
       debugInfo.evaluatedCandidates.push({
         uid,
@@ -151,7 +167,7 @@ export async function POST(req: NextRequest) {
         skills: candidateSkills,
         overlap: matchReasons,
         included: isIncluded,
-        exclusionReason: isIncluded ? null : `matchedRequiredSkillCount=${matchedRequiredSkillCount}, relevantProjectsCount=${relevantProjectsCount}, testNames=${testNames.length}`
+        exclusionReason: isIncluded ? null : `matchedRequiredSkillCount=${matchedRequiredSkillCount}`
       });
 
       if (!isIncluded) {

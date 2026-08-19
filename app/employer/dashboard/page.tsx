@@ -23,7 +23,9 @@ export default function EmployerDashboardPage() {
   const [roles, setRoles] = useState<JobPosting[]>([]);
   const [shortlistedUids, setShortlistedUids] = useState<string[]>([]);
   
-  const [selectedRole, setSelectedRole] = useState<JobPosting | null>(null);
+  const [selectedRoleId, setSelectedRoleId] = useState<string | null>(null);
+  const selectedRole = React.useMemo(() => roles.find(r => r.id === selectedRoleId) || null, [roles, selectedRoleId]);
+  
   const [candidates, setCandidates] = useState<any[]>([]);
   const [fetchingCandidates, setFetchingCandidates] = useState(false);
   
@@ -45,7 +47,7 @@ export default function EmployerDashboardPage() {
             setRoles(profile.roles);
             setShortlistedUids(profile.shortlistedCandidates || []);
             setActiveTab("candidates");
-            setSelectedRole(profile.roles[0]); // Select first role by default
+            setSelectedRoleId(profile.roles[0].id); // Select first role by default
           } else {
             setActiveTab("post-role"); // Default to post-role if they have none
           }
@@ -59,10 +61,9 @@ export default function EmployerDashboardPage() {
     }
   }, [user, userRole, authLoading, profileLoading]);
 
-  // Fetch candidates when selected role changes
   useEffect(() => {
     async function loadCandidates() {
-      if (!selectedRole || !user) return;
+      if (!selectedRoleId || !user) return;
       setFetchingCandidates(true);
       try {
         const token = await user.getIdToken();
@@ -72,7 +73,7 @@ export default function EmployerDashboardPage() {
             "Content-Type": "application/json",
             "Authorization": `Bearer ${token}`
           },
-          body: JSON.stringify({ roleId: selectedRole.id })
+          body: JSON.stringify({ roleId: selectedRoleId })
         });
         
         if (res.ok) {
@@ -91,7 +92,7 @@ export default function EmployerDashboardPage() {
     if (activeTab === "candidates") {
       loadCandidates();
     }
-  }, [selectedRole, user, activeTab]);
+  }, [selectedRoleId, user, activeTab]);
 
   if (authLoading || (user && profileLoading) || dataLoading) {
     return (
@@ -121,7 +122,7 @@ export default function EmployerDashboardPage() {
     try {
       await saveEmployerProfile(user.uid, { roles: updatedRoles });
       setRoles(updatedRoles);
-      setSelectedRole(newRole);
+      setSelectedRoleId(newRole.id);
       
       setRoleTitle("");
       setDepartment("");
@@ -145,8 +146,8 @@ export default function EmployerDashboardPage() {
     try {
       await saveEmployerProfile(user.uid, { roles: updatedRoles });
       setRoles(updatedRoles);
-      if (selectedRole?.id === id) {
-        setSelectedRole(updatedRoles[0] || null);
+      if (selectedRoleId === id) {
+        setSelectedRoleId(updatedRoles[0]?.id || null);
       }
       if (updatedRoles.length === 0) {
         setActiveTab("post-role");
@@ -208,11 +209,19 @@ export default function EmployerDashboardPage() {
               <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider px-1">Active Roles ({roles.length})</h3>
               <div className="space-y-2">
                 {roles.map((role) => (
-                  <button
+                  <div
                     key={role.id}
-                    onClick={() => setSelectedRole(role)}
-                    className={`w-full text-left px-4 py-3 rounded-lg border transition-all ${
-                      selectedRole?.id === role.id 
+                    role="button"
+                    tabIndex={0}
+                    onClick={() => setSelectedRoleId(role.id)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        setSelectedRoleId(role.id);
+                      }
+                    }}
+                    className={`w-full text-left px-4 py-3 rounded-lg border transition-all cursor-pointer outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-1 ${
+                      selectedRoleId === role.id 
                         ? "bg-white border-[#1a56db] shadow-sm ring-1 ring-[#1a56db]/10" 
                         : "bg-transparent border-slate-200 hover:bg-slate-100/50"
                     }`}
@@ -240,7 +249,7 @@ export default function EmployerDashboardPage() {
                         </span>
                       )}
                     </div>
-                  </button>
+                  </div>
                 ))}
               </div>
             </div>

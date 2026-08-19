@@ -79,6 +79,7 @@ export default function AdminDashboardPage() {
   const { user } = useAuth();
   const [candidates, setCandidates] = useState<CandidateAdminRecord[]>([]);
   const [loading, setLoading] = useState(true);
+  const [hasLoadedCandidates, setHasLoadedCandidates] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [selectedCandidate, setSelectedCandidate] = useState<CandidateAdminRecord | null>(null);
 
@@ -123,6 +124,7 @@ export default function AdminDashboardPage() {
       setError(err.message || "Failed to fetch candidates from server");
     } finally {
       setLoading(false);
+      setHasLoadedCandidates(true);
     }
   }, [user]);
 
@@ -171,6 +173,7 @@ export default function AdminDashboardPage() {
 
         setCandidates(candidateRecords);
         setLoading(false);
+        setHasLoadedCandidates(true);
       },
       (error) => {
         console.warn("Firestore onSnapshot error, using API fallback:", error);
@@ -232,6 +235,11 @@ export default function AdminDashboardPage() {
         if (!res.ok) {
           throw new Error(data.error || "Failed to update verification status");
         }
+
+        // If we fell back to the API route, it means our local onSnapshot might be dead
+        // (e.g. due to outdated firestore.rules in production).
+        // We must re-fetch from the server to guarantee React state matches Firestore truth.
+        await fetchCandidates();
       }
 
       if (effectiveActionType === "verified") {
@@ -546,7 +554,11 @@ export default function AdminDashboardPage() {
                 <span className="text-xs font-bold uppercase tracking-wider text-zinc-500">Verification Queue</span>
                 <Clock className="h-4 w-4 text-amber-500" />
               </div>
-              <p className="mt-2 text-3xl font-bold tracking-tight text-zinc-900">{pendingCount}</p>
+              {hasLoadedCandidates ? (
+                <p className="mt-2 text-3xl font-bold tracking-tight text-zinc-900">{pendingCount}</p>
+              ) : (
+                <div className="mt-2 h-9 w-16 animate-pulse rounded bg-zinc-200" />
+              )}
               <p className="mt-1 text-[11px] text-zinc-400">Awaiting codebase review</p>
             </CardContent>
           </Card>
@@ -557,8 +569,14 @@ export default function AdminDashboardPage() {
                 <span className="text-xs font-bold uppercase tracking-wider text-zinc-500">Verified Talent</span>
                 <ShieldCheck className="h-4 w-4 text-emerald-600" />
               </div>
-              <p className="mt-2 text-3xl font-bold tracking-tight text-zinc-900">{verifiedCount}</p>
-              <p className="mt-1 text-[11px] text-zinc-400">{verifiedRate}% verification pass rate</p>
+              {hasLoadedCandidates ? (
+                <p className="mt-2 text-3xl font-bold tracking-tight text-zinc-900">{verifiedCount}</p>
+              ) : (
+                <div className="mt-2 h-9 w-16 animate-pulse rounded bg-zinc-200" />
+              )}
+              <p className="mt-1 text-[11px] text-zinc-400">
+                {hasLoadedCandidates ? `${verifiedRate}% verification pass rate` : "Calculating..."}
+              </p>
             </CardContent>
           </Card>
 
@@ -568,7 +586,11 @@ export default function AdminDashboardPage() {
                 <span className="text-xs font-bold uppercase tracking-wider text-zinc-500">Action Required</span>
                 <AlertTriangle className="h-4 w-4 text-amber-600" />
               </div>
-              <p className="mt-2 text-3xl font-bold tracking-tight text-zinc-900">{changesCount}</p>
+              {hasLoadedCandidates ? (
+                <p className="mt-2 text-3xl font-bold tracking-tight text-zinc-900">{changesCount}</p>
+              ) : (
+                <div className="mt-2 h-9 w-16 animate-pulse rounded bg-zinc-200" />
+              )}
               <p className="mt-1 text-[11px] text-zinc-400">Feedback sent to candidate</p>
             </CardContent>
           </Card>
@@ -579,7 +601,11 @@ export default function AdminDashboardPage() {
                 <span className="text-xs font-bold uppercase tracking-wider text-zinc-500">Total Registered</span>
                 <Layers className="h-4 w-4 text-indigo-600" />
               </div>
-              <p className="mt-2 text-3xl font-bold tracking-tight text-zinc-900">{totalCount}</p>
+              {hasLoadedCandidates ? (
+                <p className="mt-2 text-3xl font-bold tracking-tight text-zinc-900">{totalCount}</p>
+              ) : (
+                <div className="mt-2 h-9 w-16 animate-pulse rounded bg-zinc-200" />
+              )}
               <p className="mt-1 text-[11px] text-zinc-400">Candidate portfolios</p>
             </CardContent>
           </Card>
@@ -596,7 +622,7 @@ export default function AdminDashboardPage() {
             }`}
           >
             <Clock className="h-4 w-4" />
-            <span>Pending Review Queue ({pendingCount})</span>
+            <span>Pending Review Queue ({hasLoadedCandidates ? pendingCount : "..."})</span>
           </button>
 
           <button
@@ -608,7 +634,7 @@ export default function AdminDashboardPage() {
             }`}
           >
             <Layers className="h-4 w-4" />
-            <span>Candidate Directory ({filteredCandidates.length})</span>
+            <span>Candidate Directory ({hasLoadedCandidates ? filteredCandidates.length : "..."})</span>
           </button>
 
           <button
@@ -632,7 +658,7 @@ export default function AdminDashboardPage() {
             }`}
           >
             <History className="h-4 w-4" />
-            <span>Audit Trail &amp; History ({auditLogs.length})</span>
+            <span>Audit Trail &amp; History ({hasLoadedCandidates ? auditLogs.length : "..."})</span>
           </button>
         </div>
 
@@ -648,7 +674,15 @@ export default function AdminDashboardPage() {
 
             <Card>
               <CardContent className="p-0">
-                {queueCandidates.length === 0 ? (
+                {!hasLoadedCandidates ? (
+                  <div className="flex min-h-[250px] flex-col items-center justify-center space-y-3 p-12 text-center">
+                    <Loader2 className="h-6 w-6 animate-spin text-zinc-400" />
+                    <p className="text-sm font-semibold text-zinc-900">Loading candidate records...</p>
+                    <p className="text-xs text-zinc-500 max-w-sm">
+                      Synchronizing priority verification queue with the server.
+                    </p>
+                  </div>
+                ) : queueCandidates.length === 0 ? (
                   <div className="flex min-h-[250px] flex-col items-center justify-center space-y-3 p-12 text-center">
                     <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600 border border-emerald-100">
                       <CheckCircle2 className="h-6 w-6" />
@@ -777,7 +811,23 @@ export default function AdminDashboardPage() {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-zinc-100">
-                      {filteredCandidates.map((c) => (
+                      {!hasLoadedCandidates ? (
+                        <tr>
+                          <td colSpan={6} className="px-6 py-12 text-center">
+                            <div className="flex flex-col items-center justify-center space-y-3">
+                              <Loader2 className="h-5 w-5 animate-spin text-zinc-400" />
+                              <p className="text-sm font-medium text-zinc-500">Loading directory...</p>
+                            </div>
+                          </td>
+                        </tr>
+                      ) : filteredCandidates.length === 0 ? (
+                        <tr>
+                          <td colSpan={6} className="px-6 py-8 text-center text-sm text-zinc-500">
+                            No candidates found matching the current filters.
+                          </td>
+                        </tr>
+                      ) : (
+                        filteredCandidates.map((c) => (
                         <tr key={c.uid} className="hover:bg-zinc-50/70 transition-colors">
                           <td className="px-6 py-4">
                             <div className="font-semibold text-zinc-900">{c.name || "Unnamed"}</div>
@@ -824,7 +874,8 @@ export default function AdminDashboardPage() {
                             </Button>
                           </td>
                         </tr>
-                      ))}
+                      ))
+                      )}
                     </tbody>
                   </table>
                 </div>
@@ -847,8 +898,14 @@ export default function AdminDashboardPage() {
                   <span className="text-xs font-bold uppercase tracking-wider text-zinc-500">Verification Rate</span>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-3xl font-bold text-zinc-900">{verifiedRate}%</p>
-                  <p className="mt-1 text-xs text-zinc-500">{verifiedCount} verified out of {totalCount} total</p>
+                  {hasLoadedCandidates ? (
+                    <>
+                      <p className="text-3xl font-bold text-zinc-900">{verifiedRate}%</p>
+                      <p className="mt-1 text-xs text-zinc-500">{verifiedCount} verified out of {totalCount} total</p>
+                    </>
+                  ) : (
+                    <div className="h-9 w-16 animate-pulse rounded bg-zinc-200" />
+                  )}
                 </CardContent>
               </Card>
 
@@ -857,10 +914,16 @@ export default function AdminDashboardPage() {
                   <span className="text-xs font-bold uppercase tracking-wider text-zinc-500">Assessment Readiness</span>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-3xl font-bold text-indigo-600">
-                    {candidates.filter(c => c.verificationStatus === 'verified').length}
-                  </p>
-                  <p className="mt-1 text-xs text-zinc-500">Passed Python technical audit</p>
+                  {hasLoadedCandidates ? (
+                    <>
+                      <p className="text-3xl font-bold text-indigo-600">
+                        {candidates.filter(c => c.verificationStatus === 'verified').length}
+                      </p>
+                      <p className="mt-1 text-xs text-zinc-500">Passed Python technical audit</p>
+                    </>
+                  ) : (
+                    <div className="h-9 w-16 animate-pulse rounded bg-zinc-200" />
+                  )}
                 </CardContent>
               </Card>
 
@@ -869,10 +932,16 @@ export default function AdminDashboardPage() {
                   <span className="text-xs font-bold uppercase tracking-wider text-zinc-500">Repositories Submitted</span>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-3xl font-bold text-zinc-900">
-                    {candidates.reduce((acc, c) => acc + (c.projects?.length || 0), 0)}
-                  </p>
-                  <p className="mt-1 text-xs text-zinc-500">Production codebases attached</p>
+                  {hasLoadedCandidates ? (
+                    <>
+                      <p className="text-3xl font-bold text-zinc-900">
+                        {candidates.reduce((acc, c) => acc + (c.projects?.length || 0), 0)}
+                      </p>
+                      <p className="mt-1 text-xs text-zinc-500">Production codebases attached</p>
+                    </>
+                  ) : (
+                    <div className="h-9 w-16 animate-pulse rounded bg-zinc-200" />
+                  )}
                 </CardContent>
               </Card>
             </div>
@@ -889,7 +958,12 @@ export default function AdminDashboardPage() {
 
             <Card>
               <CardContent className="p-0">
-                {auditLogs.length === 0 ? (
+                {!hasLoadedCandidates ? (
+                  <div className="p-12 text-center text-xs text-zinc-500 flex flex-col items-center justify-center space-y-3">
+                    <Loader2 className="h-5 w-5 animate-spin text-zinc-400" />
+                    <p className="font-medium">Loading audit logs...</p>
+                  </div>
+                ) : auditLogs.length === 0 ? (
                   <div className="p-12 text-center text-xs text-zinc-500">
                     No decisions logged yet.
                   </div>
