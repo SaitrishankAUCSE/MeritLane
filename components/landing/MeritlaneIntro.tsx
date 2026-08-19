@@ -5,14 +5,16 @@ import { AnimatePresence, motion } from "framer-motion";
 import { HandwritingSvg } from "@/components/ui/handwriting-svg";
 
 export function MeritlaneIntro() {
-  const [show, setShow] = useState(false);
+  const [show, setShow] = useState(true); // Default true to prevent SSR flash of homepage
   const [isClient, setIsClient] = useState(false);
+  const [isReturning, setIsReturning] = useState(false);
 
   useEffect(() => {
     setIsClient(true);
     const seen = sessionStorage.getItem("meritlane_intro_seen");
-    if (!seen) {
-      setShow(true);
+    if (seen) {
+      setIsReturning(true);
+      setShow(false);
     }
   }, []);
 
@@ -33,9 +35,6 @@ export function MeritlaneIntro() {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [show, finishIntro]);
 
-  // Don't render anything during SSR to avoid hydration mismatch
-  if (!isClient) return null;
-
   return (
     <AnimatePresence>
       {show && (
@@ -43,7 +42,7 @@ export function MeritlaneIntro() {
           className="fixed inset-0 z-50 flex items-center justify-center bg-white cursor-pointer"
           initial={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          transition={{ duration: 0.6, ease: "easeInOut" }}
+          transition={{ duration: isReturning ? 0 : 0.6, ease: "easeInOut" }}
           onClick={finishIntro}
           role="button"
           tabIndex={0}
@@ -53,19 +52,21 @@ export function MeritlaneIntro() {
           aria-label="Skip introduction animation"
         >
           <div className="w-full max-w-md px-8 text-center" onClick={(e) => e.stopPropagation()}>
-            <HandwritingSvg 
-              text="MeritLane" 
-              className="text-zinc-900 mx-auto" 
-              fontUrl="/fonts/IndieFlower-Regular.ttf"
-              width={320}
-              height={160}
-              fontSize={72}
-              strokeWidth={1.5}
-              duration={3.0}
-              onAnimationComplete={() => {
-                setTimeout(finishIntro, 800);
-              }}
-            />
+            {isClient && (
+              <HandwritingSvg 
+                text="MeritLane" 
+                className="text-zinc-900 mx-auto" 
+                fontUrl="/fonts/IndieFlower-Regular.ttf"
+                width={320}
+                height={160}
+                fontSize={72}
+                strokeWidth={1.5}
+                duration={3.0}
+                onAnimationComplete={() => {
+                  setTimeout(finishIntro, 800);
+                }}
+              />
+            )}
           </div>
         </motion.div>
       )}
