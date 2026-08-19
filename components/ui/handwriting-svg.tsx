@@ -21,6 +21,7 @@ interface HandwritingSvgProps {
   height?: number;
   fontSize?: number;
   ease?: "linear" | "easeIn" | "easeOut" | "easeInOut";
+  onAnimationComplete?: () => void;
 }
 
 export function HandwritingSvg({
@@ -36,6 +37,7 @@ export function HandwritingSvg({
   height = 100,
   fontSize = 48,
   ease = "easeInOut",
+  onAnimationComplete,
 }: HandwritingSvgProps) {
   const [path, setPath] = useState<string | null>(pathProp ?? null);
   const [viewBox, setViewBox] = useState(`${0} ${0} ${width} ${height}`);
@@ -151,6 +153,7 @@ export function HandwritingSvg({
         initial={{ pathLength: 0 }}
         animate={{ pathLength: 1 }}
         transition={{ delay, duration, ease }}
+        onAnimationComplete={onAnimationComplete}
       />
     </svg>
   );
