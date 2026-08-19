@@ -55,7 +55,7 @@ export function MeritlaneIntro() {
           <div className="w-full max-w-md px-8 text-center" onClick={(e) => e.stopPropagation()}>
             <HandwritingSvg 
               text="MeritLane" 
-              className="text-slate-900 mx-auto" 
+              className="text-zinc-900 mx-auto" 
               fontUrl="/fonts/IndieFlower-Regular.ttf"
               width={320}
               height={160}

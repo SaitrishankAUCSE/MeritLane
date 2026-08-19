@@ -140,7 +140,7 @@ export default function LoginPage() {
     <div className="flex min-h-[85vh] items-center justify-center px-4 py-12">
       <div className="w-full max-w-md rounded-2xl border border-zinc-200/90 bg-white p-8 sm:p-10 shadow-[0_4px_24px_rgba(0,0,0,0.03)]">
         <div className="text-center">
-          <div className="mx-auto mb-4 flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600 shadow-sm">
+          <div className="mx-auto mb-4 flex h-10 w-10 items-center justify-center rounded-xl bg-zinc-50 text-zinc-600 shadow-sm">
             <ShieldCheck className="h-5 w-5" />
           </div>
           <h1 className="text-2xl font-bold tracking-tight text-zinc-900">
@@ -230,7 +230,7 @@ export default function LoginPage() {
 
         <p className="mt-8 text-center text-sm text-zinc-500">
           Don&apos;t have an account?{" "}
-          <Link href="/signup" className="font-semibold text-zinc-900 hover:text-indigo-600 transition-colors underline-offset-4 hover:underline">
+          <Link href="/signup" className="font-semibold text-zinc-900 hover:text-zinc-600 transition-colors underline-offset-4 hover:underline">
             Sign up
           </Link>
         </p>

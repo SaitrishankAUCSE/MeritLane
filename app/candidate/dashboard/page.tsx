@@ -39,25 +39,25 @@ export default function CandidateDashboardPage() {
 
   if (loading || dataLoading) {
     return (
-      <div className="min-h-screen bg-slate-50 pb-24 pt-10">
+      <div className="min-h-screen bg-zinc-50 pb-24 pt-10">
         <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 space-y-6 animate-fade-up">
-          <div className="flex items-center justify-between border-b border-slate-200 pb-4">
-            <div className="h-8 w-64 rounded bg-slate-200 animate-shimmer"></div>
-            <div className="h-9 w-28 rounded-md bg-slate-200 animate-shimmer"></div>
+          <div className="flex items-center justify-between border-b border-zinc-200 pb-4">
+            <div className="h-8 w-64 rounded bg-zinc-200 animate-shimmer"></div>
+            <div className="h-9 w-28 rounded-md bg-zinc-200 animate-shimmer"></div>
           </div>
-          <Card className="border-slate-200 shadow-sm">
+          <Card className="border-zinc-200 shadow-sm">
             <CardContent className="p-6">
               <div className="flex flex-col sm:flex-row gap-5 items-start">
-                <div className="h-12 w-12 rounded bg-slate-200 animate-shimmer shrink-0"></div>
+                <div className="h-12 w-12 rounded bg-zinc-200 animate-shimmer shrink-0"></div>
                 <div className="flex-1 space-y-3 w-full">
                   <div className="flex items-center gap-2 mb-1">
-                    <div className="h-6 w-48 rounded bg-slate-200 animate-shimmer"></div>
-                    <div className="h-6 w-24 rounded-full bg-slate-200 animate-shimmer"></div>
+                    <div className="h-6 w-48 rounded bg-zinc-200 animate-shimmer"></div>
+                    <div className="h-6 w-24 rounded-full bg-zinc-200 animate-shimmer"></div>
                   </div>
-                  <div className="h-4 w-3/4 rounded bg-slate-200 animate-shimmer"></div>
-                  <div className="h-4 w-1/2 rounded bg-slate-200 animate-shimmer"></div>
+                  <div className="h-4 w-3/4 rounded bg-zinc-200 animate-shimmer"></div>
+                  <div className="h-4 w-1/2 rounded bg-zinc-200 animate-shimmer"></div>
                   <div className="pt-2">
-                    <div className="h-10 w-48 rounded-md bg-slate-200 animate-shimmer"></div>
+                    <div className="h-10 w-48 rounded-md bg-zinc-200 animate-shimmer"></div>
                   </div>
                 </div>
               </div>
@@ -72,12 +72,12 @@ export default function CandidateDashboardPage() {
   const isProfileComplete = profile && profile.name && profile.college && profile.skills && profile.skills.length > 0 && profile.projects && profile.projects.length > 0;
 
   return (
-    <div className="min-h-screen bg-slate-50 pb-24 pt-10">
+    <div className="min-h-screen bg-zinc-50 pb-24 pt-10">
       <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 space-y-6">
         
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-slate-200 pb-4">
-          <h1 className="text-2xl font-bold text-slate-900">Candidate Dashboard</h1>
+        <div className="flex items-center justify-between border-b border-zinc-200 pb-4">
+          <h1 className="text-2xl font-bold text-zinc-900">Candidate Dashboard</h1>
           <Button
             variant="outline"
             size="sm"
@@ -88,7 +88,7 @@ export default function CandidateDashboardPage() {
         </div>
 
         {/* Status Card */}
-        <Card className="border-slate-200 shadow-sm">
+        <Card className="border-zinc-200 shadow-sm">
           <CardContent className="p-6">
             <div className="flex flex-col sm:flex-row gap-5 items-start">
               {/* Icon */}
@@ -101,7 +101,7 @@ export default function CandidateDashboardPage() {
                   <AlertTriangle className="h-6 w-6" />
                 </div>
               ) : (
-                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded bg-slate-100 border border-slate-200 text-slate-600">
+                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded bg-zinc-100 border border-zinc-200 text-zinc-600">
                   <span className="font-semibold text-lg">!</span>
                 </div>
               )}
@@ -110,7 +110,7 @@ export default function CandidateDashboardPage() {
               <div className="flex-1 space-y-3">
                 <div>
                   <div className="flex items-center gap-2 mb-1">
-                    <h2 className="text-lg font-bold text-slate-900">
+                    <h2 className="text-lg font-bold text-zinc-900">
                       {status === "verified" ? "Profile Verified" :
                        status === "pending" ? "Verification Pending" :
                        status === "changes_required" ? "Action Required" :
@@ -121,7 +121,7 @@ export default function CandidateDashboardPage() {
                       {status.replace('_', ' ').toUpperCase()}
                     </Badge>
                   </div>
-                  <p className="text-sm text-slate-600">
+                  <p className="text-sm text-zinc-600">
                     {status === "verified" ? "You have successfully passed the skill assessment. Your profile is now visible to employers in the Meritlane directory." :
                      status === "pending" ? "Your profile has been submitted. The next step is to pass the technical skill assessment to prove your abilities." :
                      status === "changes_required" ? "Your profile was reviewed but requires updates before you can proceed." :
@@ -167,23 +167,23 @@ export default function CandidateDashboardPage() {
 
         {/* Verified Skills & Scores (Only shown if verified or has scores) */}
         {userProfile?.assessmentScores && Object.keys(userProfile.assessmentScores).length > 0 && (
-          <Card className="border-slate-200 shadow-sm">
-            <CardHeader className="border-b border-slate-100 bg-slate-50/50 pb-4">
-              <h2 className="text-sm font-bold text-slate-900 uppercase tracking-wide">Verified Technical Skills</h2>
+          <Card className="border-zinc-200 shadow-sm">
+            <CardHeader className="border-b border-zinc-100 bg-zinc-50/50 pb-4">
+              <h2 className="text-sm font-bold text-zinc-900 uppercase tracking-wide">Verified Technical Skills</h2>
             </CardHeader>
             <CardContent className="p-0">
-              <ul className="divide-y divide-slate-100">
+              <ul className="divide-y divide-zinc-100">
                 {Object.entries(userProfile.assessmentScores).map(([skill, score]) => (
                   <li key={skill} className="flex items-center justify-between p-4 sm:px-6">
                     <div>
-                      <p className="text-sm font-semibold text-slate-900">
+                      <p className="text-sm font-semibold text-zinc-900">
                         {skill.replace('python_', 'Python (Variant ').replace('_', ' ').toUpperCase() + (skill.startsWith('python_') ? ')' : '')}
                       </p>
-                      <p className="text-xs text-slate-500 mt-0.5">Proctored Assessment Passed</p>
+                      <p className="text-xs text-zinc-500 mt-0.5">Proctored Assessment Passed</p>
                     </div>
                     <div className="text-right">
-                      <p className="text-sm font-bold text-slate-900">{score} / 5</p>
-                      <p className="text-xs text-slate-500">Score</p>
+                      <p className="text-sm font-bold text-zinc-900">{score} / 5</p>
+                      <p className="text-xs text-zinc-500">Score</p>
                     </div>
                   </li>
                 ))}
@@ -194,19 +194,19 @@ export default function CandidateDashboardPage() {
 
         {/* Submitted Projects (Only shown if projects exist) */}
         {profile?.projects && profile.projects.length > 0 && (
-          <Card className="border-slate-200 shadow-sm">
-            <CardHeader className="border-b border-slate-100 bg-slate-50/50 pb-4">
-              <h2 className="text-sm font-bold text-slate-900 uppercase tracking-wide">Submitted Projects</h2>
+          <Card className="border-zinc-200 shadow-sm">
+            <CardHeader className="border-b border-zinc-100 bg-zinc-50/50 pb-4">
+              <h2 className="text-sm font-bold text-zinc-900 uppercase tracking-wide">Submitted Projects</h2>
             </CardHeader>
             <CardContent className="p-0">
-              <ul className="divide-y divide-slate-100">
+              <ul className="divide-y divide-zinc-100">
                 {profile.projects.map((project, index) => (
                   <li key={project.id} className="p-4 sm:px-6">
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                       <div>
-                        <h3 className="text-sm font-semibold text-slate-900">{project.title || `Project ${index + 1}`}</h3>
+                        <h3 className="text-sm font-semibold text-zinc-900">{project.title || `Project ${index + 1}`}</h3>
                         {project.description && (
-                          <p className="mt-1 text-sm text-slate-600 line-clamp-2">{project.description}</p>
+                          <p className="mt-1 text-sm text-zinc-600 line-clamp-2">{project.description}</p>
                         )}
                       </div>
                       {project.repoUrl && (
@@ -215,7 +215,7 @@ export default function CandidateDashboardPage() {
                             href={project.repoUrl} 
                             target="_blank" 
                             rel="noopener noreferrer"
-                            className="inline-flex items-center gap-1.5 text-sm font-medium text-[#1a56db] hover:underline"
+                            className="inline-flex items-center gap-1.5 text-sm font-medium text-zinc-900 hover:underline"
                           >
                             <ExternalLink className="h-4 w-4" />
                             Repository

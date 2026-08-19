@@ -21,7 +21,7 @@ export function Input({
   return (
     <div className="flex flex-col gap-1.5 w-full text-left">
       {label && (
-        <label htmlFor={inputId} className="text-sm font-semibold text-slate-900">
+        <label htmlFor={inputId} className="text-sm font-semibold text-zinc-900">
           {label}
         </label>
       )}
@@ -29,7 +29,7 @@ export function Input({
         <input
           id={inputId}
           disabled={disabled}
-          className={`w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 transition-all hover:border-slate-400 focus:border-[#1a56db] focus:outline-none focus:ring-1 focus:ring-[#1a56db] disabled:opacity-50 disabled:bg-slate-50 ${
+          className={`w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 placeholder:text-zinc-400 transition-all hover:border-zinc-400 focus:border-zinc-900 focus:outline-none focus:ring-1 focus:ring-zinc-900 disabled:opacity-50 disabled:bg-zinc-50 ${
             error
               ? "border-red-500 hover:border-red-600 focus:border-red-500 focus:ring-red-500 text-red-900 pr-10"
               : ""
@@ -43,7 +43,7 @@ export function Input({
         )}
       </div>
       {helperText && !error && (
-        <p className="text-xs text-slate-500">{helperText}</p>
+        <p className="text-xs text-zinc-500">{helperText}</p>
       )}
       {error && (
         <p className="text-xs font-medium text-red-600 animate-in fade-in duration-150">

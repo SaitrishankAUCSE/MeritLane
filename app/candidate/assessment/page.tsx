@@ -226,7 +226,7 @@ export default function AssessmentPage() {
       {/* Header */}
       <header className="flex items-center justify-between border-b border-zinc-800/80 bg-[#121215] px-6 py-3 shadow-xs">
         <div className="flex items-center gap-3">
-          <div className="flex h-7 w-7 items-center justify-center rounded-md bg-indigo-600 font-bold text-xs text-white shadow-sm">M</div>
+          <div className="flex h-7 w-7 items-center justify-center rounded-md bg-zinc-600 font-bold text-xs text-white shadow-sm">M</div>
           <span className="text-xs font-bold tracking-wider text-zinc-200 uppercase">Meritlane Technical Audit</span>
         </div>
         <div className={`flex items-center gap-2 rounded-md px-3.5 py-1.5 text-xs font-bold tracking-widest tabular-nums border transition-all ${
@@ -245,7 +245,7 @@ export default function AssessmentPage() {
         {/* Left Panel: Instructions */}
         <div className="w-[35%] border-r border-zinc-800/80 bg-[#121215] flex flex-col z-10 shadow-lg">
           <div className="flex items-center gap-2 border-b border-zinc-800/80 px-5 py-3.5 bg-zinc-900/30">
-            <FileCode2 className="h-4 w-4 text-indigo-400" />
+            <FileCode2 className="h-4 w-4 text-zinc-400" />
             <h2 className="text-xs font-bold text-zinc-300 uppercase tracking-wider">Problem Specification</h2>
           </div>
           <div className="flex-1 overflow-auto p-6 scrollbar-thin scrollbar-thumb-zinc-700 scrollbar-track-transparent">
@@ -275,7 +275,7 @@ export default function AssessmentPage() {
               value={code}
               onChange={(e) => setCode(e.target.value)}
               spellCheck={false}
-              className="h-full w-full resize-none bg-transparent font-mono text-[13.5px] leading-relaxed text-zinc-200 outline-none p-6 pb-20 selection:bg-indigo-500/30"
+              className="h-full w-full resize-none bg-transparent font-mono text-[13.5px] leading-relaxed text-zinc-200 outline-none p-6 pb-20 selection:bg-zinc-500/30"
               placeholder="Write your Python implementation here..."
             />
           </div>
@@ -299,7 +299,7 @@ export default function AssessmentPage() {
                 <button
                   onClick={() => handleTest(true)}
                   disabled={evaluating || timeLeft <= 0}
-                  className="flex items-center gap-1.5 rounded-md bg-indigo-600 px-4 py-1.5 text-xs font-semibold text-white hover:bg-indigo-500 active:scale-95 disabled:opacity-50 transition-all shadow-sm"
+                  className="flex items-center gap-1.5 rounded-md bg-zinc-600 px-4 py-1.5 text-xs font-semibold text-white hover:bg-zinc-500 active:scale-95 disabled:opacity-50 transition-all shadow-sm"
                 >
                   <CheckCircle2 className="h-3.5 w-3.5" />
                   Submit Assessment

@@ -60,22 +60,22 @@ export function TagInput({
   return (
     <div className={`flex flex-col gap-1.5 w-full text-left ${disabled ? "opacity-70 pointer-events-none" : ""}`}>
       {label && (
-        <label className="text-sm font-semibold text-slate-900">
+        <label className="text-sm font-semibold text-zinc-900">
           {label}
         </label>
       )}
-      <div className={`flex min-h-[42px] flex-wrap items-center gap-1.5 rounded-md border border-slate-300 px-2.5 py-1.5 transition-all duration-150 ease-out ${disabled ? "bg-slate-50" : "bg-white hover:border-slate-400 focus-within:border-[#1a56db] focus-within:ring-1 focus-within:ring-[#1a56db]"}`}>
+      <div className={`flex min-h-[42px] flex-wrap items-center gap-1.5 rounded-md border border-zinc-300 px-2.5 py-1.5 transition-all duration-150 ease-out ${disabled ? "bg-zinc-50" : "bg-white hover:border-zinc-400 focus-within:border-zinc-900 focus-within:ring-1 focus-within:ring-zinc-900"}`}>
         {tags.map((tag, idx) => (
           <span
             key={idx}
-            className="inline-flex items-center gap-1 rounded-sm bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-700 border border-slate-200 select-none"
+            className="inline-flex items-center gap-1 rounded-sm bg-zinc-100 px-2 py-0.5 text-xs font-medium text-zinc-700 border border-zinc-200 select-none"
           >
             {tag}
             {!disabled && (
               <button
                 type="button"
                 onClick={() => removeTag(idx)}
-                className="text-slate-400 hover:text-slate-700 focus:outline-none"
+                className="text-zinc-400 hover:text-zinc-700 focus:outline-none"
                 aria-label={`Remove ${tag}`}
                 disabled={disabled}
               >
@@ -93,13 +93,13 @@ export function TagInput({
               onKeyDown={handleKeyDown}
               onBlur={addTag}
               placeholder={tags.length === 0 ? placeholder : "Add more..."}
-              className="w-full bg-transparent px-1.5 py-1 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none"
+              className="w-full bg-transparent px-1.5 py-1 text-sm text-zinc-900 placeholder:text-zinc-400 focus:outline-none"
               disabled={disabled}
             />
           </div>
         )}
       </div>
-      {helperText && <p className="text-xs text-slate-500">{helperText}</p>}
+      {helperText && <p className="text-xs text-zinc-500">{helperText}</p>}
     </div>
   );
 }

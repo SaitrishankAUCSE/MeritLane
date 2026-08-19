@@ -39,7 +39,7 @@ export default function RoleSelector() {
   if (loading) {
     return (
       <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-white">
-        <Loader2 className="h-8 w-8 animate-spin text-indigo-600" />
+        <Loader2 className="h-8 w-8 animate-spin text-zinc-600" />
         <p className="mt-4 text-sm font-medium text-zinc-600">Setting up your profile...</p>
       </div>
     );
@@ -48,7 +48,7 @@ export default function RoleSelector() {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#fafafa] px-4">
       <div className="w-full max-w-xl text-center">
-        <div className="mx-auto mb-4 flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600 shadow-sm">
+        <div className="mx-auto mb-4 flex h-10 w-10 items-center justify-center rounded-xl bg-zinc-50 text-zinc-600 shadow-sm">
           <ShieldCheck className="h-5 w-5" />
         </div>
 
@@ -71,9 +71,9 @@ export default function RoleSelector() {
           <button
             type="button"
             onClick={() => handleSelectRole("candidate")}
-            className="group relative flex flex-col items-center justify-center gap-4 rounded-2xl border border-zinc-200 bg-white p-8 text-center shadow-sm transition-all duration-150 hover:border-indigo-600 hover:shadow-md active:scale-[0.98]"
+            className="group relative flex flex-col items-center justify-center gap-4 rounded-2xl border border-zinc-200 bg-white p-8 text-center shadow-sm transition-all duration-150 hover:border-zinc-600 hover:shadow-md active:scale-[0.98]"
           >
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600 group-hover:bg-indigo-600 group-hover:text-white transition-colors duration-150">
+            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-zinc-50 text-zinc-600 group-hover:bg-zinc-600 group-hover:text-white transition-colors duration-150">
               <Users className="h-5 w-5" />
             </div>
             <div>
@@ -88,9 +88,9 @@ export default function RoleSelector() {
           <button
             type="button"
             onClick={() => handleSelectRole("employer")}
-            className="group relative flex flex-col items-center justify-center gap-4 rounded-2xl border border-zinc-200 bg-white p-8 text-center shadow-sm transition-all duration-150 hover:border-indigo-600 hover:shadow-md active:scale-[0.98]"
+            className="group relative flex flex-col items-center justify-center gap-4 rounded-2xl border border-zinc-200 bg-white p-8 text-center shadow-sm transition-all duration-150 hover:border-zinc-600 hover:shadow-md active:scale-[0.98]"
           >
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-zinc-100 text-zinc-700 group-hover:bg-indigo-600 group-hover:text-white transition-colors duration-150">
+            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-zinc-100 text-zinc-700 group-hover:bg-zinc-600 group-hover:text-white transition-colors duration-150">
               <Briefcase className="h-5 w-5" />
             </div>
             <div>

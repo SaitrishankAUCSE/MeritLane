@@ -466,12 +466,12 @@ export default function AdminDashboardPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#fafafa] pb-24 pt-8">
+    <div className="min-h-[calc(100vh-64px)] pb-24 pt-12">
       {/* Toast Notification */}
       {successToast && (
-        <div className="fixed top-20 right-6 z-50 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-xs font-semibold text-emerald-900 shadow-lg animate-in fade-in slide-in-from-top-2 duration-150">
+        <div className="fixed top-20 right-6 z-50 rounded-xl border border-zinc-700 bg-zinc-900 px-4 py-3 text-xs font-semibold text-white shadow-lg animate-in fade-in slide-in-from-top-2 duration-150">
           <div className="flex items-center gap-2">
-            <CheckCircle2 className="h-4 w-4 text-emerald-600" />
+            <CheckCircle2 className="h-4 w-4 text-white" />
             <span>{successToast}</span>
           </div>
         </div>
@@ -599,7 +599,7 @@ export default function AdminDashboardPage() {
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <span className="text-xs font-bold uppercase tracking-wider text-zinc-500">Total Registered</span>
-                <Layers className="h-4 w-4 text-indigo-500" />
+                <Layers className="h-4 w-4 text-zinc-500" />
               </div>
               {hasLoadedCandidates ? (
                 <p className="mt-2 text-3xl font-bold tracking-tight text-zinc-900 animate-fade-up">{totalCount}</p>
@@ -617,7 +617,7 @@ export default function AdminDashboardPage() {
             onClick={() => setActiveTab("queue")}
             className={`flex items-center gap-2 border-b-2 px-5 py-3 text-xs font-bold uppercase tracking-wider transition-colors ${
               activeTab === "queue"
-                ? "border-indigo-600 text-indigo-600"
+                ? "border-zinc-600 text-zinc-600"
                 : "border-transparent text-zinc-500 hover:border-zinc-300 hover:text-zinc-900"
             }`}
           >
@@ -629,7 +629,7 @@ export default function AdminDashboardPage() {
             onClick={() => setActiveTab("directory")}
             className={`flex items-center gap-2 border-b-2 px-5 py-3 text-xs font-bold uppercase tracking-wider transition-colors ${
               activeTab === "directory"
-                ? "border-indigo-600 text-indigo-600"
+                ? "border-zinc-600 text-zinc-600"
                 : "border-transparent text-zinc-500 hover:border-zinc-300 hover:text-zinc-900"
             }`}
           >
@@ -641,7 +641,7 @@ export default function AdminDashboardPage() {
             onClick={() => setActiveTab("analytics")}
             className={`flex items-center gap-2 border-b-2 px-5 py-3 text-xs font-bold uppercase tracking-wider transition-colors ${
               activeTab === "analytics"
-                ? "border-indigo-600 text-indigo-600"
+                ? "border-zinc-600 text-zinc-600"
                 : "border-transparent text-zinc-500 hover:border-zinc-300 hover:text-zinc-900"
             }`}
           >
@@ -653,7 +653,7 @@ export default function AdminDashboardPage() {
             onClick={() => setActiveTab("audit")}
             className={`flex items-center gap-2 border-b-2 px-5 py-3 text-xs font-bold uppercase tracking-wider transition-colors ${
               activeTab === "audit"
-                ? "border-indigo-600 text-indigo-600"
+                ? "border-zinc-600 text-zinc-600"
                 : "border-transparent text-zinc-500 hover:border-zinc-300 hover:text-zinc-900"
             }`}
           >
@@ -771,7 +771,7 @@ export default function AdminDashboardPage() {
               {/* Filters */}
               <div className="flex flex-wrap items-center gap-3">
                 <div className="relative">
-                  <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-zinc-400" />
+                  <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -tranzinc-y-1/2 text-zinc-400" />
                   <input
                     type="text"
                     placeholder="Search name, college, skill..."
@@ -916,7 +916,7 @@ export default function AdminDashboardPage() {
                 <CardContent>
                   {hasLoadedCandidates ? (
                     <>
-                      <p className="text-3xl font-bold text-indigo-600">
+                      <p className="text-3xl font-bold text-zinc-600">
                         {candidates.filter(c => c.verificationStatus === 'verified').length}
                       </p>
                       <p className="mt-1 text-xs text-zinc-500">Passed Python technical audit</p>
@@ -1008,7 +1008,7 @@ export default function AdminDashboardPage() {
       {/* Candidate Review Modal */}
       {selectedCandidate && (
         <div 
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-xs overflow-y-auto"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-zinc-900/50 backdrop-blur-xs overflow-y-auto"
           role="dialog"
           aria-modal="true"
         >
@@ -1060,7 +1060,7 @@ export default function AdminDashboardPage() {
                   <div className="flex flex-wrap gap-1.5">
                     {selectedCandidate.skills && selectedCandidate.skills.length > 0 ? (
                       selectedCandidate.skills.map((skill, idx) => (
-                        <span key={idx} className="rounded-md bg-indigo-50 border border-indigo-100 px-2.5 py-1 text-xs font-semibold text-indigo-700">
+                        <span key={idx} className="rounded-md bg-zinc-50 border border-zinc-100 px-2.5 py-1 text-xs font-semibold text-zinc-700">
                           {skill}
                         </span>
                       ))
@@ -1075,7 +1075,7 @@ export default function AdminDashboardPage() {
                         href={selectedCandidate.githubUrl} 
                         target="_blank" 
                         rel="noreferrer"
-                        className="inline-flex items-center gap-1.5 text-indigo-600 hover:text-indigo-800 font-semibold"
+                        className="inline-flex items-center gap-1.5 text-zinc-600 hover:text-zinc-800 font-semibold"
                       >
                         <Code className="h-4 w-4" /> GitHub Profile <ExternalLink className="h-3 w-3" />
                       </a>
@@ -1085,7 +1085,7 @@ export default function AdminDashboardPage() {
                         href={selectedCandidate.resumeUrl} 
                         target="_blank" 
                         rel="noreferrer"
-                        className="inline-flex items-center gap-1.5 text-indigo-600 hover:text-indigo-800 font-semibold"
+                        className="inline-flex items-center gap-1.5 text-zinc-600 hover:text-zinc-800 font-semibold"
                       >
                         <FileText className="h-4 w-4" /> View Resume <ExternalLink className="h-3 w-3" />
                       </a>
@@ -1142,7 +1142,7 @@ export default function AdminDashboardPage() {
                           <h4 className="font-bold text-zinc-900 text-sm">{proj.title || `Project #${idx + 1}`}</h4>
                           <div className="flex items-center gap-3 text-xs">
                             {proj.repoUrl && (
-                              <a href={proj.repoUrl} target="_blank" rel="noreferrer" className="text-indigo-600 hover:underline inline-flex items-center gap-1 font-semibold">
+                              <a href={proj.repoUrl} target="_blank" rel="noreferrer" className="text-zinc-600 hover:underline inline-flex items-center gap-1 font-semibold">
                                 <Code className="h-3.5 w-3.5" /> Repository <ExternalLink className="h-3 w-3" />
                               </a>
                             )}

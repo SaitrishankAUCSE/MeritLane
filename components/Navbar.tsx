@@ -46,8 +46,8 @@ export default function Navbar() {
             href="/admin" 
             className={`px-3 py-1.5 rounded-sm text-sm font-medium transition-all duration-150 ${
               pathname === "/admin" 
-                ? "text-[#1a56db] bg-slate-100 font-semibold" 
-                : "text-slate-600 hover:text-slate-900 hover:bg-slate-50"
+                ? "text-zinc-900 bg-zinc-100 font-semibold" 
+                : "text-zinc-600 hover:text-zinc-900 hover:bg-zinc-50"
             }`}
           >
             Command Center
@@ -62,8 +62,8 @@ export default function Navbar() {
             href="/candidate/dashboard" 
             className={`px-3 py-1.5 rounded-sm text-sm font-medium transition-all duration-150 ${
               pathname === "/candidate/dashboard" 
-                ? "text-[#1a56db] bg-slate-100 font-semibold" 
-                : "text-slate-600 hover:text-slate-900 hover:bg-slate-50"
+                ? "text-zinc-900 bg-zinc-100 font-semibold" 
+                : "text-zinc-600 hover:text-zinc-900 hover:bg-zinc-50"
             }`}
           >
             Dashboard
@@ -72,8 +72,8 @@ export default function Navbar() {
             href="/candidate/profile" 
             className={`px-3 py-1.5 rounded-sm text-sm font-medium transition-all duration-150 ${
               pathname === "/candidate/profile" 
-                ? "text-[#1a56db] bg-slate-100 font-semibold" 
-                : "text-slate-600 hover:text-slate-900 hover:bg-slate-50"
+                ? "text-zinc-900 bg-zinc-100 font-semibold" 
+                : "text-zinc-600 hover:text-zinc-900 hover:bg-zinc-50"
             }`}
           >
             Profile
@@ -88,8 +88,8 @@ export default function Navbar() {
             href="/employer/dashboard" 
             className={`px-3 py-1.5 rounded-sm text-sm font-medium transition-all duration-150 ${
               pathname === "/employer/dashboard" 
-                ? "text-[#1a56db] bg-slate-100 font-semibold" 
-                : "text-slate-600 hover:text-slate-900 hover:bg-slate-50"
+                ? "text-zinc-900 bg-zinc-100 font-semibold" 
+                : "text-zinc-600 hover:text-zinc-900 hover:bg-zinc-50"
             }`}
           >
             Dashboard
@@ -101,14 +101,14 @@ export default function Navbar() {
   };
 
   const renderPublicLinks = () => (
-    <div className="hidden lg:flex items-center gap-6 text-sm font-medium text-slate-600">
+    <div className="hidden lg:flex items-center gap-6 text-sm font-medium text-zinc-600">
       {/* Intentionally left blank - no dead links allowed */}
     </div>
   );
 
   return (
     <header 
-      className={`sticky top-0 z-50 w-full bg-white transition-all duration-200 border-b border-slate-200 ${
+      className={`sticky top-0 z-50 w-full bg-white transition-all duration-200 border-b border-zinc-200 ${
         isScrolled ? "shadow-sm" : ""
       }`}
     >
@@ -116,12 +116,12 @@ export default function Navbar() {
         <div className="flex items-center gap-8">
           <Link 
             href={isUserAdmin ? "/admin" : "/"} 
-            className="flex items-center gap-2.5 font-bold tracking-tight text-[#1a56db] group select-none"
+            className="flex items-center gap-2.5 font-bold tracking-tight text-zinc-900 group select-none"
           >
             <ShieldCheck className="h-6 w-6" />
             <span className="text-xl tracking-tight">Meritlane</span>
             {isUserAdmin && (
-              <span className="rounded bg-slate-800 px-2 py-0.5 text-xs font-semibold text-white">
+              <span className="rounded bg-zinc-900 px-2 py-0.5 text-xs font-semibold text-white">
                 Admin
               </span>
             )}
@@ -139,22 +139,22 @@ export default function Navbar() {
         <div className="flex items-center gap-3">
           {isResolvingAuth ? (
             <div className="flex gap-2.5">
-              <div className="h-8 w-20 animate-pulse rounded bg-slate-100"></div>
-              <div className="h-8 w-24 animate-pulse rounded bg-slate-100"></div>
+              <div className="h-8 w-20 animate-pulse rounded bg-zinc-100"></div>
+              <div className="h-8 w-24 animate-pulse rounded bg-zinc-100"></div>
             </div>
           ) : user ? (
             <div className="hidden md:flex items-center gap-4">
               <div className="flex flex-col text-right">
-                <span className="text-sm font-medium text-slate-900 leading-tight">
+                <span className="text-sm font-medium text-zinc-900 leading-tight">
                   {isUserAdmin ? user?.email : (userProfile?.displayName || user?.email?.split('@')[0])}
                 </span>
-                <span className="text-xs font-medium text-slate-500 capitalize">
+                <span className="text-xs font-medium text-zinc-500 capitalize">
                   {isUserAdmin ? "Superadmin" : userProfile?.role}
                 </span>
               </div>
               <button
                 onClick={handleSignOut}
-                className="flex h-8 w-8 items-center justify-center rounded border border-slate-200 bg-slate-50 text-slate-600 transition-all duration-150 hover:border-red-200 hover:bg-red-50 hover:text-red-600 active:scale-95"
+                className="flex h-8 w-8 items-center justify-center rounded border border-zinc-200 bg-zinc-50 text-zinc-600 transition-all duration-150 hover:border-red-200 hover:bg-red-50 hover:text-red-600 active:scale-95"
                 title="Sign out"
               >
                 <LogOut className="h-3.5 w-3.5" />
@@ -162,11 +162,11 @@ export default function Navbar() {
             </div>
           ) : (
             <div className="hidden md:flex items-center gap-3">
-              <Link href="/login" className="text-sm font-medium text-slate-700 hover:text-[#1a56db]">
+              <Link href="/login" className="text-sm font-medium text-zinc-700 hover:text-zinc-900">
                 Log in
               </Link>
-              <span className="text-slate-300">|</span>
-              <Link href="/signup" className="text-sm font-medium text-slate-700 hover:text-[#1a56db]">
+              <span className="text-zinc-300">|</span>
+              <Link href="/signup" className="text-sm font-medium text-zinc-700 hover:text-zinc-900">
                 Register
               </Link>
               <Link href="/employer/dashboard" className="ml-2">
@@ -177,7 +177,7 @@ export default function Navbar() {
 
           {/* Mobile Menu Toggle */}
           <button 
-            className="md:hidden flex items-center justify-center h-9 w-9 rounded text-slate-600 hover:bg-slate-100 transition-colors"
+            className="md:hidden flex items-center justify-center h-9 w-9 rounded text-zinc-600 hover:bg-zinc-100 transition-colors"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             aria-label="Toggle navigation menu"
           >
@@ -188,14 +188,14 @@ export default function Navbar() {
 
       {/* Mobile Nav */}
       {mobileMenuOpen && (
-        <div className="md:hidden border-t border-slate-200 bg-white px-4 py-5 shadow-lg">
+        <div className="md:hidden border-t border-zinc-200 bg-white px-4 py-5 shadow-lg">
           {!isResolvingAuth && user && (
             <div className="space-y-4">
-              <div className="border-b border-slate-100 pb-3">
-                <p className="text-sm font-semibold text-slate-900">
+              <div className="border-b border-zinc-100 pb-3">
+                <p className="text-sm font-semibold text-zinc-900">
                   {isAdmin ? user?.email : (userProfile?.displayName || user?.email?.split('@')[0])}
                 </p>
-                <p className="text-xs text-slate-500 capitalize">
+                <p className="text-xs text-zinc-500 capitalize">
                   {isAdmin ? "Administrator" : userProfile?.role}
                 </p>
               </div>

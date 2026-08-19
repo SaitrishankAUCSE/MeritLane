@@ -24,7 +24,7 @@ export function Badge({
   if (variant === "verified") {
     return (
       <span
-        className={`${baseStyles} ${sizeStyles[size]} border-emerald-200 bg-emerald-50 text-emerald-800 font-semibold ${className}`}
+        className={`${baseStyles} ${sizeStyles[size]} border-emerald-200 bg-emerald-50 text-emerald-800 font-medium ${className}`}
       >
         <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600 shrink-0" />
         {children || "Verified"}
@@ -57,7 +57,7 @@ export function Badge({
   if (variant === "rejected") {
     return (
       <span
-        className={`${baseStyles} ${sizeStyles[size]} border-red-200 bg-red-50 text-red-700 font-medium ${className}`}
+        className={`${baseStyles} ${sizeStyles[size]} border-red-200 bg-red-50 text-red-800 font-medium ${className}`}
       >
         <XCircle className="h-3 w-3 text-red-600 shrink-0" />
         {children || "Not Verified"}
@@ -68,9 +68,9 @@ export function Badge({
   if (variant === "active") {
     return (
       <span
-        className={`${baseStyles} ${sizeStyles[size]} border-[#1a56db]/20 bg-[#1a56db]/10 text-[#1a56db] font-medium ${className}`}
+        className={`${baseStyles} ${sizeStyles[size]} border-zinc-900 bg-zinc-900 text-white font-medium ${className}`}
       >
-        <span className="h-1.5 w-1.5 rounded-full bg-[#1a56db] shrink-0" />
+        <span className="h-1.5 w-1.5 rounded-full bg-white shrink-0" />
         {children || "Active"}
       </span>
     );
@@ -78,7 +78,7 @@ export function Badge({
 
   return (
     <span
-      className={`${baseStyles} ${sizeStyles[size]} border-slate-200 bg-slate-100 text-slate-700 ${className}`}
+      className={`${baseStyles} ${sizeStyles[size]} border-zinc-200 bg-zinc-100 text-zinc-700 ${className}`}
     >
       {children}
     </span>

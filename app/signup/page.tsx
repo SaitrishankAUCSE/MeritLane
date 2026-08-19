@@ -137,7 +137,7 @@ export default function SignupPage() {
     <div className="flex min-h-[85vh] items-center justify-center px-4 py-12">
       <div className="w-full max-w-md rounded-2xl border border-zinc-200/90 bg-white p-8 sm:p-10 shadow-[0_4px_24px_rgba(0,0,0,0.03)]">
         <div className="text-center">
-          <div className="mx-auto mb-4 flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600 shadow-sm">
+          <div className="mx-auto mb-4 flex h-10 w-10 items-center justify-center rounded-xl bg-zinc-50 text-zinc-600 shadow-sm">
             <ShieldCheck className="h-5 w-5" />
           </div>
           <h1 className="text-2xl font-bold tracking-tight text-zinc-900">
@@ -166,11 +166,11 @@ export default function SignupPage() {
                 onClick={() => setRole("candidate")}
                 className={`flex flex-col items-center gap-2 rounded-xl border p-3.5 text-sm font-medium transition-all duration-150 select-none ${
                   role === "candidate"
-                    ? "border-indigo-600 bg-indigo-50/70 text-indigo-950 ring-1 ring-indigo-600 shadow-sm"
+                    ? "border-zinc-600 bg-zinc-50/70 text-zinc-950 ring-1 ring-zinc-600 shadow-sm"
                     : "border-zinc-200 bg-white text-zinc-600 hover:border-zinc-300 hover:bg-zinc-50/50"
                 }`}
               >
-                <Users className={`h-5 w-5 ${role === "candidate" ? "text-indigo-600" : "text-zinc-400"}`} />
+                <Users className={`h-5 w-5 ${role === "candidate" ? "text-zinc-600" : "text-zinc-400"}`} />
                 <span>Candidate</span>
               </button>
               <button
@@ -178,11 +178,11 @@ export default function SignupPage() {
                 onClick={() => setRole("employer")}
                 className={`flex flex-col items-center gap-2 rounded-xl border p-3.5 text-sm font-medium transition-all duration-150 select-none ${
                   role === "employer"
-                    ? "border-indigo-600 bg-indigo-50/70 text-indigo-950 ring-1 ring-indigo-600 shadow-sm"
+                    ? "border-zinc-600 bg-zinc-50/70 text-zinc-950 ring-1 ring-zinc-600 shadow-sm"
                     : "border-zinc-200 bg-white text-zinc-600 hover:border-zinc-300 hover:bg-zinc-50/50"
                 }`}
               >
-                <Briefcase className={`h-5 w-5 ${role === "employer" ? "text-indigo-600" : "text-zinc-400"}`} />
+                <Briefcase className={`h-5 w-5 ${role === "employer" ? "text-zinc-600" : "text-zinc-400"}`} />
                 <span>Employer</span>
               </button>
             </div>
@@ -253,7 +253,7 @@ export default function SignupPage() {
 
         <p className="mt-8 text-center text-sm text-zinc-500">
           Already have an account?{" "}
-          <Link href="/login" className="font-semibold text-zinc-900 hover:text-indigo-600 transition-colors underline-offset-4 hover:underline">
+          <Link href="/login" className="font-semibold text-zinc-900 hover:text-zinc-600 transition-colors underline-offset-4 hover:underline">
             Sign in
           </Link>
         </p>

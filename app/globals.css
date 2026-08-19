@@ -2,8 +2,15 @@
 
 @theme inline {
   --color-background: #ffffff;
-  --color-foreground: #0f172a;
-  --color-primary: #1a56db;
+  --color-foreground: #09090b;
+  --color-muted: #f4f4f5;
+  --color-muted-foreground: #71717a;
+  --color-border: #e4e4e7;
+  --color-primary: #09090b;
+  --color-primary-foreground: #ffffff;
+  --color-success: #16a34a;
+  --color-danger: #dc2626;
+  --color-warning: #d97706;
   --font-sans: var(--font-inter), "Inter", "Arial", "Helvetica", system-ui, sans-serif;
 }
 
@@ -15,7 +22,8 @@ html {
 }
 
 body {
-  background: var(--color-background);
+  background: radial-gradient(circle at top center, #eef2ff 0%, #ffffff 50%);
+  background-attachment: fixed;
   color: var(--color-foreground);
   font-family: var(--font-sans);
   min-height: 100vh;
@@ -94,13 +102,13 @@ body {
 }
 
 .animate-shimmer {
-  background: #f1f5f9;
+  background: #f4f4f5;
   background-image: linear-gradient(
     90deg,
-    #f1f5f9 0%,
-    #e2e8f0 20%,
-    #f1f5f9 40%,
-    #f1f5f9 100%
+    #f4f4f5 0%,
+    #e4e4e7 20%,
+    #f4f4f5 40%,
+    #f4f4f5 100%
   );
   background-repeat: no-repeat;
   background-size: 800px 100%;
