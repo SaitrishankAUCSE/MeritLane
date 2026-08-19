@@ -38,7 +38,14 @@ export function CandidateProofModal({ candidate, isOpen, onClose }: CandidatePro
           {/* Section: Match Reasons */}
           {candidate.matchReasons && candidate.matchReasons.length > 0 && (
             <div className="bg-emerald-50 border border-emerald-100 rounded-lg p-5">
-              <h3 className="text-sm font-bold text-emerald-900 uppercase tracking-wider mb-3">Why this candidate matches</h3>
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-3 gap-2">
+                <h3 className="text-sm font-bold text-emerald-900 uppercase tracking-wider">Why this candidate matches</h3>
+                {candidate.totalRequiredSkillCount > 0 && (
+                  <span className="text-xs font-bold text-emerald-800 bg-emerald-100/50 px-2 py-1 rounded w-fit">
+                    {candidate.matchedRequiredSkillCount} of {candidate.totalRequiredSkillCount} required skills
+                  </span>
+                )}
+              </div>
               <ul className="space-y-2">
                 {candidate.matchReasons.map((reason: string, idx: number) => (
                   <li key={idx} className="flex items-start gap-2 text-sm text-emerald-800">

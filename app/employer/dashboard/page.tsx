@@ -296,11 +296,14 @@ export default function EmployerDashboardPage() {
                               <div className="space-y-2">
                                 <span className="text-xs font-semibold text-slate-900 uppercase tracking-wider">Relevant Skills</span>
                                 <div className="flex flex-wrap gap-2">
-                                  {candidate.skills.slice(0, 6).map((skill: string) => (
+                                  {(candidate.matchedSkills || []).map((skill: string) => (
                                     <span key={skill} className="bg-slate-100 text-slate-700 px-2 py-1 rounded-md text-xs font-medium">
                                       {skill}
                                     </span>
                                   ))}
+                                  {(!candidate.matchedSkills || candidate.matchedSkills.length === 0) && (
+                                    <span className="text-xs text-slate-500 italic">No exact skill matches</span>
+                                  )}
                                 </div>
                               </div>
                             </div>
@@ -308,7 +311,14 @@ export default function EmployerDashboardPage() {
                             {/* Evidence & Action Sidebar */}
                             <div className="sm:w-64 shrink-0 flex flex-col space-y-4 border-l border-slate-100 sm:pl-6">
                               <div className="bg-emerald-50/50 rounded-lg p-3 space-y-2 border border-emerald-100/50">
-                                <span className="text-[10px] font-bold text-emerald-800 uppercase tracking-wider">Why this candidate matches</span>
+                                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1">
+                                  <span className="text-[10px] font-bold text-emerald-800 uppercase tracking-wider">Why this candidate matches</span>
+                                  {candidate.totalRequiredSkillCount > 0 && (
+                                    <span className="text-[10px] font-bold text-emerald-700 bg-emerald-100/50 px-1.5 py-0.5 rounded w-fit">
+                                      {candidate.matchedRequiredSkillCount} of {candidate.totalRequiredSkillCount} required skills
+                                    </span>
+                                  )}
+                                </div>
                                 <ul className="space-y-1.5">
                                   {candidate.matchReasons.map((reason: string, idx: number) => (
                                     <li key={idx} className="flex items-start gap-1.5 text-xs text-emerald-700 leading-tight">

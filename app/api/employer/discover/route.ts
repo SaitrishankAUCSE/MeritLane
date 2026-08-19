@@ -76,11 +76,6 @@ export async function POST(req: NextRequest) {
 
     // 5. Build Sanitized Candidates Array with Matching Logic
     const sanitizedCandidates = [];
-    const debugInfo: any = {
-      roleRequiredSkills: requiredSkills,
-      verifiedCandidateCount: candidatesSnapshot.docs.length,
-      evaluatedCandidates: []
-    };
 
     for (const doc of candidatesSnapshot.docs) {
       const data = doc.data() as CandidateProfile;
@@ -105,6 +100,7 @@ export async function POST(req: NextRequest) {
       }
 
       let matchedRequiredSkillCount = 0;
+      const matchedSkills: string[] = [];
 
       for (const reqSkill of requiredSkills) {
         const canonicalReq = canonicalize(reqSkill);
@@ -135,6 +131,7 @@ export async function POST(req: NextRequest) {
 
         if (matched) {
           matchedRequiredSkillCount++;
+          matchedSkills.push(reqSkill.trim());
         }
       }
 
@@ -161,15 +158,6 @@ export async function POST(req: NextRequest) {
       // Skip candidates with no matches if skills are required
       const isIncluded = requiredSkills.length === 0 || matchedRequiredSkillCount > 0;
 
-      debugInfo.evaluatedCandidates.push({
-        uid,
-        verificationStatus: data.verificationStatus,
-        skills: candidateSkills,
-        overlap: matchReasons,
-        included: isIncluded,
-        exclusionReason: isIncluded ? null : `matchedRequiredSkillCount=${matchedRequiredSkillCount}`
-      });
-
       if (!isIncluded) {
         continue;
       }
@@ -182,6 +170,9 @@ export async function POST(req: NextRequest) {
         branch: data.branch,
         gradYear: data.gradYear,
         skills: candidateSkills,
+        matchedSkills: Array.from(new Set(matchedSkills)),
+        matchedRequiredSkillCount,
+        totalRequiredSkillCount: requiredSkills.length,
         projects: projects,
         githubUrl: data.githubUrl,
         resumeUrl: data.resumeUrl,
@@ -192,13 +183,21 @@ export async function POST(req: NextRequest) {
     }
 
     // 6. Sort by overlap (highest first)
-    sanitizedCandidates.sort((a, b) => b.matchReasons.length - a.matchReasons.length);
+    // Primary sort: matched skills count. Secondary sort: total match reasons (projects + assessments)
+    sanitizedCandidates.sort((a, b) => {
+      if (b.matchedRequiredSkillCount !== a.matchedRequiredSkillCount) {
+        return b.matchedRequiredSkillCount - a.matchedRequiredSkillCount;
+      }
+      return b.matchReasons.length - a.matchReasons.length;
+    });
 
     if (sanitizedCandidates.length === 0) {
-      return NextResponse.json({ candidates: [], debug: debugInfo }, { status: 200 });
+      return NextResponse.json({ candidates: [] }, { status: 200 });
     }
 
-    return NextResponse.json({ candidates: sanitizedCandidates }, { status: 200 });
+    return NextResponse.json({ 
+      candidates: sanitizedCandidates 
+    }, { status: 200 });
   } catch (error: any) {
     console.error("Employer discover API error:", error);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
