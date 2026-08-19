@@ -59,6 +59,11 @@ export async function POST(req: NextRequest) {
 
     // 5. Build Sanitized Candidates Array with Matching Logic
     const sanitizedCandidates = [];
+    const debugInfo: any = {
+      roleRequiredSkills: requiredSkills,
+      verifiedCandidateCount: candidatesSnapshot.docs.length,
+      evaluatedCandidates: []
+    };
 
     for (const doc of candidatesSnapshot.docs) {
       const data = doc.data() as CandidateProfile;
@@ -85,24 +90,32 @@ export async function POST(req: NextRequest) {
       let matchedRequiredSkillCount = 0;
 
       for (const reqSkill of requiredSkills) {
-        const lowerSkill = reqSkill.toLowerCase();
+        const lowerSkill = reqSkill.trim().toLowerCase();
+        if (lowerSkill.length === 0) continue;
+        
         let matched = false;
 
         // 1. Check verified skills
-        if (candidateSkills.some(s => s.toLowerCase() === lowerSkill)) {
-          matchReasons.push(`${reqSkill} — verified`);
+        if (candidateSkills.some(s => {
+          const sLower = s.trim().toLowerCase();
+          return sLower.length > 0 && (lowerSkill.includes(sLower) || sLower.includes(lowerSkill));
+        })) {
+          matchReasons.push(`${reqSkill.trim()} — verified`);
           matched = true;
         }
 
         // 2. Check assessments
-        if (!matched && Object.keys(assessmentScores).some(k => k.toLowerCase().includes(lowerSkill))) {
-          matchReasons.push(`${reqSkill} — assessment completed`);
+        if (!matched && Object.keys(assessmentScores).some(k => {
+          const kLower = k.trim().toLowerCase();
+          return kLower.length > 0 && (lowerSkill.includes(kLower) || kLower.includes(lowerSkill));
+        })) {
+          matchReasons.push(`${reqSkill.trim()} — assessment completed`);
           matched = true;
         }
 
         // 3. Check projects
-        if (!matched && projects.some(p => p.title?.toLowerCase().includes(lowerSkill) || p.description?.toLowerCase().includes(lowerSkill))) {
-          matchReasons.push(`${reqSkill} — demonstrated in project`);
+        if (!matched && projects.some(p => p.title?.trim().toLowerCase().includes(lowerSkill) || p.description?.trim().toLowerCase().includes(lowerSkill))) {
+          matchReasons.push(`${reqSkill.trim()} — demonstrated in project`);
           matched = true;
         }
 
@@ -119,7 +132,10 @@ export async function POST(req: NextRequest) {
 
       // Add general project count reason
       const relevantProjectsCount = projects.filter(p => 
-        requiredSkills.some(s => p.title?.toLowerCase().includes(s.toLowerCase()) || p.description?.toLowerCase().includes(s.toLowerCase()))
+        requiredSkills.some(s => {
+          const lowerSkill = s.trim().toLowerCase();
+          return p.title?.trim().toLowerCase().includes(lowerSkill) || p.description?.trim().toLowerCase().includes(lowerSkill);
+        })
       ).length;
 
       if (relevantProjectsCount > 0) {
@@ -127,7 +143,18 @@ export async function POST(req: NextRequest) {
       }
 
       // Skip candidates with no matches if skills are required
-      if (requiredSkills.length > 0 && matchedRequiredSkillCount === 0 && relevantProjectsCount === 0 && testNames.length === 0) {
+      const isIncluded = !(requiredSkills.length > 0 && matchedRequiredSkillCount === 0 && relevantProjectsCount === 0 && testNames.length === 0);
+
+      debugInfo.evaluatedCandidates.push({
+        uid,
+        verificationStatus: data.verificationStatus,
+        skills: candidateSkills,
+        overlap: matchReasons,
+        included: isIncluded,
+        exclusionReason: isIncluded ? null : `matchedRequiredSkillCount=${matchedRequiredSkillCount}, relevantProjectsCount=${relevantProjectsCount}, testNames=${testNames.length}`
+      });
+
+      if (!isIncluded) {
         continue;
       }
 
@@ -150,6 +177,10 @@ export async function POST(req: NextRequest) {
 
     // 6. Sort by overlap (highest first)
     sanitizedCandidates.sort((a, b) => b.matchReasons.length - a.matchReasons.length);
+
+    if (sanitizedCandidates.length === 0) {
+      return NextResponse.json({ candidates: [], debug: debugInfo }, { status: 200 });
+    }
 
     return NextResponse.json({ candidates: sanitizedCandidates }, { status: 200 });
   } catch (error: any) {
