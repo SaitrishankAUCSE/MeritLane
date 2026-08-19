@@ -48,7 +48,18 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Role not found or does not belong to this employer" }, { status: 403 });
     }
 
-    const requiredSkills = targetRole.skills || [];
+    // Extract required skills safely
+    let requiredSkills: string[] = targetRole.skills || [];
+
+    // --- FIX FOR EXISTING PRODUCTION ROLE ---
+    if (requiredSkills.length === 1 && requiredSkills[0] === 'Python React Firebase') {
+      const fixedSkills = ['Python', 'React', 'Firebase'];
+      await adminDb.collection('employers').doc(employerUid).update({
+        roles: roles.map(r => r.id === roleId ? { ...r, skills: fixedSkills } : r)
+      });
+      requiredSkills = fixedSkills;
+    }
+    // ------------------------------------------
 
     // 4. Fetch Verified Candidates Only
     const candidatesSnapshot = await adminDb
@@ -130,7 +141,7 @@ export async function POST(req: NextRequest) {
       // Add general project count reason
       const relevantProjectsCount = projects.filter(p => 
         requiredSkills.some(s => {
-          const canonicalReq = canonicalize(s);
+          const canonicalReq = canonicalizeSkill(s);
           if (canonicalReq.length === 0) return false;
           const regex = new RegExp(`(^|\\W)${escapeRegExp(canonicalReq)}($|\\W)`, 'i');
           return (p.title && regex.test(p.title)) || (p.description && regex.test(p.description));
