@@ -35,9 +35,7 @@ export function HandwritingSvg({
     
     if (shouldReduceMotion) return;
 
-    console.log("HandwritingSvg loading font...");
     opentype.load("/fonts/IndieFlower-Regular.ttf", (err, font) => {
-      console.log("opentype.load callback", { err, hasFont: !!font, isMounted });
       if (!isMounted) return;
       if (err || !font) {
         console.error("Font could not be loaded:", err);
@@ -50,7 +48,6 @@ export function HandwritingSvg({
         const path = font.getPath(text, 0, 72, 72);
         const bbox = path.getBoundingBox();
         const d = path.toPathData(2);
-        console.log("Font loaded successfully, path generated", { bbox, dLength: d.length });
         
         // Add padding to ensure the stroke doesn't get clipped
         const paddingX = 10;

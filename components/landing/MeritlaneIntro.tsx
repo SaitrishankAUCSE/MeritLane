@@ -9,12 +9,11 @@ export function MeritlaneIntro() {
   const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
-    console.log("MeritlaneIntro mounted");
     setIsClient(true);
-    // const seen = sessionStorage.getItem("meritlane_intro_seen");
-    // if (!seen) {
+    const seen = sessionStorage.getItem("meritlane_intro_seen");
+    if (!seen) {
       setShow(true);
-    // }
+    }
   }, []);
 
   const finishIntro = useCallback(() => {
