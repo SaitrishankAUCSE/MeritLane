@@ -21,6 +21,15 @@ export function MeritlaneIntro() {
     sessionStorage.setItem("meritlane_intro_seen", "true");
   }, []);
 
+  // Auto-finish after animation
+  useEffect(() => {
+    if (!show) return;
+    const timer = setTimeout(() => {
+      finishIntro();
+    }, 3000);
+    return () => clearTimeout(timer);
+  }, [show, finishIntro]);
+
   // Handle Escape key
   useEffect(() => {
     if (!show) return;
@@ -55,11 +64,13 @@ export function MeritlaneIntro() {
           <div className="w-full max-w-md px-8 text-center" onClick={(e) => e.stopPropagation()}>
             <HandwritingSvg 
               text="Meritlane" 
-              className="text-slate-900" 
-              onAnimationComplete={() => {
-                // Wait a tiny bit after completion before fading out
-                setTimeout(finishIntro, 400);
-              }} 
+              className="text-slate-900 mx-auto" 
+              fontUrl="/fonts/IndieFlower-Regular.ttf"
+              width={320}
+              height={160}
+              fontSize={72}
+              strokeWidth={1.5}
+              duration={2.0}
             />
           </div>
         </motion.div>

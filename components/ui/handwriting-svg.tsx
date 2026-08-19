@@ -1,118 +1,159 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
-import { motion, useReducedMotion } from "framer-motion";
+import { motion } from "framer-motion";
 import * as opentype from "opentype.js";
+import { useEffect, useState } from "react";
+import { cn } from "@/lib/utils";
 
-export function cn(...classes: (string | undefined | null | false)[]) {
-  return classes.filter(Boolean).join(" ");
+const DEFAULT_FONT_URL =
+  "https://raw.githubusercontent.com/google/fonts/main/ofl/indieflower/IndieFlower-Regular.ttf";
+
+interface HandwritingSvgProps {
+  path?: string;
+  text?: string;
+  fontUrl?: string;
+  className?: string;
+  strokeClassName?: string;
+  duration?: number;
+  delay?: number;
+  strokeWidth?: number;
+  width?: number;
+  height?: number;
+  fontSize?: number;
+  ease?: "linear" | "easeIn" | "easeOut" | "easeInOut";
 }
 
-export function HandwritingSvg({ 
-  text = "Meritlane", 
-  className, 
-  onAnimationComplete 
-}: { 
-  text?: string, 
-  className?: string,
-  onAnimationComplete?: () => void 
-}) {
-  const [pathData, setPathData] = useState<{ d: string, viewBox: string } | null>(null);
-  const [error, setError] = useState(false);
-  const shouldReduceMotion = useReducedMotion();
+export function HandwritingSvg({
+  path: pathProp,
+  text,
+  fontUrl = DEFAULT_FONT_URL,
+  className,
+  strokeClassName,
+  duration = 2,
+  delay = 0.5,
+  strokeWidth = 2,
+  width = 100,
+  height = 100,
+  fontSize = 48,
+  ease = "easeInOut",
+}: HandwritingSvgProps) {
+  const [path, setPath] = useState<string | null>(pathProp ?? null);
+  const [viewBox, setViewBox] = useState(`${0} ${0} ${width} ${height}`);
+  const [loading, setLoading] = useState(!!text && !pathProp);
 
-  // If reduced motion is preferred, immediately signal completion
   useEffect(() => {
-    if (shouldReduceMotion && onAnimationComplete) {
-      // Small timeout to avoid React state updates during render
-      const t = setTimeout(() => onAnimationComplete(), 50);
-      return () => clearTimeout(t);
+    if (!text || pathProp) {
+      setPath(pathProp ?? null);
+      setViewBox(`0 0 ${width} ${height}`);
+      setLoading(false);
+      return;
     }
-  }, [shouldReduceMotion, onAnimationComplete]);
+    let cancelled = false;
+    setLoading(true);
+    fetch(fontUrl)
+      .then((res) => res.arrayBuffer())
+      .then((buffer) => {
+        if (cancelled) {
+          return;
+        }
+        const font = opentype.parse(buffer);
+        const p = font.getPath(text, 0, fontSize, fontSize);
+        const bbox = p.getBoundingBox();
+        const pad = 5;
+        const vx = Math.floor(bbox.x1) - pad;
+        const vy = Math.floor(bbox.y1) - pad;
+        const vw = Math.ceil(bbox.x2 - bbox.x1) + pad * 2;
+        const vh = Math.ceil(bbox.y2 - bbox.y1) + pad * 2;
+        setViewBox(`${vx} ${vy} ${vw} ${vh}`);
+        setPath(p.toPathData(2));
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setPath(null);
+        }
+      })
+      .finally(() => {
+        if (!cancelled) {
+          setLoading(false);
+        }
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [text, fontUrl, pathProp, fontSize, width, height]);
 
-  useEffect(() => {
-    let isMounted = true;
-    
-    if (shouldReduceMotion) return;
-
-    opentype.load("/fonts/IndieFlower-Regular.ttf", (err, font) => {
-      if (!isMounted) return;
-      if (err || !font) {
-        console.error("Font could not be loaded:", err);
-        setError(true);
-        if (onAnimationComplete) onAnimationComplete();
-        return;
-      }
-
-      try {
-        const path = font.getPath(text, 0, 72, 72);
-        const bbox = path.getBoundingBox();
-        const d = path.toPathData(2);
-        
-        // Add padding to ensure the stroke doesn't get clipped
-        const paddingX = 10;
-        const paddingY = 20;
-        const viewBox = `${bbox.x1 - paddingX} ${bbox.y1 - paddingY} ${bbox.x2 - bbox.x1 + paddingX * 2} ${bbox.y2 - bbox.y1 + paddingY * 2}`;
-        
-        setPathData({ d, viewBox });
-      } catch (e) {
-        console.error("Failed to parse font path:", e);
-        setError(true);
-        if (onAnimationComplete) onAnimationComplete();
-      }
-    });
-
-    return () => { isMounted = false; };
-  }, [text, shouldReduceMotion]); // Removed onAnimationComplete to prevent re-triggering font load
-
-  if (error || shouldReduceMotion) {
+  if (loading) {
     return (
-      <div className={cn("font-bold text-4xl text-slate-900 tracking-tight flex items-center justify-center", className)}>
-        {text}
-      </div>
+      <svg
+        width={width}
+        height={height}
+        viewBox={`0 0 ${width} ${height}`}
+        className={cn("text-muted-foreground", className)}
+        aria-hidden={true}
+      >
+        <title>Handwriting SVG loading</title>
+        <text
+          x="50%"
+          y="50%"
+          textAnchor="middle"
+          dominantBaseline="middle"
+          fontSize={14}
+        >
+          Loading…
+        </text>
+      </svg>
     );
   }
 
-  if (!pathData) {
-    return <div className={cn("h-[100px] flex items-center justify-center", className)} />;
+  const d = path ?? "";
+  if (!d) {
+    return (
+      <svg
+        width={width}
+        height={height}
+        viewBox={`0 0 ${width} ${height}`}
+        className={cn("text-muted-foreground", className)}
+        aria-hidden={true}
+      >
+        <title>Handwriting SVG</title>
+        <text
+          x="50%"
+          y="50%"
+          textAnchor="middle"
+          dominantBaseline="middle"
+          fontSize={12}
+        >
+          {text ? "Invalid font" : "Provide path or text"}
+        </text>
+      </svg>
+    );
   }
 
+  const svgViewBox = pathProp ? `0 0 ${width} ${height}` : viewBox;
+
   return (
-    <div className={cn("flex items-center justify-center text-slate-900", className)}>
-      <svg
-        viewBox={pathData.viewBox}
-        className="w-full h-auto overflow-visible"
-        style={{ maxWidth: "460px", minWidth: "260px" }}
-      >
-        <motion.path
-          d={pathData.d}
-          fill="transparent"
-          stroke="currentColor"
-          strokeWidth={1.2}
-          initial={{ pathLength: 0, opacity: 0 }}
-          animate={{ pathLength: 1, opacity: 1 }}
-          transition={{
-            pathLength: { duration: 2.0, ease: "easeInOut", delay: 0.1 },
-            opacity: { duration: 0.1, delay: 0.1 }
-          }}
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          onAnimationComplete={() => {
-            // Signal completion right after drawing finishes and fill begins
-            setTimeout(() => {
-              if (onAnimationComplete) onAnimationComplete();
-            }, 300);
-          }}
-        />
-        <motion.path
-          d={pathData.d}
-          fill="currentColor"
-          stroke="none"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.4, delay: 2.1 }}
-        />
-      </svg>
-    </div>
+    <svg
+      width={width}
+      height={height}
+      viewBox={svgViewBox}
+      className={cn("text-rose-500", className)}
+      aria-hidden={true}
+    >
+      <title>Handwriting SVG</title>
+      <motion.path
+        d={d}
+        fill="none"
+        stroke="currentColor"
+        strokeWidth={strokeWidth}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        className={strokeClassName}
+        initial={{ pathLength: 0 }}
+        animate={{ pathLength: 1 }}
+        transition={{ delay, duration, ease }}
+      />
+    </svg>
   );
 }
+
+export default HandwritingSvg;

@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@vercel/analytics": "^2.0.1",
+    "clsx": "^2.1.1",
     "dotenv": "^17.4.2",
     "firebase": "^12.17.1",
     "firebase-admin": "^13.10.0",
@@ -19,7 +20,8 @@
     "opentype.js": "^2.0.0",
     "react": "19.2.8",
     "react-dom": "19.2.8",
-    "sonner": "^2.0.8"
+    "sonner": "^2.0.8",
+    "tailwind-merge": "^3.6.0"
   },
   "devDependencies": {
     "@playwright/test": "^1.62.1",
