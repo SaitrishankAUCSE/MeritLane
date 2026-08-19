@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Users, Plus, ShieldCheck, Briefcase, Trash2, CheckCircle2, FileText, Bookmark, Loader2, ArrowRight } from "lucide-react";
+import { Users, Plus, ShieldCheck, Briefcase, Trash2, CheckCircle2, Bookmark, ArrowLeft } from "lucide-react";
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
 import { TagInput } from "@/components/ui/TagInput";
@@ -18,7 +18,7 @@ export default function EmployerDashboardPage() {
   const { user, role: userRole, loading: authLoading, profileLoading } = useAuth();
   const router = useRouter();
 
-  const [activeTab, setActiveTab] = useState<"candidates" | "post-role" | "shortlisted">("candidates");
+  const [activeTab, setActiveTab] = useState<"discover" | "shortlisted" | "post-role">("discover");
   const [dataLoading, setDataLoading] = useState(true);
 
   const [roles, setRoles] = useState<JobPosting[]>([]);
@@ -56,7 +56,7 @@ export default function EmployerDashboardPage() {
           if (profile && profile.roles && profile.roles.length > 0) {
             setRoles(profile.roles);
             setShortlistedUids(profile.shortlistedCandidates || []);
-            setActiveTab("candidates");
+            setActiveTab("discover");
             setSelectedRoleId(profile.roles[0].id); // Select first role by default
           } else {
             setActiveTab("post-role"); // Default to post-role if they have none
@@ -74,12 +74,13 @@ export default function EmployerDashboardPage() {
   useEffect(() => {
     async function loadCandidates() {
       if (!user) return;
-      if (activeTab === "candidates" && !selectedRoleId) return;
+      if (activeTab === "discover" && !selectedRoleId) return;
       
       setFetchingCandidates(true);
       try {
         const token = await user.getIdToken();
         const endpoint = activeTab === "shortlisted" ? "/api/employer/shortlisted" : "/api/employer/discover";
+        const bodyPayload = activeTab === "discover" ? { roleId: selectedRoleId } : {};
         
         const res = await fetch(endpoint, {
           method: "POST",
@@ -87,7 +88,7 @@ export default function EmployerDashboardPage() {
             "Content-Type": "application/json",
             "Authorization": `Bearer ${token}`
           },
-          body: JSON.stringify({ roleId: selectedRoleId })
+          body: JSON.stringify(bodyPayload)
         });
         
         if (res.ok) {
@@ -103,7 +104,7 @@ export default function EmployerDashboardPage() {
       }
     }
     
-    if (activeTab === "candidates" || activeTab === "shortlisted") {
+    if (activeTab === "discover" || activeTab === "shortlisted") {
       loadCandidates();
     }
   }, [selectedRoleId, user, activeTab]);
@@ -158,7 +159,7 @@ export default function EmployerDashboardPage() {
       setFormSuccess(true);
       setTimeout(() => {
         setFormSuccess(false);
-        setActiveTab("candidates");
+        setActiveTab("discover");
       }, 1200);
     } catch (err) {
       console.error("Failed to save role:", err);
@@ -192,7 +193,6 @@ export default function EmployerDashboardPage() {
       const isNowRemoved = shortlistedUids.includes(candidateUid) && !updated.includes(candidateUid);
       setShortlistedUids(updated);
       
-      // If we are currently on the shortlisted tab, we should immediately remove them from the candidates view.
       if (activeTab === "shortlisted") {
         setCandidates(prev => prev.filter(c => c.uid !== candidateUid));
         if (isNowRemoved) {
@@ -218,7 +218,7 @@ export default function EmployerDashboardPage() {
         onClose={() => setSelectedCandidate(null)} 
       />
 
-      <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 space-y-8">
+      <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 space-y-6">
         {/* Header */}
         <div className="flex flex-col justify-between gap-4 border-b border-slate-200 pb-6 sm:flex-row sm:items-center">
           <div>
@@ -234,27 +234,87 @@ export default function EmployerDashboardPage() {
           </div>
 
           <div className="flex items-center gap-2.5">
-            <Button variant={activeTab === "post-role" ? "primary" : "outline"} size="sm" leftIcon={<Plus className="h-4 w-4" />} onClick={() => setActiveTab("post-role")}>
+            {activeTab === "post-role" && roles.length > 0 && (
+              <Button
+                variant="outline"
+                size="sm"
+                leftIcon={<ArrowLeft className="h-4 w-4" />}
+                onClick={() => setActiveTab("discover")}
+              >
+                Back to Dashboard
+              </Button>
+            )}
+            <Button 
+              variant={activeTab === "post-role" ? "primary" : "outline"} 
+              size="sm" 
+              leftIcon={<Plus className="h-4 w-4" />} 
+              onClick={() => setActiveTab("post-role")}
+            >
               Post Role
             </Button>
-            {roles.length > 0 && (
-              <>
-                <Button variant={activeTab === "candidates" ? "primary" : "outline"} size="sm" leftIcon={<Users className="h-4 w-4" />} onClick={() => setActiveTab("candidates")}>
-                  Discover
-                </Button>
-                <Button variant={activeTab === "shortlisted" ? "primary" : "outline"} size="sm" leftIcon={<Bookmark className={`h-4 w-4 ${activeTab === "shortlisted" ? "fill-current" : ""}`} />} onClick={() => setActiveTab("shortlisted")}>
-                  Shortlisted
-                </Button>
-              </>
-            )}
           </div>
         </div>
 
-        {activeTab === "candidates" || activeTab === "shortlisted" ? (
-          <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+        {/* Talent Workspace Navigation */}
+        {roles.length > 0 && activeTab !== "post-role" && (
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 pb-4">
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setActiveTab("discover")}
+                className={`flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-lg transition-all ${
+                  activeTab === "discover"
+                    ? "bg-slate-900 text-white shadow-sm"
+                    : "bg-white text-slate-600 border border-slate-200 hover:bg-slate-50 hover:text-slate-900"
+                }`}
+              >
+                <Users className="h-4 w-4" />
+                <span>Discover</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setActiveTab("shortlisted")}
+                className={`flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-lg transition-all ${
+                  activeTab === "shortlisted"
+                    ? "bg-slate-900 text-white shadow-sm"
+                    : "bg-white text-slate-600 border border-slate-200 hover:bg-slate-50 hover:text-slate-900"
+                }`}
+              >
+                <Bookmark className={`h-4 w-4 ${activeTab === "shortlisted" ? "fill-current" : ""}`} />
+                <span>Shortlisted</span>
+                {shortlistedUids.length > 0 && (
+                  <span
+                    className={`ml-1 text-xs px-2 py-0.5 rounded-full font-bold transition-colors ${
+                      activeTab === "shortlisted"
+                        ? "bg-slate-800 text-slate-200"
+                        : "bg-slate-100 text-slate-700"
+                    }`}
+                  >
+                    {shortlistedUids.length}
+                  </span>
+                )}
+              </button>
+            </div>
+
+            {activeTab === "discover" && selectedRole && (
+              <div className="hidden sm:flex items-center gap-2 text-xs font-medium text-slate-500">
+                <span>Active Role:</span>
+                <span className="font-semibold text-slate-900 bg-white border border-slate-200 px-2.5 py-1 rounded-md shadow-2xs">
+                  {selectedRole.title}
+                </span>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Tab 1: Discover View (Role-Centric) */}
+        {activeTab === "discover" && (
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 animate-fade-up">
             {/* Left Sidebar: Roles List */}
             <div className="lg:col-span-1 space-y-4">
-              <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider px-1">Active Roles ({roles.length})</h3>
+              <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider px-1">
+                Active Roles ({roles.length})
+              </h3>
               <div className="space-y-2">
                 {roles.map((role) => (
                   <div
@@ -302,6 +362,7 @@ export default function EmployerDashboardPage() {
               </div>
             </div>
 
+            {/* Right Main Area: Discovery Candidates */}
             <div className="lg:col-span-3 space-y-6">
               {fetchingCandidates ? (
                 <div className="space-y-4 animate-fade-up">
@@ -434,13 +495,13 @@ export default function EmployerDashboardPage() {
                                   View Proof
                                 </Button>
                                 <Button 
-                                  variant={activeTab === "shortlisted" ? "outline" : isShortlisted ? "secondary" : "outline"} 
+                                  variant={isShortlisted ? "secondary" : "outline"} 
                                   size="sm" 
-                                  className={`w-full ${activeTab === "shortlisted" ? "hover:bg-red-50 hover:text-red-600 hover:border-red-200" : isShortlisted ? 'bg-amber-100 text-amber-900 hover:bg-amber-200 border-amber-200' : ''}`}
-                                  leftIcon={activeTab === "shortlisted" ? <Trash2 className="h-4 w-4" /> : <Bookmark className={`h-4 w-4 ${isShortlisted ? 'fill-current' : ''}`} />}
+                                  className={`w-full ${isShortlisted ? 'bg-amber-100 text-amber-900 hover:bg-amber-200 border-amber-200' : ''}`}
+                                  leftIcon={<Bookmark className={`h-4 w-4 ${isShortlisted ? 'fill-current' : ''}`} />}
                                   onClick={() => handleShortlist(candidate.uid)}
                                 >
-                                  {activeTab === "shortlisted" ? "Remove from Shortlist" : isShortlisted ? "Shortlisted" : "Shortlist"}
+                                  {isShortlisted ? "Shortlisted" : "Shortlist"}
                                 </Button>
                               </div>
                             </div>
@@ -451,17 +512,6 @@ export default function EmployerDashboardPage() {
                     })}
                   </div>
                 </div>
-              ) : activeTab === "shortlisted" ? (
-                <EmptyState 
-                  icon={<Bookmark className="h-6 w-6 text-slate-700" />}
-                  title="No candidates shortlisted yet."
-                  description="Candidates you save from the verified talent pipeline will appear here."
-                  action={
-                    <Button variant="primary" onClick={() => setActiveTab("candidates")}>
-                      Discover Verified Talent
-                    </Button>
-                  }
-                />
               ) : (
                 <EmptyState 
                   icon={<ShieldCheck className="h-6 w-6 text-slate-700" />}
@@ -471,97 +521,266 @@ export default function EmployerDashboardPage() {
               )}
             </div>
           </div>
-        ) : (
-          <Card className="max-w-3xl">
-            <CardHeader>
-              <h2 className="text-lg font-bold text-slate-900">Define a new role</h2>
-              <p className="text-sm text-slate-600 mt-1">Specify technical requirements to instantly discover verified candidates.</p>
-            </CardHeader>
-            <CardContent>
-              <form onSubmit={handlePostRole} className="space-y-6">
-                <div className="grid gap-6 sm:grid-cols-2">
-                  <div className="space-y-1.5">
-                    <label htmlFor="roleTitle" className="block text-sm font-semibold text-slate-900">
-                      Role Title <span className="text-red-500">*</span>
-                    </label>
-                    <Input
-                      id="roleTitle"
-                      placeholder="e.g. Senior Frontend Engineer"
-                      value={roleTitle}
-                      onChange={(e) => setRoleTitle(e.target.value)}
-                      required
-                      disabled={saving}
-                    />
-                  </div>
-                  
-                  <div className="space-y-1.5">
-                    <label htmlFor="department" className="block text-sm font-semibold text-slate-900">
-                      Department
-                    </label>
-                    <Input
-                      id="department"
-                      placeholder="e.g. Engineering, Platform"
-                      value={department}
-                      onChange={(e) => setDepartment(e.target.value)}
-                      disabled={saving}
-                    />
-                  </div>
-                </div>
+        )}
 
-                <div className="space-y-1.5">
-                  <label className="block text-sm font-semibold text-slate-900">
-                    Experience Level
-                  </label>
-                  <div className="flex flex-wrap gap-2 pt-1">
-                    {["Early Career (0-2 Yrs)", "Mid-Level (3-5 Yrs)", "Senior (5+ Yrs)"].map((level) => (
-                      <button
-                        key={level}
-                        type="button"
-                        onClick={() => setExperienceLevel(level)}
-                        disabled={saving}
-                        className={`rounded-md px-3.5 py-1.5 text-sm font-medium transition-all ${
-                          experienceLevel === level
-                            ? "bg-slate-900 text-white shadow-sm"
-                            : "bg-white text-slate-600 border border-slate-200 hover:border-slate-300 hover:bg-slate-50"
-                        }`}
-                      >
-                        {level}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="space-y-1.5">
-                  <label className="block text-sm font-semibold text-slate-900">
-                    Required Skills
-                  </label>
-                  <p className="text-xs text-slate-500 mb-2">We use these skills to instantly match you with verified candidates.</p>
-                  <TagInput
-                    tags={skillsNeeded}
-                    onChange={setSkillsNeeded}
-                    placeholder="Type a skill and press Enter..."
-                  />
-                </div>
-
-                <div className="pt-4 border-t border-slate-100 flex items-center justify-between">
-                  {formSuccess ? (
-                    <div className="flex items-center gap-2 text-emerald-600 bg-emerald-50 px-3 py-1.5 rounded-md">
-                      <CheckCircle2 className="h-4 w-4" />
-                      <span className="text-sm font-medium">Role posted successfully!</span>
-                    </div>
-                  ) : (
-                    <p className="text-xs text-slate-500 flex items-center gap-1.5">
-                      <ShieldCheck className="h-4 w-4 text-slate-400" /> Matches against verified proof instantly.
-                    </p>
+        {/* Tab 2: Shortlisted View (Candidate-Centric Workspace — NO Active Roles sidebar) */}
+        {activeTab === "shortlisted" && (
+          <div className="space-y-6 animate-fade-up">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-2 border-b border-slate-200/80 gap-2">
+              <div>
+                <div className="flex items-center gap-3">
+                  <h3 className="text-xl font-bold tracking-tight text-slate-900">
+                    Shortlisted Candidates
+                  </h3>
+                  {!fetchingCandidates && (
+                    <span className="text-xs font-bold text-slate-700 bg-slate-200/70 px-2.5 py-0.5 rounded-full">
+                      {candidates.length} {candidates.length === 1 ? "candidate" : "candidates"}
+                    </span>
                   )}
-                  
-                  <Button type="submit" variant="primary" disabled={!roleTitle.trim() || saving}>
-                    {saving ? "Posting..." : "Post Role & Discover"}
-                  </Button>
                 </div>
-              </form>
-            </CardContent>
-          </Card>
+                <p className="text-sm text-slate-500 mt-1">
+                  Candidates you've saved for consideration across all roles.
+                </p>
+              </div>
+            </div>
+
+            {fetchingCandidates ? (
+              <div className="space-y-4 animate-fade-up">
+                {[1, 2, 3].map((i) => (
+                  <div key={i} className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm">
+                    <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-6">
+                      <div className="space-y-4 flex-1">
+                        <div className="flex items-center gap-3">
+                          <div className="h-6 w-40 rounded bg-slate-200 animate-shimmer"></div>
+                          <div className="h-5 w-20 rounded-full bg-slate-200 animate-shimmer"></div>
+                        </div>
+                        <div className="flex gap-2">
+                          <div className="h-4 w-28 rounded bg-slate-200 animate-shimmer"></div>
+                          <div className="h-4 w-16 rounded bg-slate-200 animate-shimmer"></div>
+                          <div className="h-4 w-20 rounded bg-slate-200 animate-shimmer"></div>
+                        </div>
+                        <div className="space-y-2 pt-2">
+                          <div className="h-3 w-24 rounded bg-slate-200 animate-shimmer"></div>
+                          <div className="flex gap-2">
+                            <div className="h-6 w-16 rounded-md bg-slate-200 animate-shimmer"></div>
+                            <div className="h-6 w-20 rounded-md bg-slate-200 animate-shimmer"></div>
+                            <div className="h-6 w-14 rounded-md bg-slate-200 animate-shimmer"></div>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="sm:w-64 shrink-0 flex flex-col space-y-4 border-l border-slate-100 sm:pl-6">
+                        <div className="rounded-lg p-3 space-y-3 border border-slate-100">
+                          <div className="flex justify-between">
+                            <div className="h-3 w-32 rounded bg-slate-200 animate-shimmer"></div>
+                            <div className="h-4 w-8 rounded bg-slate-200 animate-shimmer"></div>
+                          </div>
+                          <div className="space-y-2">
+                            <div className="h-3 w-full rounded bg-slate-200 animate-shimmer"></div>
+                            <div className="h-3 w-5/6 rounded bg-slate-200 animate-shimmer"></div>
+                          </div>
+                        </div>
+                        <div className="flex flex-col gap-2 pt-2">
+                          <div className="h-8 w-full rounded-md bg-slate-200 animate-shimmer"></div>
+                          <div className="h-8 w-full rounded-md bg-slate-200 animate-shimmer"></div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : candidates.length > 0 ? (
+              <div className="space-y-4">
+                {candidates.map((candidate) => (
+                  <div key={candidate.uid} className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow">
+                    <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-6">
+                      
+                      {/* Candidate Summary */}
+                      <div className="space-y-4 flex-1">
+                        <div className="flex items-center gap-3">
+                          <h4 className="text-lg font-bold text-slate-900">{candidate.name}</h4>
+                          <Badge variant="verified" className="flex items-center gap-1 text-xs">
+                            <ShieldCheck className="h-3 w-3" /> Verified
+                          </Badge>
+                        </div>
+                        
+                        <div className="flex flex-wrap gap-y-1 gap-x-4 text-sm text-slate-600">
+                          <span>{candidate.college || "N/A"}</span>
+                          <span>•</span>
+                          <span>{candidate.branch || "N/A"}</span>
+                          <span>•</span>
+                          <span>Class of {candidate.gradYear || "N/A"}</span>
+                        </div>
+
+                        <div className="space-y-2">
+                          <span className="text-xs font-semibold text-slate-900 uppercase tracking-wider">
+                            Verified Skills
+                          </span>
+                          <div className="flex flex-wrap gap-2">
+                            {(candidate.skills || candidate.matchedSkills || []).map((skill: string) => (
+                              <span key={skill} className="bg-slate-100 text-slate-700 px-2 py-1 rounded-md text-xs font-medium">
+                                {skill}
+                              </span>
+                            ))}
+                            {(!candidate.skills || candidate.skills.length === 0) && (
+                              <span className="text-xs text-slate-500 italic">No skills listed</span>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Evidence & Action Sidebar */}
+                      <div className="sm:w-64 shrink-0 flex flex-col space-y-4 border-l border-slate-100 sm:pl-6">
+                        <div className="bg-slate-50/80 rounded-lg p-3 space-y-2 border border-slate-200/60">
+                          <span className="text-[10px] font-bold text-slate-800 uppercase tracking-wider">
+                            Verified Evidence & Signals
+                          </span>
+                          <ul className="space-y-1.5">
+                            {(candidate.matchReasons && candidate.matchReasons.length > 0 
+                              ? candidate.matchReasons 
+                              : ["Verified talent profile evidence"]
+                            ).map((reason: string, idx: number) => (
+                              <li key={idx} className="flex items-start gap-1.5 text-xs text-slate-700 leading-tight">
+                                <CheckCircle2 className="h-3 w-3 text-emerald-600 shrink-0 mt-0.5" />
+                                <span>{reason}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                        
+                        <div className="flex flex-col gap-2 pt-2">
+                          <Button 
+                            variant="primary" 
+                            size="sm" 
+                            className="w-full"
+                            onClick={() => setSelectedCandidate(candidate)}
+                          >
+                            View Proof
+                          </Button>
+                          <Button 
+                            variant="outline" 
+                            size="sm" 
+                            className="w-full text-slate-600 hover:bg-red-50 hover:text-red-600 hover:border-red-200 transition-colors"
+                            leftIcon={<Trash2 className="h-4 w-4" />}
+                            onClick={() => handleShortlist(candidate.uid)}
+                          >
+                            Remove from Shortlist
+                          </Button>
+                        </div>
+                      </div>
+                      
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <EmptyState 
+                icon={<Bookmark className="h-6 w-6 text-slate-700" />}
+                title="No candidates shortlisted yet"
+                description="Candidates you save from the verified talent pipeline will appear here."
+                action={
+                  <Button variant="primary" onClick={() => setActiveTab("discover")}>
+                    Discover Verified Talent
+                  </Button>
+                }
+              />
+            )}
+          </div>
+        )}
+
+        {/* Tab 3: Post Role View */}
+        {activeTab === "post-role" && (
+          <div className="animate-fade-up">
+            <Card className="max-w-3xl mx-auto">
+              <CardHeader>
+                <h2 className="text-lg font-bold text-slate-900">Define a new role</h2>
+                <p className="text-sm text-slate-600 mt-1">Specify technical requirements to instantly discover verified candidates.</p>
+              </CardHeader>
+              <CardContent>
+                <form onSubmit={handlePostRole} className="space-y-6">
+                  <div className="grid gap-6 sm:grid-cols-2">
+                    <div className="space-y-1.5">
+                      <label htmlFor="roleTitle" className="block text-sm font-semibold text-slate-900">
+                        Role Title <span className="text-red-500">*</span>
+                      </label>
+                      <Input
+                        id="roleTitle"
+                        placeholder="e.g. Senior Frontend Engineer"
+                        value={roleTitle}
+                        onChange={(e) => setRoleTitle(e.target.value)}
+                        required
+                        disabled={saving}
+                      />
+                    </div>
+                    
+                    <div className="space-y-1.5">
+                      <label htmlFor="department" className="block text-sm font-semibold text-slate-900">
+                        Department
+                      </label>
+                      <Input
+                        id="department"
+                        placeholder="e.g. Engineering, Platform"
+                        value={department}
+                        onChange={(e) => setDepartment(e.target.value)}
+                        disabled={saving}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label className="block text-sm font-semibold text-slate-900">
+                      Experience Level
+                    </label>
+                    <div className="flex flex-wrap gap-2 pt-1">
+                      {["Early Career (0-2 Yrs)", "Mid-Level (3-5 Yrs)", "Senior (5+ Yrs)"].map((level) => (
+                        <button
+                          key={level}
+                          type="button"
+                          onClick={() => setExperienceLevel(level)}
+                          disabled={saving}
+                          className={`rounded-md px-3.5 py-1.5 text-sm font-medium transition-all ${
+                            experienceLevel === level
+                              ? "bg-slate-900 text-white shadow-sm"
+                              : "bg-white text-slate-600 border border-slate-200 hover:border-slate-300 hover:bg-slate-50"
+                          }`}
+                        >
+                          {level}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label className="block text-sm font-semibold text-slate-900">
+                      Required Skills
+                    </label>
+                    <p className="text-xs text-slate-500 mb-2">We use these skills to instantly match you with verified candidates.</p>
+                    <TagInput
+                      tags={skillsNeeded}
+                      onChange={setSkillsNeeded}
+                      placeholder="Type a skill and press Enter..."
+                    />
+                  </div>
+
+                  <div className="pt-4 border-t border-slate-100 flex items-center justify-between">
+                    {formSuccess ? (
+                      <div className="flex items-center gap-2 text-emerald-600 bg-emerald-50 px-3 py-1.5 rounded-md">
+                        <CheckCircle2 className="h-4 w-4" />
+                        <span className="text-sm font-medium">Role posted successfully!</span>
+                      </div>
+                    ) : (
+                      <p className="text-xs text-slate-500 flex items-center gap-1.5">
+                        <ShieldCheck className="h-4 w-4 text-slate-400" /> Matches against verified proof instantly.
+                      </p>
+                    )}
+                    
+                    <Button type="submit" variant="primary" disabled={!roleTitle.trim() || saving}>
+                      {saving ? "Posting..." : "Post Role & Discover"}
+                    </Button>
+                  </div>
+                </form>
+              </CardContent>
+            </Card>
+          </div>
         )}
       </div>
 

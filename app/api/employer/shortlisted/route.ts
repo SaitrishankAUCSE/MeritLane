@@ -116,7 +116,7 @@ export async function POST(req: NextRequest) {
       if (requiredSkills.length > 0) {
         const testNames = Object.keys(assessmentScores).map(k => k.split('_')[0]);
         if (testNames.length > 0) {
-          matchReasons.push(`Technical assessment (${testNames.join(', ')}) completed`);
+          matchReasons.push(`Technical assessment (${Array.from(new Set(testNames)).join(', ')}) completed`);
         }
 
         const relevantProjectsCount = projects.filter(p => 
@@ -131,6 +131,18 @@ export async function POST(req: NextRequest) {
         if (relevantProjectsCount > 0) {
           matchReasons.push(`${relevantProjectsCount} relevant project signal(s)`);
         }
+      } else {
+        if (candidateSkills.length > 0) {
+          matchReasons.push(`${candidateSkills.length} verified technical skill(s)`);
+        }
+        const testNames = Object.keys(assessmentScores).map(k => k.split('_')[0]);
+        if (testNames.length > 0) {
+          const uniqueTests = Array.from(new Set(testNames));
+          matchReasons.push(`Technical assessment (${uniqueTests.join(', ')}) completed`);
+        }
+        if (projects.length > 0) {
+          matchReasons.push(`${projects.length} verified project signal(s)`);
+        }
       }
       
       sanitizedCandidates.push({
@@ -140,7 +152,7 @@ export async function POST(req: NextRequest) {
         branch: data.branch,
         gradYear: data.gradYear,
         skills: candidateSkills,
-        matchedSkills: Array.from(new Set(matchedSkills)),
+        matchedSkills: requiredSkills.length > 0 ? Array.from(new Set(matchedSkills)) : candidateSkills,
         matchedRequiredSkillCount,
         totalRequiredSkillCount: requiredSkills.length,
         projects: projects,
