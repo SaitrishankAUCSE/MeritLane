@@ -18,7 +18,7 @@ export default function EmployerDashboardPage() {
   const { user, role: userRole, loading: authLoading, profileLoading } = useAuth();
   const router = useRouter();
 
-  const [activeTab, setActiveTab] = useState<"candidates" | "post-role">("candidates");
+  const [activeTab, setActiveTab] = useState<"candidates" | "post-role" | "shortlisted">("candidates");
   const [dataLoading, setDataLoading] = useState(true);
 
   const [roles, setRoles] = useState<JobPosting[]>([]);
@@ -39,6 +39,15 @@ export default function EmployerDashboardPage() {
   const [skillsNeeded, setSkillsNeeded] = useState<string[]>([]);
   const [formSuccess, setFormSuccess] = useState(false);
   const [saving, setSaving] = useState(false);
+  
+  const [successToast, setSuccessToast] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (successToast) {
+      const timer = setTimeout(() => setSuccessToast(null), 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [successToast]);
 
   useEffect(() => {
     if (!authLoading && !profileLoading && user && userRole === "employer") {
@@ -64,11 +73,15 @@ export default function EmployerDashboardPage() {
 
   useEffect(() => {
     async function loadCandidates() {
-      if (!selectedRoleId || !user) return;
+      if (!user) return;
+      if (activeTab === "candidates" && !selectedRoleId) return;
+      
       setFetchingCandidates(true);
       try {
         const token = await user.getIdToken();
-        const res = await fetch("/api/employer/discover", {
+        const endpoint = activeTab === "shortlisted" ? "/api/employer/shortlisted" : "/api/employer/discover";
+        
+        const res = await fetch(endpoint, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -90,7 +103,7 @@ export default function EmployerDashboardPage() {
       }
     }
     
-    if (activeTab === "candidates") {
+    if (activeTab === "candidates" || activeTab === "shortlisted") {
       loadCandidates();
     }
   }, [selectedRoleId, user, activeTab]);
@@ -176,7 +189,22 @@ export default function EmployerDashboardPage() {
     if (!user) return;
     try {
       const updated = await toggleShortlist(user.uid, candidateUid, shortlistedUids);
+      const isNowRemoved = shortlistedUids.includes(candidateUid) && !updated.includes(candidateUid);
       setShortlistedUids(updated);
+      
+      // If we are currently on the shortlisted tab, we should immediately remove them from the candidates view.
+      if (activeTab === "shortlisted") {
+        setCandidates(prev => prev.filter(c => c.uid !== candidateUid));
+        if (isNowRemoved) {
+          setSuccessToast("Candidate removed from shortlist");
+        }
+      } else {
+        if (isNowRemoved) {
+          setSuccessToast("Candidate removed from shortlist");
+        } else {
+          setSuccessToast("Candidate shortlisted");
+        }
+      }
     } catch (err) {
       console.error("Failed to toggle shortlist", err);
     }
@@ -210,14 +238,19 @@ export default function EmployerDashboardPage() {
               Post Role
             </Button>
             {roles.length > 0 && (
-              <Button variant={activeTab === "candidates" ? "primary" : "outline"} size="sm" leftIcon={<Users className="h-4 w-4" />} onClick={() => setActiveTab("candidates")}>
-                View Pipeline
-              </Button>
+              <>
+                <Button variant={activeTab === "candidates" ? "primary" : "outline"} size="sm" leftIcon={<Users className="h-4 w-4" />} onClick={() => setActiveTab("candidates")}>
+                  Discover
+                </Button>
+                <Button variant={activeTab === "shortlisted" ? "primary" : "outline"} size="sm" leftIcon={<Bookmark className={`h-4 w-4 ${activeTab === "shortlisted" ? "fill-current" : ""}`} />} onClick={() => setActiveTab("shortlisted")}>
+                  Shortlisted
+                </Button>
+              </>
             )}
           </div>
         </div>
 
-        {activeTab === "candidates" ? (
+        {activeTab === "candidates" || activeTab === "shortlisted" ? (
           <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
             {/* Left Sidebar: Roles List */}
             <div className="lg:col-span-1 space-y-4">
@@ -401,13 +434,13 @@ export default function EmployerDashboardPage() {
                                   View Proof
                                 </Button>
                                 <Button 
-                                  variant={isShortlisted ? "secondary" : "outline"} 
+                                  variant={activeTab === "shortlisted" ? "outline" : isShortlisted ? "secondary" : "outline"} 
                                   size="sm" 
-                                  className={`w-full ${isShortlisted ? 'bg-amber-100 text-amber-900 hover:bg-amber-200 border-amber-200' : ''}`}
-                                  leftIcon={<Bookmark className={`h-4 w-4 ${isShortlisted ? 'fill-current' : ''}`} />}
+                                  className={`w-full ${activeTab === "shortlisted" ? "hover:bg-red-50 hover:text-red-600 hover:border-red-200" : isShortlisted ? 'bg-amber-100 text-amber-900 hover:bg-amber-200 border-amber-200' : ''}`}
+                                  leftIcon={activeTab === "shortlisted" ? <Trash2 className="h-4 w-4" /> : <Bookmark className={`h-4 w-4 ${isShortlisted ? 'fill-current' : ''}`} />}
                                   onClick={() => handleShortlist(candidate.uid)}
                                 >
-                                  {isShortlisted ? "Shortlisted" : "Shortlist"}
+                                  {activeTab === "shortlisted" ? "Remove from Shortlist" : isShortlisted ? "Shortlisted" : "Shortlist"}
                                 </Button>
                               </div>
                             </div>
@@ -418,6 +451,17 @@ export default function EmployerDashboardPage() {
                     })}
                   </div>
                 </div>
+              ) : activeTab === "shortlisted" ? (
+                <EmptyState 
+                  icon={<Bookmark className="h-6 w-6 text-slate-700" />}
+                  title="No candidates shortlisted yet."
+                  description="Candidates you save from the verified talent pipeline will appear here."
+                  action={
+                    <Button variant="primary" onClick={() => setActiveTab("candidates")}>
+                      Discover Verified Talent
+                    </Button>
+                  }
+                />
               ) : (
                 <EmptyState 
                   icon={<ShieldCheck className="h-6 w-6 text-slate-700" />}
@@ -520,6 +564,16 @@ export default function EmployerDashboardPage() {
           </Card>
         )}
       </div>
+
+      {/* Toast Notification */}
+      {successToast && (
+        <div className="fixed bottom-6 right-6 z-50 animate-fade-up">
+          <div className="flex items-center gap-2 rounded-lg bg-slate-900 px-4 py-3 text-sm font-medium text-white shadow-lg">
+            <CheckCircle2 className="h-4 w-4 text-emerald-400" />
+            <span>{successToast}</span>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
