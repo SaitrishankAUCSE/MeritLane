@@ -51,6 +51,62 @@ body {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
 
+/* Motion System Tokens */
+:root {
+  --motion-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  --motion-standard: 250ms cubic-bezier(0.4, 0, 0.2, 1);
+  --motion-slow: 300ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.transition-fast { transition: all var(--motion-fast); }
+.transition-standard { transition: all var(--motion-standard); }
+
+/* Page / Content Entrance */
+@keyframes fadeUpIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-up {
+  animation: fadeUpIn var(--motion-standard) forwards;
+  opacity: 0; /* Ensure hidden before animation starts */
+}
+
+/* Stagger utilities */
+.delay-50 { animation-delay: 50ms; }
+.delay-100 { animation-delay: 100ms; }
+.delay-150 { animation-delay: 150ms; }
+
+/* Shimmer Animation for Skeletons */
+@keyframes shimmer {
+  0% {
+    background-position: -800px 0;
+  }
+  100% {
+    background-position: 800px 0;
+  }
+}
+
+.animate-shimmer {
+  background: #f1f5f9;
+  background-image: linear-gradient(
+    90deg,
+    #f1f5f9 0%,
+    #e2e8f0 20%,
+    #f1f5f9 40%,
+    #f1f5f9 100%
+  );
+  background-repeat: no-repeat;
+  background-size: 800px 100%;
+  animation: shimmer 1.6s infinite linear forwards;
+}
+
 /* Respect Reduced Motion */
 @media (prefers-reduced-motion: reduce) {
   *, ::before, ::after {
@@ -59,4 +115,15 @@ body {
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
+  
+  .animate-shimmer {
+    background-image: none !important;
+    background-color: #e2e8f0 !important;
+  }
+  
+  .animate-fade-up {
+    opacity: 1 !important;
+    transform: none !important;
+  }
 }
+

@@ -269,15 +269,62 @@ export default function EmployerDashboardPage() {
               </div>
             </div>
 
-            {/* Right Main Area: Discovery Feed */}
             <div className="lg:col-span-3 space-y-6">
               {fetchingCandidates ? (
-                <div className="flex items-center justify-center py-24">
-                  <Loader2 className="h-8 w-8 animate-spin text-slate-300" />
+                <div className="space-y-4 animate-fade-up">
+                  <div className="flex flex-col items-center justify-center py-6 space-y-3">
+                    <ShieldCheck className="h-6 w-6 text-indigo-500/60" />
+                    <div className="text-center">
+                      <p className="text-sm font-semibold text-slate-900">Finding verified talent for this role…</p>
+                      <p className="text-xs text-slate-500 mt-1">Reviewing verified skills and project evidence.</p>
+                    </div>
+                  </div>
+                  
+                  {[1, 2, 3].map((i) => (
+                    <div key={i} className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm">
+                      <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-6">
+                        <div className="space-y-4 flex-1">
+                          <div className="flex items-center gap-3">
+                            <div className="h-6 w-40 rounded bg-slate-200 animate-shimmer"></div>
+                            <div className="h-5 w-20 rounded-full bg-slate-200 animate-shimmer"></div>
+                          </div>
+                          <div className="flex gap-2">
+                            <div className="h-4 w-28 rounded bg-slate-200 animate-shimmer"></div>
+                            <div className="h-4 w-16 rounded bg-slate-200 animate-shimmer"></div>
+                            <div className="h-4 w-20 rounded bg-slate-200 animate-shimmer"></div>
+                          </div>
+                          <div className="space-y-2 pt-2">
+                            <div className="h-3 w-24 rounded bg-slate-200 animate-shimmer"></div>
+                            <div className="flex gap-2">
+                              <div className="h-6 w-16 rounded-md bg-slate-200 animate-shimmer"></div>
+                              <div className="h-6 w-20 rounded-md bg-slate-200 animate-shimmer"></div>
+                              <div className="h-6 w-14 rounded-md bg-slate-200 animate-shimmer"></div>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="sm:w-64 shrink-0 flex flex-col space-y-4 border-l border-slate-100 sm:pl-6">
+                          <div className="rounded-lg p-3 space-y-3 border border-slate-100">
+                            <div className="flex justify-between">
+                              <div className="h-3 w-32 rounded bg-slate-200 animate-shimmer"></div>
+                              <div className="h-4 w-8 rounded bg-slate-200 animate-shimmer"></div>
+                            </div>
+                            <div className="space-y-2">
+                              <div className="h-3 w-full rounded bg-slate-200 animate-shimmer"></div>
+                              <div className="h-3 w-5/6 rounded bg-slate-200 animate-shimmer"></div>
+                            </div>
+                          </div>
+                          <div className="flex flex-col gap-2 pt-2">
+                            <div className="h-8 w-full rounded-md bg-slate-200 animate-shimmer"></div>
+                            <div className="h-8 w-full rounded-md bg-slate-200 animate-shimmer"></div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
                 </div>
               ) : candidates.length > 0 ? (
-                <>
-                  <div className="flex items-center justify-between">
+                <div className="animate-fade-up space-y-4">
+                  <div className="flex items-center justify-between pb-2">
                     <h3 className="text-base font-bold text-slate-900">
                       Matches for "{selectedRole?.title}"
                     </h3>
@@ -370,7 +417,7 @@ export default function EmployerDashboardPage() {
                       );
                     })}
                   </div>
-                </>
+                </div>
               ) : (
                 <EmptyState 
                   icon={<ShieldCheck className="h-6 w-6 text-slate-700" />}

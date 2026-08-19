@@ -177,9 +177,33 @@ export default function CandidateProfilePage() {
 
   if (authLoading || (user && profileLoading) || dataLoading) {
     return (
-      <div className="flex min-h-[60vh] flex-col items-center justify-center space-y-3">
-        <Loader2 className="h-8 w-8 animate-spin text-zinc-400" />
-        <p className="text-sm font-medium text-zinc-500">Loading your profile...</p>
+      <div className="min-h-screen bg-slate-50 pb-24 pt-10">
+        <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 space-y-8 animate-fade-up">
+          <div className="flex flex-col justify-between gap-4 border-b border-slate-200 pb-6 sm:flex-row sm:items-center">
+            <div>
+              <div className="flex items-center gap-3">
+                <div className="h-8 w-48 rounded bg-slate-200 animate-shimmer"></div>
+                <div className="h-6 w-20 rounded-full bg-slate-200 animate-shimmer"></div>
+              </div>
+              <div className="mt-2 h-4 w-96 rounded bg-slate-200 animate-shimmer"></div>
+            </div>
+            <div className="flex gap-2">
+              <div className="h-9 w-24 rounded-md bg-slate-200 animate-shimmer"></div>
+              <div className="h-9 w-32 rounded-md bg-slate-200 animate-shimmer"></div>
+            </div>
+          </div>
+          <div className="space-y-6">
+            <Card className="border-slate-200 shadow-sm">
+              <CardContent className="p-6 space-y-4">
+                <div className="h-6 w-32 rounded bg-slate-200 animate-shimmer mb-2"></div>
+                <div className="grid gap-6 sm:grid-cols-2">
+                  <div className="space-y-2"><div className="h-4 w-20 rounded bg-slate-200 animate-shimmer"></div><div className="h-10 w-full rounded bg-slate-200 animate-shimmer"></div></div>
+                  <div className="space-y-2"><div className="h-4 w-24 rounded bg-slate-200 animate-shimmer"></div><div className="h-10 w-full rounded bg-slate-200 animate-shimmer"></div></div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
       </div>
     );
   }

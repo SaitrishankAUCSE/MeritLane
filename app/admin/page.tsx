@@ -555,9 +555,9 @@ export default function AdminDashboardPage() {
                 <Clock className="h-4 w-4 text-amber-500" />
               </div>
               {hasLoadedCandidates ? (
-                <p className="mt-2 text-3xl font-bold tracking-tight text-zinc-900">{pendingCount}</p>
+                <p className="mt-2 text-3xl font-bold tracking-tight text-zinc-900 animate-fade-up">{pendingCount}</p>
               ) : (
-                <div className="mt-2 h-9 w-16 animate-pulse rounded bg-zinc-200" />
+                <div className="mt-2 h-9 w-16 animate-shimmer rounded bg-zinc-200" />
               )}
               <p className="mt-1 text-[11px] text-zinc-400">Awaiting codebase review</p>
             </CardContent>
@@ -570,9 +570,9 @@ export default function AdminDashboardPage() {
                 <ShieldCheck className="h-4 w-4 text-emerald-600" />
               </div>
               {hasLoadedCandidates ? (
-                <p className="mt-2 text-3xl font-bold tracking-tight text-zinc-900">{verifiedCount}</p>
+                <p className="mt-2 text-3xl font-bold tracking-tight text-zinc-900 animate-fade-up">{verifiedCount}</p>
               ) : (
-                <div className="mt-2 h-9 w-16 animate-pulse rounded bg-zinc-200" />
+                <div className="mt-2 h-9 w-16 animate-shimmer rounded bg-zinc-200" />
               )}
               <p className="mt-1 text-[11px] text-zinc-400">
                 {hasLoadedCandidates ? `${verifiedRate}% verification pass rate` : "Calculating..."}
@@ -587,9 +587,9 @@ export default function AdminDashboardPage() {
                 <AlertTriangle className="h-4 w-4 text-amber-600" />
               </div>
               {hasLoadedCandidates ? (
-                <p className="mt-2 text-3xl font-bold tracking-tight text-zinc-900">{changesCount}</p>
+                <p className="mt-2 text-3xl font-bold tracking-tight text-zinc-900 animate-fade-up">{changesCount}</p>
               ) : (
-                <div className="mt-2 h-9 w-16 animate-pulse rounded bg-zinc-200" />
+                <div className="mt-2 h-9 w-16 animate-shimmer rounded bg-zinc-200" />
               )}
               <p className="mt-1 text-[11px] text-zinc-400">Feedback sent to candidate</p>
             </CardContent>
@@ -599,14 +599,14 @@ export default function AdminDashboardPage() {
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <span className="text-xs font-bold uppercase tracking-wider text-zinc-500">Total Registered</span>
-                <Layers className="h-4 w-4 text-indigo-600" />
+                <Layers className="h-4 w-4 text-indigo-500" />
               </div>
               {hasLoadedCandidates ? (
-                <p className="mt-2 text-3xl font-bold tracking-tight text-zinc-900">{totalCount}</p>
+                <p className="mt-2 text-3xl font-bold tracking-tight text-zinc-900 animate-fade-up">{totalCount}</p>
               ) : (
-                <div className="mt-2 h-9 w-16 animate-pulse rounded bg-zinc-200" />
+                <div className="mt-2 h-9 w-16 animate-shimmer rounded bg-zinc-200" />
               )}
-              <p className="mt-1 text-[11px] text-zinc-400">Candidate portfolios</p>
+              <p className="mt-1 text-[11px] text-zinc-400">Total platform candidates</p>
             </CardContent>
           </Card>
         </div>

@@ -15,8 +15,8 @@ export function CandidateProofModal({ candidate, isOpen, onClose }: CandidatePro
   if (!isOpen || !candidate) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-sm p-4">
-      <div className="bg-white w-full max-w-3xl max-h-[90vh] overflow-y-auto rounded-xl shadow-2xl flex flex-col">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+      <div className="bg-white w-full max-w-3xl max-h-[90vh] overflow-y-auto rounded-xl shadow-2xl flex flex-col animate-fade-up" style={{ animationDuration: '300ms' }}>
         {/* Header */}
         <div className="sticky top-0 z-10 flex items-center justify-between border-b border-slate-100 bg-white p-6">
           <div className="flex items-center gap-3">

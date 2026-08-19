@@ -166,8 +166,31 @@ export default function AssessmentPage() {
 
   if (loading || initializing) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-zinc-950">
-        <Loader2 className="h-8 w-8 animate-spin text-indigo-500" />
+      <div className="flex min-h-screen flex-col bg-[#09090b] text-zinc-100">
+        <header className="flex items-center justify-between border-b border-zinc-800/80 bg-[#121215] px-6 py-3">
+          <div className="flex items-center gap-3">
+            <div className="h-7 w-7 rounded-md bg-zinc-800 animate-shimmer" style={{ background: '#27272a' }}></div>
+            <div className="h-4 w-48 rounded bg-zinc-800 animate-shimmer" style={{ background: '#27272a' }}></div>
+          </div>
+          <div className="h-6 w-16 rounded-md bg-zinc-800 animate-shimmer" style={{ background: '#27272a' }}></div>
+        </header>
+        <div className="flex flex-1 overflow-hidden animate-fade-up">
+          <div className="w-[35%] border-r border-zinc-800/80 bg-[#121215] flex flex-col">
+            <div className="border-b border-zinc-800/80 px-5 py-3.5 bg-zinc-900/30">
+              <div className="h-4 w-40 rounded bg-zinc-800 animate-shimmer" style={{ background: '#27272a' }}></div>
+            </div>
+            <div className="p-6 space-y-6">
+              <div className="h-32 w-full rounded-xl bg-zinc-800 animate-shimmer" style={{ background: '#27272a' }}></div>
+              <div className="h-24 w-full rounded-xl bg-zinc-800/50 animate-shimmer" style={{ background: '#27272a' }}></div>
+            </div>
+          </div>
+          <div className="w-[65%] bg-[#18181b] p-6 space-y-4">
+             <div className="h-4 w-24 rounded bg-zinc-800 animate-shimmer mb-6" style={{ background: '#27272a' }}></div>
+             {[1, 2, 3, 4, 5, 6].map(i => (
+               <div key={i} className="h-4 rounded bg-zinc-800 animate-shimmer opacity-50" style={{ width: `${Math.max(20, Math.random() * 80)}%`, background: '#27272a' }}></div>
+             ))}
+          </div>
+        </div>
       </div>
     );
   }

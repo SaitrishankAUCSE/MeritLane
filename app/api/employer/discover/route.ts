@@ -49,17 +49,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Extract required skills safely
-    let requiredSkills: string[] = targetRole.skills || [];
-
-    // --- FIX FOR EXISTING PRODUCTION ROLE ---
-    if (requiredSkills.length === 1 && requiredSkills[0] === 'Python React Firebase') {
-      const fixedSkills = ['Python', 'React', 'Firebase'];
-      await adminDb.collection('employers').doc(employerUid).update({
-        roles: roles.map(r => r.id === roleId ? { ...r, skills: fixedSkills } : r)
-      });
-      requiredSkills = fixedSkills;
-    }
-    // ------------------------------------------
+    const requiredSkills: string[] = targetRole.skills || [];
 
     // 4. Fetch Verified Candidates Only
     const candidatesSnapshot = await adminDb

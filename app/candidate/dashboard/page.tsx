@@ -39,9 +39,31 @@ export default function CandidateDashboardPage() {
 
   if (loading || dataLoading) {
     return (
-      <div className="flex min-h-[60vh] flex-col items-center justify-center space-y-3">
-        <Loader2 className="h-8 w-8 animate-spin text-slate-400" />
-        <p className="text-sm font-medium text-slate-500">Loading dashboard...</p>
+      <div className="min-h-screen bg-slate-50 pb-24 pt-10">
+        <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 space-y-6 animate-fade-up">
+          <div className="flex items-center justify-between border-b border-slate-200 pb-4">
+            <div className="h-8 w-64 rounded bg-slate-200 animate-shimmer"></div>
+            <div className="h-9 w-28 rounded-md bg-slate-200 animate-shimmer"></div>
+          </div>
+          <Card className="border-slate-200 shadow-sm">
+            <CardContent className="p-6">
+              <div className="flex flex-col sm:flex-row gap-5 items-start">
+                <div className="h-12 w-12 rounded bg-slate-200 animate-shimmer shrink-0"></div>
+                <div className="flex-1 space-y-3 w-full">
+                  <div className="flex items-center gap-2 mb-1">
+                    <div className="h-6 w-48 rounded bg-slate-200 animate-shimmer"></div>
+                    <div className="h-6 w-24 rounded-full bg-slate-200 animate-shimmer"></div>
+                  </div>
+                  <div className="h-4 w-3/4 rounded bg-slate-200 animate-shimmer"></div>
+                  <div className="h-4 w-1/2 rounded bg-slate-200 animate-shimmer"></div>
+                  <div className="pt-2">
+                    <div className="h-10 w-48 rounded-md bg-slate-200 animate-shimmer"></div>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
       </div>
     );
   }
