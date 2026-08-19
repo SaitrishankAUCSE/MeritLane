@@ -11,6 +11,7 @@ import { EmptyState } from "@/components/ui/EmptyState";
 import { useAuth } from "@/lib/auth/AuthContext";
 import { useRouter } from "next/navigation";
 import { fetchEmployerProfile, saveEmployerProfile, JobPosting, toggleShortlist } from "@/lib/firebase/employer";
+import { canonicalizeSkill } from "@/lib/skills";
 import { CandidateProofModal } from "@/components/employer/CandidateProofModal";
 
 export default function EmployerDashboardPage() {
@@ -108,11 +109,25 @@ export default function EmployerDashboardPage() {
     if (!roleTitle.trim() || !user) return;
 
     setSaving(true);
+    
+    // Clean and deduplicate skills using canonical forms
+    const cleanedSkills: string[] = [];
+    const seenCanonical = new Set<string>();
+    
+    for (const raw of skillsNeeded) {
+      if (!raw.trim()) continue;
+      const canonical = canonicalizeSkill(raw);
+      if (!seenCanonical.has(canonical)) {
+        seenCanonical.add(canonical);
+        cleanedSkills.push(raw.trim()); // preserve display case
+      }
+    }
+
     const newRole: JobPosting = {
       id: `role-${Date.now()}`,
-      title: roleTitle,
-      department: department || "Engineering",
-      skills: skillsNeeded,
+      title: roleTitle.trim(),
+      department: department?.trim() || "Engineering",
+      skills: cleanedSkills,
       experienceLevel,
       status: "active",
     };

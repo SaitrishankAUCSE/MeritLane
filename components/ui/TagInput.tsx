@@ -2,6 +2,7 @@
 
 import React, { useState, KeyboardEvent } from "react";
 import { X } from "lucide-react";
+import { parseSkillInput } from "@/lib/skills";
 
 export interface TagInputProps {
   label?: string;
@@ -34,9 +35,19 @@ export function TagInput({
 
   const addTag = () => {
     if (disabled) return;
-    const trimmed = inputValue.trim();
-    if (trimmed && !tags.includes(trimmed)) {
-      onChange([...tags, trimmed]);
+    const parsedTags = parseSkillInput(inputValue);
+    if (parsedTags.length > 0) {
+      const newTags = [...tags];
+      let changed = false;
+      for (const t of parsedTags) {
+        if (!newTags.includes(t)) {
+          newTags.push(t);
+          changed = true;
+        }
+      }
+      if (changed) {
+        onChange(newTags);
+      }
       setInputValue("");
     }
   };

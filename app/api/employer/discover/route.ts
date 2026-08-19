@@ -3,21 +3,7 @@ import { adminAuth, adminDb } from "@/lib/firebase/admin";
 import { CandidateProfile } from "@/lib/firebase/candidate";
 import { JobPosting } from "@/lib/firebase/employer";
 import { UserProfile } from "@/lib/firebase/users";
-
-const normalizeSkill = (val: string) => val.trim().toLowerCase().replace(/\s+/g, ' ');
-
-const skillAliases: Record<string, string> = {
-  "nodejs": "node",
-  "node.js": "node",
-  "reactjs": "react",
-  "vuejs": "vue",
-  "postgres": "postgresql"
-};
-
-const canonicalize = (val: string) => {
-  const norm = normalizeSkill(val);
-  return skillAliases[norm] || norm;
-};
+import { canonicalizeSkill } from "@/lib/skills";
 
 const escapeRegExp = (string: string) => string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
@@ -103,19 +89,19 @@ export async function POST(req: NextRequest) {
       const matchedSkills: string[] = [];
 
       for (const reqSkill of requiredSkills) {
-        const canonicalReq = canonicalize(reqSkill);
+        const canonicalReq = canonicalizeSkill(reqSkill);
         if (canonicalReq.length === 0) continue;
         
         let matched = false;
 
         // 1. Check verified skills (Exact match on canonicalized string)
-        if (candidateSkills.some(s => canonicalize(s) === canonicalReq)) {
+        if (candidateSkills.some(s => canonicalizeSkill(s) === canonicalReq)) {
           matchReasons.push(`${reqSkill.trim()} — verified`);
           matched = true;
         }
 
         // 2. Check assessments (Exact match on canonicalized string)
-        if (!matched && Object.keys(assessmentScores).some(k => canonicalize(k) === canonicalReq)) {
+        if (!matched && Object.keys(assessmentScores).some(k => canonicalizeSkill(k) === canonicalReq)) {
           matchReasons.push(`${reqSkill.trim()} — assessment completed`);
           matched = true;
         }
