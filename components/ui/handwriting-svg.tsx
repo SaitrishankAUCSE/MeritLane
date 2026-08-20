@@ -87,10 +87,8 @@ export function HandwritingSvg({
   if (loading) {
     return (
       <svg
-        width={width}
-        height={height}
         viewBox={`0 0 ${width} ${height}`}
-        className={cn("text-muted-foreground", className)}
+        className={cn("w-full h-auto text-muted-foreground", className)}
         aria-hidden={true}
       >
         <title>Handwriting SVG loading</title>
@@ -101,7 +99,7 @@ export function HandwritingSvg({
           dominantBaseline="middle"
           fontSize={14}
         >
-          Loading…
+          Loading...
         </text>
       </svg>
     );
@@ -111,10 +109,8 @@ export function HandwritingSvg({
   if (!d) {
     return (
       <svg
-        width={width}
-        height={height}
         viewBox={`0 0 ${width} ${height}`}
-        className={cn("text-muted-foreground", className)}
+        className={cn("w-full h-auto text-muted-foreground", className)}
         aria-hidden={true}
       >
         <title>Handwriting SVG</title>
@@ -142,10 +138,8 @@ export function HandwritingSvg({
 
   return (
     <svg
-      width={width}
-      height={height}
       viewBox={svgViewBox}
-      className={cn("text-rose-500", className)}
+      className={cn("w-full h-auto text-rose-500", className)}
       aria-hidden={true}
     >
       <title>Handwriting SVG</title>
