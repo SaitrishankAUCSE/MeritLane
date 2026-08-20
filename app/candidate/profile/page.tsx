@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Plus, Trash2, AlertCircle, Check, Globe, ExternalLink, ShieldCheck, User, GraduationCap, Code2, Briefcase, FileCode2, LineChart, BadgeCheck, CheckCircle2 } from "lucide-react";
+import { Plus, Trash2, AlertCircle, Check, Globe, ExternalLink, ShieldCheck, User, GraduationCap, Code2, Briefcase, FileCode2, LineChart, BadgeCheck, CheckCircle2, Loader2 } from "lucide-react";
 import { Badge } from "@/components/ui/Badge";
 import { Input } from "@/components/ui/Input";
 import { Textarea } from "@/components/ui/Textarea";
@@ -434,7 +434,7 @@ export default function CandidateProfilePage() {
                         <Autocomplete
                           value={college}
                           onChange={setCollege}
-                          fetchSuggestions={fetchColleges}
+                          fetchOptions={fetchColleges}
                           placeholder="Search for your university..."
                           disabled={isLocked}
                         />
@@ -512,7 +512,7 @@ export default function CandidateProfilePage() {
                       <h3 className="text-xs font-bold text-zinc-500 uppercase tracking-wider mb-4">Declared Skills</h3>
                       <TagInput
                         tags={skills}
-                        setTags={setSkills}
+                        onChange={setSkills}
                         placeholder="Type a skill and press Enter..."
                         disabled={isLocked}
                       />

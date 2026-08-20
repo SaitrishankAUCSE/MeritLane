@@ -39,8 +39,8 @@ export default function CandidateDashboardPage() {
   }, [user, loading, router]);
 
   const copyPublicLink = () => {
-    if (typeof window !== "undefined" && profile?.uid) {
-      const url = `${window.location.origin}/p/${profile.uid}`;
+    if (typeof window !== "undefined" && user?.uid) {
+      const url = `${window.location.origin}/p/${user.uid}`;
       navigator.clipboard.writeText(url);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
@@ -280,7 +280,7 @@ export default function CandidateDashboardPage() {
                 <Button 
                   variant="outline" 
                   className="w-full justify-center bg-white/10 border-white/20 text-white hover:bg-white/20 hover:text-white"
-                  onClick={() => router.push(`/p/${user.uid}`)}
+                  onClick={() => user?.uid && router.push(`/p/${user.uid}`)}
                 >
                   <ExternalLink className="mr-2 w-4 h-4" />
                   View Public Record
