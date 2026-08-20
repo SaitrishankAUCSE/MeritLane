@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Plus, Trash2, AlertCircle, Check, Globe, ExternalLink, ShieldCheck, User, GraduationCap, Code2, Briefcase, FileCode2, LineChart, BadgeCheck } from "lucide-react";
+import { Plus, Trash2, AlertCircle, Check, Globe, ExternalLink, ShieldCheck, User, GraduationCap, Code2, Briefcase, FileCode2, LineChart, BadgeCheck, CheckCircle2 } from "lucide-react";
 import { Badge } from "@/components/ui/Badge";
 import { Input } from "@/components/ui/Input";
 import { Textarea } from "@/components/ui/Textarea";
