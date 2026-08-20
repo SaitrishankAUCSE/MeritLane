@@ -1,0 +1,75 @@
+import fs from "fs";
+
+const files = [
+  "app/candidate/profile/page.tsx",
+  "app/employer/dashboard/page.tsx",
+  "app/admin/page.tsx",
+  "components/employer/CandidateProofModal.tsx",
+  "app/settings/page.tsx",
+  "app/login/page.tsx",
+  "app/signup/page.tsx",
+  "app/candidate/assessment/page.tsx",
+  "components/public-record/PublicProofRecord.tsx",
+  "components/RoleSelector.tsx",
+  "app/not-found.tsx",
+];
+
+const reps = [
+  [/bg-\[#FAF6EF\]/g, "bg-background"],
+  [/bg-\[#FBF8F1\]/g, "bg-background"],
+  [/text-zinc-900/g, "text-foreground"],
+  [/text-zinc-800/g, "text-foreground"],
+  [/text-zinc-700/g, "text-muted-foreground"],
+  [/text-zinc-600/g, "text-muted-foreground"],
+  [/text-zinc-500/g, "text-muted-foreground"],
+  [/text-zinc-400/g, "text-outline"],
+  [/text-zinc-300/g, "text-outline"],
+  [/border-zinc-900/g, "border-foreground"],
+  [/border-zinc-300/g, "border-border"],
+  [/border-zinc-200\/80/g, "border-border"],
+  [/border-zinc-200\/60/g, "border-border"],
+  [/border-zinc-200/g, "border-border"],
+  [/border-zinc-100\/80/g, "border-border"],
+  [/border-zinc-100/g, "border-border"],
+  [/bg-zinc-900/g, "bg-foreground"],
+  [/bg-zinc-200\/70/g, "bg-surface-high"],
+  [/bg-zinc-200\/50/g, "bg-surface-high"],
+  [/bg-zinc-200/g, "bg-surface-high"],
+  [/bg-zinc-100\/80/g, "bg-surface-low"],
+  [/bg-zinc-100\/50/g, "bg-surface-low"],
+  [/bg-zinc-100/g, "bg-surface-low"],
+  [/bg-zinc-50\/80/g, "bg-surface-low"],
+  [/bg-zinc-50\/60/g, "bg-surface-low"],
+  [/bg-zinc-50\/50/g, "bg-surface-low"],
+  [/bg-zinc-50/g, "bg-surface-low"],
+  [/bg-white/g, "bg-surface"],
+  [/hover:bg-zinc-50/g, "hover:bg-surface-low"],
+  [/hover:bg-zinc-100/g, "hover:bg-surface-low"],
+  [/hover:text-zinc-900/g, "hover:text-foreground"],
+  [/hover:border-zinc-300/g, "hover:border-outline"],
+  [/ring-zinc-900/g, "ring-foreground"],
+  [/focus:ring-zinc-900/g, "focus:ring-foreground"],
+  [/focus:border-zinc-900/g, "focus:border-foreground"],
+  [/bg-indigo-900/g, "bg-foreground"],
+  [/hover:bg-indigo-800/g, "hover:opacity-90"],
+  [/text-indigo-700/g, "text-accent"],
+  [/bg-indigo-50/g, "bg-transparent"],
+  [/text-emerald-600/g, "text-success"],
+  [/bg-emerald-50/g, "bg-success/10"],
+  [/text-emerald-400/g, "text-success"],
+  [/bg-red-50/g, "bg-danger/10"],
+  [/text-red-600/g, "text-danger"],
+  [/text-red-700/g, "text-danger"],
+  [/text-red-900/g, "text-danger"],
+  [/border-red-200/g, "border-danger/40"],
+  [/hover:text-red-600/g, "hover:text-danger"],
+  [/hover:bg-red-50/g, "hover:bg-danger/10"],
+  [/hover:border-red-200/g, "hover:border-danger/40"],
+];
+
+for (const f of files) {
+  let s = fs.readFileSync(f, "utf8");
+  for (const [a, b] of reps) s = s.replace(a, b);
+  fs.writeFileSync(f, s);
+  console.log("updated", f);
+}

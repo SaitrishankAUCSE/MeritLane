@@ -97,7 +97,7 @@ export function Autocomplete({
   return (
     <div className="flex flex-col gap-1.5 w-full text-left relative" ref={wrapperRef}>
       {label && (
-        <label htmlFor={inputId} className="text-sm font-semibold text-zinc-900">
+        <label htmlFor={inputId} className="font-data text-outline">
           {label}
         </label>
       )}
@@ -109,10 +109,8 @@ export function Autocomplete({
           onChange={handleInputChange}
           onFocus={handleInputFocus}
           placeholder={placeholder}
-          className={`w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 placeholder:text-zinc-500 transition-all duration-150 ease-out hover:border-zinc-400 focus:border-zinc-900 focus:outline-none focus:ring-1 focus:ring-zinc-900 disabled:opacity-50 disabled:bg-zinc-50 ${
-            error
-              ? "border-red-500 hover:border-red-600 focus:border-red-500 focus:ring-red-500/10 text-red-900 pr-10"
-              : ""
+          className={`field-line pr-8 ${
+            error ? "border-danger text-danger" : ""
           } ${className}`}
           {...props}
           autoComplete="off"
@@ -121,47 +119,46 @@ export function Autocomplete({
         {/* End Adornment (Error, Loading, or Chevron) */}
         <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
           {loading ? (
-            <Loader2 className="h-4 w-4 animate-spin text-zinc-400" />
+            <Loader2 className="h-4 w-4 animate-spin text-outline" />
           ) : error ? (
-            <AlertCircle className="h-4 w-4 text-red-500" aria-hidden="true" />
+            <AlertCircle className="h-4 w-4 text-danger" aria-hidden="true" />
           ) : (
-            <ChevronDown className="h-4 w-4 text-zinc-400" />
+            <ChevronDown className="h-4 w-4 text-outline" />
           )}
         </div>
       </div>
 
       {/* Dropdown */}
       {isOpen && !disabled && (
-        <div className="absolute top-full left-0 mt-1 w-full z-50 max-h-60 overflow-y-auto rounded-md border border-zinc-200 bg-white py-1 shadow-lg focus:outline-none">
+        <div className="absolute top-full left-0 z-50 mt-1 max-h-60 w-full overflow-y-auto border border-border bg-surface py-1 focus:outline-none">
           {loading && filteredOptions.length === 0 ? (
-            <div className="px-3 py-2 text-sm text-zinc-500 text-center">Loading...</div>
+            <div className="px-3 py-2 text-center text-sm text-muted-foreground">Loading...</div>
           ) : filteredOptions.length === 0 ? (
-            <div className="px-3 py-2 text-sm text-zinc-500 text-center">
+            <div className="px-3 py-2 text-center text-sm text-muted-foreground">
               {inputValue ? "No results found. You can keep your custom entry." : "Type to search..."}
             </div>
           ) : (
-            <ul className="text-sm text-zinc-900 pb-1">
+            <ul className="pb-1 text-sm text-foreground">
               {filteredOptions.map((opt, idx) => (
                 <li
                   key={idx}
                   onMouseDown={(e) => {
-                    // Prevent input blur before click fires
                     e.preventDefault();
                   }}
                   onClick={() => handleOptionSelect(opt)}
-                  className={`cursor-pointer select-none px-3.5 py-2 hover:bg-zinc-50 flex items-center justify-between ${
-                    opt === value ? "bg-zinc-100 font-medium" : ""
+                  className={`flex cursor-pointer items-center justify-between px-3.5 py-2 select-none hover:bg-surface-low ${
+                    opt === value ? "bg-surface-low font-medium" : ""
                   }`}
                 >
                   <span className="truncate">{opt}</span>
-                  {opt === value && <Check className="h-4 w-4 text-zinc-900 shrink-0 ml-2" />}
+                  {opt === value && <Check className="ml-2 h-4 w-4 shrink-0 text-foreground" />}
                 </li>
               ))}
               {inputValue && !filteredOptions.some(opt => opt.toLowerCase() === inputValue.toLowerCase()) && (
                 <li
                   onMouseDown={(e) => e.preventDefault()}
                   onClick={() => handleOptionSelect(inputValue)}
-                  className="cursor-pointer select-none px-3.5 py-2 mt-1 border-t border-zinc-100 text-zinc-900 hover:bg-zinc-50 font-medium flex items-center"
+                  className="mt-1 flex cursor-pointer items-center border-t border-border px-3.5 py-2 font-medium text-foreground select-none hover:bg-surface-low"
                 >
                   Use &quot;{inputValue}&quot;
                 </li>
@@ -172,10 +169,10 @@ export function Autocomplete({
       )}
 
       {helperText && !error && (
-        <p className="text-xs text-zinc-500">{helperText}</p>
+        <p className="text-xs text-muted-foreground">{helperText}</p>
       )}
       {error && (
-        <p className="text-xs font-medium text-red-600 animate-in fade-in duration-150">
+        <p className="text-xs font-medium text-danger">
           {error}
         </p>
       )}

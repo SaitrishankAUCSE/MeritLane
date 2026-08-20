@@ -5,6 +5,7 @@ import { useAuth } from "@/lib/auth/AuthContext";
 import { Card, CardHeader, CardContent } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
+import { ProofTrace } from "@/components/ui/ProofTrace";
 import { 
   ShieldCheck, 
   CheckCircle2, 
@@ -34,6 +35,7 @@ import {
   CheckCheck,
   Trash2
 } from "lucide-react";
+import { ReviewConsole } from "@/components/admin/ReviewConsole";
 
 import { collection, onSnapshot, doc, updateDoc, serverTimestamp, getDocs, writeBatch } from "firebase/firestore";
 import { db } from "@/lib/firebase/config";
@@ -469,7 +471,7 @@ export default function AdminDashboardPage() {
     <div className="min-h-[calc(100vh-64px)] pb-24 pt-12">
       {/* Toast Notification */}
       {successToast && (
-        <div className="fixed top-20 right-6 z-50 rounded-xl border border-zinc-700 bg-zinc-900 px-4 py-3 text-xs font-semibold text-white shadow-lg animate-in fade-in slide-in-from-top-2 duration-150">
+        <div className="fixed top-20 right-6 z-50 rounded-xl border border-zinc-700 bg-foreground px-4 py-3 text-xs font-semibold text-white shadow-lg animate-in fade-in slide-in-from-top-2 duration-150">
           <div className="flex items-center gap-2">
             <CheckCircle2 className="h-4 w-4 text-white" />
             <span>{successToast}</span>
@@ -479,17 +481,17 @@ export default function AdminDashboardPage() {
 
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 space-y-8">
         {/* Header */}
-        <div className="flex flex-col justify-between gap-4 border-b border-zinc-200/80 pb-6 sm:flex-row sm:items-center">
+        <div className="flex flex-col justify-between gap-4 border-b border-border pb-6 sm:flex-row sm:items-center">
           <div>
             <div className="flex items-center gap-3">
-              <h1 className="text-2xl font-bold tracking-tight text-zinc-900 sm:text-3xl">
+              <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
                 Administrator Command Center
               </h1>
               <span className="rounded-md border border-zinc-800 bg-zinc-950 px-2.5 py-0.5 text-xs font-semibold text-white">
                 Superadmin
               </span>
             </div>
-            <p className="mt-1.5 text-sm text-zinc-500">
+            <p className="mt-1.5 text-sm text-muted-foreground">
               Direct verification pipeline, repository audits, candidate directory, and platform integrity logs.
             </p>
           </div>
@@ -502,7 +504,7 @@ export default function AdminDashboardPage() {
                 setWipeResult(null);
                 setShowWipeModal(true);
               }}
-              className="text-red-600 border-red-200 hover:bg-red-50 hover:text-red-700"
+              className="text-danger border-danger/40 hover:bg-danger/10 hover:text-danger"
               leftIcon={<Trash2 className="h-3.5 w-3.5" />}
             >
               Wipe Test Users
@@ -529,9 +531,9 @@ export default function AdminDashboardPage() {
 
         {/* Error Alert Banner */}
         {error && (
-          <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-xs text-red-900 shadow-sm flex items-center justify-between">
+          <div className="rounded-xl border border-danger/40 bg-danger/10 p-4 text-xs text-danger shadow-sm flex items-center justify-between">
             <div className="flex items-center gap-2 font-medium">
-              <AlertTriangle className="h-4 w-4 text-red-600 shrink-0" />
+              <AlertTriangle className="h-4 w-4 text-danger shrink-0" />
               <span>Failed to synchronize candidate records: {error}</span>
             </div>
             <Button
@@ -539,7 +541,7 @@ export default function AdminDashboardPage() {
               variant="outline"
               size="sm"
               onClick={fetchCandidates}
-              className="text-xs text-red-700 border-red-300 hover:bg-red-100"
+              className="text-xs text-danger border-red-300 hover:bg-red-100"
             >
               Retry
             </Button>
@@ -551,30 +553,30 @@ export default function AdminDashboardPage() {
           <Card>
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-bold uppercase tracking-wider text-zinc-500">Verification Queue</span>
+                <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Verification Queue</span>
                 <Clock className="h-4 w-4 text-amber-500" />
               </div>
               {hasLoadedCandidates ? (
-                <p className="mt-2 text-3xl font-bold tracking-tight text-zinc-900 animate-fade-up">{pendingCount}</p>
+                <p className="mt-2 text-3xl font-bold tracking-tight text-foreground animate-fade-up">{pendingCount}</p>
               ) : (
-                <div className="mt-2 h-9 w-16 animate-shimmer rounded bg-zinc-200" />
+                <div className="mt-2 h-9 w-16 animate-shimmer rounded bg-surface-high" />
               )}
-              <p className="mt-1 text-[11px] text-zinc-400">Awaiting codebase review</p>
+              <p className="mt-1 text-[11px] text-outline">Awaiting codebase review</p>
             </CardContent>
           </Card>
 
           <Card>
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-bold uppercase tracking-wider text-zinc-500">Verified Talent</span>
-                <ShieldCheck className="h-4 w-4 text-emerald-600" />
+                <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Verified Talent</span>
+                <ShieldCheck className="h-4 w-4 text-success" />
               </div>
               {hasLoadedCandidates ? (
-                <p className="mt-2 text-3xl font-bold tracking-tight text-zinc-900 animate-fade-up">{verifiedCount}</p>
+                <p className="mt-2 text-3xl font-bold tracking-tight text-foreground animate-fade-up">{verifiedCount}</p>
               ) : (
-                <div className="mt-2 h-9 w-16 animate-shimmer rounded bg-zinc-200" />
+                <div className="mt-2 h-9 w-16 animate-shimmer rounded bg-surface-high" />
               )}
-              <p className="mt-1 text-[11px] text-zinc-400">
+              <p className="mt-1 text-[11px] text-outline">
                 {hasLoadedCandidates ? `${verifiedRate}% verification pass rate` : "Calculating..."}
               </p>
             </CardContent>
@@ -583,42 +585,42 @@ export default function AdminDashboardPage() {
           <Card>
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-bold uppercase tracking-wider text-zinc-500">Action Required</span>
+                <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Action Required</span>
                 <AlertTriangle className="h-4 w-4 text-amber-600" />
               </div>
               {hasLoadedCandidates ? (
-                <p className="mt-2 text-3xl font-bold tracking-tight text-zinc-900 animate-fade-up">{changesCount}</p>
+                <p className="mt-2 text-3xl font-bold tracking-tight text-foreground animate-fade-up">{changesCount}</p>
               ) : (
-                <div className="mt-2 h-9 w-16 animate-shimmer rounded bg-zinc-200" />
+                <div className="mt-2 h-9 w-16 animate-shimmer rounded bg-surface-high" />
               )}
-              <p className="mt-1 text-[11px] text-zinc-400">Feedback sent to candidate</p>
+              <p className="mt-1 text-[11px] text-outline">Feedback sent to candidate</p>
             </CardContent>
           </Card>
 
           <Card>
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-bold uppercase tracking-wider text-zinc-500">Total Registered</span>
-                <Layers className="h-4 w-4 text-zinc-500" />
+                <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Total Registered</span>
+                <Layers className="h-4 w-4 text-muted-foreground" />
               </div>
               {hasLoadedCandidates ? (
-                <p className="mt-2 text-3xl font-bold tracking-tight text-zinc-900 animate-fade-up">{totalCount}</p>
+                <p className="mt-2 text-3xl font-bold tracking-tight text-foreground animate-fade-up">{totalCount}</p>
               ) : (
-                <div className="mt-2 h-9 w-16 animate-shimmer rounded bg-zinc-200" />
+                <div className="mt-2 h-9 w-16 animate-shimmer rounded bg-surface-high" />
               )}
-              <p className="mt-1 text-[11px] text-zinc-400">Total platform candidates</p>
+              <p className="mt-1 text-[11px] text-outline">Total platform candidates</p>
             </CardContent>
           </Card>
         </div>
 
         {/* Admin Navigation Tabs — Cutshort style */}
-        <div className="flex items-center gap-8 border-b border-zinc-200">
+        <div className="flex items-center gap-8 border-b border-border">
           <button
             onClick={() => setActiveTab("queue")}
             className={`flex items-center gap-2 border-b-2 pb-3 text-sm font-medium transition-colors ${
               activeTab === "queue"
-                ? "border-zinc-900 text-zinc-900 font-semibold"
-                : "border-transparent text-zinc-500 hover:border-zinc-300 hover:text-zinc-900"
+                ? "border-foreground text-foreground font-semibold"
+                : "border-transparent text-muted-foreground hover:border-border hover:text-foreground"
             }`}
           >
             <Clock className="h-4 w-4" />
@@ -629,8 +631,8 @@ export default function AdminDashboardPage() {
             onClick={() => setActiveTab("directory")}
             className={`flex items-center gap-2 border-b-2 pb-3 text-sm font-medium transition-colors ${
               activeTab === "directory"
-                ? "border-zinc-900 text-zinc-900 font-semibold"
-                : "border-transparent text-zinc-500 hover:border-zinc-300 hover:text-zinc-900"
+                ? "border-foreground text-foreground font-semibold"
+                : "border-transparent text-muted-foreground hover:border-border hover:text-foreground"
             }`}
           >
             <Layers className="h-4 w-4" />
@@ -641,8 +643,8 @@ export default function AdminDashboardPage() {
             onClick={() => setActiveTab("analytics")}
             className={`flex items-center gap-2 border-b-2 pb-3 text-sm font-medium transition-colors ${
               activeTab === "analytics"
-                ? "border-zinc-900 text-zinc-900 font-semibold"
-                : "border-transparent text-zinc-500 hover:border-zinc-300 hover:text-zinc-900"
+                ? "border-foreground text-foreground font-semibold"
+                : "border-transparent text-muted-foreground hover:border-border hover:text-foreground"
             }`}
           >
             <BarChart3 className="h-4 w-4" />
@@ -653,8 +655,8 @@ export default function AdminDashboardPage() {
             onClick={() => setActiveTab("audit")}
             className={`flex items-center gap-2 border-b-2 pb-3 text-sm font-medium transition-colors ${
               activeTab === "audit"
-                ? "border-zinc-900 text-zinc-900 font-semibold"
-                : "border-transparent text-zinc-500 hover:border-zinc-300 hover:text-zinc-900"
+                ? "border-foreground text-foreground font-semibold"
+                : "border-transparent text-muted-foreground hover:border-border hover:text-foreground"
             }`}
           >
             <History className="h-4 w-4" />
@@ -663,128 +665,47 @@ export default function AdminDashboardPage() {
         </div>
 
         {/* TAB 1: PENDING QUEUE */}
-        {activeTab === "queue" && (
-          <div className="space-y-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <h2 className="text-base font-bold text-zinc-900">Priority Verification Queue</h2>
-                <p className="text-xs text-zinc-500">Candidates awaiting manual codebase audit and verification.</p>
-              </div>
-            </div>
+{activeTab === "queue" && (
+  <ReviewConsole
+    queueCandidates={queueCandidates}
+    selectedCandidate={selectedCandidate}
+    setSelectedCandidate={setSelectedCandidate}
+    actionType={actionType}
+    setActionType={setActionType}
+    actionReason={actionReason}
+    setActionReason={setActionReason}
+    actionLoading={actionLoading}
+    handleExecuteAction={handleExecuteAction}
+    FEEDBACK_PRESETS={FEEDBACK_PRESETS}
+  />
+)}
 
-            <Card>
-              <CardContent className="p-0">
-                {!hasLoadedCandidates ? (
-                  <div className="flex min-h-[250px] flex-col items-center justify-center space-y-3 p-12 text-center">
-                    <Loader2 className="h-6 w-6 animate-spin text-zinc-400" />
-                    <p className="text-sm font-semibold text-zinc-900">Loading candidate records...</p>
-                    <p className="text-xs text-zinc-500 max-w-sm">
-                      Synchronizing priority verification queue with the server.
-                    </p>
-                  </div>
-                ) : queueCandidates.length === 0 ? (
-                  <div className="flex min-h-[250px] flex-col items-center justify-center space-y-3 p-12 text-center">
-                    <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600 border border-emerald-100">
-                      <CheckCircle2 className="h-6 w-6" />
-                    </div>
-                    <p className="text-sm font-semibold text-zinc-900">Queue is completely clear!</p>
-                    <p className="text-xs text-zinc-500 max-w-sm">
-                      All submitted candidate profiles have been reviewed and verified.
-                    </p>
-                  </div>
-                ) : (
-                  <div className="overflow-x-auto">
-                    <table className="w-full text-left text-xs text-zinc-600">
-                      <thead className="border-b border-zinc-200 bg-zinc-50/80 font-bold uppercase tracking-wider text-zinc-500">
-                        <tr>
-                          <th className="px-6 py-3.5">Candidate</th>
-                          <th className="px-6 py-3.5">College &amp; Branch</th>
-                          <th className="px-6 py-3.5">Skills</th>
-                          <th className="px-6 py-3.5">Submitted Projects</th>
-                          <th className="px-6 py-3.5 text-right">Action</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-zinc-100">
-                        {queueCandidates.map((c) => (
-                          <tr key={c.uid} className="hover:bg-zinc-50/70 transition-colors">
-                            <td className="px-6 py-4">
-                              <div className="font-semibold text-zinc-900">{c.name || "Unnamed Candidate"}</div>
-                              <div className="text-[11px] text-zinc-400 font-mono">{c.email || c.uid.slice(0, 12) + "..."}</div>
-                            </td>
-                            <td className="px-6 py-4">
-                              <div className="text-zinc-900 font-medium">{c.college || "—"}</div>
-                              <div className="text-[11px] text-zinc-400">{c.branch || "—"} {c.gradYear ? `(${c.gradYear})` : ""}</div>
-                            </td>
-                            <td className="px-6 py-4">
-                              <div className="flex flex-wrap gap-1 max-w-xs">
-                                {c.skills && c.skills.length > 0 ? (
-                                  c.skills.slice(0, 3).map((s, i) => (
-                                    <span key={i} className="inline-block rounded bg-zinc-100 px-2 py-0.5 text-[11px] font-medium text-zinc-700">
-                                      {s}
-                                    </span>
-                                  ))
-                                ) : (
-                                  <span className="text-zinc-400 text-xs">—</span>
-                                )}
-                              </div>
-                            </td>
-                            <td className="px-6 py-4">
-                              <span className="text-xs font-semibold text-zinc-900">
-                                {c.projects?.length || 0} {c.projects?.length === 1 ? "project" : "projects"}
-                              </span>
-                            </td>
-                            <td className="px-6 py-4 text-right">
-                              <Button
-                                variant="primary"
-                                size="xs"
-                                onClick={() => {
-                                  setSelectedCandidate(c);
-                                  setActionType(null);
-                                  setActionReason("");
-                                  setActionError(null);
-                                }}
-                                leftIcon={<Eye className="h-3.5 w-3.5" />}
-                              >
-                                Audit &amp; Verify
-                              </Button>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </div>
-        )}
-
-        {/* TAB 2: CANDIDATE DIRECTORY */}
+{/* TAB 2: CANDIDATE DIRECTORY */}
         {activeTab === "directory" && (
           <div className="space-y-6">
             <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
               <div>
-                <h2 className="text-base font-bold text-zinc-900">Full Candidate Directory</h2>
-                <p className="text-xs text-zinc-500">Search and filter across all candidates in the Meritlane database.</p>
+                <h2 className="text-base font-bold text-foreground">Full Candidate Directory</h2>
+                <p className="text-xs text-muted-foreground">Search and filter across all candidates in the Meritlane database.</p>
               </div>
 
               {/* Filters */}
               <div className="flex flex-wrap items-center gap-3">
                 <div className="relative">
-                  <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -tranzinc-y-1/2 text-zinc-400" />
+                  <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -tranzinc-y-1/2 text-outline" />
                   <input
                     type="text"
                     placeholder="Search name, college, skill..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="rounded-md border border-zinc-200 bg-white py-1.5 pl-8 pr-3 text-xs text-zinc-900 placeholder:text-zinc-400 shadow-sm transition-all hover:border-zinc-300 focus:border-zinc-900 focus:outline-none focus:ring-2 focus:ring-zinc-900/10"
+                    className="rounded-md border border-border bg-surface py-1.5 pl-8 pr-3 text-base sm:text-xs text-foreground placeholder:text-outline shadow-sm transition-all hover:border-border focus:border-foreground focus:outline-none focus:ring-2 focus:ring-foreground/10"
                   />
                 </div>
 
                 <select
                   value={statusFilter}
                   onChange={(e) => setStatusFilter(e.target.value)}
-                  className="rounded-md border border-zinc-200 bg-white px-3 py-1.5 text-xs font-medium text-zinc-900 shadow-sm transition-all hover:border-zinc-300 focus:border-zinc-900 focus:outline-none focus:ring-2 focus:ring-zinc-900/10"
+                  className="rounded-md border border-border bg-surface px-3 py-1.5 text-base sm:text-xs font-medium text-foreground shadow-sm transition-all hover:border-border focus:border-foreground focus:outline-none focus:ring-2 focus:ring-foreground/10"
                 >
                   <option value="all">All Statuses</option>
                   <option value="verified">Verified</option>
@@ -799,8 +720,8 @@ export default function AdminDashboardPage() {
             <Card>
               <CardContent className="p-0">
                 <div className="overflow-x-auto">
-                  <table className="w-full text-left text-xs text-zinc-600">
-                    <thead className="border-b border-zinc-200 bg-zinc-50/80 font-bold uppercase tracking-wider text-zinc-500">
+                  <table className="w-full text-left text-xs text-muted-foreground">
+                    <thead className="border-b border-border bg-surface-low font-bold uppercase tracking-wider text-muted-foreground">
                       <tr>
                         <th className="px-6 py-3.5">Candidate</th>
                         <th className="px-6 py-3.5">College &amp; Branch</th>
@@ -815,38 +736,38 @@ export default function AdminDashboardPage() {
                         <tr>
                           <td colSpan={6} className="px-6 py-12 text-center">
                             <div className="flex flex-col items-center justify-center space-y-3">
-                              <Loader2 className="h-5 w-5 animate-spin text-zinc-400" />
-                              <p className="text-sm font-medium text-zinc-500">Loading directory...</p>
+                              <Loader2 className="h-5 w-5 animate-spin text-outline" />
+                              <p className="text-sm font-medium text-muted-foreground">Loading directory...</p>
                             </div>
                           </td>
                         </tr>
                       ) : filteredCandidates.length === 0 ? (
                         <tr>
-                          <td colSpan={6} className="px-6 py-8 text-center text-sm text-zinc-500">
+                          <td colSpan={6} className="px-6 py-8 text-center text-sm text-muted-foreground">
                             No candidates found matching the current filters.
                           </td>
                         </tr>
                       ) : (
                         filteredCandidates.map((c) => (
-                        <tr key={c.uid} className="hover:bg-zinc-50/70 transition-colors">
+                        <tr key={c.uid} className="hover:bg-surface-low/70 transition-colors">
                           <td className="px-6 py-4">
-                            <div className="font-semibold text-zinc-900">{c.name || "Unnamed"}</div>
-                            <div className="text-[11px] text-zinc-400 font-mono">{c.email || c.uid.slice(0, 12) + "..."}</div>
+                            <div className="font-semibold text-foreground">{c.name || "Unnamed"}</div>
+                            <div className="text-[11px] text-outline font-mono">{c.email || c.uid.slice(0, 12) + "..."}</div>
                           </td>
                           <td className="px-6 py-4">
-                            <div className="text-zinc-900 font-medium">{c.college || "—"}</div>
-                            <div className="text-[11px] text-zinc-400">{c.branch || "—"} {c.gradYear ? `(${c.gradYear})` : ""}</div>
+                            <div className="text-foreground font-medium">{c.college || "—"}</div>
+                            <div className="text-[11px] text-outline">{c.branch || "—"} {c.gradYear ? `(${c.gradYear})` : ""}</div>
                           </td>
                           <td className="px-6 py-4">
                             <div className="flex flex-wrap gap-1 max-w-xs">
                               {c.skills && c.skills.length > 0 ? (
                                 c.skills.slice(0, 3).map((s, i) => (
-                                  <span key={i} className="inline-block rounded bg-zinc-100 px-2 py-0.5 text-[11px] font-medium text-zinc-700">
+                                  <span key={i} className="inline-block rounded bg-surface-low px-2 py-0.5 text-[11px] font-medium text-muted-foreground">
                                     {s}
                                   </span>
                                 ))
                               ) : (
-                                <span className="text-zinc-400 text-xs">—</span>
+                                <span className="text-outline text-xs">—</span>
                               )}
                             </div>
                           </td>
@@ -854,7 +775,7 @@ export default function AdminDashboardPage() {
                             {getStatusBadge(c.verificationStatus)}
                           </td>
                           <td className="px-6 py-4">
-                            <span className="text-xs font-semibold text-zinc-900">
+                            <span className="text-xs font-semibold text-foreground">
                               {c.projects?.length || 0}
                             </span>
                           </td>
@@ -888,59 +809,59 @@ export default function AdminDashboardPage() {
         {activeTab === "analytics" && (
           <div className="space-y-6">
             <div>
-              <h2 className="text-base font-bold text-zinc-900">Platform KPIs &amp; Verification Funnel</h2>
-              <p className="text-xs text-zinc-500">Live operational data from candidates and assessments.</p>
+              <h2 className="text-base font-bold text-foreground">Platform KPIs &amp; Verification Funnel</h2>
+              <p className="text-xs text-muted-foreground">Live operational data from candidates and assessments.</p>
             </div>
 
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
               <Card>
                 <CardHeader>
-                  <span className="text-xs font-bold uppercase tracking-wider text-zinc-500">Verification Rate</span>
+                  <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Verification Rate</span>
                 </CardHeader>
                 <CardContent>
                   {hasLoadedCandidates ? (
                     <>
-                      <p className="text-3xl font-bold text-zinc-900">{verifiedRate}%</p>
-                      <p className="mt-1 text-xs text-zinc-500">{verifiedCount} verified out of {totalCount} total</p>
+                      <p className="text-3xl font-bold text-foreground">{verifiedRate}%</p>
+                      <p className="mt-1 text-xs text-muted-foreground">{verifiedCount} verified out of {totalCount} total</p>
                     </>
                   ) : (
-                    <div className="h-9 w-16 animate-pulse rounded bg-zinc-200" />
+                    <div className="h-9 w-16 animate-pulse rounded bg-surface-high" />
                   )}
                 </CardContent>
               </Card>
 
               <Card>
                 <CardHeader>
-                  <span className="text-xs font-bold uppercase tracking-wider text-zinc-500">Assessment Readiness</span>
+                  <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Assessment Readiness</span>
                 </CardHeader>
                 <CardContent>
                   {hasLoadedCandidates ? (
                     <>
-                      <p className="text-3xl font-bold text-zinc-600">
+                      <p className="text-3xl font-bold text-muted-foreground">
                         {candidates.filter(c => c.verificationStatus === 'verified').length}
                       </p>
-                      <p className="mt-1 text-xs text-zinc-500">Passed Python technical audit</p>
+                      <p className="mt-1 text-xs text-muted-foreground">Passed Python technical audit</p>
                     </>
                   ) : (
-                    <div className="h-9 w-16 animate-pulse rounded bg-zinc-200" />
+                    <div className="h-9 w-16 animate-pulse rounded bg-surface-high" />
                   )}
                 </CardContent>
               </Card>
 
               <Card>
                 <CardHeader>
-                  <span className="text-xs font-bold uppercase tracking-wider text-zinc-500">Repositories Submitted</span>
+                  <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Repositories Submitted</span>
                 </CardHeader>
                 <CardContent>
                   {hasLoadedCandidates ? (
                     <>
-                      <p className="text-3xl font-bold text-zinc-900">
+                      <p className="text-3xl font-bold text-foreground">
                         {candidates.reduce((acc, c) => acc + (c.projects?.length || 0), 0)}
                       </p>
-                      <p className="mt-1 text-xs text-zinc-500">Production codebases attached</p>
+                      <p className="mt-1 text-xs text-muted-foreground">Production codebases attached</p>
                     </>
                   ) : (
-                    <div className="h-9 w-16 animate-pulse rounded bg-zinc-200" />
+                    <div className="h-9 w-16 animate-pulse rounded bg-surface-high" />
                   )}
                 </CardContent>
               </Card>
@@ -952,25 +873,25 @@ export default function AdminDashboardPage() {
         {activeTab === "audit" && (
           <div className="space-y-6">
             <div>
-              <h2 className="text-base font-bold text-zinc-900">Administrative Decision History</h2>
-              <p className="text-xs text-zinc-500">Immutable audit log of all verification decisions and reasons.</p>
+              <h2 className="text-base font-bold text-foreground">Administrative Decision History</h2>
+              <p className="text-xs text-muted-foreground">Immutable audit log of all verification decisions and reasons.</p>
             </div>
 
             <Card>
               <CardContent className="p-0">
                 {!hasLoadedCandidates ? (
-                  <div className="p-12 text-center text-xs text-zinc-500 flex flex-col items-center justify-center space-y-3">
-                    <Loader2 className="h-5 w-5 animate-spin text-zinc-400" />
+                  <div className="p-12 text-center text-xs text-muted-foreground flex flex-col items-center justify-center space-y-3">
+                    <Loader2 className="h-5 w-5 animate-spin text-outline" />
                     <p className="font-medium">Loading audit logs...</p>
                   </div>
                 ) : auditLogs.length === 0 ? (
-                  <div className="p-12 text-center text-xs text-zinc-500">
+                  <div className="p-12 text-center text-xs text-muted-foreground">
                     No decisions logged yet.
                   </div>
                 ) : (
                   <div className="overflow-x-auto">
-                    <table className="w-full text-left text-xs text-zinc-600">
-                      <thead className="border-b border-zinc-200 bg-zinc-50/80 font-bold uppercase tracking-wider text-zinc-500">
+                    <table className="w-full text-left text-xs text-muted-foreground">
+                      <thead className="border-b border-border bg-surface-low font-bold uppercase tracking-wider text-muted-foreground">
                         <tr>
                           <th className="px-6 py-3.5">Candidate</th>
                           <th className="px-6 py-3.5">Decision</th>
@@ -980,17 +901,17 @@ export default function AdminDashboardPage() {
                       </thead>
                       <tbody className="divide-y divide-zinc-100">
                         {auditLogs.map((c) => (
-                          <tr key={c.uid} className="hover:bg-zinc-50/70">
-                            <td className="px-6 py-4 font-semibold text-zinc-900">
+                          <tr key={c.uid} className="hover:bg-surface-low/70">
+                            <td className="px-6 py-4 font-semibold text-foreground">
                               {c.name || c.email || c.uid}
                             </td>
                             <td className="px-6 py-4">
                               {getStatusBadge(c.verificationStatus)}
                             </td>
-                            <td className="px-6 py-4 text-zinc-500 font-mono text-[11px]">
+                            <td className="px-6 py-4 text-muted-foreground font-mono text-[11px]">
                               {c.verifiedByEmail || "saitrishankb9@gmail.com"}
                             </td>
-                            <td className="px-6 py-4 text-zinc-600 max-w-sm">
+                            <td className="px-6 py-4 text-muted-foreground max-w-sm">
                               {c.verificationReason || "Standard verification approval."}
                             </td>
                           </tr>
@@ -1005,323 +926,24 @@ export default function AdminDashboardPage() {
         )}
       </div>
 
-      {/* Candidate Review Modal */}
-      {selectedCandidate && (
-        <div 
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-zinc-900/50 backdrop-blur-xs overflow-y-auto"
-          role="dialog"
-          aria-modal="true"
-        >
-          <div className="my-8 w-full max-w-3xl rounded-2xl border border-zinc-200 bg-white p-6 sm:p-8 shadow-xl animate-in fade-in zoom-in-95 duration-150">
-            {/* Header */}
-            <div className="flex items-start justify-between border-b border-zinc-200/80 pb-5">
-              <div>
-                <div className="flex items-center gap-3">
-                  <h2 className="text-xl font-bold text-zinc-900">{selectedCandidate.name || "Candidate Review"}</h2>
-                  {getStatusBadge(selectedCandidate.verificationStatus)}
-                </div>
-                <p className="mt-1 text-xs text-zinc-500">
-                  {selectedCandidate.email} • UID: <code className="text-xs font-mono text-zinc-600">{selectedCandidate.uid}</code>
-                </p>
-              </div>
-              <button 
-                onClick={() => setSelectedCandidate(null)}
-                className="rounded-md p-1.5 text-zinc-400 hover:bg-zinc-100 hover:text-zinc-700 transition-colors"
-              >
-                <X className="h-5 w-5" />
-              </button>
-            </div>
-
-            {/* Content Area */}
-            <div className="mt-6 space-y-6 max-h-[60vh] overflow-y-auto pr-2">
-              {/* Academic & Background */}
-              <div className="rounded-xl border border-zinc-200/80 bg-zinc-50/70 p-4">
-                <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-500 mb-3">Academic Identity</h3>
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-3 text-xs">
-                  <div>
-                    <span className="text-zinc-400 block">College / University</span>
-                    <span className="font-semibold text-zinc-900">{selectedCandidate.college || "Not specified"}</span>
-                  </div>
-                  <div>
-                    <span className="text-zinc-400 block">Branch</span>
-                    <span className="font-semibold text-zinc-900">{selectedCandidate.branch || "Not specified"}</span>
-                  </div>
-                  <div>
-                    <span className="text-zinc-400 block">Graduation Year</span>
-                    <span className="font-semibold text-zinc-900">{selectedCandidate.gradYear || "Not specified"}</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Skills & External Links */}
-              <div>
-                <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-500 mb-3">Skills &amp; Profiles</h3>
-                <div className="space-y-3">
-                  <div className="flex flex-wrap gap-1.5">
-                    {selectedCandidate.skills && selectedCandidate.skills.length > 0 ? (
-                      selectedCandidate.skills.map((skill, idx) => (
-                        <span key={idx} className="rounded-md bg-zinc-50 border border-zinc-100 px-2.5 py-1 text-xs font-semibold text-zinc-700">
-                          {skill}
-                        </span>
-                      ))
-                    ) : (
-                      <span className="text-xs text-zinc-400">No skills specified</span>
-                    )}
-                  </div>
-
-                  <div className="flex flex-wrap gap-4 pt-2 text-xs">
-                    {selectedCandidate.githubUrl && (
-                      <a 
-                        href={selectedCandidate.githubUrl} 
-                        target="_blank" 
-                        rel="noreferrer"
-                        className="inline-flex items-center gap-1.5 text-zinc-600 hover:text-zinc-800 font-semibold"
-                      >
-                        <Code className="h-4 w-4" /> GitHub Profile <ExternalLink className="h-3 w-3" />
-                      </a>
-                    )}
-                    {selectedCandidate.resumeUrl && (
-                      <a 
-                        href={selectedCandidate.resumeUrl} 
-                        target="_blank" 
-                        rel="noreferrer"
-                        className="inline-flex items-center gap-1.5 text-zinc-600 hover:text-zinc-800 font-semibold"
-                      >
-                        <FileText className="h-4 w-4" /> View Resume <ExternalLink className="h-3 w-3" />
-                      </a>
-                    )}
-                  </div>
-                </div>
-              </div>
-
-              {/* Assessment Signal & Admin Cooldown Override */}
-              <div className="rounded-xl border border-zinc-200/90 bg-white p-4 space-y-3">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-500">Technical Assessment Signal</h3>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="xs"
-                    loading={resetLoading}
-                    onClick={() => handleResetCooldown(selectedCandidate.uid)}
-                    leftIcon={<RotateCcw className="h-3 w-3" />}
-                    title="Reset 14-day cooldown so candidate can re-test immediately"
-                  >
-                    Reset Cooldown
-                  </Button>
-                </div>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    {selectedCandidate.verificationStatus === 'verified' ? (
-                      <CheckCircle2 className="h-4.5 w-4.5 text-emerald-600" />
-                    ) : (
-                      <Clock className="h-4.5 w-4.5 text-zinc-400" />
-                    )}
-                    <span className="text-xs font-semibold text-zinc-900">
-                      {selectedCandidate.verificationStatus === 'verified' ? "Passed Code Assessment (Full Score)" : "Assessment Pending / Incomplete"}
-                    </span>
-                  </div>
-                  {selectedCandidate.assessmentScores && (
-                    <span className="text-xs font-mono bg-zinc-100 px-2.5 py-1 rounded text-zinc-700">
-                      Score: {JSON.stringify(selectedCandidate.assessmentScores)}
-                    </span>
-                  )}
-                </div>
-              </div>
-
-              {/* Project Submissions */}
-              <div>
-                <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-500 mb-3">
-                  Submitted Codebases ({selectedCandidate.projects?.length || 0})
-                </h3>
-                {selectedCandidate.projects && selectedCandidate.projects.length > 0 ? (
-                  <div className="space-y-4">
-                    {selectedCandidate.projects.map((proj, idx) => (
-                      <div key={proj.id || idx} className="rounded-xl border border-zinc-200/90 bg-white p-5 space-y-2">
-                        <div className="flex items-center justify-between">
-                          <h4 className="font-bold text-zinc-900 text-sm">{proj.title || `Project #${idx + 1}`}</h4>
-                          <div className="flex items-center gap-3 text-xs">
-                            {proj.repoUrl && (
-                              <a href={proj.repoUrl} target="_blank" rel="noreferrer" className="text-zinc-600 hover:underline inline-flex items-center gap-1 font-semibold">
-                                <Code className="h-3.5 w-3.5" /> Repository <ExternalLink className="h-3 w-3" />
-                              </a>
-                            )}
-                            {proj.liveUrl && (
-                              <a href={proj.liveUrl} target="_blank" rel="noreferrer" className="text-zinc-600 hover:underline inline-flex items-center gap-1">
-                                Demo <ExternalLink className="h-3 w-3" />
-                              </a>
-                            )}
-                          </div>
-                        </div>
-                        <p className="text-xs text-zinc-600 leading-relaxed">{proj.description || "No architecture description provided."}</p>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="text-xs text-zinc-400 italic">No projects submitted yet.</p>
-                )}
-              </div>
-
-              {/* Existing Feedback / Reason if any */}
-              {selectedCandidate.verificationReason && (
-                <div className="rounded-xl border border-amber-200 bg-amber-50/80 p-4">
-                  <span className="text-xs font-bold uppercase tracking-wider text-amber-800 block mb-1">Previous Verification Feedback</span>
-                  <p className="text-xs text-amber-950 font-mono">{selectedCandidate.verificationReason}</p>
-                  {selectedCandidate.verifiedByEmail && (
-                    <span className="text-[11px] text-amber-700 block mt-2">
-                      Reviewed by: {selectedCandidate.verifiedByEmail}
-                    </span>
-                  )}
-                </div>
-              )}
-
-              {/* Action Error */}
-              {actionError && (
-                <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-xs text-red-600">
-                  {actionError}
-                </div>
-              )}
-
-              {/* Action Form (if Changes Required or Reject is clicked) */}
-              {actionType && actionType !== "verified" && (
-                <div className="rounded-xl border border-zinc-200 bg-zinc-50/80 p-4.5 space-y-3 animate-in fade-in duration-150">
-                  <label className="block text-xs font-bold uppercase tracking-wider text-zinc-700">
-                    Reason for {actionType === "changes_required" ? "Requesting Changes" : "Rejection"} <span className="text-red-500">*</span>
-                  </label>
-                  
-                  {/* Preset quick buttons */}
-                  <div className="space-y-1.5">
-                    <span className="text-[11px] font-semibold text-zinc-500">Quick Presets:</span>
-                    <div className="flex flex-wrap gap-1.5">
-                      {FEEDBACK_PRESETS.map((preset, idx) => (
-                        <button
-                          key={idx}
-                          type="button"
-                          onClick={() => setActionReason(preset)}
-                          className="rounded bg-white border border-zinc-200 px-2 py-1 text-[11px] text-zinc-700 hover:border-zinc-400 hover:bg-zinc-100 transition-colors text-left"
-                        >
-                          {preset.slice(0, 45)}...
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  <textarea
-                    rows={3}
-                    value={actionReason}
-                    onChange={(e) => setActionReason(e.target.value)}
-                    placeholder="Enter specific audit remarks or click a preset above..."
-                    className="w-full rounded-md border border-zinc-300 bg-white p-2.5 text-xs text-zinc-900 placeholder:text-zinc-400 focus:border-zinc-900 focus:outline-none focus:ring-2 focus:ring-zinc-900/10"
-                  />
-                  
-                  <div className="flex justify-end gap-2">
-                    <Button 
-                      type="button" 
-                      variant="ghost" 
-                      size="sm" 
-                      onClick={() => {
-                        setActionType(null);
-                        setActionReason("");
-                        setActionError(null);
-                      }}
-                      disabled={actionLoading}
-                    >
-                      Cancel
-                    </Button>
-                    <Button
-                      type="button"
-                      variant="primary"
-                      size="sm"
-                      onClick={() => handleExecuteAction()}
-                      loading={actionLoading}
-                      className={actionType === "rejected" ? "bg-red-600 hover:bg-red-700 text-white" : ""}
-                    >
-                      Submit Decision
-                    </Button>
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* Footer Action Buttons */}
-            {!actionType && (
-              <div className="mt-6 flex flex-wrap items-center justify-between gap-3 border-t border-zinc-200/80 pt-5">
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  onClick={() => setSelectedCandidate(null)}
-                >
-                  Close
-                </Button>
-
-                <div className="flex items-center gap-2">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    className="border-red-200 text-red-700 hover:bg-red-50"
-                    onClick={() => {
-                      setActionType("rejected");
-                      setActionReason("");
-                      setActionError(null);
-                    }}
-                    leftIcon={<XCircle className="h-4 w-4" />}
-                  >
-                    Reject
-                  </Button>
-
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    className="border-amber-200 text-amber-800 hover:bg-amber-50"
-                    onClick={() => {
-                      setActionType("changes_required");
-                      setActionReason("");
-                      setActionError(null);
-                    }}
-                    leftIcon={<AlertTriangle className="h-4 w-4" />}
-                  >
-                    Request Changes
-                  </Button>
-
-                  <Button
-                    type="button"
-                    variant="primary"
-                    size="sm"
-                    loading={actionLoading}
-                    onClick={() => {
-                      handleExecuteAction("verified");
-                    }}
-                    leftIcon={<CheckCircle2 className="h-4 w-4" />}
-                  >
-                    Verify Candidate
-                  </Button>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
-
       {/* Custom Styled Wipe Test Users Confirmation & Result Modal */}
       {showWipeModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-zinc-950/60 p-4 backdrop-blur-sm animate-in fade-in duration-150">
           <div 
-            className="relative w-full max-w-lg rounded-2xl border border-zinc-200 bg-white p-6 shadow-2xl animate-in zoom-in-95 duration-150"
+            className="relative w-full max-w-lg rounded-2xl border border-border bg-surface p-6 shadow-2xl animate-in zoom-in-95 duration-150"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Modal Header */}
             <div className="flex items-start justify-between">
               <div className="flex items-center gap-3">
-                <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-red-50 text-red-600 border border-red-100">
+                <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-danger/10 text-danger border border-red-100">
                   <Trash2 className="h-5 w-5" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-bold text-zinc-900">
+                  <h3 className="text-lg font-bold text-foreground">
                     Reset Test Data & Users
                   </h3>
-                  <p className="text-xs text-zinc-500">
+                  <p className="text-xs text-muted-foreground">
                     Admin Platform Purge Utility
                   </p>
                 </div>
@@ -1331,7 +953,7 @@ export default function AdminDashboardPage() {
                 <button
                   type="button"
                   onClick={() => setShowWipeModal(false)}
-                  className="rounded-lg p-1.5 text-zinc-400 hover:bg-zinc-100 hover:text-zinc-700 transition"
+                  className="rounded-lg p-1.5 text-outline hover:bg-surface-low hover:text-muted-foreground transition"
                 >
                   <X className="h-5 w-5" />
                 </button>
@@ -1342,48 +964,48 @@ export default function AdminDashboardPage() {
             <div className="mt-5 space-y-4">
               {!wipeResult ? (
                 <>
-                  <p className="text-sm text-zinc-600 leading-relaxed">
+                  <p className="text-sm text-muted-foreground leading-relaxed">
                     This action will reset the platform database to a <strong>zero-user clean state</strong>, allowing you to test fresh signups and onboarding without authentication conflicts.
                   </p>
 
-                  <div className="rounded-xl border border-zinc-200 bg-zinc-50 p-3.5 space-y-2 text-xs">
-                    <p className="font-semibold text-zinc-800">What will be purged:</p>
-                    <ul className="space-y-1.5 text-zinc-600 list-disc list-inside">
+                  <div className="rounded-xl border border-border bg-surface-low p-3.5 space-y-2 text-xs">
+                    <p className="font-semibold text-foreground">What will be purged:</p>
+                    <ul className="space-y-1.5 text-muted-foreground list-disc list-inside">
                       <li>All non-admin <strong>Firebase Authentication</strong> accounts (Google & Email)</li>
                       <li>All Firestore <strong>candidates</strong> profiles, projects & scores</li>
                       <li>All Firestore <strong>employers</strong> profiles & created roles</li>
                       <li>All Firestore <strong>users</strong> collection profiles</li>
                     </ul>
-                    <div className="pt-2 border-t border-zinc-200 flex items-center gap-1.5 text-emerald-700 font-medium">
-                      <ShieldCheck className="h-4 w-4 text-emerald-600" />
+                    <div className="pt-2 border-t border-border flex items-center gap-1.5 text-emerald-700 font-medium">
+                      <ShieldCheck className="h-4 w-4 text-success" />
                       <span>Admin account (<code>saitrishankb9@gmail.com</code>) will remain protected.</span>
                     </div>
                   </div>
                 </>
               ) : wipeResult.success ? (
                 <div className="space-y-3">
-                  <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-4">
+                  <div className="rounded-xl border border-emerald-200 bg-success/10 p-4">
                     <div className="flex items-center gap-2 text-emerald-900 font-semibold text-sm">
-                      <CheckCircle2 className="h-5 w-5 text-emerald-600" />
+                      <CheckCircle2 className="h-5 w-5 text-success" />
                       <span>{wipeResult.message}</span>
                     </div>
                     {wipeResult.stats && (
                       <div className="mt-3 grid grid-cols-2 gap-2 text-xs">
-                        <div className="rounded-lg bg-white/80 p-2.5 border border-emerald-100">
-                          <span className="text-zinc-500 block">Auth Accounts</span>
-                          <span className="text-base font-bold text-zinc-900">{wipeResult.stats.deletedAuthCount} purged</span>
+                        <div className="rounded-lg bg-surface/80 p-2.5 border border-emerald-100">
+                          <span className="text-muted-foreground block">Auth Accounts</span>
+                          <span className="text-base font-bold text-foreground">{wipeResult.stats.deletedAuthCount} purged</span>
                         </div>
-                        <div className="rounded-lg bg-white/80 p-2.5 border border-emerald-100">
-                          <span className="text-zinc-500 block">User Profiles</span>
-                          <span className="text-base font-bold text-zinc-900">{wipeResult.stats.deletedFirestoreUsers} purged</span>
+                        <div className="rounded-lg bg-surface/80 p-2.5 border border-emerald-100">
+                          <span className="text-muted-foreground block">User Profiles</span>
+                          <span className="text-base font-bold text-foreground">{wipeResult.stats.deletedFirestoreUsers} purged</span>
                         </div>
-                        <div className="rounded-lg bg-white/80 p-2.5 border border-emerald-100">
-                          <span className="text-zinc-500 block">Candidates</span>
-                          <span className="text-base font-bold text-zinc-900">{wipeResult.stats.deletedCandidates} purged</span>
+                        <div className="rounded-lg bg-surface/80 p-2.5 border border-emerald-100">
+                          <span className="text-muted-foreground block">Candidates</span>
+                          <span className="text-base font-bold text-foreground">{wipeResult.stats.deletedCandidates} purged</span>
                         </div>
-                        <div className="rounded-lg bg-white/80 p-2.5 border border-emerald-100">
-                          <span className="text-zinc-500 block">Employers</span>
-                          <span className="text-base font-bold text-zinc-900">{wipeResult.stats.deletedEmployers} purged</span>
+                        <div className="rounded-lg bg-surface/80 p-2.5 border border-emerald-100">
+                          <span className="text-muted-foreground block">Employers</span>
+                          <span className="text-base font-bold text-foreground">{wipeResult.stats.deletedEmployers} purged</span>
                         </div>
                       </div>
                     )}
@@ -1399,8 +1021,8 @@ export default function AdminDashboardPage() {
                   </div>
                 </div>
               ) : (
-                <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-xs text-red-900 space-y-1">
-                  <div className="flex items-center gap-2 font-bold text-sm text-red-700">
+                <div className="rounded-xl border border-danger/40 bg-danger/10 p-4 text-xs text-danger space-y-1">
+                  <div className="flex items-center gap-2 font-bold text-sm text-danger">
                     <AlertTriangle className="h-4 w-4" />
                     <span>Wipe Operation Notice</span>
                   </div>
@@ -1410,7 +1032,7 @@ export default function AdminDashboardPage() {
             </div>
 
             {/* Modal Actions */}
-            <div className="mt-6 flex items-center justify-end gap-2.5 border-t border-zinc-100 pt-4">
+            <div className="mt-6 flex items-center justify-end gap-2.5 border-t border-border pt-4">
               {!wipeResult ? (
                 <>
                   <Button
@@ -1451,3 +1073,4 @@ export default function AdminDashboardPage() {
     </div>
   );
 }
+

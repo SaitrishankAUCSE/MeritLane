@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
-import Link from "next/link";
+import { Hanken_Grotesk, Source_Serif_4, JetBrains_Mono, Inter } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
+import { SiteFooter } from "@/components/chrome/SiteFooter";
 import { AuthProvider } from "@/lib/auth/AuthContext";
 import { Analytics } from "@vercel/analytics/react";
 
@@ -11,6 +11,29 @@ const inter = Inter({
   variable: "--font-inter",
   display: "swap",
 });
+
+const hanken = Hanken_Grotesk({
+  subsets: ["latin"],
+  variable: "--font-hanken",
+  display: "swap",
+});
+
+const sourceSerif = Source_Serif_4({
+  subsets: ["latin"],
+  variable: "--font-source-serif",
+  display: "swap",
+});
+
+const jetbrains = JetBrains_Mono({
+  subsets: ["latin"],
+  variable: "--font-jetbrains",
+  display: "swap",
+});
+
+export const viewport = {
+  width: "device-width",
+  initialScale: 1,
+};
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://meritlane.app"),
@@ -46,8 +69,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${inter.variable} h-full antialiased`}>
-      <body className="flex min-h-full flex-col bg-white font-sans text-zinc-900">
+    <html lang="en" className={`${inter.variable} ${hanken.variable} ${sourceSerif.variable} ${jetbrains.variable} h-full antialiased`}>
+      <body className="flex min-h-full flex-col bg-background font-sans text-foreground">
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
@@ -64,40 +87,7 @@ export default function RootLayout({
         <AuthProvider>
           <Navbar />
           <main className="flex-1">{children}</main>
-          <footer className="border-t border-zinc-200 bg-zinc-50 pt-12 pb-8">
-            <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-              <div className="grid grid-cols-2 gap-8 md:grid-cols-4 lg:grid-cols-5">
-                <div className="col-span-2 lg:col-span-2">
-                  <h3 className="text-lg font-bold text-zinc-900 tracking-tight">Meritlane</h3>
-                  <p className="mt-4 text-sm text-zinc-500 max-w-xs leading-relaxed">
-                    Connecting verified engineering talent with top companies through project-based assessments and proof of skill.
-                  </p>
-                </div>
-                <div>
-                  <h3 className="text-sm font-semibold text-zinc-900">For Candidates</h3>
-                  <ul className="mt-4 space-y-3 text-sm text-zinc-600">
-                    <li><Link href="/signup" className="hover:text-zinc-900">Create Profile</Link></li>
-                  </ul>
-                </div>
-                <div>
-                  <h3 className="text-sm font-semibold text-zinc-900">For Employers</h3>
-                  <ul className="mt-4 space-y-3 text-sm text-zinc-600">
-                    <li><Link href="/employer/dashboard" className="hover:text-zinc-900">Post a Job</Link></li>
-                    <li><Link href="/" className="hover:text-zinc-900">Search Candidates</Link></li>
-                  </ul>
-                </div>
-                <div>
-                  <h3 className="text-sm font-semibold text-zinc-900">Company</h3>
-                  <ul className="mt-4 space-y-3 text-sm text-zinc-600">
-                    <li><Link href="/" className="hover:text-zinc-900">About Us</Link></li>
-                  </ul>
-                </div>
-              </div>
-              <div className="mt-12 border-t border-zinc-200 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
-                <p className="text-xs text-zinc-500">&copy; {new Date().getFullYear()} Meritlane Inc. All rights reserved.</p>
-              </div>
-            </div>
-          </footer>
+          <SiteFooter />
         </AuthProvider>
         <Analytics />
       </body>

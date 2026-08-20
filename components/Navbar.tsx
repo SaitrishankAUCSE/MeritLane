@@ -2,36 +2,25 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import { ShieldCheck, LogOut, Menu, X, ChevronDown, User, Settings } from "lucide-react";
+import { LogOut, Menu, X, ChevronDown, User, Settings } from "lucide-react";
 import { useAuth } from "@/lib/auth/AuthContext";
 import { useRouter, usePathname } from "next/navigation";
 import { auth } from "@/lib/firebase/config";
 import { signOut } from "firebase/auth";
 import { Button } from "@/components/ui/Button";
-import { RandomLetterSwap } from "@/components/ui/random-letter-swap";
 
 export default function Navbar() {
   const { user, userProfile, isAdmin, loading, profileLoading } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [isScrolled, setIsScrolled] = useState(false);
+  const isPublicHome = pathname === "/";
 
-  useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 8);
-    };
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
-
-  // Close mobile menu on route change
   useEffect(() => {
     setMobileMenuOpen(false);
   }, [pathname]);
 
   const isUserAdmin = isAdmin || user?.email?.toLowerCase() === "saitrishankb9@gmail.com";
-
   const isResolvingAuth = loading || (!isUserAdmin && user && profileLoading);
 
   const handleSignOut = async () => {
@@ -39,127 +28,61 @@ export default function Navbar() {
     router.push("/login");
   };
 
-  /* Cutshort-style: flat text nav links in a row, active = bold black */
-  const navLinks = () => {
-    if (isUserAdmin) {
-      return (
-        <Link 
-          href="/admin" 
-          className={`text-sm transition-colors ${
-            pathname === "/admin" 
-              ? "text-zinc-900 font-semibold" 
-              : "text-zinc-500 hover:text-zinc-900"
-          }`}
-        >
-          Command Center
-        </Link>
-      );
-    }
-    if (userProfile?.role === "candidate") {
-      return (
-        <Link 
-          href="/candidate/dashboard" 
-          className="flex items-center"
-        >
-          <RandomLetterSwap
-            className={`cursor-pointer text-sm transition-colors ${
-              pathname === "/candidate/dashboard" 
-                ? "text-zinc-900 font-semibold" 
-                : "text-zinc-500 hover:text-zinc-900"
-            }`}
-            label="Dashboard"
-            staggerDuration={0.025}
-            transition={{ duration: 0.6, type: "spring" }}
-          />
-        </Link>
-      );
-    }
-    if (userProfile?.role === "employer") {
-      return (
-        <Link 
-          href="/employer/dashboard" 
-          className="flex items-center"
-        >
-          <RandomLetterSwap
-            className={`cursor-pointer text-sm transition-colors ${
-              pathname === "/employer/dashboard" 
-                ? "text-zinc-900 font-semibold" 
-                : "text-zinc-500 hover:text-zinc-900"
-            }`}
-            label="Dashboard"
-            staggerDuration={0.025}
-            transition={{ duration: 0.6, type: "spring" }}
-          />
-        </Link>
-      );
-    }
-    return null;
-  };
+  const dashboardHref = isUserAdmin
+    ? "/admin"
+    : userProfile?.role === "employer"
+      ? "/employer/dashboard"
+      : "/candidate/dashboard";
 
   return (
-    <header 
-      className={`sticky top-0 z-50 w-full bg-white transition-shadow duration-200 border-b border-zinc-200 ${
-        isScrolled ? "shadow-sm" : ""
-      }`}
-    >
-      <div className="mx-auto flex h-14 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-        {/* Left: Logo + Nav */}
-        <div className="flex items-center gap-8">
-          <Link 
-            href={isUserAdmin ? "/admin" : user ? "/dashboard" : "/"} 
-            className="flex items-center gap-2 font-bold tracking-tight text-zinc-900 select-none"
-          >
-            <ShieldCheck className="h-5 w-5" />
-            <span className="text-lg tracking-tight">Meritlane</span>
-            {isUserAdmin && (
-              <span className="rounded bg-zinc-900 px-1.5 py-0.5 text-[10px] font-semibold text-white leading-none">
-                Admin
-              </span>
-            )}
-          </Link>
+    <header className={`sticky top-0 z-50 w-full border-b backdrop-blur-md ${isPublicHome ? "theme-public border-[var(--color-border)] bg-[var(--color-background)]/90" : "border-border bg-background/85"}`}>
+      <div className="mx-auto flex h-14 max-w-7xl items-center justify-between px-5 sm:px-8 lg:px-16">
+        <Link
+          href={isUserAdmin ? "/admin" : user ? "/dashboard" : "/"}
+          className="font-serif text-xl font-medium tracking-tight text-foreground"
+        >
+          Meritlane
+          {isUserAdmin && (
+            <span className="ml-2 align-middle font-data text-[10px] text-outline">Admin</span>
+          )}
+        </Link>
 
-          {/* Desktop Nav Links — Cutshort style: flat text in a row */}
-          <nav className="hidden sm:flex items-center gap-6">
-            {!isResolvingAuth && user && navLinks()}
+        {!isResolvingAuth && user && (
+          <nav className="hidden items-center sm:flex">
+            <NavLink href={dashboardHref} current={pathname}>Dashboard</NavLink>
           </nav>
-        </div>
+        )}
 
-        {/* Right: Auth area */}
         <div className="flex items-center gap-3">
           {isResolvingAuth ? (
-            <div className="h-8 w-8 animate-pulse rounded-full bg-zinc-100"></div>
+            <div className="h-8 w-8 animate-pulse bg-surface-high" />
           ) : user ? (
-            <ProfileDropdown 
-              user={user} 
-              userProfile={userProfile} 
-              isAdmin={isUserAdmin} 
-              handleSignOut={handleSignOut} 
-            />
+            <>
+              <nav className="flex items-center sm:hidden">
+                <NavLink href={dashboardHref} current={pathname}>Dashboard</NavLink>
+              </nav>
+              <ProfileDropdown
+                user={user}
+                userProfile={userProfile}
+                isAdmin={isUserAdmin}
+                handleSignOut={handleSignOut}
+              />
+            </>
           ) : (
-            <div className="hidden md:flex items-center gap-4">
-              <Link href="/login" className="text-sm text-zinc-500 hover:text-zinc-900 transition-colors">
+            <div className="hidden items-center gap-5 md:flex">
+              <Link href="/login" className="text-sm text-muted-foreground hover:text-foreground">
                 Log in
               </Link>
-              <Link href="/signup" className="text-sm text-zinc-500 hover:text-zinc-900 transition-colors">
+              <Link href="/signup" className="text-sm text-muted-foreground hover:text-foreground">
                 Register
               </Link>
-              <Link href="/employer/dashboard">
-                <Button variant="primary" size="sm">Post a Job</Button>
-              </Link>
+              <Button href="/employer/dashboard" variant="primary" size="sm">Post a Role</Button>
             </div>
           )}
 
-          {/* Mobile Nav Links for logged-in users */}
-          {user && !isResolvingAuth && (
-            <nav className="flex sm:hidden items-center">
-              {navLinks()}
-            </nav>
-          )}
-
-          {/* Mobile Menu Toggle (Only for public/logged out users) */}
           {!user && (
-            <button 
-              className="md:hidden flex items-center justify-center h-9 w-9 rounded-md text-zinc-500 hover:bg-zinc-100 transition-colors"
+            <button
+              className="flex h-9 w-9 items-center justify-center text-muted-foreground hover:text-foreground md:hidden"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               aria-label="Toggle navigation menu"
             >
@@ -169,20 +92,13 @@ export default function Navbar() {
         </div>
       </div>
 
-      {/* Mobile Nav */}
       {mobileMenuOpen && (
-        <div className="md:hidden border-t border-zinc-100 bg-white px-4 py-4">
+        <div className="border-t border-border px-5 py-4 md:hidden">
           {!isResolvingAuth && !user && (
             <div className="flex flex-col gap-2">
-              <Link href="/login">
-                <Button variant="secondary" className="w-full justify-center">Log in</Button>
-              </Link>
-              <Link href="/signup">
-                <Button variant="secondary" className="w-full justify-center">Register</Button>
-              </Link>
-              <Link href="/employer/dashboard">
-                <Button variant="primary" className="w-full justify-center">Post a Job</Button>
-              </Link>
+              <Button href="/login" variant="secondary" className="w-full justify-center">Log in</Button>
+              <Button href="/signup" variant="secondary" className="w-full justify-center">Register</Button>
+              <Button href="/employer/dashboard" variant="primary" className="w-full justify-center">Post a Role</Button>
             </div>
           )}
         </div>
@@ -191,86 +107,94 @@ export default function Navbar() {
   );
 }
 
-/* Cutshort-style profile dropdown: compact avatar, clean menu */
 function ProfileDropdown({ user, userProfile, isAdmin, handleSignOut }: { user: any, userProfile: any, isAdmin: boolean, handleSignOut: () => void }) {
   const [open, setOpen] = useState(false);
-  const router = useRouter();
-  
-  // Close on outside click
+
   useEffect(() => {
     const close = () => setOpen(false);
-    if (open) window.addEventListener('click', close);
-    return () => window.removeEventListener('click', close);
+    if (open) window.addEventListener("click", close);
+    return () => window.removeEventListener("click", close);
   }, [open]);
 
-  const displayName = isAdmin ? user?.email : (userProfile?.displayName || user?.email?.split('@')[0]);
+  const displayName = isAdmin ? user?.email : (userProfile?.displayName || user?.email?.split("@")[0]);
   const displayRole = isAdmin ? "Administrator" : userProfile?.role;
   const initial = displayName ? displayName.charAt(0).toUpperCase() : "U";
   const photoUrl = user?.photoURL;
 
-  // Escape key to close
   useEffect(() => {
     const handleEsc = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setOpen(false);
+      if (e.key === "Escape") setOpen(false);
     };
-    if (open) window.addEventListener('keydown', handleEsc);
-    return () => window.removeEventListener('keydown', handleEsc);
+    if (open) window.addEventListener("keydown", handleEsc);
+    return () => window.removeEventListener("keydown", handleEsc);
   }, [open]);
 
   return (
     <div className="relative inline-block text-left" onClick={(e) => e.stopPropagation()}>
-      <button 
+      <button
         onClick={() => setOpen(!open)}
-        className="flex items-center gap-2 rounded-full p-1 pr-2 text-sm text-zinc-600 transition-colors hover:bg-zinc-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900"
+        className="flex items-center gap-2 p-1 text-sm text-muted-foreground hover:text-foreground"
         aria-expanded={open}
         aria-haspopup="true"
       >
-        <div className="flex h-7 w-7 overflow-hidden items-center justify-center rounded-full bg-zinc-100 text-xs font-bold text-zinc-500 ring-1 ring-zinc-200">
+        <div className="flex h-7 w-7 items-center justify-center overflow-hidden border border-border bg-surface-low text-xs">
           {photoUrl ? (
             <img src={photoUrl} alt={displayName} className="h-full w-full object-cover" />
           ) : (
             initial
           )}
         </div>
-        <span className="max-w-[100px] truncate text-xs font-medium hidden sm:inline-block">{displayName}</span>
-        <ChevronDown className={`h-3 w-3 text-zinc-400 transition-transform ${open ? "rotate-180" : ""}`} />
+        <span className="hidden max-w-[120px] truncate font-data sm:inline-block">{displayName}</span>
+        <ChevronDown className={`h-3 w-3 transition-transform ${open ? "rotate-180" : ""}`} />
       </button>
 
       {open && (
-        <div className="absolute right-0 mt-1.5 w-52 origin-top-right rounded-lg border border-zinc-200 bg-white py-1 shadow-lg z-50">
-          <div className="border-b border-zinc-100 px-3.5 py-2.5">
-            <p className="truncate text-sm font-medium text-zinc-900">{displayName}</p>
-            <p className="truncate text-xs text-zinc-500 capitalize">{displayRole}</p>
+        <div className="absolute right-0 z-50 mt-1.5 w-56 origin-top-right border border-border bg-surface py-1">
+          <div className="border-b border-border px-3.5 py-2.5">
+            <p className="truncate text-sm text-foreground">{displayName}</p>
+            <p className="truncate font-data text-outline capitalize">{displayRole}</p>
           </div>
-          
           <div className="py-1">
             {userProfile?.role === "candidate" && (
-              <Link href="/candidate/profile" className="flex w-full items-center px-3.5 py-2 text-sm text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900 transition-colors" onClick={() => setOpen(false)}>
-                <User className="mr-2.5 h-4 w-4 text-zinc-400" />
+              <Link href="/candidate/profile" className="flex w-full items-center px-3.5 py-2 text-sm text-muted-foreground hover:text-foreground" onClick={() => setOpen(false)}>
+                <User className="mr-2.5 h-4 w-4" />
                 Profile
               </Link>
             )}
-            
-            <Link href="/settings" className="flex w-full items-center px-3.5 py-2 text-sm text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900 transition-colors" onClick={() => setOpen(false)}>
-              <Settings className="mr-2.5 h-4 w-4 text-zinc-400" />
+            <Link href="/settings" className="flex w-full items-center px-3.5 py-2 text-sm text-muted-foreground hover:text-foreground" onClick={() => setOpen(false)}>
+              <Settings className="mr-2.5 h-4 w-4" />
               Settings
             </Link>
           </div>
-          
-          <div className="border-t border-zinc-100 py-1">
-            <button 
+          <div className="border-t border-border py-1">
+            <button
               onClick={() => {
                 setOpen(false);
                 handleSignOut();
-              }} 
-              className="flex w-full items-center px-3.5 py-2 text-sm text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900 transition-colors"
+              }}
+              className="flex w-full items-center px-3.5 py-2 text-sm text-muted-foreground hover:text-foreground"
             >
-              <LogOut className="mr-2.5 h-4 w-4 text-zinc-400" />
+              <LogOut className="mr-2.5 h-4 w-4" />
               Sign out
             </button>
           </div>
         </div>
       )}
     </div>
+  );
+}
+
+function NavLink({ href, current, children }: { href: string; current: string; children: React.ReactNode }) {
+  const isActive = current === href || current.startsWith(href + "/");
+  return (
+    <Link
+      href={href}
+      className={`relative text-[13px] tracking-wide ${
+        isActive ? "text-foreground" : "text-muted-foreground hover:text-foreground"
+      }`}
+    >
+      {children}
+      {isActive && <span className="absolute -bottom-1 left-0 h-px w-full bg-foreground" />}
+    </Link>
   );
 }

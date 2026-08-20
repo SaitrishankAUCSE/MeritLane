@@ -176,7 +176,7 @@ export default function AssessmentPage() {
         </header>
         <div className="flex flex-1 overflow-hidden animate-fade-up">
           <div className="w-[35%] border-r border-zinc-800/80 bg-[#121215] flex flex-col">
-            <div className="border-b border-zinc-800/80 px-5 py-3.5 bg-zinc-900/30">
+            <div className="border-b border-zinc-800/80 px-5 py-3.5 bg-foreground/30">
               <div className="h-4 w-40 rounded bg-zinc-800 animate-shimmer" style={{ background: '#27272a' }}></div>
             </div>
             <div className="p-6 space-y-6">
@@ -198,15 +198,15 @@ export default function AssessmentPage() {
   if (errorMsg) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-[#fafafa] p-4">
-        <div className="w-full max-w-md rounded-2xl border border-red-200 bg-white p-8 shadow-sm text-center">
-          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-red-50 text-red-600 border border-red-100 mb-4">
+        <div className="w-full max-w-md rounded-2xl border border-danger/40 bg-surface p-8 shadow-sm text-center">
+          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-danger/10 text-danger border border-red-100 mb-4">
             <AlertTriangle className="h-6 w-6" />
           </div>
-          <h2 className="text-lg font-bold text-zinc-900">Assessment Unavailable</h2>
-          <p className="mt-2 text-sm text-zinc-600 leading-relaxed">{errorMsg}</p>
+          <h2 className="text-lg font-bold text-foreground">Assessment Unavailable</h2>
+          <p className="mt-2 text-sm text-muted-foreground leading-relaxed">{errorMsg}</p>
           <button 
             onClick={() => router.push("/candidate/dashboard")}
-            className="mt-6 w-full rounded-lg bg-zinc-900 px-4 py-2.5 text-sm font-semibold text-white hover:bg-zinc-800 transition-colors shadow-sm"
+            className="mt-6 w-full rounded-lg bg-foreground px-4 py-2.5 text-sm font-semibold text-white hover:bg-zinc-800 transition-colors shadow-sm"
           >
             Return to Dashboard
           </button>
@@ -232,7 +232,7 @@ export default function AssessmentPage() {
         <div className={`flex items-center gap-2 rounded-md px-3.5 py-1.5 text-xs font-bold tracking-widest tabular-nums border transition-all ${
           timeLeft < 300 
             ? 'border-red-500/50 bg-red-950/40 text-red-400 shadow-[0_0_15px_rgba(239,68,68,0.15)] animate-pulse' 
-            : 'border-zinc-800 bg-zinc-900/60 text-zinc-300'
+            : 'border-zinc-800 bg-foreground/60 text-outline'
         }`}>
           <Clock className="h-3.5 w-3.5 opacity-70" />
           {formatTime(timeLeft)}
@@ -244,13 +244,13 @@ export default function AssessmentPage() {
         
         {/* Left Panel: Instructions */}
         <div className="w-[35%] border-r border-zinc-800/80 bg-[#121215] flex flex-col z-10 shadow-lg">
-          <div className="flex items-center gap-2 border-b border-zinc-800/80 px-5 py-3.5 bg-zinc-900/30">
-            <FileCode2 className="h-4 w-4 text-zinc-400" />
-            <h2 className="text-xs font-bold text-zinc-300 uppercase tracking-wider">Problem Specification</h2>
+          <div className="flex items-center gap-2 border-b border-zinc-800/80 px-5 py-3.5 bg-foreground/30">
+            <FileCode2 className="h-4 w-4 text-outline" />
+            <h2 className="text-xs font-bold text-outline uppercase tracking-wider">Problem Specification</h2>
           </div>
           <div className="flex-1 overflow-auto p-6 scrollbar-thin scrollbar-thumb-zinc-700 scrollbar-track-transparent">
-            <div className="rounded-xl border border-zinc-800 bg-zinc-900/40 p-5">
-              <pre className="whitespace-pre-wrap font-mono text-xs leading-relaxed text-zinc-300">
+            <div className="rounded-xl border border-zinc-800 bg-foreground/40 p-5">
+              <pre className="whitespace-pre-wrap font-mono text-xs leading-relaxed text-outline">
                 {variant === "A" ? VARIANT_A_INSTRUCTIONS : VARIANT_B_INSTRUCTIONS}
               </pre>
             </div>
@@ -275,17 +275,17 @@ export default function AssessmentPage() {
               value={code}
               onChange={(e) => setCode(e.target.value)}
               spellCheck={false}
-              className="h-full w-full resize-none bg-transparent font-mono text-[13.5px] leading-relaxed text-zinc-200 outline-none p-6 pb-20 selection:bg-zinc-500/30"
+              className="h-full w-full resize-none bg-transparent font-mono text-[13.5px] leading-relaxed text-zinc-200 outline-none p-6 pb-20 selection:bg-surface-low0/30"
               placeholder="Write your Python implementation here..."
             />
           </div>
 
           {/* Console Area */}
           <div className="h-[38%] flex flex-col border-t border-zinc-800 bg-[#121215] shadow-[0_-4px_20px_rgba(0,0,0,0.3)] z-20">
-            <div className="flex items-center justify-between border-b border-zinc-800/80 px-4 py-2.5 bg-zinc-900/40">
+            <div className="flex items-center justify-between border-b border-zinc-800/80 px-4 py-2.5 bg-foreground/40">
               <div className="flex items-center gap-2">
-                <TerminalSquare className="h-4 w-4 text-zinc-400" />
-                <span className="text-xs font-bold uppercase tracking-wider text-zinc-400">Console &amp; Test Suite</span>
+                <TerminalSquare className="h-4 w-4 text-outline" />
+                <span className="text-xs font-bold uppercase tracking-wider text-outline">Console &amp; Test Suite</span>
               </div>
               <div className="flex gap-2">
                 <button
@@ -299,7 +299,7 @@ export default function AssessmentPage() {
                 <button
                   onClick={() => handleTest(true)}
                   disabled={evaluating || timeLeft <= 0}
-                  className="flex items-center gap-1.5 rounded-md bg-zinc-600 px-4 py-1.5 text-xs font-semibold text-white hover:bg-zinc-500 active:scale-95 disabled:opacity-50 transition-all shadow-sm"
+                  className="flex items-center gap-1.5 rounded-md bg-zinc-600 px-4 py-1.5 text-xs font-semibold text-white hover:bg-surface-low0 active:scale-95 disabled:opacity-50 transition-all shadow-sm"
                 >
                   <CheckCircle2 className="h-3.5 w-3.5" />
                   Submit Assessment
@@ -307,7 +307,7 @@ export default function AssessmentPage() {
               </div>
             </div>
             <div className="flex-1 overflow-auto p-4.5 bg-[#09090b]">
-              <pre className="font-mono text-xs leading-relaxed text-zinc-300 whitespace-pre-wrap">
+              <pre className="font-mono text-xs leading-relaxed text-outline whitespace-pre-wrap">
                 {output || "System initialized. Click 'Run Tests' to validate your solution against public test cases."}
               </pre>
             </div>

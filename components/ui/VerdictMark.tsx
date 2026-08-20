@@ -12,7 +12,7 @@ interface VerdictMarkProps {
 export function VerdictMark({ status, size = "md", showLabel = true, className = "" }: VerdictMarkProps) {
   const config = {
     verified: {
-      theme: "text-emerald-700 border-emerald-700 bg-emerald-50",
+      theme: "text-success border-success/50 bg-success/10",
       icon: (
         <svg viewBox="0 0 24 24" fill="none" className="w-full h-full" stroke="currentColor">
           <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" strokeWidth="1.5" strokeLinecap="square" />
@@ -24,7 +24,7 @@ export function VerdictMark({ status, size = "md", showLabel = true, className =
       ringClass: "border-emerald-600/30"
     },
     pending: {
-      theme: "text-amber-700 border-amber-700 bg-amber-50",
+      theme: "text-warning border-warning/50 bg-warning/10",
       icon: (
         <svg viewBox="0 0 24 24" fill="none" className="w-full h-full" stroke="currentColor">
           <rect x="3" y="4" width="18" height="18" rx="2" ry="2" strokeWidth="1.5" strokeLinecap="square" />
@@ -37,7 +37,7 @@ export function VerdictMark({ status, size = "md", showLabel = true, className =
       ringClass: "border-amber-600/30"
     },
     changes_required: {
-      theme: "text-amber-700 border-amber-700 bg-amber-50",
+      theme: "text-warning border-warning/50 bg-warning/10",
       icon: (
         <svg viewBox="0 0 24 24" fill="none" className="w-full h-full" stroke="currentColor">
           <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" strokeWidth="1.5" strokeLinecap="square" />
@@ -49,7 +49,7 @@ export function VerdictMark({ status, size = "md", showLabel = true, className =
       ringClass: "border-amber-600/30"
     },
     rejected: {
-      theme: "text-red-700 border-red-700 bg-red-50",
+      theme: "text-danger border-danger/50 bg-danger/10",
       icon: (
         <svg viewBox="0 0 24 24" fill="none" className="w-full h-full" stroke="currentColor">
           <circle cx="12" cy="12" r="10" strokeWidth="1.5" strokeLinecap="square" />
@@ -61,7 +61,7 @@ export function VerdictMark({ status, size = "md", showLabel = true, className =
       ringClass: "border-red-600/30"
     },
     draft: {
-      theme: "text-zinc-600 border-zinc-500 bg-zinc-50",
+      theme: "text-muted-foreground border-outline bg-surface-low",
       icon: (
         <svg viewBox="0 0 24 24" fill="none" className="w-full h-full" stroke="currentColor">
           <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" strokeWidth="1.5" strokeLinecap="square" />
@@ -73,7 +73,7 @@ export function VerdictMark({ status, size = "md", showLabel = true, className =
       ringClass: "border-zinc-400/30"
     },
     unverified: {
-      theme: "text-zinc-600 border-zinc-500 bg-zinc-50",
+      theme: "text-muted-foreground border-outline bg-surface-low",
       icon: (
         <svg viewBox="0 0 24 24" fill="none" className="w-full h-full" stroke="currentColor">
           <circle cx="12" cy="12" r="10" strokeWidth="1.5" strokeDasharray="4 4" strokeLinecap="square" />

@@ -19,9 +19,9 @@ export function Input({
   const inputId = id || (label ? label.toLowerCase().replace(/\s+/g, "-") : undefined);
 
   return (
-    <div className="flex flex-col gap-1.5 w-full text-left">
+    <div className="flex w-full flex-col gap-1.5 text-left">
       {label && (
-        <label htmlFor={inputId} className="text-sm font-medium text-zinc-800">
+        <label htmlFor={inputId} className="font-data text-outline">
           {label}
         </label>
       )}
@@ -29,26 +29,20 @@ export function Input({
         <input
           id={inputId}
           disabled={disabled}
-          className={`w-full rounded-md border border-zinc-300 bg-white px-3 py-2 h-9 text-sm text-zinc-900 placeholder:text-zinc-400 transition-colors focus:border-zinc-900 focus:outline-none focus:ring-1 focus:ring-zinc-900 disabled:opacity-50 disabled:bg-zinc-50 ${
-            error
-              ? "border-red-500 hover:border-red-600 focus:border-red-500 focus:ring-red-500 text-red-900 pr-10"
-              : ""
-          } ${className}`}
+          className={`field-line ${error ? "border-danger text-danger" : ""} ${className}`}
           {...props}
         />
         {error && (
-          <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
-            <AlertCircle className="h-4 w-4 text-red-500" aria-hidden="true" />
+          <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center">
+            <AlertCircle className="h-4 w-4 text-danger" aria-hidden="true" />
           </div>
         )}
       </div>
       {helperText && !error && (
-        <p className="text-xs text-zinc-500">{helperText}</p>
+        <p className="text-xs text-muted-foreground">{helperText}</p>
       )}
       {error && (
-        <p className="text-xs font-medium text-red-600 animate-in fade-in duration-150">
-          {error}
-        </p>
+        <p className="text-xs font-medium text-danger">{error}</p>
       )}
     </div>
   );

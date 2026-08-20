@@ -114,36 +114,36 @@ export default function LoginPage() {
   if (authLoading || (user && profileLoading) || (user && userRole)) {
     return (
       <div className="flex min-h-[80vh] items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-zinc-400" />
+        <Loader2 className="h-8 w-8 animate-spin text-outline" />
       </div>
     ); 
   }
 
   return (
     <div className="flex min-h-[85vh] items-center justify-center px-4 py-12">
-      <div className="w-full max-w-md rounded-2xl border border-zinc-200/90 bg-white p-8 sm:p-10 shadow-[0_4px_24px_rgba(0,0,0,0.03)]">
+      <div className="w-full max-w-md rounded-2xl border border-border/90 bg-surface p-8 sm:p-10 shadow-[0_4px_24px_rgba(0,0,0,0.03)]">
         <div className="text-center">
-          <div className="mx-auto mb-4 flex h-10 w-10 items-center justify-center rounded-xl bg-zinc-50 text-zinc-600 shadow-sm">
+          <div className="mx-auto mb-4 flex h-10 w-10 items-center justify-center rounded-xl bg-surface-low text-muted-foreground shadow-sm">
             <ShieldCheck className="h-5 w-5" />
           </div>
-          <h1 className="text-2xl font-bold tracking-tight text-zinc-900">
+          <h1 className="text-2xl font-bold tracking-tight text-foreground">
             Sign In to Meritlane
           </h1>
-          <p className="mt-2 text-sm text-zinc-500">
+          <p className="mt-2 text-sm text-muted-foreground">
             Welcome back. Please sign in to access your verified profile.
           </p>
         </div>
 
         {error && (
-          <div className="mt-5 flex items-start gap-2.5 rounded-lg border border-red-200 bg-red-50/80 p-3.5 text-xs text-red-700 animate-in fade-in duration-150">
-            <AlertCircle className="h-4 w-4 shrink-0 text-red-600 mt-0.5" />
+          <div className="mt-5 flex items-start gap-2.5 rounded-lg border border-danger/40 bg-danger/10/80 p-3.5 text-xs text-danger animate-in fade-in duration-150">
+            <AlertCircle className="h-4 w-4 shrink-0 text-danger mt-0.5" />
             <span className="leading-relaxed">{error}</span>
           </div>
         )}
 
         {successMessage && (
-          <div className="mt-5 flex items-start gap-2.5 rounded-lg border border-emerald-200 bg-emerald-50/80 p-3.5 text-xs text-emerald-800 animate-in fade-in duration-150">
-            <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-600 mt-0.5" />
+          <div className="mt-5 flex items-start gap-2.5 rounded-lg border border-emerald-200 bg-success/10/80 p-3.5 text-xs text-emerald-800 animate-in fade-in duration-150">
+            <CheckCircle2 className="h-4 w-4 shrink-0 text-success mt-0.5" />
             <span className="leading-relaxed">{successMessage}</span>
           </div>
         )}
@@ -176,9 +176,9 @@ export default function LoginPage() {
         </form>
 
         <div className="relative mt-6 flex items-center py-2">
-          <div className="flex-grow border-t border-zinc-200"></div>
-          <span className="shrink-0 px-4 text-xs font-semibold text-zinc-400 uppercase tracking-wider">OR</span>
-          <div className="flex-grow border-t border-zinc-200"></div>
+          <div className="flex-grow border-t border-border"></div>
+          <span className="shrink-0 px-4 text-xs font-semibold text-outline uppercase tracking-wider">OR</span>
+          <div className="flex-grow border-t border-border"></div>
         </div>
 
         <Button
@@ -211,9 +211,9 @@ export default function LoginPage() {
           Continue with Google
         </Button>
 
-        <p className="mt-8 text-center text-sm text-zinc-500">
+        <p className="mt-8 text-center text-sm text-muted-foreground">
           Don&apos;t have an account?{" "}
-          <Link href="/signup" className="font-semibold text-zinc-900 hover:text-zinc-600 transition-colors underline-offset-4 hover:underline">
+          <Link href="/signup" className="font-semibold text-foreground hover:text-muted-foreground transition-colors underline-offset-4 hover:underline">
             Sign up
           </Link>
         </p>

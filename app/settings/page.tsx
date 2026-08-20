@@ -45,11 +45,11 @@ export default function SettingsPage() {
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-10 sm:px-6 lg:px-8 space-y-8">
-      <div className="border-b border-zinc-200/80 pb-5">
-        <h1 className="text-2xl font-bold tracking-tight text-zinc-900 sm:text-3xl">
+      <div className="border-b border-border pb-5">
+        <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
           Account Settings
         </h1>
-        <p className="mt-1.5 text-sm text-zinc-500">
+        <p className="mt-1.5 text-sm text-muted-foreground">
           Manage your account preferences and session credentials.
         </p>
       </div>
@@ -57,36 +57,36 @@ export default function SettingsPage() {
       <div className="space-y-6">
         <Card>
           <CardHeader>
-            <h2 className="text-base font-bold text-zinc-900">Profile &amp; Credentials</h2>
-            <p className="mt-0.5 text-xs text-zinc-500">Your verified identity details on Meritlane.</p>
+            <h2 className="text-base font-bold text-foreground">Profile &amp; Credentials</h2>
+            <p className="mt-0.5 text-xs text-muted-foreground">Your verified identity details on Meritlane.</p>
           </CardHeader>
           <CardContent>
             <div className="space-y-4 text-xs">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 border-b border-zinc-100 pb-3.5">
-                <span className="font-semibold text-zinc-500 flex items-center gap-1.5">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 border-b border-border pb-3.5">
+                <span className="font-semibold text-muted-foreground flex items-center gap-1.5">
                   <Mail className="h-3.5 w-3.5" /> Email Address
                 </span>
-                <span className="font-medium text-zinc-900 sm:text-right">{user.email}</span>
+                <span className="font-medium text-foreground sm:text-right">{user.email}</span>
               </div>
               
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 border-b border-zinc-100 pb-3.5">
-                <span className="font-semibold text-zinc-500 flex items-center gap-1.5">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 border-b border-border pb-3.5">
+                <span className="font-semibold text-muted-foreground flex items-center gap-1.5">
                   <UserIcon className="h-3.5 w-3.5" /> Workspace Role
                 </span>
-                <span className="capitalize font-semibold text-zinc-900">{userProfile?.role || "Candidate"}</span>
+                <span className="capitalize font-semibold text-foreground">{userProfile?.role || "Candidate"}</span>
               </div>
               
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
-                <span className="font-semibold text-zinc-500 flex items-center gap-1.5">
+                <span className="font-semibold text-muted-foreground flex items-center gap-1.5">
                   <Key className="h-3.5 w-3.5" /> Authentication Method
                 </span>
-                <span className="capitalize font-medium text-zinc-900">{userProfile?.authProvider || "password"}</span>
+                <span className="capitalize font-medium text-foreground">{userProfile?.authProvider || "password"}</span>
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="border-red-200/80 bg-red-50/30">
+        <Card className="border-danger/40/80 bg-danger/10/30">
           <CardHeader>
             <h2 className="text-base font-bold text-red-950">Active Session</h2>
             <p className="mt-0.5 text-xs text-red-800">
@@ -98,7 +98,7 @@ export default function SettingsPage() {
               variant="outline"
               size="sm"
               onClick={handleSignOut}
-              className="border-red-200 text-red-700 hover:bg-red-50 hover:border-red-300"
+              className="border-danger/40 text-danger hover:bg-danger/10 hover:border-red-300"
               leftIcon={<LogOut className="h-3.5 w-3.5" />}
             >
               Sign Out

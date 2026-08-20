@@ -147,7 +147,7 @@ export function ProofTrace({
         
         <button
           onClick={() => setExpanded(true)}
-          className="group flex items-center gap-1.5 text-xs font-bold uppercase tracking-widest text-zinc-500 hover:text-zinc-900 transition-colors bg-zinc-50 hover:bg-zinc-100 border border-zinc-200 px-3 py-1.5 rounded-sm whitespace-nowrap shrink-0"
+          className="group flex shrink-0 items-center gap-1.5 whitespace-nowrap border border-border px-3 py-1.5 font-data uppercase text-muted-foreground hover:text-foreground"
         >
           <Terminal className="h-3.5 w-3.5 text-zinc-400 group-hover:text-zinc-700 transition-colors shrink-0" />
           <span>View Proof Trace</span>

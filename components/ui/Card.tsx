@@ -8,8 +8,8 @@ export interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
 export function Card({ children, interactive = false, className = "", ...props }: CardProps) {
   return (
     <div
-      className={`rounded-lg border border-zinc-200 bg-white ${
-        interactive ? "cursor-pointer transition-colors hover:border-zinc-300 hover:bg-zinc-50/50" : ""
+      className={`border border-border bg-surface ${
+        interactive ? "cursor-pointer transition-colors hover:border-outline" : ""
       } ${className}`}
       {...props}
     >
@@ -20,7 +20,7 @@ export function Card({ children, interactive = false, className = "", ...props }
 
 export function CardHeader({ children, className = "", ...props }: React.HTMLAttributes<HTMLDivElement>) {
   return (
-    <div className={`border-b border-zinc-100 px-5 py-4 ${className}`} {...props}>
+    <div className={`border-b border-border px-5 py-4 ${className}`} {...props}>
       {children}
     </div>
   );
@@ -36,7 +36,7 @@ export function CardContent({ children, className = "", ...props }: React.HTMLAt
 
 export function CardFooter({ children, className = "", ...props }: React.HTMLAttributes<HTMLDivElement>) {
   return (
-    <div className={`border-t border-zinc-100 bg-zinc-50/50 px-5 py-3 ${className}`} {...props}>
+    <div className={`border-t border-border bg-surface-low/50 px-5 py-3 ${className}`} {...props}>
       {children}
     </div>
   );

@@ -13,6 +13,8 @@ import { useRouter } from "next/navigation";
 import { fetchEmployerProfile, saveEmployerProfile, JobPosting, toggleShortlist } from "@/lib/firebase/employer";
 import { canonicalizeSkill } from "@/lib/skills";
 import { CandidateProofModal } from "@/components/employer/CandidateProofModal";
+import { ProofSignal } from "@/components/ui/ProofSignal";
+import { ProofCoverage } from "@/components/proof/ProofThread";
 
 export default function EmployerDashboardPage() {
   const { user, role: userRole, loading: authLoading, profileLoading } = useAuth();
@@ -112,8 +114,8 @@ export default function EmployerDashboardPage() {
   if (authLoading || (user && profileLoading) || dataLoading) {
     return (
       <div className="flex min-h-[50vh] items-center justify-center flex-col space-y-3">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-zinc-300 border-t-zinc-900"></div>
-        <p className="text-sm text-zinc-500">Loading dashboard...</p>
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-border border-t-zinc-900"></div>
+        <p className="text-sm text-muted-foreground">Loading dashboard...</p>
       </div>
     );
   }
@@ -220,15 +222,15 @@ export default function EmployerDashboardPage() {
 
       <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 space-y-6">
         {/* Header */}
-        <div className="flex flex-col justify-between gap-4 border-b border-zinc-200 pb-6 sm:flex-row sm:items-center">
+        <div className="flex flex-col justify-between gap-4 border-b border-border pb-6 sm:flex-row sm:items-center">
           <div>
             <div className="flex items-center gap-3">
-              <h1 className="text-2xl font-bold tracking-tight text-zinc-900 sm:text-3xl">
+              <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
                 Discover Verified Talent
               </h1>
               <Badge variant="verified">Sponsor</Badge>
             </div>
-            <p className="mt-1.5 text-sm text-zinc-600">
+            <p className="mt-1.5 text-sm text-muted-foreground">
               Post roles and access verified candidate portfolios through signal-based pipelines.
             </p>
           </div>
@@ -257,15 +259,15 @@ export default function EmployerDashboardPage() {
 
         {/* Talent Workspace Navigation */}
         {roles.length > 0 && activeTab !== "post-role" && (
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-zinc-200 mb-6 mt-2">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border mb-6 mt-2">
             <div className="flex items-center gap-6">
               <button
                 type="button"
                 onClick={() => setActiveTab("discover")}
                 className={`flex items-center gap-2 pb-3 text-sm font-medium transition-all border-b-2 ${
                   activeTab === "discover"
-                    ? "border-zinc-900 text-zinc-900"
-                    : "border-transparent text-zinc-500 hover:text-zinc-700 hover:border-zinc-300"
+                    ? "border-foreground text-foreground"
+                    : "border-transparent text-muted-foreground hover:text-muted-foreground hover:border-border"
                 }`}
               >
                 Discover
@@ -275,8 +277,8 @@ export default function EmployerDashboardPage() {
                 onClick={() => setActiveTab("shortlisted")}
                 className={`flex items-center gap-2 pb-3 text-sm font-medium transition-all border-b-2 ${
                   activeTab === "shortlisted"
-                    ? "border-zinc-900 text-zinc-900"
-                    : "border-transparent text-zinc-500 hover:text-zinc-700 hover:border-zinc-300"
+                    ? "border-foreground text-foreground"
+                    : "border-transparent text-muted-foreground hover:text-muted-foreground hover:border-border"
                 }`}
               >
                 Shortlisted
@@ -284,8 +286,8 @@ export default function EmployerDashboardPage() {
                   <span
                     className={`ml-1 text-xs px-2 py-0.5 rounded-full font-bold transition-colors ${
                       activeTab === "shortlisted"
-                        ? "bg-zinc-100 text-zinc-900"
-                        : "bg-zinc-100 text-zinc-500"
+                        ? "bg-surface-low text-foreground"
+                        : "bg-surface-low text-muted-foreground"
                     }`}
                   >
                     {shortlistedUids.length}
@@ -295,9 +297,9 @@ export default function EmployerDashboardPage() {
             </div>
 
             {activeTab === "discover" && selectedRole && (
-              <div className="hidden sm:flex items-center gap-2 text-xs font-medium text-zinc-500 pb-3">
+              <div className="hidden sm:flex items-center gap-2 text-xs font-medium text-muted-foreground pb-3">
                 <span>Active Role:</span>
-                <span className="font-semibold text-zinc-900">
+                <span className="font-semibold text-foreground">
                   {selectedRole.title}
                 </span>
               </div>
@@ -310,7 +312,7 @@ export default function EmployerDashboardPage() {
           <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 animate-fade-up">
             {/* Left Sidebar: Roles List */}
             <div className="lg:col-span-1 space-y-4">
-              <h3 className="text-sm font-bold text-zinc-900 uppercase tracking-wider px-1">
+              <h3 className="text-sm font-bold text-foreground uppercase tracking-wider px-1">
                 Active Roles ({roles.length})
               </h3>
               <div className="space-y-2">
@@ -328,29 +330,29 @@ export default function EmployerDashboardPage() {
                     }}
                     className={`w-full text-left px-4 py-3 rounded-lg border transition-all cursor-pointer outline-none focus:ring-2 focus:ring-zinc-500 focus:ring-offset-1 ${
                       selectedRoleId === role.id 
-                        ? "bg-white border-zinc-900 shadow-sm ring-1 ring-zinc-900/10" 
-                        : "bg-transparent border-zinc-200 hover:bg-zinc-100/50"
+                        ? "bg-surface border-foreground shadow-sm ring-1 ring-foreground/10" 
+                        : "bg-transparent border-border hover:bg-surface-low"
                     }`}
                   >
                     <div className="flex justify-between items-start mb-1">
-                      <span className="font-semibold text-zinc-900 truncate pr-2">{role.title}</span>
+                      <span className="font-semibold text-foreground truncate pr-2">{role.title}</span>
                       <div 
                         onClick={(e) => removeRole(role.id, e)}
-                        className="text-zinc-400 hover:text-red-500 transition-colors shrink-0"
+                        className="text-outline hover:text-red-500 transition-colors shrink-0"
                         title="Delete Role"
                       >
                         <Trash2 className="h-3.5 w-3.5" />
                       </div>
                     </div>
-                    <div className="text-xs text-zinc-500 mb-2 truncate">{role.department}</div>
+                    <div className="text-xs text-muted-foreground mb-2 truncate">{role.department}</div>
                     <div className="flex flex-wrap gap-1.5">
                       {role.skills.slice(0, 3).map(skill => (
-                        <span key={skill} className="px-1.5 py-0.5 bg-zinc-100 rounded text-[10px] font-medium text-zinc-600 uppercase">
+                        <span key={skill} className="px-1.5 py-0.5 bg-surface-low rounded text-[10px] font-medium text-muted-foreground uppercase">
                           {skill}
                         </span>
                       ))}
                       {role.skills.length > 3 && (
-                        <span className="px-1.5 py-0.5 bg-zinc-100 rounded text-[10px] font-medium text-zinc-600">
+                        <span className="px-1.5 py-0.5 bg-surface-low rounded text-[10px] font-medium text-muted-foreground">
                           +{role.skills.length - 3}
                         </span>
                       )}
@@ -365,49 +367,49 @@ export default function EmployerDashboardPage() {
               {fetchingCandidates ? (
                 <div className="space-y-4 animate-fade-up">
                   <div className="flex flex-col items-center justify-center py-6 space-y-3">
-                    <ShieldCheck className="h-6 w-6 text-zinc-500/60" />
+                    <ShieldCheck className="h-6 w-6 text-muted-foreground/60" />
                     <div className="text-center">
-                      <p className="text-sm font-semibold text-zinc-900">Finding verified talent for this role…</p>
-                      <p className="text-xs text-zinc-500 mt-1">Reviewing verified skills and project evidence.</p>
+                      <p className="text-sm font-semibold text-foreground">Finding verified talent for this role…</p>
+                      <p className="text-xs text-muted-foreground mt-1">Reviewing verified skills and project evidence.</p>
                     </div>
                   </div>
                   
                   {[1, 2, 3].map((i) => (
-                    <div key={i} className="bg-white border border-zinc-200 rounded-xl p-6 shadow-sm">
+                    <div key={i} className="bg-surface border border-border rounded-xl p-6 shadow-sm">
                       <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-6">
                         <div className="space-y-4 flex-1">
                           <div className="flex items-center gap-3">
-                            <div className="h-6 w-40 rounded bg-zinc-200 animate-shimmer"></div>
-                            <div className="h-5 w-20 rounded-full bg-zinc-200 animate-shimmer"></div>
+                            <div className="h-6 w-40 rounded bg-surface-high animate-shimmer"></div>
+                            <div className="h-5 w-20 rounded-full bg-surface-high animate-shimmer"></div>
                           </div>
                           <div className="flex gap-2">
-                            <div className="h-4 w-28 rounded bg-zinc-200 animate-shimmer"></div>
-                            <div className="h-4 w-16 rounded bg-zinc-200 animate-shimmer"></div>
-                            <div className="h-4 w-20 rounded bg-zinc-200 animate-shimmer"></div>
+                            <div className="h-4 w-28 rounded bg-surface-high animate-shimmer"></div>
+                            <div className="h-4 w-16 rounded bg-surface-high animate-shimmer"></div>
+                            <div className="h-4 w-20 rounded bg-surface-high animate-shimmer"></div>
                           </div>
                           <div className="space-y-2 pt-2">
-                            <div className="h-3 w-24 rounded bg-zinc-200 animate-shimmer"></div>
+                            <div className="h-3 w-24 rounded bg-surface-high animate-shimmer"></div>
                             <div className="flex gap-2">
-                              <div className="h-6 w-16 rounded-md bg-zinc-200 animate-shimmer"></div>
-                              <div className="h-6 w-20 rounded-md bg-zinc-200 animate-shimmer"></div>
-                              <div className="h-6 w-14 rounded-md bg-zinc-200 animate-shimmer"></div>
+                              <div className="h-6 w-16 rounded-md bg-surface-high animate-shimmer"></div>
+                              <div className="h-6 w-20 rounded-md bg-surface-high animate-shimmer"></div>
+                              <div className="h-6 w-14 rounded-md bg-surface-high animate-shimmer"></div>
                             </div>
                           </div>
                         </div>
-                        <div className="sm:w-64 shrink-0 flex flex-col space-y-4 border-l border-zinc-100 sm:pl-6">
-                          <div className="rounded-lg p-3 space-y-3 border border-zinc-100">
+                        <div className="sm:w-64 shrink-0 flex flex-col space-y-4 border-l border-border sm:pl-6">
+                          <div className="rounded-lg p-3 space-y-3 border border-border">
                             <div className="flex justify-between">
-                              <div className="h-3 w-32 rounded bg-zinc-200 animate-shimmer"></div>
-                              <div className="h-4 w-8 rounded bg-zinc-200 animate-shimmer"></div>
+                              <div className="h-3 w-32 rounded bg-surface-high animate-shimmer"></div>
+                              <div className="h-4 w-8 rounded bg-surface-high animate-shimmer"></div>
                             </div>
                             <div className="space-y-2">
-                              <div className="h-3 w-full rounded bg-zinc-200 animate-shimmer"></div>
-                              <div className="h-3 w-5/6 rounded bg-zinc-200 animate-shimmer"></div>
+                              <div className="h-3 w-full rounded bg-surface-high animate-shimmer"></div>
+                              <div className="h-3 w-5/6 rounded bg-surface-high animate-shimmer"></div>
                             </div>
                           </div>
                           <div className="flex flex-col gap-2 pt-2">
-                            <div className="h-8 w-full rounded-md bg-zinc-200 animate-shimmer"></div>
-                            <div className="h-8 w-full rounded-md bg-zinc-200 animate-shimmer"></div>
+                            <div className="h-8 w-full rounded-md bg-surface-high animate-shimmer"></div>
+                            <div className="h-8 w-full rounded-md bg-surface-high animate-shimmer"></div>
                           </div>
                         </div>
                       </div>
@@ -417,29 +419,27 @@ export default function EmployerDashboardPage() {
               ) : candidates.length > 0 ? (
                 <div className="animate-fade-up space-y-4">
                   <div className="flex items-center justify-between pb-2">
-                    <h3 className="text-base font-bold text-zinc-900">
+                    <h3 className="text-base font-bold text-foreground">
                       Matches for "{selectedRole?.title}"
                     </h3>
-                    <span className="text-sm font-medium text-zinc-500">{candidates.length} verified candidate(s)</span>
+                    <span className="text-sm font-medium text-muted-foreground">{candidates.length} verified candidate(s)</span>
                   </div>
                   
                   <div className="space-y-4">
                     {candidates.map((candidate) => {
                       const isShortlisted = shortlistedUids.includes(candidate.uid);
                       return (
-                        <div key={candidate.uid} className="bg-white border border-zinc-200 rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow">
+                        <div key={candidate.uid} className="bg-surface border border-border p-6 hover:border-border transition-colors">
                           <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-6">
                             
-                            {/* Candidate Summary */}
+                            {/* Candidate Identity */}
                             <div className="space-y-4 flex-1">
                               <div className="flex items-center gap-3">
-                                <h4 className="text-lg font-bold text-zinc-900">{candidate.name}</h4>
-                                <Badge variant="verified" className="flex items-center gap-1 text-xs">
-                                  <ShieldCheck className="h-3 w-3" /> Verified
-                                </Badge>
+                                <h4 className="text-xl font-black tracking-tight text-foreground">{candidate.name}</h4>
+                                <ProofSignal type="verified" label="Verified" className="bg-success/10 px-2 py-0.5" />
                               </div>
                               
-                              <div className="flex flex-wrap gap-y-1 gap-x-4 text-sm text-zinc-600">
+                              <div className="flex flex-wrap gap-y-1 gap-x-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                                 <span>{candidate.college || "N/A"}</span>
                                 <span>•</span>
                                 <span>{candidate.branch || "N/A"}</span>
@@ -447,56 +447,61 @@ export default function EmployerDashboardPage() {
                                 <span>Class of {candidate.gradYear || "N/A"}</span>
                               </div>
 
-                              <div className="space-y-2">
-                                <span className="text-xs font-semibold text-zinc-900 uppercase tracking-wider">Relevant Skills</span>
-                                <div className="flex flex-wrap gap-2">
+                              {/* Proof Signals (Instead of just skills) */}
+                              <div className="pt-2 space-y-2">
+                                <span className="text-[10px] font-bold text-outline uppercase tracking-widest border-b border-border pb-1 flex w-full">Verified Stack</span>
+                                <div className="flex flex-wrap gap-2 pt-1">
                                   {(candidate.matchedSkills || []).map((skill: string) => (
-                                    <span key={skill} className="bg-zinc-100 text-zinc-700 px-2 py-1 rounded-md text-xs font-medium">
-                                      {skill}
-                                    </span>
+                                    <div key={skill} className="bg-surface-low border border-border px-2.5 py-1 flex items-center gap-2 rounded-sm">
+                                      <span className="text-xs font-bold text-foreground">{skill}</span>
+                                      <div className="w-px h-3 bg-zinc-300"></div>
+                                      <ProofSignal type="assessed" label="Verified" />
+                                    </div>
                                   ))}
                                   {(!candidate.matchedSkills || candidate.matchedSkills.length === 0) && (
-                                    <span className="text-xs text-zinc-500 italic">No exact skill matches</span>
+                                    <span className="text-xs text-muted-foreground italic">No exact skill matches</span>
                                   )}
                                 </div>
                               </div>
                             </div>
 
                             {/* Evidence & Action Sidebar */}
-                            <div className="sm:w-64 shrink-0 flex flex-col space-y-4 border-l border-zinc-200 sm:pl-6">
-                              <div className="bg-transparent rounded-none p-0 space-y-2">
-                                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 mb-3">
-                                  <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Match Evidence</span>
-                                  {candidate.totalRequiredSkillCount > 0 && (
-                                    <span className="text-[10px] font-bold text-zinc-600 bg-zinc-100 px-1.5 py-0.5 rounded-sm w-fit">
-                                      {candidate.matchedRequiredSkillCount} of {candidate.totalRequiredSkillCount} required skills
-                                    </span>
-                                  )}
+                            <div className="sm:w-64 shrink-0 flex flex-col space-y-5 border-l-2 border-border sm:pl-6">
+                              <div>
+                                <div className="flex items-end gap-2 mb-3">
+                                  <span className="text-2xl font-black text-foreground leading-none">{candidate.matchedRequiredSkillCount || 0}</span>
+                                  <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest pb-0.5">/ {candidate.totalRequiredSkillCount || 0} Required Skills</span>
                                 </div>
-                                <ul className="space-y-2">
-                                  {candidate.matchReasons.map((reason: string, idx: number) => (
-                                    <li key={idx} className="flex items-start gap-2 text-xs text-zinc-700 leading-tight">
-                                      <CheckCircle2 className="h-3.5 w-3.5 text-zinc-400 shrink-0 mt-0.5" />
+                                <div className="mb-4 w-full">
+                                  <ProofCoverage 
+                                    points={candidate.totalRequiredSkillCount || 1} 
+                                    filled={candidate.matchedRequiredSkillCount || 0} 
+                                  />
+                                </div>
+                                <ul className="space-y-1.5 relative pl-2 border-l border-border ml-1">
+                                  {candidate.matchReasons.slice(0, 3).map((reason: string, idx: number) => (
+                                    <li key={idx} className="flex items-start gap-2 text-[11px] font-medium text-muted-foreground leading-tight">
+                                      <div className="absolute -left-[3px] mt-1 h-1 w-1 rounded-full bg-zinc-400" />
                                       {reason}
                                     </li>
                                   ))}
                                 </ul>
                               </div>
                               
-                              <div className="flex flex-col gap-2 pt-2">
+                              <div className="flex flex-col gap-2 pt-2 border-t border-border">
                                 <Button 
                                   variant="primary" 
                                   size="sm" 
-                                  className="w-full"
+                                  className="w-full bg-foreground hover:opacity-90"
                                   onClick={() => setSelectedCandidate(candidate)}
                                 >
-                                  View Proof
+                                  Review Dossier
                                 </Button>
                                 <Button 
                                   variant={isShortlisted ? "secondary" : "outline"} 
                                   size="sm" 
                                   className="w-full"
-                                  leftIcon={<Bookmark className={`h-4 w-4 ${isShortlisted ? 'fill-zinc-900' : ''}`} />}
+                                  leftIcon={<Bookmark className={`h-3.5 w-3.5 ${isShortlisted ? 'fill-zinc-900' : ''}`} />}
                                   onClick={() => handleShortlist(candidate.uid)}
                                 >
                                   {isShortlisted ? "Shortlisted" : "Shortlist"}
@@ -512,7 +517,7 @@ export default function EmployerDashboardPage() {
                 </div>
               ) : (
                 <EmptyState 
-                  icon={<ShieldCheck className="h-6 w-6 text-zinc-700" />}
+                  icon={<ShieldCheck className="h-6 w-6 text-muted-foreground" />}
                   title="No verified candidates match this role yet."
                   description="Candidates will appear here automatically as they complete Meritlane verification and match your required skills."
                 />
@@ -524,19 +529,19 @@ export default function EmployerDashboardPage() {
         {/* Tab 2: Shortlisted View (Candidate-Centric Workspace — NO Active Roles sidebar) */}
         {activeTab === "shortlisted" && (
           <div className="space-y-6 animate-fade-up">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-2 border-b border-zinc-200/80 gap-2">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-2 border-b border-border gap-2">
               <div>
                 <div className="flex items-center gap-3">
-                  <h3 className="text-xl font-bold tracking-tight text-zinc-900">
+                  <h3 className="text-xl font-bold tracking-tight text-foreground">
                     Shortlisted Candidates
                   </h3>
                   {!fetchingCandidates && (
-                    <span className="text-xs font-bold text-zinc-700 bg-zinc-200/70 px-2.5 py-0.5 rounded-full">
+                    <span className="text-xs font-bold text-muted-foreground bg-surface-high px-2.5 py-0.5 rounded-full">
                       {candidates.length} {candidates.length === 1 ? "candidate" : "candidates"}
                     </span>
                   )}
                 </div>
-                <p className="text-sm text-zinc-500 mt-1">
+                <p className="text-sm text-muted-foreground mt-1">
                   Candidates you've saved for consideration across all roles.
                 </p>
               </div>
@@ -545,41 +550,41 @@ export default function EmployerDashboardPage() {
             {fetchingCandidates ? (
               <div className="space-y-4 animate-fade-up">
                 {[1, 2, 3].map((i) => (
-                  <div key={i} className="bg-white border border-zinc-200 rounded-xl p-6 shadow-sm">
+                  <div key={i} className="bg-surface border border-border rounded-xl p-6 shadow-sm">
                     <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-6">
                       <div className="space-y-4 flex-1">
                         <div className="flex items-center gap-3">
-                          <div className="h-6 w-40 rounded bg-zinc-200 animate-shimmer"></div>
-                          <div className="h-5 w-20 rounded-full bg-zinc-200 animate-shimmer"></div>
+                          <div className="h-6 w-40 rounded bg-surface-high animate-shimmer"></div>
+                          <div className="h-5 w-20 rounded-full bg-surface-high animate-shimmer"></div>
                         </div>
                         <div className="flex gap-2">
-                          <div className="h-4 w-28 rounded bg-zinc-200 animate-shimmer"></div>
-                          <div className="h-4 w-16 rounded bg-zinc-200 animate-shimmer"></div>
-                          <div className="h-4 w-20 rounded bg-zinc-200 animate-shimmer"></div>
+                          <div className="h-4 w-28 rounded bg-surface-high animate-shimmer"></div>
+                          <div className="h-4 w-16 rounded bg-surface-high animate-shimmer"></div>
+                          <div className="h-4 w-20 rounded bg-surface-high animate-shimmer"></div>
                         </div>
                         <div className="space-y-2 pt-2">
-                          <div className="h-3 w-24 rounded bg-zinc-200 animate-shimmer"></div>
+                          <div className="h-3 w-24 rounded bg-surface-high animate-shimmer"></div>
                           <div className="flex gap-2">
-                            <div className="h-6 w-16 rounded-md bg-zinc-200 animate-shimmer"></div>
-                            <div className="h-6 w-20 rounded-md bg-zinc-200 animate-shimmer"></div>
-                            <div className="h-6 w-14 rounded-md bg-zinc-200 animate-shimmer"></div>
+                            <div className="h-6 w-16 rounded-md bg-surface-high animate-shimmer"></div>
+                            <div className="h-6 w-20 rounded-md bg-surface-high animate-shimmer"></div>
+                            <div className="h-6 w-14 rounded-md bg-surface-high animate-shimmer"></div>
                           </div>
                         </div>
                       </div>
-                      <div className="sm:w-64 shrink-0 flex flex-col space-y-4 border-l border-zinc-100 sm:pl-6">
-                        <div className="rounded-lg p-3 space-y-3 border border-zinc-100">
+                      <div className="sm:w-64 shrink-0 flex flex-col space-y-4 border-l border-border sm:pl-6">
+                        <div className="rounded-lg p-3 space-y-3 border border-border">
                           <div className="flex justify-between">
-                            <div className="h-3 w-32 rounded bg-zinc-200 animate-shimmer"></div>
-                            <div className="h-4 w-8 rounded bg-zinc-200 animate-shimmer"></div>
+                            <div className="h-3 w-32 rounded bg-surface-high animate-shimmer"></div>
+                            <div className="h-4 w-8 rounded bg-surface-high animate-shimmer"></div>
                           </div>
                           <div className="space-y-2">
-                            <div className="h-3 w-full rounded bg-zinc-200 animate-shimmer"></div>
-                            <div className="h-3 w-5/6 rounded bg-zinc-200 animate-shimmer"></div>
+                            <div className="h-3 w-full rounded bg-surface-high animate-shimmer"></div>
+                            <div className="h-3 w-5/6 rounded bg-surface-high animate-shimmer"></div>
                           </div>
                         </div>
                         <div className="flex flex-col gap-2 pt-2">
-                          <div className="h-8 w-full rounded-md bg-zinc-200 animate-shimmer"></div>
-                          <div className="h-8 w-full rounded-md bg-zinc-200 animate-shimmer"></div>
+                          <div className="h-8 w-full rounded-md bg-surface-high animate-shimmer"></div>
+                          <div className="h-8 w-full rounded-md bg-surface-high animate-shimmer"></div>
                         </div>
                       </div>
                     </div>
@@ -589,19 +594,17 @@ export default function EmployerDashboardPage() {
             ) : candidates.length > 0 ? (
               <div className="space-y-4">
                 {candidates.map((candidate) => (
-                  <div key={candidate.uid} className="bg-white border border-zinc-200 rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow">
+                  <div key={candidate.uid} className="bg-surface border border-border p-6 hover:border-border transition-colors">
                     <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-6">
                       
-                      {/* Candidate Summary */}
+                      {/* Candidate Identity */}
                       <div className="space-y-4 flex-1">
                         <div className="flex items-center gap-3">
-                          <h4 className="text-lg font-bold text-zinc-900">{candidate.name}</h4>
-                          <Badge variant="verified" className="flex items-center gap-1 text-xs">
-                            <ShieldCheck className="h-3 w-3" /> Verified
-                          </Badge>
+                          <h4 className="text-xl font-black tracking-tight text-foreground">{candidate.name}</h4>
+                          <ProofSignal type="verified" label="Verified" className="bg-success/10 px-2 py-0.5" />
                         </div>
                         
-                        <div className="flex flex-wrap gap-y-1 gap-x-4 text-sm text-zinc-600">
+                        <div className="flex flex-wrap gap-y-1 gap-x-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                           <span>{candidate.college || "N/A"}</span>
                           <span>•</span>
                           <span>{candidate.branch || "N/A"}</span>
@@ -609,56 +612,54 @@ export default function EmployerDashboardPage() {
                           <span>Class of {candidate.gradYear || "N/A"}</span>
                         </div>
 
-                        <div className="space-y-2">
-                          <span className="text-xs font-semibold text-zinc-900 uppercase tracking-wider">
-                            Verified Skills
-                          </span>
-                          <div className="flex flex-wrap gap-2">
-                            {(candidate.skills || candidate.matchedSkills || []).map((skill: string) => (
-                              <span key={skill} className="bg-zinc-100 text-zinc-700 px-2 py-1 rounded-md text-xs font-medium">
-                                {skill}
-                              </span>
+                        <div className="pt-2 space-y-2">
+                          <span className="text-[10px] font-bold text-outline uppercase tracking-widest border-b border-border pb-1 flex w-full">Verified Stack</span>
+                          <div className="flex flex-wrap gap-2 pt-1">
+                            {(candidate.skills || candidate.matchedSkills || []).slice(0, 5).map((skill: string) => (
+                              <div key={skill} className="bg-surface-low border border-border px-2.5 py-1 flex items-center gap-2 rounded-sm">
+                                <span className="text-xs font-bold text-foreground">{skill}</span>
+                                <div className="w-px h-3 bg-zinc-300"></div>
+                                <ProofSignal type="assessed" label="Verified" />
+                              </div>
                             ))}
                             {(!candidate.skills || candidate.skills.length === 0) && (
-                              <span className="text-xs text-zinc-500 italic">No skills listed</span>
+                              <span className="text-xs text-muted-foreground italic">No exact skill matches</span>
                             )}
                           </div>
                         </div>
                       </div>
 
                       {/* Evidence & Action Sidebar */}
-                      <div className="sm:w-64 shrink-0 flex flex-col space-y-4 border-l border-zinc-100 sm:pl-6">
-                        <div className="bg-zinc-50/80 rounded-lg p-3 space-y-2 border border-zinc-200/60">
-                          <span className="text-[10px] font-bold text-zinc-800 uppercase tracking-wider">
-                            Verified Evidence & Signals
-                          </span>
-                          <ul className="space-y-1.5">
+                      <div className="sm:w-64 shrink-0 flex flex-col space-y-5 border-l-2 border-border sm:pl-6">
+                        <div>
+                          <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest block mb-3">Verified Evidence & Signals</span>
+                          <ul className="space-y-1.5 relative pl-2 border-l border-border ml-1">
                             {(candidate.matchReasons && candidate.matchReasons.length > 0 
-                              ? candidate.matchReasons 
+                              ? candidate.matchReasons.slice(0, 3) 
                               : ["Verified talent profile evidence"]
                             ).map((reason: string, idx: number) => (
-                              <li key={idx} className="flex items-start gap-1.5 text-xs text-zinc-700 leading-tight">
-                                <CheckCircle2 className="h-3.5 w-3.5 text-zinc-400 shrink-0 mt-0.5" />
-                                <span>{reason}</span>
+                              <li key={idx} className="flex items-start gap-2 text-[11px] font-medium text-muted-foreground leading-tight">
+                                <div className="absolute -left-[3px] mt-1 h-1 w-1 rounded-full bg-zinc-400" />
+                                {reason}
                               </li>
                             ))}
                           </ul>
                         </div>
                         
-                        <div className="flex flex-col gap-2 pt-2">
+                        <div className="flex flex-col gap-2 pt-2 border-t border-border">
                           <Button 
                             variant="primary" 
                             size="sm" 
-                            className="w-full"
+                            className="w-full bg-foreground hover:opacity-90"
                             onClick={() => setSelectedCandidate(candidate)}
                           >
-                            View Proof
+                            Review Dossier
                           </Button>
                           <Button 
                             variant="outline" 
                             size="sm" 
-                            className="w-full text-zinc-600 hover:bg-red-50 hover:text-red-600 hover:border-red-200 transition-colors"
-                            leftIcon={<Trash2 className="h-4 w-4" />}
+                            className="w-full text-muted-foreground hover:bg-danger/10 hover:text-danger hover:border-danger/40 transition-colors"
+                            leftIcon={<Trash2 className="h-3.5 w-3.5" />}
                             onClick={() => handleShortlist(candidate.uid)}
                           >
                             Remove from Shortlist
@@ -672,7 +673,7 @@ export default function EmployerDashboardPage() {
               </div>
             ) : (
               <EmptyState 
-                icon={<Bookmark className="h-6 w-6 text-zinc-700" />}
+                icon={<Bookmark className="h-6 w-6 text-muted-foreground" />}
                 title="No candidates shortlisted yet"
                 description="Candidates you save from the verified talent pipeline will appear here."
                 action={
@@ -690,14 +691,14 @@ export default function EmployerDashboardPage() {
           <div className="animate-fade-up">
             <Card className="max-w-3xl mx-auto">
               <CardHeader>
-                <h2 className="text-lg font-bold text-zinc-900">Define a new role</h2>
-                <p className="text-sm text-zinc-600 mt-1">Specify technical requirements to instantly discover verified candidates.</p>
+                <h2 className="text-lg font-bold text-foreground">Define a new role</h2>
+                <p className="text-sm text-muted-foreground mt-1">Specify technical requirements to instantly discover verified candidates.</p>
               </CardHeader>
               <CardContent>
                 <form onSubmit={handlePostRole} className="space-y-6">
                   <div className="grid gap-6 sm:grid-cols-2">
                     <div className="space-y-1.5">
-                      <label htmlFor="roleTitle" className="block text-sm font-semibold text-zinc-900">
+                      <label htmlFor="roleTitle" className="block text-sm font-semibold text-foreground">
                         Role Title <span className="text-red-500">*</span>
                       </label>
                       <Input
@@ -711,7 +712,7 @@ export default function EmployerDashboardPage() {
                     </div>
                     
                     <div className="space-y-1.5">
-                      <label htmlFor="department" className="block text-sm font-semibold text-zinc-900">
+                      <label htmlFor="department" className="block text-sm font-semibold text-foreground">
                         Department
                       </label>
                       <Input
@@ -725,7 +726,7 @@ export default function EmployerDashboardPage() {
                   </div>
 
                   <div className="space-y-1.5">
-                    <label className="block text-sm font-semibold text-zinc-900">
+                    <label className="block text-sm font-semibold text-foreground">
                       Experience Level
                     </label>
                     <div className="flex flex-wrap gap-2 pt-1">
@@ -737,8 +738,8 @@ export default function EmployerDashboardPage() {
                           disabled={saving}
                           className={`rounded-md px-3.5 py-1.5 text-sm font-medium transition-all ${
                             experienceLevel === level
-                              ? "bg-zinc-900 text-white shadow-sm"
-                              : "bg-white text-zinc-600 border border-zinc-200 hover:border-zinc-300 hover:bg-zinc-50"
+                              ? "bg-foreground text-white shadow-sm"
+                              : "bg-surface text-muted-foreground border border-border hover:border-border hover:bg-surface-low"
                           }`}
                         >
                           {level}
@@ -748,10 +749,10 @@ export default function EmployerDashboardPage() {
                   </div>
 
                   <div className="space-y-1.5">
-                    <label className="block text-sm font-semibold text-zinc-900">
+                    <label className="block text-sm font-semibold text-foreground">
                       Required Skills
                     </label>
-                    <p className="text-xs text-zinc-500 mb-2">We use these skills to instantly match you with verified candidates.</p>
+                    <p className="text-xs text-muted-foreground mb-2">We use these skills to instantly match you with verified candidates.</p>
                     <TagInput
                       tags={skillsNeeded}
                       onChange={setSkillsNeeded}
@@ -759,15 +760,15 @@ export default function EmployerDashboardPage() {
                     />
                   </div>
 
-                  <div className="pt-4 border-t border-zinc-100 flex items-center justify-between">
+                  <div className="pt-4 border-t border-border flex items-center justify-between">
                     {formSuccess ? (
-                      <div className="flex items-center gap-2 text-emerald-600 bg-emerald-50 px-3 py-1.5 rounded-md">
+                      <div className="flex items-center gap-2 text-success bg-success/10 px-3 py-1.5 rounded-md">
                         <CheckCircle2 className="h-4 w-4" />
                         <span className="text-sm font-medium">Role posted successfully!</span>
                       </div>
                     ) : (
-                      <p className="text-xs text-zinc-500 flex items-center gap-1.5">
-                        <ShieldCheck className="h-4 w-4 text-zinc-400" /> Matches against verified proof instantly.
+                      <p className="text-xs text-muted-foreground flex items-center gap-1.5">
+                        <ShieldCheck className="h-4 w-4 text-outline" /> Matches against verified proof instantly.
                       </p>
                     )}
                     
@@ -785,8 +786,8 @@ export default function EmployerDashboardPage() {
       {/* Toast Notification */}
       {successToast && (
         <div className="fixed bottom-6 right-6 z-50 animate-fade-up">
-          <div className="flex items-center gap-2 rounded-lg bg-zinc-900 px-4 py-3 text-sm font-medium text-white shadow-lg">
-            <CheckCircle2 className="h-4 w-4 text-emerald-400" />
+          <div className="flex items-center gap-2 rounded-lg bg-foreground px-4 py-3 text-sm font-medium text-white shadow-lg">
+            <CheckCircle2 className="h-4 w-4 text-success" />
             <span>{successToast}</span>
           </div>
         </div>

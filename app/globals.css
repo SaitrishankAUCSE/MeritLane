@@ -1,17 +1,26 @@
 @import "tailwindcss";
 
 @theme inline {
-  --color-background: #ffffff;
-  --color-foreground: #09090b;
-  --color-muted: #f4f4f5;
-  --color-muted-foreground: #71717a;
-  --color-border: #e4e4e7;
-  --color-primary: #09090b;
-  --color-primary-foreground: #ffffff;
-  --color-success: #16a34a;
-  --color-danger: #dc2626;
-  --color-warning: #d97706;
-  --font-sans: var(--font-inter), "Inter", "Arial", "Helvetica", system-ui, sans-serif;
+  --color-void: #0b0c0e;
+  --color-background: #0b0c0e;
+  --color-surface: #111316;
+  --color-surface-low: #1b1c1e;
+  --color-surface-mid: #1f2022;
+  --color-surface-high: #292a2c;
+  --color-foreground: #f4f4f2;
+  --color-muted: #1b1c1e;
+  --color-muted-foreground: #c4c7c5;
+  --color-border: #272a2f;
+  --color-outline: #8e928f;
+  --color-primary: #f4f4f2;
+  --color-primary-foreground: #0b0c0e;
+  --color-accent: #a8a2ff;
+  --color-success: #8ba889;
+  --color-warning: #c49e6e;
+  --color-danger: #c97a72;
+  --font-sans: var(--font-hanken), "Hanken Grotesk", system-ui, sans-serif;
+  --font-serif: var(--font-source-serif), "Source Serif 4", Georgia, serif;
+  --font-mono: var(--font-jetbrains), "JetBrains Mono", ui-monospace, monospace;
 }
 
 html {
@@ -22,44 +31,106 @@ html {
 }
 
 body {
-  background: radial-gradient(circle at top center, #eef2ff 0%, #ffffff 50%);
-  background-attachment: fixed;
+  background: var(--color-background);
   color: var(--color-foreground);
   font-family: var(--font-sans);
   min-height: 100vh;
 }
 
-/* Accessible & Polished Focus Rings */
+.theme-public {
+  --color-void: #faf6ef;
+  --color-background: #faf6ef;
+  --color-surface: #fffcf7;
+  --color-surface-low: #f4efe6;
+  --color-surface-mid: #efe8db;
+  --color-surface-high: #e7dfd0;
+  --color-foreground: #121315;
+  --color-muted: #efe8db;
+  --color-muted-foreground: #5c5f5d;
+  --color-border: #d8d1c4;
+  --color-outline: #6f726f;
+  --color-primary: #121315;
+  --color-primary-foreground: #f4f4f2;
+  --color-accent: #5c56b8;
+  --color-success: #4f6f4e;
+  --color-warning: #8a6a3d;
+  --color-danger: #9a3f38;
+  background: var(--color-background);
+  color: var(--color-foreground);
+}
+
 *:focus-visible {
-  outline: 2px solid #18181b;
-  outline-offset: 2px;
+  outline: 1px solid var(--color-foreground);
+  outline-offset: 3px;
 }
 
-/* Text Selection Styling */
 ::selection {
-  background: #18181b;
-  color: #ffffff;
+  background: color-mix(in srgb, var(--color-accent) 28%, transparent);
+  color: var(--color-foreground);
 }
 
-/* Micro-Interaction Helper Utilities */
+.font-label {
+  font-family: var(--font-sans);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  line-height: 1;
+}
+
+.font-data {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+}
+
+.provenance-rail {
+  width: 1px;
+  background: var(--color-border);
+}
+
+.provenance-rail-verified {
+  background: linear-gradient(180deg, var(--color-border) 0%, var(--color-success) 100%);
+}
+
+.field-line,
+.field-select {
+  width: 100%;
+  border: 0;
+  border-bottom: 1px solid var(--color-border);
+  border-radius: 0;
+  background: transparent;
+  color: var(--color-foreground);
+  font-size: 15px;
+  line-height: 1.6;
+  padding: 0.5rem 0;
+}
+
+.field-select option {
+  background: #111316;
+  color: #f4f4f2;
+}
+
+.field-line:focus,
+.field-select:focus {
+  outline: none;
+  border-bottom-color: var(--color-foreground);
+}
+
+.field-line:disabled,
+.field-select:disabled {
+  opacity: 0.55;
+}
+
 .btn-press {
-  transition: transform 150ms cubic-bezier(0.4, 0, 0.2, 1), box-shadow 150ms cubic-bezier(0.4, 0, 0.2, 1), background-color 150ms cubic-bezier(0.4, 0, 0.2, 1), border-color 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  transition: transform 150ms cubic-bezier(0.4, 0, 0.2, 1), background-color 150ms cubic-bezier(0.4, 0, 0.2, 1), border-color 150ms cubic-bezier(0.4, 0, 0.2, 1), color 150ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .btn-press:active:not(:disabled) {
   transform: scale(0.98);
 }
 
-.card-interactive {
-  transition: border-color 200ms cubic-bezier(0.4, 0, 0.2, 1), box-shadow 200ms cubic-bezier(0.4, 0, 0.2, 1), transform 200ms cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.card-interactive:hover {
-  border-color: #d4d4d8;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-}
-
-/* Motion System Tokens */
 :root {
   --motion-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
   --motion-standard: 250ms cubic-bezier(0.4, 0, 0.2, 1);
@@ -69,53 +140,47 @@ body {
 .transition-fast { transition: all var(--motion-fast); }
 .transition-standard { transition: all var(--motion-standard); }
 
-/* Page / Content Entrance */
 @keyframes fadeUpIn {
-  from {
-    opacity: 0;
-    transform: translateY(6px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 .animate-fade-up {
   animation: fadeUpIn var(--motion-standard) forwards;
-  opacity: 0; /* Ensure hidden before animation starts */
 }
 
-/* Stagger utilities */
 .delay-50 { animation-delay: 50ms; }
 .delay-100 { animation-delay: 100ms; }
 .delay-150 { animation-delay: 150ms; }
 
-/* Shimmer Animation for Skeletons */
 @keyframes shimmer {
-  0% {
-    background-position: -800px 0;
-  }
-  100% {
-    background-position: 800px 0;
-  }
+  0% { background-position: -800px 0; }
+  100% { background-position: 800px 0; }
 }
 
 .animate-shimmer {
-  background: #f4f4f5;
+  background: var(--color-surface-low);
   background-image: linear-gradient(
     90deg,
-    #f4f4f5 0%,
-    #e4e4e7 20%,
-    #f4f4f5 40%,
-    #f4f4f5 100%
+    var(--color-surface-low) 0%,
+    var(--color-surface-high) 20%,
+    var(--color-surface-low) 40%,
+    var(--color-surface-low) 100%
   );
   background-repeat: no-repeat;
   background-size: 800px 100%;
   animation: shimmer 1.6s infinite linear forwards;
 }
 
-/* Respect Reduced Motion */
+.proof-focus-group .proof-focus-item {
+  transition: opacity 220ms ease, filter 220ms ease;
+}
+
+.proof-focus-group:hover .proof-focus-item:not(:hover):not(:focus-within),
+.proof-focus-group:focus-within .proof-focus-item:not(:hover):not(:focus-within) {
+  opacity: 0.38;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *, ::before, ::after {
     animation-duration: 0.01ms !important;
@@ -123,15 +188,26 @@ body {
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
-  
+
   .animate-shimmer {
     background-image: none !important;
-    background-color: #e2e8f0 !important;
+    background-color: var(--color-surface-high) !important;
   }
-  
+
   .animate-fade-up {
     opacity: 1 !important;
     transform: none !important;
   }
+
+  .proof-focus-group .proof-focus-item {
+    opacity: 1 !important;
+  }
 }
 
+.verified-dot {
+  box-shadow: 0 0 12px rgba(168, 162, 255, 0.4);
+}
+
+.lavender-glow {
+  box-shadow: 0 0 40px rgba(168, 162, 255, 0.1);
+}

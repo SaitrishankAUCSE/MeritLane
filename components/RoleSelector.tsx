@@ -38,9 +38,9 @@ export default function RoleSelector() {
 
   if (loading) {
     return (
-      <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-white">
-        <Loader2 className="h-8 w-8 animate-spin text-zinc-600" />
-        <p className="mt-4 text-sm font-medium text-zinc-600">Setting up your profile...</p>
+      <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-surface">
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+        <p className="mt-4 text-sm font-medium text-muted-foreground">Setting up your profile...</p>
       </div>
     );
   }
@@ -48,20 +48,20 @@ export default function RoleSelector() {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#fafafa] px-4">
       <div className="w-full max-w-xl text-center">
-        <div className="mx-auto mb-4 flex h-10 w-10 items-center justify-center rounded-xl bg-zinc-50 text-zinc-600 shadow-sm">
+        <div className="mx-auto mb-4 flex h-10 w-10 items-center justify-center rounded-xl bg-surface-low text-muted-foreground shadow-sm">
           <ShieldCheck className="h-5 w-5" />
         </div>
 
-        <h1 className="text-2xl font-bold tracking-tight text-zinc-900 sm:text-3xl">
+        <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
           Choose your role
         </h1>
-        <p className="mt-2 text-sm text-zinc-500">
+        <p className="mt-2 text-sm text-muted-foreground">
           How will you be using Meritlane? This selection configures your verified workspace.
         </p>
 
         {error && (
-          <div className="mt-5 flex items-center justify-center gap-2 rounded-xl border border-red-200 bg-red-50 p-3.5 text-xs font-medium text-red-700">
-            <AlertCircle className="h-4 w-4 shrink-0 text-red-600" />
+          <div className="mt-5 flex items-center justify-center gap-2 rounded-xl border border-danger/40 bg-danger/10 p-3.5 text-xs font-medium text-danger">
+            <AlertCircle className="h-4 w-4 shrink-0 text-danger" />
             <span>{error}</span>
           </div>
         )}
@@ -71,14 +71,14 @@ export default function RoleSelector() {
           <button
             type="button"
             onClick={() => handleSelectRole("candidate")}
-            className="group relative flex flex-col items-center justify-center gap-4 rounded-2xl border border-zinc-200 bg-white p-8 text-center shadow-sm transition-all duration-150 hover:border-zinc-600 hover:shadow-md active:scale-[0.98]"
+            className="group relative flex flex-col items-center justify-center gap-4 rounded-2xl border border-border bg-surface p-8 text-center shadow-sm transition-all duration-150 hover:border-zinc-600 hover:shadow-md active:scale-[0.98]"
           >
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-zinc-50 text-zinc-600 group-hover:bg-zinc-600 group-hover:text-white transition-colors duration-150">
+            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-surface-low text-muted-foreground group-hover:bg-zinc-600 group-hover:text-white transition-colors duration-150">
               <Users className="h-5 w-5" />
             </div>
             <div>
-              <h3 className="text-base font-bold text-zinc-900">I&apos;m a Candidate</h3>
-              <p className="mt-1.5 text-xs text-zinc-500 leading-relaxed">
+              <h3 className="text-base font-bold text-foreground">I&apos;m a Candidate</h3>
+              <p className="mt-1.5 text-xs text-muted-foreground leading-relaxed">
                 I want to submit projects, pass code verification, and get discovered by top teams.
               </p>
             </div>
@@ -88,14 +88,14 @@ export default function RoleSelector() {
           <button
             type="button"
             onClick={() => handleSelectRole("employer")}
-            className="group relative flex flex-col items-center justify-center gap-4 rounded-2xl border border-zinc-200 bg-white p-8 text-center shadow-sm transition-all duration-150 hover:border-zinc-600 hover:shadow-md active:scale-[0.98]"
+            className="group relative flex flex-col items-center justify-center gap-4 rounded-2xl border border-border bg-surface p-8 text-center shadow-sm transition-all duration-150 hover:border-zinc-600 hover:shadow-md active:scale-[0.98]"
           >
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-zinc-100 text-zinc-700 group-hover:bg-zinc-600 group-hover:text-white transition-colors duration-150">
+            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-surface-low text-muted-foreground group-hover:bg-zinc-600 group-hover:text-white transition-colors duration-150">
               <Briefcase className="h-5 w-5" />
             </div>
             <div>
-              <h3 className="text-base font-bold text-zinc-900">I&apos;m Hiring</h3>
-              <p className="mt-1.5 text-xs text-zinc-500 leading-relaxed">
+              <h3 className="text-base font-bold text-foreground">I&apos;m Hiring</h3>
+              <p className="mt-1.5 text-xs text-muted-foreground leading-relaxed">
                 I want to source and evaluate verified engineering talent without pedigree bias.
               </p>
             </div>
