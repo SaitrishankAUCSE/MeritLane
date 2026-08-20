@@ -1,5 +1,14 @@
+import type { ReactNode } from "react";
 import { Metadata } from "next";
+import { Source_Serif_4 } from "next/font/google";
 import { adminDb } from "@/lib/firebase/admin";
+import { derivePublicationTitle } from "@/components/public-record/publication";
+
+const sourceSerif = Source_Serif_4({
+  subsets: ["latin"],
+  variable: "--font-proof-serif",
+  display: "swap",
+});
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -7,24 +16,28 @@ interface Props {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params;
-  
+
   try {
     const candidateDoc = await adminDb!.collection("candidates").doc(id).get();
     const userDoc = await adminDb!.collection("users").doc(id).get();
-    
+
     if (!candidateDoc.exists || candidateDoc.data()?.verificationStatus !== "verified") {
       return {
-        title: "Profile Not Found | Meritlane",
-        description: "This verified engineering profile could not be found or is no longer public.",
+        title: "Record Not Found | Meritlane",
+        description: "This published technical proof could not be found or is no longer public.",
       };
     }
 
     const candidate = candidateDoc.data()!;
     const user = userDoc.data() || {};
-    
     const name = candidate.name || user.displayName || "Verified Engineer";
-    const title = `${name} | Verified Software Engineer | Meritlane`;
-    const description = `View ${name}'s verified engineering track record, project portfolio, and technical assessment scores on Meritlane.`;
+    const assessmentKeys = user.assessmentScores ? Object.keys(user.assessmentScores) : [];
+    const publicationTitle = derivePublicationTitle({
+      assessmentKeys,
+      skills: Array.isArray(candidate.skills) ? candidate.skills : [],
+    });
+    const title = `${publicationTitle} | Meritlane`;
+    const description = `Published technical proof for ${name} on Meritlane.`;
 
     return {
       title,
@@ -36,10 +49,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         siteName: "Meritlane",
         images: [
           {
-            url: "/images/verification-preview.jpg", // Replace with dynamic OG image if available later
+            url: "/images/verification-preview.jpg",
             width: 1200,
             height: 630,
-            alt: `${name} - Verified Engineer on Meritlane`,
+            alt: `${name} — published technical proof on Meritlane`,
           },
         ],
       },
@@ -49,10 +62,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         description,
       },
     };
-  } catch (err) {
+  } catch {
     return {
-      title: "Verified Engineer | Meritlane",
-      description: "View this verified engineering track record on Meritlane.",
+      title: "Published Technical Proof | Meritlane",
+      description: "View this published technical proof on Meritlane.",
     };
   }
 }
@@ -60,7 +73,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default function PublicProfileLayout({
   children,
 }: {
-  children: React.ReactNode;
+  children: ReactNode;
 }) {
-  return <>{children}</>;
+  return <div className={`${sourceSerif.variable} font-[family-name:var(--font-sans)]`}>{children}</div>;
 }
