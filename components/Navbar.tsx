@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import { ShieldCheck, LogOut, Menu, X } from "lucide-react";
+import { ShieldCheck, LogOut, Menu, X, ChevronDown, User, LayoutDashboard, Settings } from "lucide-react";
 import { useAuth } from "@/lib/auth/AuthContext";
 import { useRouter, usePathname } from "next/navigation";
 import { auth } from "@/lib/firebase/config";
@@ -68,16 +68,6 @@ export default function Navbar() {
           >
             Dashboard
           </Link>
-          <Link 
-            href="/candidate/profile" 
-            className={`px-3 py-1.5 rounded-sm text-sm font-medium transition-all duration-150 ${
-              pathname === "/candidate/profile" 
-                ? "text-zinc-900 bg-zinc-100 font-semibold" 
-                : "text-zinc-600 hover:text-zinc-900 hover:bg-zinc-50"
-            }`}
-          >
-            Profile
-          </Link>
         </div>
       );
     }
@@ -130,8 +120,8 @@ export default function Navbar() {
           {/* Desktop Public Nav */}
           {(!user || !isResolvingAuth) && renderPublicLinks()}
 
-          {/* Desktop Dashboard Nav */}
-          <nav className="hidden md:flex items-center">
+          {/* Desktop & Mobile Dashboard Nav */}
+          <nav className="flex items-center">
             {!isResolvingAuth && user && navLinks()}
           </nav>
         </div>
@@ -139,26 +129,16 @@ export default function Navbar() {
         <div className="flex items-center gap-3">
           {isResolvingAuth ? (
             <div className="flex gap-2.5">
-              <div className="h-8 w-20 animate-pulse rounded bg-zinc-100"></div>
-              <div className="h-8 w-24 animate-pulse rounded bg-zinc-100"></div>
+              <div className="h-8 w-8 animate-pulse rounded-full bg-zinc-100"></div>
             </div>
           ) : user ? (
-            <div className="hidden md:flex items-center gap-4">
-              <div className="flex flex-col text-right">
-                <span className="text-sm font-medium text-zinc-900 leading-tight">
-                  {isUserAdmin ? user?.email : (userProfile?.displayName || user?.email?.split('@')[0])}
-                </span>
-                <span className="text-xs font-medium text-zinc-500 capitalize">
-                  {isUserAdmin ? "Superadmin" : userProfile?.role}
-                </span>
-              </div>
-              <button
-                onClick={handleSignOut}
-                className="flex h-8 w-8 items-center justify-center rounded border border-zinc-200 bg-zinc-50 text-zinc-600 transition-all duration-150 hover:border-red-200 hover:bg-red-50 hover:text-red-600 active:scale-95"
-                title="Sign out"
-              >
-                <LogOut className="h-3.5 w-3.5" />
-              </button>
+            <div className="flex items-center gap-4">
+              <ProfileDropdown 
+                user={user} 
+                userProfile={userProfile} 
+                isAdmin={isUserAdmin} 
+                handleSignOut={handleSignOut} 
+              />
             </div>
           ) : (
             <div className="hidden md:flex items-center gap-3">
@@ -175,41 +155,22 @@ export default function Navbar() {
             </div>
           )}
 
-          {/* Mobile Menu Toggle */}
-          <button 
-            className="md:hidden flex items-center justify-center h-9 w-9 rounded text-zinc-600 hover:bg-zinc-100 transition-colors"
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            aria-label="Toggle navigation menu"
-          >
-            {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-          </button>
+          {/* Mobile Menu Toggle (Only for public/logged out users) */}
+          {!user && (
+            <button 
+              className="md:hidden flex items-center justify-center h-9 w-9 rounded text-zinc-600 hover:bg-zinc-100 transition-colors"
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              aria-label="Toggle navigation menu"
+            >
+              {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+            </button>
+          )}
         </div>
       </div>
 
       {/* Mobile Nav */}
       {mobileMenuOpen && (
         <div className="md:hidden border-t border-zinc-200 bg-white px-4 py-5 shadow-lg">
-          {!isResolvingAuth && user && (
-            <div className="space-y-4">
-              <div className="border-b border-zinc-100 pb-3">
-                <p className="text-sm font-semibold text-zinc-900">
-                  {isAdmin ? user?.email : (userProfile?.displayName || user?.email?.split('@')[0])}
-                </p>
-                <p className="text-xs text-zinc-500 capitalize">
-                  {isAdmin ? "Administrator" : userProfile?.role}
-                </p>
-              </div>
-              <nav className="flex flex-col gap-2">
-                {navLinks()}
-                <button 
-                  onClick={handleSignOut} 
-                  className="flex items-center gap-2 pt-2 text-left text-sm font-medium text-red-600 hover:text-red-700"
-                >
-                  <LogOut className="h-4 w-4" /> Sign out
-                </button>
-              </nav>
-            </div>
-          )}
           {!isResolvingAuth && !user && (
             <div className="flex flex-col gap-2.5">
               <Link href="/login">
@@ -226,5 +187,97 @@ export default function Navbar() {
         </div>
       )}
     </header>
+  );
+}
+
+function ProfileDropdown({ user, userProfile, isAdmin, handleSignOut }: { user: any, userProfile: any, isAdmin: boolean, handleSignOut: () => void }) {
+  const [open, setOpen] = useState(false);
+  const router = useRouter();
+  
+  // Close on outside click
+  useEffect(() => {
+    const close = () => setOpen(false);
+    if (open) window.addEventListener('click', close);
+    return () => window.removeEventListener('click', close);
+  }, [open]);
+
+  const displayName = isAdmin ? user?.email : (userProfile?.displayName || user?.email?.split('@')[0]);
+  const displayRole = isAdmin ? "Administrator" : userProfile?.role;
+  const initial = displayName ? displayName.charAt(0).toUpperCase() : "U";
+  const photoUrl = user?.photoURL;
+
+  // Escape key to close
+  useEffect(() => {
+    const handleEsc = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setOpen(false);
+    };
+    if (open) window.addEventListener('keydown', handleEsc);
+    return () => window.removeEventListener('keydown', handleEsc);
+  }, [open]);
+
+  return (
+    <div className="relative inline-block text-left" onClick={(e) => e.stopPropagation()}>
+      <button 
+        onClick={() => setOpen(!open)}
+        className="flex items-center gap-2 rounded-full border border-zinc-200 bg-white p-1 pr-3 text-sm font-medium text-zinc-700 transition-all hover:bg-zinc-50 focus:outline-none focus:ring-2 focus:ring-zinc-900"
+        aria-expanded={open}
+        aria-haspopup="true"
+      >
+        <div className="flex h-7 w-7 overflow-hidden items-center justify-center rounded-full bg-zinc-100 text-xs font-bold text-zinc-600">
+          {photoUrl ? (
+            <img src={photoUrl} alt={displayName} className="h-full w-full object-cover" />
+          ) : (
+            initial
+          )}
+        </div>
+        <span className="max-w-[100px] truncate text-xs font-semibold hidden sm:inline-block">{displayName}</span>
+        <ChevronDown className="h-3.5 w-3.5 text-zinc-400" />
+      </button>
+
+      {open && (
+        <div className="absolute right-0 mt-2 w-56 origin-top-right rounded-lg border border-zinc-200 bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none z-50">
+          <div className="border-b border-zinc-100 px-4 py-3">
+            <p className="truncate text-sm font-semibold text-zinc-900">{displayName}</p>
+            <p className="truncate text-xs font-medium text-zinc-500 capitalize">{displayRole}</p>
+          </div>
+          
+          <div className="py-1">
+            {userProfile?.role === "candidate" && (
+              <Link href="/candidate/profile" className="flex w-full items-center px-4 py-2 text-sm text-zinc-700 hover:bg-zinc-50 hover:text-zinc-900" onClick={() => setOpen(false)}>
+                <User className="mr-2 h-4 w-4" />
+                Profile
+              </Link>
+            )}
+            
+            <Link 
+              href={isAdmin ? "/admin" : (userProfile?.role === "employer" ? "/employer/dashboard" : "/candidate/dashboard")} 
+              className="flex w-full items-center px-4 py-2 text-sm text-zinc-700 hover:bg-zinc-50 hover:text-zinc-900" 
+              onClick={() => setOpen(false)}
+            >
+              <LayoutDashboard className="mr-2 h-4 w-4" />
+              Dashboard
+            </Link>
+            
+            <Link href="/settings" className="flex w-full items-center px-4 py-2 text-sm text-zinc-700 hover:bg-zinc-50 hover:text-zinc-900" onClick={() => setOpen(false)}>
+              <Settings className="mr-2 h-4 w-4" />
+              Settings
+            </Link>
+          </div>
+          
+          <div className="border-t border-zinc-100 py-1">
+            <button 
+              onClick={() => {
+                setOpen(false);
+                handleSignOut();
+              }} 
+              className="flex w-full items-center px-4 py-2 text-sm text-red-600 hover:bg-red-50"
+            >
+              <LogOut className="mr-2 h-4 w-4" />
+              Sign out
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
   );
 }
