@@ -57,7 +57,8 @@ export default function AssessmentPage() {
         const data = await res.json();
 
         if (res.status === 400 && data.error === "Already verified") {
-          router.push("/candidate/dashboard");
+          setErrorMsg("You are already verified. No further assessment required.");
+          setInitializing(false);
           return;
         }
 

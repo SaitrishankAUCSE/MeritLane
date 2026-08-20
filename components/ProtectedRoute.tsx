@@ -58,8 +58,9 @@ export default function ProtectedRoute({ children, allowedRoles }: ProtectedRout
       }
 
       // Role-based authorization for candidate/employer routes
-      if (allowedRoles && !allowedRoles.includes(userProfile.role)) {
-        router.push(userProfile.role === "candidate" ? "/candidate/dashboard" : "/employer/dashboard");
+      const normalizedRole = userProfile.role?.trim().toLowerCase() as Role;
+      if (allowedRoles && !allowedRoles.includes(normalizedRole)) {
+        router.push(normalizedRole === "candidate" ? "/candidate/dashboard" : "/employer/dashboard");
         return;
       }
 
