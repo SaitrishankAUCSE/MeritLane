@@ -26,7 +26,7 @@ export default function SignupPage() {
   // Redirect authenticated users with valid profiles away from signup
   useEffect(() => {
     if (!authLoading && !profileLoading && user && userRole) {
-      router.push(userRole === "candidate" ? "/candidate/profile" : "/employer/dashboard");
+      router.push("/dashboard");
     }
   }, [user, userRole, authLoading, profileLoading, router]);
 

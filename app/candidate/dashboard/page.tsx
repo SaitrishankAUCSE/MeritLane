@@ -3,7 +3,22 @@
 import React, { useEffect, useState } from "react";
 import { useAuth } from "@/lib/auth/AuthContext";
 import { useRouter } from "next/navigation";
-import { Loader2, CheckCircle2, AlertTriangle, ArrowRight, ExternalLink, Link as LinkIcon, ShieldCheck, Clock, Check, ChevronRight } from "lucide-react";
+import { 
+  CheckCircle2, 
+  AlertTriangle, 
+  ExternalLink, 
+  Link as LinkIcon, 
+  ShieldCheck, 
+  Clock, 
+  Check, 
+  User, 
+  FileText, 
+  Code2, 
+  GraduationCap, 
+  Briefcase, 
+  ArrowRight,
+  Sparkles
+} from "lucide-react";
 import { fetchCandidateProfile, CandidateProfile } from "@/lib/firebase/candidate";
 import { Card, CardHeader, CardContent } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
@@ -49,11 +64,15 @@ export default function CandidateDashboardPage() {
 
   if (loading || dataLoading) {
     return (
-      <div className="min-h-[calc(100vh-64px)] bg-transparent pb-24 pt-12 relative overflow-hidden">
-        <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 space-y-8 animate-pulse">
+      <div className="min-h-[calc(100vh-64px)] pb-24 pt-8">
+        <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 space-y-6 animate-pulse">
           <div className="h-8 w-64 bg-zinc-200 rounded"></div>
-          <div className="h-40 w-full bg-zinc-200 rounded"></div>
-          <div className="h-40 w-full bg-zinc-200 rounded"></div>
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            {[1, 2, 3, 4].map(i => (
+              <div key={i} className="h-24 bg-zinc-200 rounded-lg"></div>
+            ))}
+          </div>
+          <div className="h-64 w-full bg-zinc-200 rounded-lg"></div>
         </div>
       </div>
     );
@@ -61,6 +80,7 @@ export default function CandidateDashboardPage() {
 
   const status = profile?.verificationStatus || "draft";
   const name = profile?.name || user?.displayName?.split(' ')[0] || "Engineer";
+  const initial = name ? name.charAt(0).toUpperCase() : "U";
   
   // Calculate completion
   const hasBasicInfo = !!(profile?.name && profile?.college);
@@ -78,148 +98,246 @@ export default function CandidateDashboardPage() {
   const assessmentCount = userProfile?.assessmentScores ? Object.keys(userProfile.assessmentScores).length : 0;
 
   return (
-    <div className="min-h-[calc(100vh-64px)] bg-transparent pb-24 pt-12 relative overflow-hidden">
-      <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 space-y-12">
+    <div className="min-h-[calc(100vh-64px)] pb-24 pt-8">
+      <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 space-y-6">
         
-        {/* TOP AREA */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+        {/* Top Header / Greeting Bar */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-zinc-200 pb-5">
           <div>
-            <p className="text-sm font-medium text-zinc-500 mb-2">Your Meritlane verification profile</p>
-            <h1 className="text-3xl md:text-4xl font-bold text-zinc-900 tracking-tight">Good morning, {name}</h1>
+            <div className="flex items-center gap-2.5">
+              <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-zinc-900">
+                Good morning, {name}
+              </h1>
+              {status === "verified" ? (
+                <Badge variant="verified">Verified</Badge>
+              ) : status === "pending" ? (
+                <Badge variant="pending">Under Review</Badge>
+              ) : status === "changes_required" ? (
+                <Badge variant="changes_required">Changes Required</Badge>
+              ) : (
+                <Badge variant="neutral">Incomplete</Badge>
+              )}
+            </div>
+            <p className="mt-1 text-xs sm:text-sm text-zinc-500">
+              Personal engineering command center &amp; verified talent identity
+            </p>
           </div>
-          
-          <div className="flex flex-col items-start md:items-end gap-1">
-            <span className="text-sm font-medium text-zinc-600">Profile completion</span>
-            <div className="flex items-center gap-3">
-              <div className="w-32 md:w-48 h-1.5 bg-zinc-200 rounded-full overflow-hidden">
+
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 text-xs text-zinc-500 bg-white border border-zinc-200 px-3 py-1.5 rounded-md">
+              <span>Profile setup:</span>
+              <div className="w-16 h-1.5 bg-zinc-100 rounded-full overflow-hidden">
                 <div 
-                  className="h-full bg-zinc-900 rounded-full transition-all duration-1000 ease-out" 
+                  className="h-full bg-zinc-900 transition-all duration-500" 
                   style={{ width: `${completionScore}%` }}
                 />
               </div>
-              <span className="text-sm font-bold text-zinc-900">{completionScore}%</span>
+              <span className="font-semibold text-zinc-900">{completionScore}%</span>
             </div>
+
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => router.push("/candidate/profile")}
+            >
+              Edit Profile
+            </Button>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          
-          {/* LEFT COLUMN - Main Content */}
-          <div className="lg:col-span-2 space-y-8">
-            
-            {/* VERIFICATION STATUS */}
-            <section className="bg-white rounded-xl border border-zinc-200 p-6 sm:p-8 shadow-sm relative overflow-hidden">
-              <div className="absolute -top-4 -right-4 p-8 opacity-5 pointer-events-none">
-                <ShieldCheck className="w-40 h-40" />
+        {/* Overview Stats Tiles — Cutshort 4-tile pattern */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3.5">
+          <Card>
+            <CardContent className="p-4 sm:p-5">
+              <span className="block text-[11px] font-semibold text-zinc-400 uppercase tracking-wider">
+                Technical Skills
+              </span>
+              <div className="mt-1 flex items-baseline justify-between">
+                <span className="text-2xl font-bold text-zinc-900">{profile?.skills?.length || 0}</span>
+                <span className="text-xs text-zinc-500">declared</span>
               </div>
-              
-              <div className="relative z-10">
-                <div className="flex items-center gap-3 mb-6">
-                  {status === "verified" ? (
-                    <div className="h-10 w-10 rounded-full bg-emerald-50 flex items-center justify-center text-emerald-600 border border-emerald-100">
-                      <ShieldCheck className="h-5 w-5" />
-                    </div>
-                  ) : status === "changes_required" || status === "rejected" ? (
-                    <div className="h-10 w-10 rounded-full bg-amber-50 flex items-center justify-center text-amber-600 border border-amber-100">
-                      <AlertTriangle className="h-5 w-5" />
-                    </div>
-                  ) : (
-                    <div className="h-10 w-10 rounded-full bg-zinc-100 flex items-center justify-center text-zinc-500 border border-zinc-200">
-                      <Clock className="h-5 w-5" />
-                    </div>
-                  )}
-                  <div>
-                    <h2 className="text-xl font-bold text-zinc-900">
-                      {status === "verified" ? "Verified" :
-                       status === "pending" ? "Verification Pending" :
-                       status === "changes_required" ? "Changes Required" :
-                       status === "rejected" ? "Verification Failed" :
-                       "Incomplete Profile"}
-                    </h2>
-                  </div>
-                </div>
+            </CardContent>
+          </Card>
 
-                <div className="mb-8 max-w-xl">
-                  <p className="text-base text-zinc-600 leading-relaxed">
-                    {status === "verified" ? "Your engineering background has been verified by Meritlane. You are now visible to top employers in our network." :
-                     status === "pending" ? "Your profile is under review. Please ensure you have completed all required skill assessments to expedite the process." :
-                     status === "changes_required" ? "Your verification is paused. Please address the feedback provided below to continue your review." :
-                     status === "rejected" ? "Your profile did not meet our verification standards at this time." :
-                     "Complete your profile and technical assessments to begin the verification process and gain access to employers."}
-                  </p>
-                  
-                  {status === "changes_required" && profile?.verificationReason && (
-                    <div className="mt-4 p-4 rounded-lg bg-amber-50 border border-amber-100">
-                      <p className="text-sm font-semibold text-amber-900 mb-1">Feedback from Reviewer:</p>
-                      <p className="text-sm text-amber-800">{profile.verificationReason}</p>
-                    </div>
-                  )}
-                </div>
+          <Card>
+            <CardContent className="p-4 sm:p-5">
+              <span className="block text-[11px] font-semibold text-zinc-400 uppercase tracking-wider">
+                Project Repos
+              </span>
+              <div className="mt-1 flex items-baseline justify-between">
+                <span className="text-2xl font-bold text-zinc-900">{profile?.projects?.length || 0}</span>
+                <span className="text-xs text-zinc-500">codebases</span>
+              </div>
+            </CardContent>
+          </Card>
 
-                {/* Status Signals */}
-                {status === "verified" && (
-                  <div className="flex flex-wrap gap-x-6 gap-y-3 mb-2">
-                    <div className="flex items-center gap-2 text-sm font-medium text-emerald-700">
-                      <CheckCircle2 className="h-4 w-4" /> Profile reviewed
-                    </div>
-                    {assessmentCount > 0 && (
-                      <div className="flex items-center gap-2 text-sm font-medium text-emerald-700">
-                        <CheckCircle2 className="h-4 w-4" /> Assessment completed
-                      </div>
-                    )}
-                    {hasProjects && (
-                      <div className="flex items-center gap-2 text-sm font-medium text-emerald-700">
-                        <CheckCircle2 className="h-4 w-4" /> Project evidence reviewed
-                      </div>
-                    )}
-                  </div>
-                )}
+          <Card>
+            <CardContent className="p-4 sm:p-5">
+              <span className="block text-[11px] font-semibold text-zinc-400 uppercase tracking-wider">
+                Assessments
+              </span>
+              <div className="mt-1 flex items-baseline justify-between">
+                <span className="text-2xl font-bold text-zinc-900">{assessmentCount}</span>
+                <span className="text-xs text-zinc-500">passed</span>
               </div>
-            </section>
+            </CardContent>
+          </Card>
 
-            {/* OVERVIEW METRICS */}
-            <section className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-              <div className="bg-white border border-zinc-200 rounded-lg p-5 shadow-sm">
-                <span className="block text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-2">Skills</span>
-                <span className="block text-2xl font-bold text-zinc-900">{profile?.skills?.length || 0}</span>
-              </div>
-              <div className="bg-white border border-zinc-200 rounded-lg p-5 shadow-sm">
-                <span className="block text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-2">Projects</span>
-                <span className="block text-2xl font-bold text-zinc-900">{profile?.projects?.length || 0}</span>
-              </div>
-              <div className="bg-white border border-zinc-200 rounded-lg p-5 shadow-sm">
-                <span className="block text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-2">Assessments</span>
-                <span className="block text-2xl font-bold text-zinc-900">{assessmentCount}</span>
-              </div>
-              <div className="bg-white border border-zinc-200 rounded-lg p-5 shadow-sm">
-                <span className="block text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-2">Verification</span>
-                <span className={`block text-lg font-bold mt-1.5 ${status === 'verified' ? 'text-emerald-600' : 'text-zinc-900'} capitalize`}>
+          <Card>
+            <CardContent className="p-4 sm:p-5">
+              <span className="block text-[11px] font-semibold text-zinc-400 uppercase tracking-wider">
+                Verification State
+              </span>
+              <div className="mt-1 flex items-baseline justify-between">
+                <span className={`text-base font-bold capitalize ${status === 'verified' ? 'text-emerald-700' : 'text-zinc-900'}`}>
                   {status.replace('_', ' ')}
                 </span>
+                {status === "verified" && <ShieldCheck className="h-4 w-4 text-emerald-600" />}
               </div>
-            </section>
+            </CardContent>
+          </Card>
+        </div>
 
-            {/* NEXT ACTIONS */}
-            <section>
-              <h3 className="text-sm font-bold text-zinc-900 uppercase tracking-wide mb-4">Next Steps</h3>
-              <div className="space-y-3">
-                {!isProfileComplete && (
-                  <div className="flex items-center justify-between p-4 bg-white border border-zinc-200 rounded-lg shadow-sm hover:border-zinc-300 transition-colors">
+        {/* Main Grid: Talent Card + Next Steps (Left) | Record & History (Right) */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          
+          {/* Left Column (2 Cols) */}
+          <div className="lg:col-span-2 space-y-6">
+            
+            {/* Cutshort-inspired Talent Card */}
+            <Card>
+              <div className="border-b border-zinc-100 px-5 py-3.5 flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <h2 className="text-sm font-bold text-zinc-900 tracking-tight">Your Talent Card</h2>
+                  <span className="text-xs text-zinc-400 hidden sm:inline">• Visible to verified employer network</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="outline"
+                    size="xs"
+                    onClick={() => router.push("/candidate/profile")}
+                  >
+                    Edit Card
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="xs"
+                    onClick={() => user?.uid && router.push(`/p/${user.uid}`)}
+                    leftIcon={<ExternalLink className="h-3 w-3" />}
+                  >
+                    Public View
+                  </Button>
+                </div>
+              </div>
+
+              <CardContent className="p-5 sm:p-6">
+                <div className="flex flex-col sm:flex-row sm:items-start gap-4">
+                  {/* Avatar */}
+                  <div className="h-14 w-14 rounded-full bg-zinc-100 border border-zinc-200 flex items-center justify-center text-lg font-bold text-zinc-600 shrink-0 overflow-hidden">
+                    {user?.photoURL ? (
+                      <img src={user.photoURL} alt={name} className="h-full w-full object-cover" />
+                    ) : (
+                      initial
+                    )}
+                  </div>
+
+                  {/* Details */}
+                  <div className="space-y-3 flex-1">
                     <div>
-                      <h4 className="text-sm font-semibold text-zinc-900">Complete your profile</h4>
-                      <p className="text-xs text-zinc-500 mt-1">Add education, skills, and projects to proceed.</p>
+                      <div className="flex items-center gap-2">
+                        <h3 className="text-base font-bold text-zinc-900">{profile?.name || name}</h3>
+                        {status === "verified" && (
+                          <Badge variant="verified" size="sm">Verified</Badge>
+                        )}
+                      </div>
+                      <p className="text-xs text-zinc-500 mt-0.5">
+                        {profile?.branch || "Software Engineering"} • Class of {profile?.gradYear || "2026"}
+                      </p>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-zinc-600">
+                      <div className="flex items-center gap-2">
+                        <GraduationCap className="h-3.5 w-3.5 text-zinc-400 shrink-0" />
+                        <span className="truncate">{profile?.college || "University not specified"}</span>
+                      </div>
+                      {profile?.githubUrl && (
+                        <div className="flex items-center gap-2">
+                          <Code2 className="h-3.5 w-3.5 text-zinc-400 shrink-0" />
+                          <a href={profile.githubUrl} target="_blank" rel="noreferrer" className="text-zinc-700 hover:text-zinc-900 hover:underline truncate">
+                            GitHub Profile
+                          </a>
+                        </div>
+                      )}
+                      {profile?.resumeUrl && (
+                        <div className="flex items-center gap-2">
+                          <FileText className="h-3.5 w-3.5 text-zinc-400 shrink-0" />
+                          <a href={profile.resumeUrl} target="_blank" rel="noreferrer" className="text-zinc-700 hover:text-zinc-900 hover:underline truncate">
+                            Resume Attached
+                          </a>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Skill Tags */}
+                    {profile?.skills && profile.skills.length > 0 && (
+                      <div className="pt-2">
+                        <div className="flex flex-wrap gap-1.5">
+                          {profile.skills.map((skill) => (
+                            <span key={skill} className="px-2 py-0.5 bg-zinc-100 text-zinc-700 rounded text-xs font-medium">
+                              {skill}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Verification Status & Action Feedback */}
+            {status === "changes_required" && profile?.verificationReason && (
+              <div className="p-4 rounded-lg bg-amber-50 border border-amber-200 flex items-start gap-3">
+                <AlertTriangle className="h-5 w-5 text-amber-600 shrink-0 mt-0.5" />
+                <div className="space-y-1 text-xs">
+                  <p className="font-bold text-amber-900">Changes requested by Meritlane Reviewer:</p>
+                  <p className="text-amber-800 leading-relaxed">{profile.verificationReason}</p>
+                  <div className="pt-2">
+                    <Button
+                      variant="primary"
+                      size="xs"
+                      onClick={() => router.push("/candidate/profile")}
+                    >
+                      Update Profile Now
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Recommended Next Actions — Cutshort compact list style */}
+            <Card>
+              <CardHeader className="py-3.5">
+                <h3 className="text-sm font-bold text-zinc-900 tracking-tight">Recommended Actions</h3>
+              </CardHeader>
+              <CardContent className="p-0 divide-y divide-zinc-100">
+                {!isProfileComplete && (
+                  <div className="flex items-center justify-between p-4 hover:bg-zinc-50/50 transition-colors">
+                    <div className="space-y-0.5">
+                      <h4 className="text-sm font-semibold text-zinc-900">Complete your verification profile</h4>
+                      <p className="text-xs text-zinc-500">Add university details, skills, and project repositories to unlock verification.</p>
                     </div>
                     <Button variant="outline" size="sm" onClick={() => router.push("/candidate/profile")}>
-                      Edit Profile
+                      Complete Setup
                     </Button>
                   </div>
                 )}
                 
-                {isProfileComplete && status !== "verified" && assessmentCount === 0 && (
-                  <div className="flex items-center justify-between p-4 bg-white border border-zinc-200 rounded-lg shadow-sm hover:border-zinc-300 transition-colors">
-                    <div>
-                      <h4 className="text-sm font-semibold text-zinc-900">Complete an assessment</h4>
-                      <p className="text-xs text-zinc-500 mt-1">Prove your skills to earn verification.</p>
+                {status !== "verified" && assessmentCount === 0 && (
+                  <div className="flex items-center justify-between p-4 hover:bg-zinc-50/50 transition-colors">
+                    <div className="space-y-0.5">
+                      <h4 className="text-sm font-semibold text-zinc-900">Take a technical skill assessment</h4>
+                      <p className="text-xs text-zinc-500">Demonstrate practical coding proficiency to earn instant skill signals.</p>
                     </div>
                     <Button variant="primary" size="sm" onClick={() => router.push("/candidate/assessment")}>
                       Start Assessment
@@ -227,123 +345,128 @@ export default function CandidateDashboardPage() {
                   </div>
                 )}
 
-                {/* Example placeholder action */}
-                <div className="flex items-center justify-between p-4 bg-white border border-zinc-200 rounded-lg shadow-sm hover:border-zinc-300 transition-colors">
-                  <div>
-                    <h4 className="text-sm font-semibold text-zinc-900">Add a professional summary</h4>
-                    <p className="text-xs text-zinc-500 mt-1">Tell employers what you specialize in.</p>
-                  </div>
-                  <Button variant="outline" size="sm" onClick={() => router.push("/candidate/profile")}>
-                    Add Summary
-                  </Button>
-                </div>
-
-                {isProfileComplete && (status === "verified" || assessmentCount > 0) && (
-                  <div className="p-6 bg-white border border-zinc-200 rounded-lg shadow-sm text-center">
-                    <CheckCircle2 className="h-8 w-8 text-zinc-300 mx-auto mb-3" />
-                    <h4 className="text-base font-semibold text-zinc-900">You're all set.</h4>
-                    <p className="text-sm text-zinc-500 mt-1 max-w-md mx-auto">Your profile is ready to be discovered.</p>
+                {hasProjects && (
+                  <div className="flex items-center justify-between p-4 hover:bg-zinc-50/50 transition-colors">
+                    <div className="space-y-0.5">
+                      <h4 className="text-sm font-semibold text-zinc-900">Review project repositories</h4>
+                      <p className="text-xs text-zinc-500">Ensure all linked GitHub repositories are public and contain architectural READMEs.</p>
+                    </div>
+                    <Button variant="outline" size="sm" onClick={() => router.push("/candidate/profile")}>
+                      View Repos
+                    </Button>
                   </div>
                 )}
-              </div>
-            </section>
+
+                {status === "verified" && (
+                  <div className="flex items-center justify-between p-4 bg-emerald-50/30">
+                    <div className="flex items-center gap-2.5">
+                      <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0" />
+                      <div>
+                        <h4 className="text-sm font-semibold text-zinc-900">Your profile is verified and active</h4>
+                        <p className="text-xs text-zinc-500">Employers in the Meritlane network can discover your verified portfolio.</p>
+                      </div>
+                    </div>
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      onClick={() => user?.uid && router.push(`/p/${user.uid}`)}
+                      leftIcon={<ExternalLink className="h-3.5 w-3.5" />}
+                    >
+                      Share Record
+                    </Button>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
 
           </div>
 
-          {/* RIGHT COLUMN - Sidebar Content */}
-          <div className="space-y-8">
+          {/* Right Column: Record Preview & Timeline */}
+          <div className="space-y-6">
             
-            {/* PUBLIC RECORD PREVIEW */}
-            <section className="bg-zinc-900 rounded-xl p-6 text-white shadow-md relative overflow-hidden">
-              <div className="absolute -right-10 -top-10 w-40 h-40 bg-zinc-800 rounded-full blur-3xl opacity-50"></div>
-              
-              <h3 className="text-sm font-bold text-zinc-400 uppercase tracking-wide mb-4">Your Meritlane Record</h3>
-              
-              <div className="space-y-4 mb-6 relative z-10">
-                <div className="flex items-center justify-between border-b border-zinc-800 pb-2">
-                  <span className="text-sm text-zinc-300">Status</span>
-                  <span className={`text-sm font-semibold ${status === 'verified' ? 'text-emerald-400' : 'text-zinc-100'} capitalize`}>
-                    {status.replace('_', ' ')}
-                  </span>
+            {/* Public Record Share Card */}
+            <Card>
+              <CardHeader className="py-3.5">
+                <h3 className="text-sm font-bold text-zinc-900 tracking-tight">Public Record Link</h3>
+              </CardHeader>
+              <CardContent className="p-4 space-y-3">
+                <p className="text-xs text-zinc-500 leading-relaxed">
+                  Your immutable verification record can be shared with recruiters or added to your LinkedIn/resume.
+                </p>
+                <div className="flex flex-col gap-2 pt-1">
+                  <Button 
+                    variant="primary" 
+                    size="sm"
+                    className="w-full justify-center"
+                    onClick={() => user?.uid && router.push(`/p/${user.uid}`)}
+                    leftIcon={<ExternalLink className="h-3.5 w-3.5" />}
+                  >
+                    View Public Record
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    className="w-full justify-center"
+                    onClick={copyPublicLink}
+                    leftIcon={copied ? <Check className="h-3.5 w-3.5 text-emerald-600" /> : <LinkIcon className="h-3.5 w-3.5" />}
+                  >
+                    {copied ? "Link Copied to Clipboard" : "Copy Share Link"}
+                  </Button>
                 </div>
-                <div className="flex items-center justify-between border-b border-zinc-800 pb-2">
-                  <span className="text-sm text-zinc-300">Verified Skills</span>
-                  <span className="text-sm font-semibold">{assessmentCount}</span>
+              </CardContent>
+            </Card>
+
+            {/* Verification Timeline */}
+            <Card>
+              <CardHeader className="py-3.5">
+                <h3 className="text-sm font-bold text-zinc-900 tracking-tight">Verification History</h3>
+              </CardHeader>
+              <CardContent className="p-4">
+                <div className="relative border-l border-zinc-200 ml-2.5 space-y-5">
+                  {status === "verified" && (
+                    <div className="relative pl-5">
+                      <span className="absolute -left-1 top-1 h-2.5 w-2.5 rounded-full bg-emerald-600"></span>
+                      <h4 className="text-xs font-bold text-zinc-900">Verification Passed</h4>
+                      <p className="text-[11px] text-zinc-500 mt-0.5">Profile approved by Meritlane auditors</p>
+                    </div>
+                  )}
+
+                  {assessmentCount > 0 && (
+                    <div className="relative pl-5">
+                      <span className="absolute -left-1 top-1 h-2.5 w-2.5 rounded-full bg-zinc-900"></span>
+                      <h4 className="text-xs font-bold text-zinc-900">Assessment Completed</h4>
+                      <p className="text-[11px] text-zinc-500 mt-0.5">Technical assessment scores recorded</p>
+                    </div>
+                  )}
+
+                  {hasProjects && (
+                    <div className="relative pl-5">
+                      <span className="absolute -left-1 top-1 h-2.5 w-2.5 rounded-full bg-zinc-900"></span>
+                      <h4 className="text-xs font-bold text-zinc-900">Projects Attached</h4>
+                      <p className="text-[11px] text-zinc-500 mt-0.5">{profile?.projects?.length} codebases submitted</p>
+                    </div>
+                  )}
+
+                  {status !== "draft" && (
+                    <div className="relative pl-5">
+                      <span className="absolute -left-1 top-1 h-2.5 w-2.5 rounded-full bg-zinc-900"></span>
+                      <h4 className="text-xs font-bold text-zinc-900">Review Requested</h4>
+                      <p className="text-[11px] text-zinc-500 mt-0.5">Submitted for verification queue</p>
+                    </div>
+                  )}
+
+                  <div className="relative pl-5">
+                    <span className="absolute -left-1 top-1 h-2.5 w-2.5 rounded-full bg-zinc-300"></span>
+                    <h4 className="text-xs font-bold text-zinc-900">Profile Created</h4>
+                    <p className="text-[11px] text-zinc-500 mt-0.5">Joined Meritlane</p>
+                  </div>
                 </div>
-                <div className="flex items-center justify-between pb-2">
-                  <span className="text-sm text-zinc-300">Evidence</span>
-                  <span className="text-sm font-semibold">{profile?.projects?.length || 0} Projects</span>
-                </div>
-              </div>
-
-              <div className="flex flex-col gap-2 relative z-10">
-                <Button 
-                  variant="outline" 
-                  className="w-full justify-center bg-white/10 border-white/20 text-white hover:bg-white/20 hover:text-white"
-                  onClick={() => user?.uid && router.push(`/p/${user.uid}`)}
-                >
-                  <ExternalLink className="mr-2 w-4 h-4" />
-                  View Public Record
-                </Button>
-                <Button 
-                  variant="outline" 
-                  className="w-full justify-center bg-transparent border-transparent text-zinc-400 hover:text-white hover:bg-white/5"
-                  onClick={copyPublicLink}
-                >
-                  {copied ? <Check className="mr-2 w-4 h-4 text-emerald-400" /> : <LinkIcon className="mr-2 w-4 h-4" />}
-                  {copied ? "Link Copied" : "Copy Record Link"}
-                </Button>
-              </div>
-            </section>
-
-            {/* VERIFICATION TIMELINE */}
-            <section className="bg-white rounded-xl border border-zinc-200 p-6 shadow-sm">
-              <h3 className="text-sm font-bold text-zinc-900 uppercase tracking-wide mb-6">Verification History</h3>
-              
-              <div className="relative border-l border-zinc-200 ml-3 space-y-6">
-                
-                {status === "verified" && (
-                  <div className="relative pl-6">
-                    <span className="absolute -left-1.5 top-1 h-3 w-3 rounded-full bg-emerald-500 ring-4 ring-white"></span>
-                    <h4 className="text-sm font-bold text-zinc-900">Verification Completed</h4>
-                    <p className="text-xs text-zinc-500 mt-1">Profile visible to employers</p>
-                  </div>
-                )}
-
-                {assessmentCount > 0 && (
-                  <div className="relative pl-6">
-                    <span className="absolute -left-1.5 top-1 h-3 w-3 rounded-full bg-zinc-900 ring-4 ring-white"></span>
-                    <h4 className="text-sm font-bold text-zinc-900">Assessment Completed</h4>
-                    <p className="text-xs text-zinc-500 mt-1">Technical skills verified</p>
-                  </div>
-                )}
-
-                {hasProjects && (
-                  <div className="relative pl-6">
-                    <span className="absolute -left-1.5 top-1 h-3 w-3 rounded-full bg-zinc-900 ring-4 ring-white"></span>
-                    <h4 className="text-sm font-bold text-zinc-900">Project Evidence Submitted</h4>
-                    <p className="text-xs text-zinc-500 mt-1">Project repositories linked</p>
-                  </div>
-                )}
-
-                {status !== "draft" && (
-                  <div className="relative pl-6">
-                    <span className="absolute -left-1.5 top-1 h-3 w-3 rounded-full bg-zinc-900 ring-4 ring-white"></span>
-                    <h4 className="text-sm font-bold text-zinc-900">Profile Submitted</h4>
-                    <p className="text-xs text-zinc-500 mt-1">Basic verification requested</p>
-                  </div>
-                )}
-
-                <div className="relative pl-6">
-                  <span className="absolute -left-1.5 top-1 h-3 w-3 rounded-full bg-zinc-400 ring-4 ring-white"></span>
-                  <h4 className="text-sm font-bold text-zinc-900">Profile Created</h4>
-                  <p className="text-xs text-zinc-500 mt-1">Joined Meritlane</p>
-                </div>
-              </div>
-            </section>
+              </CardContent>
+            </Card>
 
           </div>
         </div>
+
       </div>
     </div>
   );

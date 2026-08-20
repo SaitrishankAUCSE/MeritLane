@@ -37,25 +37,8 @@ export default function LoginPage() {
   // Redirect authenticated users with valid profiles
   useEffect(() => {
     if (!authLoading && !profileLoading && user && userRole) {
-      if (userRole === "admin") {
-        router.push("/admin");
-      } else if (userRole === "employer") {
-        updateLastLogin(user.uid).catch(console.error);
-        router.push("/employer/dashboard");
-      } else if (userRole === "candidate") {
-        updateLastLogin(user.uid).catch(console.error);
-        
-        fetchCandidateProfile(user.uid).then((profile) => {
-          if (profile && (profile.name || (profile.skills && profile.skills.length > 0))) {
-            router.push("/candidate/dashboard");
-          } else {
-            router.push("/candidate/profile");
-          }
-        }).catch((err) => {
-          console.error("Error fetching candidate profile for routing:", err);
-          router.push("/candidate/profile"); // Fallback
-        });
-      }
+      updateLastLogin(user.uid).catch(console.error);
+      router.push("/dashboard");
     }
   }, [user, userRole, authLoading, profileLoading, router]);
 

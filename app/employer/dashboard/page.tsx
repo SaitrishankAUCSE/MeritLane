@@ -257,37 +257,35 @@ export default function EmployerDashboardPage() {
 
         {/* Talent Workspace Navigation */}
         {roles.length > 0 && activeTab !== "post-role" && (
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-zinc-200 pb-4">
-            <div className="flex items-center gap-2">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-zinc-200 mb-6 mt-2">
+            <div className="flex items-center gap-6">
               <button
                 type="button"
                 onClick={() => setActiveTab("discover")}
-                className={`flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-lg transition-all ${
+                className={`flex items-center gap-2 pb-3 text-sm font-medium transition-all border-b-2 ${
                   activeTab === "discover"
-                    ? "bg-zinc-900 text-white shadow-sm"
-                    : "bg-white text-zinc-600 border border-zinc-200 hover:bg-zinc-50 hover:text-zinc-900"
+                    ? "border-zinc-900 text-zinc-900"
+                    : "border-transparent text-zinc-500 hover:text-zinc-700 hover:border-zinc-300"
                 }`}
               >
-                <Users className="h-4 w-4" />
-                <span>Discover</span>
+                Discover
               </button>
               <button
                 type="button"
                 onClick={() => setActiveTab("shortlisted")}
-                className={`flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-lg transition-all ${
+                className={`flex items-center gap-2 pb-3 text-sm font-medium transition-all border-b-2 ${
                   activeTab === "shortlisted"
-                    ? "bg-zinc-900 text-white shadow-sm"
-                    : "bg-white text-zinc-600 border border-zinc-200 hover:bg-zinc-50 hover:text-zinc-900"
+                    ? "border-zinc-900 text-zinc-900"
+                    : "border-transparent text-zinc-500 hover:text-zinc-700 hover:border-zinc-300"
                 }`}
               >
-                <Bookmark className={`h-4 w-4 ${activeTab === "shortlisted" ? "fill-current" : ""}`} />
-                <span>Shortlisted</span>
+                Shortlisted
                 {shortlistedUids.length > 0 && (
                   <span
                     className={`ml-1 text-xs px-2 py-0.5 rounded-full font-bold transition-colors ${
                       activeTab === "shortlisted"
-                        ? "bg-zinc-800 text-zinc-200"
-                        : "bg-zinc-100 text-zinc-700"
+                        ? "bg-zinc-100 text-zinc-900"
+                        : "bg-zinc-100 text-zinc-500"
                     }`}
                   >
                     {shortlistedUids.length}
@@ -297,9 +295,9 @@ export default function EmployerDashboardPage() {
             </div>
 
             {activeTab === "discover" && selectedRole && (
-              <div className="hidden sm:flex items-center gap-2 text-xs font-medium text-zinc-500">
+              <div className="hidden sm:flex items-center gap-2 text-xs font-medium text-zinc-500 pb-3">
                 <span>Active Role:</span>
-                <span className="font-semibold text-zinc-900 bg-white border border-zinc-200 px-2.5 py-1 rounded-md shadow-2xs">
+                <span className="font-semibold text-zinc-900">
                   {selectedRole.title}
                 </span>
               </div>

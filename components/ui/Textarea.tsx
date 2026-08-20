@@ -21,7 +21,7 @@ export function Textarea({
   return (
     <div className="flex flex-col gap-1.5 w-full text-left">
       {label && (
-        <label htmlFor={textareaId} className="text-sm font-semibold text-zinc-900">
+        <label htmlFor={textareaId} className="text-sm font-medium text-zinc-800">
           {label}
         </label>
       )}
@@ -29,7 +29,7 @@ export function Textarea({
         <textarea
           id={textareaId}
           disabled={disabled}
-          className={`w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 placeholder:text-zinc-400 transition-all hover:border-zinc-400 focus:border-zinc-900 focus:outline-none focus:ring-1 focus:ring-zinc-900 disabled:opacity-50 disabled:bg-zinc-50 ${
+          className={`w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 placeholder:text-zinc-400 transition-colors focus:border-zinc-900 focus:outline-none focus:ring-1 focus:ring-zinc-900 disabled:opacity-50 disabled:bg-zinc-50 ${
             error
               ? "border-red-500 hover:border-red-600 focus:border-red-500 focus:ring-red-500 text-red-900"
               : ""

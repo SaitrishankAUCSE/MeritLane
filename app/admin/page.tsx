@@ -611,25 +611,25 @@ export default function AdminDashboardPage() {
           </Card>
         </div>
 
-        {/* Admin Navigation Tabs */}
-        <div className="flex border-b border-zinc-200">
+        {/* Admin Navigation Tabs — Cutshort style */}
+        <div className="flex items-center gap-8 border-b border-zinc-200">
           <button
             onClick={() => setActiveTab("queue")}
-            className={`flex items-center gap-2 border-b-2 px-5 py-3 text-xs font-bold uppercase tracking-wider transition-colors ${
+            className={`flex items-center gap-2 border-b-2 pb-3 text-sm font-medium transition-colors ${
               activeTab === "queue"
-                ? "border-zinc-600 text-zinc-600"
+                ? "border-zinc-900 text-zinc-900 font-semibold"
                 : "border-transparent text-zinc-500 hover:border-zinc-300 hover:text-zinc-900"
             }`}
           >
             <Clock className="h-4 w-4" />
-            <span>Pending Review Queue ({hasLoadedCandidates ? pendingCount : "..."})</span>
+            <span>Pending Review ({hasLoadedCandidates ? pendingCount : "..."})</span>
           </button>
 
           <button
             onClick={() => setActiveTab("directory")}
-            className={`flex items-center gap-2 border-b-2 px-5 py-3 text-xs font-bold uppercase tracking-wider transition-colors ${
+            className={`flex items-center gap-2 border-b-2 pb-3 text-sm font-medium transition-colors ${
               activeTab === "directory"
-                ? "border-zinc-600 text-zinc-600"
+                ? "border-zinc-900 text-zinc-900 font-semibold"
                 : "border-transparent text-zinc-500 hover:border-zinc-300 hover:text-zinc-900"
             }`}
           >
@@ -639,9 +639,9 @@ export default function AdminDashboardPage() {
 
           <button
             onClick={() => setActiveTab("analytics")}
-            className={`flex items-center gap-2 border-b-2 px-5 py-3 text-xs font-bold uppercase tracking-wider transition-colors ${
+            className={`flex items-center gap-2 border-b-2 pb-3 text-sm font-medium transition-colors ${
               activeTab === "analytics"
-                ? "border-zinc-600 text-zinc-600"
+                ? "border-zinc-900 text-zinc-900 font-semibold"
                 : "border-transparent text-zinc-500 hover:border-zinc-300 hover:text-zinc-900"
             }`}
           >
@@ -651,14 +651,14 @@ export default function AdminDashboardPage() {
 
           <button
             onClick={() => setActiveTab("audit")}
-            className={`flex items-center gap-2 border-b-2 px-5 py-3 text-xs font-bold uppercase tracking-wider transition-colors ${
+            className={`flex items-center gap-2 border-b-2 pb-3 text-sm font-medium transition-colors ${
               activeTab === "audit"
-                ? "border-zinc-600 text-zinc-600"
+                ? "border-zinc-900 text-zinc-900 font-semibold"
                 : "border-transparent text-zinc-500 hover:border-zinc-300 hover:text-zinc-900"
             }`}
           >
             <History className="h-4 w-4" />
-            <span>Audit Trail &amp; History ({hasLoadedCandidates ? auditLogs.length : "..."})</span>
+            <span>Audit Trail ({hasLoadedCandidates ? auditLogs.length : "..."})</span>
           </button>
         </div>
 

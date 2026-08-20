@@ -2,33 +2,47 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import { Search, Building, Users, CheckCircle, Briefcase, ExternalLink, GraduationCap, Code2, ArrowRight } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { Search, Building, Users, CheckCircle, Briefcase, ExternalLink, GraduationCap, Code2, ArrowRight, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
 import { getPlatformStats, getVerifiedCandidates } from "@/lib/firebase/home";
 import { CandidateProfile } from "@/lib/firebase/candidate";
 import { MeritlaneIntro } from "@/components/landing/MeritlaneIntro";
+import { useAuth } from "@/lib/auth/AuthContext";
 
 export default function HomePage() {
+  const { user, loading: authLoading, profileLoading } = useAuth();
+  const router = useRouter();
   const [searchQuery, setSearchQuery] = useState("");
   const [stats, setStats] = useState({ registeredCandidates: 0, activeEmployers: 0, verifiedProfiles: 0 });
   const [candidates, setCandidates] = useState<(CandidateProfile & { id: string })[]>([]);
   const [loading, setLoading] = useState(true);
   const [displayedCandidates, setDisplayedCandidates] = useState<(CandidateProfile & { id: string })[]>([]);
 
+  // If user is already authenticated, immediately route to dashboard and do NOT display homepage
   useEffect(() => {
-    async function loadData() {
-      const [fetchedStats, fetchedCandidates] = await Promise.all([
-        getPlatformStats(),
-        getVerifiedCandidates()
-      ]);
-      setStats(fetchedStats);
-      setCandidates(fetchedCandidates);
-      setDisplayedCandidates(fetchedCandidates);
-      setLoading(false);
+    if (!authLoading && user) {
+      router.replace("/dashboard");
     }
-    loadData();
-  }, []);
+  }, [user, authLoading, router]);
+
+  useEffect(() => {
+    // Only load public candidate stats if visitor is not logged in
+    if (!authLoading && !user) {
+      async function loadData() {
+        const [fetchedStats, fetchedCandidates] = await Promise.all([
+          getPlatformStats(),
+          getVerifiedCandidates()
+        ]);
+        setStats(fetchedStats);
+        setCandidates(fetchedCandidates);
+        setDisplayedCandidates(fetchedCandidates);
+        setLoading(false);
+      }
+      loadData();
+    }
+  }, [user, authLoading]);
 
   const handleSearch = () => {
     if (!searchQuery.trim()) {
@@ -52,6 +66,15 @@ export default function HomePage() {
       handleSearch();
     }
   };
+
+  // If auth is still resolving or user is logged in, show nothing/loader while routing to dashboard
+  if (authLoading || user) {
+    return (
+      <div className="min-h-[80vh] flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-zinc-400" />
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col">
@@ -318,7 +341,7 @@ export default function HomePage() {
                     </div>
                     
                     <div className="shrink-0">
-                      <Link href={`/p/${c.uid || c.id}`}>
+                      <Link href={`/p/${c.id || (c as any).uid}`}>
                         <Button variant="outline" size="sm" className="rounded-none border-zinc-300" rightIcon={<ArrowRight className="h-3.5 w-3.5" />}>
                           View Public Record
                         </Button>

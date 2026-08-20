@@ -269,8 +269,8 @@ export default function CandidateProfilePage() {
 
         <div className="flex flex-col lg:flex-row gap-8">
           {/* SIDEBAR NAVIGATION */}
-          <div className="lg:w-64 shrink-0">
-            <nav className="flex flex-row lg:flex-col gap-1 overflow-x-auto lg:overflow-visible pb-2 lg:pb-0 hide-scrollbar sticky top-24">
+          <div className="lg:w-56 shrink-0">
+            <nav className="flex flex-row lg:flex-col gap-1 overflow-x-auto lg:overflow-visible pb-2 lg:pb-0 hide-scrollbar sticky top-20">
               {TABS.map((tab) => {
                 const Icon = tab.icon;
                 const isActive = activeTab === tab.id;
@@ -278,14 +278,14 @@ export default function CandidateProfilePage() {
                   <button
                     key={tab.id}
                     onClick={() => setActiveTab(tab.id)}
-                    className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all whitespace-nowrap ${
+                    className={`flex items-center gap-2.5 px-3 py-2 rounded-md text-xs font-medium transition-colors whitespace-nowrap text-left ${
                       isActive 
-                        ? "bg-white text-zinc-900 shadow-sm border border-zinc-200" 
-                        : "text-zinc-500 hover:text-zinc-900 hover:bg-zinc-50 border border-transparent"
+                        ? "bg-zinc-100 text-zinc-900 font-semibold" 
+                        : "text-zinc-500 hover:text-zinc-900 hover:bg-zinc-50"
                     }`}
                   >
-                    <Icon className={`w-4 h-4 ${isActive ? "text-zinc-900" : "text-zinc-400"}`} />
-                    {tab.label}
+                    <Icon className={`w-3.5 h-3.5 ${isActive ? "text-zinc-900" : "text-zinc-400"}`} />
+                    <span>{tab.label}</span>
                   </button>
                 );
               })}

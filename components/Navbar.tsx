@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import { ShieldCheck, LogOut, Menu, X, ChevronDown, User, LayoutDashboard, Settings } from "lucide-react";
+import { ShieldCheck, LogOut, Menu, X, ChevronDown, User, Settings } from "lucide-react";
 import { useAuth } from "@/lib/auth/AuthContext";
 import { useRouter, usePathname } from "next/navigation";
 import { auth } from "@/lib/firebase/config";
@@ -39,137 +39,127 @@ export default function Navbar() {
     router.push("/login");
   };
 
+  /* Cutshort-style: flat text nav links in a row, active = bold black */
   const navLinks = () => {
     if (isUserAdmin) {
       return (
-        <div className="flex items-center gap-1.5">
-          <Link 
-            href="/admin" 
-            className={`px-3 py-1.5 rounded-sm text-sm font-medium transition-all duration-150 ${
-              pathname === "/admin" 
-                ? "text-zinc-900 bg-zinc-100 font-semibold" 
-                : "text-zinc-600 hover:text-zinc-900 hover:bg-zinc-50"
-            }`}
-          >
-            Command Center
-          </Link>
-        </div>
+        <Link 
+          href="/admin" 
+          className={`text-sm transition-colors ${
+            pathname === "/admin" 
+              ? "text-zinc-900 font-semibold" 
+              : "text-zinc-500 hover:text-zinc-900"
+          }`}
+        >
+          Command Center
+        </Link>
       );
     }
     if (userProfile?.role === "candidate") {
       return (
-        <div className="flex items-center gap-1.5">
-          <Link 
-            href="/candidate/dashboard" 
-            className="flex items-center"
-          >
-            <RandomLetterSwap
-              className={`cursor-pointer text-sm font-medium transition-all duration-150 ${
-                pathname === "/candidate/dashboard" 
-                  ? "text-zinc-900 underline underline-offset-4 decoration-zinc-900" 
-                  : "text-zinc-500 hover:text-zinc-900"
-              }`}
-              label="Dashboard"
-              staggerDuration={0.025}
-              transition={{ duration: 0.6, type: "spring" }}
-            />
-          </Link>
-        </div>
+        <Link 
+          href="/candidate/dashboard" 
+          className="flex items-center"
+        >
+          <RandomLetterSwap
+            className={`cursor-pointer text-sm transition-colors ${
+              pathname === "/candidate/dashboard" 
+                ? "text-zinc-900 font-semibold" 
+                : "text-zinc-500 hover:text-zinc-900"
+            }`}
+            label="Dashboard"
+            staggerDuration={0.025}
+            transition={{ duration: 0.6, type: "spring" }}
+          />
+        </Link>
       );
     }
     if (userProfile?.role === "employer") {
       return (
-        <div className="flex items-center gap-1.5">
-          <Link 
-            href="/employer/dashboard" 
-            className="flex items-center"
-          >
-            <RandomLetterSwap
-              className={`cursor-pointer text-sm font-medium transition-all duration-150 ${
-                pathname === "/employer/dashboard" 
-                  ? "text-zinc-900 underline underline-offset-4 decoration-zinc-900" 
-                  : "text-zinc-500 hover:text-zinc-900"
-              }`}
-              label="Dashboard"
-              staggerDuration={0.025}
-              transition={{ duration: 0.6, type: "spring" }}
-            />
-          </Link>
-        </div>
+        <Link 
+          href="/employer/dashboard" 
+          className="flex items-center"
+        >
+          <RandomLetterSwap
+            className={`cursor-pointer text-sm transition-colors ${
+              pathname === "/employer/dashboard" 
+                ? "text-zinc-900 font-semibold" 
+                : "text-zinc-500 hover:text-zinc-900"
+            }`}
+            label="Dashboard"
+            staggerDuration={0.025}
+            transition={{ duration: 0.6, type: "spring" }}
+          />
+        </Link>
       );
     }
     return null;
   };
 
-  const renderPublicLinks = () => (
-    <div className="hidden lg:flex items-center gap-6 text-sm font-medium text-zinc-600">
-      {/* Intentionally left blank - no dead links allowed */}
-    </div>
-  );
-
   return (
     <header 
-      className={`sticky top-0 z-50 w-full bg-white transition-all duration-200 border-b border-zinc-200 ${
+      className={`sticky top-0 z-50 w-full bg-white transition-shadow duration-200 border-b border-zinc-200 ${
         isScrolled ? "shadow-sm" : ""
       }`}
     >
-      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
+      <div className="mx-auto flex h-14 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
+        {/* Left: Logo + Nav */}
         <div className="flex items-center gap-8">
           <Link 
-            href={isUserAdmin ? "/admin" : "/"} 
-            className="flex items-center gap-2.5 font-bold tracking-tight text-zinc-900 group select-none"
+            href={isUserAdmin ? "/admin" : user ? "/dashboard" : "/"} 
+            className="flex items-center gap-2 font-bold tracking-tight text-zinc-900 select-none"
           >
-            <ShieldCheck className="h-6 w-6" />
-            <span className="text-xl tracking-tight">Meritlane</span>
+            <ShieldCheck className="h-5 w-5" />
+            <span className="text-lg tracking-tight">Meritlane</span>
             {isUserAdmin && (
-              <span className="rounded bg-zinc-900 px-2 py-0.5 text-xs font-semibold text-white">
+              <span className="rounded bg-zinc-900 px-1.5 py-0.5 text-[10px] font-semibold text-white leading-none">
                 Admin
               </span>
             )}
           </Link>
 
-          {/* Desktop Public Nav */}
-          {(!user || !isResolvingAuth) && renderPublicLinks()}
-
-          {/* Desktop & Mobile Dashboard Nav */}
-          <nav className="flex items-center">
+          {/* Desktop Nav Links — Cutshort style: flat text in a row */}
+          <nav className="hidden sm:flex items-center gap-6">
             {!isResolvingAuth && user && navLinks()}
           </nav>
         </div>
 
+        {/* Right: Auth area */}
         <div className="flex items-center gap-3">
           {isResolvingAuth ? (
-            <div className="flex gap-2.5">
-              <div className="h-8 w-8 animate-pulse rounded-full bg-zinc-100"></div>
-            </div>
+            <div className="h-8 w-8 animate-pulse rounded-full bg-zinc-100"></div>
           ) : user ? (
-            <div className="flex items-center gap-4">
-              <ProfileDropdown 
-                user={user} 
-                userProfile={userProfile} 
-                isAdmin={isUserAdmin} 
-                handleSignOut={handleSignOut} 
-              />
-            </div>
+            <ProfileDropdown 
+              user={user} 
+              userProfile={userProfile} 
+              isAdmin={isUserAdmin} 
+              handleSignOut={handleSignOut} 
+            />
           ) : (
-            <div className="hidden md:flex items-center gap-3">
-              <Link href="/login" className="text-sm font-medium text-zinc-700 hover:text-zinc-900">
+            <div className="hidden md:flex items-center gap-4">
+              <Link href="/login" className="text-sm text-zinc-500 hover:text-zinc-900 transition-colors">
                 Log in
               </Link>
-              <span className="text-zinc-300">|</span>
-              <Link href="/signup" className="text-sm font-medium text-zinc-700 hover:text-zinc-900">
+              <Link href="/signup" className="text-sm text-zinc-500 hover:text-zinc-900 transition-colors">
                 Register
               </Link>
-              <Link href="/employer/dashboard" className="ml-2">
+              <Link href="/employer/dashboard">
                 <Button variant="primary" size="sm">Post a Job</Button>
               </Link>
             </div>
           )}
 
+          {/* Mobile Nav Links for logged-in users */}
+          {user && !isResolvingAuth && (
+            <nav className="flex sm:hidden items-center">
+              {navLinks()}
+            </nav>
+          )}
+
           {/* Mobile Menu Toggle (Only for public/logged out users) */}
           {!user && (
             <button 
-              className="md:hidden flex items-center justify-center h-9 w-9 rounded text-zinc-600 hover:bg-zinc-100 transition-colors"
+              className="md:hidden flex items-center justify-center h-9 w-9 rounded-md text-zinc-500 hover:bg-zinc-100 transition-colors"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               aria-label="Toggle navigation menu"
             >
@@ -181,14 +171,14 @@ export default function Navbar() {
 
       {/* Mobile Nav */}
       {mobileMenuOpen && (
-        <div className="md:hidden border-t border-zinc-200 bg-white px-4 py-5 shadow-lg">
+        <div className="md:hidden border-t border-zinc-100 bg-white px-4 py-4">
           {!isResolvingAuth && !user && (
-            <div className="flex flex-col gap-2.5">
+            <div className="flex flex-col gap-2">
               <Link href="/login">
-                <Button variant="outline" className="w-full justify-center">Log in</Button>
+                <Button variant="secondary" className="w-full justify-center">Log in</Button>
               </Link>
               <Link href="/signup">
-                <Button variant="outline" className="w-full justify-center">Register</Button>
+                <Button variant="secondary" className="w-full justify-center">Register</Button>
               </Link>
               <Link href="/employer/dashboard">
                 <Button variant="primary" className="w-full justify-center">Post a Job</Button>
@@ -201,6 +191,7 @@ export default function Navbar() {
   );
 }
 
+/* Cutshort-style profile dropdown: compact avatar, clean menu */
 function ProfileDropdown({ user, userProfile, isAdmin, handleSignOut }: { user: any, userProfile: any, isAdmin: boolean, handleSignOut: () => void }) {
   const [open, setOpen] = useState(false);
   const router = useRouter();
@@ -230,38 +221,38 @@ function ProfileDropdown({ user, userProfile, isAdmin, handleSignOut }: { user: 
     <div className="relative inline-block text-left" onClick={(e) => e.stopPropagation()}>
       <button 
         onClick={() => setOpen(!open)}
-        className="flex items-center gap-2 rounded-full border border-zinc-200 bg-white p-1 pr-3 text-sm font-medium text-zinc-700 transition-all hover:bg-zinc-50 focus:outline-none focus:ring-2 focus:ring-zinc-900"
+        className="flex items-center gap-2 rounded-full p-1 pr-2 text-sm text-zinc-600 transition-colors hover:bg-zinc-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900"
         aria-expanded={open}
         aria-haspopup="true"
       >
-        <div className="flex h-7 w-7 overflow-hidden items-center justify-center rounded-full bg-zinc-100 text-xs font-bold text-zinc-600">
+        <div className="flex h-7 w-7 overflow-hidden items-center justify-center rounded-full bg-zinc-100 text-xs font-bold text-zinc-500 ring-1 ring-zinc-200">
           {photoUrl ? (
             <img src={photoUrl} alt={displayName} className="h-full w-full object-cover" />
           ) : (
             initial
           )}
         </div>
-        <span className="max-w-[100px] truncate text-xs font-semibold hidden sm:inline-block">{displayName}</span>
-        <ChevronDown className="h-3.5 w-3.5 text-zinc-400" />
+        <span className="max-w-[100px] truncate text-xs font-medium hidden sm:inline-block">{displayName}</span>
+        <ChevronDown className={`h-3 w-3 text-zinc-400 transition-transform ${open ? "rotate-180" : ""}`} />
       </button>
 
       {open && (
-        <div className="absolute right-0 mt-2 w-56 origin-top-right rounded-lg border border-zinc-200 bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none z-50">
-          <div className="border-b border-zinc-100 px-4 py-3">
-            <p className="truncate text-sm font-semibold text-zinc-900">{displayName}</p>
-            <p className="truncate text-xs font-medium text-zinc-500 capitalize">{displayRole}</p>
+        <div className="absolute right-0 mt-1.5 w-52 origin-top-right rounded-lg border border-zinc-200 bg-white py-1 shadow-lg z-50">
+          <div className="border-b border-zinc-100 px-3.5 py-2.5">
+            <p className="truncate text-sm font-medium text-zinc-900">{displayName}</p>
+            <p className="truncate text-xs text-zinc-500 capitalize">{displayRole}</p>
           </div>
           
           <div className="py-1">
             {userProfile?.role === "candidate" && (
-              <Link href="/candidate/profile" className="flex w-full items-center px-4 py-2 text-sm text-zinc-700 hover:bg-zinc-50 hover:text-zinc-900" onClick={() => setOpen(false)}>
-                <User className="mr-2 h-4 w-4" />
+              <Link href="/candidate/profile" className="flex w-full items-center px-3.5 py-2 text-sm text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900 transition-colors" onClick={() => setOpen(false)}>
+                <User className="mr-2.5 h-4 w-4 text-zinc-400" />
                 Profile
               </Link>
             )}
             
-            <Link href="/settings" className="flex w-full items-center px-4 py-2 text-sm text-zinc-700 hover:bg-zinc-50 hover:text-zinc-900" onClick={() => setOpen(false)}>
-              <Settings className="mr-2 h-4 w-4" />
+            <Link href="/settings" className="flex w-full items-center px-3.5 py-2 text-sm text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900 transition-colors" onClick={() => setOpen(false)}>
+              <Settings className="mr-2.5 h-4 w-4 text-zinc-400" />
               Settings
             </Link>
           </div>
@@ -272,9 +263,9 @@ function ProfileDropdown({ user, userProfile, isAdmin, handleSignOut }: { user: 
                 setOpen(false);
                 handleSignOut();
               }} 
-              className="flex w-full items-center px-4 py-2 text-sm text-red-600 hover:bg-red-50"
+              className="flex w-full items-center px-3.5 py-2 text-sm text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900 transition-colors"
             >
-              <LogOut className="mr-2 h-4 w-4" />
+              <LogOut className="mr-2.5 h-4 w-4 text-zinc-400" />
               Sign out
             </button>
           </div>
