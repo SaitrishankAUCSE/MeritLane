@@ -8,6 +8,7 @@ import { useRouter, usePathname } from "next/navigation";
 import { auth } from "@/lib/firebase/config";
 import { signOut } from "firebase/auth";
 import { Button } from "@/components/ui/Button";
+import { RandomLetterSwap } from "@/components/ui/random-letter-swap";
 
 export default function Navbar() {
   const { user, userProfile, isAdmin, loading, profileLoading } = useAuth();
@@ -60,13 +61,18 @@ export default function Navbar() {
         <div className="flex items-center gap-1.5">
           <Link 
             href="/candidate/dashboard" 
-            className={`px-3 py-1.5 rounded-sm text-sm font-medium transition-all duration-150 ${
-              pathname === "/candidate/dashboard" 
-                ? "text-zinc-900 bg-zinc-100 font-semibold" 
-                : "text-zinc-600 hover:text-zinc-900 hover:bg-zinc-50"
-            }`}
+            className="flex items-center"
           >
-            Dashboard
+            <RandomLetterSwap
+              className={`cursor-pointer text-sm font-medium transition-all duration-150 ${
+                pathname === "/candidate/dashboard" 
+                  ? "text-zinc-900 underline underline-offset-4 decoration-zinc-900" 
+                  : "text-zinc-500 hover:text-zinc-900"
+              }`}
+              label="Dashboard"
+              staggerDuration={0.025}
+              transition={{ duration: 0.6, type: "spring" }}
+            />
           </Link>
         </div>
       );
@@ -76,13 +82,18 @@ export default function Navbar() {
         <div className="flex items-center gap-1.5">
           <Link 
             href="/employer/dashboard" 
-            className={`px-3 py-1.5 rounded-sm text-sm font-medium transition-all duration-150 ${
-              pathname === "/employer/dashboard" 
-                ? "text-zinc-900 bg-zinc-100 font-semibold" 
-                : "text-zinc-600 hover:text-zinc-900 hover:bg-zinc-50"
-            }`}
+            className="flex items-center"
           >
-            Dashboard
+            <RandomLetterSwap
+              className={`cursor-pointer text-sm font-medium transition-all duration-150 ${
+                pathname === "/employer/dashboard" 
+                  ? "text-zinc-900 underline underline-offset-4 decoration-zinc-900" 
+                  : "text-zinc-500 hover:text-zinc-900"
+              }`}
+              label="Dashboard"
+              staggerDuration={0.025}
+              transition={{ duration: 0.6, type: "spring" }}
+            />
           </Link>
         </div>
       );
@@ -248,15 +259,6 @@ function ProfileDropdown({ user, userProfile, isAdmin, handleSignOut }: { user: 
                 Profile
               </Link>
             )}
-            
-            <Link 
-              href={isAdmin ? "/admin" : (userProfile?.role === "employer" ? "/employer/dashboard" : "/candidate/dashboard")} 
-              className="flex w-full items-center px-4 py-2 text-sm text-zinc-700 hover:bg-zinc-50 hover:text-zinc-900" 
-              onClick={() => setOpen(false)}
-            >
-              <LayoutDashboard className="mr-2 h-4 w-4" />
-              Dashboard
-            </Link>
             
             <Link href="/settings" className="flex w-full items-center px-4 py-2 text-sm text-zinc-700 hover:bg-zinc-50 hover:text-zinc-900" onClick={() => setOpen(false)}>
               <Settings className="mr-2 h-4 w-4" />
