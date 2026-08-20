@@ -34,7 +34,6 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     const assessmentKeys = user.assessmentScores ? Object.keys(user.assessmentScores) : [];
     const publicationTitle = derivePublicationTitle({
       assessmentKeys,
-      skills: Array.isArray(candidate.skills) ? candidate.skills : [],
     });
     const title = `${publicationTitle} | Meritlane`;
     const description = `Published technical proof for ${name} on Meritlane.`;

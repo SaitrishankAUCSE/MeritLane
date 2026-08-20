@@ -9,6 +9,7 @@ import {
   humanizeAssessmentKey,
   publicationRecordId,
   publicationStatusLabel,
+  verifiedFocuses,
 } from "@/components/public-record/publication";
 
 type ProjectRecord = {
@@ -38,6 +39,17 @@ function asStringArray(value: unknown): string[] {
     : [];
 }
 
+function projectName(project: ProjectRecord, index: number): string {
+  return asString(project.title) || asString(project.name) || `Project ${index + 1}`;
+}
+
+function projectTechnologies(project: ProjectRecord): string[] {
+  const listed = asStringArray(project.technologies).length
+    ? asStringArray(project.technologies)
+    : asStringArray(project.tech);
+  return listed;
+}
+
 function SectionLabel({
   id,
   index,
@@ -62,7 +74,7 @@ function MetaCell({ label, value }: { label: string; value: string }) {
   return (
     <div className="min-w-0">
       <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-400">{label}</p>
-      <p className="mt-1 truncate text-sm text-zinc-800">{value}</p>
+      <p className="mt-1 break-words text-sm text-zinc-700">{value}</p>
     </div>
   );
 }
@@ -87,12 +99,15 @@ export function PublicProofRecord({ id, candidate, user }: PublicProofRecordProp
   const statusLabel = publicationStatusLabel(verificationStatus);
   const reviewComment = asString(candidate.verificationReason);
   const recordId = publicationRecordId(id);
-  const title = derivePublicationTitle({ assessmentKeys, skills });
-  const abstract = buildAbstract(
-    projects.map((project) => asString(project.description)).filter(Boolean)
-  );
+  const focuses = verifiedFocuses(assessmentKeys);
+  const title = derivePublicationTitle({ assessmentKeys });
+  const abstract = buildAbstract({
+    projectTitles: projects.map((project, index) => projectName(project, index)),
+    projectDescriptions: projects.map((project) => asString(project.description)).filter(Boolean),
+    focuses,
+  });
   const verifiedAt = candidate.verifiedAt ?? null;
-  const assessmentDate = user.assessmentDate ?? candidate.verifiedAt ?? null;
+  const assessmentDate = user.assessmentDate ?? null;
   const createdAt = user.createdAt ?? null;
   const verifiedAtLabel = formatPublicDate(verifiedAt);
   const assessmentDateLabel = formatPublicDate(assessmentDate);
@@ -100,7 +115,9 @@ export function PublicProofRecord({ id, candidate, user }: PublicProofRecordProp
   const hasProjects = projects.length > 0;
   const isPublished = statusLabel === "PUBLISHED";
 
-  const verifiedClaims = assessmentEntries.map(([key, score]) => {
+  const verifiedClaims: { name: string; source: string }[] = [];
+
+  for (const [key] of assessmentEntries) {
     const label = humanizeAssessmentKey(key);
     const matchingSkill = skills.find((skill) => {
       const normalized = skill.toLowerCase();
@@ -110,33 +127,43 @@ export function PublicProofRecord({ id, candidate, user }: PublicProofRecordProp
           key.toLowerCase().replace(/_/g, " ").includes(normalized))
       );
     });
-    return {
+    verifiedClaims.push({
       name: matchingSkill || label,
       source: "Technical Assessment",
-      status: "Verified",
-      score,
-    };
-  });
+    });
+  }
+
+  const assessedNames = new Set(verifiedClaims.map((claim) => claim.name.toLowerCase()));
+  for (const project of projects) {
+    for (const tech of projectTechnologies(project)) {
+      if (assessedNames.has(tech.toLowerCase())) continue;
+      verifiedClaims.push({
+        name: tech,
+        source: "Project Evidence",
+      });
+      assessedNames.add(tech.toLowerCase());
+    }
+  }
 
   const references: { label: string; href: string }[] = [];
   if (githubUrl) {
-    references.push({ label: "Authenticated GitHub profile", href: githubUrl });
+    references.push({ label: "GitHub repository", href: githubUrl });
   }
   projects.forEach((project, index) => {
-    const name = asString(project.title) || asString(project.name) || `Implementation ${index + 1}`;
+    const name = projectName(project, index);
     if (asString(project.repoUrl)) {
       references.push({ label: `Source repository — ${name}`, href: asString(project.repoUrl) });
     }
     if (asString(project.liveUrl)) {
-      references.push({ label: `Live demonstration — ${name}`, href: asString(project.liveUrl) });
+      references.push({ label: `Live demo — ${name}`, href: asString(project.liveUrl) });
     }
   });
 
   const history: { label: string; date?: string; dateTime?: string }[] = [];
-  if (createdAtLabel || createdAt) {
+  if (createdAtLabel) {
     history.push({
       label: "Profile created",
-      date: createdAtLabel || undefined,
+      date: createdAtLabel,
       dateTime: formatPublicDateTimeAttr(createdAt),
     });
   }
@@ -159,18 +186,24 @@ export function PublicProofRecord({ id, candidate, user }: PublicProofRecordProp
     });
   }
 
+  const byline = [affiliation, discipline, graduation].filter(Boolean).join(" · ");
+  const verifiedSummary =
+    verifiedClaims.length > 0
+      ? verifiedClaims.map((claim) => claim.name).slice(0, 3).join(" · ")
+      : "None public";
+
   const statusTone =
     statusLabel === "PUBLISHED"
-      ? "border-emerald-700/40 text-emerald-800"
+      ? "text-emerald-800"
       : statusLabel === "UNDER REVIEW" || statusLabel === "REVISION REQUESTED"
-        ? "border-amber-700/40 text-amber-800"
-        : "border-zinc-300 text-zinc-600";
+        ? "text-amber-800"
+        : "text-zinc-600";
 
   return (
     <div className="relative min-h-screen bg-[#F7F5FB] pb-24 text-zinc-900">
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-x-0 top-0 h-[420px] bg-[radial-gradient(ellipse_at_top,_rgba(228,222,245,0.7),_transparent_62%)]"
+        className="pointer-events-none absolute inset-x-0 top-0 h-[380px] bg-[radial-gradient(ellipse_at_top,_rgba(228,222,245,0.65),_transparent_64%)]"
       />
 
       <div className="relative mx-auto max-w-6xl px-4 pt-6 sm:px-6 lg:px-8">
@@ -180,9 +213,7 @@ export function PublicProofRecord({ id, candidate, user }: PublicProofRecordProp
             <p className="mt-1 text-[11px] font-medium uppercase tracking-[0.18em] text-zinc-500">
               Published Technical Proof
             </p>
-            <p className="mt-2 font-mono text-[11px] text-zinc-500">
-              Record {recordId}
-            </p>
+            <p className="mt-2 font-mono text-[11px] text-zinc-500">Record {recordId}</p>
           </div>
           <nav aria-label="Publication actions" className="flex items-center gap-4">
             <Link
@@ -203,77 +234,92 @@ export function PublicProofRecord({ id, candidate, user }: PublicProofRecordProp
 
         <div className="mt-10 grid gap-12 lg:grid-cols-[minmax(0,1fr)_220px] lg:items-start">
           <article className="min-w-0">
-            <div className="flex flex-wrap items-center gap-3">
-              <p className={`inline-flex items-center gap-2 border px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.22em] ${statusTone}`}>
-                {isPublished && (
-                  <span aria-hidden="true" className="h-1.5 w-1.5 rounded-full bg-emerald-700" />
-                )}
-                {statusLabel}
-              </p>
+            <p className={`text-[10px] font-semibold uppercase tracking-[0.22em] ${statusTone}`}>
+              {statusLabel}
+            </p>
+
+            <h1 className="mt-4 max-w-3xl font-[family-name:var(--font-proof-serif),ui-serif,Georgia,serif] text-[1.7rem] leading-tight tracking-tight text-zinc-950 sm:text-[2.15rem] sm:leading-[1.18]">
+              {title}
+            </h1>
+
+            <div className="mt-5">
+              <p className="text-base font-medium text-zinc-950">{author}</p>
+              {byline && <p className="mt-1 text-xs text-zinc-500">{byline}</p>}
+            </div>
+
+            <dl className="mt-8 grid grid-cols-2 gap-x-6 gap-y-4 border-y border-zinc-200 py-5 sm:grid-cols-4">
+              <div>
+                <dt className="text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-400">Who</dt>
+                <dd className="mt-1 text-sm text-zinc-900">{author}</dd>
+              </div>
+              <div>
+                <dt className="text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-400">Focus</dt>
+                <dd className="mt-1 text-sm text-zinc-900">
+                  {focuses.length > 0 ? focuses.join(" · ") : "Not specified"}
+                </dd>
+              </div>
+              <div>
+                <dt className="text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-400">Built</dt>
+                <dd className="mt-1 text-sm text-zinc-900">
+                  {hasProjects ? `${projects.length} project${projects.length === 1 ? "" : "s"}` : "No public projects"}
+                </dd>
+              </div>
+              <div>
+                <dt className="text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-400">Verified</dt>
+                <dd className="mt-1 text-sm text-zinc-900">{verifiedSummary}</dd>
+              </div>
+            </dl>
+
+            <div className="mt-5">
               <ProofTrace
                 status="verified"
                 assessmentScores={assessmentScores}
-                assessmentDate={assessmentDate as string | number | Date | null}
+                assessmentDate={(user.assessmentDate || candidate.verifiedAt) as string | number | Date | null}
                 candidateName={author}
                 size="sm"
               />
             </div>
 
-            <h1 className="mt-6 font-[family-name:var(--font-proof-serif),ui-serif,Georgia,serif] text-[1.75rem] leading-tight tracking-tight text-zinc-950 sm:text-4xl sm:leading-[1.15]">
-              {title}
-            </h1>
-
-            <dl className="mt-8 grid grid-cols-2 gap-x-6 gap-y-5 border-y border-zinc-200 py-5 sm:grid-cols-4">
-              <div>
-                <dt className="text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-400">Author</dt>
-                <dd className="mt-1 text-sm text-zinc-800">{author}</dd>
-              </div>
-              <div>
-                <dt className="text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-400">Affiliation</dt>
-                <dd className="mt-1 text-sm text-zinc-800">{affiliation || "Not recorded"}</dd>
-              </div>
-              <div>
-                <dt className="text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-400">Discipline</dt>
-                <dd className="mt-1 text-sm text-zinc-800">{discipline || "Not recorded"}</dd>
-              </div>
-              <div>
-                <dt className="text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-400">Graduation</dt>
-                <dd className="mt-1 text-sm text-zinc-800">{graduation || "Not recorded"}</dd>
-              </div>
-            </dl>
-
             <section className="mt-12" aria-labelledby="abstract-heading">
-              <SectionLabel id="abstract-heading" index="01">Abstract</SectionLabel>
+              <SectionLabel id="abstract-heading" index="01">
+                Abstract
+              </SectionLabel>
               <p className="max-w-prose text-[15px] leading-7 text-zinc-700">{abstract}</p>
             </section>
 
             <section className="mt-14" aria-labelledby="methodology-heading">
-              <SectionLabel id="methodology-heading" index="02">Methodology</SectionLabel>
+              <SectionLabel id="methodology-heading" index="02">
+                Methodology
+              </SectionLabel>
+              <p className="mb-8 max-w-prose text-sm text-zinc-500">
+                How technical ability was demonstrated through public project work.
+              </p>
               {hasProjects ? (
                 <div className="space-y-10">
                   {projects.map((project, index) => {
-                    const name = asString(project.title) || asString(project.name) || "Untitled implementation";
+                    const name = projectName(project, index);
                     const description = asString(project.description);
                     const repoUrl = asString(project.repoUrl);
                     const liveUrl = asString(project.liveUrl);
-                    const technologies = asStringArray(project.technologies).length
-                      ? asStringArray(project.technologies)
-                      : asStringArray(project.tech);
+                    const technologies = projectTechnologies(project);
 
                     return (
-                      <div key={project.id || `${name}-${index}`} className="border-l border-zinc-300 pl-4 sm:pl-5">
+                      <div key={project.id || `${name}-${index}`}>
                         <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-zinc-400">
-                          Implementation {String(index + 1).padStart(2, "0")}
+                          Project
                         </p>
                         <h3 className="mt-1 text-lg font-medium text-zinc-950">{name}</h3>
-                        {description ? (
-                          <p className="mt-3 max-w-prose text-sm leading-6 text-zinc-700">{description}</p>
-                        ) : (
-                          <p className="mt-3 text-sm text-zinc-500">No implementation notes were provided.</p>
-                        )}
+                        <p className="mt-3 max-w-prose text-sm leading-6 text-zinc-700">
+                          <span className="mr-2 text-[10px] font-semibold uppercase tracking-[0.16em] text-zinc-400">
+                            What it does
+                          </span>
+                          {description || "No project description was provided."}
+                        </p>
                         {technologies.length > 0 && (
-                          <p className="mt-4 font-mono text-xs text-zinc-600">
-                            <span className="mr-2 uppercase tracking-wider text-zinc-400">Technology</span>
+                          <p className="mt-3 font-mono text-xs text-zinc-600">
+                            <span className="mr-2 font-sans text-[10px] font-semibold uppercase tracking-[0.16em] text-zinc-400">
+                              Technologies
+                            </span>
                             {technologies.join(" · ")}
                           </p>
                         )}
@@ -298,7 +344,7 @@ export function PublicProofRecord({ id, candidate, user }: PublicProofRecordProp
                                 className="inline-flex items-center gap-1.5 bg-zinc-900 px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-zinc-800"
                               >
                                 <ExternalLink className="h-3.5 w-3.5" />
-                                Demonstration
+                                Live Demo
                               </a>
                             )}
                           </div>
@@ -308,40 +354,46 @@ export function PublicProofRecord({ id, candidate, user }: PublicProofRecordProp
                   })}
                 </div>
               ) : (
-                <p className="text-sm text-zinc-500">No public implementation evidence is available.</p>
+                <p className="text-sm text-zinc-500">No public project evidence is available.</p>
               )}
             </section>
 
             <section className="mt-14" aria-labelledby="results-heading">
-              <SectionLabel id="results-heading" index="03">Results</SectionLabel>
+              <SectionLabel id="results-heading" index="03">
+                Results
+              </SectionLabel>
               {assessmentEntries.length > 0 ? (
-                <div className="space-y-4">
+                <div className="divide-y divide-zinc-200 border-y border-zinc-200">
                   {assessmentEntries.map(([key, score]) => {
                     const numeric = Number(score);
                     const hasNumeric = Number.isFinite(numeric);
                     return (
-                      <div key={key} className="border border-zinc-200 bg-white px-4 py-4 sm:px-5">
-                        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                      <div key={key} className="py-5">
+                        <h3 className="text-base font-medium text-zinc-950">
+                          {humanizeAssessmentKey(key)}
+                        </h3>
+                        <dl className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-3">
                           <div>
-                            <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-zinc-400">
-                              Assessment record
-                            </p>
-                            <h3 className="mt-1 text-base font-medium text-zinc-950">
-                              {humanizeAssessmentKey(key)}
-                            </h3>
-                            <p className="mt-1 text-xs uppercase tracking-wider text-emerald-800">Completed</p>
+                            <dt className="text-[10px] font-semibold uppercase tracking-[0.16em] text-zinc-400">
+                              Status
+                            </dt>
+                            <dd className="mt-1 text-sm text-emerald-800">Completed</dd>
                           </div>
-                          <p className="font-mono text-sm text-zinc-900">
-                            {hasNumeric ? (
-                              <>
-                                <span className="text-xl font-semibold">{numeric.toFixed(0)}</span>
-                                <span className="text-zinc-500"> / 5</span>
-                              </>
-                            ) : (
-                              <span>{String(score)}</span>
-                            )}
-                          </p>
-                        </div>
+                          <div>
+                            <dt className="text-[10px] font-semibold uppercase tracking-[0.16em] text-zinc-400">
+                              Score
+                            </dt>
+                            <dd className="mt-1 font-mono text-sm text-zinc-900">
+                              {hasNumeric ? `${numeric.toFixed(0)} / 5` : String(score)}
+                            </dd>
+                          </div>
+                          <div>
+                            <dt className="text-[10px] font-semibold uppercase tracking-[0.16em] text-zinc-400">
+                              Technical signal
+                            </dt>
+                            <dd className="mt-1 text-sm text-zinc-700">Assessment completed</dd>
+                          </div>
+                        </dl>
                       </div>
                     );
                   })}
@@ -354,21 +406,23 @@ export function PublicProofRecord({ id, candidate, user }: PublicProofRecordProp
             </section>
 
             <section className="mt-14" aria-labelledby="claims-heading">
-              <SectionLabel id="claims-heading" index="04">Verified Claims</SectionLabel>
+              <SectionLabel id="claims-heading" index="04">
+                Verified Claims
+              </SectionLabel>
               {verifiedClaims.length > 0 ? (
                 <ul className="space-y-8">
                   {verifiedClaims.map((claim) => (
-                    <li key={claim.name}>
+                    <li key={`${claim.name}-${claim.source}`}>
                       <p className="text-sm font-semibold uppercase tracking-[0.16em] text-zinc-900">
                         {claim.name}
                       </p>
-                      <div className="mt-3 ml-1 border-l border-zinc-300 pl-4">
-                        <p className="text-xs text-zinc-500">
-                          Verified through
+                      <div className="relative mt-3 ml-2 border-l border-zinc-300 pl-4">
+                        <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-zinc-400">
+                          Source
                         </p>
-                        <p className="mt-1 font-mono text-sm text-zinc-800">{claim.source}</p>
+                        <p className="mt-1 text-sm text-zinc-800">{claim.source}</p>
                         <p className="mt-3 text-[11px] font-semibold uppercase tracking-[0.16em] text-emerald-800">
-                          {claim.status}
+                          Verified
                         </p>
                       </div>
                     </li>
@@ -377,46 +431,47 @@ export function PublicProofRecord({ id, candidate, user }: PublicProofRecordProp
               ) : (
                 <p className="text-sm text-zinc-500">No independently verified claims are publicly recorded.</p>
               )}
-              {githubUrl && (
-                <div className="mt-8 ml-1 border-l border-zinc-300 pl-4">
-                  <p className="text-sm font-semibold uppercase tracking-[0.16em] text-zinc-900">GitHub</p>
-                  <p className="mt-2 text-xs text-zinc-500">Authenticated repository</p>
-                  <a
-                    href={githubUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="mt-2 inline-flex items-center gap-1.5 text-sm text-zinc-800 underline decoration-zinc-300 underline-offset-4 hover:decoration-zinc-900"
-                  >
-                    Source profile
-                  </a>
-                </div>
-              )}
             </section>
 
             <section className="mt-14" aria-labelledby="review-heading">
-              <SectionLabel id="review-heading" index="05">Peer Review</SectionLabel>
-              <div className="border border-zinc-200 bg-white px-4 py-5 sm:px-5">
-                <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-zinc-400">
-                  Review status
-                </p>
-                <p className="mt-2 text-sm text-zinc-900">{statusLabel}</p>
-                {isPublished && (
-                  <p className="mt-3 text-sm leading-6 text-zinc-700">Verification review completed.</p>
-                )}
+              <SectionLabel id="review-heading" index="05">
+                Verification Review
+              </SectionLabel>
+              <dl className="max-w-prose space-y-4">
+                <div>
+                  <dt className="text-[10px] font-semibold uppercase tracking-[0.18em] text-zinc-400">
+                    Publication status
+                  </dt>
+                  <dd className="mt-1 text-sm text-zinc-900">{statusLabel}</dd>
+                </div>
+                <div>
+                  <dt className="text-[10px] font-semibold uppercase tracking-[0.18em] text-zinc-400">
+                    Review outcome
+                  </dt>
+                  <dd className="mt-1 text-sm text-zinc-700">
+                    {isPublished ? "Verification completed." : statusLabel}
+                  </dd>
+                </div>
                 {reviewComment && (
-                  <blockquote className="mt-4 border-l border-zinc-300 pl-4 text-sm leading-6 text-zinc-700">
-                    {reviewComment}
-                  </blockquote>
+                  <div>
+                    <dt className="text-[10px] font-semibold uppercase tracking-[0.18em] text-zinc-400">
+                      Review note
+                    </dt>
+                    <dd className="mt-1 text-sm leading-6 text-zinc-700">{reviewComment}</dd>
+                  </div>
                 )}
-              </div>
+              </dl>
 
               {history.length > 0 && (
-                <ol className="mt-8 space-y-0">
+                <ol className="mt-10 space-y-0">
                   {history.map((event, index) => (
                     <li key={event.label} className="relative flex gap-4 pb-6 last:pb-0">
-                      <span aria-hidden="true" className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-zinc-900" />
+                      <span aria-hidden="true" className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-zinc-900" />
                       {index < history.length - 1 && (
-                        <span aria-hidden="true" className="absolute left-[3.5px] top-4 h-[calc(100%-8px)] w-px bg-zinc-200" />
+                        <span
+                          aria-hidden="true"
+                          className="absolute left-[2.5px] top-4 h-[calc(100%-8px)] w-px bg-zinc-200"
+                        />
                       )}
                       <div>
                         <p className="text-xs font-semibold uppercase tracking-[0.16em] text-zinc-900">
@@ -435,7 +490,9 @@ export function PublicProofRecord({ id, candidate, user }: PublicProofRecordProp
             </section>
 
             <section className="mt-14" aria-labelledby="references-heading">
-              <SectionLabel id="references-heading" index="06">References</SectionLabel>
+              <SectionLabel id="references-heading" index="06">
+                References
+              </SectionLabel>
               {references.length > 0 ? (
                 <ol className="space-y-3">
                   {references.map((reference, index) => (
@@ -461,10 +518,10 @@ export function PublicProofRecord({ id, candidate, user }: PublicProofRecordProp
           <aside className="lg:sticky lg:top-20">
             <div className="border-t border-zinc-200 pt-5 lg:border-l lg:border-t-0 lg:pl-6 lg:pt-0">
               <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-400">
-                Publication metadata
+                Record metadata
               </p>
               <dl className="mt-4 space-y-4">
-                <MetaCell label="Status" value={statusLabel} />
+                <MetaCell label="Publication status" value={statusLabel} />
                 <MetaCell label="Record ID" value={recordId} />
                 <MetaCell label="Author" value={author} />
                 {affiliation && <MetaCell label="Affiliation" value={affiliation} />}

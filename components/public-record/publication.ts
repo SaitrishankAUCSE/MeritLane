@@ -47,15 +47,25 @@ export function formatPublicDate(value: unknown): string | null {
 
 export function formatPublicDateTimeAttr(value: unknown): string | undefined {
   if (value == null || value === "") return undefined;
+
+  let date: Date | null = null;
   if (typeof value === "number") {
-    const date = new Date(value);
-    return Number.isNaN(date.getTime()) ? undefined : date.toISOString();
+    date = new Date(value);
+  } else if (typeof value === "string") {
+    date = new Date(value);
+  } else if (typeof value === "object") {
+    const record = value as { toDate?: () => Date; seconds?: number; _seconds?: number };
+    if (typeof record.toDate === "function") {
+      date = record.toDate();
+    } else if (typeof record.seconds === "number") {
+      date = new Date(record.seconds * 1000);
+    } else if (typeof record._seconds === "number") {
+      date = new Date(record._seconds * 1000);
+    }
   }
-  if (typeof value === "string") {
-    const date = new Date(value);
-    return Number.isNaN(date.getTime()) ? undefined : date.toISOString();
-  }
-  return undefined;
+
+  if (!date || Number.isNaN(date.getTime())) return undefined;
+  return date.toISOString();
 }
 
 export function humanizeAssessmentKey(key: string): string {
@@ -66,46 +76,85 @@ export function humanizeAssessmentKey(key: string): string {
   return key.replace(/_/g, " ").trim();
 }
 
-export function primaryTechnicalFocus(options: {
-  assessmentKeys: string[];
-  skills: string[];
-}): string | null {
-  const firstAssessment = options.assessmentKeys[0];
-  if (firstAssessment) {
-    if (firstAssessment.toLowerCase().startsWith("python")) return "Python";
-    const words = humanizeAssessmentKey(firstAssessment)
-      .replace(/[()]/g, " ")
-      .split(/\s+/)
-      .filter(Boolean);
-    return words[0] ? capitalizeToken(words[0]) : null;
+/** Short verified focus label from an assessment key (e.g. python_core → Python). */
+export function assessmentFocusLabel(key: string): string {
+  const lower = key.toLowerCase();
+  if (lower.startsWith("python")) return "Python";
+  if (lower.startsWith("react")) return "React";
+  if (lower.startsWith("node") || lower.startsWith("nodejs")) return "Node.js";
+  if (lower.startsWith("javascript") || lower.startsWith("js_")) return "JavaScript";
+  if (lower.startsWith("typescript") || lower.startsWith("ts_")) return "TypeScript";
+  if (lower.startsWith("java") && !lower.startsWith("javascript")) return "Java";
+  if (lower.startsWith("sql")) return "SQL";
+  const first = key.split("_").filter(Boolean)[0];
+  return first ? capitalizeToken(first) : humanizeAssessmentKey(key);
+}
+
+export function verifiedFocuses(assessmentKeys: string[]): string[] {
+  const focuses: string[] = [];
+  for (const key of assessmentKeys) {
+    const label = assessmentFocusLabel(key);
+    if (label && !focuses.some((item) => item.toLowerCase() === label.toLowerCase())) {
+      focuses.push(label);
+    }
+    if (focuses.length >= 2) break;
+  }
+  return focuses;
+}
+
+export function derivePublicationTitle(options: { assessmentKeys: string[] }): string {
+  const focuses = verifiedFocuses(options.assessmentKeys);
+  if (focuses.length === 0) return "Verified Technical Record";
+  if (focuses.length === 1) return `Verified Technical Work in ${focuses[0]}`;
+  return `Verified Technical Work in ${focuses[0]} & ${focuses[1]}`;
+}
+
+export function buildAbstract(options: {
+  projectTitles: string[];
+  projectDescriptions: string[];
+  focuses: string[];
+}): string {
+  const titles = options.projectTitles.filter(Boolean);
+  const descriptions = options.projectDescriptions
+    .map((item) => item.replace(/\s+/g, " ").trim())
+    .filter(Boolean);
+
+  if (titles.length === 0 && descriptions.length === 0 && options.focuses.length === 0) {
+    return "Technical summary not yet provided.";
   }
 
-  const firstSkill = options.skills.find((skill) => skill.trim().length > 0);
-  return firstSkill ? firstSkill.trim() : null;
-}
+  const parts: string[] = [];
 
-export function derivePublicationTitle(options: {
-  assessmentKeys: string[];
-  skills: string[];
-}): string {
-  const focus = primaryTechnicalFocus(options);
-  if (!focus) return "Verified Technical Record";
-  return `A Verified Implementation of ${focus}`;
-}
+  if (options.focuses.length > 0) {
+    parts.push(
+      `This record documents verified technical work in ${joinFocuses(options.focuses)}.`
+    );
+  }
 
-export function buildAbstract(projectDescriptions: string[]): string {
-  const text = projectDescriptions
-    .map((item) => item.replace(/\s+/g, " ").trim())
-    .filter(Boolean)
-    .join(" ");
+  if (titles.length === 1) {
+    parts.push(`Public project evidence: ${titles[0]}.`);
+  } else if (titles.length > 1) {
+    parts.push(`Public project evidence: ${titles.slice(0, 3).join("; ")}.`);
+  }
 
-  if (!text) return "Technical summary not yet provided.";
-  if (text.length <= 420) return text;
-  return `${text.slice(0, 417).trimEnd()}…`;
+  if (descriptions[0]) {
+    const excerpt =
+      descriptions[0].length > 220 ? `${descriptions[0].slice(0, 217).trimEnd()}…` : descriptions[0];
+    parts.push(excerpt);
+  }
+
+  if (parts.length === 0) return "Technical summary not yet provided.";
+  return parts.join(" ");
 }
 
 export function publicationRecordId(id: string): string {
   return `ML-${id.substring(0, 8).toUpperCase()}`;
+}
+
+function joinFocuses(focuses: string[]): string {
+  if (focuses.length === 1) return focuses[0];
+  if (focuses.length === 2) return `${focuses[0]} and ${focuses[1]}`;
+  return focuses.join(", ");
 }
 
 function capitalizeToken(value: string): string {
