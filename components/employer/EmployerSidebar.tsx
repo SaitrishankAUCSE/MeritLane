@@ -13,10 +13,10 @@ export function EmployerSidebar() {
   const avatarUrl = user?.photoURL || "";
 
   const navItems = [
-    { name: "Dashboard", href: "/employer/dashboard", icon: Command },
-    { name: "Candidates", href: "#", icon: Activity },
-    { name: "Evaluations", href: "#", icon: FileText },
-    { name: "Settings", href: "#", icon: Settings },
+    { name: "Identity", href: "#", icon: Activity },
+    { name: "Evidence", href: "#", icon: FileText },
+    { name: "Provenance", href: "/employer/dashboard", icon: Command },
+    { name: "Verification", href: "#", icon: ShieldCheck },
   ];
 
   return (
@@ -67,9 +67,8 @@ export function EmployerSidebar() {
           </Link>
         </div>
 
-        {/* User Profile Button */}
         <div className="flex items-center justify-between pt-6 border-t border-[#272a2f] mb-4">
-          <div className="flex items-center gap-3 cursor-pointer group" onClick={() => router.push('/employer/profile')}>
+          <div className="flex items-center gap-3 cursor-pointer group" onClick={() => router.push('/employer/settings')}>
             <div className="h-8 w-8 rounded-full bg-[#1b1c1e] border border-[#272a2f] group-hover:border-[#8e928f] flex items-center justify-center overflow-hidden text-xs transition-colors shrink-0">
               {avatarUrl ? <img src={avatarUrl} alt="Profile" className="h-full w-full object-cover" /> : name.charAt(0).toUpperCase()}
             </div>
