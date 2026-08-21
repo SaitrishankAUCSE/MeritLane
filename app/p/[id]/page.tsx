@@ -25,14 +25,23 @@ export default async function PublicProfilePage({ params }: Props) {
     notFound();
   }
 
-  const candidate = candidateDoc.data()!;
+  const rawCandidate = candidateDoc.data()!;
 
   // Must be fully verified to be public
-  if (candidate.verificationStatus !== "verified") {
+  if (rawCandidate.verificationStatus !== "verified") {
     notFound();
   }
 
-  const user = userDoc.exists ? userDoc.data()! : {};
+  const rawUser = userDoc.exists ? userDoc.data()! : {};
+
+  // Deep clone to strip Firestore Timestamps and classes before passing to client component
+  const candidate = JSON.parse(JSON.stringify(rawCandidate, (key, value) => 
+    value && typeof value === 'object' && value.toDate ? value.toDate().toISOString() : value
+  ));
+  
+  const user = JSON.parse(JSON.stringify(rawUser, (key, value) => 
+    value && typeof value === 'object' && value.toDate ? value.toDate().toISOString() : value
+  ));
 
   return <PublicProofRecord id={id} candidate={candidate} user={user} />;
 }
