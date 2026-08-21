@@ -88,14 +88,14 @@ export default function CandidateProfilePage() {
               <div className="border border-[#272a2f] p-6 bg-[#111316] rounded-none">
                 <div className="text-[10px] font-mono uppercase tracking-[0.1em] text-[#8e928f] mb-4">Evidence Excerpt</div>
                 <pre className="font-mono text-[12px] text-[#c4c7c5] leading-relaxed whitespace-pre-wrap">
-{\commit 8f3a9b21c...
+{`commit 8f3a9b21c...
 Author: Alex Vance
 Date:   Tue Oct 12 14:32:01 2023 -0400
 
     feat(consensus): implement multi-paxos learner pha
 
     Resolves distributed lock contention under high pa
-    load by batching accept responses.\}
+    load by batching accept responses.`}
                 </pre>
               </div>
             </div>
