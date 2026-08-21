@@ -35,12 +35,13 @@ Requirements:
 };
 
 export default function AssessmentPage() {
-  const { user, role, loading } = useAuth();
+  const { user, userProfile, loading } = useAuth();
   const router = useRouter();
   
   const [initializing, setInitializing] = useState(true);
   const [errorMsg, setErrorMsg] = useState("");
   const [cooldownDays, setCooldownDays] = useState<number | null>(null);
+  const [hasStarted, setHasStarted] = useState(false);
   
   const [variant, setVariant] = useState<"A" | "B">("A");
   const [domain, setDomain] = useState<string>("Software Engineering");
@@ -52,6 +53,19 @@ export default function AssessmentPage() {
 
   useEffect(() => {
     if (loading || !user) return;
+
+    setInitializing(true);
+    
+    // Check local profile state first for terminal states
+    if (userProfile?.verificationStatus === "verified") {
+      setErrorMsg("ALREADY VERIFIED");
+      setInitializing(false);
+      return;
+    } else if (userProfile?.verificationStatus === "failed") {
+      setErrorMsg("ASSESSMENT NOT PASSED");
+      setInitializing(false);
+      return;
+    }
 
     const startSession = async () => {
       try {
@@ -66,14 +80,14 @@ export default function AssessmentPage() {
         const data = await res.json();
 
         if (res.status === 400 && data.error === "Already verified") {
-          setErrorMsg("You are already verified. No further assessment required.");
+          setErrorMsg("ALREADY VERIFIED");
           setInitializing(false);
           return;
         }
 
         if (res.status === 403 && data.cooldownDays) {
           setCooldownDays(data.cooldownDays);
-          setErrorMsg(data.error);
+          setErrorMsg("ASSESSMENT NOT PASSED");
           setInitializing(false);
           return;
         }
@@ -112,10 +126,10 @@ export default function AssessmentPage() {
     };
 
     startSession();
-  }, [user, role, loading, router]);
+  }, [user, loading, userProfile]);
 
   useEffect(() => {
-    if (initializing || timeLeft <= 0 || errorMsg) return;
+    if (!hasStarted) return;
     const timer = setInterval(() => {
       setTimeLeft(prev => {
         if (prev <= 1) {
@@ -126,7 +140,7 @@ export default function AssessmentPage() {
       });
     }, 1000);
     return () => clearInterval(timer);
-  }, [initializing, timeLeft, errorMsg]);
+  }, [hasStarted, timeLeft, errorMsg]);
 
   const handleTest = async (isSubmit: boolean) => {
     if (!user) return;
@@ -161,12 +175,12 @@ export default function AssessmentPage() {
       } else {
         if (data.passed) {
           logFunnelEvent("assessment_submitted_pass", { score: data.score, variant });
-          setOutput(`✅ SUCCESS: ${data.message} (Score: ${data.score}/5)\nRedirecting to dashboard...`);
-          setTimeout(() => router.push("/candidate/dashboard"), 3000);
+          setHasStarted(false);
+          setErrorMsg("VERIFICATION COMPLETE");
         } else {
           logFunnelEvent("assessment_submitted_fail", { score: data.score || 0, variant });
-          setOutput(`❌ FAILED: ${data.message}\nYou are now in a 14-day cooldown.`);
-          setErrorMsg(`Assessment Failed. You can retry in 14 days.`);
+          setHasStarted(false);
+          setErrorMsg("ASSESSMENT NOT PASSED");
         }
       }
     } catch (e) {
@@ -178,35 +192,110 @@ export default function AssessmentPage() {
 
   if (loading || initializing) {
     return (
-      <div className="flex min-h-screen flex-col bg-surface text-foreground font-sans">
-        <header className="flex items-center justify-between border-b border-border bg-surface px-6 py-3">
-          <div className="font-label text-outline uppercase tracking-widest text-xs">Meritlane Technical Evaluation</div>
-        </header>
-        <div className="flex flex-1 p-6 items-center justify-center">
-          <div className="flex items-center gap-3 text-muted-foreground font-data text-sm">
-            <Loader2 className="h-4 w-4 animate-spin" />
-            Initializing workspace...
-          </div>
-        </div>
+      <div className="flex h-full w-full items-center justify-center bg-[#0b0c0e]">
+        <div className="h-4 w-4 border-2 border-[#8e928f] border-t-white animate-spin rounded-full"></div>
       </div>
     );
   }
 
-  if (errorMsg) {
+  if (!hasStarted || errorMsg) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-surface p-4">
-        <div className="w-full max-w-lg border border-border bg-surface-low p-8">
-          <div className="flex items-center gap-3 mb-6">
-            <AlertTriangle className="h-5 w-5 text-warning" />
-            <h2 className="font-serif text-2xl font-medium text-foreground">Assessment Unavailable</h2>
+      <div className="flex h-full w-full items-center justify-center bg-[#0b0c0e] p-6 overflow-y-auto scrollbar-hide">
+        <div className="w-full max-w-2xl border border-[#272a2f] bg-[#111316] rounded-xl overflow-hidden">
+          
+          <div className="border-b border-[#272a2f] px-8 py-6 flex items-center justify-between">
+            <h1 className="font-serif text-xl font-medium text-white tracking-tight">Technical Verification</h1>
+            {errorMsg === "ALREADY VERIFIED" || errorMsg === "VERIFICATION COMPLETE" ? (
+              <span className="text-[10px] font-mono uppercase tracking-widest px-2 py-1 bg-[#a8a2ff]/10 text-[#a8a2ff] border border-[#a8a2ff]/20 rounded">Verified</span>
+            ) : errorMsg === "ASSESSMENT NOT PASSED" ? (
+              <span className="text-[10px] font-mono uppercase tracking-widest px-2 py-1 bg-red-500/10 text-red-500 border border-red-500/20 rounded">Failed</span>
+            ) : (
+              <span className="text-[10px] font-mono uppercase tracking-widest px-2 py-1 bg-[#272a2f] text-white rounded">Not Started</span>
+            )}
           </div>
-          <p className="text-sm text-muted-foreground font-data leading-relaxed mb-8">{errorMsg}</p>
-          <button 
-            onClick={() => router.push("/candidate/dashboard")}
-            className="font-label text-xs uppercase tracking-widest border border-border px-4 py-2 text-foreground hover:bg-surface transition-colors"
-          >
-            Return to Workspace
-          </button>
+
+          <div className="p-8 space-y-8">
+            {errorMsg === "ALREADY VERIFIED" || errorMsg === "VERIFICATION COMPLETE" ? (
+              <div>
+                <h2 className="text-[18px] font-serif text-white mb-2">{errorMsg}</h2>
+                <p className="text-[14px] text-[#8e928f] mb-8">
+                  You already have a verified result for this assessment. Your technical claim is backed by rigorous mathematical verification.
+                </p>
+                <div className="flex gap-4">
+                  <button 
+                    onClick={() => router.push("/candidate/provenance")}
+                    className="px-6 py-3 bg-white text-black font-mono text-[11px] font-bold uppercase tracking-widest rounded-md hover:bg-[#e3e2e5] transition-colors"
+                  >
+                    View Provenance
+                  </button>
+                  <button 
+                    onClick={() => router.push("/candidate/dashboard")}
+                    className="px-6 py-3 border border-[#272a2f] text-white font-mono text-[11px] font-bold uppercase tracking-widest rounded-md hover:bg-[#1b1c1e] transition-colors"
+                  >
+                    Return to Workspace
+                  </button>
+                </div>
+              </div>
+            ) : errorMsg === "ASSESSMENT NOT PASSED" ? (
+              <div>
+                <h2 className="text-[18px] font-serif text-[#ffb4ab] mb-2">{errorMsg}</h2>
+                <p className="text-[14px] text-[#8e928f] mb-6">
+                  Your submitted solution did not pass the integrity tests. To preserve the rigor of the Meritlane record, you have been placed in a mandatory cooldown.
+                </p>
+                <div className="border border-[#272a2f] bg-[#0b0c0e] p-5 rounded mb-8">
+                  <div className="text-[10px] font-mono uppercase tracking-widest text-[#8e928f] mb-1">Next Eligible Attempt</div>
+                  <div className="text-[14px] font-mono text-white">
+                    {new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toLocaleDateString()}
+                  </div>
+                </div>
+                <button 
+                  onClick={() => router.push("/candidate/dashboard")}
+                  className="px-6 py-3 border border-[#272a2f] text-white font-mono text-[11px] font-bold uppercase tracking-widest rounded-md hover:bg-[#1b1c1e] transition-colors"
+                >
+                  Return to Workspace
+                </button>
+              </div>
+            ) : (
+              <div>
+                <p className="text-[14px] text-[#8e928f] mb-6">You are about to begin:</p>
+                
+                <h2 className="text-[24px] font-serif text-white mb-8 border-b border-[#272a2f] pb-6">
+                  <span className="font-mono text-[14px] text-[#8e928f] block mb-2">{domain}</span>
+                  Technical Assessment
+                </h2>
+                
+                <div className="grid grid-cols-2 gap-6 mb-8">
+                  <div className="border border-[#272a2f] bg-[#0b0c0e] p-4 rounded">
+                    <div className="text-[10px] font-mono uppercase tracking-widest text-[#8e928f] mb-1">Time Limit</div>
+                    <div className="text-[14px] font-mono text-white flex items-center gap-2">
+                      <Clock className="h-4 w-4 text-[#8e928f]" /> 45 Minutes
+                    </div>
+                  </div>
+                  <div className="border border-[#272a2f] bg-[#0b0c0e] p-4 rounded">
+                    <div className="text-[10px] font-mono uppercase tracking-widest text-[#8e928f] mb-1">Allowance</div>
+                    <div className="text-[14px] font-mono text-white flex items-center gap-2">
+                      <ShieldAlert className="h-4 w-4 text-[#8e928f]" /> 1 Attempt
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex gap-4">
+                  <button 
+                    onClick={() => setHasStarted(true)}
+                    className="px-6 py-3 bg-white text-black font-mono text-[11px] font-bold uppercase tracking-widest rounded-md hover:bg-[#e3e2e5] transition-colors"
+                  >
+                    Start Assessment
+                  </button>
+                  <button 
+                    onClick={() => router.push("/candidate/dashboard")}
+                    className="px-6 py-3 border border-[#272a2f] text-white font-mono text-[11px] font-bold uppercase tracking-widest rounded-md hover:bg-[#1b1c1e] transition-colors"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     );
@@ -219,79 +308,72 @@ export default function AssessmentPage() {
   };
 
   return (
-    <div className="flex h-screen flex-col bg-surface text-foreground font-sans">
-      {/* Header */}
-      <header className="flex items-center justify-between border-b border-border bg-surface px-6 py-2.5">
+    <div className="flex h-full w-full flex-col bg-[#0b0c0e] overflow-hidden border-l border-[#272a2f]">
+      <header className="flex items-center justify-between border-b border-[#272a2f] px-6 py-4 shrink-0">
         <div className="flex items-center gap-4">
-          <span className="font-label text-xs tracking-[0.2em] uppercase text-outline">Meritlane</span>
-          <span className="text-border">/</span>
-          <span className="font-label text-xs tracking-widest uppercase text-foreground">Technical Evaluation Workspace</span>
+          <span className="font-mono text-[10px] tracking-[0.2em] uppercase text-[#8e928f]">Meritlane</span>
+          <span className="text-[#444846]">/</span>
+          <span className="font-mono text-[10px] tracking-widest uppercase text-white">Technical Evaluation Workspace</span>
         </div>
-        <div className={`font-data text-sm font-bold tracking-wider ${
-          timeLeft < 300 ? 'text-danger' : 'text-foreground'
+        <div className={`font-mono text-[14px] font-bold tracking-wider ${
+          timeLeft < 300 ? 'text-[#ffb4ab]' : 'text-white'
         }`}>
           {formatTime(timeLeft)}
         </div>
       </header>
 
-      {/* Main Content Workspace */}
       <div className="flex flex-1 overflow-hidden">
-        
-        {/* Left Panel: Instructions */}
-        <div className="w-[40%] max-w-[600px] border-r border-border bg-surface-low flex flex-col z-10">
-          <div className="p-6 border-b border-border">
-            <h2 className="font-label text-outline uppercase tracking-widest text-xs">Problem Specification</h2>
+        <div className="w-[40%] max-w-[600px] border-r border-[#272a2f] bg-[#111316] flex flex-col z-10">
+          <div className="p-6 border-b border-[#272a2f]">
+            <h2 className="font-mono text-[10px] uppercase tracking-widest text-[#8e928f]">Problem Specification</h2>
           </div>
-          <div className="flex-1 overflow-auto p-6 scrollbar-none">
-            <pre className="whitespace-pre-wrap font-data text-[13px] leading-relaxed text-foreground">
+          <div className="flex-1 overflow-auto p-6 scrollbar-hide">
+            <pre className="whitespace-pre-wrap font-mono text-[13px] leading-[1.8] text-[#c4c7c5]">
               {getInstructions(variant, domain)}
             </pre>
             
-            <div className="mt-12 border-l-2 border-warning pl-4">
-              <h3 className="font-label text-[10px] uppercase tracking-widest text-warning mb-2">Security &amp; Integrity Notice</h3>
-              <p className="font-data text-xs leading-relaxed text-muted-foreground">
+            <div className="mt-12 border-l border-[#444846] pl-6 py-2">
+              <h3 className="font-mono text-[10px] uppercase tracking-widest text-[#a8a2ff] mb-3">Security &amp; Integrity Notice</h3>
+              <p className="font-sans text-[13px] leading-relaxed text-[#8e928f]">
                 You have exactly 1 attempt. Navigating away or refreshing does not pause the server timer. Expiration triggers an automatic score calculation and enforces a 14-day cooldown.
               </p>
             </div>
           </div>
         </div>
 
-        {/* Right Panel: Editor & Console */}
-        <div className="flex flex-1 flex-col bg-surface">
-          {/* Editor Area */}
-          <div className="flex-1 overflow-hidden relative border-b border-border">
+        <div className="flex flex-1 flex-col bg-[#0b0c0e]">
+          <div className="flex-1 overflow-hidden relative border-b border-[#272a2f]">
             <textarea
               value={code}
               onChange={(e) => setCode(e.target.value)}
               spellCheck={false}
-              className="h-full w-full resize-none bg-transparent font-data text-[14px] leading-relaxed text-foreground outline-none p-6 pb-20 selection:bg-foreground selection:text-surface"
+              className="h-full w-full resize-none bg-transparent font-mono text-[14px] leading-[1.6] text-[#e3e2e5] outline-none p-6 pb-20 selection:bg-white selection:text-black"
               placeholder="Write your Python implementation here..."
             />
           </div>
 
-          {/* Console Area */}
-          <div className="h-[35%] min-h-[250px] flex flex-col bg-surface-low z-20">
-            <div className="flex items-center justify-between border-b border-border px-6 py-3">
-              <span className="font-label text-xs uppercase tracking-widest text-outline">Console &amp; Test Suite</span>
-              <div className="flex gap-3">
+          <div className="h-[35%] min-h-[250px] flex flex-col bg-[#111316] z-20">
+            <div className="flex items-center justify-between border-b border-[#272a2f] px-6 py-4">
+              <span className="font-mono text-[10px] uppercase tracking-widest text-[#8e928f]">Console &amp; Test Suite</span>
+              <div className="flex gap-4">
                 <button
                   onClick={() => handleTest(false)}
                   disabled={evaluating || timeLeft <= 0}
-                  className="font-label text-[10px] uppercase tracking-widest border border-border px-4 py-1.5 text-foreground hover:bg-surface disabled:opacity-50 transition-colors"
+                  className="font-mono text-[10px] font-bold uppercase tracking-widest border border-[#272a2f] px-4 py-2 text-white hover:bg-[#1b1c1e] disabled:opacity-50 rounded transition-colors"
                 >
                   {evaluating ? "Evaluating..." : "Run Tests"}
                 </button>
                 <button
                   onClick={() => handleTest(true)}
                   disabled={evaluating || timeLeft <= 0}
-                  className="font-label text-[10px] uppercase tracking-widest bg-foreground text-surface px-4 py-1.5 hover:bg-zinc-800 disabled:opacity-50 transition-colors"
+                  className="font-mono text-[10px] font-bold uppercase tracking-widest bg-white text-black px-4 py-2 hover:bg-[#e3e2e5] disabled:opacity-50 rounded transition-colors"
                 >
                   Submit Assessment
                 </button>
               </div>
             </div>
-            <div className="flex-1 overflow-auto p-6">
-              <pre className="font-data text-[13px] leading-relaxed text-muted-foreground whitespace-pre-wrap">
+            <div className="flex-1 overflow-auto p-6 scrollbar-hide">
+              <pre className="font-mono text-[13px] leading-[1.6] text-[#8e928f] whitespace-pre-wrap">
                 {output || "System initialized. Click 'Run Tests' to validate your solution against public test cases."}
               </pre>
             </div>

@@ -3,10 +3,12 @@
 import React, { useEffect, useState } from "react";
 import { useAuth } from "@/lib/auth/AuthContext";
 import { fetchCandidateProfile, CandidateProfile } from "@/lib/firebase/candidate";
-import { ShieldCheck, BarChart } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { ShieldCheck, Fingerprint, Link, BookOpen, Briefcase, ChevronRight, PenTool } from "lucide-react";
 
 export default function CandidateProfilePage() {
   const { user, loading } = useAuth();
+  const router = useRouter();
   const [profile, setProfile] = useState<CandidateProfile | null>(null);
 
   useEffect(() => {
@@ -17,148 +19,145 @@ export default function CandidateProfilePage() {
     }
   }, [user, loading]);
 
-  const name = profile?.name || user?.displayName?.split(" ")[0] || "Alex Vance";
-  const avatarUrl = user?.photoURL || "";
-  const roleTitle = profile?.title || "SYSTEMS ARCHITECT";
-  const primaryDomain = profile?.skills?.[0] || "Distributed Systems";
-
+  const name = profile?.name || user?.displayName || "Alex Vance";
+  const primaryDomain = profile?.skills?.[0] || "Software Engineering";
+  
+  // Mapping skills to claims (mocking statuses since backend only supports global status)
+  const skills = profile?.skills || ["Python", "React", "Firebase"];
+  
   if (loading) {
     return <div className="h-full w-full flex items-center justify-center"><div className="h-4 w-4 border-2 border-[#8e928f] border-t-white animate-spin rounded-full"></div></div>;
   }
 
   return (
-    <div className="flex h-full w-full flex-col xl:flex-row overflow-hidden">
+    <div className="mx-auto max-w-4xl px-6 py-12 h-full overflow-y-auto scrollbar-hide">
       
-      {/* COLUMN 1: IDENTITY */}
-      <div className="hidden xl:flex w-[280px] shrink-0 pt-16 px-10 flex-col overflow-y-auto scrollbar-hide">
-        <div className="h-[80px] w-[80px] rounded-full border border-[#444846] bg-[#111316] mb-8 overflow-hidden flex items-center justify-center">
-           <div className="h-full w-full rounded-full overflow-hidden grayscale">
-             {avatarUrl ? <img src={avatarUrl} alt={name} className="h-full w-full object-cover opacity-80" /> : <span className="font-serif text-2xl text-[#8e928f]">{name.charAt(0)}</span>}
-           </div>
+      <div className="mb-10">
+        <div className="text-[10px] font-mono uppercase tracking-[0.2em] text-[#8e928f] mb-3 flex items-center gap-2">
+          <Fingerprint className="h-3 w-3" /> Technical Identity
         </div>
-
-        <h2 className="font-serif text-[28px] text-white leading-tight mb-2">{name}</h2>
-        <div className="text-[10px] font-mono uppercase tracking-[0.15em] text-[#8e928f] mb-12">{roleTitle}</div>
-        
-        <div className="space-y-8">
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6 border-b border-[#272a2f] pb-6">
           <div>
-            <div className="text-[10px] font-mono uppercase tracking-[0.1em] text-[#8e928f] mb-2">Primary Domain</div>
+            <h1 className="font-serif text-[32px] sm:text-[40px] text-white leading-tight mb-2">{name}</h1>
             <div className="text-[14px] text-[#e3e2e5] font-sans">{primaryDomain}</div>
           </div>
-          <div>
-            <div className="text-[10px] font-mono uppercase tracking-[0.1em] text-[#8e928f] mb-2">Verified Since</div>
-            <div className="text-[13px] font-mono text-[#e3e2e5] font-bold">2021.11.04</div>
-          </div>
-          <div>
-            <div className="text-[10px] font-mono uppercase tracking-[0.1em] text-[#8e928f] mb-2">Trust Score</div>
-            <div className="flex items-center gap-2">
-              <ShieldCheck className="h-3.5 w-3.5 text-[#a8a2ff]" />
-              <span className="text-[13px] font-mono text-[#e3e2e5] font-bold">0.984</span>
-            </div>
-          </div>
+          <button className="flex items-center gap-2 px-4 py-2 border border-[#272a2f] bg-[#111316] text-[#e3e2e5] hover:text-white hover:border-[#444846] rounded-md text-[11px] font-mono uppercase tracking-widest transition-colors">
+            <PenTool className="h-3.5 w-3.5" /> Edit Identity
+          </button>
         </div>
       </div>
 
-      {/* COLUMN 2: PROOF THREADS */}
-      <div className="flex-1 p-10 lg:p-16 lg:overflow-y-auto scrollbar-hide border-l border-[#272a2f]">
+      {/* Main Claims Layer */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
         
-        <div className="hidden lg:flex items-center justify-between mb-16 border-b border-[#272a2f] pb-4">
-          <h2 className="text-[18px] font-serif text-white font-medium">Proof Threads</h2>
-          <div className="text-[11px] font-mono uppercase tracking-[0.1em] text-[#8e928f]">Active Assessment</div>
-        </div>
-
-        <div className="relative border-l border-[#272a2f] pl-10 space-y-24">
+        {/* Left Column: Skills / Claims */}
+        <div className="md:col-span-2 space-y-10">
           
-          {/* Thread 1 */}
-          <div className="relative">
-            <div className="absolute -left-[44px] top-1.5 h-2 w-2 rounded-full bg-white" />
-            
-            <div className="text-[11px] font-sans font-bold uppercase tracking-[0.1em] text-[#a8a2ff] mb-4">Claim</div>
-            <h3 className="font-serif text-[32px] text-white leading-[1.2] mb-6 max-w-2xl">
-              Architected Paxos-based consensus protocol for distributed state management.
-            </h3>
-
-            <div className="space-y-4">
-              <div className="text-[10px] font-mono uppercase tracking-[0.1em] text-[#8e928f] mb-2">Source</div>
-              <div className="flex items-center gap-3 text-[13px] font-mono text-white font-medium mb-6">
-                <span>{"< >"}</span>
-                GitHub Repository (Private Auth)
-              </div>
-              
-              <div className="border border-[#272a2f] p-6 bg-[#111316] rounded-none">
-                <div className="text-[10px] font-mono uppercase tracking-[0.1em] text-[#8e928f] mb-4">Evidence Excerpt</div>
-                <pre className="font-mono text-[12px] text-[#c4c7c5] leading-relaxed whitespace-pre-wrap">
-{`commit 8f3a9b21c...
-Author: Alex Vance
-Date:   Tue Oct 12 14:32:01 2023 -0400
-
-    feat(consensus): implement multi-paxos learner pha
-
-    Resolves distributed lock contention under high pa
-    load by batching accept responses.`}
-                </pre>
-              </div>
+          <section>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-[12px] font-mono uppercase tracking-[0.1em] text-[#8e928f]">Technical Claims (Skills)</h2>
+              <button className="text-[11px] font-mono uppercase tracking-widest text-[#a8a2ff] hover:text-white transition-colors">[+] Add Skill</button>
             </div>
-          </div>
-
-          {/* Thread 2 */}
-          <div className="relative">
-            <div className="absolute -left-[44px] top-1.5 h-2 w-2 border border-white bg-transparent rounded-none" />
             
-            <div className="text-[11px] font-sans font-bold uppercase tracking-[0.1em] text-[#8e928f] mb-4">Claim</div>
-            <h3 className="font-serif text-[32px] text-[#8e928f] leading-[1.2] mb-6 max-w-2xl">
-              Reduced global latency by 45% through predictive edge caching.
-            </h3>
-
             <div className="space-y-4">
-              <div className="text-[10px] font-mono uppercase tracking-[0.1em] text-[#8e928f] mb-2">Source</div>
-              <div className="flex items-center gap-3 text-[13px] font-mono text-[#8e928f] mb-8">
-                <BarChart className="h-4 w-4" />
-                Datadog APM Export
-              </div>
-              
-              <div className="text-[14px] font-serif italic text-[#8e928f]">
-                Awaiting temporal verification from third-party auditor.
-              </div>
+              {skills.map((skill, idx) => (
+                <div key={idx} className="border border-[#272a2f] bg-[#111316] p-5 rounded-lg flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                  <div className="flex items-center gap-4">
+                    <div className="h-10 w-10 shrink-0 bg-[#0b0c0e] border border-[#272a2f] rounded flex items-center justify-center font-mono text-[14px] text-white">
+                      {skill.substring(0, 2).toUpperCase()}
+                    </div>
+                    <div>
+                      <div className="text-[14px] font-medium text-white mb-1">{skill}</div>
+                      <div className="text-[11px] font-mono uppercase tracking-widest text-[#8e928f]">State: Declared</div>
+                    </div>
+                  </div>
+                  
+                  {/* Cross-pillar navigation logic */}
+                  {idx === 0 ? (
+                    <div className="text-right">
+                      <div className="text-[11px] text-[#8e928f] mb-2">No supporting evidence yet.</div>
+                      <button 
+                        onClick={() => router.push('/candidate/dashboard')}
+                        className="text-[11px] font-mono uppercase tracking-widest text-black bg-white px-3 py-1.5 rounded hover:bg-[#e3e2e5] transition-colors"
+                      >
+                        Add Evidence
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="text-right">
+                      <div className="text-[11px] text-[#a8a2ff] mb-2">Evidence linked.</div>
+                      <button 
+                        onClick={() => router.push('/candidate/assessment')}
+                        className="text-[11px] font-mono uppercase tracking-widest text-white border border-[#272a2f] px-3 py-1.5 rounded hover:bg-[#1b1c1e] transition-colors"
+                      >
+                        Test Claim
+                      </button>
+                    </div>
+                  )}
+                </div>
+              ))}
             </div>
-          </div>
+          </section>
+
+          <section>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-[12px] font-mono uppercase tracking-[0.1em] text-[#8e928f]">Experience &amp; Projects</h2>
+              <button className="text-[11px] font-mono uppercase tracking-widest text-[#a8a2ff] hover:text-white transition-colors">[+] Add Project</button>
+            </div>
+            
+            {profile?.projects && profile.projects.length > 0 ? (
+              <div className="space-y-4">
+                {profile.projects.map((proj, idx) => (
+                  <div key={idx} className="border border-[#272a2f] bg-[#111316] p-5 rounded-lg">
+                    <div className="text-[14px] font-medium text-white mb-2">{proj.title}</div>
+                    <div className="text-[13px] text-[#8e928f]">{proj.description}</div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="border border-dashed border-[#272a2f] p-8 rounded-lg text-center">
+                <div className="text-[13px] text-white font-medium mb-1">Define your technical claims.</div>
+                <div className="text-[12px] text-[#8e928f] mb-4">Add the projects you have built to establish your experience layer.</div>
+                <button className="text-[11px] font-mono uppercase tracking-widest text-black bg-white px-4 py-2 rounded hover:bg-[#e3e2e5] transition-colors">
+                  Add Experience
+                </button>
+              </div>
+            )}
+          </section>
 
         </div>
-      </div>
 
-      {/* COLUMN 3: META-DATA */}
-      <div className="hidden xl:block w-[340px] shrink-0 border-l border-[#272a2f] bg-[#0b0c0e] p-12 overflow-y-auto scrollbar-hide">
-        <h3 className="text-[11px] font-sans font-bold uppercase tracking-[0.1em] text-[#8e928f] mb-8">Evidence Meta-Data</h3>
-        
-        <div className="space-y-12">
-          <div>
-            <div className="text-[10px] font-mono uppercase tracking-[0.1em] text-[#8e928f] mb-3">Cryptographic Hash</div>
-            <div className="font-mono text-[12px] text-white break-all">0x7F8B9C2A...D4E1F0A2</div>
+        {/* Right Column: Meta & Links */}
+        <div className="space-y-8">
+          
+          <div className="border border-[#272a2f] bg-[#111316] p-5 rounded-lg">
+            <h3 className="text-[11px] font-mono uppercase tracking-[0.1em] text-[#8e928f] mb-4">External Links</h3>
+            <div className="space-y-3">
+              <a href={profile?.githubUrl || "#"} target="_blank" rel="noreferrer" className="flex items-center gap-3 text-[13px] text-[#e3e2e5] hover:text-white transition-colors group">
+                <Link className="h-4 w-4 text-[#8e928f] group-hover:text-white" /> GitHub Account
+              </a>
+              <a href={profile?.resumeUrl || "#"} target="_blank" rel="noreferrer" className="flex items-center gap-3 text-[13px] text-[#e3e2e5] hover:text-white transition-colors group">
+                <Briefcase className="h-4 w-4 text-[#8e928f] group-hover:text-white" /> External Resume
+              </a>
+            </div>
           </div>
 
-          <div>
-            <div className="text-[10px] font-mono uppercase tracking-[0.1em] text-[#8e928f] mb-6">Temporal Anchors</div>
-            
-            <div className="relative border-l border-[#272a2f] pl-6 space-y-6">
-              <div className="relative">
-                <div className="absolute -left-[28.5px] top-1.5 h-[5px] w-[5px] rounded-full bg-[#a8a2ff]" />
-                <div className="font-mono text-[12px] text-white font-medium mb-1">2023.10.12 14:32 UT</div>
-                <div className="text-[13px] text-[#c4c7c5]">Source committed</div>
-              </div>
-              
-              <div className="relative">
-                <div className="absolute -left-[28.5px] top-1.5 h-[5px] w-[5px] rounded-full border border-[#8e928f] bg-[#0b0c0e]" />
-                <div className="font-mono text-[12px] text-[#8e928f] mb-1">2023.10.15 09:00 UT</div>
-                <div className="text-[13px] text-[#8e928f]">System ingested</div>
+          <div className="border border-[#272a2f] bg-[#111316] p-5 rounded-lg">
+            <h3 className="text-[11px] font-mono uppercase tracking-[0.1em] text-[#8e928f] mb-4">Education</h3>
+            <div className="space-y-4">
+              <div>
+                <div className="flex items-start gap-3">
+                  <BookOpen className="h-4 w-4 text-[#8e928f] mt-0.5 shrink-0" />
+                  <div>
+                    <div className="text-[13px] text-white font-medium">{profile?.college || "University"}</div>
+                    <div className="text-[12px] text-[#8e928f]">{profile?.branch || "Computer Science"}</div>
+                    <div className="text-[11px] font-mono text-[#8e928f] mt-1">Class of {profile?.gradYear || "2024"}</div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
 
-          <div className="pt-8 border-t border-[#272a2f]">
-            <a href="#" className="text-[14px] font-sans font-medium text-white hover:text-[#a8a2ff] transition-colors">
-              View Raw Artifact
-            </a>
-          </div>
         </div>
       </div>
 

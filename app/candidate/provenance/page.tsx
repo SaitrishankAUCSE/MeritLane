@@ -50,11 +50,34 @@ export default function CandidateProvenancePage() {
     );
   }
 
-  // To simulate the public profile, we render PublicProofRecord.
-  // We wrap it in a container that allows scrolling, since the layout handles its own overflow.
   return (
-    <div className="h-full w-full overflow-y-auto scrollbar-hide bg-[#0b0c0e]">
-      <PublicProofRecord id={user!.uid} candidate={candidate} user={userDoc || {}} hideHeader={true} />
+    <div className="flex h-full w-full flex-col bg-[#0b0c0e] overflow-hidden">
+      
+      {/* Provenance Header */}
+      <div className="shrink-0 px-10 py-10 border-b border-[#272a2f] flex justify-between items-end">
+        <div>
+          <div className="text-[10px] font-mono uppercase tracking-[0.2em] text-[#8e928f] mb-3">
+            Output Layer
+          </div>
+          <h1 className="font-serif text-[32px] text-white leading-tight">Provenance Record</h1>
+        </div>
+        <div className="flex gap-4">
+          <button className="px-5 py-2 border border-[#272a2f] text-white hover:border-[#444846] rounded text-[11px] font-mono uppercase tracking-widest transition-colors">
+            Copy Public Link
+          </button>
+          <a href={`/p/${user!.uid}`} target="_blank" rel="noreferrer" className="px-5 py-2 bg-white text-black hover:bg-[#e3e2e5] rounded text-[11px] font-mono uppercase tracking-widest transition-colors">
+            View Public Record
+          </a>
+        </div>
+      </div>
+
+      {/* Public Record Preview container */}
+      <div className="flex-1 overflow-y-auto scrollbar-hide">
+        <div className="pointer-events-none opacity-90 scale-[0.98] origin-top max-w-[1400px] mx-auto mt-10 border border-[#272a2f] rounded-2xl overflow-hidden shadow-2xl">
+          <PublicProofRecord id={user!.uid} candidate={candidate} user={userDoc || {}} hideHeader={true} />
+        </div>
+      </div>
+
     </div>
   );
 }
