@@ -13,10 +13,10 @@ export function EmployerSidebar() {
   const avatarUrl = user?.photoURL || "";
 
   const navItems = [
-    { name: "Identity", href: "#", icon: Activity },
-    { name: "Evidence", href: "#", icon: FileText },
-    { name: "Provenance", href: "/employer/dashboard", icon: Command },
-    { name: "Verification", href: "#", icon: ShieldCheck },
+    { name: "Dashboard", href: "/employer/dashboard", icon: Command },
+    { name: "Candidates", href: "#", icon: Activity },
+    { name: "Evaluations", href: "#", icon: FileText },
+    { name: "Settings", href: "#", icon: Settings },
   ];
 
   return (
@@ -55,27 +55,26 @@ export function EmployerSidebar() {
       <div className="px-6 py-6 border-t border-[#272a2f] shrink-0">
         <button className="flex items-center gap-2 w-full text-left py-2 text-[#e3e2e5] hover:text-white transition-colors mb-6">
           <span className="font-mono text-[11px] text-white font-bold">[+]</span>
-          <span className="font-sans text-[11px] font-bold uppercase tracking-[0.1em]">Add Evidence</span>
+          <span className="font-sans text-[11px] font-bold uppercase tracking-[0.1em]">New Request</span>
         </button>
         
         <div className="space-y-3 mb-6">
-          <Link href="#" className="flex items-center text-[14px] font-sans text-[#8e928f] hover:text-white transition-colors">
+          <Link href="/employer/settings" className="flex items-center text-[14px] font-sans text-[#8e928f] hover:text-white transition-colors">
             <Settings className="mr-4 h-[18px] w-[18px] opacity-70" /> Settings
           </Link>
-          <Link href="#" className="flex items-center text-[14px] font-sans text-[#8e928f] hover:text-white transition-colors">
+          <Link href="/employer/support" className="flex items-center text-[14px] font-sans text-[#8e928f] hover:text-white transition-colors">
             <HelpCircle className="mr-4 h-[18px] w-[18px] opacity-70" /> Support
           </Link>
         </div>
 
         {/* User Profile Button */}
         <div className="flex items-center justify-between pt-6 border-t border-[#272a2f] mb-4">
-          <div className="flex items-center gap-3 cursor-pointer group">
+          <div className="flex items-center gap-3 cursor-pointer group" onClick={() => router.push('/employer/profile')}>
             <div className="h-8 w-8 rounded-full bg-[#1b1c1e] border border-[#272a2f] group-hover:border-[#8e928f] flex items-center justify-center overflow-hidden text-xs transition-colors shrink-0">
               {avatarUrl ? <img src={avatarUrl} alt="Profile" className="h-full w-full object-cover" /> : name.charAt(0).toUpperCase()}
             </div>
-            <div className="overflow-hidden">
-              <div className="text-[13px] text-[#e3e2e5] font-medium truncate group-hover:text-white transition-colors">{name}</div>
-              <div className="text-[10px] text-[#8e928f] font-mono tracking-wider uppercase truncate hover:text-[#ffb4ab] transition-colors" onClick={(e) => { e.stopPropagation(); handleSignOut(); }}>Sign out</div>
+            <div className="text-[13px] text-[#e3e2e5] font-medium truncate group-hover:text-white transition-colors">
+              {name}
             </div>
           </div>
         </div>

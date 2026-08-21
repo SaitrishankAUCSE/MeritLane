@@ -16,10 +16,10 @@ export function CandidateSidebar() {
   const avatarUrl = user?.photoURL || "";
 
   const navItems = [
-    { name: "Identity", href: "/candidate/profile", icon: Fingerprint },
-    { name: "Evidence", href: "/candidate/dashboard", icon: LayoutDashboard },
-    { name: "Provenance", href: "/candidate/provenance", icon: Network },
-    { name: "Verification", href: "/candidate/assessment", icon: ShieldCheck },
+    { name: "Dashboard", href: "/candidate/dashboard", icon: LayoutDashboard },
+    { name: "Profile", href: "/candidate/profile", icon: Fingerprint },
+    { name: "Assessments", href: "/candidate/assessment", icon: ShieldCheck },
+    { name: "Public Record", href: "/candidate/provenance", icon: Network },
   ];
 
   return (
@@ -104,14 +104,13 @@ export function CandidateSidebar() {
 
         {/* User Profile Button */}
         <div className={`flex items-center ${isCollapsed ? "justify-center" : "justify-between"} pt-6 border-t border-[#272a2f] mb-4`}>
-          <div className="flex items-center gap-3 cursor-pointer group" onClick={() => router.push('/candidate/settings')}>
+          <div className="flex items-center gap-3 cursor-pointer group" onClick={() => router.push('/candidate/profile')}>
             <div className="h-8 w-8 rounded-full bg-[#1b1c1e] border border-[#272a2f] group-hover:border-[#8e928f] flex items-center justify-center overflow-hidden text-xs transition-colors shrink-0">
               {avatarUrl ? <img src={avatarUrl} alt="Profile" className="h-full w-full object-cover" /> : name.charAt(0).toUpperCase()}
             </div>
             {!isCollapsed && (
-              <div className="overflow-hidden">
-                <div className="text-[13px] text-[#e3e2e5] font-medium truncate group-hover:text-white transition-colors">{name}</div>
-                <div className="text-[10px] text-[#8e928f] font-mono tracking-wider uppercase truncate hover:text-[#ffb4ab] transition-colors" onClick={(e) => { e.stopPropagation(); handleSignOut(); }}>Sign out</div>
+              <div className="text-[13px] text-[#e3e2e5] font-medium truncate group-hover:text-white transition-colors">
+                {name}
               </div>
             )}
           </div>
