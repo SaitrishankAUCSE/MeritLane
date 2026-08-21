@@ -62,10 +62,10 @@ export default function CandidateProvenancePage() {
           <h1 className="font-serif text-[32px] text-white leading-tight">Provenance Record</h1>
         </div>
         <div className="flex gap-4">
-          <button className="px-5 py-2 border border-[#272a2f] text-white hover:border-[#444846] rounded text-[11px] font-mono uppercase tracking-widest transition-colors">
+          <button className="px-5 py-2 border border-[#444846] text-[#8e928f] hover:text-white hover:border-white rounded-none text-[10px] font-mono uppercase tracking-[0.2em] transition-all">
             Copy Public Link
           </button>
-          <a href={`/p/${user!.uid}`} target="_blank" rel="noreferrer" className="px-5 py-2 bg-white text-black hover:bg-[#e3e2e5] rounded text-[11px] font-mono uppercase tracking-widest transition-colors">
+          <a href={`/p/${user!.uid}`} target="_blank" rel="noreferrer" className="px-5 py-2 border border-white bg-white text-black hover:bg-black hover:text-white rounded-none text-[10px] font-mono uppercase tracking-[0.2em] transition-all">
             View Public Record
           </a>
         </div>

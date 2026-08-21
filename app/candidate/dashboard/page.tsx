@@ -37,7 +37,7 @@ export default function CandidateDashboardPage() {
             <h1 className="font-serif text-[32px] sm:text-[40px] text-white leading-tight mb-2">Build your proof.</h1>
             <div className="text-[14px] text-[#e3e2e5] font-sans">Provide the material that supports the claims made in your Identity.</div>
           </div>
-          <button className="px-4 py-2 bg-white text-black hover:bg-[#e3e2e5] rounded-md text-[11px] font-mono uppercase tracking-widest transition-colors font-bold">
+          <button className="px-5 py-2.5 border border-white bg-white text-black hover:bg-black hover:text-white rounded-none text-[10px] font-mono uppercase tracking-[0.2em] transition-all font-bold">
             [+] Add Evidence
           </button>
         </div>
@@ -78,7 +78,7 @@ export default function CandidateDashboardPage() {
               <div className="text-[11px] text-[#a8a2ff] mb-4">Evidence is sufficient for testing.</div>
               <button 
                 onClick={() => router.push('/candidate/assessment')}
-                className="w-full flex items-center justify-center gap-2 text-[11px] font-mono uppercase tracking-widest text-black bg-white py-2 rounded hover:bg-[#e3e2e5] transition-colors"
+                className="w-full flex items-center justify-center gap-2 text-[10px] font-mono uppercase tracking-[0.2em] border border-white text-black bg-white py-3 rounded-none hover:bg-black hover:text-white transition-all font-bold"
               >
                 Start Verification <ArrowRight className="h-3 w-3" />
               </button>
