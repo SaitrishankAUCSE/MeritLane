@@ -52,42 +52,40 @@ export default function CandidateDashboardPage() {
         </div>
 
         {/* Action Button */}
-        <div className="px-5 py-6">
+        <div className="px-5 py-8">
           <button 
             onClick={() => router.push('/candidate/profile')}
-            className="w-full border border-[#272a2f] py-2.5 text-[11px] font-mono font-medium uppercase tracking-[0.15em] text-[#c4c7c5] hover:bg-[#111316] hover:text-white transition-colors"
+            className="flex items-center justify-center gap-2 w-full border border-[#272a2f] py-3 text-[#e3e2e5] hover:bg-[#111316] hover:text-white transition-colors"
           >
-            [+] Add Evidence
+            <span className="font-mono text-[11px] text-[#8e928f]">[+]</span>
+            <span className="font-sans text-[11px] font-bold uppercase tracking-[0.1em]">Add Evidence</span>
           </button>
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 px-3 space-y-1">
-          <a href="#" className="flex items-center px-3 py-2.5 text-[13px] text-[#8e928f] hover:text-[#f4f4f2] hover:bg-[#111316] rounded-none transition-colors group">
-            <Command className="mr-3 h-4 w-4 group-hover:text-white" />
+        <nav className="flex-1 px-5 space-y-1">
+          <a href="/candidate/profile" className="flex items-center px-3 py-2.5 font-sans text-[15px] font-normal text-[#8e928f] hover:text-[#f4f4f2] transition-colors">
             Identity
           </a>
-          <a href="#" className="flex items-center px-3 py-2.5 text-[13px] text-white bg-[#111316] border-r-2 border-[#f4f4f2]">
-            <FileText className="mr-3 h-4 w-4" />
+          <a href="/candidate/dashboard" className="flex items-center px-3 py-2.5 font-sans text-[15px] font-normal text-white bg-[#111316] relative">
             Evidence
+            <div className="absolute right-0 top-0 bottom-0 w-[1px] bg-[#f4f4f2]" />
           </a>
-          <a href="#" className="flex items-center px-3 py-2.5 text-[13px] text-[#8e928f] hover:text-[#f4f4f2] hover:bg-[#111316] rounded-none transition-colors group">
-            <Activity className="mr-3 h-4 w-4 group-hover:text-white" />
+          <a href={`/p/${user?.uid}`} className="flex items-center px-3 py-2.5 font-sans text-[15px] font-normal text-[#8e928f] hover:text-[#f4f4f2] transition-colors">
             Provenance
           </a>
-          <a href="/candidate/assessment" className="flex items-center px-3 py-2.5 text-[13px] text-[#8e928f] hover:text-[#f4f4f2] hover:bg-[#111316] rounded-none transition-colors group">
-            <ShieldCheck className="mr-3 h-4 w-4 group-hover:text-white" />
+          <a href="/candidate/assessment" className="flex items-center px-3 py-2.5 font-sans text-[15px] font-normal text-[#8e928f] hover:text-[#f4f4f2] transition-colors">
             Verification
           </a>
         </nav>
 
         {/* Bottom Nav */}
-        <div className="p-4 border-t border-[#272a2f] space-y-2">
-          <a href="#" className="flex items-center px-3 py-2 text-[12px] text-[#8e928f] hover:text-white transition-colors">
-            <Settings className="mr-3 h-4 w-4" /> Settings
+        <div className="px-5 py-6 border-t border-[#272a2f] space-y-2">
+          <a href="/settings" className="flex items-center px-3 py-2 font-sans text-[15px] font-normal text-[#8e928f] hover:text-white transition-colors">
+            Settings
           </a>
-          <a href="#" className="flex items-center px-3 py-2 text-[12px] text-[#8e928f] hover:text-white transition-colors">
-            <HelpCircle className="mr-3 h-4 w-4" /> Support
+          <a href="/support" className="flex items-center px-3 py-2 font-sans text-[15px] font-normal text-[#8e928f] hover:text-white transition-colors">
+            Support
           </a>
         </div>
       </aside>
