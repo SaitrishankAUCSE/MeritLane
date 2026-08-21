@@ -20,7 +20,8 @@ export default function Navbar() {
   if (
     pathname?.startsWith("/candidate") || 
     pathname?.startsWith("/employer") || 
-    pathname?.startsWith("/admin")
+    pathname?.startsWith("/admin") ||
+    pathname?.startsWith("/proof")
   ) {
     return null;
   }
