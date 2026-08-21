@@ -12,20 +12,7 @@ export function EmployerTopNav() {
   const avatarUrl = user?.photoURL || "";
 
   return (
-    <header className="hidden lg:flex h-20 shrink-0 items-center justify-between px-12 border-b border-[#272a2f] bg-[#0b0c0e]">
-      <div className="flex items-center gap-12 w-full justify-center lg:justify-start lg:pl-12">
-        <nav className="flex items-center gap-12 ml-10">
-          <Link href="#" className={`text-[14px] transition-colors h-20 flex items-center pt-[2px] ${pathname === '#' ? 'text-white border-b-2 border-white' : 'text-[#8e928f] hover:text-white'}`}>
-            Dashboard
-          </Link>
-          <Link href="/employer/dashboard" className={`text-[14px] transition-colors h-20 flex items-center pt-[2px] ${pathname === '/employer/dashboard' ? 'text-white border-b-2 border-white' : 'text-[#8e928f] hover:text-white'}`}>
-            Workspaces
-          </Link>
-          <Link href="#" className={`text-[14px] transition-colors h-20 flex items-center pt-[2px] ${pathname === '#' ? 'text-white border-b-2 border-white' : 'text-[#8e928f] hover:text-white'}`}>
-            Archives
-          </Link>
-        </nav>
-      </div>
+    <header className="hidden lg:flex h-20 shrink-0 items-center justify-end px-12 border-b border-[#272a2f] bg-[#0b0c0e]">
       <div className="flex items-center gap-6 text-[#8e928f] pr-4">
         <Bell className="h-[18px] w-[18px] hover:text-white cursor-pointer transition-colors" />
         <Network className="h-[18px] w-[18px] hover:text-white cursor-pointer transition-colors" />

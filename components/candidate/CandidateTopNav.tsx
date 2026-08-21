@@ -14,29 +14,7 @@ export function CandidateTopNav() {
   const avatarUrl = user?.photoURL || "";
 
   return (
-    <header className="hidden lg:flex h-20 shrink-0 items-center justify-between px-12 border-b border-[#272a2f] bg-[#0b0c0e]">
-      <div className="flex items-center">
-        <nav className="flex items-center gap-12">
-          <Link 
-            href="/candidate/dashboard" 
-            className={`text-[14px] transition-colors h-20 flex items-center ${pathname === '/candidate/dashboard' ? 'text-white border-b border-white' : 'text-[#8e928f] hover:text-white'}`}
-          >
-            Dashboard
-          </Link>
-          <Link 
-            href="/candidate/profile" 
-            className={`text-[14px] transition-colors h-20 flex items-center ${pathname === '/candidate/profile' ? 'text-white border-b border-white' : 'text-[#8e928f] hover:text-white'}`}
-          >
-            Workspaces
-          </Link>
-          <Link 
-            href={`/p/${user?.uid}`} 
-            className="text-[14px] text-[#8e928f] hover:text-white transition-colors h-20 flex items-center"
-          >
-            Archives
-          </Link>
-        </nav>
-      </div>
+    <header className="hidden lg:flex h-20 shrink-0 items-center justify-end px-12 border-b border-[#272a2f] bg-[#0b0c0e]">
       <div className="flex items-center gap-6 text-[#8e928f]">
         <Bell className="h-[18px] w-[18px] hover:text-white cursor-pointer transition-colors" />
         <Command className="h-[18px] w-[18px] hover:text-white cursor-pointer transition-colors" />
