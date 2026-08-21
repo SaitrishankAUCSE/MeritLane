@@ -53,7 +53,7 @@ export default function CandidateProfilePage() {
             Evidence
             <div className="absolute right-0 top-0 bottom-0 w-[1px] bg-white" />
           </a>
-          <a href={\/p/\\} className="flex items-center px-4 py-3 text-[15px] font-sans text-[#8e928f] hover:text-[#f4f4f2] transition-colors">
+          <a href={`/p/${user?.uid}`} className="flex items-center px-4 py-3 text-[15px] font-sans text-[#8e928f] hover:text-[#f4f4f2] transition-colors">
             <Network className="mr-4 h-[18px] w-[18px] opacity-70" />
             Provenance
           </a>
@@ -93,7 +93,7 @@ export default function CandidateProfilePage() {
             <nav className="flex items-center gap-12">
               <Link href="/candidate/dashboard" className="text-[14px] text-[#8e928f] hover:text-white transition-colors">Dashboard</Link>
               <div className="text-[14px] text-white border-b border-white h-20 flex items-center">Workspaces</div>
-              <Link href={\/p/\\} className="text-[14px] text-[#8e928f] hover:text-white transition-colors">Archives</Link>
+              <Link href={`/p/${user?.uid}`} className="text-[14px] text-[#8e928f] hover:text-white transition-colors">Archives</Link>
             </nav>
           </div>
           <div className="flex items-center gap-6 text-[#8e928f]">
