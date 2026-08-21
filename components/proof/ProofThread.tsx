@@ -47,14 +47,13 @@ export function EvidenceBlock({
   className?: string;
 }) {
   return (
-    <div className={cn("space-y-3", className)}>
+    <div className={cn("space-y-2 border-l-2 border-border pl-4", className)}>
       {source && (
-        <div className="flex items-center gap-3">
-          <span className="h-px w-8 bg-border" />
-          <p className="font-data text-muted-foreground">Source: {source}</p>
-        </div>
+        <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-outline">
+          Source: {source}
+        </p>
       )}
-      <div className="border border-border bg-surface-low/80 p-4">{children}</div>
+      <div className="text-[15px] leading-relaxed text-muted-foreground">{children}</div>
     </div>
   );
 }

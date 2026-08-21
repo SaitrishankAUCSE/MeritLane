@@ -274,7 +274,7 @@ export function PublicProofRecord({ id, candidate, user }: PublicProofRecordProp
               <ProofTrace
                 status="verified"
                 assessmentScores={assessmentScores}
-                assessmentDate={(user.assessmentDate || candidate.verifiedAt) as string | number | Date | null}
+                assessmentDate={formatPublicDateTimeAttr(user.assessmentDate) || formatPublicDateTimeAttr(candidate.verifiedAt) || null}
                 candidateName={author}
                 size="sm"
               />
