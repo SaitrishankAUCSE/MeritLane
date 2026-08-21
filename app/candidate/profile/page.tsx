@@ -2,12 +2,14 @@
 
 import React, { useEffect, useState } from "react";
 import { useAuth } from "@/lib/auth/AuthContext";
+import { useRouter } from "next/navigation";
 import { fetchCandidateProfile, CandidateProfile } from "@/lib/firebase/candidate";
-import { Search, Bell, Command, Settings, HelpCircle, FileText, Activity, ShieldCheck, Layers, Shield } from "lucide-react";
+import { Search, Bell, Command, Settings, HelpCircle, LayoutDashboard, Network, ShieldCheck, CheckCircle2, ChevronRight, Fingerprint, Code, BarChart } from "lucide-react";
 import Link from "next/link";
 
 export default function CandidateProfilePage() {
   const { user, loading, handleSignOut } = useAuth();
+  const router = useRouter();
   const [profile, setProfile] = useState<CandidateProfile | null>(null);
 
   useEffect(() => {
@@ -18,84 +20,80 @@ export default function CandidateProfilePage() {
     }
   }, [user, loading]);
 
+  const name = profile?.name || user?.displayName?.split(" ")[0] || "Alex Vance";
+  const avatarUrl = user?.photoURL || "";
+  const roleTitle = profile?.title || "SYSTEMS ARCHITECT";
+  const primaryDomain = profile?.skills?.[0] || "Distributed Systems";
+
   if (loading) {
-    return <div className="min-h-screen bg-[#0b0c0e] flex items-center justify-center"><div className="h-4 w-4 border-2 border-[#8e928f] border-t-white animate-spin"></div></div>;
+    return <div className="min-h-screen bg-[#0b0c0e] flex items-center justify-center"><div className="h-4 w-4 border-2 border-[#8e928f] border-t-white animate-spin rounded-full"></div></div>;
   }
 
-  const name = profile?.name || user?.displayName?.split(" ")[0] || "Alex Vance";
-  const roleTitle = profile?.skills?.[0] ? `${profile.skills[0]} Engineer` : "Systems Architect";
-  const primaryDomain = profile?.skills?.[0] || "Distributed Systems";
-  const avatarUrl = user?.photoURL || "";
-
   return (
-    <div className="flex h-[100dvh] w-full bg-[#121315] text-[#e3e2e5] font-sans overflow-hidden flex-col lg:flex-row">
+    <div className="flex h-screen w-full bg-[#0b0c0e] text-[#e3e2e5] font-sans overflow-hidden">
       
-      {/* MOBILE HEADER (Only on small screens) */}
-      <header className="lg:hidden flex items-start justify-between px-6 pt-10 pb-6 border-b border-[#272a2f]">
-        <div>
-          <div className="text-[10px] font-mono uppercase tracking-[0.15em] text-[#8e928f] mb-1">Subject Identity</div>
-          <h1 className="font-serif text-[28px] text-white leading-tight mb-1">{name}</h1>
-          <div className="text-[13px] text-[#c0c1ff]">{primaryDomain} / {roleTitle}</div>
-        </div>
-        <div className="h-10 w-10 rounded-full border border-[#444846] flex items-center justify-center shrink-0">
-          {avatarUrl ? <img src={avatarUrl} alt="Avatar" className="h-full w-full rounded-full object-cover grayscale" /> : <Command className="h-5 w-5 text-[#8e928f]" />}
-        </div>
-      </header>
-
-      {/* LEFT SIDEBAR (Desktop) */}
-      <aside className="hidden lg:flex w-[260px] shrink-0 flex-col border-r border-[#272a2f] bg-[#121315]">
-        <div className="flex h-20 items-center px-6 border-b border-[#272a2f]">
+      {/* LEFT SIDEBAR */}
+      <aside className="hidden lg:flex w-[260px] shrink-0 flex-col border-r border-[#272a2f] bg-[#0b0c0e]">
+        {/* Brand */}
+        <div className="flex h-20 items-center px-8">
           <div>
-            <div className="font-serif text-[22px] font-medium tracking-tight leading-none text-white mb-1">Meritlane</div>
-            <div className="font-mono text-[9px] tracking-[0.15em] text-[#8e928f] uppercase">System of Record</div>
+            <div className="font-serif text-[26px] font-medium tracking-tight text-white mb-1">Meritlane</div>
+            <div className="font-mono text-[9px] tracking-[0.2em] text-[#8e928f] uppercase">System of Record</div>
           </div>
         </div>
 
-        <nav className="flex-1 px-4 py-8 space-y-2">
-          <a href="#" className="flex items-center px-3 py-2.5 text-[13px] text-[#8e928f] hover:text-[#f4f4f2] transition-colors group">
-            <Activity className="mr-4 h-[18px] w-[18px] opacity-70 group-hover:opacity-100" />
+        {/* Navigation */}
+        <nav className="flex-1 mt-6 space-y-1 px-4">
+          <a href="/candidate/profile" className="flex items-center px-4 py-3 text-[15px] font-sans text-[#8e928f] hover:text-[#f4f4f2] transition-colors">
+            <Fingerprint className="mr-4 h-[18px] w-[18px] opacity-70" />
             Identity
           </a>
-          <div className="flex items-center px-3 py-2.5 text-[13px] text-white bg-[#1b1c1e] rounded-none border border-[#272a2f]">
-            <FileText className="mr-4 h-[18px] w-[18px]" />
+          <a href="/candidate/dashboard" className="flex items-center px-4 py-3 text-[15px] font-sans text-white bg-[#111316] relative">
+            <LayoutDashboard className="mr-4 h-[18px] w-[18px]" />
             Evidence
-          </div>
-          <a href="#" className="flex items-center px-3 py-2.5 text-[13px] text-[#8e928f] hover:text-[#f4f4f2] transition-colors group">
-            <Command className="mr-4 h-[18px] w-[18px] opacity-70 group-hover:opacity-100" />
+            <div className="absolute right-0 top-0 bottom-0 w-[1px] bg-white" />
+          </a>
+          <a href={\/p/\\} className="flex items-center px-4 py-3 text-[15px] font-sans text-[#8e928f] hover:text-[#f4f4f2] transition-colors">
+            <Network className="mr-4 h-[18px] w-[18px] opacity-70" />
             Provenance
           </a>
-          <a href="/candidate/assessment" className="flex items-center px-3 py-2.5 text-[13px] text-[#8e928f] hover:text-[#f4f4f2] transition-colors group">
-            <ShieldCheck className="mr-4 h-[18px] w-[18px] opacity-70 group-hover:opacity-100" />
+          <a href="/candidate/assessment" className="flex items-center px-4 py-3 text-[15px] font-sans text-[#8e928f] hover:text-[#f4f4f2] transition-colors">
+            <ShieldCheck className="mr-4 h-[18px] w-[18px] opacity-70" />
             Verification
           </a>
         </nav>
 
-        <div className="px-5 py-6">
-          <button className="w-full text-left text-[11px] font-mono font-bold uppercase tracking-[0.15em] text-white hover:text-[#c4c7c5] transition-colors">
-            [+] Add Evidence
+        {/* Bottom Nav / Action */}
+        <div className="px-6 py-6 border-t border-[#272a2f]">
+          <button 
+            onClick={() => router.push('/candidate/profile')}
+            className="flex items-center gap-2 w-full text-left py-2 text-[#e3e2e5] hover:text-white transition-colors mb-6"
+          >
+            <span className="font-mono text-[11px] text-white font-bold">[+]</span>
+            <span className="font-sans text-[11px] font-bold uppercase tracking-[0.1em]">Add Evidence</span>
           </button>
-        </div>
-
-        <div className="p-4 border-t border-[#272a2f] space-y-2">
-          <a href="#" className="flex items-center px-3 py-2 text-[13px] text-[#8e928f] hover:text-white transition-colors">
-            <Settings className="mr-4 h-[18px] w-[18px]" /> Settings
-          </a>
-          <a href="#" className="flex items-center px-3 py-2 text-[13px] text-[#8e928f] hover:text-white transition-colors">
-            <HelpCircle className="mr-4 h-[18px] w-[18px]" /> Support
-          </a>
+          
+          <div className="space-y-4">
+            <a href="/settings" className="flex items-center text-[15px] font-sans text-[#8e928f] hover:text-white transition-colors">
+              <Settings className="mr-4 h-[18px] w-[18px] opacity-70" /> Settings
+            </a>
+            <a href="/support" className="flex items-center text-[15px] font-sans text-[#8e928f] hover:text-white transition-colors">
+              <HelpCircle className="mr-4 h-[18px] w-[18px] opacity-70" /> Support
+            </a>
+          </div>
         </div>
       </aside>
 
       {/* RIGHT MAIN AREA */}
-      <main className="flex-1 flex flex-col min-w-0 bg-[#121315] pb-[70px] lg:pb-0 overflow-y-auto lg:overflow-hidden">
+      <main className="flex-1 flex flex-col min-w-0 bg-[#0b0c0e] overflow-y-auto lg:overflow-hidden">
         
         {/* TOP NAVBAR (Desktop) */}
-        <header className="hidden lg:flex h-20 shrink-0 items-center justify-between px-10 border-b border-[#272a2f] bg-[#121315]">
-          <div className="flex items-center gap-10">
-            <nav className="flex items-center gap-10">
+        <header className="hidden lg:flex h-20 shrink-0 items-center justify-between px-12 border-b border-[#272a2f] bg-[#0b0c0e]">
+          <div className="flex items-center">
+            <nav className="flex items-center gap-12">
               <Link href="/candidate/dashboard" className="text-[14px] text-[#8e928f] hover:text-white transition-colors">Dashboard</Link>
               <div className="text-[14px] text-white border-b border-white h-20 flex items-center">Workspaces</div>
-              <Link href={`/p/${user?.uid}`} className="text-[14px] text-[#8e928f] hover:text-white transition-colors">Archives</Link>
+              <Link href={\/p/\\} className="text-[14px] text-[#8e928f] hover:text-white transition-colors">Archives</Link>
             </nav>
           </div>
           <div className="flex items-center gap-6 text-[#8e928f]">
@@ -107,150 +105,136 @@ export default function CandidateProfilePage() {
           </div>
         </header>
 
-        {/* 3-COLUMN CONTENT (Desktop uses flex, Mobile just flows) */}
+        {/* 3-COLUMN CONTENT */}
         <div className="flex-1 flex flex-col xl:flex-row overflow-hidden">
           
-          {/* COLUMN 1: IDENTITY (Hidden on mobile, since it's in the mobile header) */}
-          <div className="hidden xl:flex w-[280px] shrink-0 p-10 flex-col overflow-y-auto">
-            <div className="h-[72px] w-[72px] rounded-full border border-[#444846] bg-[#1b1c1e] mb-6 overflow-hidden flex items-center justify-center p-0.5">
-               <div className="h-full w-full rounded-full overflow-hidden grayscale bg-[#292a2c]">
-                 {avatarUrl ? <img src={avatarUrl} alt={name} className="h-full w-full object-cover" /> : <span className="font-serif text-2xl text-[#8e928f]">{name.charAt(0)}</span>}
+          {/* COLUMN 1: IDENTITY */}
+          <div className="hidden xl:flex w-[280px] shrink-0 pt-16 px-10 flex-col overflow-y-auto">
+            <div className="h-[80px] w-[80px] rounded-full border border-[#444846] bg-[#111316] mb-8 overflow-hidden flex items-center justify-center">
+               <div className="h-full w-full rounded-full overflow-hidden grayscale">
+                 {avatarUrl ? <img src={avatarUrl} alt={name} className="h-full w-full object-cover opacity-80" /> : <span className="font-serif text-2xl text-[#8e928f]">{name.charAt(0)}</span>}
                </div>
             </div>
 
-            <h2 className="font-serif text-[28px] text-white leading-tight mb-1">{name}</h2>
-            <div className="text-[10px] font-mono uppercase tracking-[0.15em] text-[#8e928f] mb-10">{roleTitle}</div>
+            <h2 className="font-serif text-[28px] text-white leading-tight mb-2">{name}</h2>
+            <div className="text-[10px] font-mono uppercase tracking-[0.15em] text-[#8e928f] mb-12">{roleTitle}</div>
             
-            <div className="space-y-6">
+            <div className="space-y-8">
               <div>
-                <div className="text-[10px] font-mono uppercase tracking-[0.1em] text-[#8e928f] mb-1">Primary Domain</div>
-                <div className="text-[13px] text-white">{primaryDomain}</div>
+                <div className="text-[10px] font-mono uppercase tracking-[0.1em] text-[#8e928f] mb-2">Primary Domain</div>
+                <div className="text-[14px] text-[#e3e2e5] font-sans">{primaryDomain}</div>
               </div>
               <div>
-                <div className="text-[10px] font-mono uppercase tracking-[0.1em] text-[#8e928f] mb-1">Verified Since</div>
-                <div className="text-[13px] font-mono text-white">2021.11.04</div>
+                <div className="text-[10px] font-mono uppercase tracking-[0.1em] text-[#8e928f] mb-2">Verified Since</div>
+                <div className="text-[13px] font-mono text-[#e3e2e5] font-bold">2021.11.04</div>
               </div>
               <div>
-                <div className="text-[10px] font-mono uppercase tracking-[0.1em] text-[#8e928f] mb-1">Trust Score</div>
+                <div className="text-[10px] font-mono uppercase tracking-[0.1em] text-[#8e928f] mb-2">Trust Score</div>
                 <div className="flex items-center gap-2">
-                  <Shield className="h-3 w-3 text-[#c0c1ff]" />
-                  <span className="text-[13px] font-mono text-white">0.984</span>
+                  <ShieldCheck className="h-3.5 w-3.5 text-[#a8a2ff]" />
+                  <span className="text-[13px] font-mono text-[#e3e2e5] font-bold">0.984</span>
                 </div>
               </div>
             </div>
           </div>
 
           {/* COLUMN 2: PROOF THREADS */}
-          <div className="flex-1 lg:border-l lg:border-[#272a2f] p-6 lg:p-10 xl:p-12 lg:overflow-y-auto">
+          <div className="flex-1 p-10 lg:p-16 lg:overflow-y-auto border-l border-[#272a2f]">
             
-            <div className="hidden lg:flex items-center justify-between mb-12">
-              <h2 className="text-[16px] font-medium text-white">Proof Threads</h2>
-              <div className="text-[10px] font-mono uppercase tracking-[0.1em] text-[#8e928f]">Active Assessment</div>
+            <div className="hidden lg:flex items-center justify-between mb-16 border-b border-[#272a2f] pb-4">
+              <h2 className="text-[18px] font-serif text-white font-medium">Proof Threads</h2>
+              <div className="text-[11px] font-mono uppercase tracking-[0.1em] text-[#8e928f]">Active Assessment</div>
             </div>
 
-            <div className="relative border-l border-[#272a2f] pl-6 lg:pl-8 space-y-12 lg:space-y-16">
+            <div className="relative border-l border-[#272a2f] pl-10 space-y-24">
               
               {/* Thread 1 */}
               <div className="relative">
-                <div className="absolute -left-[29px] lg:-left-[37px] top-1.5 h-2.5 w-2.5 lg:h-[9px] lg:w-[9px] rounded-full bg-white ring-4 ring-[#121315]" />
+                <div className="absolute -left-[44px] top-1.5 h-2 w-2 rounded-full bg-white" />
                 
-                <div className="text-[10px] font-sans font-bold uppercase tracking-[0.15em] text-[#c0c1ff] mb-2">Core Competency</div>
-                <h3 className="font-serif text-[24px] lg:text-[32px] text-white leading-[1.2] mb-6 lg:mb-8 max-w-2xl">
-                  {profile?.skills?.[0] || "Python"} Architecture
+                <div className="text-[11px] font-sans font-bold uppercase tracking-[0.1em] text-[#a8a2ff] mb-4">Claim</div>
+                <h3 className="font-serif text-[32px] text-white leading-[1.2] mb-6 max-w-2xl">
+                  Architected Paxos-based consensus protocol for distributed state management.
                 </h3>
 
                 <div className="space-y-4">
-                  <div className="flex items-center gap-4 text-[12px] font-mono text-[#e3e2e5]">
-                    <div className="w-8 h-px bg-[#272a2f]" />
-                    Source: HackerRank Assessment
+                  <div className="text-[10px] font-mono uppercase tracking-[0.1em] text-[#8e928f] mb-2">Source</div>
+                  <div className="flex items-center gap-3 text-[13px] font-mono text-white font-medium mb-6">
+                    <span>{< >}</span>
+                    GitHub Repository (Private Auth)
                   </div>
                   
-                  <div className="mt-4 border border-[#272a2f] p-5 lg:p-6 bg-[#1b1c1e] rounded-none flex items-center justify-between">
-                    <div>
-                      <div className="text-[14px] text-white mb-1">Advanced Algorithms</div>
-                      <div className="text-[10px] font-mono text-[#8e928f] uppercase">ID: HR-8842-PY</div>
-                    </div>
-                    <div className="font-serif text-[24px] text-white">94%</div>
-                  </div>
+                  <div className="border border-[#272a2f] p-6 bg-[#111316] rounded-none">
+                    <div className="text-[10px] font-mono uppercase tracking-[0.1em] text-[#8e928f] mb-4">Evidence Excerpt</div>
+                    <pre className="font-mono text-[12px] text-[#c4c7c5] leading-relaxed whitespace-pre-wrap">
+{commit 8f3a9b21c...
+Author: Alex Vance
+Date:   Tue Oct 12 14:32:01 2023 -0400
 
-                  <div className="flex items-center gap-2 mt-4 text-[#c0c1ff]">
-                    <CheckCircle2 className="h-4 w-4" />
-                    <span className="text-[12px] font-mono uppercase tracking-wide">Verified by Meritlane</span>
+    feat(consensus): implement multi-paxos learner pha
+
+    Resolves distributed lock contention under high pa
+    load by batching accept responses.}
+                    </pre>
                   </div>
                 </div>
               </div>
 
               {/* Thread 2 */}
               <div className="relative">
-                <div className="absolute -left-[29px] lg:-left-[37px] top-1.5 h-2.5 w-2.5 lg:h-[9px] lg:w-[9px] border-2 border-white bg-transparent ring-4 ring-[#121315] rounded-none" />
+                <div className="absolute -left-[44px] top-1.5 h-2 w-2 border border-white bg-transparent rounded-none" />
                 
-                <div className="text-[10px] font-sans font-bold uppercase tracking-[0.15em] text-[#c0c1ff] mb-2">Practical Application</div>
-                <h3 className="font-serif text-[24px] lg:text-[32px] text-white leading-[1.2] mb-6 lg:mb-8 max-w-2xl">
-                  Distributed Systems
+                <div className="text-[11px] font-sans font-bold uppercase tracking-[0.1em] text-[#8e928f] mb-4">Claim</div>
+                <h3 className="font-serif text-[32px] text-[#8e928f] leading-[1.2] mb-6 max-w-2xl">
+                  Reduced global latency by 45% through predictive edge caching.
                 </h3>
 
                 <div className="space-y-4">
-                  <div className="flex items-center gap-4 text-[12px] font-mono text-[#e3e2e5]">
-                    <div className="w-8 h-px bg-[#272a2f]" />
-                    Source: GitHub Commits
+                  <div className="text-[10px] font-mono uppercase tracking-[0.1em] text-[#8e928f] mb-2">Source</div>
+                  <div className="flex items-center gap-3 text-[13px] font-mono text-[#8e928f] mb-8">
+                    <BarChart className="h-4 w-4" />
+                    Datadog APM Export
                   </div>
                   
-                  <div className="mt-4 border border-[#272a2f] p-5 lg:p-6 bg-[#121315] rounded-none">
-                    <p className="text-[14px] text-[#c4c7c5] leading-relaxed mb-4">
-                      Implemented Paxos consensus algorithm for internal key-value store. Handled network partitions and node failures gracefully.
-                    </p>
-                    <div className="flex items-center gap-2">
-                      <span className="bg-[#1b1c1e] text-[#e3e2e5] font-mono text-[10px] px-2 py-1 rounded-none">Golang</span>
-                      <span className="bg-[#1b1c1e] text-[#e3e2e5] font-mono text-[10px] px-2 py-1 rounded-none">gRPC</span>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-2 mt-4 text-[#8e928f]">
-                    <Command className="h-4 w-4" />
-                    <span className="text-[12px] font-mono uppercase tracking-wide">Under Review</span>
+                  <div className="text-[14px] font-serif italic text-[#8e928f]">
+                    Awaiting temporal verification from third-party auditor.
                   </div>
                 </div>
-              </div>
-
-              <div className="pt-8">
-                <button className="text-[11px] font-mono uppercase tracking-[0.15em] text-[#c0c1ff] hover:text-white transition-colors">
-                  + Append Evidence
-                </button>
               </div>
 
             </div>
           </div>
 
-          {/* COLUMN 3: META-DATA (Hidden on mobile) */}
-          <div className="hidden xl:block w-[320px] shrink-0 border-l border-[#272a2f] bg-[#121315] p-10 overflow-y-auto">
-            <h3 className="text-[10px] font-mono uppercase tracking-[0.15em] text-[#8e928f] mb-6">Evidence Meta-Data</h3>
+          {/* COLUMN 3: META-DATA */}
+          <div className="hidden xl:block w-[340px] shrink-0 border-l border-[#272a2f] bg-[#0b0c0e] p-12 overflow-y-auto">
+            <h3 className="text-[11px] font-sans font-bold uppercase tracking-[0.1em] text-[#8e928f] mb-8">Evidence Meta-Data</h3>
             
             <div className="space-y-12">
               <div>
-                <div className="text-[11px] font-sans font-bold uppercase tracking-[0.1em] text-[#8e928f] mb-2">Cryptographic Hash</div>
-                <div className="font-mono text-[11px] text-white break-all">0x7F8B9C2A...D4E1F0A2</div>
+                <div className="text-[10px] font-mono uppercase tracking-[0.1em] text-[#8e928f] mb-3">Cryptographic Hash</div>
+                <div className="font-mono text-[12px] text-white break-all">0x7F8B9C2A...D4E1F0A2</div>
               </div>
 
               <div>
-                <div className="text-[11px] font-sans font-bold uppercase tracking-[0.1em] text-[#8e928f] mb-6">Temporal Anchors</div>
+                <div className="text-[10px] font-mono uppercase tracking-[0.1em] text-[#8e928f] mb-6">Temporal Anchors</div>
                 
-                <div className="relative border-l border-[#272a2f] pl-4 space-y-6">
+                <div className="relative border-l border-[#272a2f] pl-6 space-y-6">
                   <div className="relative">
-                    <div className="absolute -left-[20.5px] top-1.5 h-2 w-2 rounded-full bg-[#c0c1ff] ring-4 ring-[#121315]" />
-                    <div className="font-mono text-[11px] text-white mb-1">2023.10.12 14:32 UT</div>
-                    <div className="text-[12px] text-[#8e928f]">Source committed</div>
+                    <div className="absolute -left-[28.5px] top-1.5 h-[5px] w-[5px] rounded-full bg-[#a8a2ff]" />
+                    <div className="font-mono text-[12px] text-white font-medium mb-1">2023.10.12 14:32 UT</div>
+                    <div className="text-[13px] text-[#c4c7c5]">Source committed</div>
                   </div>
                   
                   <div className="relative">
-                    <div className="absolute -left-[20.5px] top-1.5 h-2 w-2 rounded-full border border-[#8e928f] bg-[#121315] ring-4 ring-[#121315]" />
-                    <div className="font-mono text-[11px] text-[#8e928f] mb-1">2023.10.15 09:00 UT</div>
-                    <div className="text-[12px] text-[#8e928f]">System ingested</div>
+                    <div className="absolute -left-[28.5px] top-1.5 h-[5px] w-[5px] rounded-full border border-[#8e928f] bg-[#0b0c0e]" />
+                    <div className="font-mono text-[12px] text-[#8e928f] mb-1">2023.10.15 09:00 UT</div>
+                    <div className="text-[13px] text-[#8e928f]">System ingested</div>
                   </div>
                 </div>
               </div>
 
               <div className="pt-8 border-t border-[#272a2f]">
-                <a href="#" className="text-[13px] font-medium text-white hover:text-[#c0c1ff] transition-colors">
+                <a href="#" className="text-[14px] font-sans font-medium text-white hover:text-[#a8a2ff] transition-colors">
                   View Raw Artifact
                 </a>
               </div>
@@ -259,23 +243,6 @@ export default function CandidateProfilePage() {
 
         </div>
       </main>
-
-      {/* MOBILE BOTTOM NAVIGATION (Only visible on small screens) */}
-      <nav className="lg:hidden fixed bottom-0 left-0 right-0 h-[70px] bg-[#0b0c0e] border-t border-[#272a2f] flex items-center justify-around z-50">
-        <div className="flex flex-col items-center justify-center text-[#c0c1ff]">
-          <Layers className="h-5 w-5 mb-1" />
-          <span className="text-[11px] font-medium">Canvas</span>
-        </div>
-        <div className="flex flex-col items-center justify-center text-[#8e928f]">
-          <Search className="h-5 w-5 mb-1" />
-          <span className="text-[11px] font-medium">Explore</span>
-        </div>
-        <div className="flex flex-col items-center justify-center text-[#8e928f]">
-          <Command className="h-5 w-5 mb-1" />
-          <span className="text-[11px] font-medium">Archive</span>
-        </div>
-      </nav>
-      
     </div>
   );
 }
