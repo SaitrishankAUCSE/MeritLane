@@ -12,7 +12,7 @@ export default function EmployerLayout({ children }: { children: React.ReactNode
         <EmployerSidebar />
         <div className="flex-1 flex flex-col min-w-0 bg-[#0b0c0e] overflow-hidden">
           <EmployerTopNav />
-          <main className="flex-1 overflow-y-auto">
+          <main className="flex-1 overflow-hidden">
             {children}
           </main>
         </div>
