@@ -35,7 +35,7 @@ export function Button({
 
   const variantStyles = {
     primary:
-      "bg-foreground text-background hover:bg-foreground/90 border border-foreground",
+      "bg-primary text-primary-foreground hover:opacity-90 border border-primary",
     secondary:
       "bg-transparent text-foreground hover:bg-surface-low border border-border",
     outline:
