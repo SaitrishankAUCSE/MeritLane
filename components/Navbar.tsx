@@ -60,7 +60,6 @@ export default function Navbar() {
             ) : (
               <>
                 <NavLink href="/candidate/dashboard" current={pathname}>Dashboard</NavLink>
-                <NavLink href="/candidate/profile" current={pathname}>Profile</NavLink>
                 <NavLink href="/candidate/assessment" current={pathname}>Assessment</NavLink>
               </>
             )}
@@ -124,7 +123,6 @@ export default function Navbar() {
               ) : (
                 <>
                   <Link href="/candidate/dashboard" className="text-sm text-foreground">Dashboard</Link>
-                  <Link href="/candidate/profile" className="text-sm text-foreground">Profile</Link>
                   <Link href="/candidate/assessment" className="text-sm text-foreground">Assessment</Link>
                 </>
               )}
