@@ -30,7 +30,7 @@ export default function CandidateProfilePage() {
     <div className="flex h-full w-full flex-col xl:flex-row overflow-hidden">
       
       {/* COLUMN 1: IDENTITY */}
-      <div className="hidden xl:flex w-[280px] shrink-0 pt-16 px-10 flex-col overflow-y-auto">
+      <div className="hidden xl:flex w-[280px] shrink-0 pt-16 px-10 flex-col overflow-y-auto scrollbar-hide">
         <div className="h-[80px] w-[80px] rounded-full border border-[#444846] bg-[#111316] mb-8 overflow-hidden flex items-center justify-center">
            <div className="h-full w-full rounded-full overflow-hidden grayscale">
              {avatarUrl ? <img src={avatarUrl} alt={name} className="h-full w-full object-cover opacity-80" /> : <span className="font-serif text-2xl text-[#8e928f]">{name.charAt(0)}</span>}
@@ -60,7 +60,7 @@ export default function CandidateProfilePage() {
       </div>
 
       {/* COLUMN 2: PROOF THREADS */}
-      <div className="flex-1 p-10 lg:p-16 lg:overflow-y-auto border-l border-[#272a2f]">
+      <div className="flex-1 p-10 lg:p-16 lg:overflow-y-auto scrollbar-hide border-l border-[#272a2f]">
         
         <div className="hidden lg:flex items-center justify-between mb-16 border-b border-[#272a2f] pb-4">
           <h2 className="text-[18px] font-serif text-white font-medium">Proof Threads</h2>
@@ -127,7 +127,7 @@ Date:   Tue Oct 12 14:32:01 2023 -0400
       </div>
 
       {/* COLUMN 3: META-DATA */}
-      <div className="hidden xl:block w-[340px] shrink-0 border-l border-[#272a2f] bg-[#0b0c0e] p-12 overflow-y-auto">
+      <div className="hidden xl:block w-[340px] shrink-0 border-l border-[#272a2f] bg-[#0b0c0e] p-12 overflow-y-auto scrollbar-hide">
         <h3 className="text-[11px] font-sans font-bold uppercase tracking-[0.1em] text-[#8e928f] mb-8">Evidence Meta-Data</h3>
         
         <div className="space-y-12">

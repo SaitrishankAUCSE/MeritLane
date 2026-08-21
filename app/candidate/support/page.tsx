@@ -5,7 +5,7 @@ import { LifeBuoy, Mail, MessageSquare } from "lucide-react";
 
 export default function CandidateSupportPage() {
   return (
-    <div className="mx-auto max-w-3xl px-4 py-10 sm:px-6 lg:px-8 space-y-8 h-full overflow-y-auto">
+    <div className="mx-auto max-w-3xl px-4 py-10 sm:px-6 lg:px-8 space-y-8 h-full overflow-y-auto scrollbar-hide">
       <div className="border-b border-[#272a2f] pb-5">
         <h1 className="font-serif text-2xl font-bold tracking-tight text-white sm:text-3xl">
           Support & Help Center

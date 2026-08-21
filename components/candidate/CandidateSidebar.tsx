@@ -20,7 +20,7 @@ export function CandidateSidebar() {
   ];
 
   return (
-    <aside className={`hidden lg:flex shrink-0 flex-col border-r border-[#272a2f] bg-[#0b0c0e] h-[100dvh] overflow-y-auto transition-all duration-300 ${isCollapsed ? "w-[80px]" : "w-[260px]"}`}>
+    <aside className={`scrollbar-hide hidden lg:flex shrink-0 flex-col border-r border-[#272a2f] bg-[#0b0c0e] h-[100dvh] overflow-y-auto transition-all duration-300 ${isCollapsed ? "w-[80px]" : "w-[260px]"}`}>
       {/* Brand */}
       <div className={`flex h-20 items-center shrink-0 ${isCollapsed ? "justify-center px-0" : "px-8"}`}>
         {isCollapsed ? (

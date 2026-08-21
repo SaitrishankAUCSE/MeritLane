@@ -36,7 +36,7 @@ export default function CandidateDashboardPage() {
     <div className="flex h-full w-full flex-col xl:flex-row overflow-hidden">
       
       {/* COLUMN 1: CANDIDATE INTRO */}
-      <div className="hidden xl:flex w-[320px] shrink-0 pt-16 px-10 flex-col overflow-y-auto">
+      <div className="hidden xl:flex w-[320px] shrink-0 pt-16 px-10 flex-col overflow-y-auto scrollbar-hide">
         <h2 className="font-serif text-[36px] text-white leading-tight mb-2">Welcome,<br/>{name}</h2>
         <div className="text-[12px] font-sans text-[#8e928f] mb-12">System synchronization active.</div>
         
@@ -56,7 +56,7 @@ export default function CandidateDashboardPage() {
       </div>
 
       {/* COLUMN 2: RECENT EVIDENCE */}
-      <div className="flex-1 p-10 lg:p-14 lg:overflow-y-auto border-l border-[#272a2f]">
+      <div className="flex-1 p-10 lg:p-14 lg:overflow-y-auto scrollbar-hide border-l border-[#272a2f]">
         
         <div className="flex items-center justify-between mb-12 border-b border-[#272a2f] pb-4">
           <h2 className="text-[18px] font-serif text-white font-medium">Recent Evidence</h2>

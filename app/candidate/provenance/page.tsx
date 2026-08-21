@@ -53,7 +53,7 @@ export default function CandidateProvenancePage() {
   // To simulate the public profile, we render PublicProofRecord.
   // We wrap it in a container that allows scrolling, since the layout handles its own overflow.
   return (
-    <div className="h-full w-full overflow-y-auto bg-[#0b0c0e]">
+    <div className="h-full w-full overflow-y-auto scrollbar-hide bg-[#0b0c0e]">
       <PublicProofRecord id={user!.uid} candidate={candidate} user={userDoc || {}} />
     </div>
   );

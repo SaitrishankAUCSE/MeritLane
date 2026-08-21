@@ -16,10 +16,10 @@ export default function EmployerDashboardPage() {
   return (
     <div className="flex h-full w-full flex-col xl:flex-row overflow-hidden">
       
-      {/* COLUMN 1: FEED */}
-      <div className="flex-1 p-10 lg:p-14 lg:overflow-y-auto">
+      {/* COLUMN 1: DISCOVERY FEED */}
+      <div className="flex-1 p-10 lg:p-14 lg:overflow-y-auto scrollbar-hide">
         
-        <div className="mb-14">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between mb-12 border-b border-[#272a2f] pb-4 gap-4">
           <h1 className="font-serif text-[40px] text-white leading-tight mb-2">Proof Review Desk</h1>
           <p className="text-[15px] text-[#c4c7c5] font-sans">Inspecting Senior Systems Engineer Candidates.</p>
         </div>
@@ -140,7 +140,7 @@ export default function EmployerDashboardPage() {
       </div>
 
       {/* COLUMN 3: DECISION DESK */}
-      <div className="xl:w-[360px] shrink-0 border-t xl:border-t-0 xl:border-l border-[#272a2f] bg-[#0b0c0e] p-12 overflow-y-auto">
+      <div className="xl:w-[360px] shrink-0 border-t xl:border-t-0 xl:border-l border-[#272a2f] bg-[#0b0c0e] p-12 overflow-y-auto scrollbar-hide">
         
         <div className="mb-16">
           <h3 className="text-[10px] font-sans font-bold uppercase tracking-[0.1em] text-[#8e928f] mb-8">Requirement Coverage</h3>
