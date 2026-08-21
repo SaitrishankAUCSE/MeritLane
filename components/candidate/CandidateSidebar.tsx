@@ -14,7 +14,7 @@ export function CandidateSidebar() {
   const navItems = [
     { name: "Identity", href: "/candidate/profile", icon: Fingerprint },
     { name: "Evidence", href: "/candidate/dashboard", icon: LayoutDashboard },
-    { name: "Provenance", href: `/p/${user?.uid}`, icon: Network },
+    { name: "Provenance", href: "/candidate/provenance", icon: Network },
     { name: "Verification", href: "/candidate/assessment", icon: ShieldCheck },
   ];
 
