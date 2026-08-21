@@ -4,13 +4,14 @@ import React from "react";
 import Link from "next/link";
 import { CheckCircle2, Hexagon, Shield, Network, Lock, GitCommit } from "lucide-react";
 
-type PublicProofRecordProps = {
+interface PublicProofRecordProps {
   id: string;
   candidate: any;
   user: any;
-};
+  hideHeader?: boolean;
+}
 
-export function PublicProofRecord({ id, candidate, user }: PublicProofRecordProps) {
+export function PublicProofRecord({ id, candidate, user, hideHeader = false }: PublicProofRecordProps) {
   const name = candidate.name || "Anonymous Candidate";
   const primarySkill = candidate.skills?.[0] || "Software Engineering";
   const secondarySkill = candidate.skills?.[1] || "Systems Architecture";
@@ -22,12 +23,14 @@ export function PublicProofRecord({ id, candidate, user }: PublicProofRecordProp
     <div className="min-h-screen bg-[#0b0c0e] text-[#e3e2e5] font-sans">
       
       {/* Top Navbar */}
-      <header className="flex h-[72px] items-center justify-between px-8 lg:px-16 border-b border-[#1b1c1e] bg-[#0b0c0e]">
-        <Link href="/" className="font-serif text-[26px] font-medium tracking-tight text-white">Meritlane</Link>
-        <div className="font-mono text-[10px] tracking-[0.1em] text-[#8e928f] uppercase">
-          Public Artifact
-        </div>
-      </header>
+      {!hideHeader && (
+        <header className="flex h-[72px] items-center justify-between px-8 lg:px-16 border-b border-[#1b1c1e] bg-[#0b0c0e]">
+          <Link href="/" className="font-serif text-[26px] font-medium tracking-tight text-white">Meritlane</Link>
+          <div className="font-mono text-[10px] tracking-[0.1em] text-[#8e928f] uppercase">
+            Public Artifact
+          </div>
+        </header>
+      )}
 
       {/* Hero Section */}
       <section className="px-8 lg:px-16 pt-20 pb-16 border-b border-[#1b1c1e] bg-[#0b0c0e]">

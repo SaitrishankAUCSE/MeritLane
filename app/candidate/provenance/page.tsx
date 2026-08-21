@@ -54,7 +54,7 @@ export default function CandidateProvenancePage() {
   // We wrap it in a container that allows scrolling, since the layout handles its own overflow.
   return (
     <div className="h-full w-full overflow-y-auto scrollbar-hide bg-[#0b0c0e]">
-      <PublicProofRecord id={user!.uid} candidate={candidate} user={userDoc || {}} />
+      <PublicProofRecord id={user!.uid} candidate={candidate} user={userDoc || {}} hideHeader={true} />
     </div>
   );
 }
