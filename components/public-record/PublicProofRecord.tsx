@@ -19,18 +19,18 @@ export function PublicProofRecord({ id, candidate, user }: PublicProofRecordProp
   const avatarUrl = user?.photoURL || "";
 
   return (
-    <div className="min-h-screen bg-[#121315] text-[#e3e2e5] font-sans">
+    <div className="min-h-screen bg-[#0b0c0e] text-[#e3e2e5] font-sans">
       
       {/* Top Navbar */}
-      <header className="flex h-[72px] items-center justify-between px-8 lg:px-16 border-b border-[#1b1c1e] bg-[#121315]">
+      <header className="flex h-[72px] items-center justify-between px-8 lg:px-16 border-b border-[#1b1c1e] bg-[#0b0c0e]">
         <Link href="/" className="font-serif text-[26px] font-medium tracking-tight text-white">Meritlane</Link>
         <div className="font-mono text-[10px] tracking-[0.1em] text-[#8e928f] uppercase">
-          Public Artifact #VX-{recordId}
+          Public Artifact
         </div>
       </header>
 
       {/* Hero Section */}
-      <section className="px-8 lg:px-16 pt-20 pb-16 border-b border-[#1b1c1e] bg-[#121315]">
+      <section className="px-8 lg:px-16 pt-20 pb-16 border-b border-[#1b1c1e] bg-[#0b0c0e]">
         <div className="flex flex-col md:flex-row gap-10 items-start max-w-[1200px] mx-auto">
           <div className="h-[120px] w-[120px] shrink-0 rounded-full border border-[#272a2f] overflow-hidden bg-[#111316]">
             {avatarUrl ? <img src={avatarUrl} alt={name} className="h-full w-full object-cover grayscale opacity-90" /> : (
@@ -62,7 +62,7 @@ export function PublicProofRecord({ id, candidate, user }: PublicProofRecordProp
       </section>
 
       {/* 3-Column Main Grid */}
-      <main className="max-w-[1200px] mx-auto px-8 lg:px-16 py-20 bg-[#121315]">
+      <main className="max-w-[1200px] mx-auto px-8 lg:px-16 py-20 bg-[#0b0c0e]">
         <div className="grid grid-cols-1 lg:grid-cols-[200px_1fr_260px] gap-16 lg:gap-24">
           
           {/* Left: Assertion Meta */}
