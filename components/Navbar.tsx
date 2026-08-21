@@ -15,10 +15,16 @@ export default function Navbar() {
   const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const isPublicHome = pathname === "/";
-
+  const isCandidateDashboard = pathname === "/candidate/dashboard";
+  const isCandidateProfile = pathname === "/candidate/profile";
+  const isPublicProfile = pathname.startsWith("/p/");
+  const isEmployerDashboard = pathname === "/employer/dashboard";
+  
   useEffect(() => {
     setMobileMenuOpen(false);
   }, [pathname]);
+
+  if (isCandidateDashboard || isCandidateProfile || isPublicProfile || isEmployerDashboard) return null;
 
   const isUserAdmin = isAdmin || user?.email?.toLowerCase() === "saitrishankb9@gmail.com";
   const isResolvingAuth = loading || (!isUserAdmin && user && profileLoading);

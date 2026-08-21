@@ -2,22 +2,26 @@
 
 @theme inline {
   --color-void: #0b0c0e;
-  --color-background: #0b0c0e;
+  --color-background: #121315;
   --color-surface: #111316;
-  --color-surface-low: #1b1c1e;
-  --color-surface-mid: #1f2022;
-  --color-surface-high: #292a2c;
-  --color-foreground: #f4f4f2;
+  --color-surface-dim: #121315;
+  --color-surface-bright: #38393b;
+  --color-surface-container-lowest: #0d0e10;
+  --color-surface-container-low: #1b1c1e;
+  --color-surface-container: #1f2022;
+  --color-surface-container-high: #292a2c;
+  --color-surface-container-highest: #343537;
+  --color-foreground: #e3e2e5;
   --color-muted: #1b1c1e;
   --color-muted-foreground: #c4c7c5;
   --color-border: #272a2f;
   --color-outline: #8e928f;
-  --color-primary: #f4f4f2;
-  --color-primary-foreground: #0b0c0e;
-  --color-accent: #a8a2ff;
+  --color-primary: #ffffff;
+  --color-primary-foreground: #2f3130;
+  --color-accent: #c0c1ff;
   --color-success: #8ba889;
   --color-warning: #c49e6e;
-  --color-danger: #c97a72;
+  --color-danger: #ffb4ab;
   --font-sans: var(--font-hanken), "Hanken Grotesk", system-ui, sans-serif;
   --font-serif: var(--font-source-serif), "Source Serif 4", Georgia, serif;
   --font-mono: var(--font-jetbrains), "JetBrains Mono", ui-monospace, monospace;

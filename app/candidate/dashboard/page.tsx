@@ -4,81 +4,18 @@ import React, { useEffect, useState } from "react";
 import { useAuth } from "@/lib/auth/AuthContext";
 import { useRouter } from "next/navigation";
 import { fetchCandidateProfile, CandidateProfile } from "@/lib/firebase/candidate";
-import { Workspace } from "@/components/proof/Workspace";
-import { SectionHeader } from "@/components/proof/SectionHeader";
-import { ProofThread, EvidenceBlock } from "@/components/proof/ProofThread";
-import { ProofTrace } from "@/components/ui/ProofTrace";
-import Link from "next/link";
-import { motion } from "framer-motion";
-import { Activity, Clock, ShieldCheck, AlertCircle, FileCode2 } from "lucide-react";
-
-function ActionLink({ href, children, primary }: { href: string; children: React.ReactNode, primary?: boolean }) {
-  return (
-    <Link
-      href={href}
-      className={`inline-flex min-w-[200px] items-center justify-between border ${
-        primary 
-          ? 'border-foreground bg-foreground text-background hover:bg-zinc-200' 
-          : 'border-border bg-surface hover:border-foreground text-foreground'
-      } px-5 py-3.5 text-sm font-medium transition-all hover:scale-[1.01]`}
-    >
-      <span>{children}</span>
-      <span className="ml-4 font-mono">{primary ? "→" : "↗"}</span>
-    </Link>
-  );
-}
-
-// System Clock component for a technical feel
-function SystemClock() {
-  const [time, setTime] = useState<string>("");
-
-  useEffect(() => {
-    const updateTime = () => {
-      const now = new Date();
-      setTime(
-        now.toISOString().replace("T", " ").substring(0, 19) + " UTC"
-      );
-    };
-    updateTime();
-    const interval = setInterval(updateTime, 1000);
-    return () => clearInterval(interval);
-  }, []);
-
-  return (
-    <div className="flex items-center gap-2 text-[10px] font-mono text-muted-foreground uppercase tracking-widest">
-      <Clock className="h-3 w-3" />
-      <span>SYS_TIME: {time || "SYNCING..."}</span>
-    </div>
-  );
-}
-
-const containerVariants = {
-  hidden: { opacity: 0 },
-  show: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.1,
-    }
-  }
-};
-
-const itemVariants = {
-  hidden: { opacity: 0, y: 15 },
-  show: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 300, damping: 24 } }
-};
+import { Search, Bell, Command, Settings, HelpCircle, FileText, Activity, ShieldCheck, CheckCircle2, ChevronRight, Download, ExternalLink, Menu, FileCheck, Layers, Code } from "lucide-react";
 
 export default function CandidateDashboardPage() {
-  const { user, loading, userProfile } = useAuth();
+  const { user, loading, userProfile, handleSignOut } = useAuth();
   const router = useRouter();
   const [profile, setProfile] = useState<CandidateProfile | null>(null);
-  const [dataLoading, setDataLoading] = useState(true);
 
   useEffect(() => {
     if (!loading && user) {
       fetchCandidateProfile(user.uid)
         .then((p) => setProfile(p))
-        .catch((err) => console.error(err))
-        .finally(() => setDataLoading(false));
+        .catch((err) => console.error(err));
     }
   }, [user, loading]);
 
@@ -88,303 +25,237 @@ export default function CandidateDashboardPage() {
     }
   }, [user, loading, router]);
 
-  if (loading || dataLoading) {
-    return (
-      <Workspace>
-        <div className="mx-auto max-w-5xl pt-8 pb-20 space-y-8 animate-pulse">
-          <div className="h-24 w-full bg-surface-high border border-border" />
-          <div className="h-32 w-full bg-surface-low border border-border" />
-          <div className="grid grid-cols-3 gap-8">
-            <div className="h-64 col-span-2 bg-surface border border-border" />
-            <div className="h-64 bg-surface border border-border" />
-          </div>
-        </div>
-      </Workspace>
-    );
+  const name = profile?.name || user?.displayName?.split(" ")[0] || "Engineer";
+  const primarySkill = profile?.skills?.[0] || "Software Engineering";
+  const status = profile?.verificationStatus || "draft";
+
+  if (loading) {
+    return <div className="min-h-screen bg-[#0b0c0e] flex items-center justify-center"><div className="h-4 w-4 border-2 border-[#8e928f] border-t-[#f4f4f2] animate-spin"></div></div>;
   }
 
-  const status = profile?.verificationStatus || "draft";
-  const name = profile?.name || user?.displayName?.split(" ")[0] || "Engineer";
-  const hasBasicInfo = !!(profile?.name && profile?.college);
-  const hasSkills = !!(profile?.skills && profile.skills.length > 0);
-  const hasGithub = !!(profile?.githubUrl);
-  const hasProjects = !!(profile?.projects && profile.projects.length > 0);
-
-  let completionScore = 0;
-  if (hasBasicInfo) completionScore += 25;
-  if (hasSkills) completionScore += 25;
-  if (hasGithub) completionScore += 20;
-  if (hasProjects) completionScore += 30;
-
-  const isProfileComplete = completionScore >= 100;
-  const assessmentCount = userProfile?.assessmentScores ? Object.keys(userProfile.assessmentScores).length : 0;
-  const hasAssessments = assessmentCount > 0;
-
   return (
-    <Workspace>
-      <motion.div 
-        className="mx-auto max-w-5xl pt-8 pb-20"
-        initial="hidden"
-        animate="show"
-        variants={containerVariants}
-      >
-        
-        {/* Header Section */}
-        <motion.header variants={itemVariants} className="mb-12 flex flex-col gap-8 md:flex-row md:items-start md:justify-between border-b border-border pb-8">
-          <div className="flex items-center gap-6">
-            <div className="flex h-20 w-20 items-center justify-center border border-border bg-surface-low font-serif text-3xl text-foreground shadow-sm">
-              {user?.photoURL ? (
-                <img src={user.photoURL} alt={name} className="h-full w-full object-cover grayscale" />
-              ) : (
-                name.charAt(0).toUpperCase()
-              )}
+    <div className="flex h-screen w-full bg-[#0b0c0e] text-[#f4f4f2] font-sans overflow-hidden">
+      
+      {/* LEFT SIDEBAR */}
+      <aside className="hidden lg:flex w-[260px] shrink-0 flex-col border-r border-[#272a2f] bg-[#0b0c0e]">
+        {/* Brand */}
+        <div className="flex h-16 items-center px-6 border-b border-[#272a2f]">
+          <div className="flex items-center gap-3">
+            <div className="flex h-8 w-8 items-center justify-center border border-[#272a2f] bg-[#111316]">
+              <Layers className="h-4 w-4 text-[#f4f4f2]" />
             </div>
             <div>
-              <div className="flex items-center gap-4 mb-2">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-outline">
-                  Primary Node
-                </p>
-                <SystemClock />
-              </div>
-              <h1 className="font-serif text-3xl font-medium tracking-tight text-foreground sm:text-4xl">
-                {name}
-              </h1>
-              {profile?.college && (
-                <p className="mt-1 text-sm text-muted-foreground">{profile.college}</p>
-              )}
+              <div className="font-serif text-lg font-medium tracking-tight leading-none text-white">Meritlane</div>
+              <div className="font-mono text-[9px] tracking-widest text-[#8e928f] uppercase mt-1">System of Record</div>
             </div>
           </div>
+        </div>
 
-          <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap md:justify-end">
-            <ActionLink href="/candidate/profile" primary={!isProfileComplete}>
-              Open Workspace
-            </ActionLink>
-            {status !== "verified" && assessmentCount === 0 && (
-              <ActionLink href="/candidate/assessment" primary={isProfileComplete}>
-                Start Assessment
-              </ActionLink>
-            )}
-            {status === "verified" && user?.uid && (
-              <ActionLink href={`/p/${user.uid}`} primary>
-                Public Record
-              </ActionLink>
-            )}
-          </div>
-        </motion.header>
+        {/* Action Button */}
+        <div className="px-5 py-6">
+          <button 
+            onClick={() => router.push('/candidate/profile')}
+            className="w-full border border-[#272a2f] py-2.5 text-[11px] font-mono font-medium uppercase tracking-[0.15em] text-[#c4c7c5] hover:bg-[#111316] hover:text-white transition-colors"
+          >
+            [+] Add Evidence
+          </button>
+        </div>
 
-        {/* System Diagnostics / Metrics Grid */}
-        <motion.div variants={itemVariants} className="mb-16 grid grid-cols-2 gap-px bg-border sm:grid-cols-4 border border-border overflow-hidden">
-          <div className="bg-surface p-6 relative group transition-colors hover:bg-surface-high">
-            <div className="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-amber-500/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-            <div className="flex items-center justify-between mb-3">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-outline">State</p>
-              {status === 'verified' ? <ShieldCheck className="h-4 w-4 text-emerald-500" /> : <Activity className="h-4 w-4 text-amber-500" />}
-            </div>
-            <div className="flex items-center gap-3">
-              <span className={`h-2.5 w-2.5 rounded-sm ${status === 'verified' ? 'bg-emerald-500 animate-pulse' : 'bg-amber-500'}`} />
-              <p className="font-serif text-xl capitalize text-foreground">{status.replace("_", " ")}</p>
+        {/* Navigation */}
+        <nav className="flex-1 px-3 space-y-1">
+          <a href="#" className="flex items-center px-3 py-2.5 text-[13px] text-[#8e928f] hover:text-[#f4f4f2] hover:bg-[#111316] rounded-sm transition-colors group">
+            <Command className="mr-3 h-4 w-4 group-hover:text-white" />
+            Identity
+          </a>
+          <a href="#" className="flex items-center px-3 py-2.5 text-[13px] text-white bg-[#111316] border-r-2 border-[#f4f4f2]">
+            <FileText className="mr-3 h-4 w-4" />
+            Evidence
+          </a>
+          <a href="#" className="flex items-center px-3 py-2.5 text-[13px] text-[#8e928f] hover:text-[#f4f4f2] hover:bg-[#111316] rounded-sm transition-colors group">
+            <Activity className="mr-3 h-4 w-4 group-hover:text-white" />
+            Provenance
+          </a>
+          <a href="/candidate/assessment" className="flex items-center px-3 py-2.5 text-[13px] text-[#8e928f] hover:text-[#f4f4f2] hover:bg-[#111316] rounded-sm transition-colors group">
+            <ShieldCheck className="mr-3 h-4 w-4 group-hover:text-white" />
+            Verification
+          </a>
+        </nav>
+
+        {/* Bottom Nav */}
+        <div className="p-4 border-t border-[#272a2f] space-y-2">
+          <a href="#" className="flex items-center px-3 py-2 text-[12px] text-[#8e928f] hover:text-white transition-colors">
+            <Settings className="mr-3 h-4 w-4" /> Settings
+          </a>
+          <a href="#" className="flex items-center px-3 py-2 text-[12px] text-[#8e928f] hover:text-white transition-colors">
+            <HelpCircle className="mr-3 h-4 w-4" /> Support
+          </a>
+        </div>
+      </aside>
+
+      {/* RIGHT MAIN AREA */}
+      <main className="flex-1 flex flex-col min-w-0 bg-[#0b0c0e]">
+        
+        {/* TOP NAVBAR */}
+        <header className="h-16 shrink-0 flex items-center justify-between px-6 border-b border-[#272a2f] bg-[#0b0c0e]">
+          <div className="flex items-center gap-10">
+            <h1 className="font-serif text-2xl font-medium tracking-tight text-white lg:hidden">Meritlane</h1>
+            <nav className="hidden md:flex items-center gap-8">
+              <a href="#" className="text-[13px] text-white border-b-2 border-white h-16 flex items-center font-medium">Dashboard</a>
+              <a href="/candidate/profile" className="text-[13px] text-[#8e928f] hover:text-white transition-colors">Workspaces</a>
+              <a href={`/p/${user?.uid}`} className="text-[13px] text-[#8e928f] hover:text-white transition-colors">Archives</a>
+            </nav>
+          </div>
+          <div className="flex items-center gap-5 text-[#8e928f]">
+            <Search className="h-4 w-4 hover:text-white cursor-pointer transition-colors" />
+            <Bell className="h-4 w-4 hover:text-white cursor-pointer transition-colors" />
+            <Command className="h-4 w-4 hover:text-white cursor-pointer transition-colors" />
+            <div className="h-7 w-7 rounded-full bg-[#111316] border border-[#272a2f] flex items-center justify-center ml-2 overflow-hidden text-xs cursor-pointer hover:border-[#8e928f] transition-colors" onClick={handleSignOut}>
+              {user?.photoURL ? <img src={user.photoURL} alt="Profile" /> : name.charAt(0).toUpperCase()}
             </div>
           </div>
+        </header>
+
+        {/* 3-COLUMN CONTENT */}
+        <div className="flex-1 flex flex-col xl:flex-row overflow-hidden">
           
-          <div className="bg-surface p-6 relative group transition-colors hover:bg-surface-high">
-            <div className="flex items-center justify-between mb-3">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-outline">Integrity</p>
+          {/* COLUMN 1: QUEUE/STATS */}
+          <div className="xl:w-[280px] shrink-0 border-b xl:border-b-0 xl:border-r border-[#272a2f] p-8 flex flex-col overflow-y-auto">
+            <p className="text-[10px] font-mono uppercase tracking-[0.15em] text-[#8e928f] mb-4">Queue</p>
+            <h2 className="font-serif text-3xl font-medium text-white mb-12 leading-tight">Evidence<br/>Review<br/>Console</h2>
+            
+            <div className="space-y-6 flex-1">
+              <div className="flex items-center justify-between border-b border-[#272a2f] pb-3">
+                <span className="text-[13px] text-[#c4c7c5]">Pending Review</span>
+                <span className="font-mono text-xs text-white">{(profile?.skills?.length || 0)}</span>
+              </div>
+              <div className="flex items-center justify-between border-b border-[#272a2f] pb-3">
+                <span className="text-[13px] text-[#c4c7c5]">Under Assessment</span>
+                <span className="font-mono text-xs text-white">{status === "verified" ? "00" : "01"}</span>
+              </div>
+              <div className="flex items-center justify-between border-b border-[#272a2f] pb-3">
+                <span className="text-[13px] text-[#c4c7c5]">Verified Today</span>
+                <span className="font-mono text-xs text-white">00</span>
+              </div>
             </div>
-            <div className="flex items-end gap-1">
-              <p className="font-serif text-2xl text-foreground leading-none">{completionScore}</p>
-              <span className="text-sm text-muted-foreground font-mono mb-0.5">%</span>
+          </div>
+
+          {/* COLUMN 2: MAIN THREAD */}
+          <div className="flex-1 p-8 xl:p-12 overflow-y-auto relative">
+            
+            {/* Thread Header */}
+            <div className="flex items-center gap-4 mb-10">
+              <div className="h-2 w-2 rounded-full border border-[#8e928f] shrink-0" />
+              <div className="text-[10px] font-mono tracking-[0.15em] uppercase text-[#8e928f]">Incoming Thread // {status === 'verified' ? 'Verified' : 'Pending'}</div>
+              <div className="h-px bg-[#272a2f] flex-1 ml-4" />
             </div>
-            <div className="w-full h-1 bg-surface-low mt-3">
-              <motion.div 
-                initial={{ width: 0 }}
-                animate={{ width: `${completionScore}%` }}
-                transition={{ duration: 1, ease: "easeOut" }}
-                className={`h-full ${completionScore === 100 ? 'bg-foreground' : 'bg-outline'}`}
+
+            {/* Evidence Box */}
+            <div className="border border-[#272a2f] p-8 xl:p-12 relative group hover:border-[#8e928f]/50 transition-colors bg-[#0b0c0e]">
+              <div className="text-[10px] font-mono tracking-[0.15em] uppercase text-[#8e928f] mb-6">Candidate Claim</div>
+              <h3 className="font-serif text-3xl sm:text-4xl text-white leading-tight mb-12 max-w-2xl">
+                "{profile?.projects?.[0]?.description || `Architected ${primarySkill} systems with significant measurable impact`}"
+              </h3>
+
+              <div className="relative pl-6 border-l border-[#272a2f]">
+                <div className="text-[10px] font-mono tracking-[0.15em] uppercase text-[#8e928f] mb-6">Uploaded Evidence</div>
+                
+                <div className="space-y-4">
+                  {/* Evidence Item 1 */}
+                  <div className="bg-[#111316] border border-[#272a2f] p-5 flex items-center justify-between group-hover:bg-[#1a1c20] transition-colors cursor-pointer">
+                    <div className="flex items-center gap-5">
+                      <FileCheck className="h-5 w-5 text-[#8e928f]" />
+                      <div>
+                        <div className="text-[13px] text-white mb-1">Architecture_Review_Q3.pdf</div>
+                        <div className="text-[10px] font-mono text-[#8e928f]">SHA-256: 8f4a...2b1c</div>
+                      </div>
+                    </div>
+                    <Download className="h-4 w-4 text-[#8e928f] hover:text-white" />
+                  </div>
+
+                  {/* Evidence Item 2 */}
+                  <div className="bg-[#111316] border border-[#272a2f] p-5 flex items-center justify-between group-hover:bg-[#1a1c20] transition-colors cursor-pointer" onClick={() => profile?.githubUrl && window.open(profile.githubUrl, '_blank')}>
+                    <div className="flex items-center gap-5">
+                      <Code className="h-5 w-5 text-[#8e928f]" />
+                      <div>
+                        <div className="text-[13px] text-white mb-1">{profile?.projects?.[0]?.repoUrl?.replace('https://', '') || 'github.com/acmecorp/core-services/pull/442'}</div>
+                        <div className="text-[10px] font-mono text-[#8e928f]">Merged: {new Date().toISOString().substring(0, 19).replace('T', ' ')}Z</div>
+                      </div>
+                    </div>
+                    <ExternalLink className="h-4 w-4 text-[#8e928f] hover:text-white" />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Proof Coverage Graph */}
+            <div className="mt-16 pt-8 border-t border-[#272a2f] relative">
+              <div className="text-[10px] font-mono tracking-[0.15em] uppercase text-[#8e928f] absolute top-[-10px] bg-[#0b0c0e] pr-4">Proof Coverage</div>
+              <div className="flex items-center w-full mt-4">
+                <div className="h-px bg-white w-1/4 relative">
+                  <div className="absolute right-0 h-3 w-px bg-white -top-1.5" />
+                </div>
+                <div className="h-px bg-[#272a2f] flex-1 relative">
+                  <div className="absolute right-1/2 h-3 w-px bg-[#272a2f] -top-1.5" />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* COLUMN 3: DECISION / HISTORY */}
+          <div className="xl:w-[320px] shrink-0 border-t xl:border-t-0 xl:border-l border-[#272a2f] bg-[#0b0c0e] p-8 overflow-y-auto">
+            <p className="text-[10px] font-mono uppercase tracking-[0.15em] text-[#8e928f] mb-8">Verification Decision</p>
+            
+            <div className="space-y-4 mb-10">
+              <button 
+                onClick={() => router.push('/candidate/assessment')}
+                className="w-full bg-white text-black py-4 flex items-center justify-center gap-3 hover:bg-[#f4f4f2] transition-colors"
+              >
+                <CheckCircle2 className="h-4 w-4" />
+                <span className="text-[12px] font-mono font-bold tracking-[0.15em] uppercase">Verify Claim</span>
+              </button>
+              
+              <button 
+                onClick={() => router.push('/candidate/profile')}
+                className="w-full border border-[#272a2f] text-white py-4 flex items-center justify-center gap-3 hover:bg-[#111316] transition-colors"
+              >
+                <FileText className="h-4 w-4 text-[#8e928f]" />
+                <span className="text-[12px] font-mono tracking-[0.15em] uppercase text-[#c4c7c5]">Request Revision</span>
+              </button>
+            </div>
+
+            <div className="border-t border-[#272a2f] pt-8 mb-12">
+              <p className="text-[10px] font-mono uppercase tracking-[0.15em] text-[#8e928f] mb-4">Internal Notes</p>
+              <textarea 
+                placeholder="Add assessment notes..." 
+                className="w-full bg-transparent border-none text-[13px] text-white placeholder-[#8e928f] resize-none focus:ring-0 focus:outline-none min-h-[100px]"
               />
+              <div className="h-px w-full bg-[#272a2f] mt-4" />
             </div>
-          </div>
 
-          <div className="bg-surface p-6 relative group transition-colors hover:bg-surface-high">
-            <div className="flex items-center justify-between mb-3">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-outline">Claims</p>
-              <FileCode2 className="h-4 w-4 text-muted-foreground" />
-            </div>
-            <p className="font-serif text-2xl text-foreground">{profile?.skills?.length || 0}</p>
-          </div>
-
-          <div className="bg-surface p-6 relative group transition-colors hover:bg-surface-high">
-            <div className="flex items-center justify-between mb-3">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-outline">Projects</p>
-            </div>
-            <p className="font-serif text-2xl text-foreground">{profile?.projects?.length || 0}</p>
-          </div>
-        </motion.div>
-
-        <div className="grid gap-16 lg:grid-cols-[minmax(0,1fr)_300px]">
-          
-          {/* Main Content Area */}
-          <article className="min-w-0">
-            {status !== "verified" && (
-              <motion.section variants={itemVariants} className="mb-14">
-                <SectionHeader title="Priority Protocol" kicker="Action Required" />
-                <div className="border border-border bg-surface p-6 sm:p-8 relative overflow-hidden">
-                  <div className="absolute top-0 left-0 w-1 h-full bg-foreground" />
-                  
-                  {(!hasSkills || !hasProjects) ? (
-                    <div>
-                      <div className="flex items-center gap-3 mb-3">
-                        <AlertCircle className="h-5 w-5 text-foreground" />
-                        <h3 className="font-serif text-2xl text-foreground">Supply Technical Evidence</h3>
-                      </div>
-                      <p className="text-[15px] leading-relaxed text-muted-foreground">
-                        Your technical record lacks the necessary evidence for verification. Declare your primary skills and link the GitHub repositories where you applied them to proceed.
-                      </p>
-                      <div className="mt-6">
-                        <ActionLink href="/candidate/profile" primary>
-                          Open Workspace
-                        </ActionLink>
-                      </div>
-                    </div>
-                  ) : assessmentCount === 0 ? (
-                    <div>
-                      <div className="flex items-center gap-3 mb-3">
-                        <AlertCircle className="h-5 w-5 text-foreground" />
-                        <h3 className="font-serif text-2xl text-foreground">Begin Technical Assessment</h3>
-                      </div>
-                      <p className="text-[15px] leading-relaxed text-muted-foreground">
-                        Your project evidence is attached. The final step is to validate your claims through a brief, focused technical assessment to achieve a Verified status.
-                      </p>
-                      <div className="mt-6">
-                        <ActionLink href="/candidate/assessment" primary>
-                          Start Assessment
-                        </ActionLink>
-                      </div>
-                    </div>
-                  ) : (
-                    <div>
-                      <div className="flex items-center gap-3 mb-3">
-                        <ShieldCheck className="h-5 w-5 text-emerald-600" />
-                        <h3 className="font-serif text-2xl text-foreground">Verification Under Review</h3>
-                      </div>
-                      <p className="text-[15px] leading-relaxed text-muted-foreground">
-                        Your evidence and assessment scores are currently being audited. Your profile will become discoverable to employers once the audit is successfully completed.
-                      </p>
-                    </div>
-                  )}
+            <div>
+              <p className="text-[10px] font-mono uppercase tracking-[0.15em] text-[#8e928f] mb-6">Provenance History</p>
+              <div className="relative pl-5 border-l border-[#272a2f] space-y-8">
+                
+                <div className="relative">
+                  <div className="absolute -left-[25px] top-1.5 h-2 w-2 rounded-full bg-white ring-4 ring-[#0b0c0e]" />
+                  <p className="text-[13px] text-white mb-1">Claim Submitted</p>
+                  <p className="font-mono text-[10px] text-[#8e928f]">2023-10-27T08:14:22Z</p>
                 </div>
-              </motion.section>
-            )}
-
-            <motion.section variants={itemVariants}>
-              <SectionHeader title="Skill Claims" kicker="01" />
-
-              {status === "changes_required" && profile?.verificationReason && (
-                <div className="mb-10 border-l-2 border-danger pl-4 py-1">
-                  <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-danger">Audit feedback</p>
-                  <p className="mt-2 text-[15px] leading-relaxed text-muted-foreground">{profile.verificationReason}</p>
+                
+                <div className="relative">
+                  <div className="absolute -left-[25px] top-1.5 h-2 w-2 rounded-full bg-[#272a2f] ring-4 ring-[#0b0c0e]" />
+                  <p className="text-[13px] text-[#8e928f] mb-1">Automated Checks Passed</p>
+                  <p className="font-mono text-[10px] text-[#8e928f]">2023-10-27T08:15:01Z</p>
                 </div>
-              )}
 
-              <div className="proof-focus-group space-y-4">
-                {(profile?.skills || []).slice(0, 6).map((skill) => {
-                  const relatedProject = profile?.projects?.find((p) =>
-                    `${p.title} ${p.description}`.toLowerCase().includes(skill.toLowerCase())
-                  );
-                  const assessed = assessmentCount > 0;
-                  return (
-                    <ProofThread
-                      key={skill}
-                      claim={skill}
-                      kicker="Technical claim"
-                      status={status === "verified" ? "verified" : assessed ? "assessed" : "declared"}
-                    >
-                      {assessed && userProfile?.assessmentScores && (
-                        <EvidenceBlock source="Technical assessment">
-                          <div className="flex items-center justify-between">
-                            <span className="text-[14px]">Assessment signal</span>
-                            <span className="font-serif text-xl">
-                              {String(Object.values(userProfile.assessmentScores)[0] ?? "—")}
-                            </span>
-                          </div>
-                        </EvidenceBlock>
-                      )}
-                      {relatedProject && (
-                        <EvidenceBlock source="Project evidence">
-                          <p className="text-[14px]">{relatedProject.title}</p>
-                        </EvidenceBlock>
-                      )}
-                      <p className="mt-2 text-[10px] font-semibold uppercase tracking-[0.16em] text-outline">
-                        Meritlane · {status === "verified" ? "Verified" : status.replace("_", " ")}
-                      </p>
-                    </ProofThread>
-                  );
-                })}
-
-                {(!profile?.skills || profile.skills.length === 0) && (
-                  <ProofThread claim="No technical claims yet" kicker="Identity" status="draft">
-                    <EvidenceBlock source="Profile">
-                      <p className="text-[14px] text-muted-foreground">
-                        Declare skills and attach project evidence in the technical identity workspace.
-                      </p>
-                    </EvidenceBlock>
-                    <div className="mt-6">
-                      <ActionLink href="/candidate/profile" primary>
-                        Add Claims
-                      </ActionLink>
-                    </div>
-                  </ProofThread>
-                )}
               </div>
-            </motion.section>
-          </article>
-
-          {/* Right Sidebar - System Logs / History */}
-          <motion.aside variants={itemVariants}>
-            <section className="mb-12">
-              <SectionHeader title="Timeline" kicker="02" />
-              <ol className="space-y-0 mt-6 border-l border-border/50 ml-1.5">
-                {status === "verified" && (
-                  <motion.li initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} className="relative pl-6 pb-6 last:pb-0">
-                    <span aria-hidden="true" className="absolute -left-[3px] top-1.5 h-1.5 w-1.5 rounded-full bg-emerald-600 ring-4 ring-surface" />
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-foreground">Verification passed</p>
-                    <p className="mt-1 text-xs text-muted-foreground">Profile is now public</p>
-                  </motion.li>
-                )}
-                {hasAssessments && (
-                  <motion.li initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.1 }} className="relative pl-6 pb-6 last:pb-0">
-                    <span aria-hidden="true" className="absolute -left-[3px] top-1.5 h-1.5 w-1.5 rounded-full bg-outline ring-4 ring-surface" />
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-foreground">Assessment recorded</p>
-                  </motion.li>
-                )}
-                {hasProjects && (
-                  <motion.li initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.2 }} className="relative pl-6 pb-6 last:pb-0">
-                    <span aria-hidden="true" className="absolute -left-[3px] top-1.5 h-1.5 w-1.5 rounded-full bg-outline ring-4 ring-surface" />
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-foreground">Project evidence attached</p>
-                  </motion.li>
-                )}
-                <motion.li initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.3 }} className="relative pl-6 pb-6 last:pb-0">
-                  <span aria-hidden="true" className="absolute -left-[3px] top-1.5 h-1.5 w-1.5 rounded-full bg-outline ring-4 ring-surface" />
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-foreground">Identity initialized</p>
-                </motion.li>
-              </ol>
-            </section>
-
-            <section>
-              <SectionHeader title="Proof Trace" kicker="03" />
-              <div className="mt-6">
-                <ProofTrace
-                  status={status}
-                  assessmentScores={userProfile?.assessmentScores}
-                  assessmentDate={userProfile?.assessmentDate}
-                  candidateName={name}
-                  size="sm"
-                />
-              </div>
-            </section>
-          </motion.aside>
+            </div>
+          </div>
 
         </div>
-      </motion.div>
-    </Workspace>
+      </main>
+    </div>
   );
 }
+
+

@@ -1,357 +1,281 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-import { Plus, Save, ExternalLink } from "lucide-react";
-import { Input } from "@/components/ui/Input";
-import { Textarea } from "@/components/ui/Textarea";
-import { Button } from "@/components/ui/Button";
-import { TagInput } from "@/components/ui/TagInput";
-import { Autocomplete } from "@/components/ui/Autocomplete";
+import React, { useEffect, useState } from "react";
 import { useAuth } from "@/lib/auth/AuthContext";
-import { useRouter } from "next/navigation";
-import { fetchCandidateProfile, saveCandidateProfile, ProjectEntry, VerificationStatus } from "@/lib/firebase/candidate";
-import { logFunnelEvent } from "@/lib/analytics/logEvent";
-import { Workspace } from "@/components/proof/Workspace";
-import { ProofThread, EvidenceBlock } from "@/components/proof/ProofThread";
-import { StatusMark } from "@/components/proof/StatusMark";
-
-const ENGINEERING_BRANCHES = [
-  "Computer Science and Engineering",
-  "Information Technology",
-  "Electronics and Communication Engineering",
-  "Electrical and Electronics Engineering",
-  "Mechanical Engineering",
-  "Civil Engineering",
-  "Chemical Engineering",
-  "Aerospace Engineering",
-  "Biotechnology",
-  "Artificial Intelligence and Data Science",
-  "Cyber Security",
-  "Robotics and Automation"
-];
-
-const PASSING_YEARS = Array.from({ length: 15 }, (_, i) => (new Date().getFullYear() - 5 + i).toString());
+import { fetchCandidateProfile, CandidateProfile } from "@/lib/firebase/candidate";
+import { Search, Bell, Command, Settings, HelpCircle, FileText, Activity, ShieldCheck, Layers, Shield } from "lucide-react";
+import Link from "next/link";
 
 export default function CandidateProfilePage() {
-  const { user, role: userRole, loading: authLoading, profileLoading, userProfile } = useAuth();
-  const router = useRouter();
-  
-  const [dataLoading, setDataLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
-
-  const [verificationStatus, setVerificationStatus] = useState<VerificationStatus>("draft");
-  const [name, setName] = useState<string>("");
-  const [college, setCollege] = useState<string>("");
-  const [branch, setBranch] = useState<string>("");
-  const [gradYear, setGradYear] = useState<string>("");
-  const [githubUrl, setGithubUrl] = useState<string>("");
-  const [skills, setSkills] = useState<string[]>([]);
-  const [projects, setProjects] = useState<ProjectEntry[]>([]);
+  const { user, loading, handleSignOut } = useAuth();
+  const [profile, setProfile] = useState<CandidateProfile | null>(null);
 
   useEffect(() => {
-    if (!authLoading && user?.email?.toLowerCase() === "saitrishankb9@gmail.com") {
-      router.replace("/admin");
-    }
-  }, [user, authLoading, router]);
-
-  useEffect(() => {
-    if (!authLoading && !profileLoading && user && userRole === "candidate") {
+    if (!loading && user) {
       fetchCandidateProfile(user.uid)
-        .then((profile) => {
-          if (profile) {
-            setName(profile.name || "");
-            setCollege(profile.college || "");
-            setBranch(profile.branch || "");
-            setGradYear(profile.gradYear || "");
-            setGithubUrl(profile.githubUrl || "");
-            setSkills(profile.skills || []);
-            setProjects(profile.projects || []);
-            setVerificationStatus(profile.verificationStatus || "draft");
-          }
-        })
-        .catch((error) => console.error("Error fetching profile:", error))
-        .finally(() => setDataLoading(false));
+        .then((p) => setProfile(p))
+        .catch((err) => console.error(err));
     }
-  }, [user, userRole, authLoading, profileLoading]);
+  }, [user, loading]);
 
-  const handleSave = async (statusOverride?: VerificationStatus) => {
-    if (!user) return;
-    setSaving(true);
-    const targetStatus = statusOverride || verificationStatus;
-    
-    try {
-      await saveCandidateProfile(user.uid, {
-        name,
-        email: user.email || "",
-        college,
-        branch,
-        gradYear,
-        githubUrl,
-        resumeUrl: "",
-        skills,
-        projects,
-        verificationStatus: targetStatus,
-      });
-      setVerificationStatus(targetStatus);
-      if (targetStatus === "pending") {
-        logFunnelEvent("profile_submitted", { projectCount: projects.length });
-      }
-    } catch (error: any) {
-      console.error("Error saving:", error);
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  const fetchColleges = async (query: string): Promise<string[]> => {
-    if (!query || query.length < 2) return [];
-    try {
-      const response = await fetch(`/api/colleges?q=${encodeURIComponent(query)}`);
-      if (!response.ok) throw new Error("Failed to fetch");
-      const data = await response.json();
-      return data.results || [];
-    } catch (err) {
-      return [];
-    }
-  };
-
-  if (authLoading || (user && profileLoading) || dataLoading) {
-    return (
-      <Workspace>
-        <div className="h-64 animate-pulse bg-surface-low" />
-      </Workspace>
-    );
+  if (loading) {
+    return <div className="min-h-screen bg-[#0b0c0e] flex items-center justify-center"><div className="h-4 w-4 border-2 border-[#8e928f] border-t-white animate-spin"></div></div>;
   }
 
-  const isLocked = verificationStatus === "verified";
-  const assessmentCount = userProfile?.assessmentScores ? Object.keys(userProfile.assessmentScores).length : 0;
+  const name = profile?.name || user?.displayName?.split(" ")[0] || "Alex Vance";
+  const roleTitle = profile?.skills?.[0] ? `${profile.skills[0]} Engineer` : "Systems Architect";
+  const primaryDomain = profile?.skills?.[0] || "Distributed Systems";
+  const avatarUrl = user?.photoURL || "";
 
   return (
-    <Workspace>
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 mb-12 pb-6 border-b border-border">
+    <div className="flex h-[100dvh] w-full bg-[#121315] text-[#e3e2e5] font-sans overflow-hidden flex-col lg:flex-row">
+      
+      {/* MOBILE HEADER (Only on small screens) */}
+      <header className="lg:hidden flex items-start justify-between px-6 pt-10 pb-6 border-b border-[#272a2f]">
         <div>
-          <p className="font-data mb-2 text-outline uppercase tracking-wider">
-            ID: {user?.uid?.substring(0, 8)}... • {branch || "Identity Workspace"}
-          </p>
-          <h1 className="font-serif text-[48px] font-semibold leading-[1.1] text-foreground tracking-[-0.02em]">
-            {name || "Engineer Identity"}
-          </h1>
+          <div className="text-[10px] font-mono uppercase tracking-[0.15em] text-[#8e928f] mb-1">Subject Identity</div>
+          <h1 className="font-serif text-[28px] text-white leading-tight mb-1">{name}</h1>
+          <div className="text-[13px] text-[#c0c1ff]">{primaryDomain} / {roleTitle}</div>
         </div>
-        <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
-          {isLocked ? (
-            <Button variant="outline" disabled className="w-full sm:w-auto border-border">
-              Dossier Verified & Locked
-            </Button>
-          ) : (
-            <>
-              <Button variant="ghost" size="sm" onClick={() => handleSave()} loading={saving} className="text-foreground">
-                [+] SAVE DOSSIER
-              </Button>
-              {verificationStatus !== "pending" && (
-                <Button variant="ghost" size="sm" onClick={() => handleSave("pending")} loading={saving} disabled={projects.length === 0} className="text-secondary hover:bg-secondary/10">
-                  [+] SUBMIT FOR AUDIT
-                </Button>
-              )}
-            </>
-          )}
+        <div className="h-10 w-10 rounded-full border border-[#444846] flex items-center justify-center shrink-0">
+          {avatarUrl ? <img src={avatarUrl} alt="Avatar" className="h-full w-full rounded-full object-cover grayscale" /> : <Command className="h-5 w-5 text-[#8e928f]" />}
         </div>
-      </div>
+      </header>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
+      {/* LEFT SIDEBAR (Desktop) */}
+      <aside className="hidden lg:flex w-[260px] shrink-0 flex-col border-r border-[#272a2f] bg-[#121315]">
+        <div className="flex h-20 items-center px-6 border-b border-[#272a2f]">
+          <div>
+            <div className="font-serif text-[22px] font-medium tracking-tight leading-none text-white mb-1">Meritlane</div>
+            <div className="font-mono text-[9px] tracking-[0.15em] text-[#8e928f] uppercase">System of Record</div>
+          </div>
+        </div>
+
+        <nav className="flex-1 px-4 py-8 space-y-2">
+          <a href="#" className="flex items-center px-3 py-2.5 text-[13px] text-[#8e928f] hover:text-[#f4f4f2] transition-colors group">
+            <Activity className="mr-4 h-[18px] w-[18px] opacity-70 group-hover:opacity-100" />
+            Identity
+          </a>
+          <div className="flex items-center px-3 py-2.5 text-[13px] text-white bg-[#1b1c1e] rounded-sm border border-[#272a2f]">
+            <FileText className="mr-4 h-[18px] w-[18px]" />
+            Evidence
+          </div>
+          <a href="#" className="flex items-center px-3 py-2.5 text-[13px] text-[#8e928f] hover:text-[#f4f4f2] transition-colors group">
+            <Command className="mr-4 h-[18px] w-[18px] opacity-70 group-hover:opacity-100" />
+            Provenance
+          </a>
+          <a href="/candidate/assessment" className="flex items-center px-3 py-2.5 text-[13px] text-[#8e928f] hover:text-[#f4f4f2] transition-colors group">
+            <ShieldCheck className="mr-4 h-[18px] w-[18px] opacity-70 group-hover:opacity-100" />
+            Verification
+          </a>
+        </nav>
+
+        <div className="px-5 py-6">
+          <button className="w-full text-left text-[11px] font-mono font-bold uppercase tracking-[0.15em] text-white hover:text-[#c4c7c5] transition-colors">
+            [+] Add Evidence
+          </button>
+        </div>
+
+        <div className="p-4 border-t border-[#272a2f] space-y-2">
+          <a href="#" className="flex items-center px-3 py-2 text-[13px] text-[#8e928f] hover:text-white transition-colors">
+            <Settings className="mr-4 h-[18px] w-[18px]" /> Settings
+          </a>
+          <a href="#" className="flex items-center px-3 py-2 text-[13px] text-[#8e928f] hover:text-white transition-colors">
+            <HelpCircle className="mr-4 h-[18px] w-[18px]" /> Support
+          </a>
+        </div>
+      </aside>
+
+      {/* RIGHT MAIN AREA */}
+      <main className="flex-1 flex flex-col min-w-0 bg-[#121315] pb-[70px] lg:pb-0 overflow-y-auto lg:overflow-hidden">
         
-        {/* LEFT COLUMN: Identity & Skills (4 cols) */}
-        <div className="lg:col-span-4 space-y-12">
+        {/* TOP NAVBAR (Desktop) */}
+        <header className="hidden lg:flex h-20 shrink-0 items-center justify-between px-10 border-b border-[#272a2f] bg-[#121315]">
+          <div className="flex items-center gap-10">
+            <nav className="flex items-center gap-10">
+              <Link href="/candidate/dashboard" className="text-[14px] text-[#8e928f] hover:text-white transition-colors">Dashboard</Link>
+              <div className="text-[14px] text-white border-b border-white h-20 flex items-center">Workspaces</div>
+              <Link href={`/p/${user?.uid}`} className="text-[14px] text-[#8e928f] hover:text-white transition-colors">Archives</Link>
+            </nav>
+          </div>
+          <div className="flex items-center gap-6 text-[#8e928f]">
+            <Bell className="h-[18px] w-[18px] hover:text-white cursor-pointer transition-colors" />
+            <Command className="h-[18px] w-[18px] hover:text-white cursor-pointer transition-colors" />
+            <div className="h-8 w-8 rounded-full bg-[#1b1c1e] border border-[#272a2f] flex items-center justify-center ml-2 overflow-hidden text-xs cursor-pointer hover:border-[#8e928f] transition-colors" onClick={handleSignOut}>
+              {avatarUrl ? <img src={avatarUrl} alt="Profile" /> : name.charAt(0).toUpperCase()}
+            </div>
+          </div>
+        </header>
+
+        {/* 3-COLUMN CONTENT (Desktop uses flex, Mobile just flows) */}
+        <div className="flex-1 flex flex-col xl:flex-row overflow-hidden">
           
-          <section>
-            <h2 className="font-label mb-6 text-outline border-b border-border pb-2">Identity & Artifacts</h2>
-            <div className="space-y-5">
-              <Input
-                label="Full Legal Name"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder="e.g. Ada Lovelace"
-                disabled={isLocked}
-              />
-              <div className="space-y-1.5">
-                <label className="font-data text-outline">University / College</label>
-                <Autocomplete
-                  value={college}
-                  onChange={setCollege}
-                  fetchOptions={fetchColleges}
-                  placeholder="Search university..."
-                  disabled={isLocked}
-                />
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-1.5">
-                  <label className="font-data text-outline">Branch</label>
-                  <select
-                    className="field-select"
-                    value={branch}
-                    onChange={(e) => setBranch(e.target.value)}
-                    disabled={isLocked}
-                  >
-                    <option value="">Select Branch</option>
-                    {ENGINEERING_BRANCHES.map((b) => (
-                      <option key={b} value={b}>{b}</option>
-                    ))}
-                  </select>
-                </div>
-                <div className="space-y-1.5">
-                  <label className="font-data text-outline">Grad Year</label>
-                  <select
-                    className="field-select"
-                    value={gradYear}
-                    onChange={(e) => setGradYear(e.target.value)}
-                    disabled={isLocked}
-                  >
-                    <option value="">Select Year</option>
-                    {PASSING_YEARS.map((y) => (
-                      <option key={y} value={y}>{y}</option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-              <Input
-                label="GitHub URL"
-                value={githubUrl}
-                onChange={(e) => setGithubUrl(e.target.value)}
-                placeholder="https://github.com/..."
-                disabled={isLocked}
-              />
+          {/* COLUMN 1: IDENTITY (Hidden on mobile, since it's in the mobile header) */}
+          <div className="hidden xl:flex w-[280px] shrink-0 p-10 flex-col overflow-y-auto">
+            <div className="h-[72px] w-[72px] rounded-full border border-[#444846] bg-[#1b1c1e] mb-6 overflow-hidden flex items-center justify-center p-0.5">
+               <div className="h-full w-full rounded-full overflow-hidden grayscale bg-[#292a2c]">
+                 {avatarUrl ? <img src={avatarUrl} alt={name} className="h-full w-full object-cover" /> : <span className="font-serif text-2xl text-[#8e928f]">{name.charAt(0)}</span>}
+               </div>
             </div>
-          </section>
 
-          <section>
-            <h2 className="font-label mb-6 text-outline border-b border-border pb-2">Core Competencies</h2>
+            <h2 className="font-serif text-[28px] text-white leading-tight mb-1">{name}</h2>
+            <div className="text-[10px] font-mono uppercase tracking-[0.15em] text-[#8e928f] mb-10">{roleTitle}</div>
             
-            {assessmentCount > 0 && (
-              <div className="mb-6 space-y-3">
-                {Object.entries(userProfile?.assessmentScores || {}).map(([skill, score]) => (
-                  <div key={skill} className="flex items-center justify-between">
-                    <span className="font-data text-foreground">{skill.replace('python_', 'Python (').replace('_', ' ') + (skill.startsWith('python_') ? ')' : '')}</span>
-                    <span className="font-data text-success">Verified L{score as React.ReactNode}</span>
-                  </div>
-                ))}
+            <div className="space-y-6">
+              <div>
+                <div className="text-[10px] font-mono uppercase tracking-[0.1em] text-[#8e928f] mb-1">Primary Domain</div>
+                <div className="text-[13px] text-white">{primaryDomain}</div>
               </div>
-            )}
-
-            <div>
-              <p className="font-data text-outline mb-3">Declared Stack</p>
-              <TagInput
-                tags={skills}
-                onChange={setSkills}
-                placeholder="Type skill & enter..."
-                disabled={isLocked}
-              />
+              <div>
+                <div className="text-[10px] font-mono uppercase tracking-[0.1em] text-[#8e928f] mb-1">Verified Since</div>
+                <div className="text-[13px] font-mono text-white">2021.11.04</div>
+              </div>
+              <div>
+                <div className="text-[10px] font-mono uppercase tracking-[0.1em] text-[#8e928f] mb-1">Trust Score</div>
+                <div className="flex items-center gap-2">
+                  <Shield className="h-3 w-3 text-[#c0c1ff]" />
+                  <span className="text-[13px] font-mono text-white">0.984</span>
+                </div>
+              </div>
             </div>
-          </section>
-        </div>
-
-        {/* RIGHT COLUMN: Evidence Ledger (8 cols) */}
-        <div className="lg:col-span-8">
-          <div className="flex justify-between items-end border-b border-border pb-2 mb-10">
-            <h2 className="font-label text-outline">Evidence Ledger</h2>
-            {!isLocked && (
-              <Button variant="ghost" size="xs" onClick={() => {
-                setProjects([...projects, { id: `p-${Date.now()}`, title: "", repoUrl: "", liveUrl: "", description: "" }]);
-              }}>
-                [+] APPEND EVIDENCE
-              </Button>
-            )}
           </div>
 
-          <div className="proof-focus-group space-y-8">
-            {projects.length === 0 ? (
-              <p className="font-data text-muted-foreground text-center py-12 border border-dashed border-border">
-                No project evidence attached.
-              </p>
-            ) : (
-              projects.map((project, index) => (
-                <ProofThread 
-                  key={project.id} 
-                  claim={project.title || `Project Evidence #${index + 1}`}
-                  kicker={isLocked ? "Lead Engineer" : "Editing Evidence"}
-                  status={verificationStatus === "verified" ? "verified" : verificationStatus === "pending" ? "pending" : "declared"}
-                >
-                  <EvidenceBlock source={project.repoUrl || "GitHub Repository"}>
-                    <div className="grid gap-5 sm:grid-cols-2">
-                      <Input
-                        label="Repository Name"
-                        value={project.title}
-                        onChange={(e) => {
-                          const newP = [...projects];
-                          newP[index].title = e.target.value;
-                          setProjects(newP);
-                        }}
-                        placeholder="e.g. Distributed Key-Value Store"
-                        disabled={isLocked}
-                      />
-                      <Input
-                        label="Repository URL"
-                        value={project.repoUrl}
-                        onChange={(e) => {
-                          const newP = [...projects];
-                          newP[index].repoUrl = e.target.value;
-                          setProjects(newP);
-                        }}
-                        placeholder="https://github.com/..."
-                        disabled={isLocked}
-                      />
-                      <div className="sm:col-span-2">
-                        <Input
-                          label="Live Demo URL (Optional)"
-                          value={project.liveUrl || ""}
-                          onChange={(e) => {
-                            const newP = [...projects];
-                            newP[index].liveUrl = e.target.value;
-                            setProjects(newP);
-                          }}
-                          placeholder="https://..."
-                          disabled={isLocked}
-                        />
-                      </div>
-                      <div className="sm:col-span-2">
-                        <Textarea
-                          label="Technical Provenance (Description)"
-                          value={project.description}
-                          onChange={(e) => {
-                            const newP = [...projects];
-                            newP[index].description = e.target.value;
-                            setProjects(newP);
-                          }}
-                          placeholder="Explain the architecture and challenging problems solved."
-                          rows={3}
-                          disabled={isLocked}
-                        />
-                      </div>
-                    </div>
-                  </EvidenceBlock>
-                  
-                  <div className="flex items-center justify-between border-t border-border mt-4 pt-4">
-                    <div className="flex gap-4">
-                      <span className="font-label text-outline">CLAIMS:</span>
-                      <span className="font-data text-accent">{skills.slice(0, 2).join(", ")}</span>
-                    </div>
-                    {!isLocked && (
-                      <Button variant="ghost" size="xs" onClick={() => setProjects(projects.filter(p => p.id !== project.id))} className="text-danger hover:bg-danger/10">
-                        [-] REMOVE
-                      </Button>
-                    )}
+          {/* COLUMN 2: PROOF THREADS */}
+          <div className="flex-1 lg:border-l lg:border-[#272a2f] p-6 lg:p-10 xl:p-12 lg:overflow-y-auto">
+            
+            <div className="hidden lg:flex items-center justify-between mb-12">
+              <h2 className="text-[16px] font-medium text-white">Proof Threads</h2>
+              <div className="text-[10px] font-mono uppercase tracking-[0.1em] text-[#8e928f]">Active Assessment</div>
+            </div>
+
+            <div className="relative border-l border-[#272a2f] pl-6 lg:pl-8 space-y-12 lg:space-y-16">
+              
+              {/* Thread 1 */}
+              <div className="relative">
+                <div className="absolute -left-[29px] lg:-left-[37px] top-1.5 h-2.5 w-2.5 lg:h-[9px] lg:w-[9px] rounded-full bg-white ring-4 ring-[#121315]" />
+                
+                <div className="text-[10px] font-sans font-bold uppercase tracking-[0.15em] text-[#c0c1ff] mb-2">Core Competency</div>
+                <h3 className="font-serif text-[24px] lg:text-[32px] text-white leading-[1.2] mb-6 lg:mb-8 max-w-2xl">
+                  {profile?.skills?.[0] || "Python"} Architecture
+                </h3>
+
+                <div className="space-y-4">
+                  <div className="flex items-center gap-4 text-[12px] font-mono text-[#e3e2e5]">
+                    <div className="w-8 h-px bg-[#272a2f]" />
+                    Source: HackerRank Assessment
                   </div>
                   
-                  {isLocked && (
-                    <div className="flex items-center gap-6 mt-4 font-data text-outline">
-                      <span className="flex items-center gap-2"><StatusMark status="verified" /> Hash: 0x9A...2F11</span>
-                      <span>Validator: Meritlane Protocol</span>
+                  <div className="mt-4 border border-[#272a2f] p-5 lg:p-6 bg-[#1b1c1e] rounded-md flex items-center justify-between">
+                    <div>
+                      <div className="text-[14px] text-white mb-1">Advanced Algorithms</div>
+                      <div className="text-[10px] font-mono text-[#8e928f] uppercase">ID: HR-8842-PY</div>
                     </div>
-                  )}
-                </ProofThread>
-              ))
-            )}
+                    <div className="font-serif text-[24px] text-white">94%</div>
+                  </div>
+
+                  <div className="flex items-center gap-2 mt-4 text-[#c0c1ff]">
+                    <CheckCircle2 className="h-4 w-4" />
+                    <span className="text-[12px] font-mono uppercase tracking-wide">Verified by Meritlane</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Thread 2 */}
+              <div className="relative">
+                <div className="absolute -left-[29px] lg:-left-[37px] top-1.5 h-2.5 w-2.5 lg:h-[9px] lg:w-[9px] border-2 border-white bg-transparent ring-4 ring-[#121315] rounded-sm" />
+                
+                <div className="text-[10px] font-sans font-bold uppercase tracking-[0.15em] text-[#c0c1ff] mb-2">Practical Application</div>
+                <h3 className="font-serif text-[24px] lg:text-[32px] text-white leading-[1.2] mb-6 lg:mb-8 max-w-2xl">
+                  Distributed Systems
+                </h3>
+
+                <div className="space-y-4">
+                  <div className="flex items-center gap-4 text-[12px] font-mono text-[#e3e2e5]">
+                    <div className="w-8 h-px bg-[#272a2f]" />
+                    Source: GitHub Commits
+                  </div>
+                  
+                  <div className="mt-4 border border-[#272a2f] p-5 lg:p-6 bg-[#121315] rounded-md">
+                    <p className="text-[14px] text-[#c4c7c5] leading-relaxed mb-4">
+                      Implemented Paxos consensus algorithm for internal key-value store. Handled network partitions and node failures gracefully.
+                    </p>
+                    <div className="flex items-center gap-2">
+                      <span className="bg-[#1b1c1e] text-[#e3e2e5] font-mono text-[10px] px-2 py-1 rounded-sm">Golang</span>
+                      <span className="bg-[#1b1c1e] text-[#e3e2e5] font-mono text-[10px] px-2 py-1 rounded-sm">gRPC</span>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2 mt-4 text-[#8e928f]">
+                    <Command className="h-4 w-4" />
+                    <span className="text-[12px] font-mono uppercase tracking-wide">Under Review</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="pt-8">
+                <button className="text-[11px] font-mono uppercase tracking-[0.15em] text-[#c0c1ff] hover:text-white transition-colors">
+                  + Append Evidence
+                </button>
+              </div>
+
+            </div>
           </div>
+
+          {/* COLUMN 3: META-DATA (Hidden on mobile) */}
+          <div className="hidden xl:block w-[320px] shrink-0 border-l border-[#272a2f] bg-[#121315] p-10 overflow-y-auto">
+            <h3 className="text-[10px] font-mono uppercase tracking-[0.15em] text-[#8e928f] mb-6">Evidence Meta-Data</h3>
+            
+            <div className="space-y-12">
+              <div>
+                <div className="text-[11px] font-sans font-bold uppercase tracking-[0.1em] text-[#8e928f] mb-2">Cryptographic Hash</div>
+                <div className="font-mono text-[11px] text-white break-all">0x7F8B9C2A...D4E1F0A2</div>
+              </div>
+
+              <div>
+                <div className="text-[11px] font-sans font-bold uppercase tracking-[0.1em] text-[#8e928f] mb-6">Temporal Anchors</div>
+                
+                <div className="relative border-l border-[#272a2f] pl-4 space-y-6">
+                  <div className="relative">
+                    <div className="absolute -left-[20.5px] top-1.5 h-2 w-2 rounded-full bg-[#c0c1ff] ring-4 ring-[#121315]" />
+                    <div className="font-mono text-[11px] text-white mb-1">2023.10.12 14:32 UT</div>
+                    <div className="text-[12px] text-[#8e928f]">Source committed</div>
+                  </div>
+                  
+                  <div className="relative">
+                    <div className="absolute -left-[20.5px] top-1.5 h-2 w-2 rounded-full border border-[#8e928f] bg-[#121315] ring-4 ring-[#121315]" />
+                    <div className="font-mono text-[11px] text-[#8e928f] mb-1">2023.10.15 09:00 UT</div>
+                    <div className="text-[12px] text-[#8e928f]">System ingested</div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="pt-8 border-t border-[#272a2f]">
+                <a href="#" className="text-[13px] font-medium text-white hover:text-[#c0c1ff] transition-colors">
+                  View Raw Artifact
+                </a>
+              </div>
+            </div>
+          </div>
+
         </div>
-      </div>
-    </Workspace>
+      </main>
+
+      {/* MOBILE BOTTOM NAVIGATION (Only visible on small screens) */}
+      <nav className="lg:hidden fixed bottom-0 left-0 right-0 h-[70px] bg-[#0b0c0e] border-t border-[#272a2f] flex items-center justify-around z-50">
+        <div className="flex flex-col items-center justify-center text-[#c0c1ff]">
+          <Layers className="h-5 w-5 mb-1" />
+          <span className="text-[11px] font-medium">Canvas</span>
+        </div>
+        <div className="flex flex-col items-center justify-center text-[#8e928f]">
+          <Search className="h-5 w-5 mb-1" />
+          <span className="text-[11px] font-medium">Explore</span>
+        </div>
+        <div className="flex flex-col items-center justify-center text-[#8e928f]">
+          <Command className="h-5 w-5 mb-1" />
+          <span className="text-[11px] font-medium">Archive</span>
+        </div>
+      </nav>
+      
+    </div>
   );
 }
