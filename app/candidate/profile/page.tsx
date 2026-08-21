@@ -56,7 +56,7 @@ export default function CandidateProfilePage() {
             <Activity className="mr-4 h-[18px] w-[18px] opacity-70 group-hover:opacity-100" />
             Identity
           </a>
-          <div className="flex items-center px-3 py-2.5 text-[13px] text-white bg-[#1b1c1e] rounded-sm border border-[#272a2f]">
+          <div className="flex items-center px-3 py-2.5 text-[13px] text-white bg-[#1b1c1e] rounded-none border border-[#272a2f]">
             <FileText className="mr-4 h-[18px] w-[18px]" />
             Evidence
           </div>
@@ -165,7 +165,7 @@ export default function CandidateProfilePage() {
                     Source: HackerRank Assessment
                   </div>
                   
-                  <div className="mt-4 border border-[#272a2f] p-5 lg:p-6 bg-[#1b1c1e] rounded-md flex items-center justify-between">
+                  <div className="mt-4 border border-[#272a2f] p-5 lg:p-6 bg-[#1b1c1e] rounded-none flex items-center justify-between">
                     <div>
                       <div className="text-[14px] text-white mb-1">Advanced Algorithms</div>
                       <div className="text-[10px] font-mono text-[#8e928f] uppercase">ID: HR-8842-PY</div>
@@ -182,7 +182,7 @@ export default function CandidateProfilePage() {
 
               {/* Thread 2 */}
               <div className="relative">
-                <div className="absolute -left-[29px] lg:-left-[37px] top-1.5 h-2.5 w-2.5 lg:h-[9px] lg:w-[9px] border-2 border-white bg-transparent ring-4 ring-[#121315] rounded-sm" />
+                <div className="absolute -left-[29px] lg:-left-[37px] top-1.5 h-2.5 w-2.5 lg:h-[9px] lg:w-[9px] border-2 border-white bg-transparent ring-4 ring-[#121315] rounded-none" />
                 
                 <div className="text-[10px] font-sans font-bold uppercase tracking-[0.15em] text-[#c0c1ff] mb-2">Practical Application</div>
                 <h3 className="font-serif text-[24px] lg:text-[32px] text-white leading-[1.2] mb-6 lg:mb-8 max-w-2xl">
@@ -195,13 +195,13 @@ export default function CandidateProfilePage() {
                     Source: GitHub Commits
                   </div>
                   
-                  <div className="mt-4 border border-[#272a2f] p-5 lg:p-6 bg-[#121315] rounded-md">
+                  <div className="mt-4 border border-[#272a2f] p-5 lg:p-6 bg-[#121315] rounded-none">
                     <p className="text-[14px] text-[#c4c7c5] leading-relaxed mb-4">
                       Implemented Paxos consensus algorithm for internal key-value store. Handled network partitions and node failures gracefully.
                     </p>
                     <div className="flex items-center gap-2">
-                      <span className="bg-[#1b1c1e] text-[#e3e2e5] font-mono text-[10px] px-2 py-1 rounded-sm">Golang</span>
-                      <span className="bg-[#1b1c1e] text-[#e3e2e5] font-mono text-[10px] px-2 py-1 rounded-sm">gRPC</span>
+                      <span className="bg-[#1b1c1e] text-[#e3e2e5] font-mono text-[10px] px-2 py-1 rounded-none">Golang</span>
+                      <span className="bg-[#1b1c1e] text-[#e3e2e5] font-mono text-[10px] px-2 py-1 rounded-none">gRPC</span>
                     </div>
                   </div>
 

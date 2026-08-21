@@ -111,7 +111,7 @@ export function PublicProofRecord({ id, candidate, user }: PublicProofRecordProp
                   </div>
                   <div className="flex items-center justify-between border-b border-[#272a2f] pb-4">
                     <div className="text-[15px] text-white font-medium">Scalability Overhaul - {candidate.projects?.[0]?.title || 'Project X'}</div>
-                    <div className="bg-[#1b1c1e] text-[#c0c1ff] font-mono text-[9px] uppercase tracking-[0.1em] px-2.5 py-1 rounded-sm border border-[#272a2f]">
+                    <div className="bg-[#1b1c1e] text-[#c0c1ff] font-mono text-[9px] uppercase tracking-[0.1em] px-2.5 py-1 rounded-none border border-[#272a2f]">
                       99.9% UPTIME
                     </div>
                   </div>

@@ -47,7 +47,7 @@ export default function EmployerDashboardPage() {
             <FileText className="mr-4 h-[18px] w-[18px] opacity-70 group-hover:opacity-100" />
             Evidence
           </a>
-          <div className="flex items-center px-3 py-2.5 text-[13px] text-white bg-[#1b1c1e] rounded-sm border border-[#272a2f]">
+          <div className="flex items-center px-3 py-2.5 text-[13px] text-white bg-[#1b1c1e] rounded-none border border-[#272a2f]">
             <Command className="mr-4 h-[18px] w-[18px]" />
             Provenance
           </div>
@@ -58,7 +58,7 @@ export default function EmployerDashboardPage() {
         </nav>
 
         <div className="px-5 py-6">
-          <button className="w-full text-left text-[11px] font-mono font-bold uppercase tracking-[0.15em] text-[#8e928f] hover:text-[#c4c7c5] bg-[#1b1c1e] py-3 px-4 border border-[#272a2f] transition-colors rounded-sm">
+          <button className="w-full text-left text-[11px] font-mono font-bold uppercase tracking-[0.15em] text-[#8e928f] hover:text-[#c4c7c5] bg-[#1b1c1e] py-3 px-4 border border-[#272a2f] transition-colors rounded-none">
             [+] Add Evidence
           </button>
         </div>
@@ -109,7 +109,7 @@ export default function EmployerDashboardPage() {
             <div className="space-y-6">
               
               {/* Candidate 1 (Expanded) */}
-              <div className="border border-[#272a2f] rounded-xl bg-[#121315] p-8 lg:p-10">
+              <div className="border border-[#272a2f] rounded-none bg-[#121315] p-8 lg:p-10">
                 
                 <div className="flex items-start justify-between mb-12">
                   <div className="flex items-center gap-5">
@@ -140,7 +140,7 @@ export default function EmployerDashboardPage() {
                     </h3>
                     
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <div className="border border-[#272a2f] bg-[#121315] p-6 rounded-md">
+                      <div className="border border-[#272a2f] bg-[#121315] p-6 rounded-none">
                         <div className="flex items-center justify-between mb-4">
                           <span className="text-[10px] font-sans font-bold uppercase tracking-[0.1em] text-[#8e928f]">Source: Github</span>
                           <Code className="h-4 w-4 text-[#8e928f]" />
@@ -160,7 +160,7 @@ export default function EmployerDashboardPage() {
                         </div>
                       </div>
 
-                      <div className="border border-[#272a2f] bg-[#121315] p-6 rounded-md">
+                      <div className="border border-[#272a2f] bg-[#121315] p-6 rounded-none">
                         <div className="flex items-center justify-between mb-4">
                           <span className="text-[10px] font-sans font-bold uppercase tracking-[0.1em] text-[#8e928f]">Source: Peer Assessment</span>
                           <Users className="h-4 w-4 text-[#8e928f]" />
@@ -183,7 +183,7 @@ export default function EmployerDashboardPage() {
                       Applied Cryptography
                     </h3>
                     
-                    <div className="border border-[#272a2f] bg-[#121315] p-6 rounded-md">
+                    <div className="border border-[#272a2f] bg-[#121315] p-6 rounded-none">
                       <div className="flex items-center justify-between mb-4">
                         <span className="text-[10px] font-sans font-bold uppercase tracking-[0.1em] text-[#8e928f]">Source: Audit Report</span>
                         <FileCheck className="h-4 w-4 text-[#8e928f]" />
@@ -203,7 +203,7 @@ export default function EmployerDashboardPage() {
               </div>
 
               {/* Candidate 2 (Collapsed) */}
-              <div className="border border-[#272a2f] rounded-xl bg-[#121315] p-6 flex items-center justify-between cursor-pointer hover:border-[#444846] transition-colors">
+              <div className="border border-[#272a2f] rounded-none bg-[#121315] p-6 flex items-center justify-between cursor-pointer hover:border-[#444846] transition-colors">
                 <div className="flex items-center gap-5">
                   <div className="h-12 w-12 rounded-full bg-[#1b1c1e] border border-[#444846] flex items-center justify-center text-[#8e928f] font-serif text-[18px]">
                     JD

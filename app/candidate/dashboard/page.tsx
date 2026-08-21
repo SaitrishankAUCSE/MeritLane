@@ -63,7 +63,7 @@ export default function CandidateDashboardPage() {
 
         {/* Navigation */}
         <nav className="flex-1 px-3 space-y-1">
-          <a href="#" className="flex items-center px-3 py-2.5 text-[13px] text-[#8e928f] hover:text-[#f4f4f2] hover:bg-[#111316] rounded-sm transition-colors group">
+          <a href="#" className="flex items-center px-3 py-2.5 text-[13px] text-[#8e928f] hover:text-[#f4f4f2] hover:bg-[#111316] rounded-none transition-colors group">
             <Command className="mr-3 h-4 w-4 group-hover:text-white" />
             Identity
           </a>
@@ -71,11 +71,11 @@ export default function CandidateDashboardPage() {
             <FileText className="mr-3 h-4 w-4" />
             Evidence
           </a>
-          <a href="#" className="flex items-center px-3 py-2.5 text-[13px] text-[#8e928f] hover:text-[#f4f4f2] hover:bg-[#111316] rounded-sm transition-colors group">
+          <a href="#" className="flex items-center px-3 py-2.5 text-[13px] text-[#8e928f] hover:text-[#f4f4f2] hover:bg-[#111316] rounded-none transition-colors group">
             <Activity className="mr-3 h-4 w-4 group-hover:text-white" />
             Provenance
           </a>
-          <a href="/candidate/assessment" className="flex items-center px-3 py-2.5 text-[13px] text-[#8e928f] hover:text-[#f4f4f2] hover:bg-[#111316] rounded-sm transition-colors group">
+          <a href="/candidate/assessment" className="flex items-center px-3 py-2.5 text-[13px] text-[#8e928f] hover:text-[#f4f4f2] hover:bg-[#111316] rounded-none transition-colors group">
             <ShieldCheck className="mr-3 h-4 w-4 group-hover:text-white" />
             Verification
           </a>
