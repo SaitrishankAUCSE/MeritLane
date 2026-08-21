@@ -38,10 +38,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const loadProfile = useCallback(async (uid: string) => {
     setProfileLoading(true);
     try {
-      const timeoutPromise = new Promise<null>((_, reject) => 
-        setTimeout(() => reject(new Error("Firestore connection timed out. Check your network or adblocker.")), 8000)
-      );
-      const profile = await Promise.race([fetchUserProfile(uid), timeoutPromise]);
+      const profile = await fetchUserProfile(uid);
       
       if (profile) {
         setUserProfile(profile);
@@ -51,8 +48,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         setRole(null);
       }
     } catch (error: any) {
-      console.error("Failed to load user profile:", error);
-      setAuthError("Failed to load user profile: " + error.message);
+      console.error("Failed to load user profile (transient error or sign-out):", error);
       setUserProfile(null);
       setRole(null);
     } finally {
@@ -95,16 +91,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     let unsubscribe: (() => void) | undefined;
 
-    const timer = setTimeout(() => {
-      console.error("Firebase auth initialization timed out after 5 seconds.");
-      setAuthError("Authentication failed to initialize. Please check your network, adblocker settings, or environment variables.");
-      setLoading(false);
-      setProfileLoading(false);
-    }, 5000);
-
     try {
       unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
-        clearTimeout(timer);
         setUser(currentUser);
         setLoading(false);
         
@@ -141,14 +129,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           setProfileLoading(false);
         }
       }, (error) => {
-        clearTimeout(timer);
         console.error("Firebase auth error:", error);
         setAuthError("Firebase authentication error: " + error.message);
         setLoading(false);
         setProfileLoading(false);
       });
     } catch (err: any) {
-      clearTimeout(timer);
       console.error("Failed to attach onAuthStateChanged:", err);
       setAuthError("Failed to initialize authentication.");
       setLoading(false);
@@ -156,7 +142,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
 
     return () => {
-      clearTimeout(timer);
       if (unsubscribe) unsubscribe();
     };
   }, [loadProfile]);
