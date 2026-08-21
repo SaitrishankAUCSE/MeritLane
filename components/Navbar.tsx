@@ -52,19 +52,16 @@ export default function Navbar() {
             {isUserAdmin ? (
               <>
                 <NavLink href="/admin" current={pathname}>Admin</NavLink>
-                <NavLink href="/settings" current={pathname}>Settings</NavLink>
               </>
             ) : userProfile?.role === "employer" ? (
               <>
                 <NavLink href="/employer/dashboard" current={pathname}>Dashboard</NavLink>
-                <NavLink href="/settings" current={pathname}>Settings</NavLink>
               </>
             ) : (
               <>
                 <NavLink href="/candidate/dashboard" current={pathname}>Dashboard</NavLink>
                 <NavLink href="/candidate/profile" current={pathname}>Profile</NavLink>
                 <NavLink href="/candidate/assessment" current={pathname}>Assessment</NavLink>
-                <NavLink href="/settings" current={pathname}>Settings</NavLink>
               </>
             )}
           </nav>
@@ -119,19 +116,16 @@ export default function Navbar() {
               {isUserAdmin ? (
                 <>
                   <Link href="/admin" className="text-sm text-foreground">Admin</Link>
-                  <Link href="/settings" className="text-sm text-foreground">Settings</Link>
                 </>
               ) : userProfile?.role === "employer" ? (
                 <>
                   <Link href="/employer/dashboard" className="text-sm text-foreground">Dashboard</Link>
-                  <Link href="/settings" className="text-sm text-foreground">Settings</Link>
                 </>
               ) : (
                 <>
                   <Link href="/candidate/dashboard" className="text-sm text-foreground">Dashboard</Link>
                   <Link href="/candidate/profile" className="text-sm text-foreground">Profile</Link>
                   <Link href="/candidate/assessment" className="text-sm text-foreground">Assessment</Link>
-                  <Link href="/settings" className="text-sm text-foreground">Settings</Link>
                 </>
               )}
             </div>
