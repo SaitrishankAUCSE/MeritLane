@@ -27,7 +27,7 @@ export function PublicProofRecord({ id, candidate, user, hideHeader = false }: P
         <header className="flex h-[72px] items-center justify-between px-8 lg:px-16 border-b border-[#1b1c1e] bg-[#0b0c0e]">
           <Link href="/" className="font-serif text-[26px] font-medium tracking-tight text-white">Meritlane</Link>
           <div className="font-mono text-[10px] tracking-[0.1em] text-[#8e928f] uppercase">
-            Public Artifact
+            Public artifact
           </div>
         </header>
       )}
@@ -48,7 +48,7 @@ export function PublicProofRecord({ id, candidate, user, hideHeader = false }: P
               {name}
             </h1>
             
-            <div className="flex items-center gap-4 mb-6 text-[11px] font-mono tracking-[0.1em] uppercase">
+            <div className="flex items-center gap-4 mb-6 text-[13px] font-sans font-medium">
               <div className="flex items-center gap-2 text-[#c4c7c5]">
                 <CheckCircle2 className="h-[14px] w-[14px] text-[#c0c1ff]" />
                 <span>Verified Practitioner</span>
@@ -68,22 +68,22 @@ export function PublicProofRecord({ id, candidate, user, hideHeader = false }: P
       <main className="max-w-[1200px] mx-auto px-8 lg:px-16 py-20 bg-[#0b0c0e]">
         <div className="grid grid-cols-1 lg:grid-cols-[200px_1fr_260px] gap-16 lg:gap-24">
           
-          {/* Left: Assertion Meta */}
+          {/* Left: Assertion metadata */}
           <aside className="space-y-10">
-            <h3 className="text-[10px] font-mono uppercase tracking-[0.15em] text-[#8e928f] mb-8">Assertion Meta</h3>
+            <h3 className="text-[13px] font-sans font-medium text-[#8e928f] mb-8">Assertion metadata</h3>
             
             <div className="space-y-2">
-              <div className="text-[9px] font-mono uppercase tracking-[0.1em] text-[#8e928f]">Last Verified</div>
+              <div className="text-[13px] font-sans font-medium text-[#8e928f]">Last Verified</div>
               <div className="text-[13px] text-white font-mono">2023-10-27T14:32:00Z</div>
             </div>
             
             <div className="space-y-2">
-              <div className="text-[9px] font-mono uppercase tracking-[0.1em] text-[#8e928f]">Issuer Network</div>
+              <div className="text-[13px] font-sans font-medium text-[#8e928f]">Issuer Network</div>
               <div className="text-[13px] text-[#c4c7c5]">Meritlane Core Protocol</div>
             </div>
             
             <div className="space-y-2">
-              <div className="text-[9px] font-mono uppercase tracking-[0.1em] text-[#8e928f]">Total Proofs</div>
+              <div className="text-[13px] font-sans font-medium text-[#8e928f]">Total Proofs</div>
               <div className="text-[13px] text-[#c4c7c5]">47 Verified Nodes</div>
             </div>
           </aside>
@@ -110,7 +110,7 @@ export function PublicProofRecord({ id, candidate, user, hideHeader = false }: P
                 <div className="mb-10">
                   <div className="flex items-center gap-3 mb-4">
                     <Network className="h-[14px] w-[14px] text-[#c0c1ff]" />
-                    <span className="text-[10px] font-mono uppercase tracking-[0.15em] text-[#c0c1ff]">Primary Evidence</span>
+                    <span className="text-[13px] font-sans font-medium text-[#c0c1ff]">Primary Evidence</span>
                   </div>
                   <div className="flex items-center justify-between border-b border-[#272a2f] pb-4">
                     <div className="text-[15px] text-white font-medium">Scalability Overhaul - {candidate.projects?.[0]?.title || 'Project X'}</div>
@@ -134,7 +134,7 @@ export function PublicProofRecord({ id, candidate, user, hideHeader = false }: P
                       <div className="absolute right-0 h-1.5 w-[1px] bg-[#272a2f] -top-[2px]" />
                     </div>
                   </div>
-                  <div className="text-[9px] font-mono uppercase tracking-[0.15em] text-[#8e928f]">Evidence Density Rating: High</div>
+                  <div className="text-[13px] font-sans font-medium text-[#8e928f]">Evidence Density Rating: High</div>
                 </div>
               </div>
 
@@ -154,14 +154,14 @@ export function PublicProofRecord({ id, candidate, user, hideHeader = false }: P
                 <div className="space-y-4">
                   <div className="flex items-center gap-3 mb-6">
                     <Lock className="h-[14px] w-[14px] text-[#c0c1ff]" />
-                    <span className="text-[10px] font-mono uppercase tracking-[0.15em] text-[#c0c1ff]">Source Assertion</span>
+                    <span className="text-[13px] font-sans font-medium text-[#c0c1ff]">Source Assertion</span>
                   </div>
                   <div className="grid grid-cols-[80px_1fr] gap-4 items-baseline">
-                    <div className="text-[9px] font-mono uppercase tracking-[0.15em] text-[#8e928f]">Repo</div>
+                    <div className="text-[13px] font-sans font-medium text-[#8e928f]">Repo</div>
                     <div className="text-[13px] text-white font-mono">github.com/{name.toLowerCase().replace(/\s+/g, '')}/zk-core</div>
                   </div>
                   <div className="grid grid-cols-[80px_1fr] gap-4 items-baseline">
-                    <div className="text-[9px] font-mono uppercase tracking-[0.15em] text-[#8e928f]">Audit</div>
+                    <div className="text-[13px] font-sans font-medium text-[#8e928f]">Audit</div>
                     <div className="text-[13px] text-[#e3e2e5]">Trail of Bits (Passed w/ 0 High)</div>
                   </div>
                 </div>
@@ -170,28 +170,28 @@ export function PublicProofRecord({ id, candidate, user, hideHeader = false }: P
             </div>
           </article>
 
-          {/* Right: Verification Log */}
+          {/* Right: Verification log */}
           <aside className="pl-4">
-            <h3 className="text-[10px] font-mono uppercase tracking-[0.15em] text-[#8e928f] mb-12">Verification Log</h3>
+            <h3 className="text-[13px] font-sans font-medium text-[#8e928f] mb-12">Verification log</h3>
             
             <div className="space-y-10">
               <div className="relative">
                 <div className="absolute -left-[20px] top-[6px] h-1.5 w-1.5 rounded-full border border-[#c0c1ff] bg-transparent" />
-                <div className="text-[9px] font-mono uppercase tracking-[0.15em] text-[#c0c1ff] mb-2">Node Auth</div>
+                <div className="text-[13px] font-sans font-medium text-[#c0c1ff] mb-2">Node Auth</div>
                 <div className="text-[13px] text-[#e3e2e5] mb-2 font-medium">GitHub Identity Verified</div>
                 <div className="font-mono text-[9px] text-[#8e928f]">2023-10-27T14:32:00Z</div>
               </div>
               
               <div className="relative">
                 <div className="absolute -left-[20px] top-[6px] h-1.5 w-1.5 rounded-full border border-[#c0c1ff] bg-transparent" />
-                <div className="text-[9px] font-mono uppercase tracking-[0.15em] text-[#c0c1ff] mb-2">Peer Assertion</div>
+                <div className="text-[13px] font-sans font-medium text-[#c0c1ff] mb-2">Peer Assertion</div>
                 <div className="text-[13px] text-[#e3e2e5] mb-2 font-medium">Skill endorsed by @elara_tech</div>
                 <div className="font-mono text-[9px] text-[#8e928f]">2023-09-15T09:12:44Z</div>
               </div>
               
               <div className="relative">
                 <div className="absolute -left-[20px] top-[6px] h-1.5 w-1.5 rounded-full border border-[#c0c1ff] bg-transparent" />
-                <div className="text-[9px] font-mono uppercase tracking-[0.15em] text-[#c0c1ff] mb-2">Data Integrity</div>
+                <div className="text-[13px] font-sans font-medium text-[#c0c1ff] mb-2">Data Integrity</div>
                 <div className="text-[13px] text-[#e3e2e5] mb-2 font-medium">Commit History Synchronized</div>
                 <div className="font-mono text-[9px] text-[#8e928f]">2023-08-01T11:00:21Z</div>
               </div>

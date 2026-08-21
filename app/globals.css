@@ -73,20 +73,21 @@ body {
   color: var(--color-foreground);
 }
 
+/* Professional control overrides */
 .font-label {
   font-family: var(--font-sans);
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  line-height: 1;
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: normal;
+  text-transform: none;
+  line-height: 1.5;
 }
 
 .font-data {
   font-family: var(--font-mono);
-  font-size: 12px;
-  font-weight: 500;
-  letter-spacing: 0.05em;
+  font-size: 13px;
+  font-weight: 400;
+  letter-spacing: normal;
 }
 
 .provenance-rail {
@@ -101,25 +102,26 @@ body {
 .field-line,
 .field-select {
   width: 100%;
-  border: 0;
-  border-bottom: 1px solid var(--color-border);
-  border-radius: 0;
-  background: transparent;
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  background: var(--color-surface);
   color: var(--color-foreground);
-  font-size: 15px;
-  line-height: 1.6;
-  padding: 0.5rem 0;
+  font-size: 14px;
+  line-height: 1.5;
+  padding: 0.5rem 0.75rem;
+  height: 40px;
+  transition: border-color 150ms ease;
 }
 
 .field-select option {
-  background: #111316;
-  color: #f4f4f2;
+  background: var(--color-surface);
+  color: var(--color-foreground);
 }
 
 .field-line:focus,
 .field-select:focus {
   outline: none;
-  border-bottom-color: var(--color-foreground);
+  border-color: var(--color-outline);
 }
 
 .field-line:disabled,
@@ -216,12 +218,10 @@ body {
   box-shadow: 0 0 40px rgba(168, 162, 255, 0.1);
 }
 
-/* Hide scrollbar for Chrome, Safari and Opera */
 .scrollbar-hide::-webkit-scrollbar {
   display: none;
 }
-/* Hide scrollbar for IE, Edge and Firefox */
 .scrollbar-hide {
-  -ms-overflow-style: none;  /* IE and Edge */
-  scrollbar-width: none;  /* Firefox */
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }

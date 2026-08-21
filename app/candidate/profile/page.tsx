@@ -33,16 +33,16 @@ export default function CandidateProfilePage() {
     <div className="mx-auto max-w-4xl px-6 py-12 h-full overflow-y-auto scrollbar-hide">
       
       <div className="mb-10">
-        <div className="text-[10px] font-mono uppercase tracking-[0.2em] text-[#8e928f] mb-3 flex items-center gap-2">
-          <Fingerprint className="h-3 w-3" /> Technical Identity
+        <div className="text-[14px] font-sans font-medium text-[#8e928f] mb-3 flex items-center gap-2">
+          <Fingerprint className="h-3 w-3" /> Technical identity
         </div>
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6 border-b border-[#272a2f] pb-6">
           <div>
             <h1 className="font-serif text-[32px] sm:text-[40px] text-white leading-tight mb-2">{name}</h1>
             <div className="text-[14px] text-[#e3e2e5] font-sans">{primaryDomain}</div>
           </div>
-          <button className="flex items-center gap-2 px-5 py-2.5 border border-[#444846] bg-transparent text-[#e3e2e5] hover:text-black hover:bg-white hover:border-white rounded-none text-[10px] font-mono uppercase tracking-[0.2em] transition-all">
-            <PenTool className="h-3.5 w-3.5" /> Edit Identity
+          <button className="flex items-center gap-2 px-5 h-10 border border-[#444846] bg-transparent text-[#e3e2e5] hover:text-black hover:bg-white hover:border-white rounded-md text-[14px] font-sans font-medium transition-all">
+            <PenTool className="h-3.5 w-3.5" /> Edit identity
           </button>
         </div>
       </div>
@@ -55,15 +55,15 @@ export default function CandidateProfilePage() {
           
           <section>
             <div className="flex items-center justify-between mb-4 border-b border-[#272a2f] pb-3">
-              <h2 className="text-[11px] font-mono uppercase tracking-[0.2em] text-[#8e928f]">Technical Claims (Skills)</h2>
-              <button className="text-[10px] font-mono uppercase tracking-[0.2em] text-[#8e928f] hover:text-white transition-colors">[+] Add Skill</button>
+              <h2 className="text-[14px] font-sans font-medium text-[#8e928f]">Technical claims</h2>
+              <button className="text-[14px] font-sans font-medium text-[#8e928f] hover:text-white transition-colors">Add evidence</button>
             </div>
             
             <div className="space-y-4">
               {skills.map((skill, idx) => (
-                <div key={idx} className="border border-[#272a2f] bg-[#0b0c0e] p-5 rounded-none flex flex-col sm:flex-row sm:items-center justify-between gap-4 group hover:border-[#444846] transition-colors">
+                <div key={idx} className="border border-[#272a2f] bg-[#0b0c0e] p-5 rounded-md flex flex-col sm:flex-row sm:items-center justify-between gap-4 group hover:border-[#444846] transition-colors">
                   <div className="flex items-center gap-4">
-                    <div className="h-10 w-10 shrink-0 bg-transparent border border-[#444846] rounded-none flex items-center justify-center font-mono text-[14px] text-white">
+                    <div className="h-10 w-10 shrink-0 bg-transparent border border-[#444846] rounded-md flex items-center justify-center font-mono text-[14px] text-white">
                       {skill.substring(0, 2).toUpperCase()}
                     </div>
                     <div>
@@ -78,9 +78,9 @@ export default function CandidateProfilePage() {
                       <div className="text-[10px] text-[#8e928f] font-mono uppercase tracking-[0.1em] mb-2">No evidence.</div>
                       <button 
                         onClick={() => router.push('/candidate/dashboard')}
-                        className="text-[10px] font-mono uppercase tracking-[0.2em] text-[#e3e2e5] border border-[#444846] px-4 py-2 rounded-none hover:bg-white hover:text-black hover:border-white transition-colors"
+                        className="text-[14px] font-sans font-medium text-[#e3e2e5] border border-[#444846] px-4 h-9 rounded-md hover:bg-white hover:text-black hover:border-white transition-colors"
                       >
-                        Add Evidence
+                        Add evidence
                       </button>
                     </div>
                   ) : (
@@ -88,7 +88,7 @@ export default function CandidateProfilePage() {
                       <div className="text-[10px] text-[#a8a2ff] font-mono uppercase tracking-[0.1em] mb-2">Evidence Linked.</div>
                       <button 
                         onClick={() => router.push('/candidate/assessment')}
-                        className="text-[10px] font-mono uppercase tracking-[0.2em] text-[#e3e2e5] border border-[#a8a2ff]/40 bg-[#a8a2ff]/5 px-4 py-2 rounded-none hover:bg-[#a8a2ff] hover:text-black hover:border-[#a8a2ff] transition-colors"
+                        className="text-[14px] font-sans font-medium text-[#e3e2e5] border border-[#a8a2ff]/40 bg-[#a8a2ff]/5 px-4 h-9 rounded-md hover:bg-[#a8a2ff] hover:text-black hover:border-[#a8a2ff] transition-colors"
                       >
                         Test Claim
                       </button>
@@ -101,25 +101,25 @@ export default function CandidateProfilePage() {
 
           <section>
             <div className="flex items-center justify-between mb-4 border-b border-[#272a2f] pb-3">
-              <h2 className="text-[11px] font-mono uppercase tracking-[0.2em] text-[#8e928f]">Experience &amp; Projects</h2>
-              <button className="text-[10px] font-mono uppercase tracking-[0.2em] text-[#8e928f] hover:text-white transition-colors">[+] Add Project</button>
+              <h2 className="text-[14px] font-sans font-medium text-[#8e928f]">Experience & projects</h2>
+              <button className="text-[14px] font-sans font-medium text-[#8e928f] hover:text-white transition-colors">Add evidence</button>
             </div>
             
             {profile?.projects && profile.projects.length > 0 ? (
               <div className="space-y-4">
                 {profile.projects.map((proj, idx) => (
-                  <div key={idx} className="border border-[#272a2f] bg-[#0b0c0e] p-6 rounded-none group hover:border-[#444846] transition-colors">
+                  <div key={idx} className="border border-[#272a2f] bg-[#0b0c0e] p-6 rounded-md group hover:border-[#444846] transition-colors">
                     <div className="text-[16px] font-serif text-white mb-2">{proj.title}</div>
                     <div className="text-[13px] text-[#8e928f] leading-relaxed font-sans">{proj.description}</div>
                   </div>
                 ))}
               </div>
             ) : (
-              <div className="border border-dashed border-[#444846] p-10 rounded-none text-center bg-[#0b0c0e]">
+              <div className="border border-dashed border-[#444846] p-10 rounded-md text-center bg-[#0b0c0e]">
                 <div className="text-[14px] text-white font-serif mb-2">Define your technical claims.</div>
                 <div className="text-[13px] text-[#8e928f] mb-6 font-sans">Add the projects you have built to establish your experience layer.</div>
-                <button className="text-[10px] font-mono uppercase tracking-[0.2em] text-white border border-[#444846] px-5 py-2.5 rounded-none hover:bg-white hover:text-black transition-colors">
-                  Add Experience
+                <button className="text-[14px] font-sans font-medium text-white border border-[#444846] px-5 h-10 rounded-md hover:bg-white hover:text-black transition-colors">
+                  Add experience
                 </button>
               </div>
             )}
@@ -130,8 +130,8 @@ export default function CandidateProfilePage() {
         {/* Right Column: Meta & Links */}
         <div className="space-y-10">
           
-          <div className="border border-[#272a2f] bg-[#0b0c0e] p-6 rounded-none">
-            <h3 className="text-[10px] font-mono uppercase tracking-[0.2em] text-[#8e928f] mb-5 border-b border-[#272a2f] pb-3">External Links</h3>
+          <div className="border border-[#272a2f] bg-[#0b0c0e] p-6 rounded-md">
+            <h3 className="text-[14px] font-sans font-medium text-[#8e928f] mb-5 border-b border-[#272a2f] pb-3">External links</h3>
             <div className="space-y-4">
               <a href={profile?.githubUrl || "#"} target="_blank" rel="noreferrer" className="flex items-center gap-3 text-[13px] text-[#e3e2e5] hover:text-white transition-colors group">
                 <Link className="h-[14px] w-[14px] text-[#8e928f] group-hover:text-white" /> <span className="font-mono">GitHub Profile</span>
@@ -142,8 +142,8 @@ export default function CandidateProfilePage() {
             </div>
           </div>
 
-          <div className="border border-[#272a2f] bg-[#0b0c0e] p-6 rounded-none">
-            <h3 className="text-[10px] font-mono uppercase tracking-[0.2em] text-[#8e928f] mb-5 border-b border-[#272a2f] pb-3">Education</h3>
+          <div className="border border-[#272a2f] bg-[#0b0c0e] p-6 rounded-md">
+            <h3 className="text-[14px] font-sans font-medium text-[#8e928f] mb-5 border-b border-[#272a2f] pb-3">Education</h3>
             <div className="space-y-4">
               <div>
                 <div className="flex items-start gap-3">
@@ -164,3 +164,5 @@ export default function CandidateProfilePage() {
     </div>
   );
 }
+
+

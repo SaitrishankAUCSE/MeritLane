@@ -48,7 +48,7 @@ export function CandidateSidebar() {
                 key={item.name}
                 href={item.href}
                 title={isCollapsed ? item.name : undefined}
-                className={`flex items-center py-3 text-[14px] font-sans text-white bg-[#111316] relative transition-colors ${isCollapsed ? "justify-center px-0 rounded-md mx-1" : "px-4"}`}
+                className={`flex items-center py-2 h-10 text-[14px] font-sans text-white bg-[#111316] relative transition-colors ${isCollapsed ? "justify-center px-0 rounded-md mx-1" : "px-4"}`}
               >
                 <Icon className={`h-[18px] w-[18px] ${isCollapsed ? "" : "mr-4"}`} />
                 {!isCollapsed && item.name}
@@ -62,7 +62,7 @@ export function CandidateSidebar() {
               key={item.name}
               href={item.href}
               title={isCollapsed ? item.name : undefined}
-              className={`flex items-center py-3 text-[14px] font-sans text-[#8e928f] hover:text-[#f4f4f2] hover:bg-[#111316]/50 transition-colors relative ${isCollapsed ? "justify-center px-0 rounded-md mx-1" : "px-4"}`}
+              className={`flex items-center py-2 h-10 text-[14px] font-sans text-[#8e928f] hover:text-[#f4f4f2] hover:bg-[#111316]/50 transition-colors relative ${isCollapsed ? "justify-center px-0 rounded-md mx-1" : "px-4"}`}
             >
               <Icon className={`h-[18px] w-[18px] opacity-70 ${isCollapsed ? "" : "mr-4"}`} />
               {!isCollapsed && item.name}
@@ -79,12 +79,12 @@ export function CandidateSidebar() {
             className="flex items-center gap-2 w-full text-left py-2 text-[#e3e2e5] hover:text-white transition-colors mb-6"
           >
             <span className="font-mono text-[11px] text-white font-bold">[+]</span>
-            <span className="font-sans text-[11px] font-bold uppercase tracking-[0.1em]">Add Evidence</span>
+            <span className="font-sans text-[11px] font-bold uppercase tracking-[0.1em]">Add evidence</span>
           </button>
         ) : (
           <button 
             onClick={() => router.push('/candidate/profile')}
-            title="Add Evidence"
+            title="Add evidence"
             className="flex items-center justify-center p-2 mb-6 text-[#e3e2e5] hover:text-white hover:bg-[#111316]/50 rounded-md transition-colors"
           >
             <span className="font-mono text-[11px] text-white font-bold">[+]</span>
@@ -141,3 +141,4 @@ export function CandidateSidebar() {
     </aside>
   );
 }
+

@@ -10,7 +10,7 @@ export default function EmployerDashboardPage() {
   const { user, loading } = useAuth();
   
   if (loading) {
-    return <div className="h-full w-full flex items-center justify-center"><div className="h-4 w-4 border-2 border-[#8e928f] border-t-white animate-spin rounded-full"></div></div>;
+    return <div className="h-full w-full flex items-center justify-center"><div className="h-4 w-4 border-2 border-[#8e928f] border-t-white animate-spin rounded-md"></div></div>;
   }
 
   return (
@@ -27,11 +27,11 @@ export default function EmployerDashboardPage() {
         <div className="max-w-[800px] space-y-10">
           
           {/* Candidate 1 (Expanded) */}
-          <div className="border border-[#272a2f] rounded-2xl bg-[#0b0c0e] p-10">
+          <div className="border border-[#272a2f] rounded-md bg-[#0b0c0e] p-10">
             
             <div className="flex items-start justify-between mb-12">
               <div className="flex items-center gap-6">
-                <div className="h-16 w-16 rounded-full bg-[#1b1c1e] border border-[#444846] flex items-center justify-center text-white font-serif text-[24px]">
+                <div className="h-16 w-16 rounded-md bg-[#1b1c1e] border border-[#444846] flex items-center justify-center text-white font-serif text-[24px]">
                   ER
                 </div>
                 <div>
@@ -53,12 +53,12 @@ export default function EmployerDashboardPage() {
               {/* Skill 1 */}
               <div>
                 <h3 className="font-serif text-[28px] text-white mb-6 flex items-center gap-4">
-                  <span className="h-[6px] w-[6px] rounded-full bg-white shrink-0" />
+                  <span className="h-[6px] w-[6px] rounded-md bg-white shrink-0" />
                   Rust Architecture
                 </h3>
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                  <div className="border border-[#272a2f] bg-[#111316] p-7 rounded-xl">
+                  <div className="border border-[#272a2f] bg-[#111316] p-7 rounded-md">
                     <div className="flex items-center justify-between mb-6">
                       <span className="text-[10px] font-sans font-bold uppercase tracking-[0.1em] text-white">Source: Github</span>
                       <span className="font-mono text-[12px] text-[#8e928f]">{"< >"}</span>
@@ -78,7 +78,7 @@ export default function EmployerDashboardPage() {
                     </div>
                   </div>
 
-                  <div className="border border-[#272a2f] bg-[#111316] p-7 rounded-xl">
+                  <div className="border border-[#272a2f] bg-[#111316] p-7 rounded-md">
                     <div className="flex items-center justify-between mb-6">
                       <span className="text-[10px] font-sans font-bold uppercase tracking-[0.1em] text-white">Source: Peer Assessment</span>
                       <Users className="h-4 w-4 text-[#8e928f]" />
@@ -101,7 +101,7 @@ export default function EmployerDashboardPage() {
                   Applied Cryptography
                 </h3>
                 
-                <div className="border border-[#272a2f] bg-[#111316] p-7 rounded-xl">
+                <div className="border border-[#272a2f] bg-[#111316] p-7 rounded-md">
                   <div className="flex items-center justify-between mb-6">
                     <span className="text-[10px] font-sans font-bold uppercase tracking-[0.1em] text-white">Source: Audit Report</span>
                     <FileText className="h-4 w-4 text-[#8e928f]" />
@@ -110,8 +110,8 @@ export default function EmployerDashboardPage() {
                     Implemented custom ZK-SNARK circuits for privacy layer. Passed Trail of Bits audit with 0 critical findings.
                   </p>
                   <div className="border-t border-[#272a2f] pt-5">
-                    <a href="#" className="text-[10px] font-mono uppercase tracking-[0.15em] text-[#8e928f] hover:text-white transition-colors flex items-center gap-3">
-                      <LinkIcon className="h-3.5 w-3.5" /> View IPFS Record
+                    <a href="#" className="text-[14px] font-sans font-medium text-[#8e928f] hover:text-white transition-colors flex items-center gap-3">
+                      <LinkIcon className="h-3.5 w-3.5" /> View IPFS record
                     </a>
                   </div>
                 </div>
@@ -121,9 +121,9 @@ export default function EmployerDashboardPage() {
           </div>
 
           {/* Candidate 2 (Collapsed) */}
-          <div className="border border-[#272a2f] rounded-2xl bg-[#0b0c0e] p-7 flex items-center justify-between cursor-pointer hover:border-[#444846] transition-colors">
+          <div className="border border-[#272a2f] rounded-md bg-[#0b0c0e] p-7 flex items-center justify-between cursor-pointer hover:border-[#444846] transition-colors">
             <div className="flex items-center gap-6">
-              <div className="h-14 w-14 rounded-full bg-[#1b1c1e] border border-[#444846] flex items-center justify-center text-[#8e928f] font-serif text-[22px]">
+              <div className="h-14 w-14 rounded-md bg-[#1b1c1e] border border-[#444846] flex items-center justify-center text-[#8e928f] font-serif text-[22px]">
                 JD
               </div>
               <div>
@@ -168,11 +168,11 @@ export default function EmployerDashboardPage() {
         </div>
 
         <div className="pt-10 border-t border-[#272a2f] space-y-4">
-          <button className="w-full bg-white text-black rounded-lg py-4 px-6 text-[14px] font-sans font-medium hover:bg-[#e3e2e5] transition-colors">
+          <button className="w-full bg-white text-black rounded-md py-2 h-10 px-6 text-[14px] font-sans font-medium hover:bg-[#e3e2e5] transition-colors">
             Shortlist Candidate
           </button>
-          <button className="w-full bg-transparent border border-[#272a2f] text-white rounded-lg py-4 px-6 text-[13px] font-sans hover:bg-[#1b1c1e] transition-colors flex items-center justify-center gap-3">
-            <FileText className="h-4 w-4" /> Request More Proof
+          <button className="w-full bg-transparent border border-[#272a2f] text-white rounded-md py-2 h-10 px-6 text-[13px] font-sans hover:bg-[#1b1c1e] transition-colors flex items-center justify-center gap-3">
+            <FileText className="h-4 w-4" /> Request more proof
           </button>
         </div>
 

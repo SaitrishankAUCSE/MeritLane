@@ -471,7 +471,7 @@ export default function AdminDashboardPage() {
     <div className="min-h-[calc(100vh-64px)] pb-24 pt-12">
       {/* Toast Notification */}
       {successToast && (
-        <div className="fixed top-20 right-6 z-50 rounded-xl border border-zinc-700 bg-foreground px-4 py-3 text-xs font-semibold text-white shadow-lg animate-in fade-in slide-in-from-top-2 duration-150">
+        <div className="fixed top-20 right-6 z-50 rounded-md border border-zinc-700 bg-foreground px-4 py-2 h-10 text-xs font-semibold text-white shadow-lg animate-in fade-in slide-in-from-top-2 duration-150">
           <div className="flex items-center gap-2">
             <CheckCircle2 className="h-4 w-4 text-white" />
             <span>{successToast}</span>
@@ -531,7 +531,7 @@ export default function AdminDashboardPage() {
 
         {/* Error Alert Banner */}
         {error && (
-          <div className="rounded-xl border border-danger/40 bg-danger/10 p-4 text-xs text-danger shadow-sm flex items-center justify-between">
+          <div className="rounded-md border border-danger/40 bg-danger/10 p-4 text-xs text-danger shadow-sm flex items-center justify-between">
             <div className="flex items-center gap-2 font-medium">
               <AlertTriangle className="h-4 w-4 text-danger shrink-0" />
               <span>Failed to synchronize candidate records: {error}</span>
@@ -723,12 +723,12 @@ export default function AdminDashboardPage() {
                   <table className="w-full text-left text-xs text-muted-foreground">
                     <thead className="border-b border-border bg-surface-low font-bold uppercase tracking-wider text-muted-foreground">
                       <tr>
-                        <th className="px-6 py-3.5">Candidate</th>
-                        <th className="px-6 py-3.5">College &amp; Branch</th>
-                        <th className="px-6 py-3.5">Skills</th>
-                        <th className="px-6 py-3.5">Status</th>
-                        <th className="px-6 py-3.5">Projects</th>
-                        <th className="px-6 py-3.5 text-right">Action</th>
+                        <th className="px-6 py-2 h-10.5">Candidate</th>
+                        <th className="px-6 py-2 h-10.5">College &amp; Branch</th>
+                        <th className="px-6 py-2 h-10.5">Skills</th>
+                        <th className="px-6 py-2 h-10.5">Status</th>
+                        <th className="px-6 py-2 h-10.5">Projects</th>
+                        <th className="px-6 py-2 h-10.5 text-right">Action</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-zinc-100">
@@ -750,15 +750,15 @@ export default function AdminDashboardPage() {
                       ) : (
                         filteredCandidates.map((c) => (
                         <tr key={c.uid} className="hover:bg-surface-low/70 transition-colors">
-                          <td className="px-6 py-4">
+                          <td className="px-6 py-2 h-10">
                             <div className="font-semibold text-foreground">{c.name || "Unnamed"}</div>
                             <div className="text-[11px] text-outline font-mono">{c.email || c.uid.slice(0, 12) + "..."}</div>
                           </td>
-                          <td className="px-6 py-4">
+                          <td className="px-6 py-2 h-10">
                             <div className="text-foreground font-medium">{c.college || "—"}</div>
                             <div className="text-[11px] text-outline">{c.branch || "—"} {c.gradYear ? `(${c.gradYear})` : ""}</div>
                           </td>
-                          <td className="px-6 py-4">
+                          <td className="px-6 py-2 h-10">
                             <div className="flex flex-wrap gap-1 max-w-xs">
                               {c.skills && c.skills.length > 0 ? (
                                 c.skills.slice(0, 3).map((s, i) => (
@@ -771,15 +771,15 @@ export default function AdminDashboardPage() {
                               )}
                             </div>
                           </td>
-                          <td className="px-6 py-4">
+                          <td className="px-6 py-2 h-10">
                             {getStatusBadge(c.verificationStatus)}
                           </td>
-                          <td className="px-6 py-4">
+                          <td className="px-6 py-2 h-10">
                             <span className="text-xs font-semibold text-foreground">
                               {c.projects?.length || 0}
                             </span>
                           </td>
-                          <td className="px-6 py-4 text-right">
+                          <td className="px-6 py-2 h-10 text-right">
                             <Button
                               variant="outline"
                               size="xs"
@@ -893,25 +893,25 @@ export default function AdminDashboardPage() {
                     <table className="w-full text-left text-xs text-muted-foreground">
                       <thead className="border-b border-border bg-surface-low font-bold uppercase tracking-wider text-muted-foreground">
                         <tr>
-                          <th className="px-6 py-3.5">Candidate</th>
-                          <th className="px-6 py-3.5">Decision</th>
-                          <th className="px-6 py-3.5">Reviewed By</th>
-                          <th className="px-6 py-3.5">Feedback / Notes</th>
+                          <th className="px-6 py-2 h-10.5">Candidate</th>
+                          <th className="px-6 py-2 h-10.5">Decision</th>
+                          <th className="px-6 py-2 h-10.5">Reviewed By</th>
+                          <th className="px-6 py-2 h-10.5">Feedback / Notes</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-zinc-100">
                         {auditLogs.map((c) => (
                           <tr key={c.uid} className="hover:bg-surface-low/70">
-                            <td className="px-6 py-4 font-semibold text-foreground">
+                            <td className="px-6 py-2 h-10 font-semibold text-foreground">
                               {c.name || c.email || c.uid}
                             </td>
-                            <td className="px-6 py-4">
+                            <td className="px-6 py-2 h-10">
                               {getStatusBadge(c.verificationStatus)}
                             </td>
-                            <td className="px-6 py-4 text-muted-foreground font-mono text-[11px]">
+                            <td className="px-6 py-2 h-10 text-muted-foreground font-mono text-[11px]">
                               {c.verifiedByEmail || "saitrishankb9@gmail.com"}
                             </td>
-                            <td className="px-6 py-4 text-muted-foreground max-w-sm">
+                            <td className="px-6 py-2 h-10 text-muted-foreground max-w-sm">
                               {c.verificationReason || "Standard verification approval."}
                             </td>
                           </tr>
@@ -930,13 +930,13 @@ export default function AdminDashboardPage() {
       {showWipeModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-zinc-950/60 p-4 backdrop-blur-sm animate-in fade-in duration-150">
           <div 
-            className="relative w-full max-w-lg rounded-2xl border border-border bg-surface p-6 shadow-2xl animate-in zoom-in-95 duration-150"
+            className="relative w-full max-w-lg rounded-md border border-border bg-surface p-6 shadow-2xl animate-in zoom-in-95 duration-150"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Modal Header */}
             <div className="flex items-start justify-between">
               <div className="flex items-center gap-3">
-                <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-danger/10 text-danger border border-red-100">
+                <div className="flex h-11 w-11 items-center justify-center rounded-md bg-danger/10 text-danger border border-red-100">
                   <Trash2 className="h-5 w-5" />
                 </div>
                 <div>
@@ -953,7 +953,7 @@ export default function AdminDashboardPage() {
                 <button
                   type="button"
                   onClick={() => setShowWipeModal(false)}
-                  className="rounded-lg p-1.5 text-outline hover:bg-surface-low hover:text-muted-foreground transition"
+                  className="rounded-md p-1.5 text-outline hover:bg-surface-low hover:text-muted-foreground transition"
                 >
                   <X className="h-5 w-5" />
                 </button>
@@ -968,7 +968,7 @@ export default function AdminDashboardPage() {
                     This action will reset the platform database to a <strong>zero-user clean state</strong>, allowing you to test fresh signups and onboarding without authentication conflicts.
                   </p>
 
-                  <div className="rounded-xl border border-border bg-surface-low p-3.5 space-y-2 text-xs">
+                  <div className="rounded-md border border-border bg-surface-low p-3.5 space-y-2 text-xs">
                     <p className="font-semibold text-foreground">What will be purged:</p>
                     <ul className="space-y-1.5 text-muted-foreground list-disc list-inside">
                       <li>All non-admin <strong>Firebase Authentication</strong> accounts (Google & Email)</li>
@@ -984,33 +984,33 @@ export default function AdminDashboardPage() {
                 </>
               ) : wipeResult.success ? (
                 <div className="space-y-3">
-                  <div className="rounded-xl border border-emerald-200 bg-success/10 p-4">
+                  <div className="rounded-md border border-emerald-200 bg-success/10 p-4">
                     <div className="flex items-center gap-2 text-emerald-900 font-semibold text-sm">
                       <CheckCircle2 className="h-5 w-5 text-success" />
                       <span>{wipeResult.message}</span>
                     </div>
                     {wipeResult.stats && (
                       <div className="mt-3 grid grid-cols-2 gap-2 text-xs">
-                        <div className="rounded-lg bg-surface/80 p-2.5 border border-emerald-100">
+                        <div className="rounded-md bg-surface/80 p-2.5 border border-emerald-100">
                           <span className="text-muted-foreground block">Auth Accounts</span>
                           <span className="text-base font-bold text-foreground">{wipeResult.stats.deletedAuthCount} purged</span>
                         </div>
-                        <div className="rounded-lg bg-surface/80 p-2.5 border border-emerald-100">
+                        <div className="rounded-md bg-surface/80 p-2.5 border border-emerald-100">
                           <span className="text-muted-foreground block">User Profiles</span>
                           <span className="text-base font-bold text-foreground">{wipeResult.stats.deletedFirestoreUsers} purged</span>
                         </div>
-                        <div className="rounded-lg bg-surface/80 p-2.5 border border-emerald-100">
+                        <div className="rounded-md bg-surface/80 p-2.5 border border-emerald-100">
                           <span className="text-muted-foreground block">Candidates</span>
                           <span className="text-base font-bold text-foreground">{wipeResult.stats.deletedCandidates} purged</span>
                         </div>
-                        <div className="rounded-lg bg-surface/80 p-2.5 border border-emerald-100">
+                        <div className="rounded-md bg-surface/80 p-2.5 border border-emerald-100">
                           <span className="text-muted-foreground block">Employers</span>
                           <span className="text-base font-bold text-foreground">{wipeResult.stats.deletedEmployers} purged</span>
                         </div>
                       </div>
                     )}
                     {wipeResult.warnings?.authError && (
-                      <div className="mt-3 rounded-lg bg-amber-50 p-2.5 border border-amber-200 text-xs text-amber-900">
+                      <div className="mt-3 rounded-md bg-amber-50 p-2.5 border border-amber-200 text-xs text-amber-900">
                         <div className="font-semibold flex items-center gap-1.5 text-amber-800 mb-1">
                           <AlertTriangle className="h-3.5 w-3.5" />
                           <span>Firebase Auth Note:</span>
@@ -1021,7 +1021,7 @@ export default function AdminDashboardPage() {
                   </div>
                 </div>
               ) : (
-                <div className="rounded-xl border border-danger/40 bg-danger/10 p-4 text-xs text-danger space-y-1">
+                <div className="rounded-md border border-danger/40 bg-danger/10 p-4 text-xs text-danger space-y-1">
                   <div className="flex items-center gap-2 font-bold text-sm text-danger">
                     <AlertTriangle className="h-4 w-4" />
                     <span>Wipe Operation Notice</span>

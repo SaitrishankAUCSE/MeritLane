@@ -29,7 +29,7 @@ export default function CandidateDashboardPage() {
     <div className="mx-auto max-w-5xl px-6 py-12 h-full overflow-y-auto scrollbar-hide">
       
       <div className="mb-12">
-        <div className="text-[10px] font-mono uppercase tracking-[0.2em] text-[#8e928f] mb-3 flex items-center gap-2">
+        <div className="text-[14px] font-sans font-medium text-[#8e928f] mb-3 flex items-center gap-2">
           <FolderOpen className="h-3 w-3" /> Evidence Workspace
         </div>
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6 border-b border-[#272a2f] pb-6">
@@ -37,8 +37,8 @@ export default function CandidateDashboardPage() {
             <h1 className="font-serif text-[32px] sm:text-[40px] text-white leading-tight mb-2">Build your proof.</h1>
             <div className="text-[14px] text-[#e3e2e5] font-sans">Provide the material that supports the claims made in your Identity.</div>
           </div>
-          <button className="px-5 py-2.5 border border-white bg-white text-black hover:bg-black hover:text-white rounded-none text-[10px] font-mono uppercase tracking-[0.2em] transition-all font-bold">
-            [+] Add Evidence
+          <button className="px-5 h-10 border border-white bg-white text-black hover:bg-black hover:text-white rounded-md text-[14px] font-sans font-medium transition-all font-bold">
+            [+] Add evidence
           </button>
         </div>
       </div>
@@ -78,9 +78,9 @@ export default function CandidateDashboardPage() {
               <div className="text-[11px] text-[#a8a2ff] mb-4">Evidence is sufficient for testing.</div>
               <button 
                 onClick={() => router.push('/candidate/assessment')}
-                className="w-full flex items-center justify-center gap-2 text-[10px] font-mono uppercase tracking-[0.2em] border border-white text-black bg-white py-3 rounded-none hover:bg-black hover:text-white transition-all font-bold"
+                className="w-full flex items-center justify-center gap-2 text-[14px] font-sans font-medium border border-white text-black bg-white py-2 h-10 rounded-md hover:bg-black hover:text-white transition-all font-bold"
               >
-                Start Verification <ArrowRight className="h-3 w-3" />
+                Start verification <ArrowRight className="h-3 w-3" />
               </button>
             </div>
           </div>
@@ -97,11 +97,11 @@ export default function CandidateDashboardPage() {
               <div className="flex items-start justify-between mb-6">
                 <div>
                   <h3 className="text-[16px] font-serif text-white mb-1">House Price Prediction Model</h3>
-                  <div className="text-[12px] font-mono uppercase tracking-widest text-[#8e928f] flex items-center gap-2">
+                  <div className="text-[12px] font-sans font-medium text-[#8e928f] flex items-center gap-2">
                     <FileCheck className="h-3.5 w-3.5" /> Project Repository
                   </div>
                 </div>
-                <div className="flex gap-3 text-[11px] font-mono uppercase tracking-widest text-[#8e928f]">
+                <div className="flex gap-3 text-[11px] font-sans font-medium text-[#8e928f]">
                   <button className="hover:text-white transition-colors">View</button>
                   <button className="hover:text-white transition-colors">Remove</button>
                 </div>
@@ -109,7 +109,7 @@ export default function CandidateDashboardPage() {
 
               {/* Proof Thread */}
               <div className="mt-6 border-t border-[#272a2f] pt-6">
-                <div className="text-[10px] font-mono uppercase tracking-widest text-[#8e928f] mb-4">Supports Claim:</div>
+                <div className="text-[10px] font-sans font-medium text-[#8e928f] mb-4">Supports Claim:</div>
                 <div className="relative border-l border-[#272a2f] pl-4 space-y-4">
                   <div className="relative">
                     <div className="absolute -left-[18.5px] top-1.5 h-2 w-2 rounded-full bg-[#a8a2ff]" />
@@ -125,11 +125,11 @@ export default function CandidateDashboardPage() {
               <div className="flex items-start justify-between mb-6">
                 <div>
                   <h3 className="text-[16px] font-serif text-white mb-1">E-Commerce Frontend Architecture</h3>
-                  <div className="text-[12px] font-mono uppercase tracking-widest text-[#8e928f] flex items-center gap-2">
+                  <div className="text-[12px] font-sans font-medium text-[#8e928f] flex items-center gap-2">
                     <Code className="h-3.5 w-3.5" /> GitHub Commits
                   </div>
                 </div>
-                <div className="flex gap-3 text-[11px] font-mono uppercase tracking-widest text-[#8e928f]">
+                <div className="flex gap-3 text-[11px] font-sans font-medium text-[#8e928f]">
                   <button className="hover:text-white transition-colors">View</button>
                   <button className="hover:text-white transition-colors">Remove</button>
                 </div>
@@ -137,7 +137,7 @@ export default function CandidateDashboardPage() {
 
               {/* Proof Thread */}
               <div className="mt-6 border-t border-[#272a2f] pt-6">
-                <div className="text-[10px] font-mono uppercase tracking-widest text-[#8e928f] mb-4">Supports Claim:</div>
+                <div className="text-[10px] font-sans font-medium text-[#8e928f] mb-4">Supports Claim:</div>
                 <div className="relative border-l border-[#272a2f] pl-4 space-y-4">
                   <div className="relative">
                     <div className="absolute -left-[18.5px] top-1.5 h-2 w-2 rounded-full bg-[#a8a2ff]" />
@@ -155,3 +155,4 @@ export default function CandidateDashboardPage() {
     </div>
   );
 }
+

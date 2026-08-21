@@ -21,7 +21,7 @@ export function Input({
   return (
     <div className="flex w-full flex-col gap-1.5 text-left">
       {label && (
-        <label htmlFor={inputId} className="font-data text-outline">
+        <label htmlFor={inputId} className="font-sans text-[14px] text-foreground font-medium">
           {label}
         </label>
       )}
@@ -29,20 +29,20 @@ export function Input({
         <input
           id={inputId}
           disabled={disabled}
-          className={`field-line ${error ? "border-danger text-danger" : ""} ${className}`}
+          className={`w-full h-[42px] px-3 py-2 bg-surface text-foreground text-[14px] font-sans border rounded-md transition-colors placeholder:text-muted-foreground focus:outline-none focus:border-outline disabled:opacity-50 ${error ? "border-danger text-danger" : "border-border"} ${className}`}
           {...props}
         />
         {error && (
-          <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center">
+          <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
             <AlertCircle className="h-4 w-4 text-danger" aria-hidden="true" />
           </div>
         )}
       </div>
       {helperText && !error && (
-        <p className="text-xs text-muted-foreground">{helperText}</p>
+        <p className="text-[13px] text-muted-foreground">{helperText}</p>
       )}
       {error && (
-        <p className="text-xs font-medium text-danger">{error}</p>
+        <p className="text-[13px] font-medium text-danger">{error}</p>
       )}
     </div>
   );

@@ -56,17 +56,17 @@ export default function CandidateProvenancePage() {
       {/* Provenance Header */}
       <div className="shrink-0 px-10 py-10 border-b border-[#272a2f] flex justify-between items-end">
         <div>
-          <div className="text-[10px] font-mono uppercase tracking-[0.2em] text-[#8e928f] mb-3">
+          <div className="text-[14px] font-sans font-medium text-[#8e928f] mb-3">
             Output Layer
           </div>
           <h1 className="font-serif text-[32px] text-white leading-tight">Provenance Record</h1>
         </div>
         <div className="flex gap-4">
-          <button className="px-5 py-2 border border-[#444846] text-[#8e928f] hover:text-white hover:border-white rounded-none text-[10px] font-mono uppercase tracking-[0.2em] transition-all">
-            Copy Public Link
+          <button className="px-5 py-2 border border-[#444846] text-[#8e928f] hover:text-white hover:border-white rounded-md text-[14px] font-sans font-medium transition-all">
+            Copy public link
           </button>
-          <a href={`/p/${user!.uid}`} target="_blank" rel="noreferrer" className="px-5 py-2 border border-white bg-white text-black hover:bg-black hover:text-white rounded-none text-[10px] font-mono uppercase tracking-[0.2em] transition-all">
-            View Public Record
+          <a href={`/p/${user!.uid}`} target="_blank" rel="noreferrer" className="px-5 py-2 border border-white bg-white text-black hover:bg-black hover:text-white rounded-md text-[14px] font-sans font-medium transition-all">
+            View public record
           </a>
         </div>
       </div>
@@ -81,3 +81,4 @@ export default function CandidateProvenancePage() {
     </div>
   );
 }
+
