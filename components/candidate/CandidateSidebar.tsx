@@ -9,8 +9,11 @@ import { Fingerprint, LayoutDashboard, Network, ShieldCheck, Settings, HelpCircl
 export function CandidateSidebar() {
   const pathname = usePathname();
   const router = useRouter();
-  const { user } = useAuth();
+  const { user, handleSignOut } = useAuth();
   const [isCollapsed, setIsCollapsed] = useState(false);
+
+  const name = user?.displayName || "User";
+  const avatarUrl = user?.photoURL || "";
 
   const navItems = [
     { name: "Identity", href: "/candidate/profile", icon: Fingerprint },
@@ -20,7 +23,7 @@ export function CandidateSidebar() {
   ];
 
   return (
-    <aside className={`scrollbar-hide hidden lg:flex shrink-0 flex-col border-r border-[#272a2f] bg-[#0b0c0e] h-[100dvh] overflow-y-auto transition-all duration-300 ${isCollapsed ? "w-[80px]" : "w-[260px]"}`}>
+    <aside className={`scrollbar-hide hidden lg:flex shrink-0 flex-col border-r border-[#272a2f] bg-[#0b0c0e] h-[100dvh] overflow-y-auto transition-all duration-300 ${isCollapsed ? "w-[80px]" : "w-[220px]"}`}>
       {/* Brand */}
       <div className={`flex h-20 items-center shrink-0 ${isCollapsed ? "justify-center px-0" : "px-8"}`}>
         {isCollapsed ? (
@@ -45,7 +48,7 @@ export function CandidateSidebar() {
                 key={item.name}
                 href={item.href}
                 title={isCollapsed ? item.name : undefined}
-                className={`flex items-center py-3 text-[15px] font-sans text-white bg-[#111316] relative transition-colors ${isCollapsed ? "justify-center px-0 rounded-md mx-1" : "px-4"}`}
+                className={`flex items-center py-3 text-[14px] font-sans text-white bg-[#111316] relative transition-colors ${isCollapsed ? "justify-center px-0 rounded-md mx-1" : "px-4"}`}
               >
                 <Icon className={`h-[18px] w-[18px] ${isCollapsed ? "" : "mr-4"}`} />
                 {!isCollapsed && item.name}
@@ -59,7 +62,7 @@ export function CandidateSidebar() {
               key={item.name}
               href={item.href}
               title={isCollapsed ? item.name : undefined}
-              className={`flex items-center py-3 text-[15px] font-sans text-[#8e928f] hover:text-[#f4f4f2] hover:bg-[#111316]/50 transition-colors relative ${isCollapsed ? "justify-center px-0 rounded-md mx-1" : "px-4"}`}
+              className={`flex items-center py-3 text-[14px] font-sans text-[#8e928f] hover:text-[#f4f4f2] hover:bg-[#111316]/50 transition-colors relative ${isCollapsed ? "justify-center px-0 rounded-md mx-1" : "px-4"}`}
             >
               <Icon className={`h-[18px] w-[18px] opacity-70 ${isCollapsed ? "" : "mr-4"}`} />
               {!isCollapsed && item.name}
@@ -88,31 +91,54 @@ export function CandidateSidebar() {
           </button>
         )}
         
-        <div className={`space-y-4 mb-6 ${isCollapsed ? "w-full space-y-2" : ""}`}>
-          <Link href="/candidate/settings" title={isCollapsed ? "Settings" : undefined} className={`flex items-center text-[15px] font-sans text-[#8e928f] hover:text-white transition-colors ${isCollapsed ? "justify-center p-2 rounded-md hover:bg-[#111316]/50" : ""}`}>
+        <div className={`space-y-3 mb-6 ${isCollapsed ? "w-full space-y-2" : ""}`}>
+          <Link href="/candidate/settings" title={isCollapsed ? "Settings" : undefined} className={`flex items-center text-[14px] font-sans text-[#8e928f] hover:text-white transition-colors ${isCollapsed ? "justify-center p-2 rounded-md hover:bg-[#111316]/50" : ""}`}>
             <Settings className={`h-[18px] w-[18px] opacity-70 ${isCollapsed ? "" : "mr-4"}`} /> 
             {!isCollapsed && "Settings"}
           </Link>
-          <Link href="/candidate/support" title={isCollapsed ? "Support" : undefined} className={`flex items-center text-[15px] font-sans text-[#8e928f] hover:text-white transition-colors ${isCollapsed ? "justify-center p-2 rounded-md hover:bg-[#111316]/50" : ""}`}>
+          <Link href="/candidate/support" title={isCollapsed ? "Support" : undefined} className={`flex items-center text-[14px] font-sans text-[#8e928f] hover:text-white transition-colors ${isCollapsed ? "justify-center p-2 rounded-md hover:bg-[#111316]/50" : ""}`}>
             <HelpCircle className={`h-[18px] w-[18px] opacity-70 ${isCollapsed ? "" : "mr-4"}`} /> 
             {!isCollapsed && "Support"}
           </Link>
         </div>
 
-        {/* Toggle Button */}
-        <div className={`flex mt-2 ${isCollapsed ? "justify-center" : "justify-end"}`}>
-          <button
-            onClick={() => setIsCollapsed(!isCollapsed)}
-            className="p-1.5 text-[#8e928f] hover:text-white hover:bg-[#111316] rounded-md transition-colors"
-            title={isCollapsed ? "Expand Sidebar" : "Collapse Sidebar"}
-          >
-            {isCollapsed ? (
-              <PanelLeftOpen className="h-[18px] w-[18px]" />
-            ) : (
-              <PanelLeftClose className="h-[18px] w-[18px]" />
+        {/* User Profile Button */}
+        <div className={`flex items-center ${isCollapsed ? "justify-center" : "justify-between"} pt-6 border-t border-[#272a2f] mb-4`}>
+          <div className="flex items-center gap-3 cursor-pointer group" onClick={() => router.push('/candidate/settings')}>
+            <div className="h-8 w-8 rounded-full bg-[#1b1c1e] border border-[#272a2f] group-hover:border-[#8e928f] flex items-center justify-center overflow-hidden text-xs transition-colors shrink-0">
+              {avatarUrl ? <img src={avatarUrl} alt="Profile" className="h-full w-full object-cover" /> : name.charAt(0).toUpperCase()}
+            </div>
+            {!isCollapsed && (
+              <div className="overflow-hidden">
+                <div className="text-[13px] text-[#e3e2e5] font-medium truncate group-hover:text-white transition-colors">{name}</div>
+                <div className="text-[10px] text-[#8e928f] font-mono tracking-wider uppercase truncate hover:text-[#ffb4ab] transition-colors" onClick={(e) => { e.stopPropagation(); handleSignOut(); }}>Sign out</div>
+              </div>
             )}
-          </button>
+          </div>
+          
+          {/* Toggle Button */}
+          {!isCollapsed && (
+            <button
+              onClick={() => setIsCollapsed(!isCollapsed)}
+              className="p-1.5 text-[#8e928f] hover:text-white hover:bg-[#111316] rounded-md transition-colors shrink-0"
+              title="Collapse Sidebar"
+            >
+              <PanelLeftClose className="h-[18px] w-[18px]" />
+            </button>
+          )}
         </div>
+        
+        {isCollapsed && (
+          <div className="flex justify-center mt-2">
+            <button
+              onClick={() => setIsCollapsed(!isCollapsed)}
+              className="p-1.5 text-[#8e928f] hover:text-white hover:bg-[#111316] rounded-md transition-colors"
+              title="Expand Sidebar"
+            >
+              <PanelLeftOpen className="h-[18px] w-[18px]" />
+            </button>
+          </div>
+        )}
       </div>
     </aside>
   );
