@@ -30,9 +30,43 @@ export function EmployerTopNav() {
     alert("This feature is currently in development and will be available soon.");
   };
 
+  const getBreadcrumbs = () => {
+    const paths = pathname.split('/').filter(Boolean);
+    if (paths.length <= 1) return null;
+    
+    const formatName = (str: string) => {
+      return str.charAt(0).toUpperCase() + str.slice(1);
+    };
+
+    return (
+      <div className="flex items-center text-[12px] font-mono tracking-widest uppercase">
+        <span className="text-[#8e928f] px-2">/</span>
+        <span className="text-white font-medium">{formatName(paths[1])}</span>
+      </div>
+    );
+  };
+
   return (
-    <header className="hidden lg:flex h-20 shrink-0 items-center justify-end px-12 border-b border-[#272a2f] bg-[#0b0c0e]">
-      <div className="flex items-center gap-6 text-[#8e928f] pr-4">
+    <header className="hidden lg:flex h-20 shrink-0 items-center justify-between px-12 border-b border-[#272a2f] bg-[#0b0c0e]">
+      <div className="flex items-center min-w-[120px]">
+        {getBreadcrumbs()}
+      </div>
+
+      <div className="flex-1 flex justify-center px-8">
+        <div 
+          onClick={handleFeatureClick}
+          className="flex items-center w-full max-w-md bg-[#111316] hover:bg-[#1b1c1e] border border-[#272a2f] hover:border-[#444846] transition-colors rounded-lg px-3 py-2 cursor-pointer"
+        >
+          <Command className="h-3.5 w-3.5 text-[#8e928f] mr-3" />
+          <span className="text-[12px] text-[#8e928f] font-sans">Search candidates, proofs...</span>
+          <div className="ml-auto flex gap-1">
+            <kbd className="bg-[#0b0c0e] text-[#8e928f] px-1.5 py-0.5 rounded text-[10px] border border-[#272a2f] font-sans">⌘</kbd>
+            <kbd className="bg-[#0b0c0e] text-[#8e928f] px-1.5 py-0.5 rounded text-[10px] border border-[#272a2f] font-sans">K</kbd>
+          </div>
+        </div>
+      </div>
+
+      <div className="flex items-center gap-6 text-[#8e928f] pr-4 min-w-[120px] justify-end">
         <button onClick={handleFeatureClick} className="hover:text-white transition-colors" title="Notifications">
           <Bell className="h-[18px] w-[18px]" />
         </button>
