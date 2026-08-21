@@ -6,18 +6,11 @@ import { useRouter } from "next/navigation";
 import { fetchCandidateProfile, CandidateProfile } from "@/lib/firebase/candidate";
 import { Workspace } from "@/components/proof/Workspace";
 import { SectionHeader } from "@/components/proof/SectionHeader";
-import { ProofThread, EvidenceBlock, ProofCoverage } from "@/components/proof/ProofThread";
+import { ProofThread, EvidenceBlock } from "@/components/proof/ProofThread";
 import { ProofTrace } from "@/components/ui/ProofTrace";
 import Link from "next/link";
-
-function MetaCell({ label, value }: { label: string; value: React.ReactNode }) {
-  return (
-    <div className="min-w-0">
-      <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-outline">{label}</p>
-      <div className="mt-1 break-words text-sm text-muted-foreground">{value}</div>
-    </div>
-  );
-}
+import { motion } from "framer-motion";
+import { Activity, Clock, ShieldCheck, AlertCircle, FileCode2 } from "lucide-react";
 
 function ActionLink({ href, children, primary }: { href: string; children: React.ReactNode, primary?: boolean }) {
   return (
@@ -27,13 +20,52 @@ function ActionLink({ href, children, primary }: { href: string; children: React
         primary 
           ? 'border-foreground bg-foreground text-background hover:bg-zinc-200' 
           : 'border-border bg-surface hover:border-foreground text-foreground'
-      } px-5 py-3.5 text-sm font-medium transition-colors`}
+      } px-5 py-3.5 text-sm font-medium transition-all hover:scale-[1.01]`}
     >
       <span>{children}</span>
       <span className="ml-4 font-mono">{primary ? "→" : "↗"}</span>
     </Link>
   );
 }
+
+// System Clock component for a technical feel
+function SystemClock() {
+  const [time, setTime] = useState<string>("");
+
+  useEffect(() => {
+    const updateTime = () => {
+      const now = new Date();
+      setTime(
+        now.toISOString().replace("T", " ").substring(0, 19) + " UTC"
+      );
+    };
+    updateTime();
+    const interval = setInterval(updateTime, 1000);
+    return () => clearInterval(interval);
+  }, []);
+
+  return (
+    <div className="flex items-center gap-2 text-[10px] font-mono text-muted-foreground uppercase tracking-widest">
+      <Clock className="h-3 w-3" />
+      <span>SYS_TIME: {time || "SYNCING..."}</span>
+    </div>
+  );
+}
+
+const containerVariants = {
+  hidden: { opacity: 0 },
+  show: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1,
+    }
+  }
+};
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 15 },
+  show: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 300, damping: 24 } }
+};
 
 export default function CandidateDashboardPage() {
   const { user, loading, userProfile } = useAuth();
@@ -44,9 +76,7 @@ export default function CandidateDashboardPage() {
   useEffect(() => {
     if (!loading && user) {
       fetchCandidateProfile(user.uid)
-        .then((p) => {
-          setProfile(p);
-        })
+        .then((p) => setProfile(p))
         .catch((err) => console.error(err))
         .finally(() => setDataLoading(false));
     }
@@ -61,9 +91,13 @@ export default function CandidateDashboardPage() {
   if (loading || dataLoading) {
     return (
       <Workspace>
-        <div className="space-y-6 animate-pulse">
-          <div className="h-16 w-1/3 bg-surface-high" />
-          <div className="h-80 w-full bg-surface-low" />
+        <div className="mx-auto max-w-5xl pt-8 pb-20 space-y-8 animate-pulse">
+          <div className="h-24 w-full bg-surface-high border border-border" />
+          <div className="h-32 w-full bg-surface-low border border-border" />
+          <div className="grid grid-cols-3 gap-8">
+            <div className="h-64 col-span-2 bg-surface border border-border" />
+            <div className="h-64 bg-surface border border-border" />
+          </div>
         </div>
       </Workspace>
     );
@@ -71,7 +105,6 @@ export default function CandidateDashboardPage() {
 
   const status = profile?.verificationStatus || "draft";
   const name = profile?.name || user?.displayName?.split(" ")[0] || "Engineer";
-
   const hasBasicInfo = !!(profile?.name && profile?.college);
   const hasSkills = !!(profile?.skills && profile.skills.length > 0);
   const hasGithub = !!(profile?.githubUrl);
@@ -86,16 +119,20 @@ export default function CandidateDashboardPage() {
   const isProfileComplete = completionScore >= 100;
   const assessmentCount = userProfile?.assessmentScores ? Object.keys(userProfile.assessmentScores).length : 0;
   const hasAssessments = assessmentCount > 0;
-  const coverageFilled = [hasBasicInfo, hasSkills, hasGithub, hasProjects].filter(Boolean).length;
 
   return (
     <Workspace>
-      <div className="mx-auto max-w-5xl pt-8 pb-20">
+      <motion.div 
+        className="mx-auto max-w-5xl pt-8 pb-20"
+        initial="hidden"
+        animate="show"
+        variants={containerVariants}
+      >
         
         {/* Header Section */}
-        <header className="mb-12 flex flex-col gap-8 md:flex-row md:items-end md:justify-between border-b border-border pb-8">
+        <motion.header variants={itemVariants} className="mb-12 flex flex-col gap-8 md:flex-row md:items-start md:justify-between border-b border-border pb-8">
           <div className="flex items-center gap-6">
-            <div className="flex h-20 w-20 items-center justify-center border border-border bg-surface-low font-serif text-3xl text-foreground">
+            <div className="flex h-20 w-20 items-center justify-center border border-border bg-surface-low font-serif text-3xl text-foreground shadow-sm">
               {user?.photoURL ? (
                 <img src={user.photoURL} alt={name} className="h-full w-full object-cover grayscale" />
               ) : (
@@ -103,16 +140,22 @@ export default function CandidateDashboardPage() {
               )}
             </div>
             <div>
-              <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-outline">
-                Identity Overview
-              </p>
-              <h1 className="mt-1 font-serif text-3xl font-medium tracking-tight text-foreground sm:text-4xl">
+              <div className="flex items-center gap-4 mb-2">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-outline">
+                  Primary Node
+                </p>
+                <SystemClock />
+              </div>
+              <h1 className="font-serif text-3xl font-medium tracking-tight text-foreground sm:text-4xl">
                 {name}
               </h1>
+              {profile?.college && (
+                <p className="mt-1 text-sm text-muted-foreground">{profile.college}</p>
+              )}
             </div>
           </div>
 
-          <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+          <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap md:justify-end">
             <ActionLink href="/candidate/profile" primary={!isProfileComplete}>
               Open Workspace
             </ActionLink>
@@ -123,50 +166,78 @@ export default function CandidateDashboardPage() {
             )}
             {status === "verified" && user?.uid && (
               <ActionLink href={`/p/${user.uid}`} primary>
-                View Public Record
+                Public Record
               </ActionLink>
             )}
           </div>
-        </header>
+        </motion.header>
 
-        {/* Dashboard Metrics Grid */}
-        <div className="mb-16 grid grid-cols-2 gap-px bg-border sm:grid-cols-4 border border-border">
-          <div className="bg-surface p-6">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-outline">State</p>
-            <div className="mt-3 flex items-center gap-3">
-              <span className={`h-2.5 w-2.5 ${status === 'verified' ? 'bg-emerald-500' : 'bg-amber-500'}`} />
+        {/* System Diagnostics / Metrics Grid */}
+        <motion.div variants={itemVariants} className="mb-16 grid grid-cols-2 gap-px bg-border sm:grid-cols-4 border border-border overflow-hidden">
+          <div className="bg-surface p-6 relative group transition-colors hover:bg-surface-high">
+            <div className="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-amber-500/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+            <div className="flex items-center justify-between mb-3">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-outline">State</p>
+              {status === 'verified' ? <ShieldCheck className="h-4 w-4 text-emerald-500" /> : <Activity className="h-4 w-4 text-amber-500" />}
+            </div>
+            <div className="flex items-center gap-3">
+              <span className={`h-2.5 w-2.5 rounded-sm ${status === 'verified' ? 'bg-emerald-500 animate-pulse' : 'bg-amber-500'}`} />
               <p className="font-serif text-xl capitalize text-foreground">{status.replace("_", " ")}</p>
             </div>
           </div>
-          <div className="bg-surface p-6">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-outline">Evidence</p>
-            <p className="mt-3 font-serif text-2xl text-foreground">
-              {completionScore}<span className="text-sm text-muted-foreground ml-1">%</span>
-            </p>
+          
+          <div className="bg-surface p-6 relative group transition-colors hover:bg-surface-high">
+            <div className="flex items-center justify-between mb-3">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-outline">Integrity</p>
+            </div>
+            <div className="flex items-end gap-1">
+              <p className="font-serif text-2xl text-foreground leading-none">{completionScore}</p>
+              <span className="text-sm text-muted-foreground font-mono mb-0.5">%</span>
+            </div>
+            <div className="w-full h-1 bg-surface-low mt-3">
+              <motion.div 
+                initial={{ width: 0 }}
+                animate={{ width: `${completionScore}%` }}
+                transition={{ duration: 1, ease: "easeOut" }}
+                className={`h-full ${completionScore === 100 ? 'bg-foreground' : 'bg-outline'}`}
+              />
+            </div>
           </div>
-          <div className="bg-surface p-6">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-outline">Claims</p>
-            <p className="mt-3 font-serif text-2xl text-foreground">{profile?.skills?.length || 0}</p>
+
+          <div className="bg-surface p-6 relative group transition-colors hover:bg-surface-high">
+            <div className="flex items-center justify-between mb-3">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-outline">Claims</p>
+              <FileCode2 className="h-4 w-4 text-muted-foreground" />
+            </div>
+            <p className="font-serif text-2xl text-foreground">{profile?.skills?.length || 0}</p>
           </div>
-          <div className="bg-surface p-6">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-outline">Projects</p>
-            <p className="mt-3 font-serif text-2xl text-foreground">{profile?.projects?.length || 0}</p>
+
+          <div className="bg-surface p-6 relative group transition-colors hover:bg-surface-high">
+            <div className="flex items-center justify-between mb-3">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-outline">Projects</p>
+            </div>
+            <p className="font-serif text-2xl text-foreground">{profile?.projects?.length || 0}</p>
           </div>
-        </div>
+        </motion.div>
 
         <div className="grid gap-16 lg:grid-cols-[minmax(0,1fr)_300px]">
           
           {/* Main Content Area */}
           <article className="min-w-0">
             {status !== "verified" && (
-              <section className="mb-14">
+              <motion.section variants={itemVariants} className="mb-14">
                 <SectionHeader title="Priority Protocol" kicker="Action Required" />
-                <div className="border border-border bg-surface p-6 sm:p-8">
+                <div className="border border-border bg-surface p-6 sm:p-8 relative overflow-hidden">
+                  <div className="absolute top-0 left-0 w-1 h-full bg-foreground" />
+                  
                   {(!hasSkills || !hasProjects) ? (
                     <div>
-                      <h3 className="font-serif text-2xl text-foreground">Supply Technical Evidence</h3>
-                      <p className="mt-3 text-[15px] leading-relaxed text-muted-foreground">
-                        Your technical record lacks the necessary evidence for verification. Declare your primary skills and link the GitHub repositories where you applied them.
+                      <div className="flex items-center gap-3 mb-3">
+                        <AlertCircle className="h-5 w-5 text-foreground" />
+                        <h3 className="font-serif text-2xl text-foreground">Supply Technical Evidence</h3>
+                      </div>
+                      <p className="text-[15px] leading-relaxed text-muted-foreground">
+                        Your technical record lacks the necessary evidence for verification. Declare your primary skills and link the GitHub repositories where you applied them to proceed.
                       </p>
                       <div className="mt-6">
                         <ActionLink href="/candidate/profile" primary>
@@ -176,8 +247,11 @@ export default function CandidateDashboardPage() {
                     </div>
                   ) : assessmentCount === 0 ? (
                     <div>
-                      <h3 className="font-serif text-2xl text-foreground">Begin Technical Assessment</h3>
-                      <p className="mt-3 text-[15px] leading-relaxed text-muted-foreground">
+                      <div className="flex items-center gap-3 mb-3">
+                        <AlertCircle className="h-5 w-5 text-foreground" />
+                        <h3 className="font-serif text-2xl text-foreground">Begin Technical Assessment</h3>
+                      </div>
+                      <p className="text-[15px] leading-relaxed text-muted-foreground">
                         Your project evidence is attached. The final step is to validate your claims through a brief, focused technical assessment to achieve a Verified status.
                       </p>
                       <div className="mt-6">
@@ -188,21 +262,24 @@ export default function CandidateDashboardPage() {
                     </div>
                   ) : (
                     <div>
-                      <h3 className="font-serif text-2xl text-foreground">Verification Under Review</h3>
-                      <p className="mt-3 text-[15px] leading-relaxed text-muted-foreground">
-                        Your evidence and assessment scores are being reviewed. Your profile will become discoverable to employers once the audit is complete.
+                      <div className="flex items-center gap-3 mb-3">
+                        <ShieldCheck className="h-5 w-5 text-emerald-600" />
+                        <h3 className="font-serif text-2xl text-foreground">Verification Under Review</h3>
+                      </div>
+                      <p className="text-[15px] leading-relaxed text-muted-foreground">
+                        Your evidence and assessment scores are currently being audited. Your profile will become discoverable to employers once the audit is successfully completed.
                       </p>
                     </div>
                   )}
                 </div>
-              </section>
+              </motion.section>
             )}
 
-            <section>
+            <motion.section variants={itemVariants}>
               <SectionHeader title="Skill Claims" kicker="01" />
 
               {status === "changes_required" && profile?.verificationReason && (
-                <div className="mb-10 border-l-2 border-danger pl-4">
+                <div className="mb-10 border-l-2 border-danger pl-4 py-1">
                   <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-danger">Audit feedback</p>
                   <p className="mt-2 text-[15px] leading-relaxed text-muted-foreground">{profile.verificationReason}</p>
                 </div>
@@ -258,37 +335,37 @@ export default function CandidateDashboardPage() {
                   </ProofThread>
                 )}
               </div>
-            </section>
+            </motion.section>
           </article>
 
           {/* Right Sidebar - System Logs / History */}
-          <aside>
+          <motion.aside variants={itemVariants}>
             <section className="mb-12">
               <SectionHeader title="Timeline" kicker="02" />
               <ol className="space-y-0 mt-6 border-l border-border/50 ml-1.5">
                 {status === "verified" && (
-                  <li className="relative pl-6 pb-6 last:pb-0">
+                  <motion.li initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} className="relative pl-6 pb-6 last:pb-0">
                     <span aria-hidden="true" className="absolute -left-[3px] top-1.5 h-1.5 w-1.5 rounded-full bg-emerald-600 ring-4 ring-surface" />
                     <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-foreground">Verification passed</p>
                     <p className="mt-1 text-xs text-muted-foreground">Profile is now public</p>
-                  </li>
+                  </motion.li>
                 )}
                 {hasAssessments && (
-                  <li className="relative pl-6 pb-6 last:pb-0">
+                  <motion.li initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.1 }} className="relative pl-6 pb-6 last:pb-0">
                     <span aria-hidden="true" className="absolute -left-[3px] top-1.5 h-1.5 w-1.5 rounded-full bg-outline ring-4 ring-surface" />
                     <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-foreground">Assessment recorded</p>
-                  </li>
+                  </motion.li>
                 )}
                 {hasProjects && (
-                  <li className="relative pl-6 pb-6 last:pb-0">
+                  <motion.li initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.2 }} className="relative pl-6 pb-6 last:pb-0">
                     <span aria-hidden="true" className="absolute -left-[3px] top-1.5 h-1.5 w-1.5 rounded-full bg-outline ring-4 ring-surface" />
                     <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-foreground">Project evidence attached</p>
-                  </li>
+                  </motion.li>
                 )}
-                <li className="relative pl-6 pb-6 last:pb-0">
+                <motion.li initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.3 }} className="relative pl-6 pb-6 last:pb-0">
                   <span aria-hidden="true" className="absolute -left-[3px] top-1.5 h-1.5 w-1.5 rounded-full bg-outline ring-4 ring-surface" />
                   <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-foreground">Identity initialized</p>
-                </li>
+                </motion.li>
               </ol>
             </section>
 
@@ -304,10 +381,10 @@ export default function CandidateDashboardPage() {
                 />
               </div>
             </section>
-          </aside>
+          </motion.aside>
 
         </div>
-      </div>
+      </motion.div>
     </Workspace>
   );
 }
