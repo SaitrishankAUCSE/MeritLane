@@ -160,7 +160,7 @@ export default function CandidateProfilePage() {
                 <div className="space-y-4">
                   <div className="text-[10px] font-mono uppercase tracking-[0.1em] text-[#8e928f] mb-2">Source</div>
                   <div className="flex items-center gap-3 text-[13px] font-mono text-white font-medium mb-6">
-                    <span>{< >}</span>
+                    <span>{"< >"}</span>
                     GitHub Repository (Private Auth)
                   </div>
                   
