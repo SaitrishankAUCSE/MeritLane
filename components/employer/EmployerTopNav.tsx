@@ -1,0 +1,38 @@
+"use client";
+
+import React from "react";
+import Link from "next/link";
+import { useAuth } from "@/lib/auth/AuthContext";
+import { Bell, Network, Command } from "lucide-react";
+import { usePathname } from "next/navigation";
+
+export function EmployerTopNav() {
+  const { user, handleSignOut } = useAuth();
+  const pathname = usePathname();
+  const avatarUrl = user?.photoURL || "";
+
+  return (
+    <header className="hidden lg:flex h-20 shrink-0 items-center justify-between px-12 border-b border-[#272a2f] bg-[#0b0c0e]">
+      <div className="flex items-center gap-12 w-full justify-center lg:justify-start lg:pl-12">
+        <nav className="flex items-center gap-12 ml-10">
+          <Link href="#" className={`text-[14px] transition-colors h-20 flex items-center pt-[2px] ${pathname === '#' ? 'text-white border-b-2 border-white' : 'text-[#8e928f] hover:text-white'}`}>
+            Dashboard
+          </Link>
+          <Link href="/employer/dashboard" className={`text-[14px] transition-colors h-20 flex items-center pt-[2px] ${pathname === '/employer/dashboard' ? 'text-white border-b-2 border-white' : 'text-[#8e928f] hover:text-white'}`}>
+            Workspaces
+          </Link>
+          <Link href="#" className={`text-[14px] transition-colors h-20 flex items-center pt-[2px] ${pathname === '#' ? 'text-white border-b-2 border-white' : 'text-[#8e928f] hover:text-white'}`}>
+            Archives
+          </Link>
+        </nav>
+      </div>
+      <div className="flex items-center gap-6 text-[#8e928f] pr-4">
+        <Bell className="h-[18px] w-[18px] hover:text-white cursor-pointer transition-colors" />
+        <Network className="h-[18px] w-[18px] hover:text-white cursor-pointer transition-colors" />
+        <div className="h-8 w-8 rounded-full bg-[#1b1c1e] border border-[#272a2f] flex items-center justify-center overflow-hidden text-xs cursor-pointer hover:border-[#8e928f] transition-colors" onClick={handleSignOut}>
+          {avatarUrl ? <img src={avatarUrl} alt="Profile" className="h-full w-full object-cover" /> : <Command className="h-4 w-4" />}
+        </div>
+      </div>
+    </header>
+  );
+}
