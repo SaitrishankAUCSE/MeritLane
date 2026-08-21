@@ -14,6 +14,17 @@ export default function Navbar() {
   const router = useRouter();
   const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  // Hide the global top navbar entirely for authenticated dashboard environments,
+  // as they provide their own custom side-navigation and internal layout wrappers.
+  if (
+    pathname?.startsWith("/candidate") || 
+    pathname?.startsWith("/employer") || 
+    pathname?.startsWith("/admin")
+  ) {
+    return null;
+  }
+
   const isPublicHome = pathname === "/";
   const isCandidateDashboard = pathname === "/candidate/dashboard";
   const isCandidateProfile = pathname === "/candidate/profile";
