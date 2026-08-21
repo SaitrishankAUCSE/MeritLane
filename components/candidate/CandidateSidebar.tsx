@@ -89,31 +89,30 @@ export function CandidateSidebar() {
         )}
         
         <div className={`space-y-4 mb-6 ${isCollapsed ? "w-full space-y-2" : ""}`}>
-          <Link href="/settings" title={isCollapsed ? "Settings" : undefined} className={`flex items-center text-[15px] font-sans text-[#8e928f] hover:text-white transition-colors ${isCollapsed ? "justify-center p-2 rounded-md hover:bg-[#111316]/50" : ""}`}>
+          <Link href="/candidate/settings" title={isCollapsed ? "Settings" : undefined} className={`flex items-center text-[15px] font-sans text-[#8e928f] hover:text-white transition-colors ${isCollapsed ? "justify-center p-2 rounded-md hover:bg-[#111316]/50" : ""}`}>
             <Settings className={`h-[18px] w-[18px] opacity-70 ${isCollapsed ? "" : "mr-4"}`} /> 
             {!isCollapsed && "Settings"}
           </Link>
-          <Link href="/support" title={isCollapsed ? "Support" : undefined} className={`flex items-center text-[15px] font-sans text-[#8e928f] hover:text-white transition-colors ${isCollapsed ? "justify-center p-2 rounded-md hover:bg-[#111316]/50" : ""}`}>
+          <Link href="/candidate/support" title={isCollapsed ? "Support" : undefined} className={`flex items-center text-[15px] font-sans text-[#8e928f] hover:text-white transition-colors ${isCollapsed ? "justify-center p-2 rounded-md hover:bg-[#111316]/50" : ""}`}>
             <HelpCircle className={`h-[18px] w-[18px] opacity-70 ${isCollapsed ? "" : "mr-4"}`} /> 
             {!isCollapsed && "Support"}
           </Link>
         </div>
 
         {/* Toggle Button */}
-        <button
-          onClick={() => setIsCollapsed(!isCollapsed)}
-          className={`flex items-center text-[13px] font-sans text-[#8e928f] hover:text-white transition-colors ${isCollapsed ? "justify-center p-2 rounded-md hover:bg-[#111316]/50 w-full" : "w-full px-2"}`}
-          title={isCollapsed ? "Expand Sidebar" : "Collapse Menu"}
-        >
-          {isCollapsed ? (
-            <PanelLeftOpen className="h-[18px] w-[18px] opacity-70" />
-          ) : (
-            <>
-              <PanelLeftClose className="mr-3 h-[18px] w-[18px] opacity-70" />
-              <span>Collapse Menu</span>
-            </>
-          )}
-        </button>
+        <div className={`flex mt-2 ${isCollapsed ? "justify-center" : "justify-end"}`}>
+          <button
+            onClick={() => setIsCollapsed(!isCollapsed)}
+            className="p-1.5 text-[#8e928f] hover:text-white hover:bg-[#111316] rounded-md transition-colors"
+            title={isCollapsed ? "Expand Sidebar" : "Collapse Sidebar"}
+          >
+            {isCollapsed ? (
+              <PanelLeftOpen className="h-[18px] w-[18px]" />
+            ) : (
+              <PanelLeftClose className="h-[18px] w-[18px]" />
+            )}
+          </button>
+        </div>
       </div>
     </aside>
   );
