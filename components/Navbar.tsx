@@ -48,8 +48,25 @@ export default function Navbar() {
         </Link>
 
         {!isResolvingAuth && user && (
-          <nav className="hidden items-center sm:flex">
-            <NavLink href={dashboardHref} current={pathname}>Dashboard</NavLink>
+          <nav className="hidden items-center gap-6 sm:flex">
+            {isUserAdmin ? (
+              <>
+                <NavLink href="/admin" current={pathname}>Admin</NavLink>
+                <NavLink href="/settings" current={pathname}>Settings</NavLink>
+              </>
+            ) : userProfile?.role === "employer" ? (
+              <>
+                <NavLink href="/employer/dashboard" current={pathname}>Dashboard</NavLink>
+                <NavLink href="/settings" current={pathname}>Settings</NavLink>
+              </>
+            ) : (
+              <>
+                <NavLink href="/candidate/dashboard" current={pathname}>Dashboard</NavLink>
+                <NavLink href="/candidate/profile" current={pathname}>Profile</NavLink>
+                <NavLink href="/candidate/assessment" current={pathname}>Assessment</NavLink>
+                <NavLink href="/settings" current={pathname}>Settings</NavLink>
+              </>
+            )}
           </nav>
         )}
 
@@ -58,9 +75,7 @@ export default function Navbar() {
             <div className="h-8 w-8 animate-pulse bg-surface-high" />
           ) : user ? (
             <>
-              <nav className="flex items-center sm:hidden">
-                <NavLink href={dashboardHref} current={pathname}>Dashboard</NavLink>
-              </nav>
+              {/* Mobile menu handled by hamburger icon below */}
               <ProfileDropdown
                 user={user}
                 userProfile={userProfile}
@@ -80,27 +95,47 @@ export default function Navbar() {
             </div>
           )}
 
-          {!user && (
-            <button
-              className="flex h-9 w-9 items-center justify-center text-muted-foreground hover:text-foreground md:hidden"
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              aria-label="Toggle navigation menu"
-            >
-              {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-            </button>
-          )}
+          {/* Mobile menu toggle */}
+          <button
+            className="flex h-9 w-9 items-center justify-center text-muted-foreground hover:text-foreground sm:hidden"
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            aria-label="Toggle navigation menu"
+          >
+            {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+          </button>
         </div>
       </div>
 
       {mobileMenuOpen && (
         <div className="border-t border-border px-5 py-4 md:hidden">
-          {!isResolvingAuth && !user && (
+          {!isResolvingAuth && !user ? (
             <div className="flex flex-col gap-2">
               <Button href="/login" variant="secondary" className="w-full justify-center">Log in</Button>
               <Button href="/signup" variant="secondary" className="w-full justify-center">Register</Button>
               <Button href="/employer/dashboard" variant="primary" className="w-full justify-center">Post a Role</Button>
             </div>
-          )}
+          ) : !isResolvingAuth && user ? (
+            <div className="flex flex-col gap-4">
+              {isUserAdmin ? (
+                <>
+                  <Link href="/admin" className="text-sm text-foreground">Admin</Link>
+                  <Link href="/settings" className="text-sm text-foreground">Settings</Link>
+                </>
+              ) : userProfile?.role === "employer" ? (
+                <>
+                  <Link href="/employer/dashboard" className="text-sm text-foreground">Dashboard</Link>
+                  <Link href="/settings" className="text-sm text-foreground">Settings</Link>
+                </>
+              ) : (
+                <>
+                  <Link href="/candidate/dashboard" className="text-sm text-foreground">Dashboard</Link>
+                  <Link href="/candidate/profile" className="text-sm text-foreground">Profile</Link>
+                  <Link href="/candidate/assessment" className="text-sm text-foreground">Assessment</Link>
+                  <Link href="/settings" className="text-sm text-foreground">Settings</Link>
+                </>
+              )}
+            </div>
+          ) : null}
         </div>
       )}
     </header>
