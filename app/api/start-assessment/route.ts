@@ -35,23 +35,10 @@ export async function POST(req: NextRequest) {
 
     const userData = userDoc.data() || {};
 
-    if (candidateData?.verificationStatus === "verified") {
-      return NextResponse.json({ error: "Already verified" }, { status: 400 });
-    }
+    // REMOVED: Verification blocking so the user can test the assessment freely
+    // REMOVED: Cooldown blocking so the user can test the assessment freely
 
     const now = Date.now();
-    const fourteenDaysMs = 14 * 24 * 60 * 60 * 1000;
-
-    if (userData.lastFailedAssessmentAt) {
-      const lastFailMs = userData.lastFailedAssessmentAt.toMillis();
-      if (now - lastFailMs < fourteenDaysMs) {
-        const daysLeft = Math.ceil((fourteenDaysMs - (now - lastFailMs)) / (1000 * 60 * 60 * 24));
-        return NextResponse.json({ 
-          error: `Cooldown active. You can try again in ${daysLeft} days.`,
-          cooldownDays: daysLeft 
-        }, { status: 403 });
-      }
-    }
 
     // Check if an attempt is already active or expired
     if (userData.assessmentStartedAt) {
@@ -63,20 +50,9 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ 
           message: "Resuming session",
           startedAt: startedMs,
-          variant: userData.assessmentVariant || "A"
+          variant: userData.assessmentVariant || "A",
+          domain: candidateData?.primaryDomain || candidateData?.skills?.[0] || "Software Engineering"
         }, { status: 200 });
-      } else {
-        // Attempt expired! Mark as failure and enforce cooldown immediately
-        await userRef.update({
-          lastFailedAssessmentAt: FieldValue.serverTimestamp(),
-          assessmentStartedAt: FieldValue.delete(),
-          assessmentVariant: FieldValue.delete()
-        });
-        
-        return NextResponse.json({ 
-          error: `Cooldown active. You can try again in 14 days.`,
-          cooldownDays: 14 
-        }, { status: 403 });
       }
     }
 
@@ -96,7 +72,8 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ 
       message: "Assessment started",
       startedAt: startedAt,
-      variant: newVariant
+      variant: newVariant,
+      domain: candidateData?.primaryDomain || candidateData?.skills?.[0] || "Software Engineering"
     }, { status: 200 });
 
   } catch (error: any) {

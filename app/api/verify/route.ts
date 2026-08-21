@@ -179,12 +179,9 @@ export async function POST(req: NextRequest) {
     const candidateRef = adminDb.collection("candidates").doc(uid);
     const candidateDoc = await candidateRef.get();
     const candidateData = candidateDoc.exists ? candidateDoc.data() : {};
-
     const userData = userDoc.data() || {};
 
-    if (candidateData?.verificationStatus === "verified") {
-      return NextResponse.json({ error: "Already verified" }, { status: 400 });
-    }
+    // REMOVED: Verification blocking so user can repeatedly test
 
     if (!userData.assessmentStartedAt) {
       return NextResponse.json({ error: "Assessment not started" }, { status: 400 });

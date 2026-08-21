@@ -6,7 +6,11 @@ import { useRouter } from "next/navigation";
 import { Loader2, Play, CheckCircle2, Clock, AlertTriangle, TerminalSquare, FileCode2, ShieldAlert } from "lucide-react";
 import { logFunnelEvent } from "@/lib/analytics/logEvent";
 
-const VARIANT_A_INSTRUCTIONS = `Write a Python function named process_transactions(csv_string) that takes a multiline CSV string of financial transactions.
+const getInstructions = (variant: "A" | "B", domain: string) => {
+  if (variant === "A") {
+    return `As a candidate claiming expertise in ${domain.toUpperCase()}, your task is to solve the following data integrity problem.
+
+Write a Python function named process_transactions(csv_string) that takes a multiline CSV string of financial transactions.
 
 Columns: transaction_id, user_id, amount, status
 
@@ -15,8 +19,10 @@ Requirements:
 2. Ignore any malformed rows (e.g., missing columns, invalid floats).
 3. Sum the total valid amount per user_id.
 4. Return a Python dictionary mapping user_id to their total spend.`;
+  } else {
+    return `As a candidate claiming expertise in ${domain.toUpperCase()}, your task is to solve the following metrics problem.
 
-const VARIANT_B_INSTRUCTIONS = `Write a Python function named calculate_aov(csv_string) that takes a multiline CSV string of orders.
+Write a Python function named calculate_aov(csv_string) that takes a multiline CSV string of orders.
 
 Columns: order_id, user_id, amount, status
 
@@ -24,7 +30,9 @@ Requirements:
 1. Filter out any order where status is not "SUCCESS".
 2. Ignore any malformed rows (e.g., missing columns, invalid floats).
 3. Sum the total valid amount per user_id.
-4. Return a Python dictionary mapping user_id to their total spend (acting as AOV since it's total).`;
+4. Return a Python dictionary mapping user_id to their total spend.`;
+  }
+};
 
 export default function AssessmentPage() {
   const { user, role, loading } = useAuth();
@@ -35,6 +43,7 @@ export default function AssessmentPage() {
   const [cooldownDays, setCooldownDays] = useState<number | null>(null);
   
   const [variant, setVariant] = useState<"A" | "B">("A");
+  const [domain, setDomain] = useState<string>("Software Engineering");
   const [timeLeft, setTimeLeft] = useState<number>(45 * 60);
   const [code, setCode] = useState("def process_transactions(csv_string):\n    pass\n");
   
@@ -77,7 +86,9 @@ export default function AssessmentPage() {
 
         const startedAt = data.startedAt;
         const v = data.variant || "A";
+        const d = data.domain || "Software Engineering";
         setVariant(v);
+        setDomain(d);
         logFunnelEvent("assessment_started", { variant: v });
         if (v === "B") {
           setCode("def calculate_aov(csv_string):\n    pass\n");
@@ -233,7 +244,7 @@ export default function AssessmentPage() {
           </div>
           <div className="flex-1 overflow-auto p-6 scrollbar-none">
             <pre className="whitespace-pre-wrap font-data text-[13px] leading-relaxed text-foreground">
-              {variant === "A" ? VARIANT_A_INSTRUCTIONS : VARIANT_B_INSTRUCTIONS}
+              {getInstructions(variant, domain)}
             </pre>
             
             <div className="mt-12 border-l-2 border-warning pl-4">
