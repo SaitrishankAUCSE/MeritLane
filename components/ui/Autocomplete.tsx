@@ -107,13 +107,13 @@ export function Autocomplete({
       </div>
 
       {isOpen && (
-        <div className="absolute top-[calc(100%+4px)] left-0 w-full max-h-[250px] overflow-y-auto bg-[#181a1f] border border-[#E5E5E5] rounded-md shadow-sm z-50 py-1 scrollbar-hide">
+        <div className="absolute top-[calc(100%+4px)] left-0 w-full max-h-[250px] overflow-y-auto bg-[#FFFFFF] border border-[#E5E5E5] rounded-md shadow-sm z-50 py-1 scrollbar-hide">
           {results.length > 0 ? (
             results.map((res, idx) => (
               <div
                 key={idx}
                 onClick={() => handleSelect(res)}
-                className="px-4 py-2.5 text-[14px] font-sans text-[#0D0D0D] hover:bg-[#E5E5E5] hover:text-[#0D0D0D] cursor-pointer transition-colors"
+                className="px-4 py-2.5 text-[14px] font-sans text-[#0D0D0D] hover:bg-[#F3F3F1] hover:text-[#0D0D0D] cursor-pointer transition-colors"
               >
                 {res}
               </div>

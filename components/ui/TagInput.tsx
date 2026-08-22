@@ -97,7 +97,7 @@ export function TagInput({
         {tags.map((tag, idx) => (
           <span
             key={idx}
-            className="inline-flex items-center gap-1.5 border border-[#D2D2D2] bg-[#181a1f] px-2.5 py-1 rounded-sm font-mono text-[12px] text-[#0D0D0D] select-none"
+            className="inline-flex items-center gap-1.5 border border-[#D2D2D2] bg-[#F3F3F1] px-2.5 py-1 rounded-sm font-mono text-[12px] text-[#0D0D0D] select-none"
           >
             {tag}
             {!disabled && (
@@ -130,12 +130,12 @@ export function TagInput({
       </div>
 
       {showDropdown && filteredOptions.length > 0 && (
-        <div className="absolute top-[calc(100%+4px)] left-0 w-full max-h-[250px] overflow-y-auto bg-[#181a1f] border border-[#E5E5E5] rounded-md shadow-sm z-50 py-1 scrollbar-hide">
+        <div className="absolute top-[calc(100%+4px)] left-0 w-full max-h-[250px] overflow-y-auto bg-[#FFFFFF] border border-[#E5E5E5] rounded-md shadow-sm z-50 py-1 scrollbar-hide">
           {filteredOptions.map((opt, idx) => (
             <div
               key={idx}
               onClick={() => addTag(opt)}
-              className="px-4 py-2.5 text-[14px] font-sans text-[#0D0D0D] hover:bg-[#E5E5E5] hover:text-[#0D0D0D] cursor-pointer transition-colors"
+              className="px-4 py-2.5 text-[14px] font-sans text-[#0D0D0D] hover:bg-[#F3F3F1] hover:text-[#0D0D0D] cursor-pointer transition-colors"
             >
               {opt}
             </div>
