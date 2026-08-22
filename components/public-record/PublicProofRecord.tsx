@@ -109,18 +109,35 @@ export function PublicProofRecord({ id, candidate, user, hideHeader = false }: P
             <div className="space-y-24">
               {skills.map((skill: string, index: number) => {
                 const projectEvidence = projects[index % projects.length];
+                const isVerified = candidate.verifiedSkills?.[skill]?.status === "verified";
+                const verifiedAt = candidate.verifiedSkills?.[skill]?.verifiedAt;
+                const verifiedDate = verifiedAt ? new Date(verifiedAt).toISOString().split('T')[0] : "";
 
                 return (
                   <div key={index} className="relative">
-                    {/* Purple Square Mark */}
-                    <div className="absolute -left-6 top-3 h-1.5 w-1.5 bg-[#15803D]" />
+                    {/* Status Mark */}
+                    <div className={`absolute -left-6 top-3 h-1.5 w-1.5 ${isVerified ? 'bg-[#15803D]' : 'bg-[#D2D2D2]'}`} />
                     
-                    <h3 className="font-serif text-[28px] text-[#0D0D0D] mb-4 leading-[1.2]">
+                    <h3 className="font-serif text-[28px] text-[#0D0D0D] mb-2 leading-[1.2]">
                       {skill}
                     </h3>
-                    <p className="text-[14px] text-[#737373] leading-[1.6] mb-8 max-w-[500px]">
-                      Demonstrated structural competency and technical fluency in {skill} via institutional verification.
-                    </p>
+                    <div className="mb-4 text-[10px] font-mono uppercase tracking-[0.15em]">
+                      {isVerified ? (
+                        <span className="text-[#15803D]">✓ Cryptographically Verified</span>
+                      ) : (
+                        <span className="text-[#666666]">Self-Declared (Unverified)</span>
+                      )}
+                    </div>
+                    
+                    {isVerified ? (
+                      <p className="text-[14px] text-[#737373] leading-[1.6] mb-8 max-w-[500px]">
+                        Passed rigorous technical assessment. Demonstrated structural competency and technical fluency in {skill} on {verifiedDate}.
+                      </p>
+                    ) : (
+                      <p className="text-[14px] text-[#737373] leading-[1.6] mb-8 max-w-[500px]">
+                        Pending technical verification. Evidence provided is currently under review or awaiting assessment completion.
+                      </p>
+                    )}
                     
                     {/* Primary Evidence Block */}
                     {projectEvidence && (

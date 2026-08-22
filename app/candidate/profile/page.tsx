@@ -92,42 +92,47 @@ export default function CandidateProfilePage() {
             </div>
             
             <div className="space-y-4">
-              {skills.map((skill, idx) => (
-                <div key={idx} className="border border-[#E5E5E5] bg-[#FAFAFA] p-5 rounded-md flex flex-col sm:flex-row sm:items-center justify-between gap-4 group hover:border-[#D2D2D2] transition-colors">
-                  <div className="flex items-center gap-4">
-                    <div className="h-10 w-10 shrink-0 bg-transparent border border-[#D2D2D2] rounded-md flex items-center justify-center font-mono text-[14px] text-[#0D0D0D]">
-                      {skill.substring(0, 2).toUpperCase()}
+              {skills.map((skill, idx) => {
+                const isVerified = profile?.verifiedSkills?.[skill]?.status === "verified";
+                const isFailed = profile?.verifiedSkills?.[skill]?.status === "failed";
+                
+                return (
+                  <div key={idx} className={`border p-5 rounded-md flex flex-col sm:flex-row sm:items-center justify-between gap-4 group transition-colors ${isVerified ? 'border-[#15803D]/30 bg-[#F0FDF4]' : 'border-[#E5E5E5] bg-[#FAFAFA] hover:border-[#D2D2D2]'}`}>
+                    <div className="flex items-center gap-4">
+                      <div className={`h-10 w-10 shrink-0 border rounded-md flex items-center justify-center font-mono text-[14px] ${isVerified ? 'bg-[#FFFFFF] border-[#15803D]/30 text-[#15803D]' : 'bg-transparent border-[#D2D2D2] text-[#0D0D0D]'}`}>
+                        {skill.substring(0, 2).toUpperCase()}
+                      </div>
+                      <div>
+                        <div className="text-[14px] font-medium text-[#0D0D0D] mb-1 font-serif">{skill}</div>
+                        <div className={`text-[10px] font-mono uppercase tracking-[0.15em] ${isVerified ? 'text-[#15803D]' : 'text-[#666666]'}`}>
+                          State: {isVerified ? 'Verified' : 'Declared'}
+                        </div>
+                      </div>
                     </div>
-                    <div>
-                      <div className="text-[14px] font-medium text-[#0D0D0D] mb-1 font-serif">{skill}</div>
-                      <div className="text-[10px] font-mono uppercase tracking-[0.15em] text-[#666666]">State: Declared</div>
+                    
+                    <div className="text-right">
+                      {isVerified ? (
+                        <>
+                          <div className="text-[10px] text-[#15803D] font-mono uppercase tracking-[0.1em] mb-2">Cryptographically Signed</div>
+                          <div className="text-[14px] font-sans font-medium text-[#15803D] flex items-center justify-end gap-1.5 h-9">
+                            ✓ Verified
+                          </div>
+                        </>
+                      ) : (
+                        <>
+                          <div className="text-[10px] text-[#666666] font-mono uppercase tracking-[0.1em] mb-2">No evidence.</div>
+                          <button 
+                            onClick={() => router.push('/candidate/dashboard')}
+                            className="text-[14px] font-sans font-medium text-[#0D0D0D] border border-[#D2D2D2] px-4 h-9 rounded-md hover:bg-[#F3F3F1] hover:text-[#0D0D0D] hover:border-[#E5E5E5] transition-colors"
+                          >
+                            Add evidence
+                          </button>
+                        </>
+                      )}
                     </div>
                   </div>
-                  
-                  {/* Cross-pillar navigation logic */}
-                  {idx === 0 ? (
-                    <div className="text-right">
-                      <div className="text-[10px] text-[#666666] font-mono uppercase tracking-[0.1em] mb-2">No evidence.</div>
-                      <button 
-                        onClick={() => router.push('/candidate/dashboard')}
-                        className="text-[14px] font-sans font-medium text-[#0D0D0D] border border-[#D2D2D2] px-4 h-9 rounded-md hover:bg-[#F3F3F1] hover:text-[#0D0D0D] hover:border-[#E5E5E5] transition-colors"
-                      >
-                        Add evidence
-                      </button>
-                    </div>
-                  ) : (
-                    <div className="text-right">
-                      <div className="text-[10px] text-[#15803D] font-mono uppercase tracking-[0.1em] mb-2">Evidence Linked.</div>
-                      <button 
-                        onClick={() => router.push(`/candidate/assessment?skill=${encodeURIComponent(skill)}`)}
-                        className="text-[14px] font-sans font-medium text-[#0D0D0D] border border-[#15803D]/40 bg-[#15803D]/5 px-4 h-9 rounded-md hover:bg-[#15803D] hover:text-[#FFFFFF] hover:border-[#15803D] transition-colors"
-                      >
-                        Test Claim
-                      </button>
-                    </div>
-                  )}
-                </div>
-              ))}
+                );
+              })}
             </div>
           </section>
 

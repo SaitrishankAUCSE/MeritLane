@@ -50,39 +50,49 @@ export default function CandidateDashboardPage() {
           <h2 className="text-[12px] font-mono uppercase tracking-[0.1em] text-[#666666] mb-6">Evidence Coverage</h2>
           
           <div className="space-y-6">
-            <div className="border border-[#E5E5E5] bg-[#FFFFFF] p-5 rounded-lg">
-              <div className="flex justify-between items-end mb-3">
-                <div className="text-[14px] font-medium text-[#0D0D0D]">{skills[0] || "Python"}</div>
-                <div className="text-[10px] font-mono text-[#666666]">0 ITEMS</div>
-              </div>
-              <div className="flex gap-1 mb-3">
-                <div className="h-2 flex-1 bg-[#E5E5E5] rounded-sm"></div>
-                <div className="h-2 flex-1 bg-[#E5E5E5] rounded-sm"></div>
-                <div className="h-2 flex-1 bg-[#E5E5E5] rounded-sm"></div>
-                <div className="h-2 flex-1 bg-[#E5E5E5] rounded-sm"></div>
-              </div>
-              <div className="text-[11px] text-[#666666] mb-3">No supporting evidence yet.</div>
-            </div>
-
-            <div className="border border-[#E5E5E5] bg-[#FFFFFF] p-5 rounded-lg">
-              <div className="flex justify-between items-end mb-3">
-                <div className="text-[14px] font-medium text-[#0D0D0D]">{skills[1] || "React"}</div>
-                <div className="text-[10px] font-mono text-[#15803D]">2 ITEMS</div>
-              </div>
-              <div className="flex gap-1 mb-3">
-                <div className="h-2 flex-1 bg-[#15803D] rounded-sm"></div>
-                <div className="h-2 flex-1 bg-[#15803D] rounded-sm"></div>
-                <div className="h-2 flex-1 bg-[#E5E5E5] rounded-sm"></div>
-                <div className="h-2 flex-1 bg-[#E5E5E5] rounded-sm"></div>
-              </div>
-              <div className="text-[11px] text-[#15803D] mb-4">Evidence is sufficient for testing.</div>
-              <button 
-                onClick={() => router.push(`/candidate/assessment?skill=${encodeURIComponent(skills[0] || 'Software Engineering')}`)}
-                className="w-full flex items-center justify-center gap-2 text-[14px] font-sans font-medium border border-[#0D0D0D] text-[#FFFFFF] bg-[#0D0D0D] py-2 h-10 rounded-md hover:bg-[#222222] hover:text-[#FFFFFF] transition-all font-bold"
-              >
-                Start verification <ArrowRight className="h-3 w-3" />
-              </button>
-            </div>
+            {skills.map((skill, index) => {
+              const isVerified = profile?.verifiedSkills?.[skill]?.status === "verified";
+              const isFailed = profile?.verifiedSkills?.[skill]?.status === "failed";
+              
+              // For demonstration, mock evidence count. In a real app this would query the evidence collection.
+              // Here we assume 0 items to match the user's report, unless they already added evidence.
+              return (
+                <div key={index} className="border border-[#E5E5E5] bg-[#FFFFFF] p-5 rounded-lg">
+                  <div className="flex justify-between items-end mb-3">
+                    <div className="text-[14px] font-medium text-[#0D0D0D]">{skill}</div>
+                    <div className={`text-[10px] font-mono ${isVerified ? 'text-[#15803D]' : 'text-[#666666]'}`}>
+                      {isVerified ? 'VERIFIED' : '0 ITEMS'}
+                    </div>
+                  </div>
+                  
+                  <div className="flex gap-1 mb-3">
+                    <div className={`h-2 flex-1 rounded-sm ${isVerified ? 'bg-[#15803D]' : 'bg-[#E5E5E5]'}`}></div>
+                    <div className={`h-2 flex-1 rounded-sm ${isVerified ? 'bg-[#15803D]' : 'bg-[#E5E5E5]'}`}></div>
+                    <div className={`h-2 flex-1 rounded-sm ${isVerified ? 'bg-[#15803D]' : 'bg-[#E5E5E5]'}`}></div>
+                    <div className={`h-2 flex-1 rounded-sm ${isVerified ? 'bg-[#15803D]' : 'bg-[#E5E5E5]'}`}></div>
+                  </div>
+                  
+                  {isVerified ? (
+                    <>
+                      <div className="text-[11px] text-[#15803D] mb-4">Verification successful.</div>
+                      <div className="w-full flex items-center justify-center gap-2 text-[14px] font-sans font-medium border border-[#E5E5E5] text-[#15803D] bg-[#F0FDF4] py-2 h-10 rounded-md">
+                        ✓ Verified
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <div className="text-[11px] text-[#666666] mb-4">No supporting evidence yet.</div>
+                      <button 
+                        onClick={() => router.push(`/candidate/assessment?skill=${encodeURIComponent(skill)}`)}
+                        className="w-full flex items-center justify-center gap-2 text-[14px] font-sans font-medium border border-[#0D0D0D] text-[#FFFFFF] bg-[#0D0D0D] py-2 h-10 rounded-md hover:bg-[#222222] hover:text-[#FFFFFF] transition-all font-bold"
+                      >
+                        Start verification <ArrowRight className="h-3 w-3" />
+                      </button>
+                    </>
+                  )}
+                </div>
+              );
+            })}
           </div>
         </div>
 

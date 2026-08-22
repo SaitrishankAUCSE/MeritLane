@@ -95,9 +95,13 @@ export async function POST(req: NextRequest) {
         
         let matched = false;
 
-        // 1. Check verified skills (Exact match on canonicalized string)
-        if (candidateSkills.some(s => canonicalizeSkill(s) === canonicalReq)) {
-          matchReasons.push(`${reqSkill.trim()} — verified`);
+        // 1. Check cryptographically verified skills (Exact match on canonicalized string, mapped from verifiedSkills)
+        const isVerified = Object.keys(data.verifiedSkills || {}).some(k => 
+          canonicalizeSkill(k) === canonicalReq && data.verifiedSkills![k].status === "verified"
+        );
+        
+        if (isVerified) {
+          matchReasons.push(`${reqSkill.trim()} — cryptographically verified`);
           matched = true;
         }
 

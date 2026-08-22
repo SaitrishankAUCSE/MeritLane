@@ -44,19 +44,39 @@ function AssessmentContentWrapper() {
       setContent(loadedContent);
       setCode(loadedContent.coding.initialCode);
 
-      // Simple mock cooldown check
-      const lastAttemptStr = localStorage.getItem(`meritlane_cooldown_${user.uid}`);
-      if (lastAttemptStr) {
-        const lastAttempt = parseInt(lastAttemptStr, 10);
-        const daysPassed = (Date.now() - lastAttempt) / (1000 * 60 * 60 * 24);
-        if (daysPassed < 14) {
-          setErrorMsg("ASSESSMENT NOT PASSED");
-          setCooldownDays(14 - Math.floor(daysPassed));
-          setInitializing(false);
-          return;
+      // Check if already verified
+      const checkCandidateStatus = async () => {
+        try {
+          const cRef = doc(db, "candidates", user.uid);
+          const cSnap = await getDoc(cRef);
+          if (cSnap.exists()) {
+            const cData = cSnap.data();
+            if (cData.verifiedSkills?.[skillParam]?.status === "verified") {
+              setErrorMsg("ALREADY VERIFIED");
+              setInitializing(false);
+              return;
+            }
+          }
+        } catch (err) {
+          console.error(err);
         }
-      }
-      setInitializing(false);
+
+        // Simple mock cooldown check
+        const lastAttemptStr = localStorage.getItem(`meritlane_cooldown_${user.uid}`);
+        if (lastAttemptStr) {
+          const lastAttempt = parseInt(lastAttemptStr, 10);
+          const daysPassed = (Date.now() - lastAttempt) / (1000 * 60 * 60 * 24);
+          if (daysPassed < 14) {
+            setErrorMsg("ASSESSMENT NOT PASSED");
+            setCooldownDays(14 - Math.floor(daysPassed));
+            setInitializing(false);
+            return;
+          }
+        }
+        setInitializing(false);
+      };
+
+      checkCandidateStatus();
     }
   }, [user, userProfile, loading, router, skillParam]);
 
@@ -123,7 +143,11 @@ function AssessmentContentWrapper() {
               if (user) {
                 const candidateRef = doc(db, "candidates", user.uid);
                 await updateDoc(candidateRef, {
-                  verificationStatus: "pending",
+                  [`verifiedSkills.${skillParam}`]: {
+                    status: "verified",
+                    verifiedAt: Date.now()
+                  },
+                  verificationStatus: "verified",
                   updatedAt: Date.now()
                 });
               }
@@ -144,6 +168,25 @@ function AssessmentContentWrapper() {
   }
 
   if (errorMsg) {
+    if (errorMsg === "ALREADY VERIFIED") {
+      return (
+        <div className="flex h-[100dvh] w-full bg-[#FAFAFA] text-[#0D0D0D] font-sans items-center justify-center">
+          <div className="max-w-md w-full border border-[#E5E5E5] bg-[#FFFFFF] rounded-md p-8 shadow-sm">
+             <h2 className="text-[18px] font-serif text-[#15803D] mb-2 flex items-center gap-2"><CheckCircle2 className="h-5 w-5" /> Already Verified</h2>
+             <p className="text-[14px] text-[#737373] mb-8 font-sans">
+               You have already successfully passed the technical assessment for {skillParam}. Your cryptographic proof is permanently recorded.
+             </p>
+             <button 
+               onClick={() => router.push("/candidate/dashboard")}
+               className="px-6 py-2 h-10 border border-[#D2D2D2] text-[#737373] font-sans text-[14px] font-medium rounded-md hover:border-[#0D0D0D] hover:text-[#0D0D0D] transition-all w-full"
+             >
+               Return to workspace
+             </button>
+          </div>
+        </div>
+      );
+    }
+
     return (
       <div className="flex h-[100dvh] w-full bg-[#FAFAFA] text-[#0D0D0D] font-sans items-center justify-center">
         <div className="max-w-md w-full border border-[#E5E5E5] bg-[#FFFFFF] rounded-md p-8 shadow-sm">
@@ -154,7 +197,7 @@ function AssessmentContentWrapper() {
            <div className="border border-[#E5E5E5] bg-[#FAFAFA] p-5 rounded-md mb-8">
              <div className="text-[14px] font-sans font-medium text-[#737373] mb-1">Next Eligible Attempt</div>
              <div className="text-[14px] font-mono text-[#0D0D0D]">
-               {new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toLocaleDateString()}
+               {new Date(Date.now() + (cooldownDays || 14) * 24 * 60 * 60 * 1000).toLocaleDateString()}
              </div>
            </div>
            <button 

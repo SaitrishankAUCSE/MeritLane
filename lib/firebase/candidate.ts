@@ -11,6 +11,11 @@ export interface ProjectEntry {
 
 export type VerificationStatus = "draft" | "pending" | "verified" | "changes_required" | "rejected";
 
+export interface SkillVerification {
+  status: "verified" | "failed";
+  verifiedAt?: number;
+}
+
 export interface CandidateProfile {
   name: string;
   email?: string;
@@ -20,6 +25,7 @@ export interface CandidateProfile {
   githubUrl: string;
   resumeUrl: string;
   skills: string[];
+  verifiedSkills?: Record<string, SkillVerification>;
   projects: ProjectEntry[];
   verificationStatus: VerificationStatus;
   verificationReason?: string;
