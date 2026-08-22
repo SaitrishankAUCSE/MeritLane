@@ -44,7 +44,7 @@ export default function CandidateProvenancePage() {
 
   if (!candidate) {
     return (
-      <div className="h-full w-full flex items-center justify-center bg-[#FAFAFA] text-[#737373] font-mono text-[11px] uppercase tracking-widest">
+      <div className="h-full w-full flex items-center justify-center bg-[#FAFAFA] text-[#666666] font-mono text-[11px] uppercase tracking-widest">
         Profile not initialized.
       </div>
     );
@@ -73,7 +73,7 @@ export default function CandidateProvenancePage() {
 
       {/* Public Record Preview container */}
       <div className="flex-1 overflow-y-auto scrollbar-hide">
-        <div className="pointer-events-none opacity-90 scale-[0.98] origin-top max-w-[1400px] mx-auto mt-10 border border-[#E5E5E5] rounded-2xl overflow-hidden shadow-2xl">
+        <div className="pointer-events-none opacity-90 scale-[0.98] origin-top max-w-[1400px] mx-auto mt-10 border border-[#E5E5E5] rounded-2xl overflow-hidden shadow-sm">
           <PublicProofRecord id={user!.uid} candidate={candidate} user={userDoc || {}} hideHeader={true} />
         </div>
       </div>

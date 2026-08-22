@@ -39,7 +39,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   if (!isUserAdmin) {
     return (
       <div className="mx-auto max-w-lg px-4 py-20 text-center">
-        <div className="rounded-2xl border border-red-200 bg-[#0D0D0D] p-8 shadow-xl">
+        <div className="rounded-2xl border border-red-200 bg-[#0D0D0D] p-8 shadow-sm">
           <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-red-50 text-red-600 border border-red-100 mb-4">
             <ShieldAlert className="h-7 w-7" />
           </div>

@@ -107,7 +107,7 @@ export function Autocomplete({
       </div>
 
       {isOpen && (
-        <div className="absolute top-[calc(100%+4px)] left-0 w-full max-h-[250px] overflow-y-auto bg-[#181a1f] border border-[#E5E5E5] rounded-md shadow-2xl z-50 py-1 scrollbar-hide">
+        <div className="absolute top-[calc(100%+4px)] left-0 w-full max-h-[250px] overflow-y-auto bg-[#181a1f] border border-[#E5E5E5] rounded-md shadow-sm z-50 py-1 scrollbar-hide">
           {results.length > 0 ? (
             results.map((res, idx) => (
               <div

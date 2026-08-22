@@ -16,7 +16,7 @@ export default function Icon() {
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          backgroundColor: "#0A192F",
+          backgroundColor: "#0D0D0D",
           borderRadius: "8px",
         }}
       >
@@ -26,7 +26,7 @@ export default function Icon() {
           height="20"
           viewBox="0 0 24 24"
           fill="none"
-          stroke="#D4AF37"
+          stroke="#FFFFFF"
           strokeWidth="2.5"
           strokeLinecap="round"
           strokeLinejoin="round"

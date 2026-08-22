@@ -49,7 +49,7 @@ export default function SettingsPage() {
         <div className="border border-[#E5E5E5] bg-[#FFFFFF] rounded-xl overflow-hidden">
           <div className="border-b border-[#E5E5E5] px-6 py-5">
             <h2 className="text-base font-bold text-[#0D0D0D]">Profile &amp; Credentials</h2>
-            <p className="mt-1 text-xs text-[#737373]">Your verified identity details on Meritlane.</p>
+            <p className="mt-1 text-xs text-[#666666]">Your verified identity details on Meritlane.</p>
           </div>
           <div className="px-6 py-5">
             <div className="space-y-4 text-xs">
@@ -81,22 +81,22 @@ export default function SettingsPage() {
         <div className="border border-[#E5E5E5] bg-[#FFFFFF] rounded-xl overflow-hidden">
           <div className="border-b border-[#E5E5E5] px-6 py-5">
             <h2 className="text-base font-bold text-[#0D0D0D]">Password &amp; Security</h2>
-            <p className="mt-1 text-xs text-[#737373]">Manage your security settings and authentication methods.</p>
+            <p className="mt-1 text-xs text-[#666666]">Manage your security settings and authentication methods.</p>
           </div>
           <div className="px-6 py-5 space-y-4">
             <div className="flex items-center justify-between border-b border-[#E5E5E5] pb-4">
               <div className="space-y-1">
                 <span className="block text-sm font-semibold text-[#0D0D0D]">Change Password</span>
-                <span className="block text-xs text-[#737373]">Update your account password</span>
+                <span className="block text-xs text-[#666666]">Update your account password</span>
               </div>
-              <button className="text-xs font-semibold uppercase tracking-widest px-4 py-2 border border-[#E5E5E5] hover:bg-[#1b1c1e] text-[#0D0D0D] rounded-md transition-colors">
+              <button className="text-xs font-semibold uppercase tracking-widest px-4 py-2 border border-[#E5E5E5] hover:bg-[#F3F3F1] text-[#0D0D0D] rounded-md transition-colors">
                 Update
               </button>
             </div>
             <div className="flex items-center justify-between">
               <div className="space-y-1">
                 <span className="block text-sm font-semibold text-[#0D0D0D]">Two-Factor Authentication</span>
-                <span className="block text-xs text-[#737373]">Add an extra layer of security to your account</span>
+                <span className="block text-xs text-[#666666]">Add an extra layer of security to your account</span>
               </div>
               <button className="text-xs font-semibold uppercase tracking-widest px-4 py-2 bg-[#0D0D0D] text-[#FFFFFF] hover:bg-[#0D0D0D] rounded-md transition-colors">
                 Enable
@@ -109,33 +109,33 @@ export default function SettingsPage() {
         <div className="border border-[#E5E5E5] bg-[#FFFFFF] rounded-xl overflow-hidden">
           <div className="border-b border-[#E5E5E5] px-6 py-5">
             <h2 className="text-base font-bold text-[#0D0D0D]">Preferences &amp; Notifications</h2>
-            <p className="mt-1 text-xs text-[#737373]">Customize your workspace experience.</p>
+            <p className="mt-1 text-xs text-[#666666]">Customize your workspace experience.</p>
           </div>
           <div className="px-6 py-5 space-y-4">
             <div className="flex items-center justify-between border-b border-[#E5E5E5] pb-4">
               <div className="space-y-1">
                 <span className="block text-sm font-semibold text-[#0D0D0D]">Email Notifications</span>
-                <span className="block text-xs text-[#737373]">Receive updates about your verification status</span>
+                <span className="block text-xs text-[#666666]">Receive updates about your verification status</span>
               </div>
-              <div className="w-10 h-5 bg-[#c0c1ff] rounded-full relative cursor-pointer">
+              <div className="w-10 h-5 bg-[#15803D] rounded-full relative cursor-pointer">
                 <div className="w-4 h-4 bg-[#FFFFFF] rounded-full absolute right-0.5 top-0.5 shadow-sm"></div>
               </div>
             </div>
             <div className="flex items-center justify-between border-b border-[#E5E5E5] pb-4">
               <div className="space-y-1">
                 <span className="block text-sm font-semibold text-[#0D0D0D]">Workspace Theme</span>
-                <span className="block text-xs text-[#737373]">Meritlane defaults to Dark Mode</span>
+                <span className="block text-xs text-[#666666]">Meritlane defaults to Dark Mode</span>
               </div>
-              <span className="text-xs font-mono text-[#737373] uppercase tracking-widest bg-[#1b1c1e] px-2 py-1 rounded border border-[#E5E5E5]">
+              <span className="text-xs font-mono text-[#666666] uppercase tracking-widest bg-[#F3F3F1] px-2 py-1 rounded border border-[#E5E5E5]">
                 Locked (Dark)
               </span>
             </div>
             <div className="flex items-center justify-between">
               <div className="space-y-1">
                 <span className="block text-sm font-semibold text-[#0D0D0D]">Public Profile Visibility</span>
-                <span className="block text-xs text-[#737373]">Allow employers to search your public record</span>
+                <span className="block text-xs text-[#666666]">Allow employers to search your public record</span>
               </div>
-              <div className="w-10 h-5 bg-[#c0c1ff] rounded-full relative cursor-pointer">
+              <div className="w-10 h-5 bg-[#15803D] rounded-full relative cursor-pointer">
                 <div className="w-4 h-4 bg-[#FFFFFF] rounded-full absolute right-0.5 top-0.5 shadow-sm"></div>
               </div>
             </div>

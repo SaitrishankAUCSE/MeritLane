@@ -17,7 +17,7 @@ export function CandidateProofModal({ candidate, isOpen, onClose }: CandidatePro
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-foreground/60 backdrop-blur-sm p-4 sm:p-6 animate-in fade-in duration-200">
-      <div className="bg-surface w-full max-w-4xl max-h-[90vh] overflow-y-auto rounded-none border border-border shadow-2xl flex flex-col">
+      <div className="bg-surface w-full max-w-4xl max-h-[90vh] overflow-y-auto rounded-none border border-border shadow-sm flex flex-col">
         
         {/* MODAL DOSSIER HEADER */}
         <div className="sticky top-0 z-10 border-b border-border bg-surface/95 backdrop-blur px-8 py-5 flex items-center justify-between">

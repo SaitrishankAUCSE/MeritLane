@@ -1,6 +1,6 @@
 export default function PublicProofLoading() {
   return (
-    <div className="min-h-screen bg-[#F6F4FB]">
+    <div className="min-h-screen bg-[#FAFAFA]">
       <div className="mx-auto max-w-3xl px-4 py-12 sm:px-6 sm:py-16">
         <div className="space-y-3 border-b border-zinc-200 pb-8">
           <div className="h-3 w-24 animate-shimmer rounded-sm" />

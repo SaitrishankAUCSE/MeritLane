@@ -4,7 +4,7 @@ import Link from "next/link";
 
 export default function ProofCanvasPage() {
   return (
-    <div className="min-h-screen bg-[#111214] text-[#0D0D0D] font-sans selection:bg-[#9b8afb] selection:text-[#0D0D0D]">
+    <div className="min-h-screen bg-[#111214] text-[#0D0D0D] font-sans selection:bg-[#0D0D0D] selection:text-[#0D0D0D]">
       {/* Top Nav */}
       <header className="flex h-[100px] items-center justify-between px-12 border-b border-[#E5E5E5]/50">
         <div className="font-serif text-[32px] font-medium tracking-tight text-[#0D0D0D]">
@@ -21,7 +21,7 @@ export default function ProofCanvasPage() {
           <Link href="#" className="text-[14px] text-[#737373] hover:text-[#0D0D0D] transition-colors">Archives</Link>
         </nav>
 
-        <div className="h-9 w-9 rounded-full border border-[#D2D2D2] flex items-center justify-center text-[#737373] hover:text-[#0D0D0D] hover:border-[#0D0D0D] transition-all cursor-pointer bg-[#1b1c1e]">
+        <div className="h-9 w-9 rounded-full border border-[#D2D2D2] flex items-center justify-center text-[#737373] hover:text-[#0D0D0D] hover:border-[#0D0D0D] transition-all cursor-pointer bg-[#F3F3F1]">
           <User className="h-4 w-4" />
         </div>
       </header>
@@ -35,8 +35,8 @@ export default function ProofCanvasPage() {
             <h1 className="font-serif text-[52px] leading-none mb-6">Elena Rostova</h1>
             <div className="flex items-center justify-between">
               <div>
-                <div className="text-[10px] font-mono text-[#737373] uppercase tracking-widest mb-1">ID:</div>
-                <div className="font-mono text-[13px] text-[#9b8afb]">0x7F...3B9A</div>
+                <div className="text-[10px] font-mono text-[#666666] uppercase tracking-widest mb-1">ID:</div>
+                <div className="font-mono text-[13px] text-[#0D0D0D]">0x7F...3B9A</div>
               </div>
               <div className="w-px h-8 bg-[#E5E5E5]" />
               <div className="w-[140px]">
@@ -46,25 +46,25 @@ export default function ProofCanvasPage() {
           </div>
 
           <div className="mb-14">
-            <h2 className="text-[10px] font-sans font-bold uppercase tracking-[0.15em] text-[#737373] mb-6">Core Competencies</h2>
+            <h2 className="text-[10px] font-sans font-bold uppercase tracking-[0.15em] text-[#666666] mb-6">Core Competencies</h2>
             <div className="space-y-0">
               <div className="flex items-center justify-between py-4 border-b border-[#E5E5E5]">
                 <span className="text-[15px] font-medium">Distributed Systems</span>
-                <span className="font-mono text-[12px] text-[#4ade80]">L4</span>
+                <span className="font-mono text-[12px] text-[#15803D]">L4</span>
               </div>
               <div className="flex items-center justify-between py-4 border-b border-[#E5E5E5]">
                 <span className="text-[15px] font-medium">Rust</span>
-                <span className="font-mono text-[12px] text-[#4ade80]">L3</span>
+                <span className="font-mono text-[12px] text-[#15803D]">L3</span>
               </div>
               <div className="flex items-center justify-between py-4 border-b border-[#E5E5E5]">
                 <span className="text-[15px] font-medium">Cryptography</span>
-                <span className="font-mono text-[12px] text-[#f59e0b]">L2</span>
+                <span className="font-mono text-[12px] text-[#A16207]">L2</span>
               </div>
             </div>
           </div>
 
           <div>
-            <h2 className="text-[10px] font-sans font-bold uppercase tracking-[0.15em] text-[#737373] mb-6">Artifacts</h2>
+            <h2 className="text-[10px] font-sans font-bold uppercase tracking-[0.15em] text-[#666666] mb-6">Artifacts</h2>
             <div className="space-y-0">
               <div className="flex items-center py-4 border-b border-[#E5E5E5]">
                 <FileText className="h-4 w-4 text-[#737373] mr-4" />
@@ -82,7 +82,7 @@ export default function ProofCanvasPage() {
         <div className="flex-1 relative pb-32">
           {/* Top Button */}
           <div className="absolute right-0 top-0">
-            <button className="border border-[#D2D2D2] hover:bg-[#1b1c1e] text-[#0D0D0D] hover:text-[#0D0D0D] px-5 py-2.5 text-[10px] font-sans font-bold uppercase tracking-[0.15em] transition-colors rounded-sm flex items-center gap-2">
+            <button className="border border-[#D2D2D2] hover:bg-[#F3F3F1] text-[#0D0D0D] hover:text-[#0D0D0D] px-5 py-2.5 text-[10px] font-sans font-bold uppercase tracking-[0.15em] transition-colors rounded-sm flex items-center gap-2">
               <span className="font-mono text-[12px] font-medium">[+]</span> VERIFY OBJECT
             </button>
           </div>
@@ -94,7 +94,7 @@ export default function ProofCanvasPage() {
               {/* Vertical line passing through */}
               <div className="absolute -left-[33px] top-3 bottom-[-96px] w-[2px] bg-[#E5E5E5]" />
               {/* Timeline Dot */}
-              <div className="absolute -left-[36px] top-1.5 h-2 w-2 rounded-full bg-[#4ade80]" />
+              <div className="absolute -left-[36px] top-1.5 h-2 w-2 rounded-full bg-[#15803D]" />
 
               <div className="flex items-center gap-4 mb-4">
                 <div className="text-[11px] font-mono text-[#0D0D0D] tracking-widest uppercase">2023 -<br/>Present</div>
@@ -111,23 +111,23 @@ export default function ProofCanvasPage() {
               </p>
 
               <div className="flex items-center gap-4 mb-10">
-                <span className="text-[10px] font-sans font-bold uppercase tracking-[0.15em] text-[#737373]">Claims:</span>
-                <span className="text-[14px] font-medium text-[#9b8afb]">Distributed Systems</span>
-                <span className="text-[14px] font-medium text-[#9b8afb] ml-4">Cryptography</span>
+                <span className="text-[10px] font-sans font-bold uppercase tracking-[0.15em] text-[#666666]">Claims:</span>
+                <span className="text-[14px] font-medium text-[#0D0D0D]">Distributed Systems</span>
+                <span className="text-[14px] font-medium text-[#0D0D0D] ml-4">Cryptography</span>
               </div>
 
               {/* Verification Block */}
               <div className="border-t border-[#E5E5E5] pt-5 flex items-start gap-12">
                 <div className="flex items-center gap-2">
-                  <CheckCircle2 className="h-4 w-4 text-[#4ade80]" />
-                  <span className="font-mono text-[12px] text-[#4ade80]">Verified</span>
+                  <CheckCircle2 className="h-4 w-4 text-[#15803D]" />
+                  <span className="font-mono text-[12px] text-[#15803D]">Verified</span>
                 </div>
                 <div>
-                  <div className="font-mono text-[11px] text-[#737373] mb-1">Hash:</div>
+                  <div className="font-mono text-[11px] text-[#666666] mb-1">Hash:</div>
                   <div className="font-mono text-[13px] text-[#0D0D0D]">0x9A...2F11</div>
                 </div>
                 <div>
-                  <div className="font-mono text-[11px] text-[#737373] mb-1">Validator:</div>
+                  <div className="font-mono text-[11px] text-[#666666] mb-1">Validator:</div>
                   <div className="font-mono text-[13px] text-[#0D0D0D]">Meritlane<br/>Protocol</div>
                 </div>
               </div>
@@ -136,7 +136,7 @@ export default function ProofCanvasPage() {
             {/* Timeline Item 2 */}
             <div className="relative">
               {/* Timeline Dot */}
-              <div className="absolute -left-[36px] top-1.5 h-2 w-2 rounded-full bg-[#f59e0b]" />
+              <div className="absolute -left-[36px] top-1.5 h-2 w-2 rounded-full bg-[#A16207]" />
 
               <div className="flex items-center gap-4 mb-4">
                 <div className="text-[11px] font-mono text-[#0D0D0D] tracking-widest uppercase">2021 -<br/>2023</div>
@@ -153,22 +153,22 @@ export default function ProofCanvasPage() {
               </p>
 
               <div className="flex items-center gap-4 mb-10">
-                <span className="text-[10px] font-sans font-bold uppercase tracking-[0.15em] text-[#737373]">Claims:</span>
-                <span className="text-[14px] font-medium text-[#9b8afb]">Rust</span>
+                <span className="text-[10px] font-sans font-bold uppercase tracking-[0.15em] text-[#666666]">Claims:</span>
+                <span className="text-[14px] font-medium text-[#0D0D0D]">Rust</span>
               </div>
 
               {/* Verification Block */}
               <div className="border-t border-[#E5E5E5] pt-5 flex items-start gap-12">
                 <div className="flex items-center gap-2">
-                  <Clock className="h-4 w-4 text-[#f59e0b]" />
-                  <span className="font-mono text-[12px] text-[#f59e0b]">Under<br/>Review</span>
+                  <Clock className="h-4 w-4 text-[#A16207]" />
+                  <span className="font-mono text-[12px] text-[#A16207]">Under<br/>Review</span>
                 </div>
                 <div>
-                  <div className="font-mono text-[11px] text-[#737373] mb-1">Hash:</div>
+                  <div className="font-mono text-[11px] text-[#666666] mb-1">Hash:</div>
                   <div className="font-mono text-[13px] text-[#0D0D0D]">0x3C...8B90</div>
                 </div>
                 <div>
-                  <div className="font-mono text-[11px] text-[#737373] mb-1">Validator:</div>
+                  <div className="font-mono text-[11px] text-[#666666] mb-1">Validator:</div>
                   <div className="font-mono text-[13px] text-[#0D0D0D]">Peer<br/>Network</div>
                 </div>
               </div>

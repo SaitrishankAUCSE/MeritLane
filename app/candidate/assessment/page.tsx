@@ -146,7 +146,7 @@ function AssessmentContentWrapper() {
   if (errorMsg) {
     return (
       <div className="flex h-[100dvh] w-full bg-[#FAFAFA] text-[#0D0D0D] font-sans items-center justify-center">
-        <div className="max-w-md w-full border border-[#E5E5E5] bg-[#FFFFFF] rounded-md p-8 shadow-2xl">
+        <div className="max-w-md w-full border border-[#E5E5E5] bg-[#FFFFFF] rounded-md p-8 shadow-sm">
            <h2 className="text-[18px] font-serif text-[#B42318] mb-2">{errorMsg}</h2>
            <p className="text-[14px] text-[#737373] mb-6 font-sans">
              Your submitted solution did not pass the integrity tests. To preserve the rigor of the Meritlane record, you have been placed in a mandatory cooldown.
@@ -171,7 +171,7 @@ function AssessmentContentWrapper() {
   if (!hasStarted) {
     return (
       <div className="flex h-[100dvh] w-full bg-[#FAFAFA] text-[#0D0D0D] font-sans items-center justify-center">
-        <div className="max-w-2xl w-full border border-[#E5E5E5] bg-[#FFFFFF] rounded-md p-10 shadow-2xl">
+        <div className="max-w-2xl w-full border border-[#E5E5E5] bg-[#FFFFFF] rounded-md p-10 shadow-sm">
             <p className="text-[14px] text-[#737373] mb-6 font-sans">You are about to begin:</p>
             
             <h2 className="text-[24px] font-serif text-[#0D0D0D] mb-8 border-b border-[#E5E5E5] pb-6">
@@ -223,7 +223,7 @@ function AssessmentContentWrapper() {
     <div className="flex h-full w-full flex-col bg-[#FAFAFA] overflow-hidden border-l border-[#E5E5E5]">
       <header className="flex items-center justify-between border-b border-[#E5E5E5] px-4 sm:px-6 py-4 shrink-0">
         <div className="flex items-center gap-4 truncate mr-4">
-          <span className="font-mono text-[10px] tracking-[0.2em] uppercase text-[#737373] shrink-0">Meritlane</span>
+          <span className="font-mono text-[10px] tracking-[0.2em] uppercase text-[#666666] shrink-0">Meritlane</span>
           <span className="hidden sm:inline text-[#D2D2D2] shrink-0">/</span>
           <span className="hidden sm:inline font-mono text-[10px] tracking-widest uppercase text-[#0D0D0D] truncate">{skillParam} Evaluation</span>
         </div>
@@ -237,7 +237,7 @@ function AssessmentContentWrapper() {
       {phase === 'mcq' && (
         <div className="flex-1 flex flex-col items-center p-8 overflow-y-auto">
           <div className="w-full max-w-2xl mt-10">
-            <div className="text-[12px] font-mono text-[#737373] mb-4">MULTIPLE CHOICE ({mcqIndex + 1} OF {content.mcqs.length})</div>
+            <div className="text-[12px] font-mono text-[#666666] mb-4">MULTIPLE CHOICE ({mcqIndex + 1} OF {content.mcqs.length})</div>
             <h3 className="text-[20px] font-serif text-[#0D0D0D] mb-8">{content.mcqs[mcqIndex].question}</h3>
             
             <div className="space-y-3">

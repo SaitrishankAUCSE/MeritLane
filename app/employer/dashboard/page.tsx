@@ -31,14 +31,14 @@ export default function EmployerDashboardPage() {
             
             <div className="flex items-start justify-between mb-12">
               <div className="flex items-center gap-6">
-                <div className="h-16 w-16 rounded-md bg-[#1b1c1e] border border-[#D2D2D2] flex items-center justify-center text-[#0D0D0D] font-serif text-[24px]">
+                <div className="h-16 w-16 rounded-md bg-[#F3F3F1] border border-[#D2D2D2] flex items-center justify-center text-[#0D0D0D] font-serif text-[24px]">
                   ER
                 </div>
                 <div>
                   <div className="font-serif text-[28px] text-[#0D0D0D] leading-tight">E. Rostova</div>
                   <div className="flex items-center gap-2 mt-2">
                     <CheckCircle2 className="h-3.5 w-3.5 text-[#737373]" />
-                    <span className="font-mono text-[10px] text-[#737373] uppercase tracking-widest">UID: 0x9f8b...3a21</span>
+                    <span className="font-mono text-[10px] text-[#666666] uppercase tracking-widest">UID: 0x9f8b...3a21</span>
                   </div>
                 </div>
               </div>
@@ -61,7 +61,7 @@ export default function EmployerDashboardPage() {
                   <div className="border border-[#E5E5E5] bg-[#FFFFFF] p-7 rounded-md">
                     <div className="flex items-center justify-between mb-6">
                       <span className="text-[10px] font-sans font-bold uppercase tracking-[0.1em] text-[#0D0D0D]">Source: Github</span>
-                      <span className="font-mono text-[12px] text-[#737373]">{"< >"}</span>
+                      <span className="font-mono text-[12px] text-[#666666]">{"< >"}</span>
                     </div>
                     <p className="text-[14px] text-[#0D0D0D] leading-relaxed mb-8">
                       Lead architect for high-throughput messaging queue. 100k+ TPS.
@@ -69,11 +69,11 @@ export default function EmployerDashboardPage() {
                     <div className="border-t border-[#E5E5E5] pt-5 flex gap-10">
                       <div>
                         <div className="text-[10px] font-mono text-[#D2D2D2] mb-1">Commits:</div>
-                        <div className="text-[12px] font-mono text-[#737373]">4,210</div>
+                        <div className="text-[12px] font-mono text-[#666666]">4,210</div>
                       </div>
                       <div>
                         <div className="text-[10px] font-mono text-[#D2D2D2] mb-1">Verified:</div>
-                        <div className="text-[12px] font-mono text-[#737373]">2023-10</div>
+                        <div className="text-[12px] font-mono text-[#666666]">2023-10</div>
                       </div>
                     </div>
                   </div>
@@ -123,12 +123,12 @@ export default function EmployerDashboardPage() {
           {/* Candidate 2 (Collapsed) */}
           <div className="border border-[#E5E5E5] rounded-md bg-[#FAFAFA] p-7 flex items-center justify-between cursor-pointer hover:border-[#D2D2D2] transition-colors">
             <div className="flex items-center gap-6">
-              <div className="h-14 w-14 rounded-md bg-[#1b1c1e] border border-[#D2D2D2] flex items-center justify-center text-[#737373] font-serif text-[22px]">
+              <div className="h-14 w-14 rounded-md bg-[#F3F3F1] border border-[#D2D2D2] flex items-center justify-center text-[#737373] font-serif text-[22px]">
                 JD
               </div>
               <div>
                 <div className="font-sans text-[16px] text-[#0D0D0D] font-medium mb-1">J. Doe</div>
-                <div className="font-mono text-[11px] text-[#737373]">Pending verification</div>
+                <div className="font-mono text-[11px] text-[#666666]">Pending verification</div>
               </div>
             </div>
             <div className="text-[#737373]">
@@ -143,7 +143,7 @@ export default function EmployerDashboardPage() {
       <div className="xl:w-[360px] shrink-0 border-t xl:border-t-0 xl:border-l border-[#E5E5E5] bg-[#FAFAFA] p-12 overflow-y-auto scrollbar-hide">
         
         <div className="mb-16">
-          <h3 className="text-[10px] font-sans font-bold uppercase tracking-[0.1em] text-[#737373] mb-8">Requirement Coverage</h3>
+          <h3 className="text-[10px] font-sans font-bold uppercase tracking-[0.1em] text-[#666666] mb-8">Requirement Coverage</h3>
           
           <div className="relative mb-5">
             <div className="h-px bg-[#E5E5E5] w-full relative">
@@ -171,7 +171,7 @@ export default function EmployerDashboardPage() {
           <button className="w-full bg-[#0D0D0D] text-[#FFFFFF] rounded-md py-2 h-10 px-6 text-[14px] font-sans font-medium hover:bg-[#0D0D0D] transition-colors">
             Shortlist Candidate
           </button>
-          <button className="w-full bg-transparent border border-[#E5E5E5] text-[#0D0D0D] rounded-md py-2 h-10 px-6 text-[13px] font-sans hover:bg-[#1b1c1e] transition-colors flex items-center justify-center gap-3">
+          <button className="w-full bg-transparent border border-[#E5E5E5] text-[#0D0D0D] rounded-md py-2 h-10 px-6 text-[13px] font-sans hover:bg-[#F3F3F1] transition-colors flex items-center justify-center gap-3">
             <FileText className="h-4 w-4" /> Request more proof
           </button>
         </div>

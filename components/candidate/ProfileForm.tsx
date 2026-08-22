@@ -81,7 +81,7 @@ export function ProfileForm({ initialData, onSave, onCancel, isNew = false }: Pr
   };
 
   return (
-    <form onSubmit={handleSubmit} className="border border-[#E5E5E5] bg-[#FFFFFF] rounded-md p-6 sm:p-8 space-y-8 shadow-2xl">
+    <form onSubmit={handleSubmit} className="border border-[#E5E5E5] bg-[#FFFFFF] rounded-md p-6 sm:p-8 space-y-8 shadow-sm">
       <div>
         <h2 className="font-serif text-[24px] text-[#0D0D0D] mb-2">{isNew ? "Establish your identity" : "Edit your identity"}</h2>
         <p className="text-[14px] text-[#737373] font-sans">

@@ -157,10 +157,10 @@ export function ProofTrace({
       {/* Expanded State: Terminal Modal */}
       {expanded && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-zinc-950/80 p-4 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="w-full max-w-2xl bg-[#0A0A0A] border border-zinc-800 rounded-md overflow-hidden shadow-2xl animate-in zoom-in-95 duration-200 flex flex-col">
+          <div className="w-full max-w-2xl bg-surface border border-zinc-800 rounded-md overflow-hidden shadow-sm animate-in zoom-in-95 duration-200 flex flex-col">
             
             {/* Terminal Header */}
-            <div className="flex items-center justify-between bg-[#1A1A1A] border-b border-zinc-800 px-4 py-3 select-none">
+            <div className="flex items-center justify-between bg-surface-low border-b border-zinc-800 px-4 py-3 select-none">
               <div className="flex items-center gap-3">
                 <div className="flex items-center gap-1.5">
                   <div className="h-3 w-3 rounded-full bg-red-500/80"></div>

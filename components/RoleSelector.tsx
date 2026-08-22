@@ -71,7 +71,7 @@ export default function RoleSelector() {
           <button
             type="button"
             onClick={() => handleSelectRole("candidate")}
-            className="group relative flex flex-col items-center justify-center gap-4 rounded-2xl border border-border bg-surface p-8 text-center shadow-sm transition-all duration-150 hover:border-zinc-600 hover:shadow-md active:scale-[0.98]"
+            className="group relative flex flex-col items-center justify-center gap-4 rounded-2xl border border-border bg-surface p-8 text-center shadow-sm transition-all duration-150 hover:border-zinc-600  active:scale-[0.98]"
           >
             <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-surface-low text-muted-foreground group-hover:bg-zinc-600 group-hover:text-[#0D0D0D] transition-colors duration-150">
               <Users className="h-5 w-5" />
@@ -88,7 +88,7 @@ export default function RoleSelector() {
           <button
             type="button"
             onClick={() => handleSelectRole("employer")}
-            className="group relative flex flex-col items-center justify-center gap-4 rounded-2xl border border-border bg-surface p-8 text-center shadow-sm transition-all duration-150 hover:border-zinc-600 hover:shadow-md active:scale-[0.98]"
+            className="group relative flex flex-col items-center justify-center gap-4 rounded-2xl border border-border bg-surface p-8 text-center shadow-sm transition-all duration-150 hover:border-zinc-600  active:scale-[0.98]"
           >
             <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-surface-low text-muted-foreground group-hover:bg-zinc-600 group-hover:text-[#0D0D0D] transition-colors duration-150">
               <Briefcase className="h-5 w-5" />

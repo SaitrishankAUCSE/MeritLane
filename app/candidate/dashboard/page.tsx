@@ -47,13 +47,13 @@ export default function CandidateDashboardPage() {
         
         {/* Left Column: Evidence Coverage */}
         <div className="space-y-8">
-          <h2 className="text-[12px] font-mono uppercase tracking-[0.1em] text-[#737373] mb-6">Evidence Coverage</h2>
+          <h2 className="text-[12px] font-mono uppercase tracking-[0.1em] text-[#666666] mb-6">Evidence Coverage</h2>
           
           <div className="space-y-6">
             <div className="border border-[#E5E5E5] bg-[#FFFFFF] p-5 rounded-lg">
               <div className="flex justify-between items-end mb-3">
                 <div className="text-[14px] font-medium text-[#0D0D0D]">{skills[0] || "Python"}</div>
-                <div className="text-[10px] font-mono text-[#737373]">0 ITEMS</div>
+                <div className="text-[10px] font-mono text-[#666666]">0 ITEMS</div>
               </div>
               <div className="flex gap-1 mb-3">
                 <div className="h-2 flex-1 bg-[#E5E5E5] rounded-sm"></div>
@@ -61,7 +61,7 @@ export default function CandidateDashboardPage() {
                 <div className="h-2 flex-1 bg-[#E5E5E5] rounded-sm"></div>
                 <div className="h-2 flex-1 bg-[#E5E5E5] rounded-sm"></div>
               </div>
-              <div className="text-[11px] text-[#737373] mb-3">No supporting evidence yet.</div>
+              <div className="text-[11px] text-[#666666] mb-3">No supporting evidence yet.</div>
             </div>
 
             <div className="border border-[#E5E5E5] bg-[#FFFFFF] p-5 rounded-lg">
@@ -88,7 +88,7 @@ export default function CandidateDashboardPage() {
 
         {/* Right Column: Evidence Objects */}
         <div className="lg:col-span-2 space-y-8">
-          <h2 className="text-[12px] font-mono uppercase tracking-[0.1em] text-[#737373] mb-6">Linked Artifacts</h2>
+          <h2 className="text-[12px] font-mono uppercase tracking-[0.1em] text-[#666666] mb-6">Linked Artifacts</h2>
           
           <div className="space-y-6">
             
@@ -97,11 +97,11 @@ export default function CandidateDashboardPage() {
               <div className="flex items-start justify-between mb-6">
                 <div>
                   <h3 className="text-[16px] font-serif text-[#0D0D0D] mb-1">House Price Prediction Model</h3>
-                  <div className="text-[12px] font-sans font-medium text-[#737373] flex items-center gap-2">
+                  <div className="text-[12px] font-sans font-medium text-[#666666] flex items-center gap-2">
                     <FileCheck className="h-3.5 w-3.5" /> Project Repository
                   </div>
                 </div>
-                <div className="flex gap-3 text-[11px] font-sans font-medium text-[#737373]">
+                <div className="flex gap-3 text-[11px] font-sans font-medium text-[#666666]">
                   <button className="hover:text-[#0D0D0D] transition-colors">View</button>
                   <button className="hover:text-[#0D0D0D] transition-colors">Remove</button>
                 </div>
@@ -109,12 +109,12 @@ export default function CandidateDashboardPage() {
 
               {/* Proof Thread */}
               <div className="mt-6 border-t border-[#E5E5E5] pt-6">
-                <div className="text-[10px] font-sans font-medium text-[#737373] mb-4">Supports Claim:</div>
+                <div className="text-[10px] font-sans font-medium text-[#666666] mb-4">Supports Claim:</div>
                 <div className="relative border-l border-[#E5E5E5] pl-4 space-y-4">
                   <div className="relative">
                     <div className="absolute -left-[18.5px] top-1.5 h-2 w-2 rounded-full bg-[#15803D]" />
                     <div className="text-[13px] font-medium text-[#0D0D0D]">Machine Learning Pipeline</div>
-                    <div className="text-[11px] text-[#737373] mt-1">Status: Evidence Linked</div>
+                    <div className="text-[11px] text-[#666666] mt-1">Status: Evidence Linked</div>
                   </div>
                 </div>
               </div>
@@ -125,11 +125,11 @@ export default function CandidateDashboardPage() {
               <div className="flex items-start justify-between mb-6">
                 <div>
                   <h3 className="text-[16px] font-serif text-[#0D0D0D] mb-1">E-Commerce Frontend Architecture</h3>
-                  <div className="text-[12px] font-sans font-medium text-[#737373] flex items-center gap-2">
+                  <div className="text-[12px] font-sans font-medium text-[#666666] flex items-center gap-2">
                     <Code className="h-3.5 w-3.5" /> GitHub Commits
                   </div>
                 </div>
-                <div className="flex gap-3 text-[11px] font-sans font-medium text-[#737373]">
+                <div className="flex gap-3 text-[11px] font-sans font-medium text-[#666666]">
                   <button className="hover:text-[#0D0D0D] transition-colors">View</button>
                   <button className="hover:text-[#0D0D0D] transition-colors">Remove</button>
                 </div>
@@ -137,12 +137,12 @@ export default function CandidateDashboardPage() {
 
               {/* Proof Thread */}
               <div className="mt-6 border-t border-[#E5E5E5] pt-6">
-                <div className="text-[10px] font-sans font-medium text-[#737373] mb-4">Supports Claim:</div>
+                <div className="text-[10px] font-sans font-medium text-[#666666] mb-4">Supports Claim:</div>
                 <div className="relative border-l border-[#E5E5E5] pl-4 space-y-4">
                   <div className="relative">
                     <div className="absolute -left-[18.5px] top-1.5 h-2 w-2 rounded-full bg-[#15803D]" />
                     <div className="text-[13px] font-medium text-[#0D0D0D]">{skills[1] || "React"}</div>
-                    <div className="text-[11px] text-[#737373] mt-1">Status: Evidence Linked</div>
+                    <div className="text-[11px] text-[#666666] mt-1">Status: Evidence Linked</div>
                   </div>
                 </div>
               </div>

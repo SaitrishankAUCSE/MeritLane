@@ -69,23 +69,23 @@ body {
 }
 
 .theme-public {
-  --color-void: #faf6ef;
-  --color-background: #faf6ef;
-  --color-surface: #fffcf7;
-  --color-surface-low: #f4efe6;
-  --color-surface-mid: #efe8db;
-  --color-surface-high: #e7dfd0;
-  --color-foreground: #121315;
-  --color-muted: #efe8db;
-  --color-muted-foreground: #5c5f5d;
-  --color-border: #d8d1c4;
-  --color-outline: #6f726f;
-  --color-primary: #121315;
-  --color-primary-foreground: #f4f4f2;
-  --color-accent: #5c56b8;
-  --color-success: #4f6f4e;
-  --color-warning: #8a6a3d;
-  --color-danger: #9a3f38;
+  --color-void: #FAFAFA;
+  --color-background: #FAFAFA;
+  --color-surface: #FFFFFF;
+  --color-surface-low: #F3F3F1;
+  --color-surface-mid: #EAEAE7;
+  --color-surface-high: #E5E5E5;
+  --color-foreground: #0D0D0D;
+  --color-muted: #F3F3F1;
+  --color-muted-foreground: #737373;
+  --color-border: #E5E5E5;
+  --color-outline: #D2D2D2;
+  --color-primary: #0D0D0D;
+  --color-primary-foreground: #FFFFFF;
+  --color-accent: #15803D;
+  --color-success: #15803D;
+  --color-warning: #A16207;
+  --color-danger: #B42318;
   
   background: var(--color-background);
   color: var(--color-foreground);

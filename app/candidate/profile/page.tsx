@@ -100,14 +100,14 @@ export default function CandidateProfilePage() {
                     </div>
                     <div>
                       <div className="text-[14px] font-medium text-[#0D0D0D] mb-1 font-serif">{skill}</div>
-                      <div className="text-[10px] font-mono uppercase tracking-[0.15em] text-[#737373]">State: Declared</div>
+                      <div className="text-[10px] font-mono uppercase tracking-[0.15em] text-[#666666]">State: Declared</div>
                     </div>
                   </div>
                   
                   {/* Cross-pillar navigation logic */}
                   {idx === 0 ? (
                     <div className="text-right">
-                      <div className="text-[10px] text-[#737373] font-mono uppercase tracking-[0.1em] mb-2">No evidence.</div>
+                      <div className="text-[10px] text-[#666666] font-mono uppercase tracking-[0.1em] mb-2">No evidence.</div>
                       <button 
                         onClick={() => router.push('/candidate/dashboard')}
                         className="text-[14px] font-sans font-medium text-[#0D0D0D] border border-[#D2D2D2] px-4 h-9 rounded-md hover:bg-[#F3F3F1] hover:text-[#0D0D0D] hover:border-[#E5E5E5] transition-colors"
@@ -182,7 +182,7 @@ export default function CandidateProfilePage() {
                   <BookOpen className="h-[14px] w-[14px] text-[#737373] mt-1 shrink-0" />
                   <div>
                     <div className="text-[14px] text-[#0D0D0D] font-serif mb-1">{profile?.college || "University"}</div>
-                    <div className="text-[12px] text-[#737373] font-sans">{profile?.branch || "Computer Science"}</div>
+                    <div className="text-[12px] text-[#666666] font-sans">{profile?.branch || "Computer Science"}</div>
                     <div className="text-[10px] font-mono tracking-[0.1em] text-[#D2D2D2] uppercase mt-2">Class of {profile?.gradYear || "2024"}</div>
                   </div>
                 </div>

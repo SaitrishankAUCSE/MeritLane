@@ -17,23 +17,23 @@ export default function CandidateSupportPage() {
 
       <div className="grid gap-6 sm:grid-cols-2">
         <div className="border border-[#E5E5E5] bg-[#FFFFFF] rounded-xl p-6 transition-colors hover:border-[#D2D2D2]">
-          <Mail className="h-6 w-6 text-[#9b8afb] mb-4" />
+          <Mail className="h-6 w-6 text-[#0D0D0D] mb-4" />
           <h2 className="text-base font-bold text-[#0D0D0D] mb-2">Email Support</h2>
           <p className="text-sm text-[#737373] mb-4">
             For complex verification issues or account recovery.
           </p>
-          <a href="mailto:support@meritlane.app" className="text-sm font-medium text-[#0D0D0D] hover:text-[#9b8afb] transition-colors">
+          <a href="mailto:support@meritlane.app" className="text-sm font-medium text-[#0D0D0D] hover:text-[#0D0D0D] transition-colors">
             support@meritlane.app →
           </a>
         </div>
 
         <div className="border border-[#E5E5E5] bg-[#FFFFFF] rounded-xl p-6 transition-colors hover:border-[#D2D2D2]">
-          <MessageSquare className="h-6 w-6 text-[#4ade80] mb-4" />
+          <MessageSquare className="h-6 w-6 text-[#15803D] mb-4" />
           <h2 className="text-base font-bold text-[#0D0D0D] mb-2">Live Chat</h2>
           <p className="text-sm text-[#737373] mb-4">
             Available Monday-Friday, 9am-5pm PST.
           </p>
-          <button className="text-sm font-medium text-[#0D0D0D] hover:text-[#4ade80] transition-colors">
+          <button className="text-sm font-medium text-[#0D0D0D] hover:text-[#15803D] transition-colors">
             Start Chat →
           </button>
         </div>

@@ -29,16 +29,16 @@ export function PublicProofRecord({ id, candidate, user, hideHeader = false }: P
       
       {/* Top Navbar */}
       {!hideHeader && (
-        <header className="flex h-[72px] items-center justify-between px-8 lg:px-16 border-b border-[#1b1c1e] bg-[#FAFAFA]">
+        <header className="flex h-[72px] items-center justify-between px-8 lg:px-16 border-b border-[#E5E5E5] bg-[#FAFAFA]">
           <Link href="/" className="font-serif text-[26px] font-medium tracking-tight text-[#0D0D0D]">Meritlane</Link>
-          <div className="font-mono text-[10px] tracking-[0.1em] text-[#737373] uppercase flex items-center gap-2">
+          <div className="font-mono text-[10px] tracking-[0.1em] text-[#666666] uppercase flex items-center gap-2">
             <Shield className="h-3 w-3" /> Public artifact
           </div>
         </header>
       )}
 
       {/* Hero Section */}
-      <section className="px-8 lg:px-16 pt-20 pb-16 border-b border-[#1b1c1e] bg-[#FAFAFA]">
+      <section className="px-8 lg:px-16 pt-20 pb-16 border-b border-[#E5E5E5] bg-[#FAFAFA]">
         <div className="flex flex-col md:flex-row gap-10 items-start max-w-[1200px] mx-auto">
           <div className="h-[120px] w-[120px] shrink-0 rounded-full border border-[#E5E5E5] overflow-hidden bg-[#FFFFFF]">
             {avatarUrl ? <img src={avatarUrl} alt={name} className="h-full w-full object-cover grayscale opacity-90" /> : (
@@ -59,7 +59,7 @@ export function PublicProofRecord({ id, candidate, user, hideHeader = false }: P
                 <span>Verified Practitioner</span>
               </div>
               <div className="w-px h-3 bg-[#E5E5E5]" />
-              <div className="text-[#737373] lowercase tracking-normal font-mono text-[12px]">ID: {recordId}.eth</div>
+              <div className="text-[#666666] lowercase tracking-normal font-mono text-[12px]">ID: {recordId}.eth</div>
             </div>
             
             <p className="max-w-2xl text-[15px] leading-[1.6] text-[#737373] font-sans">
@@ -93,11 +93,11 @@ export function PublicProofRecord({ id, candidate, user, hideHeader = false }: P
             </div>
 
             {candidate.college && (
-              <div className="space-y-2 pt-4 border-t border-[#1b1c1e]">
+              <div className="space-y-2 pt-4 border-t border-[#E5E5E5]">
                 <div className="text-[13px] font-sans font-medium text-[#737373]">Education</div>
                 <div className="text-[13px] text-[#0D0D0D]">{candidate.college}</div>
-                <div className="text-[12px] text-[#737373]">{candidate.branch}</div>
-                <div className="text-[11px] font-mono text-[#737373]">Class of {candidate.gradYear}</div>
+                <div className="text-[12px] text-[#666666]">{candidate.branch}</div>
+                <div className="text-[11px] font-mono text-[#666666]">Class of {candidate.gradYear}</div>
               </div>
             )}
           </aside>
@@ -136,7 +136,7 @@ export function PublicProofRecord({ id, candidate, user, hideHeader = false }: P
                               href={projectEvidence.repoUrl} 
                               target="_blank" 
                               rel="noreferrer"
-                              className="bg-[#1b1c1e] text-[#15803D] font-mono text-[9px] uppercase tracking-[0.1em] px-2.5 py-1 rounded-none border border-[#E5E5E5] hover:bg-[#F3F3F1] hover:text-[#0D0D0D] transition-colors shrink-0 text-center"
+                              className="bg-[#F3F3F1] text-[#15803D] font-mono text-[9px] uppercase tracking-[0.1em] px-2.5 py-1 rounded-none border border-[#E5E5E5] hover:bg-[#F3F3F1] hover:text-[#0D0D0D] transition-colors shrink-0 text-center"
                             >
                               View Repository
                             </a>
@@ -157,7 +157,7 @@ export function PublicProofRecord({ id, candidate, user, hideHeader = false }: P
                         <div className="h-[1px] bg-[#E5E5E5] flex-1 relative">
                           <div className="absolute left-0 h-1.5 w-[1px] bg-[#D2D2D2] -top-[2px]" />
                         </div>
-                        <div className="h-[1px] bg-[#1b1c1e] flex-1 relative">
+                        <div className="h-[1px] bg-[#F3F3F1] flex-1 relative">
                           <div className="absolute left-0 h-1.5 w-[1px] bg-[#D2D2D2] -top-[2px]" />
                           <div className="absolute right-0 h-1.5 w-[1px] bg-[#E5E5E5] -top-[2px]" />
                         </div>
@@ -172,7 +172,7 @@ export function PublicProofRecord({ id, candidate, user, hideHeader = false }: P
             </div>
             
             {/* Security Footer */}
-            <div className="mt-20 pt-10 border-t border-[#1b1c1e] flex items-start gap-4">
+            <div className="mt-20 pt-10 border-t border-[#E5E5E5] flex items-start gap-4">
               <Lock className="h-5 w-5 text-[#737373] shrink-0 mt-0.5" />
               <div>
                 <div className="text-[13px] font-sans font-medium text-[#0D0D0D] mb-2">Immutable Record</div>
@@ -185,42 +185,42 @@ export function PublicProofRecord({ id, candidate, user, hideHeader = false }: P
           </article>
 
           {/* Right: Security & Network Activity */}
-          <aside className="space-y-10 lg:pl-10 lg:border-l border-[#1b1c1e]">
+          <aside className="space-y-10 lg:pl-10 lg:border-l border-[#E5E5E5]">
             
             <div>
-              <h3 className="text-[13px] font-sans font-medium text-[#737373] mb-6 border-b border-[#1b1c1e] pb-3">
+              <h3 className="text-[13px] font-sans font-medium text-[#737373] mb-6 border-b border-[#E5E5E5] pb-3">
                 Security Profile
               </h3>
-              <div className="flex items-start gap-3 text-[12px] font-sans text-[#737373] leading-relaxed">
+              <div className="flex items-start gap-3 text-[12px] font-sans text-[#666666] leading-relaxed">
                 <Shield className="h-4 w-4 text-[#15803D] shrink-0 mt-0.5" />
                 This record is immutable. Any attempt to modify the underlying evidence will break the verification seal.
               </div>
             </div>
 
             <div>
-              <h3 className="text-[13px] font-sans font-medium text-[#737373] mb-6 border-b border-[#1b1c1e] pb-3">
+              <h3 className="text-[13px] font-sans font-medium text-[#737373] mb-6 border-b border-[#E5E5E5] pb-3">
                 Network Activity
               </h3>
               
               <div className="space-y-6">
                 <div className="relative pl-6">
-                  <div className="absolute left-[3px] top-1.5 bottom-[-24px] w-[1px] bg-[#1b1c1e]" />
+                  <div className="absolute left-[3px] top-1.5 bottom-[-24px] w-[1px] bg-[#F3F3F1]" />
                   <div className="absolute left-0 top-1.5 h-2 w-2 rounded-full bg-[#15803D]" />
                   <div className="text-[12px] font-sans font-medium text-[#0D0D0D] mb-1">Verification Seal Issued</div>
-                  <div className="text-[10px] font-mono text-[#737373]">TX: {recordId}</div>
+                  <div className="text-[10px] font-mono text-[#666666]">TX: {recordId}</div>
                 </div>
 
                 <div className="relative pl-6">
-                  <div className="absolute left-[3px] top-1.5 bottom-[-24px] w-[1px] bg-[#1b1c1e]" />
+                  <div className="absolute left-[3px] top-1.5 bottom-[-24px] w-[1px] bg-[#F3F3F1]" />
                   <div className="absolute left-[1px] top-1.5 h-1.5 w-1.5 rounded-full bg-[#D2D2D2]" />
-                  <div className="text-[12px] font-sans text-[#737373] mb-1">Evidence Synchronized</div>
-                  <div className="text-[10px] font-mono text-[#737373]">Candidate Profile</div>
+                  <div className="text-[12px] font-sans text-[#666666] mb-1">Evidence Synchronized</div>
+                  <div className="text-[10px] font-mono text-[#666666]">Candidate Profile</div>
                 </div>
 
                 <div className="relative pl-6">
                   <div className="absolute left-[1px] top-1.5 h-1.5 w-1.5 rounded-full bg-[#D2D2D2]" />
-                  <div className="text-[12px] font-sans text-[#737373] mb-1">Identity Claim Created</div>
-                  <div className="text-[10px] font-mono text-[#737373]">Wallet / Auth connected</div>
+                  <div className="text-[12px] font-sans text-[#666666] mb-1">Identity Claim Created</div>
+                  <div className="text-[10px] font-mono text-[#666666]">Wallet / Auth connected</div>
                 </div>
               </div>
             </div>

@@ -475,7 +475,7 @@ export default function AdminDashboardPage() {
     <div className="min-h-[calc(100vh-64px)] pb-24 pt-12">
       {/* Toast Notification */}
       {successToast && (
-        <div className="fixed top-20 right-6 z-50 rounded-md border border-zinc-700 bg-foreground px-4 py-2 h-10 text-xs font-semibold text-[#0D0D0D] shadow-lg animate-in fade-in slide-in-from-top-2 duration-150">
+        <div className="fixed top-20 right-6 z-50 rounded-md border border-zinc-700 bg-foreground px-4 py-2 h-10 text-xs font-semibold text-[#0D0D0D] shadow-sm animate-in fade-in slide-in-from-top-2 duration-150">
           <div className="flex items-center gap-2">
             <CheckCircle2 className="h-4 w-4 text-[#0D0D0D]" />
             <span>{successToast}</span>
@@ -944,7 +944,7 @@ export default function AdminDashboardPage() {
       {showWipeModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-zinc-950/60 p-4 backdrop-blur-sm animate-in fade-in duration-150">
           <div 
-            className="relative w-full max-w-lg rounded-md border border-border bg-surface p-6 shadow-2xl animate-in zoom-in-95 duration-150"
+            className="relative w-full max-w-lg rounded-md border border-border bg-surface p-6 shadow-sm animate-in zoom-in-95 duration-150"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Modal Header */}

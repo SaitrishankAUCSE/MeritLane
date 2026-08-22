@@ -104,7 +104,7 @@ export function CandidateSidebar() {
 
         <div className={`flex items-center ${isCollapsed ? "justify-center" : "justify-between"} pt-6 border-t border-[#E5E5E5] mb-4`}>
           <div className="flex items-center gap-3 cursor-pointer group" onClick={() => router.push('/candidate/settings')}>
-            <div className="h-8 w-8 rounded-full bg-[#1b1c1e] border border-[#E5E5E5] group-hover:border-[#737373] flex items-center justify-center overflow-hidden text-xs transition-colors shrink-0">
+            <div className="h-8 w-8 rounded-full bg-[#F3F3F1] border border-[#E5E5E5] group-hover:border-[#737373] flex items-center justify-center overflow-hidden text-xs transition-colors shrink-0">
               {avatarUrl ? <img src={avatarUrl} alt="Profile" className="h-full w-full object-cover" /> : name.charAt(0).toUpperCase()}
             </div>
             {!isCollapsed && (
