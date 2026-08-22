@@ -8,6 +8,7 @@ export interface ProjectEntry {
   liveUrl: string;
   description: string;
   supportsClaim?: string;
+  skillsUsed?: string[];
 }
 
 export type VerificationStatus = "draft" | "pending" | "verified" | "changes_required" | "rejected";

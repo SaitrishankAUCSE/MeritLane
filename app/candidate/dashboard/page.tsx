@@ -7,6 +7,7 @@ import { fetchCandidateProfile, CandidateProfile, ProjectEntry } from "@/lib/fir
 import { FileCheck, Code, FolderOpen, ArrowRight, X, Loader2 } from "lucide-react";
 import { db } from "@/lib/firebase/config";
 import { doc, updateDoc } from "firebase/firestore";
+import { TagInput } from "@/components/ui/TagInput";
 
 export default function CandidateDashboardPage() {
   const { user, loading } = useAuth();
@@ -20,7 +21,9 @@ export default function CandidateDashboardPage() {
     title: "",
     repoUrl: "",
     liveUrl: "",
-    supportsClaim: ""
+    description: "",
+    supportsClaim: "",
+    skillsUsed: []
   });
 
   useEffect(() => {
@@ -57,8 +60,9 @@ export default function CandidateDashboardPage() {
         title: newProject.title || "",
         repoUrl: newProject.repoUrl || "",
         liveUrl: newProject.liveUrl || "",
-        description: "",
-        supportsClaim: newProject.supportsClaim || ""
+        description: newProject.description || "",
+        supportsClaim: newProject.supportsClaim || "",
+        skillsUsed: newProject.skillsUsed || []
       };
 
       const updatedProjects = [...projects, projectToAdd];
@@ -69,7 +73,7 @@ export default function CandidateDashboardPage() {
 
       setProfile({ ...profile, projects: updatedProjects });
       setIsModalOpen(false);
-      setNewProject({ title: "", repoUrl: "", liveUrl: "", supportsClaim: skills[0] || "" });
+      setNewProject({ title: "", repoUrl: "", liveUrl: "", description: "", supportsClaim: skills[0] || "", skillsUsed: [] });
     } catch (err: any) {
       console.error(err);
       setErrorMsg(err.message || "Failed to save evidence.");
@@ -187,20 +191,36 @@ export default function CandidateDashboardPage() {
             ) : (
               projects.map((project, idx) => (
                 <div key={project.id || idx} className="border border-[#E5E5E5] bg-[#FFFFFF] p-6 rounded-lg group hover:border-[#D2D2D2] transition-colors">
-                  <div className="flex items-start justify-between mb-6">
-                    <div>
-                      <h3 className="text-[16px] font-sans font-medium text-[#0D0D0D] mb-1">{project.title}</h3>
-                      <div className="text-[12px] font-sans font-medium text-[#666666] flex items-center gap-2">
-                        <FileCheck className="h-3.5 w-3.5" /> Project Repository
+                    <div className="flex items-start justify-between mb-4">
+                      <div>
+                        <h3 className="text-[16px] font-sans font-medium text-[#0D0D0D] mb-1">{project.title}</h3>
+                        <div className="text-[12px] font-sans font-medium text-[#666666] flex items-center gap-2">
+                          <FileCheck className="h-3.5 w-3.5" /> Project Repository
+                        </div>
+                      </div>
+                      <div className="flex gap-3 text-[11px] font-sans font-medium text-[#666666]">
+                        <a href={project.repoUrl} target="_blank" rel="noopener noreferrer" className="hover:text-[#0D0D0D] transition-colors">View</a>
+                        <button onClick={() => handleRemoveEvidence(project.id)} className="hover:text-[#B42318] transition-colors">Remove</button>
                       </div>
                     </div>
-                    <div className="flex gap-3 text-[11px] font-sans font-medium text-[#666666]">
-                      <a href={project.repoUrl} target="_blank" rel="noopener noreferrer" className="hover:text-[#0D0D0D] transition-colors">View</a>
-                      <button onClick={() => handleRemoveEvidence(project.id)} className="hover:text-[#B42318] transition-colors">Remove</button>
-                    </div>
-                  </div>
 
-                  {/* Proof Thread */}
+                    {project.description && (
+                      <div className="text-[13px] text-[#404040] mb-4 whitespace-pre-wrap leading-relaxed">
+                        {project.description}
+                      </div>
+                    )}
+                    
+                    {project.skillsUsed && project.skillsUsed.length > 0 && (
+                      <div className="flex flex-wrap gap-2 mb-2">
+                        {project.skillsUsed.map(skill => (
+                          <span key={skill} className="px-2 py-1 bg-[#F3F3F1] border border-[#E5E5E5] rounded-md text-[11px] font-mono text-[#404040]">
+                            {skill}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* Proof Thread */}
                   <div className="mt-6 border-t border-[#E5E5E5] pt-6">
                     <div className="text-[10px] font-sans font-medium text-[#666666] mb-4">Supports Claim:</div>
                     <div className="relative border-l border-[#E5E5E5] pl-4 space-y-4">
@@ -270,6 +290,25 @@ export default function CandidateDashboardPage() {
                   onChange={(e) => setNewProject({...newProject, liveUrl: e.target.value})}
                   className="w-full border border-[#E5E5E5] rounded-md px-3 py-2 text-[14px] outline-none focus:border-[#0D0D0D] transition-colors"
                   placeholder="https://myproject.com"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-[13px] font-medium text-[#0D0D0D]">Description <span className="text-[#737373] font-normal">(Optional)</span></label>
+                <textarea 
+                  value={newProject.description}
+                  onChange={(e) => setNewProject({...newProject, description: e.target.value})}
+                  className="w-full border border-[#E5E5E5] rounded-md px-3 py-2 text-[14px] outline-none focus:border-[#0D0D0D] transition-colors resize-none h-20"
+                  placeholder="Describe what you built and how it works..."
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-[13px] font-medium text-[#0D0D0D]">Other Features & Skills <span className="text-[#737373] font-normal">(Optional)</span></label>
+                <TagInput 
+                  tags={newProject.skillsUsed || []} 
+                  onChange={(tags) => setNewProject({...newProject, skillsUsed: tags})}
+                  placeholder="e.g. Postgres, AWS, Real-time (press Enter)"
                 />
               </div>
 
