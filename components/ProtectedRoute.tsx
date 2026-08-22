@@ -58,7 +58,7 @@ export default function ProtectedRoute({ children, allowedRoles }: ProtectedRout
       }
 
       // Role-based authorization for candidate/employer routes
-      const normalizedRole = userProfile.role?.trim().toLowerCase() as Role;
+      const normalizedRole = (userProfile.role || "").trim().toLowerCase() as Role;
       if (allowedRoles && !allowedRoles.includes(normalizedRole)) {
         router.push(normalizedRole === "candidate" ? "/candidate/dashboard" : "/employer/dashboard");
         return;
@@ -71,7 +71,7 @@ export default function ProtectedRoute({ children, allowedRoles }: ProtectedRout
     enforceAuth();
   }, [user, userProfile, isAdmin, loading, profileLoading, router, pathname, allowedRoles]);
 
-  if (!isAuthorized) {
+  if (loading || profileLoading || !user || !isAuthorized) {
     return (
       <div className="flex h-screen w-full items-center justify-center bg-[#FAFAFA]">
         <div className="h-4 w-4 border-2 border-[#737373] border-t-[#0D0D0D] animate-spin rounded-full"></div>
