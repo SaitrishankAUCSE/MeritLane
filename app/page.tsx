@@ -100,7 +100,7 @@ export default function HomePage() {
             <span className="h-px w-8 bg-foreground"></span>
             <span className="text-[10px] font-mono tracking-[0.2em] uppercase text-outline">The Meritlane Standard</span>
           </motion.div>
-          <motion.h1 variants={fadeUp} className="text-5xl sm:text-6xl lg:text-7xl font-serif text-foreground tracking-tight leading-[1.05]">
+          <motion.h1 variants={fadeUp} className="text-5xl sm:text-6xl lg:text-7xl font-playfair text-foreground tracking-tight leading-[1.05]">
             Proof of skill.<br/>
             <span className="text-muted-foreground">Not just credentials.</span>
           </motion.h1>
@@ -400,3 +400,4 @@ export default function HomePage() {
     </div>
   );
 }
+

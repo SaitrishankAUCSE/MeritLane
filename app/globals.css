@@ -49,9 +49,12 @@
   --color-danger: var(--color-danger);
   --color-info: var(--color-info);
 
-  --font-sans: var(--font-hanken), "Hanken Grotesk", system-ui, sans-serif;
-  --font-serif: var(--font-source-serif), "Source Serif 4", Georgia, serif;
-  --font-mono: var(--font-jetbrains), "JetBrains Mono", ui-monospace, monospace;
+  --font-sans: var(--font-inter), "Inter", system-ui, sans-serif;
+  --font-serif: var(--font-instrument-serif), "Instrument Serif", Georgia, serif;
+  --font-mono: var(--font-jetbrains-mono), "JetBrains Mono", ui-monospace, monospace;
+  --font-playfair: var(--font-playfair-display), "Playfair Display", Georgia, serif;
+  --font-bodoni: var(--font-bodoni-moda), "Bodoni Moda", Georgia, serif;
+  --font-cormorant: var(--font-cormorant-garamond), "Cormorant Garamond", Georgia, serif;
 }
 
 html {

@@ -238,7 +238,7 @@ function AssessmentContentWrapper() {
         <div className="flex-1 flex flex-col items-center p-8 overflow-y-auto">
           <div className="w-full max-w-2xl mt-10">
             <div className="text-[12px] font-mono text-[#666666] mb-4">MULTIPLE CHOICE ({mcqIndex + 1} OF {content.mcqs.length})</div>
-            <h3 className="text-[20px] font-serif text-[#0D0D0D] mb-8">{content.mcqs[mcqIndex].question}</h3>
+            <h3 className="text-[20px] font-sans font-medium text-[#0D0D0D] mb-8">{content.mcqs[mcqIndex].question}</h3>
             
             <div className="space-y-3">
               {content.mcqs[mcqIndex].options.map((opt, idx) => (
@@ -326,3 +326,4 @@ export default function AssessmentPage() {
     </Suspense>
   );
 }
+

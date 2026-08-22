@@ -62,7 +62,7 @@ export function PublicProofRecord({ id, candidate, user, hideHeader = false }: P
               <div className="text-[#666666] lowercase tracking-normal font-mono text-[12px]">ID: {recordId}.eth</div>
             </div>
             
-            <p className="max-w-2xl text-[15px] leading-[1.6] text-[#737373] font-sans">
+            <p className="max-w-2xl text-[18px] leading-[1.6] text-[#525252] font-cormorant italic">
               Cryptographic assertion of skills and professional history. All claims below are backed by verifiable evidence evaluated by the Meritlane system.
             </p>
           </div>
@@ -232,3 +232,4 @@ export function PublicProofRecord({ id, candidate, user, hideHeader = false }: P
     </div>
   );
 }
+

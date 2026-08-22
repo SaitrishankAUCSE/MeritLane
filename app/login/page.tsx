@@ -126,7 +126,7 @@ export default function LoginPage() {
           <div className="mx-auto mb-4 flex h-10 w-10 items-center justify-center rounded-xl bg-surface-low text-muted-foreground shadow-sm">
             <ShieldCheck className="h-5 w-5" />
           </div>
-          <h1 className="text-2xl font-bold tracking-tight text-foreground">
+          <h1 className="text-2xl font-serif tracking-tight text-foreground">
             Sign In to Meritlane
           </h1>
           <p className="mt-2 text-sm text-muted-foreground">
@@ -221,3 +221,4 @@ export default function LoginPage() {
     </div>
   );
 }
+

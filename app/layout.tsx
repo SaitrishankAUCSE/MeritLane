@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Hanken_Grotesk, Source_Serif_4, JetBrains_Mono, Inter } from "next/font/google";
+import { Inter, Instrument_Serif, JetBrains_Mono, Playfair_Display, Bodoni_Moda, Cormorant_Garamond } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
 import { SiteFooter } from "@/components/chrome/SiteFooter";
@@ -12,21 +12,39 @@ const inter = Inter({
   display: "swap",
 });
 
-const hanken = Hanken_Grotesk({
+const instrumentSerif = Instrument_Serif({
   subsets: ["latin"],
-  variable: "--font-hanken",
+  weight: ["400"],
+  style: ["normal", "italic"],
+  variable: "--font-instrument-serif",
   display: "swap",
 });
 
-const sourceSerif = Source_Serif_4({
+const jetbrainsMono = JetBrains_Mono({
   subsets: ["latin"],
-  variable: "--font-source-serif",
+  variable: "--font-jetbrains-mono",
   display: "swap",
 });
 
-const jetbrains = JetBrains_Mono({
+const playfairDisplay = Playfair_Display({
   subsets: ["latin"],
-  variable: "--font-jetbrains",
+  style: ["normal", "italic"],
+  variable: "--font-playfair-display",
+  display: "swap",
+});
+
+const bodoniModa = Bodoni_Moda({
+  subsets: ["latin"],
+  style: ["normal", "italic"],
+  variable: "--font-bodoni-moda",
+  display: "swap",
+});
+
+const cormorantGaramond = Cormorant_Garamond({
+  subsets: ["latin"],
+  weight: ["300", "400", "500", "600", "700"],
+  style: ["normal", "italic"],
+  variable: "--font-cormorant-garamond",
   display: "swap",
 });
 
@@ -69,7 +87,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${inter.variable} ${hanken.variable} ${sourceSerif.variable} ${jetbrains.variable} h-full antialiased`}>
+    <html lang="en" className={`${inter.variable} ${instrumentSerif.variable} ${jetbrainsMono.variable} ${playfairDisplay.variable} ${bodoniModa.variable} ${cormorantGaramond.variable} h-full antialiased`}>
       <body className="flex min-h-full flex-col bg-background font-sans text-foreground">
         <script
           type="application/ld+json"
