@@ -8,7 +8,7 @@ const PUBLIC_PATHS = new Set(["/", "/login", "/signup"]);
 export function SiteFooter() {
   const pathname = usePathname();
   const isPublicHome = pathname === "/";
-  const isApp = !PUBLIC_PATHS.has(pathname) && !pathname.startsWith("/p/");
+  const isApp = pathname ? (!PUBLIC_PATHS.has(pathname) && !pathname.startsWith("/p/")) : false;
 
   if (isApp) return null;
 

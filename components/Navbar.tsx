@@ -29,7 +29,7 @@ export default function Navbar() {
   const isPublicHome = pathname === "/";
   const isCandidateDashboard = pathname === "/candidate/dashboard";
   const isCandidateProfile = pathname === "/candidate/profile";
-  const isPublicProfile = pathname.startsWith("/p/");
+  const isPublicProfile = pathname?.startsWith("/p/") ?? false;
   const isEmployerDashboard = pathname === "/employer/dashboard";
   
   useEffect(() => {
@@ -224,8 +224,8 @@ function ProfileDropdown({ user, userProfile, isAdmin, handleSignOut }: { user: 
   );
 }
 
-function NavLink({ href, current, children }: { href: string; current: string; children: React.ReactNode }) {
-  const isActive = current === href || current.startsWith(href + "/");
+function NavLink({ href, current, children }: { href: string; current: string | null; children: React.ReactNode }) {
+  const isActive = current === href || (current?.startsWith(href + "/") ?? false);
   return (
     <Link
       href={href}
