@@ -27,7 +27,7 @@ export function ReviewConsole({
         </div>
         <div className="overflow-y-auto flex-1">
           {queueCandidates.length === 0 ? (
-            <div className="p-8 text-center text-muted-foreground font-data text-xs">Queue is clear</div>
+            <div className="p-8 text-center text-[#737373] font-sans text-sm">Queue is clear</div>
           ) : (
             queueCandidates.map((c: any) => (
               <button
@@ -116,7 +116,7 @@ export function ReviewConsole({
             </div>
           </>
         ) : (
-          <div className="flex-1 flex items-center justify-center text-muted-foreground font-data text-sm">
+          <div className="flex-1 flex items-center justify-center text-[#737373] font-sans text-sm">
             Select a candidate from the queue to inspect evidence
           </div>
         )}
@@ -168,7 +168,7 @@ export function ReviewConsole({
               )}
             </>
           ) : (
-            <div className="text-center text-xs font-data text-muted-foreground italic mb-4">
+            <div className="text-center text-sm font-sans text-[#737373] mb-4">
               Decision actions locked
             </div>
           )}
