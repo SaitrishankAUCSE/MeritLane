@@ -81,8 +81,8 @@ export default function SettingsPage() {
                 <span className="block text-sm font-semibold text-[#0D0D0D]">Change Password</span>
                 <span className="block text-xs text-[#666666]">Update your account password</span>
               </div>
-              <button className="text-xs font-semibold uppercase tracking-widest px-4 py-2 border border-[#E5E5E5] hover:bg-[#F3F3F1] text-[#0D0D0D] rounded-md transition-colors">
-                Update
+              <button disabled className="text-xs font-semibold uppercase tracking-widest px-4 py-2 border border-[#E5E5E5] bg-[#FAFAFA] text-[#D2D2D2] rounded-md transition-colors cursor-not-allowed" title="Coming soon">
+                Coming Soon
               </button>
             </div>
             <div className="flex items-center justify-between">
@@ -90,8 +90,8 @@ export default function SettingsPage() {
                 <span className="block text-sm font-semibold text-[#0D0D0D]">Two-Factor Authentication</span>
                 <span className="block text-xs text-[#666666]">Add an extra layer of security to your account</span>
               </div>
-              <button className="text-xs font-semibold uppercase tracking-widest px-4 py-2 bg-[#0D0D0D] text-[#FFFFFF] hover:bg-[#222222] rounded-md transition-colors">
-                Enable
+              <button disabled className="text-xs font-semibold uppercase tracking-widest px-4 py-2 bg-[#F3F3F1] text-[#D2D2D2] rounded-md transition-colors cursor-not-allowed" title="Coming soon">
+                Coming Soon
               </button>
             </div>
           </div>
@@ -201,10 +201,10 @@ export default function SettingsPage() {
                 </div>
               ) : (
                 <button
-                  onClick={() => setConfirmDelete(true)}
-                  className="text-xs font-semibold uppercase tracking-widest px-4 py-2 border border-[#E5E5E5] hover:border-[#D2D2D2] text-[#737373] hover:text-[#0D0D0D] rounded-md transition-colors"
+                  disabled
+                  className="text-xs font-semibold uppercase tracking-widest px-4 py-2 border border-[#E5E5E5] bg-[#FAFAFA] text-[#D2D2D2] rounded-md transition-colors cursor-not-allowed" title="Coming soon"
                 >
-                  Delete Account
+                  Coming Soon
                 </button>
               )}
             </div>

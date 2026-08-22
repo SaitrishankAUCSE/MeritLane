@@ -4,7 +4,7 @@ import Link from "next/link";
 
 export default function ProofCanvasPage() {
   return (
-    <div className="min-h-screen bg-[#111214] text-[#0D0D0D] font-sans selection:bg-[#0D0D0D] selection:text-[#0D0D0D]">
+    <div className="min-h-screen bg-[#111214] text-[#FAFAFA] font-sans selection:bg-[#FAFAFA] selection:text-[#0D0D0D]">
       {/* Top Nav */}
       <header className="flex h-[100px] items-center justify-between px-12 border-b border-[#E5E5E5]/50">
         <div className="font-serif text-[32px] font-medium tracking-tight text-[#0D0D0D]">

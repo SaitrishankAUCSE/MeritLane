@@ -62,7 +62,13 @@ export default function CandidateProvenancePage() {
           <h1 className="font-serif text-[32px] text-[#0D0D0D] leading-tight">Provenance Record</h1>
         </div>
         <div className="flex gap-4">
-          <button className="px-5 py-2 border border-[#D2D2D2] text-[#737373] hover:text-[#0D0D0D] hover:border-[#0D0D0D] rounded-md text-[14px] font-sans font-medium transition-all">
+          <button 
+            onClick={() => {
+              navigator.clipboard.writeText(window.location.origin + `/p/${user!.uid}`);
+              alert("Public link copied to clipboard!");
+            }}
+            className="px-5 py-2 border border-[#D2D2D2] text-[#737373] hover:text-[#0D0D0D] hover:border-[#0D0D0D] rounded-md text-[14px] font-sans font-medium transition-all"
+          >
             Copy public link
           </button>
           <a href={`/p/${user!.uid}`} target="_blank" rel="noreferrer" className="px-5 py-2 border border-[#0D0D0D] bg-[#0D0D0D] text-[#FFFFFF] hover:bg-[#222222] hover:text-[#FFFFFF] rounded-md text-[14px] font-sans font-medium transition-all">

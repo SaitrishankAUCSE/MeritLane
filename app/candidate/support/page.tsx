@@ -33,8 +33,8 @@ export default function CandidateSupportPage() {
           <p className="text-sm text-[#737373] mb-4">
             Available Monday-Friday, 9am-5pm PST.
           </p>
-          <button className="text-sm font-medium text-[#0D0D0D] hover:text-[#15803D] transition-colors">
-            Start Chat →
+          <button disabled className="text-sm font-medium text-[#D2D2D2] cursor-not-allowed transition-colors" title="Coming soon">
+            Coming Soon
           </button>
         </div>
       </div>

@@ -108,7 +108,7 @@ export function PublicProofRecord({ id, candidate, user, hideHeader = false }: P
             
             <div className="space-y-24">
               {skills.map((skill: string, index: number) => {
-                const projectEvidence = projects[index % projects.length];
+                const projectEvidence = projects.find((p: any) => p.supportsClaim === skill) || null;
                 const isVerified = candidate.verifiedSkills?.[skill]?.status === "verified";
                 const verifiedAt = candidate.verifiedSkills?.[skill]?.verifiedAt;
                 const verifiedDate = verifiedAt ? new Date(verifiedAt).toISOString().split('T')[0] : "";

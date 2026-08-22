@@ -23,7 +23,7 @@ export default function NotFound() {
 
       <div className="mt-9 flex justify-center">
         <Link href="/">
-          <Button size="lg" className="bg-[#0A192F] text-[#0D0D0D] hover:bg-[#0A192F]/90 rounded-none border border-[#0A192F]" rightIcon={<ArrowRight className="h-4 w-4" />}>
+          <Button size="lg" className="bg-[#0D0D0D] text-[#FFFFFF] hover:bg-[#222222] rounded-none border border-[#0D0D0D]" rightIcon={<ArrowRight className="h-4 w-4" />}>
             Return to Homepage
           </Button>
         </Link>

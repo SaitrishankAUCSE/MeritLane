@@ -168,11 +168,11 @@ export default function EmployerDashboardPage() {
         </div>
 
         <div className="pt-10 border-t border-[#E5E5E5] space-y-4">
-          <button className="w-full bg-[#0D0D0D] text-[#FFFFFF] rounded-md py-2 h-10 px-6 text-[14px] font-sans font-medium hover:bg-[#0D0D0D] transition-colors">
-            Shortlist Candidate
+          <button disabled className="w-full bg-[#EAEAE7] text-[#A3A3A3] rounded-md py-2 h-10 px-6 text-[14px] font-sans font-medium cursor-not-allowed transition-colors" title="Coming soon">
+            Coming Soon
           </button>
-          <button className="w-full bg-transparent border border-[#E5E5E5] text-[#0D0D0D] rounded-md py-2 h-10 px-6 text-[13px] font-sans hover:bg-[#F3F3F1] transition-colors flex items-center justify-center gap-3">
-            <FileText className="h-4 w-4" /> Request more proof
+          <button disabled className="w-full bg-transparent border border-[#E5E5E5] text-[#A3A3A3] rounded-md py-2 h-10 px-6 text-[13px] font-sans cursor-not-allowed transition-colors flex items-center justify-center gap-3" title="Coming soon">
+            <FileText className="h-4 w-4 opacity-50" /> Coming Soon
           </button>
         </div>
 

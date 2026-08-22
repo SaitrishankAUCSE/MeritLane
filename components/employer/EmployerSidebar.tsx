@@ -38,10 +38,10 @@ export function EmployerSidebar() {
   }, [pathname]);
 
   const navItems = [
-    { name: "Identity", href: "#", icon: Activity },
-    { name: "Evidence", href: "#", icon: FileText },
+    { name: "Identity", href: "#", icon: Activity, disabled: true },
+    { name: "Evidence", href: "#", icon: FileText, disabled: true },
     { name: "Provenance", href: "/employer/dashboard", icon: Command },
-    { name: "Verification", href: "#", icon: ShieldCheck },
+    { name: "Verification", href: "#", icon: ShieldCheck, disabled: true },
   ];
 
   return (
@@ -68,6 +68,15 @@ export function EmployerSidebar() {
             );
           }
 
+          if (item.disabled) {
+            return (
+              <div key={item.name} className="flex items-center px-4 py-3 text-[14px] font-sans text-[#D2D2D2] cursor-not-allowed transition-colors rounded-md" title="Coming soon">
+                <Icon className="mr-4 h-[18px] w-[18px] opacity-30" />
+                {item.name}
+              </div>
+            );
+          }
+
           return (
             <Link key={item.name} href={item.href} className="flex items-center px-4 py-3 text-[14px] font-sans text-[#737373] hover:text-[#0D0D0D] hover:bg-[#FFFFFF]/50 transition-colors rounded-md">
               <Icon className="mr-4 h-[18px] w-[18px] opacity-70" />
@@ -78,8 +87,8 @@ export function EmployerSidebar() {
       </nav>
 
       <div className="px-6 py-6 border-t border-[#E5E5E5] shrink-0">
-        <button className="flex items-center gap-2 w-full text-left py-2 text-[#0D0D0D] hover:text-[#0D0D0D] transition-colors mb-6">
-          <span className="font-mono text-[11px] text-[#0D0D0D] font-bold">[+]</span>
+        <button disabled className="flex items-center gap-2 w-full text-left py-2 text-[#D2D2D2] cursor-not-allowed transition-colors mb-6" title="Coming soon">
+          <span className="font-mono text-[11px] text-[#D2D2D2] font-bold">[+]</span>
           <span className="font-sans text-[11px] font-bold uppercase tracking-[0.1em]">New Request</span>
         </button>
         
