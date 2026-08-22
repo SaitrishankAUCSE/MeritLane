@@ -62,7 +62,7 @@ export function CandidateSidebar() {
               key={item.name}
               href={item.href}
               title={isCollapsed ? item.name : undefined}
-              className={`flex items-center py-2 h-10 text-[14px] font-sans text-[#737373] hover:text-[#f4f4f2] hover:bg-[#FFFFFF]/50 transition-colors relative ${isCollapsed ? "justify-center px-0 rounded-md mx-1" : "px-4"}`}
+              className={`flex items-center py-2 h-10 text-[14px] font-sans text-[#737373] hover:text-[#0D0D0D] hover:bg-[#FFFFFF]/50 transition-colors relative ${isCollapsed ? "justify-center px-0 rounded-md mx-1" : "px-4"}`}
             >
               <Icon className={`h-[18px] w-[18px] opacity-70 ${isCollapsed ? "" : "mr-4"}`} />
               {!isCollapsed && item.name}
@@ -141,4 +141,5 @@ export function CandidateSidebar() {
     </aside>
   );
 }
+
 

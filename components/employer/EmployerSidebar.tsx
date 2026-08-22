@@ -44,7 +44,7 @@ export function EmployerSidebar() {
           }
 
           return (
-            <Link key={item.name} href={item.href} className="flex items-center px-4 py-3 text-[14px] font-sans text-[#737373] hover:text-[#f4f4f2] hover:bg-[#FFFFFF]/50 transition-colors">
+            <Link key={item.name} href={item.href} className="flex items-center px-4 py-3 text-[14px] font-sans text-[#737373] hover:text-[#0D0D0D] hover:bg-[#FFFFFF]/50 transition-colors">
               <Icon className="mr-4 h-[18px] w-[18px] opacity-70" />
               {item.name}
             </Link>
@@ -81,3 +81,4 @@ export function EmployerSidebar() {
     </aside>
   );
 }
+
