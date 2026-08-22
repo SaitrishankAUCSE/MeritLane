@@ -38,7 +38,17 @@ export default function LoginPage() {
   useEffect(() => {
     if (!authLoading && !profileLoading && user && userRole) {
       updateLastLogin(user.uid).catch(console.error);
-      router.push("/dashboard");
+      
+      let redirectDest = "/dashboard";
+      if (typeof window !== "undefined") {
+        const params = new URLSearchParams(window.location.search);
+        const redirectParam = params.get("redirect");
+        if (redirectParam && redirectParam.startsWith("/")) {
+          redirectDest = redirectParam;
+        }
+      }
+      
+      router.push(redirectDest);
     }
   }, [user, userRole, authLoading, profileLoading, router]);
 

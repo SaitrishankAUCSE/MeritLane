@@ -34,14 +34,26 @@ export default async function PublicProfilePage({ params }: Props) {
 
   const rawUser = userDoc.exists ? userDoc.data()! : {};
 
-  // Deep clone to strip Firestore Timestamps and classes before passing to client component
-  const candidate = JSON.parse(JSON.stringify(rawCandidate, (key, value) => 
-    value && typeof value === 'object' && value.toDate ? value.toDate().toISOString() : value
-  ));
+  // Deep clone to strip Firestore Timestamps and extract ONLY safe public fields
+  // CRITICAL SECURITY FIX: Do not pass the entire document to a Client Component
+  // or it will serialize private emails and failed assessment attempts to the browser.
+  const parseTimestamp = (val: any) => val && typeof val === "object" && val.toDate ? val.toDate().toISOString() : val;
   
-  const user = JSON.parse(JSON.stringify(rawUser, (key, value) => 
-    value && typeof value === 'object' && value.toDate ? value.toDate().toISOString() : value
-  ));
+  const candidate = {
+    name: rawCandidate.name || "",
+    skills: rawCandidate.skills || [],
+    projects: rawCandidate.projects || [],
+    college: rawCandidate.college || "",
+    branch: rawCandidate.branch || "",
+    gradYear: rawCandidate.gradYear || "",
+    verifiedAt: parseTimestamp(rawCandidate.verifiedAt) || null,
+    updatedAt: parseTimestamp(rawCandidate.updatedAt) || null,
+  };
+  
+  const user = {
+    photoURL: rawUser.photoURL || "",
+  };
 
   return <PublicProofRecord id={id} candidate={candidate} user={user} />;
 }
+
