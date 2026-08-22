@@ -2,7 +2,7 @@
 
 import React from "react";
 import Link from "next/link";
-import { CheckCircle2, Hexagon, Shield, Network, Lock, GitCommit } from "lucide-react";
+import { CheckCircle2, Shield, Network, Lock, GitCommit } from "lucide-react";
 
 interface PublicProofRecordProps {
   id: string;
@@ -13,11 +13,16 @@ interface PublicProofRecordProps {
 
 export function PublicProofRecord({ id, candidate, user, hideHeader = false }: PublicProofRecordProps) {
   const name = candidate.name || "Anonymous Candidate";
-  const primarySkill = candidate.skills?.[0] || "Software Engineering";
-  const secondarySkill = candidate.skills?.[1] || "Systems Architecture";
-  const gradYear = candidate.gradYear || "2024";
-  const recordId = id.substring(0, 6).toUpperCase();
+  const skills = candidate.skills || ["Software Engineering"];
+  const projects = candidate.projects || [];
+  const recordId = id.substring(0, 8).toLowerCase();
   const avatarUrl = user?.photoURL || "";
+  
+  const verifiedDate = candidate.verifiedAt 
+    ? new Date(candidate.verifiedAt).toISOString()
+    : (candidate.updatedAt ? new Date(candidate.updatedAt).toISOString() : new Date().toISOString());
+
+  const totalProofs = skills.length + projects.length;
 
   return (
     <div className="min-h-screen bg-[#0b0c0e] text-[#e3e2e5] font-sans">
@@ -26,8 +31,8 @@ export function PublicProofRecord({ id, candidate, user, hideHeader = false }: P
       {!hideHeader && (
         <header className="flex h-[72px] items-center justify-between px-8 lg:px-16 border-b border-[#1b1c1e] bg-[#0b0c0e]">
           <Link href="/" className="font-serif text-[26px] font-medium tracking-tight text-white">Meritlane</Link>
-          <div className="font-mono text-[10px] tracking-[0.1em] text-[#8e928f] uppercase">
-            Public artifact
+          <div className="font-mono text-[10px] tracking-[0.1em] text-[#8e928f] uppercase flex items-center gap-2">
+            <Shield className="h-3 w-3" /> Public artifact
           </div>
         </header>
       )}
@@ -48,17 +53,17 @@ export function PublicProofRecord({ id, candidate, user, hideHeader = false }: P
               {name}
             </h1>
             
-            <div className="flex items-center gap-4 mb-6 text-[13px] font-sans font-medium">
-              <div className="flex items-center gap-2 text-[#c4c7c5]">
-                <CheckCircle2 className="h-[14px] w-[14px] text-[#c0c1ff]" />
+            <div className="flex flex-wrap items-center gap-4 mb-6 text-[13px] font-sans font-medium">
+              <div className="flex items-center gap-2 text-[#a8a2ff]">
+                <CheckCircle2 className="h-[14px] w-[14px] text-[#a8a2ff]" />
                 <span>Verified Practitioner</span>
               </div>
               <div className="w-px h-3 bg-[#272a2f]" />
-              <div className="text-[#8e928f] lowercase tracking-normal font-mono text-[12px]">ID: {name.toLowerCase().replace(/\s+/g, '.')}.eth</div>
+              <div className="text-[#8e928f] lowercase tracking-normal font-mono text-[12px]">ID: {recordId}.eth</div>
             </div>
             
             <p className="max-w-2xl text-[15px] leading-[1.6] text-[#c4c7c5] font-sans">
-              Cryptographic assertion of skills and professional history. All claims below are backed by verifiable on-chain or institutional evidence.
+              Cryptographic assertion of skills and professional history. All claims below are backed by verifiable evidence evaluated by the Meritlane system.
             </p>
           </div>
         </div>
@@ -74,7 +79,7 @@ export function PublicProofRecord({ id, candidate, user, hideHeader = false }: P
             
             <div className="space-y-2">
               <div className="text-[13px] font-sans font-medium text-[#8e928f]">Last Verified</div>
-              <div className="text-[13px] text-white font-mono">2023-10-27T14:32:00Z</div>
+              <div className="text-[13px] text-white font-mono break-all">{verifiedDate}</div>
             </div>
             
             <div className="space-y-2">
@@ -84,8 +89,17 @@ export function PublicProofRecord({ id, candidate, user, hideHeader = false }: P
             
             <div className="space-y-2">
               <div className="text-[13px] font-sans font-medium text-[#8e928f]">Total Proofs</div>
-              <div className="text-[13px] text-[#c4c7c5]">47 Verified Nodes</div>
+              <div className="text-[13px] text-[#c4c7c5]">{totalProofs} Evidence Nodes</div>
             </div>
+
+            {candidate.college && (
+              <div className="space-y-2 pt-4 border-t border-[#1b1c1e]">
+                <div className="text-[13px] font-sans font-medium text-[#8e928f]">Education</div>
+                <div className="text-[13px] text-white">{candidate.college}</div>
+                <div className="text-[12px] text-[#c4c7c5]">{candidate.branch}</div>
+                <div className="text-[11px] font-mono text-[#8e928f]">Class of {candidate.gradYear}</div>
+              </div>
+            )}
           </aside>
 
           {/* Center: Proof Map */}
@@ -93,113 +107,128 @@ export function PublicProofRecord({ id, candidate, user, hideHeader = false }: P
             <h2 className="font-serif text-[36px] text-white mb-12">Proof Map</h2>
             
             <div className="space-y-24">
-              
-              {/* Skill 1 */}
-              <div className="relative">
-                {/* Purple Square Mark */}
-                <div className="absolute -left-6 top-3 h-1.5 w-1.5 bg-[#c0c1ff]" />
-                
-                <h3 className="font-serif text-[28px] text-white mb-4 leading-[1.2]">
-                  Distributed Systems<br />Architecture
-                </h3>
-                <p className="text-[14px] text-[#c4c7c5] leading-[1.6] mb-8 max-w-[500px]">
-                  Demonstrated ability to design and implement resilient, fault-tolerant distributed networks under high load conditions.
-                </p>
-                
-                {/* Primary Evidence Block */}
-                <div className="mb-10">
-                  <div className="flex items-center gap-3 mb-4">
-                    <Network className="h-[14px] w-[14px] text-[#c0c1ff]" />
-                    <span className="text-[13px] font-sans font-medium text-[#c0c1ff]">Primary Evidence</span>
-                  </div>
-                  <div className="flex items-center justify-between border-b border-[#272a2f] pb-4">
-                    <div className="text-[15px] text-white font-medium">Scalability Overhaul - {candidate.projects?.[0]?.title || 'Project X'}</div>
-                    <div className="bg-[#1b1c1e] text-[#c0c1ff] font-mono text-[9px] uppercase tracking-[0.1em] px-2.5 py-1 rounded-none border border-[#272a2f]">
-                      99.9% UPTIME
+              {skills.map((skill: string, index: number) => {
+                const projectEvidence = projects[index % projects.length];
+
+                return (
+                  <div key={index} className="relative">
+                    {/* Purple Square Mark */}
+                    <div className="absolute -left-6 top-3 h-1.5 w-1.5 bg-[#a8a2ff]" />
+                    
+                    <h3 className="font-serif text-[28px] text-white mb-4 leading-[1.2]">
+                      {skill}
+                    </h3>
+                    <p className="text-[14px] text-[#c4c7c5] leading-[1.6] mb-8 max-w-[500px]">
+                      Demonstrated structural competency and technical fluency in {skill} via institutional verification.
+                    </p>
+                    
+                    {/* Primary Evidence Block */}
+                    {projectEvidence && (
+                      <div className="mb-10">
+                        <div className="flex items-center gap-3 mb-4">
+                          <Network className="h-[14px] w-[14px] text-[#a8a2ff]" />
+                          <span className="text-[13px] font-sans font-medium text-[#a8a2ff]">Primary Evidence</span>
+                        </div>
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-[#272a2f] pb-4 gap-4">
+                          <div className="text-[15px] text-white font-medium">{projectEvidence.title}</div>
+                          {projectEvidence.repoUrl && (
+                            <a 
+                              href={projectEvidence.repoUrl} 
+                              target="_blank" 
+                              rel="noreferrer"
+                              className="bg-[#1b1c1e] text-[#a8a2ff] font-mono text-[9px] uppercase tracking-[0.1em] px-2.5 py-1 rounded-none border border-[#272a2f] hover:bg-white hover:text-black transition-colors shrink-0 text-center"
+                            >
+                              View Repository
+                            </a>
+                          )}
+                        </div>
+                        <p className="mt-4 text-[13px] text-[#8e928f] leading-relaxed">
+                          {projectEvidence.description}
+                        </p>
+                      </div>
+                    )}
+                    
+                    {/* Evidence Density Rating */}
+                    <div className="mb-12">
+                      <div className="flex items-center w-full mb-3">
+                        <div className="h-[1px] bg-[#272a2f] flex-1 relative">
+                          <div className="absolute left-0 h-1.5 w-[1px] bg-[#444846] -top-[2px]" />
+                        </div>
+                        <div className="h-[1px] bg-[#272a2f] flex-1 relative">
+                          <div className="absolute left-0 h-1.5 w-[1px] bg-[#444846] -top-[2px]" />
+                        </div>
+                        <div className="h-[1px] bg-[#1b1c1e] flex-1 relative">
+                          <div className="absolute left-0 h-1.5 w-[1px] bg-[#444846] -top-[2px]" />
+                          <div className="absolute right-0 h-1.5 w-[1px] bg-[#272a2f] -top-[2px]" />
+                        </div>
+                      </div>
+                      <div className="text-[13px] font-sans font-medium text-[#8e928f]">
+                        Evidence Density Rating: {projectEvidence ? "High" : "Standard"}
+                      </div>
                     </div>
                   </div>
-                </div>
-                
-                {/* Evidence Density Rating */}
-                <div className="mb-12">
-                  <div className="flex items-center w-full mb-3">
-                    <div className="h-[1px] bg-[#272a2f] flex-1 relative">
-                      <div className="absolute left-0 h-1.5 w-[1px] bg-[#444846] -top-[2px]" />
-                    </div>
-                    <div className="h-[1px] bg-[#272a2f] flex-1 relative">
-                      <div className="absolute left-0 h-1.5 w-[1px] bg-[#444846] -top-[2px]" />
-                    </div>
-                    <div className="h-[1px] bg-[#1b1c1e] flex-1 relative">
-                      <div className="absolute left-0 h-1.5 w-[1px] bg-[#444846] -top-[2px]" />
-                      <div className="absolute right-0 h-1.5 w-[1px] bg-[#272a2f] -top-[2px]" />
-                    </div>
-                  </div>
-                  <div className="text-[13px] font-sans font-medium text-[#8e928f]">Evidence Density Rating: High</div>
+                );
+              })}
+            </div>
+            
+            {/* Security Footer */}
+            <div className="mt-20 pt-10 border-t border-[#1b1c1e] flex items-start gap-4">
+              <Lock className="h-5 w-5 text-[#8e928f] shrink-0 mt-0.5" />
+              <div>
+                <div className="text-[13px] font-sans font-medium text-white mb-2">Immutable Record</div>
+                <div className="text-[13px] text-[#8e928f] leading-relaxed max-w-2xl">
+                  This public artifact is permanently stored and its underlying assertions cannot be modified by the candidate after verification. 
+                  Tampering with the source evidence invalidates the Meritlane cryptographic signature.
                 </div>
               </div>
-
-              {/* Skill 2 */}
-              <div className="relative">
-                {/* Purple Square Mark */}
-                <div className="absolute -left-6 top-3 h-1.5 w-1.5 bg-[#c0c1ff]" />
-                
-                <h3 className="font-serif text-[28px] text-white mb-4 leading-[1.2]">
-                  Cryptographic Engineering
-                </h3>
-                <p className="text-[14px] text-[#c4c7c5] leading-[1.6] mb-8 max-w-[500px]">
-                  Implementation of zero-knowledge proof circuits and secure key management systems.
-                </p>
-                
-                {/* Source Assertion */}
-                <div className="space-y-4">
-                  <div className="flex items-center gap-3 mb-6">
-                    <Lock className="h-[14px] w-[14px] text-[#c0c1ff]" />
-                    <span className="text-[13px] font-sans font-medium text-[#c0c1ff]">Source Assertion</span>
-                  </div>
-                  <div className="grid grid-cols-[80px_1fr] gap-4 items-baseline">
-                    <div className="text-[13px] font-sans font-medium text-[#8e928f]">Repo</div>
-                    <div className="text-[13px] text-white font-mono">github.com/{name.toLowerCase().replace(/\s+/g, '')}/zk-core</div>
-                  </div>
-                  <div className="grid grid-cols-[80px_1fr] gap-4 items-baseline">
-                    <div className="text-[13px] font-sans font-medium text-[#8e928f]">Audit</div>
-                    <div className="text-[13px] text-[#e3e2e5]">Trail of Bits (Passed w/ 0 High)</div>
-                  </div>
-                </div>
-              </div>
-
             </div>
           </article>
 
-          {/* Right: Verification log */}
-          <aside className="pl-4">
-            <h3 className="text-[13px] font-sans font-medium text-[#8e928f] mb-12">Verification log</h3>
+          {/* Right: Security & Network Activity */}
+          <aside className="space-y-10 lg:pl-10 lg:border-l border-[#1b1c1e]">
             
-            <div className="space-y-10">
-              <div className="relative">
-                <div className="absolute -left-[20px] top-[6px] h-1.5 w-1.5 rounded-full border border-[#c0c1ff] bg-transparent" />
-                <div className="text-[13px] font-sans font-medium text-[#c0c1ff] mb-2">Node Auth</div>
-                <div className="text-[13px] text-[#e3e2e5] mb-2 font-medium">GitHub Identity Verified</div>
-                <div className="font-mono text-[9px] text-[#8e928f]">2023-10-27T14:32:00Z</div>
-              </div>
-              
-              <div className="relative">
-                <div className="absolute -left-[20px] top-[6px] h-1.5 w-1.5 rounded-full border border-[#c0c1ff] bg-transparent" />
-                <div className="text-[13px] font-sans font-medium text-[#c0c1ff] mb-2">Peer Assertion</div>
-                <div className="text-[13px] text-[#e3e2e5] mb-2 font-medium">Skill endorsed by @elara_tech</div>
-                <div className="font-mono text-[9px] text-[#8e928f]">2023-09-15T09:12:44Z</div>
-              </div>
-              
-              <div className="relative">
-                <div className="absolute -left-[20px] top-[6px] h-1.5 w-1.5 rounded-full border border-[#c0c1ff] bg-transparent" />
-                <div className="text-[13px] font-sans font-medium text-[#c0c1ff] mb-2">Data Integrity</div>
-                <div className="text-[13px] text-[#e3e2e5] mb-2 font-medium">Commit History Synchronized</div>
-                <div className="font-mono text-[9px] text-[#8e928f]">2023-08-01T11:00:21Z</div>
+            <div>
+              <h3 className="text-[13px] font-sans font-medium text-[#8e928f] mb-6 border-b border-[#1b1c1e] pb-3">
+                Security Profile
+              </h3>
+              <div className="flex items-start gap-3 text-[12px] font-sans text-[#c4c7c5] leading-relaxed">
+                <Shield className="h-4 w-4 text-[#a8a2ff] shrink-0 mt-0.5" />
+                This record is immutable. Any attempt to modify the underlying evidence will break the verification seal.
               </div>
             </div>
-          </aside>
 
+            <div>
+              <h3 className="text-[13px] font-sans font-medium text-[#8e928f] mb-6 border-b border-[#1b1c1e] pb-3">
+                Network Activity
+              </h3>
+              
+              <div className="space-y-6">
+                <div className="relative pl-6">
+                  <div className="absolute left-[3px] top-1.5 bottom-[-24px] w-[1px] bg-[#1b1c1e]" />
+                  <div className="absolute left-0 top-1.5 h-2 w-2 rounded-full bg-[#a8a2ff]" />
+                  <div className="text-[12px] font-sans font-medium text-white mb-1">Verification Seal Issued</div>
+                  <div className="text-[10px] font-mono text-[#8e928f]">TX: {recordId}</div>
+                </div>
+
+                <div className="relative pl-6">
+                  <div className="absolute left-[3px] top-1.5 bottom-[-24px] w-[1px] bg-[#1b1c1e]" />
+                  <div className="absolute left-[1px] top-1.5 h-1.5 w-1.5 rounded-full bg-[#444846]" />
+                  <div className="text-[12px] font-sans text-[#c4c7c5] mb-1">Evidence Synchronized</div>
+                  <div className="text-[10px] font-mono text-[#8e928f]">Candidate Profile</div>
+                </div>
+
+                <div className="relative pl-6">
+                  <div className="absolute left-[1px] top-1.5 h-1.5 w-1.5 rounded-full bg-[#444846]" />
+                  <div className="text-[12px] font-sans text-[#c4c7c5] mb-1">Identity Claim Created</div>
+                  <div className="text-[10px] font-mono text-[#8e928f]">Wallet / Auth connected</div>
+                </div>
+              </div>
+            </div>
+
+          </aside>
         </div>
       </main>
+
     </div>
   );
 }
