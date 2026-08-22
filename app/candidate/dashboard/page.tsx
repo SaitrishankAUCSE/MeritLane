@@ -3,30 +3,101 @@
 import React, { useEffect, useState } from "react";
 import { useAuth } from "@/lib/auth/AuthContext";
 import { useRouter } from "next/navigation";
-import { fetchCandidateProfile, CandidateProfile } from "@/lib/firebase/candidate";
-import { FileCheck, Code, FolderOpen, ArrowRight, Activity } from "lucide-react";
+import { fetchCandidateProfile, CandidateProfile, ProjectEntry } from "@/lib/firebase/candidate";
+import { FileCheck, Code, FolderOpen, ArrowRight, X, Loader2 } from "lucide-react";
+import { db } from "@/lib/firebase/config";
+import { doc, updateDoc } from "firebase/firestore";
 
 export default function CandidateDashboardPage() {
   const { user, loading } = useAuth();
   const router = useRouter();
   const [profile, setProfile] = useState<CandidateProfile | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [errorMsg, setErrorMsg] = useState("");
+
+  const [newProject, setNewProject] = useState<Partial<ProjectEntry>>({
+    title: "",
+    repoUrl: "",
+    liveUrl: "",
+    supportsClaim: ""
+  });
 
   useEffect(() => {
     if (!loading && user) {
       fetchCandidateProfile(user.uid)
-        .then((p) => setProfile(p))
+        .then((p) => {
+          setProfile(p);
+          if (p?.skills && p.skills.length > 0) {
+            setNewProject(prev => ({ ...prev, supportsClaim: p.skills[0] }));
+          }
+        })
         .catch((err) => console.error(err));
     }
   }, [user, loading]);
 
-  const skills = profile?.skills || ["Python", "React", "Firebase"];
+  const skills = profile?.skills || [];
+  const projects = profile?.projects || [];
+
+  const handleSaveEvidence = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!user || !profile) return;
+    
+    if (!newProject.title || !newProject.repoUrl) {
+      setErrorMsg("Title and Repository URL are required.");
+      return;
+    }
+
+    setSaving(true);
+    setErrorMsg("");
+
+    try {
+      const projectToAdd: ProjectEntry = {
+        id: Date.now().toString(),
+        title: newProject.title || "",
+        repoUrl: newProject.repoUrl || "",
+        liveUrl: newProject.liveUrl || "",
+        description: "",
+        supportsClaim: newProject.supportsClaim || ""
+      };
+
+      const updatedProjects = [...projects, projectToAdd];
+      await updateDoc(doc(db, "candidates", user.uid), {
+        projects: updatedProjects,
+        updatedAt: Date.now()
+      });
+
+      setProfile({ ...profile, projects: updatedProjects });
+      setIsModalOpen(false);
+      setNewProject({ title: "", repoUrl: "", liveUrl: "", supportsClaim: skills[0] || "" });
+    } catch (err: any) {
+      console.error(err);
+      setErrorMsg(err.message || "Failed to save evidence.");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleRemoveEvidence = async (idToRemove: string) => {
+    if (!user || !profile) return;
+    try {
+      const updatedProjects = projects.filter(p => p.id !== idToRemove);
+      await updateDoc(doc(db, "candidates", user.uid), {
+        projects: updatedProjects,
+        updatedAt: Date.now()
+      });
+      setProfile({ ...profile, projects: updatedProjects });
+    } catch (err) {
+      console.error("Failed to remove evidence", err);
+    }
+  };
 
   if (loading) {
     return <div className="h-full w-full flex items-center justify-center"><div className="h-4 w-4 border-2 border-[#737373] border-t-[#0D0D0D] animate-spin rounded-full"></div></div>;
   }
 
   return (
-    <div className="mx-auto max-w-5xl px-6 py-12 h-full overflow-y-auto scrollbar-hide">
+    <div className="mx-auto max-w-5xl px-6 py-12 h-full overflow-y-auto scrollbar-hide relative">
       
       <div className="mb-12">
         <div className="text-[14px] font-sans font-medium text-[#737373] mb-3 flex items-center gap-2">
@@ -37,7 +108,10 @@ export default function CandidateDashboardPage() {
             <h1 className="font-serif text-[32px] sm:text-[40px] text-[#0D0D0D] leading-tight mb-2">Build your proof.</h1>
             <div className="text-[14px] text-[#0D0D0D] font-sans">Provide the material that supports the claims made in your Identity.</div>
           </div>
-          <button className="px-5 h-10 border border-[#0D0D0D] bg-[#0D0D0D] text-[#FFFFFF] hover:bg-[#222222] hover:text-[#FFFFFF] rounded-md text-[14px] font-sans font-medium transition-all font-bold">
+          <button 
+            onClick={() => setIsModalOpen(true)}
+            className="px-5 h-10 border border-[#0D0D0D] bg-[#0D0D0D] text-[#FFFFFF] hover:bg-[#222222] hover:text-[#FFFFFF] rounded-md text-[14px] font-sans font-medium transition-all font-bold"
+          >
             [+] Add evidence
           </button>
         </div>
@@ -52,16 +126,14 @@ export default function CandidateDashboardPage() {
           <div className="space-y-6">
             {skills.map((skill, index) => {
               const isVerified = profile?.verifiedSkills?.[skill]?.status === "verified";
-              const isFailed = profile?.verifiedSkills?.[skill]?.status === "failed";
+              const itemsCount = projects.filter(p => p.supportsClaim === skill).length;
               
-              // For demonstration, mock evidence count. In a real app this would query the evidence collection.
-              // Here we assume 0 items to match the user's report, unless they already added evidence.
               return (
                 <div key={index} className="border border-[#E5E5E5] bg-[#FFFFFF] p-5 rounded-lg">
                   <div className="flex justify-between items-end mb-3">
                     <div className="text-[14px] font-medium text-[#0D0D0D]">{skill}</div>
                     <div className={`text-[10px] font-mono ${isVerified ? 'text-[#15803D]' : 'text-[#666666]'}`}>
-                      {isVerified ? 'VERIFIED' : '0 ITEMS'}
+                      {isVerified ? (itemsCount > 0 ? `${itemsCount} ITEM${itemsCount > 1 ? 'S' : ''}` : 'VERIFIED') : `${itemsCount} ITEM${itemsCount !== 1 ? 'S' : ''}`}
                     </div>
                   </div>
                   
@@ -81,7 +153,7 @@ export default function CandidateDashboardPage() {
                     </>
                   ) : (
                     <>
-                      <div className="text-[11px] text-[#666666] mb-4">No supporting evidence yet.</div>
+                      <div className="text-[11px] text-[#666666] mb-4">{itemsCount > 0 ? 'Verification pending.' : 'No supporting evidence yet.'}</div>
                       <button 
                         onClick={() => router.push(`/candidate/assessment?skill=${encodeURIComponent(skill)}`)}
                         className="w-full flex items-center justify-center gap-2 text-[14px] font-sans font-medium border border-[#0D0D0D] text-[#FFFFFF] bg-[#0D0D0D] py-2 h-10 rounded-md hover:bg-[#222222] hover:text-[#FFFFFF] transition-all font-bold"
@@ -93,6 +165,12 @@ export default function CandidateDashboardPage() {
                 </div>
               );
             })}
+            
+            {skills.length === 0 && (
+              <div className="text-[13px] text-[#737373] p-4 border border-[#E5E5E5] border-dashed rounded-lg text-center">
+                Add skills in your Identity to see them here.
+              </div>
+            )}
           </div>
         </div>
 
@@ -102,68 +180,139 @@ export default function CandidateDashboardPage() {
           
           <div className="space-y-6">
             
-            {/* Artifact 1 */}
-            <div className="border border-[#E5E5E5] bg-[#FFFFFF] p-6 rounded-lg group hover:border-[#D2D2D2] transition-colors">
-              <div className="flex items-start justify-between mb-6">
-                <div>
-                  <h3 className="text-[16px] font-sans font-medium text-[#0D0D0D] mb-1">House Price Prediction Model</h3>
-                  <div className="text-[12px] font-sans font-medium text-[#666666] flex items-center gap-2">
-                    <FileCheck className="h-3.5 w-3.5" /> Project Repository
+            {projects.length === 0 ? (
+               <div className="text-[14px] text-[#737373] p-8 border border-[#E5E5E5] border-dashed rounded-lg text-center bg-[#FAFAFA]">
+                 No evidence linked yet. Click [+] Add evidence to prove your skills.
+               </div>
+            ) : (
+              projects.map((project, idx) => (
+                <div key={project.id || idx} className="border border-[#E5E5E5] bg-[#FFFFFF] p-6 rounded-lg group hover:border-[#D2D2D2] transition-colors">
+                  <div className="flex items-start justify-between mb-6">
+                    <div>
+                      <h3 className="text-[16px] font-sans font-medium text-[#0D0D0D] mb-1">{project.title}</h3>
+                      <div className="text-[12px] font-sans font-medium text-[#666666] flex items-center gap-2">
+                        <FileCheck className="h-3.5 w-3.5" /> Project Repository
+                      </div>
+                    </div>
+                    <div className="flex gap-3 text-[11px] font-sans font-medium text-[#666666]">
+                      <a href={project.repoUrl} target="_blank" rel="noopener noreferrer" className="hover:text-[#0D0D0D] transition-colors">View</a>
+                      <button onClick={() => handleRemoveEvidence(project.id)} className="hover:text-[#B42318] transition-colors">Remove</button>
+                    </div>
+                  </div>
+
+                  {/* Proof Thread */}
+                  <div className="mt-6 border-t border-[#E5E5E5] pt-6">
+                    <div className="text-[10px] font-sans font-medium text-[#666666] mb-4">Supports Claim:</div>
+                    <div className="relative border-l border-[#E5E5E5] pl-4 space-y-4">
+                      <div className="relative">
+                        <div className="absolute -left-[18.5px] top-1.5 h-2 w-2 rounded-full bg-[#15803D]" />
+                        <div className="text-[13px] font-medium text-[#0D0D0D]">{project.supportsClaim || "Unspecified"}</div>
+                        <div className="text-[11px] text-[#666666] mt-1">Status: Evidence Linked</div>
+                      </div>
+                    </div>
                   </div>
                 </div>
-                <div className="flex gap-3 text-[11px] font-sans font-medium text-[#666666]">
-                  <button className="hover:text-[#0D0D0D] transition-colors">View</button>
-                  <button className="hover:text-[#0D0D0D] transition-colors">Remove</button>
-                </div>
-              </div>
-
-              {/* Proof Thread */}
-              <div className="mt-6 border-t border-[#E5E5E5] pt-6">
-                <div className="text-[10px] font-sans font-medium text-[#666666] mb-4">Supports Claim:</div>
-                <div className="relative border-l border-[#E5E5E5] pl-4 space-y-4">
-                  <div className="relative">
-                    <div className="absolute -left-[18.5px] top-1.5 h-2 w-2 rounded-full bg-[#15803D]" />
-                    <div className="text-[13px] font-medium text-[#0D0D0D]">Machine Learning Pipeline</div>
-                    <div className="text-[11px] text-[#666666] mt-1">Status: Evidence Linked</div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Artifact 2 */}
-            <div className="border border-[#E5E5E5] bg-[#FFFFFF] p-6 rounded-lg group hover:border-[#D2D2D2] transition-colors">
-              <div className="flex items-start justify-between mb-6">
-                <div>
-                  <h3 className="text-[16px] font-sans font-medium text-[#0D0D0D] mb-1">E-Commerce Frontend Architecture</h3>
-                  <div className="text-[12px] font-sans font-medium text-[#666666] flex items-center gap-2">
-                    <Code className="h-3.5 w-3.5" /> GitHub Commits
-                  </div>
-                </div>
-                <div className="flex gap-3 text-[11px] font-sans font-medium text-[#666666]">
-                  <button className="hover:text-[#0D0D0D] transition-colors">View</button>
-                  <button className="hover:text-[#0D0D0D] transition-colors">Remove</button>
-                </div>
-              </div>
-
-              {/* Proof Thread */}
-              <div className="mt-6 border-t border-[#E5E5E5] pt-6">
-                <div className="text-[10px] font-sans font-medium text-[#666666] mb-4">Supports Claim:</div>
-                <div className="relative border-l border-[#E5E5E5] pl-4 space-y-4">
-                  <div className="relative">
-                    <div className="absolute -left-[18.5px] top-1.5 h-2 w-2 rounded-full bg-[#15803D]" />
-                    <div className="text-[13px] font-medium text-[#0D0D0D]">{skills[1] || "React"}</div>
-                    <div className="text-[11px] text-[#666666] mt-1">Status: Evidence Linked</div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
+              ))
+            )}
+            
           </div>
         </div>
 
       </div>
+
+      {/* Add Evidence Modal */}
+      {isModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#0D0D0D]/40 backdrop-blur-sm p-4">
+          <div className="bg-[#FFFFFF] rounded-xl shadow-2xl w-full max-w-lg overflow-hidden flex flex-col">
+            <div className="flex items-center justify-between px-6 py-5 border-b border-[#E5E5E5]">
+              <h2 className="text-[16px] font-bold text-[#0D0D0D]">Add Supporting Evidence</h2>
+              <button onClick={() => setIsModalOpen(false)} className="text-[#737373] hover:text-[#0D0D0D]">
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+            
+            <form onSubmit={handleSaveEvidence} className="p-6 flex flex-col gap-5">
+              {errorMsg && (
+                <div className="text-[13px] text-[#B42318] bg-[#B42318]/10 p-3 rounded-md">
+                  {errorMsg}
+                </div>
+              )}
+              
+              <div className="space-y-1.5">
+                <label className="text-[13px] font-medium text-[#0D0D0D]">Project Title <span className="text-[#B42318]">*</span></label>
+                <input 
+                  type="text" 
+                  value={newProject.title}
+                  onChange={(e) => setNewProject({...newProject, title: e.target.value})}
+                  className="w-full border border-[#E5E5E5] rounded-md px-3 py-2 text-[14px] outline-none focus:border-[#0D0D0D] transition-colors"
+                  placeholder="e.g. Meritlane Backend Services"
+                  required
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-[13px] font-medium text-[#0D0D0D]">Repository URL <span className="text-[#B42318]">*</span></label>
+                <input 
+                  type="url" 
+                  value={newProject.repoUrl}
+                  onChange={(e) => setNewProject({...newProject, repoUrl: e.target.value})}
+                  className="w-full border border-[#E5E5E5] rounded-md px-3 py-2 text-[14px] outline-none focus:border-[#0D0D0D] transition-colors"
+                  placeholder="https://github.com/username/project"
+                  required
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-[13px] font-medium text-[#0D0D0D]">Live URL <span className="text-[#737373] font-normal">(Optional)</span></label>
+                <input 
+                  type="url" 
+                  value={newProject.liveUrl}
+                  onChange={(e) => setNewProject({...newProject, liveUrl: e.target.value})}
+                  className="w-full border border-[#E5E5E5] rounded-md px-3 py-2 text-[14px] outline-none focus:border-[#0D0D0D] transition-colors"
+                  placeholder="https://myproject.com"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-[13px] font-medium text-[#0D0D0D]">Supports Claim <span className="text-[#B42318]">*</span></label>
+                <select 
+                  value={newProject.supportsClaim}
+                  onChange={(e) => setNewProject({...newProject, supportsClaim: e.target.value})}
+                  className="w-full border border-[#E5E5E5] rounded-md px-3 py-2 text-[14px] outline-none focus:border-[#0D0D0D] transition-colors bg-transparent"
+                  required
+                >
+                  {skills.length === 0 ? (
+                    <option value="">No skills found in Identity</option>
+                  ) : (
+                    skills.map((skill) => (
+                      <option key={skill} value={skill}>{skill}</option>
+                    ))
+                  )}
+                </select>
+                <p className="text-[11px] text-[#737373]">Select the skill this evidence proves.</p>
+              </div>
+
+              <div className="flex justify-end gap-3 mt-4">
+                <button 
+                  type="button"
+                  onClick={() => setIsModalOpen(false)}
+                  className="px-4 py-2 text-[13px] font-medium text-[#737373] hover:text-[#0D0D0D] transition-colors"
+                >
+                  Cancel
+                </button>
+                <button 
+                  type="submit"
+                  disabled={saving}
+                  className="flex items-center gap-2 px-4 py-2 bg-[#0D0D0D] text-[#FFFFFF] hover:bg-[#222222] rounded-md text-[13px] font-medium transition-colors disabled:opacity-70"
+                >
+                  {saving && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
+                  Link Evidence
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
-
-

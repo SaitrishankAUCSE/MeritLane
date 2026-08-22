@@ -7,6 +7,7 @@ export interface ProjectEntry {
   repoUrl: string;
   liveUrl: string;
   description: string;
+  supportsClaim?: string;
 }
 
 export type VerificationStatus = "draft" | "pending" | "verified" | "changes_required" | "rejected";
