@@ -6,6 +6,8 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Loader2, Play, CheckCircle2, Clock, AlertTriangle, TerminalSquare, FileCode2, ShieldAlert } from "lucide-react";
 import { logFunnelEvent } from "@/lib/analytics/logEvent";
 import { getAssessmentContent, AssessmentContent } from "@/lib/assessments/content";
+import { db } from "@/lib/firebase/config";
+import { doc, updateDoc, serverTimestamp } from "firebase/firestore";
 
 function AssessmentContentWrapper() {
   const { user, userProfile, loading } = useAuth();
@@ -43,7 +45,7 @@ function AssessmentContentWrapper() {
       setCode(loadedContent.coding.initialCode);
 
       // Simple mock cooldown check
-      const lastAttemptStr = localStorage.getItem(\meritlane_cooldown_\\);
+      const lastAttemptStr = localStorage.getItem(`meritlane_cooldown_${user.uid}`);
       if (lastAttemptStr) {
         const lastAttempt = parseInt(lastAttemptStr, 10);
         const daysPassed = (Date.now() - lastAttempt) / (1000 * 60 * 60 * 24);
@@ -72,7 +74,7 @@ function AssessmentContentWrapper() {
 
   const handleFail = () => {
     if (!user) return;
-    localStorage.setItem(\meritlane_cooldown_\\, Date.now().toString());
+    localStorage.setItem(`meritlane_cooldown_${user.uid}`, Date.now().toString());
     setErrorMsg("ASSESSMENT NOT PASSED");
   };
 
@@ -115,9 +117,21 @@ function AssessmentContentWrapper() {
         } else {
           // Success Path!
           setOutput((prev) => prev + "Evaluating hidden test suites...\n[====================] 100%\nAll tests passed successfully.\nCryptographic signature generated.");
-          setTimeout(() => {
-            logFunnelEvent("assessment_passed", { skill: skillParam });
-            router.push("/candidate/dashboard?verified=true");
+          
+          setTimeout(async () => {
+            try {
+              if (user) {
+                const candidateRef = doc(db, "candidates", user.uid);
+                await updateDoc(candidateRef, {
+                  verificationStatus: "pending",
+                  updatedAt: Date.now()
+                });
+              }
+              logFunnelEvent("assessment_passed", { skill: skillParam });
+              router.push("/candidate/dashboard?verified=true");
+            } catch (e) {
+              console.error("Failed to update verification status:", e);
+            }
           }, 2000);
         }
         setEvaluating(false);
@@ -202,7 +216,7 @@ function AssessmentContentWrapper() {
   const formatTime = (seconds: number) => {
     const m = Math.floor(seconds / 60);
     const s = seconds % 60;
-    return \\:\\\;
+    return `${m}:${s < 10 ? '0' : ''}${s}`;
   };
 
   return (
@@ -213,7 +227,9 @@ function AssessmentContentWrapper() {
           <span className="hidden sm:inline text-[#444846] shrink-0">/</span>
           <span className="hidden sm:inline font-mono text-[10px] tracking-widest uppercase text-white truncate">{skillParam} Evaluation</span>
         </div>
-        <div className={\ont-mono text-[14px] font-bold tracking-wider \\}>
+        <div className={`font-mono text-[14px] font-bold tracking-wider ${
+          timeLeft < 300 ? 'text-[#ffb4ab]' : 'text-white'
+        }`}>
           {formatTime(timeLeft)}
         </div>
       </header>

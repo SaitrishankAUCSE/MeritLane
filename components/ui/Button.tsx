@@ -54,7 +54,7 @@ export function Button({
   
   // If tertiary is used, override sizing to be inline
   const finalSize = variant === "tertiary" ? "" : sizeStyles[size];
-  const combinedClassName = \\ \ \ \\;
+  const combinedClassName = `${baseStyles} ${finalSize} ${variantStyles[appliedVariant]} ${className}`;
 
   const content = (
     <>
