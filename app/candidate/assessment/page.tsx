@@ -44,13 +44,25 @@ function AssessmentContentWrapper() {
       setContent(loadedContent);
       setCode(loadedContent.coding.initialCode);
 
-      // Check if already verified
+      // Check if already verified and if skill exists
       const checkCandidateStatus = async () => {
         try {
           const cRef = doc(db, "candidates", user.uid);
           const cSnap = await getDoc(cRef);
           if (cSnap.exists()) {
             const cData = cSnap.data();
+            
+            // Validation 1: Skill must be declared in Technical Identity
+            const normalizedParam = skillParam.toLowerCase().trim();
+            const skillExists = (cData.skills || []).some((s: string) => s.toLowerCase().trim() === normalizedParam);
+            
+            if (!skillExists) {
+              setErrorMsg("SKILL NOT FOUND");
+              setInitializing(false);
+              return;
+            }
+
+            // Validation 2: Must not already be verified
             if (cData.verifiedSkills?.[skillParam]?.status === "verified") {
               setErrorMsg("ALREADY VERIFIED");
               setInitializing(false);
@@ -61,8 +73,8 @@ function AssessmentContentWrapper() {
           console.error(err);
         }
 
-        // Simple mock cooldown check
-        const lastAttemptStr = localStorage.getItem(`meritlane_cooldown_${user.uid}`);
+        // Mock per-skill cooldown check
+        const lastAttemptStr = localStorage.getItem(`meritlane_cooldown_${user.uid}_${skillParam}`);
         if (lastAttemptStr) {
           const lastAttempt = parseInt(lastAttemptStr, 10);
           const daysPassed = (Date.now() - lastAttempt) / (1000 * 60 * 60 * 24);
@@ -94,7 +106,7 @@ function AssessmentContentWrapper() {
 
   const handleFail = () => {
     if (!user) return;
-    localStorage.setItem(`meritlane_cooldown_${user.uid}`, Date.now().toString());
+    localStorage.setItem(`meritlane_cooldown_${user.uid}_${skillParam}`, Date.now().toString());
     setErrorMsg("ASSESSMENT NOT PASSED");
   };
 
@@ -168,6 +180,25 @@ function AssessmentContentWrapper() {
   }
 
   if (errorMsg) {
+    if (errorMsg === "SKILL NOT FOUND") {
+      return (
+        <div className="flex h-[100dvh] w-full bg-[#FAFAFA] text-[#0D0D0D] font-sans items-center justify-center">
+          <div className="max-w-md w-full border border-[#E5E5E5] bg-[#FFFFFF] rounded-md p-8 shadow-sm">
+             <h2 className="text-[18px] font-serif text-[#B42318] mb-2 flex items-center gap-2"><AlertTriangle className="h-5 w-5" /> Skill Not Found</h2>
+             <p className="text-[14px] text-[#737373] mb-8 font-sans">
+               The skill &quot;{skillParam}&quot; does not exist in your Technical Identity. Add this skill to your Identity before starting verification.
+             </p>
+             <button 
+               onClick={() => router.push("/candidate/profile")}
+               className="px-6 py-2 h-10 border border-[#0D0D0D] bg-[#0D0D0D] text-[#FFFFFF] font-sans text-[14px] font-medium rounded-md hover:bg-[#222222] transition-all w-full"
+             >
+               Return to Identity
+             </button>
+          </div>
+        </div>
+      );
+    }
+
     if (errorMsg === "ALREADY VERIFIED") {
       return (
         <div className="flex h-[100dvh] w-full bg-[#FAFAFA] text-[#0D0D0D] font-sans items-center justify-center">

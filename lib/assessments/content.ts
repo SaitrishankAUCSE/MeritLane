@@ -46,6 +46,35 @@ const fallbackContent: AssessmentContent = {
 };
 
 const skillContentMap: Record<string, AssessmentContent> = {
+  django: {
+    mcqs: [
+      {
+        question: "In Django, what is the primary purpose of the `models.py` file?",
+        options: [
+          "To define the URL routing structure.",
+          "To render HTML templates.",
+          "To define the database schema and data relationships.",
+          "To write frontend JavaScript."
+        ],
+        answerIndex: 2
+      },
+      {
+        question: "Which Django ORM method is used to retrieve all objects of a model?",
+        options: [
+          "Model.objects.all()",
+          "Model.all()",
+          "Model.objects.get_all()",
+          "Model.fetch_all()"
+        ],
+        answerIndex: 0
+      }
+    ],
+    coding: {
+      title: "Django View Challenge",
+      instructions: "Write a Django view function `get_active_users(request)` that queries the `User` model for all users where `is_active=True`, and returns a JSON response containing their usernames in a list format.",
+      initialCode: "from django.http import JsonResponse\nfrom django.contrib.auth.models import User\n\ndef get_active_users(request):\n    # Your code here\n    pass\n"
+    }
+  },
   python: {
     mcqs: [
       {
