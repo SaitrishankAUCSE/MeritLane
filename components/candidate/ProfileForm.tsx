@@ -6,7 +6,8 @@ import { Button } from "@/components/ui/Button";
 import { TagInput } from "@/components/ui/TagInput";
 import { CandidateProfile, saveCandidateProfile } from "@/lib/firebase/candidate";
 import { useAuth } from "@/lib/auth/AuthContext";
-import { Save, X } from "lucide-react";
+import { Autocomplete } from "@/components/ui/Autocomplete";
+import { COMMON_BRANCHES, YEARS, fetchIndianColleges, COMMON_SKILLS } from "@/lib/constants";
 
 interface ProfileFormProps {
   initialData: CandidateProfile | null;
@@ -104,29 +105,29 @@ export function ProfileForm({ initialData, onSave, onCancel, isNew = false }: Pr
             placeholder="Ada Lovelace"
             required
           />
-          <Input
+          <Autocomplete
             label="Graduation Year"
-            name="gradYear"
             value={formData.gradYear}
-            onChange={handleChange}
+            onChange={(val) => setFormData((prev) => ({ ...prev, gradYear: val }))}
             placeholder="e.g. 2024"
+            options={YEARS}
           />
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <Input
+          <Autocomplete
             label="University / College"
-            name="college"
             value={formData.college}
-            onChange={handleChange}
+            onChange={(val) => setFormData((prev) => ({ ...prev, college: val }))}
             placeholder="Institution Name"
+            fetchOptions={fetchIndianColleges}
           />
-          <Input
+          <Autocomplete
             label="Degree / Branch"
-            name="branch"
             value={formData.branch}
-            onChange={handleChange}
+            onChange={(val) => setFormData((prev) => ({ ...prev, branch: val }))}
             placeholder="Computer Science"
+            options={COMMON_BRANCHES}
           />
         </div>
 
@@ -139,6 +140,7 @@ export function ProfileForm({ initialData, onSave, onCancel, isNew = false }: Pr
               onChange={handleSkillsChange}
               placeholder="React, Python, Systems Design..."
               helperText="The first skill listed will be your Primary Domain. Separate with commas or press Enter."
+              options={COMMON_SKILLS}
             />
           </div>
         </div>

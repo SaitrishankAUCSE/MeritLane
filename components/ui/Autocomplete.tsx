@@ -1,103 +1,92 @@
-import React, { useState, useEffect, useRef, useCallback } from "react";
-import { AlertCircle, Loader2, ChevronDown, Check } from "lucide-react";
+"use client";
 
-export interface AutocompleteProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'value' | 'onChange'> {
+import React, { useState, useEffect, useRef } from "react";
+import { ChevronDown, Search, Loader2 } from "lucide-react";
+
+export interface AutocompleteProps {
   label?: string;
-  helperText?: string;
-  error?: string;
   value: string;
   onChange: (value: string) => void;
-  // Use either static options or a fetch function
-  options?: string[];
-  fetchOptions?: (query: string) => Promise<string[]>;
-  debounceMs?: number;
+  placeholder?: string;
+  options?: string[]; // Static options
+  fetchOptions?: (query: string) => Promise<string[]>; // Dynamic fetch
+  disabled?: boolean;
 }
 
 export function Autocomplete({
   label,
-  helperText,
-  error,
-  id,
-  className = "",
-  disabled,
   value,
   onChange,
+  placeholder,
   options,
   fetchOptions,
-  debounceMs = 300,
-  placeholder,
-  ...props
+  disabled
 }: AutocompleteProps) {
-  const [inputValue, setInputValue] = useState(value);
   const [isOpen, setIsOpen] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [filteredOptions, setFilteredOptions] = useState<string[]>([]);
+  const [query, setQuery] = useState(value);
+  const [results, setResults] = useState<string[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
   const wrapperRef = useRef<HTMLDivElement>(null);
-  const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
 
-  const inputId = id || (label ? label.toLowerCase().replace(/\s+/g, "-") : "autocomplete-input");
-
-  // Sync prop value to input value when it changes externally
+  // Sync prop value to local query if it changes externally
   useEffect(() => {
-    setInputValue(value);
+    setQuery(value);
   }, [value]);
 
-  // Handle outside click to close dropdown
   useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
+    const handleClickOutside = (event: MouseEvent) => {
       if (wrapperRef.current && !wrapperRef.current.contains(event.target as Node)) {
         setIsOpen(false);
       }
-    }
+    };
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const runSearch = useCallback(async (query: string) => {
-    setLoading(true);
-    try {
-      if (fetchOptions) {
-        const results = await fetchOptions(query);
-        setFilteredOptions(results);
-      } else if (options) {
-        const results = options.filter(opt => opt.toLowerCase().includes(query.toLowerCase()));
-        setFilteredOptions(results);
+  useEffect(() => {
+    if (!isOpen) return;
+
+    if (fetchOptions) {
+      const delayDebounceFn = setTimeout(async () => {
+        setIsLoading(true);
+        try {
+          const res = await fetchOptions(query);
+          setResults(res);
+        } catch (e) {
+          console.error(e);
+        } finally {
+          setIsLoading(false);
+        }
+      }, 300); // 300ms debounce
+      return () => clearTimeout(delayDebounceFn);
+    } else if (options) {
+      if (!query) {
+        setResults(options);
+      } else {
+        const filtered = options.filter(opt => opt.toLowerCase().includes(query.toLowerCase()));
+        setResults(filtered);
       }
-    } catch (err) {
-      console.error("Autocomplete search error:", err);
-    } finally {
-      setLoading(false);
     }
-  }, [fetchOptions, options]);
+  }, [query, isOpen, options, fetchOptions]);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newVal = e.target.value;
-    setInputValue(newVal);
-    onChange(newVal); // Let parent know immediately
-    setIsOpen(true);
-
-    if (debounceTimerRef.current) clearTimeout(debounceTimerRef.current);
-
-    debounceTimerRef.current = setTimeout(() => {
-      runSearch(newVal);
-    }, debounceMs);
-  };
-
-  const handleInputFocus = () => {
-    setIsOpen(true);
-    runSearch(inputValue);
-  };
-
-  const handleOptionSelect = (option: string) => {
-    setInputValue(option);
-    onChange(option);
+  const handleSelect = (selected: string) => {
+    setQuery(selected);
+    onChange(selected);
     setIsOpen(false);
   };
 
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setQuery(e.target.value);
+    onChange(e.target.value); // Keep parent state in sync even if not selected from list
+    setIsOpen(true);
+  };
+
+  const inputId = label ? label.toLowerCase().replace(/\s+/g, "-") : undefined;
+
   return (
-    <div className="flex flex-col gap-1.5 w-full text-left relative" ref={wrapperRef}>
+    <div className="flex w-full flex-col gap-1.5 text-left relative" ref={wrapperRef}>
       {label && (
-        <label htmlFor={inputId} className="font-data text-outline">
+        <label htmlFor={inputId} className="font-sans text-[14px] text-foreground font-medium">
           {label}
         </label>
       )}
@@ -105,76 +94,36 @@ export function Autocomplete({
         <input
           id={inputId}
           disabled={disabled}
-          value={inputValue}
-          onChange={handleInputChange}
-          onFocus={handleInputFocus}
+          value={query}
+          onChange={handleChange}
+          onFocus={() => setIsOpen(true)}
+          className={"w-full h-[42px] px-3 py-2 bg-surface text-foreground text-[14px] font-sans border rounded-md transition-colors placeholder:text-muted-foreground focus:outline-none focus:border-outline focus-visible:ring-1 focus-visible:ring-foreground disabled:opacity-50 border-border"}
           placeholder={placeholder}
-          className={`field-line pr-8 ${
-            error ? "border-danger text-danger" : ""
-          } ${className}`}
-          {...props}
           autoComplete="off"
         />
-        
-        {/* End Adornment (Error, Loading, or Chevron) */}
-        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
-          {loading ? (
-            <Loader2 className="h-4 w-4 animate-spin text-outline" />
-          ) : error ? (
-            <AlertCircle className="h-4 w-4 text-danger" aria-hidden="true" />
-          ) : (
-            <ChevronDown className="h-4 w-4 text-outline" />
-          )}
+        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3 text-muted-foreground">
+          {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <ChevronDown className="h-4 w-4" />}
         </div>
       </div>
 
-      {/* Dropdown */}
-      {isOpen && !disabled && (
-        <div className="absolute top-full left-0 z-50 mt-1 max-h-60 w-full overflow-y-auto border border-border bg-surface py-1 focus:outline-none">
-          {loading && filteredOptions.length === 0 ? (
-            <div className="px-3 py-2 text-center text-sm text-muted-foreground">Loading...</div>
-          ) : filteredOptions.length === 0 ? (
-            <div className="px-3 py-2 text-center text-sm text-muted-foreground">
-              {inputValue ? "No results found. You can keep your custom entry." : "Type to search..."}
-            </div>
+      {isOpen && (
+        <div className="absolute top-[calc(100%+4px)] left-0 w-full max-h-[250px] overflow-y-auto bg-[#181a1f] border border-[#272a2f] rounded-md shadow-2xl z-50 py-1 scrollbar-hide">
+          {results.length > 0 ? (
+            results.map((res, idx) => (
+              <div
+                key={idx}
+                onClick={() => handleSelect(res)}
+                className="px-4 py-2.5 text-[14px] font-sans text-[#e3e2e5] hover:bg-[#272a2f] hover:text-white cursor-pointer transition-colors"
+              >
+                {res}
+              </div>
+            ))
           ) : (
-            <ul className="pb-1 text-sm text-foreground">
-              {filteredOptions.map((opt, idx) => (
-                <li
-                  key={idx}
-                  onMouseDown={(e) => {
-                    e.preventDefault();
-                  }}
-                  onClick={() => handleOptionSelect(opt)}
-                  className={`flex cursor-pointer items-center justify-between px-3.5 py-2 select-none hover:bg-surface-low ${
-                    opt === value ? "bg-surface-low font-medium" : ""
-                  }`}
-                >
-                  <span className="truncate">{opt}</span>
-                  {opt === value && <Check className="ml-2 h-4 w-4 shrink-0 text-foreground" />}
-                </li>
-              ))}
-              {inputValue && !filteredOptions.some(opt => opt.toLowerCase() === inputValue.toLowerCase()) && (
-                <li
-                  onMouseDown={(e) => e.preventDefault()}
-                  onClick={() => handleOptionSelect(inputValue)}
-                  className="mt-1 flex cursor-pointer items-center border-t border-border px-3.5 py-2 font-medium text-foreground select-none hover:bg-surface-low"
-                >
-                  Use &quot;{inputValue}&quot;
-                </li>
-              )}
-            </ul>
+            <div className="px-4 py-3 text-[13px] text-[#8e928f] italic font-sans">
+              {isLoading ? "Searching..." : "No matches found."}
+            </div>
           )}
         </div>
-      )}
-
-      {helperText && !error && (
-        <p className="text-xs text-muted-foreground">{helperText}</p>
-      )}
-      {error && (
-        <p className="text-xs font-medium text-danger">
-          {error}
-        </p>
       )}
     </div>
   );
