@@ -1,7 +1,7 @@
 "use client";
 
-import { AuthSwitch } from "@/components/ui/auth-switch";
+import AuthForm from "@/components/ui/auth-form";
 
 export default function SignupPage() {
-  return <AuthSwitch defaultMode="signup" />;
+  return <AuthForm mode="signup" />;
 }

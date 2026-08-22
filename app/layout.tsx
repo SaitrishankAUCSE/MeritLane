@@ -4,6 +4,7 @@ import "./globals.css";
 import Navbar from "@/components/Navbar";
 import { SiteFooter } from "@/components/chrome/SiteFooter";
 import { AuthProvider } from "@/lib/auth/AuthContext";
+import { ThemeProvider } from "@/components/theme-provider";
 import { Analytics } from "@vercel/analytics/react";
 
 const inter = Inter({
@@ -103,9 +104,11 @@ export default function RootLayout({
           }}
         />
         <AuthProvider>
-          <Navbar />
-          <main className="flex-1">{children}</main>
-          <SiteFooter />
+          <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+            <Navbar />
+            <main className="flex-1">{children}</main>
+            <SiteFooter />
+          </ThemeProvider>
         </AuthProvider>
         <Analytics />
       </body>
