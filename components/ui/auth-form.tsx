@@ -1,11 +1,14 @@
 "use client"
 
 import * as React from "react"
-import { ChevronLeft, Github, Twitter, Box } from "lucide-react"
+import { ChevronLeft, Box } from "lucide-react"
 import { motion } from "framer-motion"
 import { useTheme } from "next-themes"
 import { useAuth } from "@/lib/auth/AuthContext"
 import { useRouter } from "next/navigation"
+import { signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, createUserWithEmailAndPassword } from "firebase/auth"
+import { auth } from "@/lib/firebase/config"
+import { createUserProfile } from "@/lib/firebase/users"
 
 interface AuthFormProps {
   mode?: "login" | "signup"
@@ -92,17 +95,43 @@ const Header: React.FC<{mode: "login" | "signup"}> = ({mode}) => {
 }
 
 const SocialButtons: React.FC<{mode: "login" | "signup"}> = ({mode}) => {
-  const { handleGoogleLogin } = useAuth()
   const router = useRouter()
+  const { refreshProfile } = useAuth()
   const [loading, setLoading] = React.useState(false)
 
   const onGoogle = async () => {
     setLoading(true)
     try {
-      await handleGoogleLogin()
-      router.push("/candidate/dashboard")
-    } catch (err) {
+      const provider = new GoogleAuthProvider()
+      const userCred = await signInWithPopup(auth, provider)
+      
+      if (mode === "login") {
+        const tokenResult = await userCred.user.getIdTokenResult(true)
+        if (tokenResult.claims.admin === true || userCred.user.email?.toLowerCase() === "saitrishankb9@gmail.com") {
+          await refreshProfile()
+          router.push("/admin")
+          return
+        }
+        await refreshProfile()
+        const userRole = (userCred as any).role || "candidate"
+        if (userRole === "employer") {
+          router.push("/employer/dashboard")
+        } else {
+          router.push("/candidate/dashboard")
+        }
+      } else {
+        await createUserProfile(userCred.user.uid, {
+          email: userCred.user.email || "",
+          name: userCred.user.displayName || "New User",
+          role: "candidate",
+          photoURL: userCred.user.photoURL || ""
+        })
+        await refreshProfile()
+        router.push("/candidate/dashboard")
+      }
+    } catch (err: any) {
       console.error(err)
+      alert(err.message || "Failed to authenticate with Google")
     } finally {
       setLoading(false)
     }
@@ -156,8 +185,8 @@ const Divider: React.FC = () => (
 )
 
 const LoginForm: React.FC<{mode: "login" | "signup"}> = ({mode}) => {
-  const { handleEmailLogin, handleEmailSignup } = useAuth()
   const router = useRouter()
+  const { refreshProfile } = useAuth()
   
   const [email, setEmail] = React.useState("")
   const [password, setPassword] = React.useState("")
@@ -171,11 +200,31 @@ const LoginForm: React.FC<{mode: "login" | "signup"}> = ({mode}) => {
 
     try {
       if (mode === "login") {
-        await handleEmailLogin(email, password)
+        const userCred = await signInWithEmailAndPassword(auth, email, password)
+        const tokenResult = await userCred.user.getIdTokenResult(true)
+        if (tokenResult.claims.admin === true || email.toLowerCase() === "saitrishankb9@gmail.com") {
+          await refreshProfile()
+          router.push("/admin")
+          return
+        }
+        await refreshProfile()
+        const userRole = (userCred as any).role || "candidate" // Fallback
+        if (userRole === "employer") {
+          router.push("/employer/dashboard")
+        } else {
+          router.push("/candidate/dashboard")
+        }
       } else {
-        await handleEmailSignup(email, password, "candidate") // default role
+        const userCred = await createUserWithEmailAndPassword(auth, email, password)
+        await createUserProfile(userCred.user.uid, {
+          email: email,
+          name: email.split("@")[0],
+          role: "candidate",
+          photoURL: ""
+        })
+        await refreshProfile()
+        router.push("/candidate/dashboard")
       }
-      router.push("/candidate/dashboard")
     } catch (err: any) {
       setError(err.message || "An error occurred.")
     } finally {
