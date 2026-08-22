@@ -100,7 +100,7 @@ export default function Navbar() {
               <Link href="/signup" className="text-sm text-muted-foreground hover:text-foreground">
                 Register
               </Link>
-              <Button href="/employer/dashboard" variant="primary" size="sm">Hire Talent</Button>
+              <Button href="/signup" variant="primary" size="sm">Hire Talent</Button>
             </div>
           )}
 
@@ -121,7 +121,7 @@ export default function Navbar() {
             <div className="flex flex-col gap-2">
               <Button href="/login" variant="secondary" className="w-full justify-center">Log in</Button>
               <Button href="/signup" variant="secondary" className="w-full justify-center">Register</Button>
-              <Button href="/employer/dashboard" variant="primary" className="w-full justify-center">Hire Talent</Button>
+              <Button href="/signup" variant="primary" className="w-full justify-center">Hire Talent</Button>
             </div>
           ) : !isResolvingAuth && user ? (
             <div className="flex flex-col gap-4">
@@ -238,3 +238,4 @@ function NavLink({ href, current, children }: { href: string; current: string; c
     </Link>
   );
 }
+
