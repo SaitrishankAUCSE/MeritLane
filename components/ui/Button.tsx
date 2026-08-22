@@ -72,13 +72,13 @@ export function Button({
     const { href, ...rest } = props as ButtonProps & { href: string };
     if (href.startsWith("http")) {
       return (
-        <a href={href} className={combinedClassName} {...rest}>
+        <a href={href} className={combinedClassName} {...(rest as any)}>
           {content}
         </a>
       );
     }
     return (
-      <Link href={href} className={combinedClassName} {...rest}>
+      <Link href={href} className={combinedClassName} {...(rest as any)}>
         {content}
       </Link>
     );

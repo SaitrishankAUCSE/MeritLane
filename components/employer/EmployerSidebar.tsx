@@ -2,12 +2,13 @@
 
 import React from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { Activity, FileText, Command, ShieldCheck, Settings, HelpCircle } from "lucide-react";
 import { useAuth } from "@/lib/auth/AuthContext";
 
 export function EmployerSidebar() {
   const pathname = usePathname();
+  const router = useRouter();
   const { user, handleSignOut } = useAuth();
   const name = user?.displayName || "Employer";
   const avatarUrl = user?.photoURL || "";

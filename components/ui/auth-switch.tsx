@@ -5,7 +5,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, createUserWithEmailAndPassword, signOut } from "firebase/auth";
 import { auth } from "@/lib/firebase/config";
 import { useAuth } from "@/lib/auth/AuthContext";
-import { fetchCandidateProfile, saveCandidateProfile } from "@/lib/firebase/candidate";
+import { fetchCandidateProfile } from "@/lib/firebase/candidate";
+import { createUserProfile } from "@/lib/firebase/users";
 import { useRouter } from "next/navigation";
 import { Loader2, ShieldCheck, AlertCircle, CheckCircle2, Users, Briefcase } from "lucide-react";
 import { Button } from "./Button";
@@ -107,13 +108,13 @@ export function AuthSwitch({ defaultMode = "login" }: AuthSwitchProps) {
     setError(null);
     setSuccessMessage(null);
     
-    
     try {
       const userCred = await createUserWithEmailAndPassword(auth, email, password);
-      await saveCandidateProfile(userCred.user.uid, {
+      await createUserProfile(userCred.user.uid, {
         email: userCred.user.email || email,
         role: role,
-        authProvider: "email"
+        authProvider: "password",
+        displayName: ""
       });
       await refreshProfile();
       
@@ -136,7 +137,6 @@ export function AuthSwitch({ defaultMode = "login" }: AuthSwitchProps) {
     setLoadingAction(true);
     setError(null);
     setSuccessMessage(null);
-    if (mode === "signup") 
     
     try {
       const provider = new GoogleAuthProvider();
@@ -168,7 +168,7 @@ export function AuthSwitch({ defaultMode = "login" }: AuthSwitchProps) {
           return;
         }
 
-        await saveCandidateProfile(userCred.user.uid, {
+        await createUserProfile(userCred.user.uid, {
           email: userCred.user.email || "",
           role: role!,
           displayName: userCred.user.displayName || "",

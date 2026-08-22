@@ -7,7 +7,7 @@ import { Loader2, Play, CheckCircle2, Clock, AlertTriangle, TerminalSquare, File
 import { logFunnelEvent } from "@/lib/analytics/logEvent";
 import { getAssessmentContent, AssessmentContent } from "@/lib/assessments/content";
 import { db } from "@/lib/firebase/config";
-import { doc, updateDoc, serverTimestamp } from "firebase/firestore";
+import { doc, updateDoc, serverTimestamp, getDoc } from "firebase/firestore";
 
 function AssessmentContentWrapper() {
   const { user, userProfile, loading } = useAuth();
