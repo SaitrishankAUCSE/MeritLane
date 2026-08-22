@@ -77,7 +77,7 @@ export default function CandidateDashboardPage() {
               </div>
               <div className="text-[11px] text-[#a8a2ff] mb-4">Evidence is sufficient for testing.</div>
               <button 
-                onClick={() => router.push('/candidate/assessment')}
+                onClick={() => router.push(`/candidate/assessment?skill=${encodeURIComponent(skills[0] || 'Software Engineering')}`)}
                 className="w-full flex items-center justify-center gap-2 text-[14px] font-sans font-medium border border-white text-black bg-white py-2 h-10 rounded-md hover:bg-black hover:text-white transition-all font-bold"
               >
                 Start verification <ArrowRight className="h-3 w-3" />

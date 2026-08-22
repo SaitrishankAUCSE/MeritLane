@@ -119,7 +119,7 @@ export default function CandidateProfilePage() {
                     <div className="text-right">
                       <div className="text-[10px] text-[#a8a2ff] font-mono uppercase tracking-[0.1em] mb-2">Evidence Linked.</div>
                       <button 
-                        onClick={() => router.push('/candidate/assessment')}
+                        onClick={() => router.push(`/candidate/assessment?skill=${encodeURIComponent(skill)}`)}
                         className="text-[14px] font-sans font-medium text-[#e3e2e5] border border-[#a8a2ff]/40 bg-[#a8a2ff]/5 px-4 h-9 rounded-md hover:bg-[#a8a2ff] hover:text-black hover:border-[#a8a2ff] transition-colors"
                       >
                         Test Claim

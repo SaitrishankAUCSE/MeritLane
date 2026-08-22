@@ -498,13 +498,12 @@ export default function AdminDashboardPage() {
 
           <div className="flex items-center gap-2.5">
             <Button 
-              variant="outline" 
+              variant="danger" 
               size="sm" 
               onClick={() => {
                 setWipeResult(null);
                 setShowWipeModal(true);
               }}
-              className="text-danger border-danger/40 hover:bg-danger/10 hover:text-danger"
               leftIcon={<Trash2 className="h-3.5 w-3.5" />}
             >
               Wipe Test Users

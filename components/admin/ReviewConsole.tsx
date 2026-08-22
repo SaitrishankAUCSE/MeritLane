@@ -132,13 +132,13 @@ export function ReviewConsole({
             <>
               {!actionType ? (
                 <>
-                  <Button variant="primary" className="w-full justify-start bg-success hover:bg-emerald-600 text-white border-transparent" leftIcon={<ShieldCheck className="h-4 w-4" />} onClick={() => { setActionType("verified"); setActionReason("Standard verification approval."); handleExecuteAction("verified"); }}>
+                  <Button variant="success" className="w-full justify-start" leftIcon={<ShieldCheck className="h-4 w-4" />} onClick={() => { setActionType("verified"); setActionReason("Standard verification approval."); handleExecuteAction("verified"); }}>
                     Verify Object
                   </Button>
-                  <Button variant="outline" className="w-full justify-start border-warning/40 text-warning hover:bg-warning/10" leftIcon={<AlertTriangle className="h-4 w-4" />} onClick={() => setActionType("changes_required")}>
+                  <Button variant="secondary" className="w-full justify-start" leftIcon={<AlertTriangle className="h-4 w-4" />} onClick={() => setActionType("changes_required")}>
                     Request Changes
                   </Button>
-                  <Button variant="outline" className="w-full justify-start border-danger/40 text-danger hover:bg-danger/10" leftIcon={<XCircle className="h-4 w-4" />} onClick={() => setActionType("rejected")}>
+                  <Button variant="danger" className="w-full justify-start" leftIcon={<XCircle className="h-4 w-4" />} onClick={() => setActionType("rejected")}>
                     Reject Object
                   </Button>
                 </>
