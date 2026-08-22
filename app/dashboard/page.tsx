@@ -68,8 +68,8 @@ export default function DashboardRouter() {
   }, [user, role, loading, profileLoading, router]);
 
   return (
-    <div className="flex h-screen w-full items-center justify-center bg-[#0b0c0e]">
-      <div className="h-4 w-4 border-2 border-[#8e928f] border-t-white animate-spin rounded-full"></div>
+    <div className="flex h-screen w-full items-center justify-center bg-[#FAFAFA]">
+      <div className="h-4 w-4 border-2 border-[#737373] border-t-[#0D0D0D] animate-spin rounded-full"></div>
     </div>
   );
 }

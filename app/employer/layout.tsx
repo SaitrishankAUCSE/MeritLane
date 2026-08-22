@@ -7,9 +7,9 @@ import { EmployerSidebar } from "@/components/employer/EmployerSidebar";
 export default function EmployerLayout({ children }: { children: React.ReactNode }) {
   return (
     <ProtectedRoute allowedRoles={["employer"]}>
-      <div className="flex h-[100dvh] w-full bg-[#0b0c0e] text-[#e3e2e5] font-sans overflow-hidden">
+      <div className="flex h-[100dvh] w-full bg-[#FAFAFA] text-[#0D0D0D] font-sans overflow-hidden">
         <EmployerSidebar />
-        <main className="flex-1 bg-[#0b0c0e] overflow-hidden">
+        <main className="flex-1 bg-[#FAFAFA] overflow-hidden">
           {children}
         </main>
       </div>

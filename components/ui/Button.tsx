@@ -23,7 +23,7 @@ export function Button({
   ...props
 }: ButtonProps) {
   const baseStyles =
-    "inline-flex items-center justify-center font-sans font-medium transition-all select-none focus:outline-none focus-visible:ring-1 focus-visible:ring-white disabled:opacity-50 disabled:pointer-events-none whitespace-nowrap shrink-0";
+    "inline-flex items-center justify-center font-sans font-medium transition-all select-none focus:outline-none focus-visible:ring-1 focus-visible:ring-[#0D0D0D] focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none whitespace-nowrap shrink-0";
 
   const sizeStyles = {
     xs: "text-[12px] px-3 h-7 gap-1.5 rounded-sm",
@@ -35,19 +35,19 @@ export function Button({
 
   const variantStyles = {
     primary:
-      "bg-white text-black border border-white hover:bg-black hover:text-white",
+      "bg-[#0D0D0D] text-[#FFFFFF] border border-[#0D0D0D] hover:bg-[#222222] hover:border-[#222222]",
     secondary:
-      "bg-transparent text-[#e3e2e5] border border-[#444846] hover:bg-white hover:text-black hover:border-white",
+      "bg-[#FFFFFF] text-[#0D0D0D] border border-[#E5E5E5] hover:bg-[#F3F3F1]",
     outline:
-      "bg-transparent text-[#e3e2e5] border border-[#444846] hover:bg-white hover:text-black hover:border-white",
+      "bg-[#FFFFFF] text-[#0D0D0D] border border-[#E5E5E5] hover:bg-[#F3F3F1]",
     ghost:
-      "bg-transparent text-[#8e928f] border border-transparent hover:text-white",
+      "bg-transparent text-[#525252] border border-transparent hover:text-[#0D0D0D] hover:bg-[#F3F3F1]",
     tertiary:
-      "bg-transparent text-[#8e928f] border border-transparent underline-offset-4 hover:underline p-0 h-auto",
+      "bg-transparent text-[#737373] border border-transparent underline-offset-4 hover:underline hover:text-[#525252] p-0 h-auto",
     danger:
-      "bg-[#ffb4ab]/5 text-[#ffb4ab] border border-[#ffb4ab]/40 hover:bg-[#ffb4ab] hover:text-black hover:border-[#ffb4ab]",
+      "bg-[#B42318]/5 text-[#B42318] border border-[#B42318]/20 hover:bg-[#B42318] hover:text-[#FFFFFF] hover:border-[#B42318]",
     success:
-      "bg-[#a8a2ff]/5 text-[#a8a2ff] border border-[#a8a2ff]/40 hover:bg-[#a8a2ff] hover:text-black hover:border-[#a8a2ff]",
+      "bg-[#15803D]/5 text-[#15803D] border border-[#15803D]/20 hover:bg-[#15803D] hover:text-[#FFFFFF] hover:border-[#15803D]",
   };
 
   const appliedVariant = variant === "outline" ? "secondary" : variant;
@@ -59,7 +59,7 @@ export function Button({
   const content = (
     <>
       {loading ? (
-        <div className="h-3 w-3 border-[1.5px] border-[#8e928f] border-t-current animate-spin rounded-full shrink-0" />
+        <div className="h-3 w-3 border-[1.5px] border-current/30 border-t-current animate-spin rounded-full shrink-0" />
       ) : (
         leftIcon && <span className={size === "icon" ? "" : "shrink-0"}>{leftIcon}</span>
       )}

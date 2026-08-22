@@ -25,7 +25,7 @@ export default function TestAuthPage() {
   if (!user) return <div>Not logged in</div>;
 
   return (
-    <div className="p-8 bg-black text-white">
+    <div className="p-8 bg-[#FFFFFF] text-[#0D0D0D]">
       <h1>Test Auth</h1>
       <pre>{JSON.stringify(userProfile, null, 2)}</pre>
       <h2>API Result</h2>

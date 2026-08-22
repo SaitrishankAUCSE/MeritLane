@@ -36,36 +36,36 @@ export default function CandidateProvenancePage() {
 
   if (loading || fetching) {
     return (
-      <div className="h-full w-full flex items-center justify-center bg-[#0b0c0e]">
-        <div className="h-4 w-4 border-2 border-[#8e928f] border-t-white animate-spin rounded-full"></div>
+      <div className="h-full w-full flex items-center justify-center bg-[#FAFAFA]">
+        <div className="h-4 w-4 border-2 border-[#737373] border-t-[#0D0D0D] animate-spin rounded-full"></div>
       </div>
     );
   }
 
   if (!candidate) {
     return (
-      <div className="h-full w-full flex items-center justify-center bg-[#0b0c0e] text-[#8e928f] font-mono text-[11px] uppercase tracking-widest">
+      <div className="h-full w-full flex items-center justify-center bg-[#FAFAFA] text-[#737373] font-mono text-[11px] uppercase tracking-widest">
         Profile not initialized.
       </div>
     );
   }
 
   return (
-    <div className="flex h-full w-full flex-col bg-[#0b0c0e] overflow-hidden">
+    <div className="flex h-full w-full flex-col bg-[#FAFAFA] overflow-hidden">
       
       {/* Provenance Header */}
-      <div className="shrink-0 px-10 py-10 border-b border-[#272a2f] flex justify-between items-end">
+      <div className="shrink-0 px-10 py-10 border-b border-[#E5E5E5] flex justify-between items-end">
         <div>
-          <div className="text-[14px] font-sans font-medium text-[#8e928f] mb-3">
+          <div className="text-[14px] font-sans font-medium text-[#737373] mb-3">
             Output Layer
           </div>
-          <h1 className="font-serif text-[32px] text-white leading-tight">Provenance Record</h1>
+          <h1 className="font-serif text-[32px] text-[#0D0D0D] leading-tight">Provenance Record</h1>
         </div>
         <div className="flex gap-4">
-          <button className="px-5 py-2 border border-[#444846] text-[#8e928f] hover:text-white hover:border-white rounded-md text-[14px] font-sans font-medium transition-all">
+          <button className="px-5 py-2 border border-[#D2D2D2] text-[#737373] hover:text-[#0D0D0D] hover:border-[#0D0D0D] rounded-md text-[14px] font-sans font-medium transition-all">
             Copy public link
           </button>
-          <a href={`/p/${user!.uid}`} target="_blank" rel="noreferrer" className="px-5 py-2 border border-white bg-white text-black hover:bg-black hover:text-white rounded-md text-[14px] font-sans font-medium transition-all">
+          <a href={`/p/${user!.uid}`} target="_blank" rel="noreferrer" className="px-5 py-2 border border-[#0D0D0D] bg-[#0D0D0D] text-[#FFFFFF] hover:bg-[#222222] hover:text-[#FFFFFF] rounded-md text-[14px] font-sans font-medium transition-all">
             View public record
           </a>
         </div>
@@ -73,7 +73,7 @@ export default function CandidateProvenancePage() {
 
       {/* Public Record Preview container */}
       <div className="flex-1 overflow-y-auto scrollbar-hide">
-        <div className="pointer-events-none opacity-90 scale-[0.98] origin-top max-w-[1400px] mx-auto mt-10 border border-[#272a2f] rounded-2xl overflow-hidden shadow-2xl">
+        <div className="pointer-events-none opacity-90 scale-[0.98] origin-top max-w-[1400px] mx-auto mt-10 border border-[#E5E5E5] rounded-2xl overflow-hidden shadow-2xl">
           <PublicProofRecord id={user!.uid} candidate={candidate} user={userDoc || {}} hideHeader={true} />
         </div>
       </div>

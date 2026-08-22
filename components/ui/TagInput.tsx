@@ -97,14 +97,14 @@ export function TagInput({
         {tags.map((tag, idx) => (
           <span
             key={idx}
-            className="inline-flex items-center gap-1.5 border border-[#444846] bg-[#181a1f] px-2.5 py-1 rounded-sm font-mono text-[12px] text-white select-none"
+            className="inline-flex items-center gap-1.5 border border-[#D2D2D2] bg-[#181a1f] px-2.5 py-1 rounded-sm font-mono text-[12px] text-[#0D0D0D] select-none"
           >
             {tag}
             {!disabled && (
               <button
                 type="button"
                 onClick={() => removeTag(idx)}
-                className="text-[#8e928f] hover:text-white focus:outline-none focus-visible:ring-1 focus-visible:ring-white rounded-sm transition-colors"
+                className="text-[#737373] hover:text-[#0D0D0D] focus:outline-none focus-visible:ring-1 focus-visible:ring-white rounded-sm transition-colors"
                 aria-label={`Remove ${tag}`}
                 disabled={disabled}
               >
@@ -130,12 +130,12 @@ export function TagInput({
       </div>
 
       {showDropdown && filteredOptions.length > 0 && (
-        <div className="absolute top-[calc(100%+4px)] left-0 w-full max-h-[250px] overflow-y-auto bg-[#181a1f] border border-[#272a2f] rounded-md shadow-2xl z-50 py-1 scrollbar-hide">
+        <div className="absolute top-[calc(100%+4px)] left-0 w-full max-h-[250px] overflow-y-auto bg-[#181a1f] border border-[#E5E5E5] rounded-md shadow-2xl z-50 py-1 scrollbar-hide">
           {filteredOptions.map((opt, idx) => (
             <div
               key={idx}
               onClick={() => addTag(opt)}
-              className="px-4 py-2.5 text-[14px] font-sans text-[#e3e2e5] hover:bg-[#272a2f] hover:text-white cursor-pointer transition-colors"
+              className="px-4 py-2.5 text-[14px] font-sans text-[#0D0D0D] hover:bg-[#E5E5E5] hover:text-[#0D0D0D] cursor-pointer transition-colors"
             >
               {opt}
             </div>

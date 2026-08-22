@@ -107,19 +107,19 @@ export function Autocomplete({
       </div>
 
       {isOpen && (
-        <div className="absolute top-[calc(100%+4px)] left-0 w-full max-h-[250px] overflow-y-auto bg-[#181a1f] border border-[#272a2f] rounded-md shadow-2xl z-50 py-1 scrollbar-hide">
+        <div className="absolute top-[calc(100%+4px)] left-0 w-full max-h-[250px] overflow-y-auto bg-[#181a1f] border border-[#E5E5E5] rounded-md shadow-2xl z-50 py-1 scrollbar-hide">
           {results.length > 0 ? (
             results.map((res, idx) => (
               <div
                 key={idx}
                 onClick={() => handleSelect(res)}
-                className="px-4 py-2.5 text-[14px] font-sans text-[#e3e2e5] hover:bg-[#272a2f] hover:text-white cursor-pointer transition-colors"
+                className="px-4 py-2.5 text-[14px] font-sans text-[#0D0D0D] hover:bg-[#E5E5E5] hover:text-[#0D0D0D] cursor-pointer transition-colors"
               >
                 {res}
               </div>
             ))
           ) : (
-            <div className="px-4 py-3 text-[13px] text-[#8e928f] italic font-sans">
+            <div className="px-4 py-3 text-[13px] text-[#737373] italic font-sans">
               {isLoading ? "Searching..." : "No matches found."}
             </div>
           )}

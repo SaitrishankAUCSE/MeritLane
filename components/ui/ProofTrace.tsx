@@ -171,7 +171,7 @@ export function ProofTrace({
               </div>
               <button 
                 onClick={() => setExpanded(false)}
-                className="text-zinc-500 hover:text-white transition-colors"
+                className="text-zinc-500 hover:text-[#0D0D0D] transition-colors"
                 aria-label="Close trace"
               >
                 <X className="h-4 w-4" />

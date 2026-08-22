@@ -23,15 +23,15 @@ export function CandidateSidebar() {
   ];
 
   return (
-    <aside className={`scrollbar-hide hidden lg:flex shrink-0 flex-col border-r border-[#272a2f] bg-[#0b0c0e] h-[100dvh] overflow-y-auto transition-all duration-300 ${isCollapsed ? "w-[80px]" : "w-[220px]"}`}>
+    <aside className={`scrollbar-hide hidden lg:flex shrink-0 flex-col border-r border-[#E5E5E5] bg-[#FAFAFA] h-[100dvh] overflow-y-auto transition-all duration-300 ${isCollapsed ? "w-[80px]" : "w-[220px]"}`}>
       {/* Brand */}
       <div className={`flex h-20 items-center shrink-0 ${isCollapsed ? "justify-center px-0" : "px-8"}`}>
         {isCollapsed ? (
-          <div className="font-serif text-[26px] font-medium tracking-tight text-white">M</div>
+          <div className="font-serif text-[26px] font-medium tracking-tight text-[#0D0D0D]">M</div>
         ) : (
           <div>
-            <div className="font-serif text-[26px] font-medium tracking-tight text-white mb-1">Meritlane</div>
-            <div className="font-mono text-[9px] tracking-[0.2em] text-[#8e928f] uppercase">System of Record</div>
+            <div className="font-serif text-[26px] font-medium tracking-tight text-[#0D0D0D] mb-1">Meritlane</div>
+            <div className="font-mono text-[9px] tracking-[0.2em] text-[#737373] uppercase">System of Record</div>
           </div>
         )}
       </div>
@@ -48,11 +48,11 @@ export function CandidateSidebar() {
                 key={item.name}
                 href={item.href}
                 title={isCollapsed ? item.name : undefined}
-                className={`flex items-center py-2 h-10 text-[14px] font-sans text-white bg-[#111316] relative transition-colors ${isCollapsed ? "justify-center px-0 rounded-md mx-1" : "px-4"}`}
+                className={`flex items-center py-2 h-10 text-[14px] font-sans text-[#0D0D0D] bg-[#FFFFFF] relative transition-colors ${isCollapsed ? "justify-center px-0 rounded-md mx-1" : "px-4"}`}
               >
                 <Icon className={`h-[18px] w-[18px] ${isCollapsed ? "" : "mr-4"}`} />
                 {!isCollapsed && item.name}
-                <div className={`absolute bg-white ${isCollapsed ? "left-0 top-1/2 -translate-y-1/2 h-4 w-[2px] rounded-r-md" : "right-0 top-0 bottom-0 w-[1px]"}`} />
+                <div className={`absolute bg-[#0D0D0D] ${isCollapsed ? "left-0 top-1/2 -translate-y-1/2 h-4 w-[2px] rounded-r-md" : "right-0 top-0 bottom-0 w-[1px]"}`} />
               </Link>
             )
           }
@@ -62,7 +62,7 @@ export function CandidateSidebar() {
               key={item.name}
               href={item.href}
               title={isCollapsed ? item.name : undefined}
-              className={`flex items-center py-2 h-10 text-[14px] font-sans text-[#8e928f] hover:text-[#f4f4f2] hover:bg-[#111316]/50 transition-colors relative ${isCollapsed ? "justify-center px-0 rounded-md mx-1" : "px-4"}`}
+              className={`flex items-center py-2 h-10 text-[14px] font-sans text-[#737373] hover:text-[#f4f4f2] hover:bg-[#FFFFFF]/50 transition-colors relative ${isCollapsed ? "justify-center px-0 rounded-md mx-1" : "px-4"}`}
             >
               <Icon className={`h-[18px] w-[18px] opacity-70 ${isCollapsed ? "" : "mr-4"}`} />
               {!isCollapsed && item.name}
@@ -72,43 +72,43 @@ export function CandidateSidebar() {
       </nav>
 
       {/* Bottom Nav / Action */}
-      <div className={`py-6 border-t border-[#272a2f] shrink-0 ${isCollapsed ? "px-2 flex flex-col items-center" : "px-6"}`}>
+      <div className={`py-6 border-t border-[#E5E5E5] shrink-0 ${isCollapsed ? "px-2 flex flex-col items-center" : "px-6"}`}>
         {!isCollapsed ? (
           <button 
             onClick={() => router.push('/candidate/profile')}
-            className="flex items-center gap-2 w-full text-left py-2 text-[#e3e2e5] hover:text-white transition-colors mb-6"
+            className="flex items-center gap-2 w-full text-left py-2 text-[#0D0D0D] hover:text-[#0D0D0D] transition-colors mb-6"
           >
-            <span className="font-mono text-[11px] text-white font-bold">[+]</span>
+            <span className="font-mono text-[11px] text-[#0D0D0D] font-bold">[+]</span>
             <span className="font-sans text-[11px] font-bold uppercase tracking-[0.1em]">Add evidence</span>
           </button>
         ) : (
           <button 
             onClick={() => router.push('/candidate/profile')}
             title="Add evidence"
-            className="flex items-center justify-center p-2 mb-6 text-[#e3e2e5] hover:text-white hover:bg-[#111316]/50 rounded-md transition-colors"
+            className="flex items-center justify-center p-2 mb-6 text-[#0D0D0D] hover:text-[#0D0D0D] hover:bg-[#FFFFFF]/50 rounded-md transition-colors"
           >
-            <span className="font-mono text-[11px] text-white font-bold">[+]</span>
+            <span className="font-mono text-[11px] text-[#0D0D0D] font-bold">[+]</span>
           </button>
         )}
         
         <div className={`space-y-3 mb-6 ${isCollapsed ? "w-full space-y-2" : ""}`}>
-          <Link href="/candidate/settings" title={isCollapsed ? "Settings" : undefined} className={`flex items-center text-[14px] font-sans text-[#8e928f] hover:text-white transition-colors ${isCollapsed ? "justify-center p-2 rounded-md hover:bg-[#111316]/50" : ""}`}>
+          <Link href="/candidate/settings" title={isCollapsed ? "Settings" : undefined} className={`flex items-center text-[14px] font-sans text-[#737373] hover:text-[#0D0D0D] transition-colors ${isCollapsed ? "justify-center p-2 rounded-md hover:bg-[#FFFFFF]/50" : ""}`}>
             <Settings className={`h-[18px] w-[18px] opacity-70 ${isCollapsed ? "" : "mr-4"}`} /> 
             {!isCollapsed && "Settings"}
           </Link>
-          <Link href="/candidate/support" title={isCollapsed ? "Support" : undefined} className={`flex items-center text-[14px] font-sans text-[#8e928f] hover:text-white transition-colors ${isCollapsed ? "justify-center p-2 rounded-md hover:bg-[#111316]/50" : ""}`}>
+          <Link href="/candidate/support" title={isCollapsed ? "Support" : undefined} className={`flex items-center text-[14px] font-sans text-[#737373] hover:text-[#0D0D0D] transition-colors ${isCollapsed ? "justify-center p-2 rounded-md hover:bg-[#FFFFFF]/50" : ""}`}>
             <HelpCircle className={`h-[18px] w-[18px] opacity-70 ${isCollapsed ? "" : "mr-4"}`} /> 
             {!isCollapsed && "Support"}
           </Link>
         </div>
 
-        <div className={`flex items-center ${isCollapsed ? "justify-center" : "justify-between"} pt-6 border-t border-[#272a2f] mb-4`}>
+        <div className={`flex items-center ${isCollapsed ? "justify-center" : "justify-between"} pt-6 border-t border-[#E5E5E5] mb-4`}>
           <div className="flex items-center gap-3 cursor-pointer group" onClick={() => router.push('/candidate/settings')}>
-            <div className="h-8 w-8 rounded-full bg-[#1b1c1e] border border-[#272a2f] group-hover:border-[#8e928f] flex items-center justify-center overflow-hidden text-xs transition-colors shrink-0">
+            <div className="h-8 w-8 rounded-full bg-[#1b1c1e] border border-[#E5E5E5] group-hover:border-[#737373] flex items-center justify-center overflow-hidden text-xs transition-colors shrink-0">
               {avatarUrl ? <img src={avatarUrl} alt="Profile" className="h-full w-full object-cover" /> : name.charAt(0).toUpperCase()}
             </div>
             {!isCollapsed && (
-              <div className="text-[13px] text-[#e3e2e5] font-medium truncate group-hover:text-white transition-colors">
+              <div className="text-[13px] text-[#0D0D0D] font-medium truncate group-hover:text-[#0D0D0D] transition-colors">
                 {name}
               </div>
             )}
@@ -118,7 +118,7 @@ export function CandidateSidebar() {
           {!isCollapsed && (
             <button
               onClick={() => setIsCollapsed(!isCollapsed)}
-              className="p-1.5 text-[#8e928f] hover:text-white hover:bg-[#111316] rounded-md transition-colors shrink-0"
+              className="p-1.5 text-[#737373] hover:text-[#0D0D0D] hover:bg-[#FFFFFF] rounded-md transition-colors shrink-0"
               title="Collapse Sidebar"
             >
               <PanelLeftClose className="h-[18px] w-[18px]" />
@@ -130,7 +130,7 @@ export function CandidateSidebar() {
           <div className="flex justify-center mt-2">
             <button
               onClick={() => setIsCollapsed(!isCollapsed)}
-              className="p-1.5 text-[#8e928f] hover:text-white hover:bg-[#111316] rounded-md transition-colors"
+              className="p-1.5 text-[#737373] hover:text-[#0D0D0D] hover:bg-[#FFFFFF] rounded-md transition-colors"
               title="Expand Sidebar"
             >
               <PanelLeftOpen className="h-[18px] w-[18px]" />

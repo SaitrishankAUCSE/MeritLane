@@ -81,10 +81,10 @@ export function ProfileForm({ initialData, onSave, onCancel, isNew = false }: Pr
   };
 
   return (
-    <form onSubmit={handleSubmit} className="border border-[#272a2f] bg-[#111316] rounded-md p-6 sm:p-8 space-y-8 shadow-2xl">
+    <form onSubmit={handleSubmit} className="border border-[#E5E5E5] bg-[#FFFFFF] rounded-md p-6 sm:p-8 space-y-8 shadow-2xl">
       <div>
-        <h2 className="font-serif text-[24px] text-white mb-2">{isNew ? "Establish your identity" : "Edit your identity"}</h2>
-        <p className="text-[14px] text-[#8e928f] font-sans">
+        <h2 className="font-serif text-[24px] text-[#0D0D0D] mb-2">{isNew ? "Establish your identity" : "Edit your identity"}</h2>
+        <p className="text-[14px] text-[#737373] font-sans">
           This information forms the base of your verified technical record. Ensure your details are accurate.
         </p>
       </div>
@@ -131,8 +131,8 @@ export function ProfileForm({ initialData, onSave, onCancel, isNew = false }: Pr
           />
         </div>
 
-        <div className="pt-2 border-t border-[#272a2f]">
-          <h3 className="font-sans font-medium text-[14px] text-white mb-4">Technical Claims</h3>
+        <div className="pt-2 border-t border-[#E5E5E5]">
+          <h3 className="font-sans font-medium text-[14px] text-[#0D0D0D] mb-4">Technical Claims</h3>
           <div className="mb-6">
             <TagInput
               label="Skills & Domains"
@@ -145,8 +145,8 @@ export function ProfileForm({ initialData, onSave, onCancel, isNew = false }: Pr
           </div>
         </div>
 
-        <div className="pt-2 border-t border-[#272a2f]">
-          <h3 className="font-sans font-medium text-[14px] text-white mb-4">External Evidence</h3>
+        <div className="pt-2 border-t border-[#E5E5E5]">
+          <h3 className="font-sans font-medium text-[14px] text-[#0D0D0D] mb-4">External Evidence</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <Input
               label="GitHub URL"
@@ -168,7 +168,7 @@ export function ProfileForm({ initialData, onSave, onCancel, isNew = false }: Pr
         </div>
       </div>
 
-      <div className="flex items-center justify-end gap-4 pt-6 border-t border-[#272a2f]">
+      <div className="flex items-center justify-end gap-4 pt-6 border-t border-[#E5E5E5]">
         {!isNew && onCancel && (
           <Button type="button" variant="secondary" onClick={onCancel}>
             Cancel

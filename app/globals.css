@@ -1,27 +1,28 @@
 @import "tailwindcss";
 
 :root {
-  --color-void: #0b0c0e;
-  --color-background: #0b0c0e;
-  --color-surface: #111316;
-  --color-surface-dim: #121315;
-  --color-surface-bright: #38393b;
-  --color-surface-container-lowest: #0d0e10;
-  --color-surface-container-low: #1b1c1e;
-  --color-surface-container: #1f2022;
-  --color-surface-container-high: #292a2c;
-  --color-surface-container-highest: #343537;
-  --color-foreground: #e3e2e5;
-  --color-muted: #1b1c1e;
-  --color-muted-foreground: #c4c7c5;
-  --color-border: #272a2f;
-  --color-outline: #8e928f;
-  --color-primary: #ffffff;
-  --color-primary-foreground: #2f3130;
-  --color-accent: #a8a2ff;
-  --color-success: #8ba889;
-  --color-warning: #c49e6e;
-  --color-danger: #ffb4ab;
+  --color-void: #FAFAFA;
+  --color-background: #FAFAFA;
+  --color-surface: #FFFFFF;
+  --color-surface-dim: #F3F3F1;
+  --color-surface-bright: #FFFFFF;
+  --color-surface-container-lowest: #FFFFFF;
+  --color-surface-container-low: #F3F3F1;
+  --color-surface-container: #FFFFFF;
+  --color-surface-container-high: #EAEAE7;
+  --color-surface-container-highest: #E5E5E5;
+  --color-foreground: #0D0D0D;
+  --color-muted: #F3F3F1;
+  --color-muted-foreground: #737373;
+  --color-border: #E5E5E5;
+  --color-outline: #D2D2D2;
+  --color-primary: #0D0D0D;
+  --color-primary-foreground: #FFFFFF;
+  --color-accent: #15803D;
+  --color-success: #15803D;
+  --color-warning: #A16207;
+  --color-danger: #B42318;
+  --color-info: #475569;
 }
 
 @theme inline {
@@ -46,6 +47,7 @@
   --color-success: var(--color-success);
   --color-warning: var(--color-warning);
   --color-danger: var(--color-danger);
+  --color-info: var(--color-info);
 
   --font-sans: var(--font-hanken), "Hanken Grotesk", system-ui, sans-serif;
   --font-serif: var(--font-source-serif), "Source Serif 4", Georgia, serif;

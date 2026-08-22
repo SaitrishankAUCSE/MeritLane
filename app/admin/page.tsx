@@ -471,9 +471,9 @@ export default function AdminDashboardPage() {
     <div className="min-h-[calc(100vh-64px)] pb-24 pt-12">
       {/* Toast Notification */}
       {successToast && (
-        <div className="fixed top-20 right-6 z-50 rounded-md border border-zinc-700 bg-foreground px-4 py-2 h-10 text-xs font-semibold text-white shadow-lg animate-in fade-in slide-in-from-top-2 duration-150">
+        <div className="fixed top-20 right-6 z-50 rounded-md border border-zinc-700 bg-foreground px-4 py-2 h-10 text-xs font-semibold text-[#0D0D0D] shadow-lg animate-in fade-in slide-in-from-top-2 duration-150">
           <div className="flex items-center gap-2">
-            <CheckCircle2 className="h-4 w-4 text-white" />
+            <CheckCircle2 className="h-4 w-4 text-[#0D0D0D]" />
             <span>{successToast}</span>
           </div>
         </div>
@@ -487,7 +487,7 @@ export default function AdminDashboardPage() {
               <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
                 Administrator Command Center
               </h1>
-              <span className="rounded-md border border-zinc-800 bg-zinc-950 px-2.5 py-0.5 text-xs font-semibold text-white">
+              <span className="rounded-md border border-zinc-800 bg-zinc-950 px-2.5 py-0.5 text-xs font-semibold text-[#0D0D0D]">
                 Superadmin
               </span>
             </div>
@@ -1049,7 +1049,7 @@ export default function AdminDashboardPage() {
                     size="sm"
                     onClick={handleExecuteWipe}
                     loading={wipeLoading}
-                    className="bg-red-600 hover:bg-red-700 text-white border-transparent shadow-sm"
+                    className="bg-red-600 hover:bg-red-700 text-[#0D0D0D] border-transparent shadow-sm"
                     leftIcon={<Trash2 className="h-4 w-4" />}
                   >
                     Confirm & Wipe All Test Users
