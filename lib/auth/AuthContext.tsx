@@ -91,13 +91,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   }, [user, loadProfile]);
 
   const handleSignOut = useCallback(async () => {
-    if (window.confirm("Are you sure you want to sign out?")) {
-      try {
-        await signOut(auth);
-        window.location.href = "/";
-      } catch (error) {
-        console.error("Error signing out:", error);
-      }
+    try {
+      await signOut(auth);
+      window.location.href = "/";
+    } catch (error) {
+      console.error("Error signing out:", error);
     }
   }, []);
 

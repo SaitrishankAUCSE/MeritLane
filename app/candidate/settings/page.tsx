@@ -1,15 +1,16 @@
 "use client";
 
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useAuth } from "@/lib/auth/AuthContext";
-import { auth } from "@/lib/firebase/config";
-import { signOut } from "firebase/auth";
 import { useRouter } from "next/navigation";
-import { LogOut, User as UserIcon, Mail, Key } from "lucide-react";
+import { LogOut, User as UserIcon, Mail, Key, ShieldAlert } from "lucide-react";
 
 export default function SettingsPage() {
   const { user, userProfile, loading, profileLoading, handleSignOut } = useAuth();
   const router = useRouter();
+  
+  const [confirmSignOut, setConfirmSignOut] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(false);
 
   useEffect(() => {
     if (!loading && !profileLoading && (!user || !userProfile)) {
@@ -89,7 +90,7 @@ export default function SettingsPage() {
                 <span className="block text-sm font-semibold text-[#0D0D0D]">Two-Factor Authentication</span>
                 <span className="block text-xs text-[#666666]">Add an extra layer of security to your account</span>
               </div>
-              <button className="text-xs font-semibold uppercase tracking-widest px-4 py-2 bg-[#0D0D0D] text-[#FFFFFF] hover:bg-[#0D0D0D] rounded-md transition-colors">
+              <button className="text-xs font-semibold uppercase tracking-widest px-4 py-2 bg-[#0D0D0D] text-[#FFFFFF] hover:bg-[#222222] rounded-md transition-colors">
                 Enable
               </button>
             </div>
@@ -133,28 +134,84 @@ export default function SettingsPage() {
           </div>
         </div>
 
-        <div className="border border-red-900/30 bg-red-950/10 rounded-xl overflow-hidden">
-          <div className="border-b border-red-900/30 px-6 py-5">
-            <h2 className="text-base font-bold text-red-500">Active Session &amp; Danger Zone</h2>
-            <p className="mt-1 text-xs text-red-400/70">
-              Terminate your current session or delete your identity record.
+        {/* Professional Session Management Block */}
+        <div className="border border-[#E5E5E5] bg-[#FFFFFF] rounded-xl overflow-hidden">
+          <div className="border-b border-[#E5E5E5] px-6 py-5">
+            <h2 className="text-base font-bold text-[#0D0D0D] flex items-center gap-2">
+              Session Management
+            </h2>
+            <p className="mt-1 text-xs text-[#666666]">
+              Control your active session or permanently erase your verified identity record.
             </p>
           </div>
-          <div className="px-6 py-5 flex items-center gap-4">
-            <button
-              onClick={handleSignOut}
-              className="flex items-center gap-2 bg-transparent border border-red-900/50 text-red-500 hover:bg-red-950/30 hover:text-red-400 px-4 py-2 rounded-md text-xs font-bold uppercase tracking-widest transition-colors"
-            >
-              <LogOut className="h-4 w-4" />
-              Sign Out
-            </button>
-            <button
-              className="flex items-center gap-2 bg-red-500 text-[#0D0D0D] hover:bg-red-600 px-4 py-2 rounded-md text-xs font-bold uppercase tracking-widest transition-colors"
-            >
-              Delete Account
-            </button>
+          <div className="px-6 py-5 space-y-4">
+            
+            {/* Sign Out Row */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-[#E5E5E5] pb-4">
+              <div className="space-y-1 mb-4 sm:mb-0">
+                <span className="block text-sm font-semibold text-[#0D0D0D]">Sign Out</span>
+                <span className="block text-xs text-[#666666]">Securely end your current session on this device.</span>
+              </div>
+              {confirmSignOut ? (
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => setConfirmSignOut(false)}
+                    className="text-xs font-semibold uppercase tracking-widest px-4 py-2 text-[#737373] hover:text-[#0D0D0D] transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleSignOut}
+                    className="text-xs font-semibold uppercase tracking-widest px-4 py-2 bg-[#0D0D0D] text-[#FFFFFF] hover:bg-[#222222] rounded-md transition-colors shadow-sm"
+                  >
+                    Confirm Sign Out
+                  </button>
+                </div>
+              ) : (
+                <button
+                  onClick={() => setConfirmSignOut(true)}
+                  className="flex items-center gap-2 text-xs font-semibold uppercase tracking-widest px-4 py-2 border border-[#E5E5E5] hover:bg-[#F3F3F1] text-[#0D0D0D] rounded-md transition-colors"
+                >
+                  <LogOut className="h-3.5 w-3.5" />
+                  Sign Out
+                </button>
+              )}
+            </div>
+
+            {/* Delete Account Row */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between">
+              <div className="space-y-1 mb-4 sm:mb-0">
+                <span className="block text-sm font-semibold text-[#0D0D0D]">Delete Account</span>
+                <span className="block text-xs text-[#666666]">Permanently remove your identity and destroy all evidence.</span>
+              </div>
+              {confirmDelete ? (
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => setConfirmDelete(false)}
+                    className="text-xs font-semibold uppercase tracking-widest px-4 py-2 text-[#737373] hover:text-[#0D0D0D] transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    className="flex items-center gap-2 text-xs font-semibold uppercase tracking-widest px-4 py-2 border border-[#B42318] bg-[#B42318]/10 text-[#B42318] hover:bg-[#B42318] hover:text-[#FFFFFF] rounded-md transition-colors shadow-sm"
+                  >
+                    <ShieldAlert className="h-3.5 w-3.5" />
+                    Confirm Deletion
+                  </button>
+                </div>
+              ) : (
+                <button
+                  onClick={() => setConfirmDelete(true)}
+                  className="text-xs font-semibold uppercase tracking-widest px-4 py-2 border border-[#E5E5E5] hover:border-[#D2D2D2] text-[#737373] hover:text-[#0D0D0D] rounded-md transition-colors"
+                >
+                  Delete Account
+                </button>
+              )}
+            </div>
+            
           </div>
         </div>
+        
       </div>
     </div>
   );
