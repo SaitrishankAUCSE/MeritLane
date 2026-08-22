@@ -35,11 +35,10 @@ export const COMMON_SKILLS = [
 export const fetchIndianColleges = async (query: string): Promise<string[]> => {
   if (!query || query.length < 2) return [];
   try {
-    const res = await fetch(`http://universities.hipolabs.com/search?country=India&name=${encodeURIComponent(query)}`);
+    const res = await fetch(`/api/colleges?q=${encodeURIComponent(query)}`);
     if (!res.ok) return [];
     const data = await res.json();
-    const names = Array.from(new Set(data.map((item: any) => item.name))) as string[];
-    return names.slice(0, 50);
+    return data.colleges || [];
   } catch (e) {
     return [];
   }
