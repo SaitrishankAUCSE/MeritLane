@@ -25,7 +25,9 @@ export default function Navbar() {
     pathname?.startsWith("/candidate") || 
     pathname?.startsWith("/employer") || 
     pathname?.startsWith("/admin") ||
-    pathname?.startsWith("/proof")
+    pathname?.startsWith("/proof") ||
+    pathname === "/login" ||
+    pathname === "/signup"
   ) {
     return null;
   }
