@@ -83,7 +83,7 @@ export default function EmployerDashboardPage() {
                       <span className="text-[10px] font-sans font-bold uppercase tracking-[0.1em] text-[#0D0D0D]">Source: Peer Assessment</span>
                       <Users className="h-4 w-4 text-[#737373]" />
                     </div>
-                    <p className="font-serif text-[26px] text-[#0D0D0D] italic leading-[1.3] mb-8">
+                    <p className="font-cormorant text-[26px] text-[#0D0D0D] italic leading-[1.3] mb-8">
                       "Exceptional grasp of memory safety and concurrency models."
                     </p>
                     <div className="border-t border-[#E5E5E5] pt-5 flex justify-between">
@@ -181,3 +181,4 @@ export default function EmployerDashboardPage() {
     </div>
   );
 }
+

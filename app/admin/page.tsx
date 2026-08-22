@@ -488,7 +488,7 @@ export default function AdminDashboardPage() {
         <div className="flex flex-col justify-between gap-4 border-b border-border pb-6 sm:flex-row sm:items-center">
           <div>
             <div className="flex items-center gap-3">
-              <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
+              <h1 className="text-2xl font-serif tracking-tight text-foreground sm:text-3xl">
                 Administrator Command Center
               </h1>
               <span className="rounded-md border border-zinc-800 bg-zinc-950 px-2.5 py-0.5 text-xs font-semibold text-[#0D0D0D]">
@@ -1084,5 +1084,6 @@ export default function AdminDashboardPage() {
     </div>
   );
 }
+
 
 

@@ -96,7 +96,7 @@ export default function CandidateDashboardPage() {
             <div className="border border-[#E5E5E5] bg-[#FFFFFF] p-6 rounded-lg group hover:border-[#D2D2D2] transition-colors">
               <div className="flex items-start justify-between mb-6">
                 <div>
-                  <h3 className="text-[16px] font-serif text-[#0D0D0D] mb-1">House Price Prediction Model</h3>
+                  <h3 className="text-[16px] font-sans font-medium text-[#0D0D0D] mb-1">House Price Prediction Model</h3>
                   <div className="text-[12px] font-sans font-medium text-[#666666] flex items-center gap-2">
                     <FileCheck className="h-3.5 w-3.5" /> Project Repository
                   </div>
@@ -124,7 +124,7 @@ export default function CandidateDashboardPage() {
             <div className="border border-[#E5E5E5] bg-[#FFFFFF] p-6 rounded-lg group hover:border-[#D2D2D2] transition-colors">
               <div className="flex items-start justify-between mb-6">
                 <div>
-                  <h3 className="text-[16px] font-serif text-[#0D0D0D] mb-1">E-Commerce Frontend Architecture</h3>
+                  <h3 className="text-[16px] font-sans font-medium text-[#0D0D0D] mb-1">E-Commerce Frontend Architecture</h3>
                   <div className="text-[12px] font-sans font-medium text-[#666666] flex items-center gap-2">
                     <Code className="h-3.5 w-3.5" /> GitHub Commits
                   </div>
@@ -155,4 +155,5 @@ export default function CandidateDashboardPage() {
     </div>
   );
 }
+
 
