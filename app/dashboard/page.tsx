@@ -68,11 +68,8 @@ export default function DashboardRouter() {
   }, [user, role, loading, profileLoading, router]);
 
   return (
-    <div className="flex min-h-[calc(100vh-64px)] items-center justify-center">
-      <div className="flex flex-col items-center gap-4">
-        <Loader2 className="h-8 w-8 animate-spin text-zinc-400" />
-        <p className="text-sm text-zinc-500">Loading your workspace...</p>
-      </div>
+    <div className="flex h-screen w-full items-center justify-center bg-[#0b0c0e]">
+      <div className="h-4 w-4 border-2 border-[#8e928f] border-t-white animate-spin rounded-full"></div>
     </div>
   );
 }

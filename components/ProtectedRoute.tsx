@@ -73,9 +73,8 @@ export default function ProtectedRoute({ children, allowedRoles }: ProtectedRout
 
   if (!isAuthorized) {
     return (
-      <div className="flex min-h-[50vh] flex-col items-center justify-center space-y-4">
-        <Loader2 className="h-8 w-8 animate-spin text-zinc-400" />
-        <p className="text-sm font-medium text-zinc-500">Verifying access...</p>
+      <div className="flex h-screen w-full items-center justify-center bg-[#0b0c0e]">
+        <div className="h-4 w-4 border-2 border-[#8e928f] border-t-white animate-spin rounded-full"></div>
       </div>
     );
   }

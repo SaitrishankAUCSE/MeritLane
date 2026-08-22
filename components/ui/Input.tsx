@@ -29,7 +29,7 @@ export function Input({
         <input
           id={inputId}
           disabled={disabled}
-          className={`w-full h-[42px] px-3 py-2 bg-surface text-foreground text-[14px] font-sans border rounded-md transition-colors placeholder:text-muted-foreground focus:outline-none focus:border-outline disabled:opacity-50 ${error ? "border-danger text-danger" : "border-border"} ${className}`}
+          className={`w-full h-[42px] px-3 py-2 bg-surface text-foreground text-[14px] font-sans border rounded-md transition-colors placeholder:text-muted-foreground focus:outline-none focus:border-outline focus-visible:ring-1 focus-visible:ring-foreground disabled:opacity-50 ${error ? "border-danger text-danger" : "border-border"} ${className}`}
           {...props}
         />
         {error && (
