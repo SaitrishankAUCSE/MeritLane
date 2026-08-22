@@ -31,7 +31,7 @@ export function SiteFooter() {
           <div>
             <h3 className="font-label text-outline">For Employers</h3>
             <ul className="mt-4 space-y-3 text-sm text-muted-foreground">
-              <li><Link href="/employer/dashboard" className="hover:text-foreground">Post a Role</Link></li>
+              <li><Link href="/employer/dashboard" className="hover:text-foreground">Hire Talent</Link></li>
             </ul>
           </div>
           <div>
