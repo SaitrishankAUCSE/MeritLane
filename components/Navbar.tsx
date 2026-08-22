@@ -15,6 +15,10 @@ export default function Navbar() {
   const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
+  useEffect(() => {
+    setMobileMenuOpen(false);
+  }, [pathname]);
+
   // Hide the global top navbar entirely for authenticated dashboard environments,
   // as they provide their own custom side-navigation and internal layout wrappers.
   if (
@@ -31,10 +35,6 @@ export default function Navbar() {
   const isCandidateProfile = pathname === "/candidate/profile";
   const isPublicProfile = pathname?.startsWith("/p/") ?? false;
   const isEmployerDashboard = pathname === "/employer/dashboard";
-  
-  useEffect(() => {
-    setMobileMenuOpen(false);
-  }, [pathname]);
 
   if (isCandidateDashboard || isCandidateProfile || isPublicProfile || isEmployerDashboard) return null;
 
