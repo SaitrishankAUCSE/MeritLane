@@ -5,29 +5,61 @@ import { useAuth } from "@/lib/auth/AuthContext";
 import { fetchCandidateProfile, CandidateProfile } from "@/lib/firebase/candidate";
 import { useRouter } from "next/navigation";
 import { ShieldCheck, Fingerprint, Link, BookOpen, Briefcase, ChevronRight, PenTool } from "lucide-react";
+import { ProfileForm } from "@/components/candidate/ProfileForm";
 
 export default function CandidateProfilePage() {
   const { user, loading } = useAuth();
   const router = useRouter();
   const [profile, setProfile] = useState<CandidateProfile | null>(null);
+  const [isEditing, setIsEditing] = useState(false);
+  const [isInitializing, setIsInitializing] = useState(true);
 
   useEffect(() => {
     if (!loading && user) {
       fetchCandidateProfile(user.uid)
-        .then((p) => setProfile(p))
-        .catch((err) => console.error(err));
+        .then((p) => {
+          setProfile(p);
+          // If profile is missing fundamental data, force edit mode
+          if (!p || !p.name || !p.skills || p.skills.length === 0) {
+            setIsEditing(true);
+          }
+          setIsInitializing(false);
+        })
+        .catch((err) => {
+          console.error(err);
+          setIsEditing(true);
+          setIsInitializing(false);
+        });
+    } else if (!loading && !user) {
+      router.push("/login");
     }
-  }, [user, loading]);
+  }, [user, loading, router]);
+
+  const handleSave = (updatedProfile: CandidateProfile) => {
+    setProfile(updatedProfile);
+    setIsEditing(false);
+  };
+
+  if (loading || isInitializing) {
+    return <div className="h-full w-full flex items-center justify-center"><div className="h-4 w-4 border-2 border-[#8e928f] border-t-white animate-spin rounded-full"></div></div>;
+  }
+
+  if (isEditing) {
+    return (
+      <div className="mx-auto max-w-3xl px-6 py-12 h-full overflow-y-auto scrollbar-hide">
+        <ProfileForm 
+          initialData={profile} 
+          onSave={handleSave} 
+          onCancel={profile?.name ? () => setIsEditing(false) : undefined}
+          isNew={!profile?.name}
+        />
+      </div>
+    );
+  }
 
   const name = profile?.name || user?.displayName || "Alex Vance";
   const primaryDomain = profile?.skills?.[0] || "Software Engineering";
-  
-  // Mapping skills to claims (mocking statuses since backend only supports global status)
   const skills = profile?.skills || ["Python", "React", "Firebase"];
-  
-  if (loading) {
-    return <div className="h-full w-full flex items-center justify-center"><div className="h-4 w-4 border-2 border-[#8e928f] border-t-white animate-spin rounded-full"></div></div>;
-  }
 
   return (
     <div className="mx-auto max-w-4xl px-6 py-12 h-full overflow-y-auto scrollbar-hide">
@@ -41,7 +73,7 @@ export default function CandidateProfilePage() {
             <h1 className="font-serif text-[32px] sm:text-[40px] text-white leading-tight mb-2">{name}</h1>
             <div className="text-[14px] text-[#e3e2e5] font-sans">{primaryDomain}</div>
           </div>
-          <button className="flex items-center gap-2 px-5 h-10 border border-[#444846] bg-transparent text-[#e3e2e5] hover:text-black hover:bg-white hover:border-white rounded-md text-[14px] font-sans font-medium transition-all">
+          <button onClick={() => setIsEditing(true)} className="flex items-center gap-2 px-5 h-10 border border-[#444846] bg-transparent text-[#e3e2e5] hover:text-black hover:bg-white hover:border-white rounded-md text-[14px] font-sans font-medium transition-all">
             <PenTool className="h-3.5 w-3.5" /> Edit identity
           </button>
         </div>
