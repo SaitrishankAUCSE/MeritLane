@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState, useCallback, useMemo } from "react";
 import { useAuth } from "@/lib/auth/AuthContext";
+import { useRouter } from "next/navigation";
 import { Card, CardHeader, CardContent } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
@@ -33,12 +34,14 @@ import {
   Sparkles,
   Zap,
   CheckCheck,
-  Trash2
+  Trash2,
+  LogOut
 } from "lucide-react";
 import { ReviewConsole } from "@/components/admin/ReviewConsole";
 
 import { collection, onSnapshot, doc, updateDoc, serverTimestamp, getDocs, writeBatch } from "firebase/firestore";
-import { db } from "@/lib/firebase/config";
+import { db, auth } from "@/lib/firebase/config";
+import { signOut } from "firebase/auth";
 
 interface ProjectEntry {
   id: string;
@@ -79,6 +82,7 @@ const FEEDBACK_PRESETS = [
 
 export default function AdminDashboardPage() {
   const { user } = useAuth();
+  const router = useRouter();
   const [candidates, setCandidates] = useState<CandidateAdminRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [hasLoadedCandidates, setHasLoadedCandidates] = useState(false);
@@ -524,6 +528,17 @@ export default function AdminDashboardPage() {
               leftIcon={<RefreshCw className="h-3.5 w-3.5" />}
             >
               Refresh Data
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={async () => {
+                await signOut(auth);
+                router.push("/login");
+              }}
+              leftIcon={<LogOut className="h-3.5 w-3.5" />}
+            >
+              Sign Out
             </Button>
           </div>
         </div>
