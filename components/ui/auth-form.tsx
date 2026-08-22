@@ -122,9 +122,9 @@ const SocialButtons: React.FC<{mode: "login" | "signup"}> = ({mode}) => {
       } else {
         await createUserProfile(userCred.user.uid, {
           email: userCred.user.email || "",
-          name: userCred.user.displayName || "New User",
+          displayName: userCred.user.displayName || "New User",
           role: "candidate",
-          photoURL: userCred.user.photoURL || ""
+          authProvider: "google"
         })
         await refreshProfile()
         router.push("/candidate/dashboard")
@@ -218,9 +218,9 @@ const LoginForm: React.FC<{mode: "login" | "signup"}> = ({mode}) => {
         const userCred = await createUserWithEmailAndPassword(auth, email, password)
         await createUserProfile(userCred.user.uid, {
           email: email,
-          name: email.split("@")[0],
+          displayName: email.split("@")[0],
           role: "candidate",
-          photoURL: ""
+          authProvider: "password"
         })
         await refreshProfile()
         router.push("/candidate/dashboard")
