@@ -1,7 +1,7 @@
 "use client";
 
 import React, { createContext, useContext, useEffect, useState, useCallback } from "react";
-import { User, onAuthStateChanged } from "firebase/auth";
+import { User, onAuthStateChanged, signOut } from "firebase/auth";
 import { auth } from "@/lib/firebase/config";
 import { fetchUserProfile, UserProfile, Role } from "@/lib/firebase/users";
 
@@ -13,6 +13,7 @@ interface AuthContextType {
   loading: boolean;
   profileLoading: boolean;
   refreshProfile: () => Promise<void>;
+  handleSignOut: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -23,6 +24,7 @@ const AuthContext = createContext<AuthContextType>({
   loading: true,
   profileLoading: true,
   refreshProfile: async () => {},
+  handleSignOut: async () => {},
 });
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
@@ -87,6 +89,17 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       await loadProfile(user.uid);
     }
   }, [user, loadProfile]);
+
+  const handleSignOut = useCallback(async () => {
+    if (window.confirm("Are you sure you want to sign out?")) {
+      try {
+        await signOut(auth);
+        window.location.href = "/";
+      } catch (error) {
+        console.error("Error signing out:", error);
+      }
+    }
+  }, []);
 
   useEffect(() => {
     let unsubscribe: (() => void) | undefined;
@@ -164,7 +177,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   }
 
   return (
-    <AuthContext.Provider value={{ user, role, userProfile, isAdmin, loading, profileLoading, refreshProfile }}>
+    <AuthContext.Provider value={{ user, role, userProfile, isAdmin, loading, profileLoading, refreshProfile, handleSignOut }}>
       {children}
     </AuthContext.Provider>
   );

@@ -8,23 +8,14 @@ import { useRouter } from "next/navigation";
 import { LogOut, User as UserIcon, Mail, Key } from "lucide-react";
 
 export default function SettingsPage() {
-  const { user, userProfile, loading, profileLoading } = useAuth();
+  const { user, userProfile, loading, profileLoading, handleSignOut } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
-    if (!loading && !profileLoading && !user) {
+    if (!loading && !profileLoading && (!user || !userProfile)) {
       router.push("/login");
     }
   }, [user, loading, profileLoading, router]);
-
-  const handleSignOut = async () => {
-    try {
-      await signOut(auth);
-      router.push("/");
-    } catch (error) {
-      console.error("Error signing out:", error);
-    }
-  };
 
   if (loading || (user && profileLoading)) {
     return <div className="min-h-[50vh]"></div>;

@@ -10,7 +10,7 @@ import { signOut } from "firebase/auth";
 import { Button } from "@/components/ui/Button";
 
 export default function Navbar() {
-  const { user, userProfile, isAdmin, loading, profileLoading } = useAuth();
+  const { user, userProfile, isAdmin, loading, profileLoading, handleSignOut } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -40,11 +40,6 @@ export default function Navbar() {
 
   const isUserAdmin = isAdmin || user?.email?.toLowerCase() === "saitrishankb9@gmail.com";
   const isResolvingAuth = loading || (!isUserAdmin && user && profileLoading);
-
-  const handleSignOut = async () => {
-    await signOut(auth);
-    router.push("/login");
-  };
 
   const dashboardHref = isUserAdmin
     ? "/admin"

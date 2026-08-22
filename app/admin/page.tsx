@@ -81,7 +81,7 @@ const FEEDBACK_PRESETS = [
 ];
 
 export default function AdminDashboardPage() {
-  const { user } = useAuth();
+  const { user, handleSignOut } = useAuth();
   const router = useRouter();
   const [candidates, setCandidates] = useState<CandidateAdminRecord[]>([]);
   const [loading, setLoading] = useState(true);
@@ -532,10 +532,7 @@ export default function AdminDashboardPage() {
             <Button
               variant="outline"
               size="sm"
-              onClick={async () => {
-                await signOut(auth);
-                router.push("/login");
-              }}
+              onClick={handleSignOut}
               leftIcon={<LogOut className="h-3.5 w-3.5" />}
             >
               Sign Out
@@ -1087,4 +1084,5 @@ export default function AdminDashboardPage() {
     </div>
   );
 }
+
 

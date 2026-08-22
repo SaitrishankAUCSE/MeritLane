@@ -11,7 +11,7 @@ import { signOut } from "firebase/auth";
 const ADMIN_EMAIL = "saitrishankb9@gmail.com";
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
-  const { user, isAdmin, loading, profileLoading } = useAuth();
+  const { user, isAdmin, loading, profileLoading, handleSignOut } = useAuth();
   const router = useRouter();
 
   const isUserAdmin = isAdmin || user?.email?.toLowerCase().trim() === ADMIN_EMAIL;
@@ -52,10 +52,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             <Button
               variant="primary"
               size="sm"
-              onClick={async () => {
-                await signOut(auth);
-                router.push("/login");
-              }}
+              onClick={handleSignOut}
               leftIcon={<LogOut className="h-3.5 w-3.5" />}
             >
               Sign Out &amp; Log In as {ADMIN_EMAIL}
