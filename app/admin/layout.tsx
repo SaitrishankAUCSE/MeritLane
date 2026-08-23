@@ -12,6 +12,7 @@ import { MeritlaneLoader } from "@/components/ui/MeritlaneLoader";
 const ADMIN_EMAIL = "saitrishankb9@gmail.com";
 
 import { MobileNav } from "@/components/ui/MobileNav";
+import { PageTransition } from "@/components/ui/PageTransition";
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const { user, isAdmin, loading, profileLoading, handleSignOut } = useAuth();
@@ -66,7 +67,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     <div className="flex flex-col h-[100dvh] w-full bg-[#FAFAFA] text-[#0D0D0D] font-sans">
       <MobileNav role="admin" />
       <div className="flex-1 overflow-y-auto">
-        {children}
+        <PageTransition>{children}</PageTransition>
       </div>
     </div>
   );

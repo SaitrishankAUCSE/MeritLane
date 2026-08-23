@@ -1,6 +1,7 @@
 "use client"
 
 import * as React from "react"
+import Link from "next/link"
 import { Button } from "@/components/ui/Button"
 import { Input } from "@/components/ui/Input"
 import { Label } from "@/components/ui/label"
@@ -33,7 +34,7 @@ export function Footerdemo() {
             <p className="mb-6 text-muted-foreground font-sans">
               Join our newsletter for the latest platform updates and exclusive features.
             </p>
-            <form className="relative">
+            <form className="relative" onSubmit={(e) => { e.preventDefault(); alert("Subscribed successfully!"); }}>
               <Input
                 type="email"
                 placeholder="Enter your email"
@@ -52,32 +53,18 @@ export function Footerdemo() {
           <div>
             <h3 className="mb-4 text-lg font-serif font-semibold">Platform</h3>
             <nav className="space-y-2 text-sm font-sans">
-              <a href="#" className="block transition-colors hover:text-foreground text-muted-foreground">
-                For Engineers
-              </a>
-              <a href="#" className="block transition-colors hover:text-foreground text-muted-foreground">
-                For Employers
-              </a>
-              <a href="#" className="block transition-colors hover:text-foreground text-muted-foreground">
-                Verification Standard
-              </a>
-              <a href="#" className="block transition-colors hover:text-foreground text-muted-foreground">
-                Methodology
-              </a>
+              <Link href="/signup" className="block transition-colors hover:text-foreground text-muted-foreground">For Engineers</Link>
+              <Link href="/login" className="block transition-colors hover:text-foreground text-muted-foreground">For Employers</Link>
+              <Link href="/" className="block transition-colors hover:text-foreground text-muted-foreground">Verification Standard</Link>
+              <Link href="/" className="block transition-colors hover:text-foreground text-muted-foreground">Methodology</Link>
             </nav>
           </div>
           <div>
             <h3 className="mb-4 text-lg font-serif font-semibold">Institution</h3>
             <nav className="space-y-2 text-sm font-sans">
-              <a href="#" className="block transition-colors hover:text-foreground text-muted-foreground">
-                About Us
-              </a>
-              <a href="#" className="block transition-colors hover:text-foreground text-muted-foreground">
-                Careers
-              </a>
-              <a href="#" className="block transition-colors hover:text-foreground text-muted-foreground">
-                Contact Support
-              </a>
+              <Link href="/" className="block transition-colors hover:text-foreground text-muted-foreground">About Us</Link>
+              <Link href="/" className="block transition-colors hover:text-foreground text-muted-foreground">Careers</Link>
+              <a href="mailto:hello@meritlane.app" className="block transition-colors hover:text-foreground text-muted-foreground">Contact Support</a>
             </nav>
           </div>
           <div className="relative">
@@ -86,7 +73,7 @@ export function Footerdemo() {
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <Button variant="outline" size="icon" className="rounded-full">
+                    <Button href="https://twitter.com/meritlane" variant="outline" size="icon" className="rounded-full" target="_blank" rel="noopener noreferrer">
                       <MessageCircle className="h-4 w-4" />
                       <span className="sr-only">Twitter</span>
                     </Button>
@@ -99,7 +86,7 @@ export function Footerdemo() {
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <Button variant="outline" size="icon" className="rounded-full">
+                    <Button href="https://linkedin.com/company/meritlane" variant="outline" size="icon" className="rounded-full" target="_blank" rel="noopener noreferrer">
                       <Share2 className="h-4 w-4" />
                       <span className="sr-only">LinkedIn</span>
                     </Button>
@@ -117,12 +104,8 @@ export function Footerdemo() {
             © {new Date().getFullYear()} Meritlane. All rights reserved.
           </p>
           <nav className="flex gap-4 text-sm font-mono text-muted-foreground">
-            <a href="#" className="transition-colors hover:text-foreground">
-              Privacy Policy
-            </a>
-            <a href="#" className="transition-colors hover:text-foreground">
-              Terms of Service
-            </a>
+            <Link href="/privacy" className="transition-colors hover:text-foreground">Privacy Policy</Link>
+            <Link href="/terms" className="transition-colors hover:text-foreground">Terms of Service</Link>
           </nav>
           <div className="flex items-center gap-1.5 text-sm font-mono text-muted-foreground">
             Made with <Heart className="h-3.5 w-3.5 text-red-500 fill-red-500" /> from Vizag
