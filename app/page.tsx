@@ -86,7 +86,7 @@ export default function HomePage() {
       <MeritlaneIntro />
       
       {/* HERO: Editorial Statement */}
-      <section className="relative px-6 pt-32 pb-24 sm:pt-40 sm:pb-32 lg:px-10 w-full max-w-[1600px] mx-auto flex flex-col lg:flex-row items-center gap-16 border-b border-border/40">
+      <section className="relative px-6 pt-32 pb-24 sm:pt-40 sm:pb-32 lg:px-10 w-full max-w-7xl mx-auto flex flex-col lg:flex-row items-center gap-16 border-b border-border/40">
         <motion.div 
           initial="hidden" 
           animate="visible" 
@@ -190,7 +190,7 @@ export default function HomePage() {
 
       {/* HOW IT WORKS */}
       <section className="py-32 bg-background">
-        <div className="mx-auto w-full max-w-[1600px] px-6 lg:px-10">
+        <div className="mx-auto w-full max-w-7xl px-6 lg:px-10">
           <motion.div 
             initial="hidden"
             whileInView="visible"
@@ -218,7 +218,7 @@ export default function HomePage() {
 
       {/* EVIDENCE SECTION */}
       <section className="py-32 bg-surface border-y border-border/40">
-        <div className="mx-auto w-full max-w-[1600px] px-6 lg:px-10">
+        <div className="mx-auto w-full max-w-7xl px-6 lg:px-10">
           <motion.div 
             initial="hidden"
             whileInView="visible"
@@ -247,7 +247,7 @@ export default function HomePage() {
               <motion.div key={i} variants={fadeUp} className="flex flex-col">
                 <pillar.icon className="h-6 w-6 text-foreground mb-6" strokeWidth={1.5} />
                 <h3 className="text-xl font-serif text-foreground mb-4">{pillar.title}</h3>
-                <p className="text-sm text-muted-foreground leading-relaxed flex-1">
+                <p className="text-sm text-muted-foreground leading-relaxed flex-1 max-w-[65ch]">
                   {pillar.desc}
                 </p>
               </motion.div>
@@ -368,7 +368,7 @@ export default function HomePage() {
               <h2 className="text-3xl lg:text-4xl font-serif text-foreground mb-6 tracking-tight">
                 Stop screening resumes.<br/>Start reviewing proof.
               </h2>
-              <p className="text-muted-foreground mb-10 text-sm leading-relaxed">
+              <p className="text-muted-foreground mb-10 text-sm leading-relaxed max-w-[65ch]">
                 Instantly discover candidates whose skills are already audited and verified. Reduce hiring risk and engineering interview hours by trusting the Meritlane standard.
               </p>
               <div className="flex items-center text-sm font-medium text-foreground group-hover:translate-x-2 transition-transform">
@@ -384,7 +384,7 @@ export default function HomePage() {
               <h2 className="text-3xl lg:text-4xl font-serif text-foreground mb-6 tracking-tight">
                 Make your work easier to trust.
               </h2>
-              <p className="text-muted-foreground mb-10 text-sm leading-relaxed">
+              <p className="text-muted-foreground mb-10 text-sm leading-relaxed max-w-[65ch]">
                 Stand out in a crowded market by providing irrefutable evidence of your capabilities. Share your official verification record with anyone.
               </p>
               <div className="flex items-center text-sm font-medium text-foreground group-hover:translate-x-2 transition-transform">
