@@ -11,7 +11,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
-import { Globe, Share2, MessageCircle, Moon, Send, Sun, Mail } from "lucide-react"
+import { Globe, Share2, MessageCircle, Moon, Send, Sun, Mail, Heart } from "lucide-react"
 
 export function Footerdemo() {
   const [isDarkMode, setIsDarkMode] = React.useState(true)
@@ -112,9 +112,9 @@ export function Footerdemo() {
             </div>
           </div>
         </div>
-        <div className="mt-12 flex flex-col items-center justify-between gap-4 border-t border-border pt-8 text-center md:flex-row">
+        <div className="mt-12 flex flex-col items-center justify-between gap-4 border-t border-border pt-8 md:flex-row">
           <p className="text-sm text-muted-foreground font-mono">
-            � {new Date().getFullYear()} Meritlane. All rights reserved.
+            © {new Date().getFullYear()} Meritlane. All rights reserved.
           </p>
           <nav className="flex gap-4 text-sm font-mono text-muted-foreground">
             <a href="#" className="transition-colors hover:text-foreground">
@@ -124,6 +124,9 @@ export function Footerdemo() {
               Terms of Service
             </a>
           </nav>
+          <div className="flex items-center gap-1.5 text-sm font-mono text-muted-foreground">
+            Made with <Heart className="h-3.5 w-3.5 text-red-500 fill-red-500" /> from Vizag
+          </div>
         </div>
       </div>
     </footer>
