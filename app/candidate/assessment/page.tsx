@@ -194,10 +194,6 @@ function AssessmentContentWrapper() {
     }
   };
 
-  if (initializing || loading || !content) {
-    return <MeritlaneLoader level="page" text="Initializing" />;
-  }
-
   if (errorMsg) {
     if (errorMsg === "SKILL NOT FOUND") {
       return (
@@ -259,6 +255,10 @@ function AssessmentContentWrapper() {
         </div>
       </div>
     );
+  }
+
+  if (initializing || loading || !content) {
+    return <MeritlaneLoader level="page" text="Initializing" />;
   }
 
   if (!hasStarted) {
