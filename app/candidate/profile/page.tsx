@@ -47,7 +47,7 @@ export default function CandidateProfilePage() {
 
   if (isEditing) {
     return (
-      <div className="mx-auto max-w-3xl px-6 py-12 h-full overflow-y-auto scrollbar-hide">
+      <div className="w-full px-8 md:px-16 lg:px-24 py-12 mx-auto max-w-[1600px] h-full overflow-y-auto scrollbar-hide">
         <ProfileForm 
           initialData={profile} 
           onSave={handleSave} 
@@ -63,7 +63,7 @@ export default function CandidateProfilePage() {
   const skills = profile?.skills || ["Python", "React", "Firebase"];
 
   return (
-    <div className="mx-auto max-w-4xl px-6 py-12 h-full overflow-y-auto scrollbar-hide">
+    <div className="w-full px-8 md:px-16 lg:px-24 py-12 mx-auto max-w-[1600px] h-full overflow-y-auto scrollbar-hide">
       
       <div className="mb-10">
         <div className="text-[14px] font-sans font-medium text-[#737373] mb-3 flex items-center gap-2">
@@ -71,7 +71,7 @@ export default function CandidateProfilePage() {
         </div>
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6 border-b border-[#E5E5E5] pb-6">
           <div>
-            <h1 className="font-serif text-[32px] sm:text-[40px] text-[#0D0D0D] leading-tight mb-2">{name}</h1>
+            <h1 className="font-serif text-[40px] sm:text-[48px] text-[#0D0D0D] leading-tight mb-2">{name}</h1>
             <div className="text-[14px] text-[#0D0D0D] font-sans">{primaryDomain}</div>
           </div>
           <button onClick={() => setIsEditing(true)} className="flex items-center gap-2 px-5 h-10 border border-[#D2D2D2] bg-transparent text-[#0D0D0D] hover:text-[#0D0D0D] hover:bg-[#F3F3F1] hover:border-[#0D0D0D] rounded-md text-[14px] font-sans font-medium transition-all">

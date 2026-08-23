@@ -113,7 +113,7 @@ export default function CandidateDashboardPage() {
   }
 
   return (
-    <div className="mx-auto max-w-5xl px-6 py-12 h-full overflow-y-auto scrollbar-hide relative">
+    <div className="w-full px-8 md:px-16 lg:px-24 py-12 mx-auto max-w-[1600px] h-full overflow-y-auto scrollbar-hide relative">
       
       <div className="mb-12">
         <div className="text-[14px] font-sans font-medium text-[#737373] mb-3 flex items-center gap-2">
@@ -121,7 +121,7 @@ export default function CandidateDashboardPage() {
         </div>
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6 border-b border-[#E5E5E5] pb-6">
           <div>
-            <h1 className="font-serif text-[32px] sm:text-[40px] text-[#0D0D0D] leading-tight mb-2">Build your proof.</h1>
+            <h1 className="font-serif text-[40px] sm:text-[48px] text-[#0D0D0D] leading-tight mb-2">Build your proof.</h1>
             <div className="text-[14px] text-[#0D0D0D] font-sans">Provide the material that supports the claims made in your Identity.</div>
           </div>
           <button 
