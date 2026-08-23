@@ -55,31 +55,22 @@ export const viewport = {
 };
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://meritlane.app"),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://merit-lane.vercel.app"),
   title: "Meritlane | Verified, Project-Based Engineering Hiring",
   description:
     "A verified, project-based hiring platform for Tier-2 and Tier-3 engineering talent in India. Proof of skill over college pedigree.",
   openGraph: {
     title: "Meritlane | Verified, Project-Based Engineering Hiring",
     description: "A verified, project-based hiring platform for Tier-2 and Tier-3 engineering talent in India. Proof of skill over college pedigree.",
-    url: "https://meritlane.app",
+    url: "https://merit-lane.vercel.app",
     siteName: "Meritlane",
-    images: [
-      {
-        url: "/images/verification-preview.jpg",
-        width: 1200,
-        height: 630,
-        alt: "Meritlane Verified Engineering Hiring",
-      },
-    ],
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
     title: "Meritlane | Verified, Project-Based Engineering Hiring",
     description: "A verified, project-based hiring platform for Tier-2 and Tier-3 engineering talent in India. Proof of skill over college pedigree.",
-    images: ["/images/verification-preview.jpg"],
-  },
+  }
 };
 
 export default function RootLayout({
