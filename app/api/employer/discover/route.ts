@@ -30,7 +30,15 @@ export async function POST(req: NextRequest) {
     }
 
     // 3. Verify Employer Owns the Role
-    const { roleId } = await req.json();
+    
+    let roleId;
+    try {
+      const body = await req.json();
+      roleId = body.roleId;
+    } catch (e) {
+      // Body might be empty
+    }
+  
     if (!roleId) {
       return NextResponse.json({ error: "Missing roleId" }, { status: 400 });
     }
@@ -49,7 +57,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Extract required skills safely
-    const requiredSkills: string[] = targetRole.skills || [];
+    const requiredSkills: string[] = targetRole?.skills || [];
 
     // 4. Fetch Verified Candidates Only
     const candidatesSnapshot = await adminDb

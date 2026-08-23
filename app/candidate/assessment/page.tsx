@@ -5,10 +5,27 @@ import { useAuth } from "@/lib/auth/AuthContext";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Play, CheckCircle2, Clock, AlertTriangle, TerminalSquare, FileCode2, ShieldAlert } from "lucide-react";
 import { logFunnelEvent } from "@/lib/analytics/logEvent";
-import { getAssessmentContent, AssessmentContent } from "@/lib/assessments/content";
-import { db } from "@/lib/firebase/config";
+import { auth } from "@/lib/firebase/config";
+import { getIdToken } from "firebase/auth";
+
+export interface MCQ {
+  question: string;
+  options: string[];
+}
+
+export interface CodingChallenge {
+  title: string;
+  instructions: string;
+  initialCode: string;
+}
+
+export interface AssessmentContent {
+  mcqs: MCQ[];
+  coding: CodingChallenge;
+}
+
 import { MeritlaneLoader } from "@/components/ui/MeritlaneLoader";
-import { doc, updateDoc, serverTimestamp, getDoc } from "firebase/firestore";
+
 
 function AssessmentContentWrapper() {
   const { user, userProfile, loading } = useAuth();
@@ -27,7 +44,7 @@ function AssessmentContentWrapper() {
   // Phase tracking: 'intro' -> 'mcq' -> 'coding'
   const [phase, setPhase] = useState<'intro' | 'mcq' | 'coding'>('intro');
   const [mcqIndex, setMcqIndex] = useState(0);
-  const [mcqScore, setMcqScore] = useState(0);
+  const [mcqAnswers, setMcqAnswers] = useState<number[]>([]);
 
   const [timeLeft, setTimeLeft] = useState<number>(45 * 60);
   const [code, setCode] = useState("");
@@ -41,55 +58,44 @@ function AssessmentContentWrapper() {
         return;
       }
       
-      const loadedContent = getAssessmentContent(skillParam);
-      setContent(loadedContent);
-      setCode(loadedContent.coding.initialCode);
+      
 
       // Check if already verified and if skill exists
-      const checkCandidateStatus = async () => {
+      const initAssessment = async () => {
         try {
-          const cRef = doc(db, "candidates", user.uid);
-          const cSnap = await getDoc(cRef);
-          if (cSnap.exists()) {
-            const cData = cSnap.data();
-            
-            // Validation 1: Skill must be declared in Technical Identity
-            const normalizedParam = skillParam.toLowerCase().trim();
-            const skillExists = (cData.skills || []).some((s: string) => s.toLowerCase().trim() === normalizedParam);
-            
-            if (!skillExists) {
-              setErrorMsg("SKILL NOT FOUND");
-              setInitializing(false);
-              return;
-            }
-
-            // Validation 2: Must not already be verified
-            if (cData.verifiedSkills?.[skillParam]?.status === "verified") {
-              setErrorMsg("ALREADY VERIFIED");
-              setInitializing(false);
-              return;
-            }
-          }
-        } catch (err) {
-          console.error(err);
-        }
-
-        // Mock per-skill cooldown check
-        const lastAttemptStr = localStorage.getItem(`meritlane_cooldown_${user.uid}_${skillParam}`);
-        if (lastAttemptStr) {
-          const lastAttempt = parseInt(lastAttemptStr, 10);
-          const daysPassed = (Date.now() - lastAttempt) / (1000 * 60 * 60 * 24);
-          if (daysPassed < 14) {
-            setErrorMsg("ASSESSMENT NOT PASSED");
-            setCooldownDays(14 - Math.floor(daysPassed));
+          const token = await getIdToken(auth.currentUser!, true);
+          const res = await fetch("/api/start-assessment", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": `Bearer ${token}`
+            },
+            body: JSON.stringify({ skill: skillParam })
+          });
+          
+          const data = await res.json();
+          if (!res.ok) {
+            if (res.status === 403) setErrorMsg("SKILL NOT FOUND");
+            else if (res.status === 429) {
+              setErrorMsg("ASSESSMENT NOT PASSED");
+              setCooldownDays(14);
+            } else if (res.status === 409) setErrorMsg("ALREADY VERIFIED");
+            else setErrorMsg(data.error || "Failed to start assessment");
             setInitializing(false);
             return;
           }
+          
+          setContent(data.content);
+          setCode(data.content.coding.initialCode);
+          setInitializing(false);
+        } catch (err) {
+          console.error(err);
+          setErrorMsg("SYSTEM ERROR");
+          setInitializing(false);
         }
-        setInitializing(false);
       };
 
-      checkCandidateStatus();
+      initAssessment();
     }
   }, [user, userProfile, loading, router, skillParam]);
 
@@ -119,61 +125,73 @@ function AssessmentContentWrapper() {
 
   const handleAnswerMcq = (selectedIndex: number) => {
     if (!content) return;
-    const currentQ = content.mcqs[mcqIndex];
-    if (selectedIndex === currentQ.answerIndex) {
-      setMcqScore(s => s + 1);
-    }
+    setMcqAnswers(prev => [...prev, selectedIndex]);
     
     if (mcqIndex < content.mcqs.length - 1) {
       setMcqIndex(i => i + 1);
     } else {
-      // Done with MCQs, move to coding
-      setPhase('coding');
+      setPhase("coding");
     }
   };
 
-  const handleTest = (isSubmit: boolean) => {
+  const handleTest = async (isSubmit: boolean) => {
     setEvaluating(true);
     setOutput("Compiling environment...\nRunning secure test runner...\n");
     
-    setTimeout(() => {
-      if (!isSubmit) {
-        setOutput((prev) => prev + "Executed 3 public test cases.\nAll standard checks passed.\nNote: Hidden integrity tests will run on final submission.");
+    if (!isSubmit) {
+      setTimeout(() => {
+        setOutput((prev) => prev + "Executed public test cases.\nNote: Hidden integrity tests will run on final submission.\n");
         setEvaluating(false);
-      } else {
-        // Mock fail condition for demo purposes (unless they actually wrote code)
-        if (code.length < 50 || code.includes("pass") || code.includes("return new ArrayList")) {
-          setOutput((prev) => prev + "Evaluating hidden test suites...\nFAILED: Test Case #4 Null boundary check failed.\nIntegrity score below threshold.");
-          setTimeout(() => {
-            handleFail();
-          }, 2000);
-        } else {
-          // Success Path!
-          setOutput((prev) => prev + "Evaluating hidden test suites...\n[====================] 100%\nAll tests passed successfully.\nCryptographic signature generated.");
-          
-          setTimeout(async () => {
-            try {
-              if (user) {
-                const candidateRef = doc(db, "candidates", user.uid);
-                await updateDoc(candidateRef, {
-                  [`verifiedSkills.${skillParam}`]: {
-                    status: "verified",
-                    verifiedAt: Date.now()
-                  },
-                  verificationStatus: "verified",
-                  updatedAt: Date.now()
-                });
-              }
-              logFunnelEvent("assessment_passed", { skill: skillParam });
-              router.push("/candidate/dashboard?verified=true");
-            } catch (e) {
-              console.error("Failed to update verification status:", e);
-            }
-          }, 2000);
+      }, 1000);
+      return;
+    }
+
+    try {
+      const token = await getIdToken(auth.currentUser!, true);
+      const res = await fetch("/api/verify", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          skill: skillParam,
+          answers: mcqAnswers,
+          code,
+          isPublicTest: false
+        })
+      });
+
+      const data = await res.json();
+      
+      if (!res.ok) {
+        setOutput((prev) => prev + "\n" + (data.error || "Evaluation failed."));
+        if (res.status !== 501) { 
+            setTimeout(() => {
+              handleFail();
+            }, 2000);
         }
         setEvaluating(false);
+        return;
       }
-    }, 1500);
+
+      if (data.passed) {
+        setOutput((prev) => prev + "Evaluating hidden test suites...\n[====================] 100%\nAll tests passed successfully.\nCryptographic signature generated.");
+        setTimeout(() => {
+          logFunnelEvent("assessment_passed", { skill: skillParam });
+          router.push("/candidate/dashboard?verified=true");
+        }, 2000);
+      } else {
+        setOutput((prev) => prev + "Evaluating hidden test suites...\n" + (data.message || "Integrity score below threshold."));
+        setTimeout(() => {
+          handleFail();
+        }, 2000);
+      }
+    } catch (e) {
+      console.error(e);
+      setOutput((prev) => prev + "\nSystem Error during evaluation.");
+      setEvaluating(false);
+    }
   };
 
   if (initializing || loading || !content) {

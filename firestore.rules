@@ -35,9 +35,7 @@ service cloud.firestore {
       )) || isAdmin();
       // Candidates can update profile (draft or pending) but cannot self-verify or tamper with audit fields
       allow update: if (isOwner(userId) && (
-        resource.data.verificationStatus != 'verified' &&
-        !request.resource.data.diff(resource.data).affectedKeys().hasAny(['verifiedBy', 'verifiedByUid', 'verifiedByEmail', 'verifiedAt']) &&
-        (request.resource.data.verificationStatus in ['draft', 'pending'])
+        !request.resource.data.diff(resource.data).affectedKeys().hasAny(['verificationStatus', 'verifiedAt', 'verifiedBy', 'verifiedByUid', 'verifiedByEmail'])
       )) || isAdmin();
       allow delete: if isAdmin();
     }

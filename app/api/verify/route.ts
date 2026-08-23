@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { adminAuth, adminDb } from "@/lib/firebase/admin";
 import { FieldValue } from 'firebase-admin/firestore';
+import { getAssessmentContent } from "@/lib/assessments/content";
 
 // Variant A: Filter COMPLETED, sum valid amounts
 const TEST_WRAPPER_A = `
@@ -155,9 +156,16 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { code, isPublicTest } = await req.json();
-    if (!code) {
-      return NextResponse.json({ error: "No code provided" }, { status: 400 });
+    let body;
+    try {
+      body = await req.json();
+    } catch {
+      return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
+    }
+    const { skill, answers, code, isPublicTest } = body;
+    
+    if (!skill || !code) {
+      return NextResponse.json({ error: "Skill and code are required" }, { status: 400 });
     }
 
     const idToken = authHeader.split("Bearer ")[1];
@@ -181,10 +189,9 @@ export async function POST(req: NextRequest) {
     const candidateData = candidateDoc.exists ? candidateDoc.data() : {};
     const userData = userDoc.data() || {};
 
-    // REMOVED: Verification blocking so user can repeatedly test
-
-    if (!userData.assessmentStartedAt) {
-      return NextResponse.json({ error: "Assessment not started" }, { status: 400 });
+    // Check if session is active and for the correct skill
+    if (!userData.assessmentStartedAt || userData.assessmentSkill !== skill) {
+      return NextResponse.json({ error: "Assessment not started or skill mismatch" }, { status: 400 });
     }
 
     const startedMs = userData.assessmentStartedAt.toMillis();
@@ -197,9 +204,29 @@ export async function POST(req: NextRequest) {
       await userRef.update({
         lastFailedAssessmentAt: FieldValue.serverTimestamp(),
         assessmentStartedAt: FieldValue.delete(),
-        assessmentVariant: FieldValue.delete()
+        assessmentVariant: FieldValue.delete(),
+        assessmentSkill: FieldValue.delete()
       });
       return NextResponse.json({ error: "Assessment time expired" }, { status: 400 });
+    }
+
+    // Evaluate MCQs
+    const content = getAssessmentContent(skill);
+    let mcqScore = 0;
+    if (answers && Array.isArray(answers)) {
+      answers.forEach((ans: number, idx: number) => {
+        if (content.mcqs[idx] && content.mcqs[idx].answerIndex === ans) {
+          mcqScore++;
+        }
+      });
+    }
+
+    const normalizedSkill = skill.toLowerCase();
+    const isPython = normalizedSkill.includes("python") || normalizedSkill.includes("django");
+    if (!isPython) {
+      return NextResponse.json({ 
+        error: "Controlled Error: Coding evaluation infrastructure for " + skill + " is not currently implemented. We are working on expanding compiler support." 
+      }, { status: 501 });
     }
 
     const variant = userData.assessmentVariant || "A";
@@ -273,31 +300,39 @@ export async function POST(req: NextRequest) {
     }
 
     // Final Submission Handling
-    const threshold = 4;
-    const passed = passedTests >= threshold;
+    const mcqPassed = mcqScore === content.mcqs.length;
+    const codePassed = passedTests >= 4;
+    const passed = mcqPassed && codePassed;
 
     if (passed) {
       await Promise.all([
         userRef.update({
           assessmentScores: {
-            [`python_${variant}`]: passedTests
+            [`${skill}_${variant}`]: passedTests,
+            [`${skill}_mcq`]: mcqScore
           },
           assessmentDate: FieldValue.serverTimestamp(),
           // Clear active session
           assessmentStartedAt: FieldValue.delete(),
-          assessmentVariant: FieldValue.delete()
+          assessmentVariant: FieldValue.delete(),
+          assessmentSkill: FieldValue.delete()
         }),
-        candidateRef.set({
+        candidateRef.update({
           verificationStatus: "verified",
           verifiedAt: FieldValue.serverTimestamp(),
+          [`verifiedSkills.${skill}`]: {
+            status: "verified",
+            verifiedAt: Date.now()
+          },
           updatedAt: Date.now()
-        }, { merge: true })
+        })
       ]);
 
       return NextResponse.json({
         success: true,
         passed: true,
-        score: passedTests,
+        mcqScore,
+        codeScore: passedTests,
         message: "Congratulations! Your profile is now verified."
       });
     } else {
@@ -306,14 +341,16 @@ export async function POST(req: NextRequest) {
         lastFailedAssessmentAt: FieldValue.serverTimestamp(),
         // Clear active session
         assessmentStartedAt: FieldValue.delete(),
-        assessmentVariant: FieldValue.delete()
+        assessmentVariant: FieldValue.delete(),
+        assessmentSkill: FieldValue.delete()
       });
 
       return NextResponse.json({
         success: true,
         passed: false,
-        score: passedTests,
-        message: `Assessment failed. You passed ${passedTests} out of 5 tests. You can retry in 14 days.`
+        mcqScore,
+        codeScore: passedTests,
+        message: `Assessment failed. You passed ${mcqScore}/${content.mcqs.length} MCQs and ${passedTests}/5 tests. You can retry in 14 days.`
       });
     }
 

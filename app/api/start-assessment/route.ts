@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { adminAuth, adminDb } from "@/lib/firebase/admin";
 import { FieldValue } from 'firebase-admin/firestore';
+import { getAssessmentContent } from "@/lib/assessments/content";
 
 export async function POST(req: NextRequest) {
   try {
@@ -11,6 +12,18 @@ export async function POST(req: NextRequest) {
     const authHeader = req.headers.get("Authorization");
     if (!authHeader?.startsWith("Bearer ")) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    let body;
+    try {
+      body = await req.json();
+    } catch {
+      return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
+    }
+    const { skill } = body;
+    
+    if (!skill) {
+      return NextResponse.json({ error: "Skill parameter is required" }, { status: 400 });
     }
 
     const idToken = authHeader.split("Bearer ")[1];
@@ -31,27 +44,56 @@ export async function POST(req: NextRequest) {
 
     const candidateRef = adminDb.collection("candidates").doc(uid);
     const candidateDoc = await candidateRef.get();
-    const candidateData = candidateDoc.exists ? candidateDoc.data() : {};
+    
+    if (!candidateDoc.exists) {
+      return NextResponse.json({ error: "Candidate profile not found" }, { status: 404 });
+    }
 
+    const candidateData = candidateDoc.data() || {};
     const userData = userDoc.data() || {};
-
-    // REMOVED: Verification blocking so the user can test the assessment freely
-    // REMOVED: Cooldown blocking so the user can test the assessment freely
+    
+    // Validate skill belongs to candidate
+    const normalizedSkill = skill.toLowerCase().trim();
+    const hasSkill = (candidateData.skills || []).some((s: string) => s.toLowerCase().trim() === normalizedSkill);
+    if (!hasSkill) {
+      return NextResponse.json({ error: "Requested skill is not part of your profile" }, { status: 403 });
+    }
 
     const now = Date.now();
 
-    // Check if an attempt is already active or expired
-    if (userData.assessmentStartedAt) {
+    // Check cooldown
+    if (userData.lastFailedAssessmentAt) {
+      const failedMs = userData.lastFailedAssessmentAt.toMillis();
+      const fourteenDaysMs = 14 * 24 * 60 * 60 * 1000;
+      if (now - failedMs < fourteenDaysMs) {
+        return NextResponse.json({ error: "You are currently in a 14-day cooldown period." }, { status: 429 });
+      }
+    }
+
+    // Get the content for the requested skill
+    const content = getAssessmentContent(skill);
+    
+    // Sanitize content to remove answers
+    const sanitizedContent = {
+      mcqs: content.mcqs.map((mcq) => ({
+        question: mcq.question,
+        options: mcq.options
+      })),
+      coding: content.coding
+    };
+
+    // Check if an attempt is already active
+    if (userData.assessmentStartedAt && userData.assessmentSkill === skill) {
       const startedMs = userData.assessmentStartedAt.toMillis();
       const fortyFiveMinsMs = 45 * 60 * 1000;
       
       if (now - startedMs < fortyFiveMinsMs) {
-        // Resume active session
         return NextResponse.json({ 
           message: "Resuming session",
           startedAt: startedMs,
           variant: userData.assessmentVariant || "A",
-          domain: candidateData?.primaryDomain || candidateData?.skills?.[0] || "Software Engineering"
+          skill: skill,
+          content: sanitizedContent
         }, { status: 200 });
       }
     }
@@ -62,10 +104,10 @@ export async function POST(req: NextRequest) {
     // Start a fresh session
     await userRef.update({
       assessmentStartedAt: FieldValue.serverTimestamp(),
-      assessmentVariant: newVariant
+      assessmentVariant: newVariant,
+      assessmentSkill: skill
     });
 
-    // Fetch the timestamp we just wrote to return it to the client
     const updatedDoc = await userRef.get();
     const startedAt = updatedDoc.data()?.assessmentStartedAt?.toMillis() || Date.now();
 
@@ -73,7 +115,8 @@ export async function POST(req: NextRequest) {
       message: "Assessment started",
       startedAt: startedAt,
       variant: newVariant,
-      domain: candidateData?.primaryDomain || candidateData?.skills?.[0] || "Software Engineering"
+      skill: skill,
+      content: sanitizedContent
     }, { status: 200 });
 
   } catch (error: any) {
