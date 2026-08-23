@@ -142,7 +142,7 @@ export function CandidateSidebar() {
         </button>
         
         {/* User Context Menu Container */}
-        <div ref={menuRef} className="relative flex items-center pt-6 border-t border-[#E5E5E5] mb-4 h-14">
+        <div ref={menuRef} className={`relative flex items-center pt-6 border-t border-[#E5E5E5] mb-4 transition-all duration-300 ${isCollapsed ? "flex-col gap-4 h-24" : "justify-between h-14"}`}>
           
           <AnimatePresence>
             {isUserMenuOpen && (
@@ -192,7 +192,7 @@ export function CandidateSidebar() {
           {/* Avatar Button */}
           <button 
             type="button"
-            className={`flex items-center cursor-pointer group p-1 rounded-lg transition-colors text-left overflow-hidden w-full ${isUserMenuOpen ? "bg-[#F3F3F1]" : "hover:bg-[#F3F3F1]"}`}
+            className={`flex items-center cursor-pointer group p-1 rounded-lg transition-colors text-left overflow-hidden ${isCollapsed ? "w-full" : "flex-1"} ${isUserMenuOpen ? "bg-[#F3F3F1]" : "hover:bg-[#F3F3F1]"}`}
             onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
           >
             <div className="w-10 flex justify-center shrink-0">
@@ -208,7 +208,7 @@ export function CandidateSidebar() {
                   animate={{ opacity: 1, width: "auto" }}
                   exit={{ opacity: 0, width: 0 }}
                   transition={{ duration: 0.3, ease: "easeInOut" }}
-                  className="text-[13px] text-[#0D0D0D] font-medium truncate whitespace-nowrap ml-1"
+                  className="text-[13px] text-[#0D0D0D] font-medium truncate whitespace-nowrap ml-1 pr-2"
                 >
                   {name}
                 </motion.div>
@@ -216,18 +216,16 @@ export function CandidateSidebar() {
             </AnimatePresence>
           </button>
           
-        </div>
-        
-        {/* Toggle Button Container - Below the avatar */}
-        <div className="flex justify-center mt-2 h-10 items-center">
+          {/* Toggle Button */}
           <button
             type="button"
             onClick={() => setIsCollapsed(!isCollapsed)}
-            className="p-1.5 text-[#737373] hover:text-[#0D0D0D] hover:bg-[#FFFFFF] rounded-md transition-colors"
+            className="p-1.5 text-[#737373] hover:text-[#0D0D0D] hover:bg-[#FFFFFF] rounded-md transition-colors shrink-0"
             aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
           >
             {isCollapsed ? <PanelLeftOpen className="h-[18px] w-[18px]" aria-hidden="true" /> : <PanelLeftClose className="h-[18px] w-[18px]" aria-hidden="true" />}
           </button>
+          
         </div>
         
       </div>
