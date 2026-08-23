@@ -54,9 +54,9 @@ export default function Navbar() {
       <div className="mx-auto flex h-14 max-w-7xl items-center justify-between px-5 sm:px-8 lg:px-16">
         <Link
           href={isUserAdmin ? "/admin" : user ? "/dashboard" : "/"}
-          className="font-serif text-xl font-medium tracking-tight text-foreground"
+          className="flex items-center"
         >
-          Meritlane
+          <img src="/logo-full.png" alt="Meritlane" className="h-6 w-auto" />
           {isUserAdmin && (
             <span className="ml-2 align-middle font-data text-[10px] text-outline">Admin</span>
           )}

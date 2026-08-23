@@ -47,10 +47,7 @@ export function EmployerSidebar() {
   return (
     <aside className="hidden lg:flex w-[220px] shrink-0 flex-col border-r border-[#E5E5E5] bg-[#FAFAFA] h-[100dvh]">
       <div className="flex h-20 items-center px-8 shrink-0">
-        <div>
-          <div className="font-serif text-[26px] font-medium tracking-tight text-[#0D0D0D] mb-1">Meritlane</div>
-          <div className="font-mono text-[9px] tracking-[0.2em] text-[#737373] uppercase">System of Record</div>
-        </div>
+        <img src="/logo-full.png" alt="Meritlane" className="h-8 w-auto" />
       </div>
 
       <nav aria-label="Employer Navigation" className="flex-1 px-4 mt-6 space-y-1">

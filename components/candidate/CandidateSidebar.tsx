@@ -50,12 +50,9 @@ export function CandidateSidebar() {
       {/* Brand */}
       <div className={`flex h-20 items-center shrink-0 ${isCollapsed ? "justify-center px-0" : "px-8"}`}>
         {isCollapsed ? (
-          <div className="font-serif text-[26px] font-medium tracking-tight text-[#0D0D0D]">M</div>
+          <img src="/logo-m.png" alt="M" className="h-8 w-auto" />
         ) : (
-          <div>
-            <div className="font-serif text-[26px] font-medium tracking-tight text-[#0D0D0D] mb-1">Meritlane</div>
-            <div className="font-mono text-[9px] tracking-[0.2em] text-[#737373] uppercase">System of Record</div>
-          </div>
+          <img src="/logo-full.png" alt="Meritlane" className="h-8 w-auto" />
         )}
       </div>
 

@@ -39,7 +39,7 @@ export function MobileNav({ role }: { role: "candidate" | "employer" | "admin" }
 
   return (
     <div className="lg:hidden flex items-center justify-between px-6 h-16 border-b border-[#E5E5E5] bg-[#FAFAFA] shrink-0">
-      <div className="font-serif text-[22px] font-medium tracking-tight text-[#0D0D0D]">Meritlane</div>
+      <img src="/logo-full.png" alt="Meritlane" className="h-6 w-auto" />
       
       <button 
         onClick={() => setIsOpen(true)}
@@ -58,7 +58,7 @@ export function MobileNav({ role }: { role: "candidate" | "employer" | "admin" }
             className="fixed inset-0 z-50 bg-[#FAFAFA] flex flex-col"
           >
             <div className="flex items-center justify-between px-6 h-16 border-b border-[#E5E5E5] shrink-0">
-              <div className="font-serif text-[22px] font-medium tracking-tight text-[#0D0D0D]">Meritlane</div>
+              <img src="/logo-full.png" alt="Meritlane" className="h-6 w-auto" />
               <button 
                 onClick={() => setIsOpen(false)}
                 className="p-2 -mr-2 text-[#0D0D0D]"
