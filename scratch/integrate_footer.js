@@ -1,4 +1,8 @@
-"use client";
+
+const fs = require("fs");
+let content = fs.readFileSync("components/chrome/SiteFooter.tsx", "utf8");
+
+content = \`"use client";
 
 import { usePathname } from "next/navigation";
 import { Footerdemo } from "@/components/ui/footer-section";
@@ -18,4 +22,8 @@ export function SiteFooter() {
     </div>
   );
 }
+\`;
+
+fs.writeFileSync("components/chrome/SiteFooter.tsx", content, "utf8");
+console.log("Done");
 
