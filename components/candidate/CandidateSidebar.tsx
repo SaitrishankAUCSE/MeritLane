@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
@@ -18,7 +19,6 @@ export function CandidateSidebar() {
   const name = user?.displayName || "User";
   const avatarUrl = user?.photoURL || "";
 
-  // Close menu when clicking outside
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
@@ -28,15 +28,8 @@ export function CandidateSidebar() {
     if (isUserMenuOpen) {
       document.addEventListener("mousedown", handleClickOutside);
     }
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [isUserMenuOpen]);
-
-  // Close menu on route change
-  useEffect(() => {
-    setIsUserMenuOpen(false);
-  }, [pathname]);
 
   const navItems = [
     { name: "Identity", href: "/candidate/profile", icon: Fingerprint },
@@ -46,72 +39,111 @@ export function CandidateSidebar() {
   ];
 
   return (
-    <aside className={`scrollbar-hide hidden lg:flex shrink-0 flex-col border-r border-[#E5E5E5] bg-[#FAFAFA] h-[100dvh] overflow-y-auto transition-all duration-300 ${isCollapsed ? "w-[80px]" : "w-[220px]"}`}>
+    <motion.aside 
+      initial={false}
+      animate={{ width: isCollapsed ? 80 : 220 }}
+      transition={{ duration: 0.3, ease: "easeInOut" }}
+      className="scrollbar-hide hidden lg:flex shrink-0 flex-col border-r border-[#E5E5E5] bg-[#FAFAFA] h-[100dvh] overflow-y-auto"
+    >
       {/* Brand */}
-      <div className={`flex h-20 items-center shrink-0 relative overflow-hidden transition-all duration-300 ${isCollapsed ? "justify-center px-0" : "px-8"}`}>
-        <img 
-          src="/logo-m.png" 
-          alt="M" 
-          className={`h-8 w-auto absolute left-1/2 -translate-x-1/2 transition-opacity duration-300 ${isCollapsed ? "opacity-100" : "opacity-0"}`} 
-        />
-        <img 
-          src="/logo-full.png" 
-          alt="Meritlane" 
-          className={`h-8 w-auto absolute left-8 transition-opacity duration-300 ${isCollapsed ? "opacity-0 pointer-events-none" : "opacity-100"}`} 
-        />
+      <div className="flex h-20 items-center shrink-0 relative overflow-hidden px-8">
+        <AnimatePresence initial={false} mode="wait">
+          {isCollapsed ? (
+            <motion.img 
+              key="logo-m"
+              src="/logo-m.png" 
+              alt="M" 
+              className="h-8 w-auto absolute left-1/2 -translate-x-1/2"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+            />
+          ) : (
+            <motion.img 
+              key="logo-full"
+              src="/logo-full.png" 
+              alt="Meritlane" 
+              className="h-8 w-auto absolute left-8"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+            />
+          )}
+        </AnimatePresence>
       </div>
 
       {/* Navigation */}
-      <nav aria-label="Candidate Navigation" className={`flex-1 mt-6 space-y-1 ${isCollapsed ? "px-2" : "px-4"}`}>
+      <nav aria-label="Candidate Navigation" className="flex-1 mt-6 space-y-1 px-4">
         {navItems.map((item) => {
           const isActive = pathname === item.href;
           const Icon = item.icon;
           
-          if (isActive) {
-            return (
-              <Link
-                key={item.name}
-                href={item.href}
-                aria-current="page"
-                title={isCollapsed ? item.name : undefined}
-                className={`flex items-center py-2 h-10 text-[14px] font-sans text-[#0D0D0D] bg-[#FFFFFF] relative overflow-hidden whitespace-nowrap transition-all duration-300 ${isCollapsed ? "justify-center px-0 rounded-md mx-3" : "px-4"}`}
-              >
-                <Icon className={`h-[18px] w-[18px] shrink-0 transition-all duration-300 ${isCollapsed ? "mr-0" : "mr-4"}`} aria-hidden="true" />
-                <span className={`transition-all duration-300 ${isCollapsed ? "opacity-0 w-0 hidden" : "opacity-100 w-auto"}`}>{item.name}</span>
-                <div className={`absolute bg-[#0D0D0D] transition-all duration-300 ${isCollapsed ? "left-0 top-1/2 -translate-y-1/2 h-4 w-[2px] rounded-r-md" : "right-0 top-0 bottom-0 w-[1px]"}`} />
-              </Link>
-            )
-          }
-
           return (
             <Link
               key={item.name}
               href={item.href}
+              aria-current={isActive ? "page" : undefined}
               title={isCollapsed ? item.name : undefined}
-              className={`flex items-center py-2 h-10 text-[14px] font-sans text-[#737373] hover:text-[#0D0D0D] hover:bg-[#FFFFFF]/50 relative overflow-hidden whitespace-nowrap transition-all duration-300 ${isCollapsed ? "justify-center px-0 rounded-md mx-3" : "px-4"}`}
+              className={`flex items-center h-10 text-[14px] font-sans relative overflow-hidden rounded-md transition-colors ${isActive ? "text-[#0D0D0D] bg-[#FFFFFF]" : "text-[#737373] hover:text-[#0D0D0D] hover:bg-[#FFFFFF]/50"}`}
             >
-              <Icon className={`h-[18px] w-[18px] opacity-70 shrink-0 transition-all duration-300 ${isCollapsed ? "mr-0" : "mr-4"}`} aria-hidden="true" />
-              <span className={`transition-all duration-300 ${isCollapsed ? "opacity-0 w-0 hidden" : "opacity-100 w-auto"}`}>{item.name}</span>
+              <div className="w-20 flex justify-center shrink-0">
+                <Icon className={`h-[18px] w-[18px] ${isActive ? "" : "opacity-70"}`} aria-hidden="true" />
+              </div>
+              <AnimatePresence initial={false}>
+                {!isCollapsed && (
+                  <motion.span 
+                    initial={{ opacity: 0, width: 0 }}
+                    animate={{ opacity: 1, width: "auto" }}
+                    exit={{ opacity: 0, width: 0 }}
+                    transition={{ duration: 0.3, ease: "easeInOut" }}
+                    className="whitespace-nowrap -ml-6"
+                  >
+                    {item.name}
+                  </motion.span>
+                )}
+              </AnimatePresence>
+              {isActive && (
+                <motion.div 
+                  layoutId="activeTabIndicator"
+                  className={`absolute bg-[#0D0D0D] transition-all ${isCollapsed ? "left-0 top-1/2 -translate-y-1/2 h-4 w-[2px] rounded-r-md" : "right-0 top-0 bottom-0 w-[1px]"}`} 
+                />
+              )}
             </Link>
           );
         })}
       </nav>
 
       {/* Bottom Nav / Action */}
-      <div className={`py-6 border-t border-[#E5E5E5] shrink-0 ${isCollapsed ? "px-2 flex flex-col items-center" : "px-6"}`}>
+      <div className="py-6 border-t border-[#E5E5E5] shrink-0 px-4">
+        
         <button 
-          onClick={() => router.push('/candidate/dashboard')}
+          onClick={() => router.push("/candidate/dashboard")}
           title={isCollapsed ? "Add evidence" : undefined}
-          className={`flex items-center transition-all duration-300 text-[#0D0D0D] hover:text-[#0D0D0D] overflow-hidden whitespace-nowrap ${isCollapsed ? "justify-center p-2 mb-6 hover:bg-[#FFFFFF]/50 rounded-md mx-4" : "gap-2 w-full text-left py-2 mb-6"}`}
+          className="flex items-center h-10 w-full text-left text-[#0D0D0D] hover:text-[#0D0D0D] hover:bg-[#FFFFFF]/50 rounded-md transition-colors mb-6 overflow-hidden"
         >
-          <span className="font-mono text-[11px] text-[#0D0D0D] font-bold shrink-0">[+]</span>
-          <span className={`font-sans text-[11px] font-bold uppercase tracking-[0.1em] transition-all duration-300 ${isCollapsed ? "opacity-0 w-0 hidden" : "opacity-100 w-auto"}`}>Add evidence</span>
+          <div className="w-12 flex justify-center shrink-0">
+            <span className="font-mono text-[11px] font-bold">[+]</span>
+          </div>
+          <AnimatePresence initial={false}>
+            {!isCollapsed && (
+              <motion.span 
+                initial={{ opacity: 0, width: 0 }}
+                animate={{ opacity: 1, width: "auto" }}
+                exit={{ opacity: 0, width: 0 }}
+                transition={{ duration: 0.3, ease: "easeInOut" }}
+                className="font-sans text-[11px] font-bold uppercase tracking-[0.1em] whitespace-nowrap -ml-2"
+              >
+                Add evidence
+              </motion.span>
+            )}
+          </AnimatePresence>
         </button>
         
         {/* User Context Menu Container */}
-        <div ref={menuRef} className={`relative flex items-center ${isCollapsed ? "justify-center" : "justify-between"} pt-6 border-t border-[#E5E5E5] mb-4`}>
+        <div ref={menuRef} className="relative flex items-center pt-6 border-t border-[#E5E5E5] mb-4 h-14">
           
-          {/* Popover Menu */}
           <AnimatePresence>
             {isUserMenuOpen && (
               <motion.div
@@ -119,7 +151,7 @@ export function CandidateSidebar() {
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 exit={{ opacity: 0, y: 10, scale: 0.95 }}
                 transition={{ duration: 0.15, ease: "easeOut" }}
-                className={`absolute bottom-full mb-3 bg-[#FFFFFF] border border-[#E5E5E5] shadow-lg rounded-xl overflow-hidden py-1 z-50 ${isCollapsed ? "left-0 w-48" : "left-0 right-0"}`}
+                className="absolute bottom-full mb-3 bg-[#FFFFFF] border border-[#E5E5E5] shadow-lg rounded-xl overflow-hidden py-1 z-50 left-0 w-48"
               >
                 <div className="px-4 py-3 border-b border-[#E5E5E5] mb-1">
                   <div className="text-[13px] font-medium text-[#0D0D0D] truncate">{name}</div>
@@ -160,47 +192,43 @@ export function CandidateSidebar() {
           {/* Avatar Button */}
           <button 
             type="button"
-            aria-haspopup="menu"
-            aria-expanded={isUserMenuOpen}
-            aria-label="User account menu"
-            className={`flex items-center gap-3 cursor-pointer group p-1.5 -ml-1.5 rounded-lg transition-colors text-left overflow-hidden whitespace-nowrap ${isUserMenuOpen ? "bg-[#F3F3F1]" : "hover:bg-[#F3F3F1]"}`}
+            className={`flex items-center cursor-pointer group p-1.5 rounded-lg transition-colors text-left overflow-hidden ${isUserMenuOpen ? "bg-[#F3F3F1]" : "hover:bg-[#F3F3F1]"}`}
             onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
           >
             <div className="h-8 w-8 rounded-full bg-[#E5E5E5] border border-[#D2D2D2] group-hover:border-[#737373] flex items-center justify-center overflow-hidden text-xs transition-colors shrink-0">
               {avatarUrl ? <img src={avatarUrl} alt="Profile" className="h-full w-full object-cover" /> : name.charAt(0).toUpperCase()}
             </div>
-            <div className={`text-[13px] text-[#0D0D0D] font-medium truncate transition-all duration-300 ${isCollapsed ? "opacity-0 w-0 hidden" : "opacity-100 w-auto"}`}>
-              {name}
-            </div>
+            
+            <AnimatePresence initial={false}>
+              {!isCollapsed && (
+                <motion.div 
+                  initial={{ opacity: 0, width: 0 }}
+                  animate={{ opacity: 1, width: "auto" }}
+                  exit={{ opacity: 0, width: 0 }}
+                  transition={{ duration: 0.3, ease: "easeInOut" }}
+                  className="text-[13px] text-[#0D0D0D] font-medium truncate whitespace-nowrap ml-3"
+                >
+                  {name}
+                </motion.div>
+              )}
+            </AnimatePresence>
           </button>
           
-          <div className={`overflow-hidden transition-all duration-300 ${isCollapsed ? "opacity-0 max-w-0" : "opacity-100 max-w-10"}`}>
-            <button
-              type="button"
-              onClick={() => setIsCollapsed(!isCollapsed)}
-              className="p-1.5 text-[#737373] hover:text-[#0D0D0D] hover:bg-[#FFFFFF] rounded-md transition-colors shrink-0"
-              aria-label="Collapse sidebar"
-              aria-expanded={!isCollapsed}
-            >
-              <PanelLeftClose className="h-[18px] w-[18px]" aria-hidden="true" />
-            </button>
-          </div>
         </div>
         
-        <div className={`flex justify-center overflow-hidden transition-all duration-300 ${isCollapsed ? "mt-2 opacity-100 max-h-10" : "mt-0 opacity-0 max-h-0"}`}>
+        {/* Toggle Button Container - Below the avatar */}
+        <div className="flex justify-center mt-2 h-10 items-center">
           <button
             type="button"
             onClick={() => setIsCollapsed(!isCollapsed)}
             className="p-1.5 text-[#737373] hover:text-[#0D0D0D] hover:bg-[#FFFFFF] rounded-md transition-colors"
-            aria-label="Expand sidebar"
-            aria-expanded={!isCollapsed}
+            aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
           >
-            <PanelLeftOpen className="h-[18px] w-[18px]" aria-hidden="true" />
+            {isCollapsed ? <PanelLeftOpen className="h-[18px] w-[18px]" aria-hidden="true" /> : <PanelLeftClose className="h-[18px] w-[18px]" aria-hidden="true" />}
           </button>
         </div>
+        
       </div>
-    </aside>
+    </motion.aside>
   );
 }
-
-
