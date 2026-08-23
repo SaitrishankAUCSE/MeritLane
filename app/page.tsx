@@ -86,7 +86,7 @@ export default function HomePage() {
       <MeritlaneIntro />
       
       {/* HERO: Editorial Statement */}
-      <section className="relative px-6 pt-32 pb-24 sm:pt-40 sm:pb-32 lg:px-10 w-full max-w-7xl mx-auto flex flex-col lg:flex-row items-center gap-16 border-b border-border/40">
+      <section className="relative px-8 md:px-16 lg:px-24 pt-32 pb-24 sm:pt-40 sm:pb-32 w-full max-w-[1600px] mx-auto flex flex-col lg:flex-row items-center gap-16 border-b border-border/40">
         <motion.div 
           initial="hidden" 
           animate="visible" 
@@ -101,17 +101,17 @@ export default function HomePage() {
             Proof of skill.<br/>
             <span className="text-[#525252]">Not just credentials.</span>
           </motion.h1>
-          <motion.p variants={fadeUp} className="mt-8 text-[17px] lg:text-[18px] text-[#525252] max-w-xl leading-[1.6]">
+          <motion.p variants={fadeUp} className="mt-8 text-[18px] lg:text-[20px] text-[#525252] max-w-xl leading-[1.6]">
             Meritlane is a technical talent verification institution. We audit code, validate engineering capabilities, and establish immutable proof of skill—so you can hire based on evidence, not pedigree.
           </motion.p>
           <motion.div variants={fadeUp} className="mt-12 flex flex-wrap gap-4">
             <Link href="/employer/dashboard">
-              <Button className="bg-[#0D0D0D] text-[#FFFFFF] h-11 px-6 rounded-[6px] text-[14px] font-medium font-sans hover:bg-[#222222] transition-colors border-none">
+              <Button className="bg-[#0D0D0D] text-[#FFFFFF] h-12 px-8 rounded-[6px] text-[16px] font-medium font-sans hover:bg-[#222222] transition-colors border-none">
                   Start hiring verified talent
                 </Button>
             </Link>
             <Link href="/signup">
-              <Button variant="outline" className="h-11 px-6 rounded-[6px] text-[14px] font-medium font-sans border-border hover:bg-surface-low transition-colors text-foreground">
+              <Button variant="outline" className="h-12 px-8 rounded-[6px] text-[16px] font-medium font-sans border-border hover:bg-surface-low transition-colors text-foreground">
                   Get verified as an engineer
                 </Button>
             </Link>
@@ -190,7 +190,7 @@ export default function HomePage() {
 
       {/* HOW IT WORKS */}
       <section className="py-32 bg-background">
-        <div className="mx-auto w-full max-w-7xl px-6 lg:px-10">
+        <div className="mx-auto w-full max-w-[1600px] px-8 md:px-16 lg:px-24">
           <motion.div 
             initial="hidden"
             whileInView="visible"
@@ -218,7 +218,7 @@ export default function HomePage() {
 
       {/* EVIDENCE SECTION */}
       <section className="py-32 bg-surface border-y border-border/40">
-        <div className="mx-auto w-full max-w-7xl px-6 lg:px-10">
+        <div className="mx-auto w-full max-w-[1600px] px-8 md:px-16 lg:px-24">
           <motion.div 
             initial="hidden"
             whileInView="visible"
