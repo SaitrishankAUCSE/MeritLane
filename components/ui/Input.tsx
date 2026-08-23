@@ -16,7 +16,12 @@ export function Input({
   disabled,
   ...props
 }: InputProps) {
-  const inputId = id || (label ? label.toLowerCase().replace(/\s+/g, "-") : undefined);
+  const reactId = React.useId();
+  const inputId = id || (label ? label.toLowerCase().replace(/\s+/g, "-") : reactId);
+  const errorId = `${inputId}-error`;
+  const helperId = `${inputId}-helper`;
+  
+  const describedBy = error ? errorId : helperText ? helperId : props["aria-describedby"];
 
   return (
     <div className="flex w-full flex-col gap-1.5 text-left">
@@ -29,6 +34,8 @@ export function Input({
         <input
           id={inputId}
           disabled={disabled}
+          aria-invalid={!!error}
+          aria-describedby={describedBy}
           className={`w-full h-[42px] px-3 py-2 bg-surface text-foreground text-[14px] font-sans border rounded-md transition-colors placeholder:text-muted-foreground focus:outline-none focus:border-outline focus-visible:ring-1 focus-visible:ring-foreground disabled:opacity-50 ${error ? "border-danger text-danger" : "border-border"} ${className}`}
           {...props}
         />
@@ -39,10 +46,10 @@ export function Input({
         )}
       </div>
       {helperText && !error && (
-        <p className="text-[13px] text-muted-foreground">{helperText}</p>
+        <p id={helperId} className="text-[13px] text-muted-foreground">{helperText}</p>
       )}
       {error && (
-        <p className="text-[13px] font-medium text-danger">{error}</p>
+        <p id={errorId} role="alert" className="text-[13px] font-medium text-danger">{error}</p>
       )}
     </div>
   );

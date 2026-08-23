@@ -40,6 +40,17 @@ export default function CandidateDashboardPage() {
     }
   }, [user, loading]);
 
+  useEffect(() => {
+    if (!isModalOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setIsModalOpen(false);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isModalOpen]);
+
   const skills = profile?.skills || [];
   const projects = profile?.projects || [];
 
@@ -114,8 +125,11 @@ export default function CandidateDashboardPage() {
             <div className="text-[14px] text-[#0D0D0D] font-sans">Provide the material that supports the claims made in your Identity.</div>
           </div>
           <button 
+            type="button"
             onClick={() => setIsModalOpen(true)}
-            className="px-5 h-10 border border-[#0D0D0D] bg-[#0D0D0D] text-[#FFFFFF] hover:bg-[#222222] hover:text-[#FFFFFF] rounded-md text-[14px] font-sans font-medium transition-all font-bold"
+            aria-haspopup="dialog"
+            aria-expanded={isModalOpen}
+            className="px-5 h-10 border border-[#0D0D0D] bg-[#0D0D0D] text-[#FFFFFF] hover:bg-[#222222] hover:text-[#FFFFFF] rounded-md text-[14px] font-sans font-medium transition-all font-bold shrink-0"
           >
             [+] Add evidence
           </button>
@@ -243,25 +257,40 @@ export default function CandidateDashboardPage() {
 
       {/* Add Evidence Modal */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#0D0D0D]/40 backdrop-blur-sm p-4">
-          <div className="bg-[#FFFFFF] rounded-xl shadow-2xl w-full max-w-lg overflow-hidden flex flex-col">
+        <div 
+          className="fixed inset-0 z-50 flex items-center justify-center bg-[#0D0D0D]/40 backdrop-blur-sm p-4"
+          onClick={() => setIsModalOpen(false)}
+        >
+          <div 
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="modal-evidence-title"
+            onClick={(e) => e.stopPropagation()}
+            className="bg-[#FFFFFF] rounded-xl shadow-2xl w-full max-w-lg overflow-hidden flex flex-col"
+          >
             <div className="flex items-center justify-between px-6 py-5 border-b border-[#E5E5E5]">
-              <h2 className="text-[16px] font-bold text-[#0D0D0D]">Add Supporting Evidence</h2>
-              <button onClick={() => setIsModalOpen(false)} className="text-[#737373] hover:text-[#0D0D0D]">
-                <X className="h-5 w-5" />
+              <h2 id="modal-evidence-title" className="text-[16px] font-bold text-[#0D0D0D]">Add Supporting Evidence</h2>
+              <button 
+                type="button"
+                onClick={() => setIsModalOpen(false)} 
+                className="text-[#737373] hover:text-[#0D0D0D]"
+                aria-label="Close modal"
+              >
+                <X className="h-5 w-5" aria-hidden="true" />
               </button>
             </div>
             
             <form onSubmit={handleSaveEvidence} className="p-6 flex flex-col gap-5">
               {errorMsg && (
-                <div className="text-[13px] text-[#B42318] bg-[#B42318]/10 p-3 rounded-md">
+                <div role="alert" className="text-[13px] text-[#B42318] bg-[#B42318]/10 p-3 rounded-md">
                   {errorMsg}
                 </div>
               )}
               
               <div className="space-y-1.5">
-                <label className="text-[13px] font-medium text-[#0D0D0D]">Project Title <span className="text-[#B42318]">*</span></label>
+                <label htmlFor="evidence-project-title" className="text-[13px] font-medium text-[#0D0D0D]">Project Title <span className="text-[#B42318]">*</span></label>
                 <input 
+                  id="evidence-project-title"
                   type="text" 
                   value={newProject.title}
                   onChange={(e) => setNewProject({...newProject, title: e.target.value})}
@@ -272,8 +301,9 @@ export default function CandidateDashboardPage() {
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-[13px] font-medium text-[#0D0D0D]">Repository URL <span className="text-[#B42318]">*</span></label>
+                <label htmlFor="evidence-repo-url" className="text-[13px] font-medium text-[#0D0D0D]">Repository URL <span className="text-[#B42318]">*</span></label>
                 <input 
+                  id="evidence-repo-url"
                   type="url" 
                   value={newProject.repoUrl}
                   onChange={(e) => setNewProject({...newProject, repoUrl: e.target.value})}
@@ -284,8 +314,9 @@ export default function CandidateDashboardPage() {
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-[13px] font-medium text-[#0D0D0D]">Live URL <span className="text-[#737373] font-normal">(Optional)</span></label>
+                <label htmlFor="evidence-live-url" className="text-[13px] font-medium text-[#0D0D0D]">Live URL <span className="text-[#737373] font-normal">(Optional)</span></label>
                 <input 
+                  id="evidence-live-url"
                   type="url" 
                   value={newProject.liveUrl}
                   onChange={(e) => setNewProject({...newProject, liveUrl: e.target.value})}
@@ -295,8 +326,9 @@ export default function CandidateDashboardPage() {
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-[13px] font-medium text-[#0D0D0D]">Description <span className="text-[#737373] font-normal">(Optional)</span></label>
+                <label htmlFor="evidence-description" className="text-[13px] font-medium text-[#0D0D0D]">Description <span className="text-[#737373] font-normal">(Optional)</span></label>
                 <textarea 
+                  id="evidence-description"
                   value={newProject.description}
                   onChange={(e) => setNewProject({...newProject, description: e.target.value})}
                   className="w-full border border-[#E5E5E5] rounded-md px-3 py-2 text-[14px] outline-none focus:border-[#0D0D0D] transition-colors resize-none h-20"
@@ -314,8 +346,10 @@ export default function CandidateDashboardPage() {
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-[13px] font-medium text-[#0D0D0D]">Supports Claim <span className="text-[#B42318]">*</span></label>
+                <label htmlFor="evidence-supports-claim" className="text-[13px] font-medium text-[#0D0D0D]">Supports Claim <span className="text-[#B42318]">*</span></label>
                 <select 
+                  id="evidence-supports-claim"
+                  aria-describedby="evidence-supports-claim-desc"
                   value={newProject.supportsClaim}
                   onChange={(e) => setNewProject({...newProject, supportsClaim: e.target.value})}
                   className="w-full border border-[#E5E5E5] rounded-md px-3 py-2 text-[14px] outline-none focus:border-[#0D0D0D] transition-colors bg-transparent"
@@ -329,7 +363,7 @@ export default function CandidateDashboardPage() {
                     ))
                   )}
                 </select>
-                <p className="text-[11px] text-[#737373]">Select the skill this evidence proves.</p>
+                <p id="evidence-supports-claim-desc" className="text-[11px] text-[#737373]">Select the skill this evidence proves.</p>
               </div>
 
               <div className="flex justify-end gap-3 mt-4">

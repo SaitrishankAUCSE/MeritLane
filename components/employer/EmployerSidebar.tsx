@@ -53,25 +53,30 @@ export function EmployerSidebar() {
         </div>
       </div>
 
-      <nav className="flex-1 px-4 mt-6 space-y-1">
+      <nav aria-label="Employer Navigation" className="flex-1 px-4 mt-6 space-y-1">
         {navItems.map((item) => {
           const isActive = pathname === item.href;
           const Icon = item.icon;
 
           if (isActive) {
             return (
-              <div key={item.name} className="flex items-center px-4 py-3 text-[14px] font-sans text-[#0D0D0D] bg-[#FFFFFF] relative transition-colors rounded-md">
-                <Icon className="mr-4 h-[18px] w-[18px]" />
+              <Link 
+                key={item.name} 
+                href={item.href}
+                aria-current="page" 
+                className="flex items-center px-4 py-3 text-[14px] font-sans text-[#0D0D0D] bg-[#FFFFFF] relative transition-colors rounded-md"
+              >
+                <Icon className="mr-4 h-[18px] w-[18px]" aria-hidden="true" />
                 {item.name}
                 <div className="absolute bg-[#0D0D0D] right-0 top-1/2 -translate-y-1/2 h-4 w-[2px] rounded-l-md" />
-              </div>
+              </Link>
             );
           }
 
           if (item.disabled) {
             return (
-              <div key={item.name} className="flex items-center px-4 py-3 text-[14px] font-sans text-[#D2D2D2] cursor-not-allowed transition-colors rounded-md" title="Coming soon">
-                <Icon className="mr-4 h-[18px] w-[18px] opacity-30" />
+              <div key={item.name} aria-disabled="true" className="flex items-center px-4 py-3 text-[14px] font-sans text-[#D2D2D2] cursor-not-allowed transition-colors rounded-md" title="Coming soon">
+                <Icon className="mr-4 h-[18px] w-[18px] opacity-30" aria-hidden="true" />
                 {item.name}
               </div>
             );
@@ -79,7 +84,7 @@ export function EmployerSidebar() {
 
           return (
             <Link key={item.name} href={item.href} className="flex items-center px-4 py-3 text-[14px] font-sans text-[#737373] hover:text-[#0D0D0D] hover:bg-[#FFFFFF]/50 transition-colors rounded-md">
-              <Icon className="mr-4 h-[18px] w-[18px] opacity-70" />
+              <Icon className="mr-4 h-[18px] w-[18px] opacity-70" aria-hidden="true" />
               {item.name}
             </Link>
           );
@@ -142,8 +147,12 @@ export function EmployerSidebar() {
           </AnimatePresence>
 
           {/* Avatar Button */}
-          <div 
-            className={`flex items-center gap-3 cursor-pointer group p-1.5 -ml-1.5 rounded-lg transition-colors w-full ${isUserMenuOpen ? "bg-[#F3F3F1]" : "hover:bg-[#F3F3F1]"}`}
+          <button 
+            type="button"
+            aria-haspopup="menu"
+            aria-expanded={isUserMenuOpen}
+            aria-label="Employer account menu"
+            className={`flex items-center gap-3 cursor-pointer group p-1.5 -ml-1.5 rounded-lg transition-colors w-full text-left ${isUserMenuOpen ? "bg-[#F3F3F1]" : "hover:bg-[#F3F3F1]"}`}
             onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
           >
             <div className="h-8 w-8 rounded-full bg-[#E5E5E5] border border-[#D2D2D2] group-hover:border-[#737373] flex items-center justify-center overflow-hidden text-xs transition-colors shrink-0">
@@ -152,7 +161,7 @@ export function EmployerSidebar() {
             <div className="text-[13px] text-[#0D0D0D] font-medium truncate transition-colors">
               {name}
             </div>
-          </div>
+          </button>
         </div>
       </div>
     </aside>

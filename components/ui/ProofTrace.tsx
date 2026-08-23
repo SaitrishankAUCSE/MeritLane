@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { VerdictMark, VerdictStatus } from "@/components/ui/VerdictMark";
 import { Terminal, X } from "lucide-react";
 
@@ -23,6 +23,7 @@ export function ProofTrace({
 }: ProofTraceProps) {
   const [expanded, setExpanded] = useState(false);
   const [visibleLines, setVisibleLines] = useState<number>(0);
+  const scrollRef = useRef<HTMLDivElement>(null);
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
 
   // Check for reduced motion preference
@@ -122,22 +123,41 @@ export function ProofTrace({
         setVisibleLines(lines.length);
       } else {
         setVisibleLines(0);
-        const interval = setInterval(() => {
+        const timer = setInterval(() => {
           setVisibleLines((prev) => {
             if (prev >= lines.length) {
-              clearInterval(interval);
+              clearInterval(timer);
               return prev;
             }
             return prev + 1;
           });
-        }, 150); // 150ms staggered reveal per line
+        }, 30); // Fast 30ms terminal output effect
         
-        return () => clearInterval(interval);
+        return () => clearInterval(timer);
       }
     } else {
       setVisibleLines(0);
     }
   }, [expanded, lines.length, prefersReducedMotion]);
+
+  // Escape key handler
+  useEffect(() => {
+    if (!expanded) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setExpanded(false);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [expanded]);
+
+  // Auto-scroll when lines are added
+  useEffect(() => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+    }
+  }, [visibleLines]);
 
   return (
     <>
@@ -148,38 +168,57 @@ export function ProofTrace({
         <button
           onClick={() => setExpanded(true)}
           className="group flex shrink-0 items-center gap-1.5 whitespace-nowrap border border-border px-3 py-1.5 font-data uppercase text-muted-foreground hover:text-foreground"
+          aria-haspopup="dialog"
+          aria-expanded={expanded}
         >
-          <Terminal className="h-3.5 w-3.5 text-zinc-400 group-hover:text-zinc-700 transition-colors shrink-0" />
+          <Terminal className="h-3.5 w-3.5 text-zinc-400 group-hover:text-zinc-700 transition-colors shrink-0" aria-hidden="true" />
           <span>View Proof Trace</span>
         </button>
       </div>
 
       {/* Expanded State: Terminal Modal */}
       {expanded && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-zinc-950/80 p-4 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="w-full max-w-2xl bg-[#0D0D0D] border border-zinc-800 rounded-md overflow-hidden shadow-sm animate-in zoom-in-95 duration-200 flex flex-col">
+        <div 
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-zinc-950/80 p-4 backdrop-blur-sm animate-in fade-in duration-200"
+          onClick={() => setExpanded(false)}
+        >
+          <div 
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="proof-trace-title"
+            onClick={(e) => e.stopPropagation()}
+            className="w-full max-w-2xl bg-[#0D0D0D] border border-zinc-800 rounded-md overflow-hidden shadow-sm animate-in zoom-in-95 duration-200 flex flex-col"
+          >
             
             {/* Terminal Header */}
             <div className="flex items-center justify-between bg-[#1A1A1A] border-b border-zinc-800 px-4 py-3 select-none">
               <div className="flex items-center gap-3">
-                <div className="flex items-center gap-1.5">
+                <div className="flex items-center gap-1.5" aria-hidden="true">
                   <div className="h-3 w-3 rounded-full bg-red-500/80"></div>
                   <div className="h-3 w-3 rounded-full bg-amber-500/80"></div>
                   <div className="h-3 w-3 rounded-full bg-emerald-500/80"></div>
                 </div>
-                <span className="text-[10px] font-mono text-zinc-400 tracking-wider">meritlane-proof-layer ~ sh</span>
+                <span id="proof-trace-title" className="text-[10px] font-mono text-zinc-400 tracking-wider">meritlane-proof-layer ~ sh</span>
               </div>
               <button 
+                type="button"
                 onClick={() => setExpanded(false)}
-                className="text-zinc-500 hover:text-[#0D0D0D] transition-colors"
+                className="text-zinc-500 hover:text-zinc-300 transition-colors"
                 aria-label="Close trace"
               >
-                <X className="h-4 w-4" />
+                <X className="h-4 w-4" aria-hidden="true" />
               </button>
             </div>
 
             {/* Terminal Output */}
-            <div className="p-6 font-mono text-sm leading-relaxed overflow-y-auto max-h-[70vh]">
+            <div 
+              ref={scrollRef} 
+              role="log"
+              aria-live="polite"
+              tabIndex={0}
+              aria-label="Proof trace logs"
+              className="p-6 font-mono text-sm leading-relaxed overflow-y-auto max-h-[70vh]"
+            >
               {lines.map((line, index) => {
                 if (index >= visibleLines) return null;
                 

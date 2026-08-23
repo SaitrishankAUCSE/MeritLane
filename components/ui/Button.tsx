@@ -58,26 +58,40 @@ export function Button({
   const content = (
     <>
       {loading ? (
-        <MeritlaneLoader level="button" />
+        <span aria-hidden="true"><MeritlaneLoader level="button" /></span>
       ) : (
-        leftIcon && <span className={size === "icon" ? "" : "shrink-0"}>{leftIcon}</span>
+        leftIcon && <span aria-hidden="true" className={size === "icon" ? "" : "shrink-0"}>{leftIcon}</span>
       )}
       {children}
-      {!loading && rightIcon && <span className="shrink-0">{rightIcon}</span>}
+      {!loading && rightIcon && <span aria-hidden="true" className="shrink-0">{rightIcon}</span>}
     </>
   );
 
   if (props.href) {
     const { href, ...rest } = props as ButtonProps & { href: string };
+    const isLinkDisabled = disabled || loading;
+    const linkProps = {
+      ...rest,
+      "aria-disabled": isLinkDisabled ? ("true" as const) : undefined,
+      tabIndex: isLinkDisabled ? -1 : undefined,
+      onClick: (e: React.MouseEvent<HTMLAnchorElement>) => {
+        if (isLinkDisabled) {
+          e.preventDefault();
+          return;
+        }
+        (rest as any).onClick?.(e);
+      },
+    };
+
     if (href.startsWith("http")) {
       return (
-        <a href={href} className={combinedClassName} {...(rest as any)}>
+        <a href={href} className={combinedClassName} {...(linkProps as any)}>
           {content}
         </a>
       );
     }
     return (
-      <Link href={href} className={combinedClassName} {...(rest as any)}>
+      <Link href={href} className={combinedClassName} {...(linkProps as any)}>
         {content}
       </Link>
     );
@@ -87,6 +101,7 @@ export function Button({
     <button
       className={combinedClassName}
       disabled={disabled || loading}
+      aria-busy={loading ? "true" : undefined}
       {...props}
     >
       {content}

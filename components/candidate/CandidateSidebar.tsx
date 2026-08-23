@@ -60,7 +60,7 @@ export function CandidateSidebar() {
       </div>
 
       {/* Navigation */}
-      <nav className={`flex-1 mt-6 space-y-1 ${isCollapsed ? "px-2" : "px-4"}`}>
+      <nav aria-label="Candidate Navigation" className={`flex-1 mt-6 space-y-1 ${isCollapsed ? "px-2" : "px-4"}`}>
         {navItems.map((item) => {
           const isActive = pathname === item.href;
           const Icon = item.icon;
@@ -70,10 +70,11 @@ export function CandidateSidebar() {
               <Link
                 key={item.name}
                 href={item.href}
+                aria-current="page"
                 title={isCollapsed ? item.name : undefined}
                 className={`flex items-center py-2 h-10 text-[14px] font-sans text-[#0D0D0D] bg-[#FFFFFF] relative transition-colors ${isCollapsed ? "justify-center px-0 rounded-md mx-1" : "px-4"}`}
               >
-                <Icon className={`h-[18px] w-[18px] ${isCollapsed ? "" : "mr-4"}`} />
+                <Icon className={`h-[18px] w-[18px] ${isCollapsed ? "" : "mr-4"}`} aria-hidden="true" />
                 {!isCollapsed && item.name}
                 <div className={`absolute bg-[#0D0D0D] ${isCollapsed ? "left-0 top-1/2 -translate-y-1/2 h-4 w-[2px] rounded-r-md" : "right-0 top-0 bottom-0 w-[1px]"}`} />
               </Link>
@@ -87,7 +88,7 @@ export function CandidateSidebar() {
               title={isCollapsed ? item.name : undefined}
               className={`flex items-center py-2 h-10 text-[14px] font-sans text-[#737373] hover:text-[#0D0D0D] hover:bg-[#FFFFFF]/50 transition-colors relative ${isCollapsed ? "justify-center px-0 rounded-md mx-1" : "px-4"}`}
             >
-              <Icon className={`h-[18px] w-[18px] opacity-70 ${isCollapsed ? "" : "mr-4"}`} />
+              <Icon className={`h-[18px] w-[18px] opacity-70 ${isCollapsed ? "" : "mr-4"}`} aria-hidden="true" />
               {!isCollapsed && item.name}
             </Link>
           );
@@ -164,8 +165,12 @@ export function CandidateSidebar() {
           </AnimatePresence>
 
           {/* Avatar Button */}
-          <div 
-            className={`flex items-center gap-3 cursor-pointer group p-1.5 -ml-1.5 rounded-lg transition-colors ${isUserMenuOpen ? "bg-[#F3F3F1]" : "hover:bg-[#F3F3F1]"}`}
+          <button 
+            type="button"
+            aria-haspopup="menu"
+            aria-expanded={isUserMenuOpen}
+            aria-label="User account menu"
+            className={`flex items-center gap-3 cursor-pointer group p-1.5 -ml-1.5 rounded-lg transition-colors text-left ${isUserMenuOpen ? "bg-[#F3F3F1]" : "hover:bg-[#F3F3F1]"}`}
             onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
           >
             <div className="h-8 w-8 rounded-full bg-[#E5E5E5] border border-[#D2D2D2] group-hover:border-[#737373] flex items-center justify-center overflow-hidden text-xs transition-colors shrink-0">
@@ -176,16 +181,18 @@ export function CandidateSidebar() {
                 {name}
               </div>
             )}
-          </div>
+          </button>
           
           {/* Toggle Button */}
           {!isCollapsed && (
             <button
+              type="button"
               onClick={() => setIsCollapsed(!isCollapsed)}
               className="p-1.5 text-[#737373] hover:text-[#0D0D0D] hover:bg-[#FFFFFF] rounded-md transition-colors shrink-0"
-              title="Collapse Sidebar"
+              aria-label="Collapse sidebar"
+              aria-expanded={!isCollapsed}
             >
-              <PanelLeftClose className="h-[18px] w-[18px]" />
+              <PanelLeftClose className="h-[18px] w-[18px]" aria-hidden="true" />
             </button>
           )}
         </div>
@@ -193,11 +200,13 @@ export function CandidateSidebar() {
         {isCollapsed && (
           <div className="flex justify-center mt-2">
             <button
+              type="button"
               onClick={() => setIsCollapsed(!isCollapsed)}
               className="p-1.5 text-[#737373] hover:text-[#0D0D0D] hover:bg-[#FFFFFF] rounded-md transition-colors"
-              title="Expand Sidebar"
+              aria-label="Expand sidebar"
+              aria-expanded={!isCollapsed}
             >
-              <PanelLeftOpen className="h-[18px] w-[18px]" />
+              <PanelLeftOpen className="h-[18px] w-[18px]" aria-hidden="true" />
             </button>
           </div>
         )}

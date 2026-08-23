@@ -159,16 +159,17 @@ const SocialButtons: React.FC<{ mode: "login" | "signup" }> = ({ mode }) => {
         type="button"
         onClick={onGoogle}
         disabled={loading}
+        aria-busy={loading}
         className="flex h-10 w-full items-center justify-center gap-2.5 rounded-md border border-[#E5E5E5] bg-[#FFFFFF] text-[13px] font-medium text-[#0D0D0D] transition-colors hover:bg-[#F3F3F1] active:bg-[#EAEAE7] disabled:opacity-60"
       >
         {loading ? (
           <span className="flex items-center gap-2">
-            <span className="inline-block h-3.5 w-3.5 animate-spin rounded-full border-[1.5px] border-[#737373]/30 border-t-[#0D0D0D]" />
+            <span className="inline-block h-3.5 w-3.5 animate-spin rounded-full border-[1.5px] border-[#737373]/30 border-t-[#0D0D0D]" aria-hidden="true" />
             Authenticating…
           </span>
         ) : (
           <>
-            <svg className="h-4 w-4" viewBox="0 0 24 24">
+            <svg className="h-4 w-4" viewBox="0 0 24 24" aria-hidden="true">
               <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
               <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
               <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
@@ -243,7 +244,7 @@ const LoginForm: React.FC<{ mode: "login" | "signup" }> = ({ mode }) => {
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       {error && (
-        <div className="rounded-md border border-[#B42318]/20 bg-[#B42318]/5 px-3 py-2.5 text-[13px] text-[#B42318]" role="alert">
+        <div id="auth-form-error" className="rounded-md border border-[#B42318]/20 bg-[#B42318]/5 px-3 py-2.5 text-[13px] text-[#B42318]" role="alert">
           {error}
         </div>
       )}
@@ -261,6 +262,8 @@ const LoginForm: React.FC<{ mode: "login" | "signup" }> = ({ mode }) => {
           placeholder="you@example.com"
           required
           autoComplete="email"
+          aria-invalid={!!error}
+          aria-describedby={error ? "auth-form-error" : undefined}
           className="auth-input"
         />
       </div>
@@ -285,6 +288,8 @@ const LoginForm: React.FC<{ mode: "login" | "signup" }> = ({ mode }) => {
           placeholder="••••••••"
           required
           autoComplete={mode === "login" ? "current-password" : "new-password"}
+          aria-invalid={!!error}
+          aria-describedby={error ? "auth-form-error" : undefined}
           className="auth-input"
         />
       </div>
@@ -293,11 +298,12 @@ const LoginForm: React.FC<{ mode: "login" | "signup" }> = ({ mode }) => {
       <button
         type="submit"
         disabled={loading}
+        aria-busy={loading}
         className="flex h-10 w-full items-center justify-center rounded-md bg-[#0D0D0D] text-[13px] font-medium text-[#FFFFFF] transition-colors hover:bg-[#222222] active:bg-[#000000] disabled:opacity-60"
       >
         {loading ? (
           <span className="flex items-center gap-2">
-            <span className="inline-block h-3.5 w-3.5 animate-spin rounded-full border-[1.5px] border-[#FFFFFF]/30 border-t-[#FFFFFF]" />
+            <span className="inline-block h-3.5 w-3.5 animate-spin rounded-full border-[1.5px] border-[#FFFFFF]/30 border-t-[#FFFFFF]" aria-hidden="true" />
             {mode === "login" ? "Signing in…" : "Creating account…"}
           </span>
         ) : (
