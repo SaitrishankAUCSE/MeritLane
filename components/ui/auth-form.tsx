@@ -15,45 +15,65 @@ interface AuthFormProps {
 
 export default function AuthForm({ mode = "login" }: AuthFormProps) {
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#FAFAFA] font-sans">
-      {/* Subtle technical grid — full background, very faint */}
-      <div
-        className="pointer-events-none absolute inset-0 opacity-[0.35]"
-        style={{
-          backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32' width='32' height='32' fill='none' stroke='rgb(210 210 210 / 0.6)'%3e%3cpath d='M0 .5H31.5V32'/%3e%3c/svg%3e")`,
-        }}
-      />
-      {/* Radial fade so the grid dissolves toward edges */}
-      <div
-        className="pointer-events-none absolute inset-0"
-        style={{
-          background: "radial-gradient(ellipse 70% 70% at 50% 50%, transparent 0%, #FAFAFA 100%)",
-        }}
-      />
-
-      <motion.div
-        initial={{ opacity: 0, y: 8 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.3, ease: "easeOut" }}
-        className="relative z-10 mx-4 w-full max-w-[400px]"
-      >
-        {/* Back button — positioned above the card */}
-        <div className="mb-6">
-          <BackButton />
+    <div className="min-h-[100dvh] w-full flex bg-[#FAFAFA] font-sans relative z-[60]">
+      {/* Left side: Branding/Image */}
+      <div className="hidden lg:flex w-1/2 bg-[#0D0D0D] text-[#FFFFFF] relative overflow-hidden flex-col justify-between p-12 lg:p-20">
+        <div
+          className="pointer-events-none absolute inset-0 opacity-[0.07]"
+          style={{
+            backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32' width='32' height='32' fill='none' stroke='rgb(255 255 255 / 1)'%3e%3cpath d='M0 .5H31.5V32'/%3e%3c/svg%3e")`,
+          }}
+        />
+        <div
+          className="pointer-events-none absolute inset-0"
+          style={{
+            background: "radial-gradient(ellipse 80% 80% at 50% 50%, transparent 0%, #0D0D0D 100%)",
+          }}
+        />
+        <div className="relative z-10">
+          <span className="font-serif text-3xl font-medium tracking-tight text-[#FFFFFF]">
+            Meritlane
+          </span>
         </div>
-
-        {/* Auth card */}
-        <div className="rounded-md border border-[#E5E5E5] bg-[#FFFFFF] px-6 py-7 sm:px-8 sm:py-8">
-          <Logo />
-          <Header mode={mode} />
-          <SocialButtons mode={mode} />
-          <Divider />
-          <LoginForm mode={mode} />
+        <div className="relative z-10 max-w-lg mb-12">
+          <h1 className="font-serif text-[48px] leading-tight mb-6 text-[#FFFFFF]">Prove your capability.</h1>
+          <p className="font-sans text-[16px] text-[#A3A3A3] leading-relaxed">
+            Meritlane translates your self-declared skills into cryptographically verified claims, providing undeniable proof of your technical expertise.
+          </p>
         </div>
+      </div>
 
-        {/* Legal text — below the card */}
-        <TermsAndConditions />
-      </motion.div>
+      {/* Right side: Form */}
+      <div className="w-full lg:w-1/2 flex flex-col items-center justify-center p-6 sm:p-12 relative min-h-[100dvh]">
+        {/* Mobile Logo */}
+        <div className="absolute top-8 left-8 lg:hidden">
+          <span className="font-serif text-xl font-medium tracking-tight text-[#0D0D0D]">
+            Meritlane
+          </span>
+        </div>
+        
+        <motion.div
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3, ease: "easeOut" }}
+          className="relative z-10 w-full max-w-[420px]"
+        >
+          {/* Back button */}
+          <div className="mb-6">
+            <BackButton />
+          </div>
+
+          {/* Auth card */}
+          <div className="rounded-xl border border-[#E5E5E5] bg-[#FFFFFF] px-8 py-10 shadow-sm">
+            <Header mode={mode} />
+            <SocialButtons mode={mode} />
+            <Divider />
+            <LoginForm mode={mode} />
+          </div>
+
+          <TermsAndConditions />
+        </motion.div>
+      </div>
     </div>
   )
 }
@@ -71,14 +91,6 @@ const BackButton: React.FC = () => {
     </button>
   )
 }
-
-const Logo: React.FC = () => (
-  <div className="mb-5 text-center">
-    <span className="font-serif text-xl font-medium tracking-tight text-[#0D0D0D]">
-      Meritlane
-    </span>
-  </div>
-)
 
 const Header: React.FC<{ mode: "login" | "signup" }> = ({ mode }) => {
   const router = useRouter()
