@@ -25,7 +25,7 @@ export function ProofSignal({ type, label, source, className = "" }: ProofSignal
         return { wrapper: "text-warning", icon: <AlertCircle className="mr-1 h-3.5 w-3.5" /> };
       case "declared":
       default:
-        return { wrapper: "text-outline", icon: <Circle className="mr-1.5 h-2.5 w-2.5" strokeWidth={3} /> };
+        return { wrapper: "text-muted-foreground", icon: <Circle className="mr-1.5 h-2.5 w-2.5" strokeWidth={3} /> };
     }
   };
 
@@ -51,3 +51,4 @@ export function EvidenceRail({ children, className = "" }: { children: React.Rea
     </div>
   );
 }
+

@@ -21,7 +21,7 @@ export function Textarea({
   return (
     <div className="flex w-full flex-col gap-1.5 text-left">
       {label && (
-        <label htmlFor={textareaId} className="font-data text-outline">
+        <label htmlFor={textareaId} className="font-data text-muted-foreground">
           {label}
         </label>
       )}
@@ -47,3 +47,4 @@ export function Textarea({
     </div>
   );
 }
+

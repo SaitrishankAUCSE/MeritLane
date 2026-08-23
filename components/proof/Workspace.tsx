@@ -21,8 +21,9 @@ export function TechnicalRecord({
 }) {
   return (
     <div className="border-b border-border/60 py-3">
-      <p className="font-label mb-2 text-outline">{label}</p>
+      <p className="font-label mb-2 text-muted-foreground">{label}</p>
       <div className="text-[15px] leading-relaxed text-foreground">{value || "—"}</div>
     </div>
   );
 }
+

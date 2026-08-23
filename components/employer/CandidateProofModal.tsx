@@ -40,7 +40,7 @@ export function CandidateProofModal({ candidate, isOpen, onClose }: CandidatePro
           
           <button 
             onClick={onClose} 
-            className="flex h-10 w-10 items-center justify-center rounded-sm border border-border text-outline hover:bg-surface-low hover:text-foreground transition-colors bg-surface"
+            className="flex h-10 w-10 items-center justify-center rounded-sm border border-border text-muted-foreground hover:bg-surface-low hover:text-foreground transition-colors bg-surface"
             aria-label="Close modal"
           >
             <X className="h-4 w-4" />
@@ -65,7 +65,7 @@ export function CandidateProofModal({ candidate, isOpen, onClose }: CandidatePro
               <div className="bg-surface border-l-2 border-border pl-4 space-y-2">
                 {candidate.matchReasons.map((reason: string, idx: number) => (
                   <div key={idx} className="flex items-start gap-2">
-                    <CheckCircle2 className="h-4 w-4 text-outline shrink-0 mt-0.5" />
+                    <CheckCircle2 className="h-4 w-4 text-muted-foreground shrink-0 mt-0.5" />
                     <span className="text-sm font-medium text-muted-foreground">{reason}</span>
                   </div>
                 ))}
@@ -85,7 +85,7 @@ export function CandidateProofModal({ candidate, isOpen, onClose }: CandidatePro
               {/* Verified Stack */}
               {candidate.matchedSkills && candidate.matchedSkills.length > 0 && (
                 <div className="space-y-3">
-                  <span className="text-[10px] font-bold text-outline uppercase tracking-widest block">Role Matches</span>
+                  <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest block">Role Matches</span>
                   <div className="flex flex-col gap-2">
                     {candidate.matchedSkills.map((skill: string) => (
                       <div key={skill} className="flex items-center justify-between border border-border p-3 bg-surface">
@@ -100,7 +100,7 @@ export function CandidateProofModal({ candidate, isOpen, onClose }: CandidatePro
               {/* All Declared Skills */}
               {candidate.skills && candidate.skills.length > 0 && (
                 <div className="space-y-3">
-                  <span className="text-[10px] font-bold text-outline uppercase tracking-widest block">Declared Stack</span>
+                  <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest block">Declared Stack</span>
                   <div className="flex flex-wrap gap-2">
                     {candidate.skills.map((skill: string) => (
                       <span key={skill} className="bg-surface-low text-muted-foreground px-3 py-1.5 rounded-sm text-xs font-semibold">
@@ -232,3 +232,4 @@ export function CandidateProofModal({ candidate, isOpen, onClose }: CandidatePro
     </div>
   );
 }
+

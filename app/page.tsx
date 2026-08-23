@@ -204,7 +204,7 @@ export default function HomePage() {
               { num: "03", title: "Get discovered", desc: "Share your verified public record or join the private talent pool where top employers actively seek out validated engineering excellence." }
             ].map((step, i) => (
               <motion.div key={i} variants={fadeUp} className="border-t border-border pt-8 relative group">
-                <div className="text-[10px] font-mono text-outline mb-4">{step.num}</div>
+                <div className="text-[10px] font-mono text-muted-foreground mb-4">{step.num}</div>
                 <h3 className="text-xl font-serif text-foreground mb-4">{step.title}</h3>
                 <p className="text-sm text-muted-foreground leading-relaxed">
                   {step.desc}
@@ -226,7 +226,7 @@ export default function HomePage() {
             variants={fadeUp}
             className="mb-16 flex items-center justify-between border-b border-border pb-6"
           >
-            <h2 className="text-[10px] font-mono tracking-widest text-outline uppercase">
+            <h2 className="text-[10px] font-mono tracking-widest text-muted-foreground uppercase">
               The Three Pillars of Proof
             </h2>
             <div className="h-px w-24 bg-border hidden sm:block" />
@@ -271,11 +271,11 @@ export default function HomePage() {
             
             <div className="flex flex-col md:flex-row gap-0 border border-border bg-surface shadow-sm focus-within:border-foreground transition-colors">
               <div className="flex-1 flex items-center px-6 py-4">
-                <Search className="h-5 w-5 text-outline mr-4 shrink-0" />
+                <Search className="h-5 w-5 text-muted-foreground mr-4 shrink-0" />
                 <input 
                   type="text" 
                   placeholder="Query by title, skills, or college" 
-                  className="w-full bg-transparent focus:outline-none text-foreground placeholder:text-outline text-lg font-mono text-sm"
+                  className="w-full bg-transparent focus:outline-none text-foreground placeholder:text-muted-foreground text-lg font-mono text-sm"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   onKeyDown={handleKeyDown}
@@ -291,13 +291,13 @@ export default function HomePage() {
           </motion.div>
           
           <div className="flex justify-between items-center mb-8 border-b border-border pb-4">
-            <h3 className="text-[10px] font-mono tracking-wider text-outline uppercase">
+            <h3 className="text-[10px] font-mono tracking-wider text-muted-foreground uppercase">
               {searchQuery ? `Search Results [${displayedCandidates.length}]` : "Recently Verified Records"}
             </h3>
           </div>
           
           {loading ? (
-            <div className="py-20 text-outline font-mono text-sm flex items-center gap-4">
+            <div className="py-20 text-muted-foreground font-mono text-sm flex items-center gap-4">
               <div className="h-4 w-4 border border-outline border-t-foreground animate-spin"></div>
               Retrieving public records...
             </div>
@@ -337,7 +337,7 @@ export default function HomePage() {
                             </span>
                           ))}
                           {c.skills?.length > 5 && (
-                            <span className="text-[10px] font-mono text-outline px-2 py-1">+{c.skills.length - 5}</span>
+                            <span className="text-[10px] font-mono text-muted-foreground px-2 py-1">+{c.skills.length - 5}</span>
                           )}
                         </div>
                       </div>
@@ -364,7 +364,7 @@ export default function HomePage() {
           {/* Employer */}
           <div className="p-16 lg:p-32 bg-surface flex flex-col justify-center hover:bg-surface-high transition-colors group cursor-pointer" onClick={() => router.push('/employer/dashboard')}>
             <div className="max-w-md mx-auto w-full">
-              <div className="text-[10px] font-mono tracking-widest text-outline uppercase mb-6">For Employers</div>
+              <div className="text-[10px] font-mono tracking-widest text-muted-foreground uppercase mb-6">For Employers</div>
               <h2 className="text-3xl lg:text-4xl font-serif text-foreground mb-6 tracking-tight">
                 Stop screening resumes.<br/>Start reviewing proof.
               </h2>
@@ -380,7 +380,7 @@ export default function HomePage() {
           {/* Engineer */}
           <div className="p-16 lg:p-32 bg-background flex flex-col justify-center hover:bg-surface-low transition-colors group cursor-pointer" onClick={() => router.push('/signup')}>
             <div className="max-w-md mx-auto w-full">
-              <div className="text-[10px] font-mono tracking-widest text-outline uppercase mb-6">For Engineers</div>
+              <div className="text-[10px] font-mono tracking-widest text-muted-foreground uppercase mb-6">For Engineers</div>
               <h2 className="text-3xl lg:text-4xl font-serif text-foreground mb-6 tracking-tight">
                 Make your work easier to trust.
               </h2>

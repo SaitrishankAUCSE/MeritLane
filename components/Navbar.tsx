@@ -58,7 +58,7 @@ export default function Navbar() {
         >
           <img src="/logo-full.png" alt="Meritlane" className="h-6 w-auto" />
           {isUserAdmin && (
-            <span className="ml-2 align-middle font-data text-[10px] text-outline">Admin</span>
+            <span className="ml-2 align-middle font-data text-[10px] text-muted-foreground">Admin</span>
           )}
         </Link>
 
@@ -194,7 +194,7 @@ function ProfileDropdown({ user, userProfile, isAdmin, handleSignOut }: { user: 
         <div className="absolute right-0 z-50 mt-1.5 w-56 origin-top-right border border-border bg-surface py-1">
           <div className="border-b border-border px-3.5 py-2.5">
             <p className="truncate text-sm text-foreground">{displayName}</p>
-            <p className="truncate font-data text-outline capitalize">{displayRole}</p>
+            <p className="truncate font-data text-muted-foreground capitalize">{displayRole}</p>
           </div>
           <div className="py-1">
             {userProfile?.role === "candidate" && (
@@ -240,4 +240,5 @@ function NavLink({ href, current, children }: { href: string; current: string | 
     </Link>
   );
 }
+
 

@@ -266,7 +266,7 @@ export function AuthSwitch({ defaultMode = "login" }: AuthSwitchProps) {
                           : "border-border bg-surface text-muted-foreground hover:border-border hover:bg-surface-low"
                       }`}
                     >
-                      <Users className={`h-5 w-5 ${role === "candidate" ? "text-muted-foreground" : "text-outline"}`} />
+                      <Users className={`h-5 w-5 ${role === "candidate" ? "text-muted-foreground" : "text-muted-foreground"}`} />
                       <span>Candidate</span>
                     </button>
                     <button
@@ -278,7 +278,7 @@ export function AuthSwitch({ defaultMode = "login" }: AuthSwitchProps) {
                           : "border-border bg-surface text-muted-foreground hover:border-border hover:bg-surface-low"
                       }`}
                     >
-                      <Briefcase className={`h-5 w-5 ${role === "employer" ? "text-muted-foreground" : "text-outline"}`} />
+                      <Briefcase className={`h-5 w-5 ${role === "employer" ? "text-muted-foreground" : "text-muted-foreground"}`} />
                       <span>Employer</span>
                     </button>
                   </div>
@@ -316,7 +316,7 @@ export function AuthSwitch({ defaultMode = "login" }: AuthSwitchProps) {
 
         <div className="relative mt-6 flex items-center py-2">
           <div className="flex-grow border-t border-border"></div>
-          <span className="shrink-0 px-4 text-xs font-semibold text-outline uppercase tracking-wider">OR</span>
+          <span className="shrink-0 px-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">OR</span>
           <div className="flex-grow border-t border-border"></div>
         </div>
 
@@ -353,3 +353,4 @@ export function AuthSwitch({ defaultMode = "login" }: AuthSwitchProps) {
     </div>
   );
 }
+

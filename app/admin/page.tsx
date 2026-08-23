@@ -573,7 +573,7 @@ export default function AdminDashboardPage() {
               ) : (
                 <div className="mt-2 h-9 w-16 animate-shimmer rounded bg-surface-high" />
               )}
-              <p className="mt-1 text-[11px] text-outline">Awaiting codebase review</p>
+              <p className="mt-1 text-[11px] text-muted-foreground">Awaiting codebase review</p>
             </CardContent>
           </Card>
 
@@ -588,7 +588,7 @@ export default function AdminDashboardPage() {
               ) : (
                 <div className="mt-2 h-9 w-16 animate-shimmer rounded bg-surface-high" />
               )}
-              <p className="mt-1 text-[11px] text-outline">
+              <p className="mt-1 text-[11px] text-muted-foreground">
                 {hasLoadedCandidates ? `${verifiedRate}% verification pass rate` : "Calculating..."}
               </p>
             </CardContent>
@@ -605,7 +605,7 @@ export default function AdminDashboardPage() {
               ) : (
                 <div className="mt-2 h-9 w-16 animate-shimmer rounded bg-surface-high" />
               )}
-              <p className="mt-1 text-[11px] text-outline">Feedback sent to candidate</p>
+              <p className="mt-1 text-[11px] text-muted-foreground">Feedback sent to candidate</p>
             </CardContent>
           </Card>
 
@@ -620,7 +620,7 @@ export default function AdminDashboardPage() {
               ) : (
                 <div className="mt-2 h-9 w-16 animate-shimmer rounded bg-surface-high" />
               )}
-              <p className="mt-1 text-[11px] text-outline">Total platform candidates</p>
+              <p className="mt-1 text-[11px] text-muted-foreground">Total platform candidates</p>
             </CardContent>
           </Card>
         </div>
@@ -704,13 +704,13 @@ export default function AdminDashboardPage() {
               {/* Filters */}
               <div className="flex flex-wrap items-center gap-3">
                 <div className="relative">
-                  <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -tranzinc-y-1/2 text-outline" />
+                  <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -tranzinc-y-1/2 text-muted-foreground" />
                   <input
                     type="text"
                     placeholder="Search name, college, skill..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="rounded-md border border-border bg-surface py-1.5 pl-8 pr-3 text-base sm:text-xs text-foreground placeholder:text-outline shadow-sm transition-all hover:border-border focus:border-foreground focus:outline-none focus:ring-2 focus:ring-foreground/10"
+                    className="rounded-md border border-border bg-surface py-1.5 pl-8 pr-3 text-base sm:text-xs text-foreground placeholder:text-muted-foreground shadow-sm transition-all hover:border-border focus:border-foreground focus:outline-none focus:ring-2 focus:ring-foreground/10"
                   />
                 </div>
 
@@ -763,11 +763,11 @@ export default function AdminDashboardPage() {
                         <tr key={c.uid} className="hover:bg-surface-low/70 transition-colors">
                           <td className="px-6 py-2 h-10">
                             <div className="font-semibold text-foreground">{c.name || "Unnamed"}</div>
-                            <div className="text-[11px] text-outline font-mono">{c.email || c.uid.slice(0, 12) + "..."}</div>
+                            <div className="text-[11px] text-muted-foreground font-mono">{c.email || c.uid.slice(0, 12) + "..."}</div>
                           </td>
                           <td className="px-6 py-2 h-10">
                             <div className="text-foreground font-medium">{c.college || "—"}</div>
-                            <div className="text-[11px] text-outline">{c.branch || "—"} {c.gradYear ? `(${c.gradYear})` : ""}</div>
+                            <div className="text-[11px] text-muted-foreground">{c.branch || "—"} {c.gradYear ? `(${c.gradYear})` : ""}</div>
                           </td>
                           <td className="px-6 py-2 h-10">
                             <div className="flex flex-wrap gap-1 max-w-xs">
@@ -778,7 +778,7 @@ export default function AdminDashboardPage() {
                                   </span>
                                 ))
                               ) : (
-                                <span className="text-outline text-xs">—</span>
+                                <span className="text-muted-foreground text-xs">—</span>
                               )}
                             </div>
                           </td>
@@ -963,7 +963,7 @@ export default function AdminDashboardPage() {
                 <button
                   type="button"
                   onClick={() => setShowWipeModal(false)}
-                  className="rounded-md p-1.5 text-outline hover:bg-surface-low hover:text-muted-foreground transition"
+                  className="rounded-md p-1.5 text-muted-foreground hover:bg-surface-low hover:text-muted-foreground transition"
                 >
                   <X className="h-5 w-5" />
                 </button>
@@ -1083,6 +1083,7 @@ export default function AdminDashboardPage() {
     </div>
   );
 }
+
 
 
 

@@ -22,7 +22,7 @@ export function ReviewConsole({
       {/* ZONE 1: REVIEW QUEUE (Col 1-3) */}
       <div className="lg:col-span-3 border border-border bg-surface flex flex-col h-full overflow-hidden">
         <div className="p-4 border-b border-border bg-surface-low">
-          <h2 className="font-label text-outline uppercase tracking-widest text-xs">Review Queue</h2>
+          <h2 className="font-label text-muted-foreground uppercase tracking-widest text-xs">Review Queue</h2>
           <p className="text-[10px] text-muted-foreground mt-1 font-data">{queueCandidates.length} Pending</p>
         </div>
         <div className="overflow-y-auto flex-1">
@@ -54,7 +54,7 @@ export function ReviewConsole({
               <div className="flex items-start justify-between">
                 <div>
                   <h2 className="font-serif text-3xl font-medium tracking-tight text-foreground">{selectedCandidate.name}</h2>
-                  <p className="font-data text-sm text-outline mt-1 uppercase">ID: {selectedCandidate.uid.slice(0,8)} • {selectedCandidate.college}</p>
+                  <p className="font-data text-sm text-muted-foreground mt-1 uppercase">ID: {selectedCandidate.uid.slice(0,8)} • {selectedCandidate.college}</p>
                 </div>
                 <ProofTrace 
                   status={selectedCandidate.verificationStatus} 
@@ -68,7 +68,7 @@ export function ReviewConsole({
             <div className="overflow-y-auto flex-1 p-6 space-y-8">
               
               <section>
-                <h3 className="font-label text-outline uppercase text-xs mb-4">Core Competencies</h3>
+                <h3 className="font-label text-muted-foreground uppercase text-xs mb-4">Core Competencies</h3>
                 <div className="flex flex-wrap gap-2">
                   {selectedCandidate.skills?.map((s: string) => (
                     <span key={s} className="px-2.5 py-1 bg-surface-low border border-border text-xs font-data font-bold text-foreground">{s}</span>
@@ -77,7 +77,7 @@ export function ReviewConsole({
               </section>
 
               <section>
-                <h3 className="font-label text-outline uppercase text-xs mb-4">External Artifacts</h3>
+                <h3 className="font-label text-muted-foreground uppercase text-xs mb-4">External Artifacts</h3>
                 <div className="flex gap-4">
                   {selectedCandidate.githubUrl && (
                     <a href={selectedCandidate.githubUrl} target="_blank" rel="noreferrer" className="flex items-center gap-2 text-xs font-bold font-data bg-surface-low border border-border px-3 py-2 hover:bg-surface transition-colors">
@@ -93,7 +93,7 @@ export function ReviewConsole({
               </section>
 
               <section>
-                <h3 className="font-label text-outline uppercase text-xs mb-4">Project Evidence</h3>
+                <h3 className="font-label text-muted-foreground uppercase text-xs mb-4">Project Evidence</h3>
                 {selectedCandidate.projects?.length > 0 ? (
                   <div className="space-y-4">
                     {selectedCandidate.projects.map((proj: any, idx: number) => (
@@ -102,7 +102,7 @@ export function ReviewConsole({
                         <h4 className="font-serif text-xl font-medium text-foreground mb-2">{proj.title}</h4>
                         <p className="text-sm text-muted-foreground mb-4">{proj.description}</p>
                         <div className="flex gap-3">
-                          {proj.repoUrl && <a href={proj.repoUrl} target="_blank" rel="noreferrer" className="text-xs font-bold font-data text-outline hover:text-foreground">Source ↗</a>}
+                          {proj.repoUrl && <a href={proj.repoUrl} target="_blank" rel="noreferrer" className="text-xs font-bold font-data text-muted-foreground hover:text-foreground">Source ↗</a>}
                           {proj.liveUrl && <a href={proj.liveUrl} target="_blank" rel="noreferrer" className="text-xs font-bold font-data text-accent hover:text-indigo-400">Demo ↗</a>}
                         </div>
                       </div>
@@ -125,7 +125,7 @@ export function ReviewConsole({
       {/* ZONE 3: DECISION CONSOLE (Col 10-12) */}
       <div className="lg:col-span-3 border border-border bg-surface flex flex-col h-full overflow-hidden">
         <div className="p-4 border-b border-border bg-surface-low">
-          <h2 className="font-label text-outline uppercase tracking-widest text-xs">Decision Console</h2>
+          <h2 className="font-label text-muted-foreground uppercase tracking-widest text-xs">Decision Console</h2>
         </div>
         <div className="flex-1 p-4 flex flex-col justify-end space-y-4">
           {selectedCandidate ? (
@@ -177,3 +177,4 @@ export function ReviewConsole({
     </div>
   );
 }
+

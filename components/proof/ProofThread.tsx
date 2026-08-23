@@ -49,7 +49,7 @@ export function EvidenceBlock({
   return (
     <div className={cn("space-y-2 border-l-2 border-border pl-4", className)}>
       {source && (
-        <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-outline">
+        <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
           Source: {source}
         </p>
       )}
@@ -86,3 +86,4 @@ export function ProofCoverage({
     </div>
   );
 }
+
