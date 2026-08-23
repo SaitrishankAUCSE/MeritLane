@@ -4,6 +4,36 @@ import * as React from "react"
 import { ChevronLeft } from "lucide-react"
 import { motion } from "framer-motion"
 import { useAuth } from "@/lib/auth/AuthContext"
+
+import { AlertCircle } from "lucide-react"
+
+function parseAuthError(error: any): string {
+  if (typeof error !== "object" || !error) return "An unexpected error occurred.";
+  const code = error.code || "";
+  const message = error.message || "";
+  
+  switch (code) {
+    case "auth/email-already-in-use":
+      return "This email is already registered. Please sign in instead.";
+    case "auth/invalid-email":
+      return "Please enter a valid email address.";
+    case "auth/user-not-found":
+    case "auth/wrong-password":
+    case "auth/invalid-credential":
+      return "Incorrect email or password. Please try again.";
+    case "auth/weak-password":
+      return "Your password is too weak. Please use at least 6 characters.";
+    case "auth/too-many-requests":
+      return "Too many unsuccessful attempts. Please try again later.";
+    case "auth/network-request-failed":
+      return "Network error. Please check your connection and try again.";
+    default:
+      if (message.includes("auth/email-already-in-use")) return "This email is already registered. Please sign in instead.";
+      if (message.includes("auth/invalid-credential")) return "Incorrect email or password. Please try again.";
+      return "An unexpected error occurred. Please try again.";
+  }
+}
+
 import { useRouter } from "next/navigation"
 import { signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, createUserWithEmailAndPassword } from "firebase/auth"
 import { auth } from "@/lib/firebase/config"
@@ -154,7 +184,7 @@ const SocialButtons: React.FC<{ mode: "login" | "signup" }> = ({ mode }) => {
       }
     } catch (err: any) {
       console.error(err)
-      setGoogleError(err.message || "Failed to authenticate with Google.")
+      setGoogleError(parseAuthError(err))
     } finally {
       setLoading(false)
     }
@@ -163,8 +193,9 @@ const SocialButtons: React.FC<{ mode: "login" | "signup" }> = ({ mode }) => {
   return (
     <div className="mb-0">
       {googleError && (
-        <div className="mb-3 rounded-md border border-[#B42318]/20 bg-[#B42318]/5 px-3 py-2.5 text-[13px] text-[#B42318]" role="alert">
-          {googleError}
+        <div className="mb-3 flex items-start gap-2.5 rounded-md border border-red-500/20 bg-red-50/50 dark:bg-red-950/20 px-3 py-3 text-[13px] text-red-600 dark:text-red-400" role="alert">
+          <AlertCircle className="h-4 w-4 shrink-0 mt-0.5" />
+          <p className="leading-snug">{googleError}</p>
         </div>
       )}
       <button
@@ -247,7 +278,7 @@ const LoginForm: React.FC<{ mode: "login" | "signup" }> = ({ mode }) => {
         router.push("/candidate/dashboard")
       }
     } catch (err: any) {
-      setError(err.message || "An error occurred.")
+      setError(parseAuthError(err))
     } finally {
       setLoading(false)
     }
@@ -256,8 +287,9 @@ const LoginForm: React.FC<{ mode: "login" | "signup" }> = ({ mode }) => {
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       {error && (
-        <div id="auth-form-error" className="rounded-md border border-[#B42318]/20 bg-[#B42318]/5 px-3 py-2.5 text-[13px] text-[#B42318]" role="alert">
-          {error}
+        <div id="auth-form-error" className="mb-4 flex items-start gap-2.5 rounded-md border border-red-500/20 bg-red-50/50 dark:bg-red-950/20 px-3 py-3 text-[13px] text-red-600 dark:text-red-400" role="alert">
+          <AlertCircle className="h-4 w-4 shrink-0 mt-0.5" />
+          <p className="leading-snug">{error}</p>
         </div>
       )}
 
