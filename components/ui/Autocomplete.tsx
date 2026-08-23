@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
-import { ChevronDown, Search, Loader2 } from "lucide-react";
+import { ChevronDown, Search } from "lucide-react";
 
 export interface AutocompleteProps {
   label?: string;
@@ -102,7 +102,7 @@ export function Autocomplete({
           autoComplete="off"
         />
         <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3 text-muted-foreground">
-          {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <ChevronDown className="h-4 w-4" />}
+          {isLoading ? <div className="h-4 w-4 rounded-full border-[1.5px] border-[#E5E5E5] border-t-[#0D0D0D] animate-spin" /> : <ChevronDown className="h-4 w-4" />}
         </div>
       </div>
 

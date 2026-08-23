@@ -5,7 +5,6 @@ import { useAuth } from "@/lib/auth/AuthContext";
 import { PublicProofRecord } from "@/components/public-record/PublicProofRecord";
 import { db } from "@/lib/firebase/config";
 import { doc, getDoc } from "firebase/firestore";
-import { Loader2 } from "lucide-react";
 import { MeritlaneLoader } from "@/components/ui/MeritlaneLoader";
 
 export default function CandidateProvenancePage() {

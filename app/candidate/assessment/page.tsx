@@ -3,7 +3,7 @@
 import React, { useEffect, useState, Suspense } from "react";
 import { useAuth } from "@/lib/auth/AuthContext";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Loader2, Play, CheckCircle2, Clock, AlertTriangle, TerminalSquare, FileCode2, ShieldAlert } from "lucide-react";
+import { Play, CheckCircle2, Clock, AlertTriangle, TerminalSquare, FileCode2, ShieldAlert } from "lucide-react";
 import { logFunnelEvent } from "@/lib/analytics/logEvent";
 import { getAssessmentContent, AssessmentContent } from "@/lib/assessments/content";
 import { db } from "@/lib/firebase/config";

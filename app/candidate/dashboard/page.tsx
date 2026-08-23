@@ -4,7 +4,7 @@ import React, { useEffect, useState } from "react";
 import { useAuth } from "@/lib/auth/AuthContext";
 import { useRouter } from "next/navigation";
 import { fetchCandidateProfile, CandidateProfile, ProjectEntry } from "@/lib/firebase/candidate";
-import { FileCheck, Code, FolderOpen, ArrowRight, X, Loader2 } from "lucide-react";
+import { FileCheck, Code, FolderOpen, ArrowRight, X } from "lucide-react";
 import { MeritlaneLoader } from "@/components/ui/MeritlaneLoader";
 import { db } from "@/lib/firebase/config";
 import { doc, updateDoc } from "firebase/firestore";
@@ -379,7 +379,7 @@ export default function CandidateDashboardPage() {
                   disabled={saving}
                   className="flex items-center gap-2 px-4 py-2 bg-[#0D0D0D] text-[#FFFFFF] hover:bg-[#222222] rounded-md text-[13px] font-medium transition-colors disabled:opacity-70"
                 >
-                  {saving && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
+                  {saving && <div className="h-3.5 w-3.5 rounded-full border-[1.5px] border-[#FFFFFF]/30 border-t-[#FFFFFF] animate-spin" />}
                   Link Evidence
                 </button>
               </div>

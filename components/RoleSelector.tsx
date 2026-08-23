@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { Users, Briefcase, Loader2, ShieldCheck, AlertCircle } from "lucide-react";
+import { Users, Briefcase, ShieldCheck, AlertCircle } from "lucide-react";
 import { MeritlaneLoader } from "@/components/ui/MeritlaneLoader";
 import { createUserProfile } from "@/lib/firebase/users";
 import { useAuth } from "@/lib/auth/AuthContext";

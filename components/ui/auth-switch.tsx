@@ -8,7 +8,7 @@ import { useAuth } from "@/lib/auth/AuthContext";
 import { fetchCandidateProfile } from "@/lib/firebase/candidate";
 import { createUserProfile } from "@/lib/firebase/users";
 import { useRouter } from "next/navigation";
-import { Loader2, ShieldCheck, AlertCircle, CheckCircle2, Users, Briefcase } from "lucide-react";
+import { ShieldCheck, AlertCircle, CheckCircle2, Users, Briefcase } from "lucide-react";
 import { Button } from "./Button";
 import { Input } from "./Input";
 import { MeritlaneLoader } from "@/components/ui/MeritlaneLoader";

@@ -17,7 +17,6 @@ import {
   ExternalLink, 
   Code,
   FileText, 
-  Loader2, 
   Eye, 
   Check, 
   X, 

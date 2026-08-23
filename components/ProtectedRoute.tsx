@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { useAuth } from "@/lib/auth/AuthContext";
-import { Loader2 } from "lucide-react";
 import { Role } from "@/lib/firebase/users";
 import { auth } from "@/lib/firebase/config";
 import { signOut } from "firebase/auth";

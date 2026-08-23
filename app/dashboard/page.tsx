@@ -3,7 +3,6 @@
 import React, { useEffect } from "react";
 import { useAuth } from "@/lib/auth/AuthContext";
 import { useRouter } from "next/navigation";
-import { Loader2 } from "lucide-react";
 import { fetchCandidateProfile } from "@/lib/firebase/candidate";
 import { MeritlaneLoader } from "@/components/ui/MeritlaneLoader";
 
