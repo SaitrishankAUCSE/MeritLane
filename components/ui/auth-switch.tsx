@@ -235,7 +235,7 @@ export function AuthSwitch({ defaultMode = "login" }: AuthSwitchProps) {
         )}
 
         {successMessage && (
-          <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="mb-5 flex items-start gap-2.5 rounded-lg border border-emerald-200 bg-success/10/80 p-3.5 text-xs text-emerald-800">
+          <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="mb-5 flex items-start gap-2.5 rounded-lg border border-[#15803D]/20 bg-[#15803D]/10 p-3.5 text-xs text-[#15803D]">
             <CheckCircle2 className="h-4 w-4 shrink-0 text-success mt-0.5" />
             <span className="leading-relaxed">{successMessage}</span>
           </motion.div>
@@ -254,7 +254,7 @@ export function AuthSwitch({ defaultMode = "login" }: AuthSwitchProps) {
               {mode === "signup" && (
                 <div className="space-y-2 text-left pb-2">
                   <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                    Select Your Role <span className="text-red-500">*</span>
+                    Select Your Role <span className="text-danger">*</span>
                   </label>
                   <div className="grid grid-cols-2 gap-3">
                     <button

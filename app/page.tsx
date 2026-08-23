@@ -133,7 +133,7 @@ export default function HomePage() {
                 <div className="text-[10px] font-mono tracking-widest text-outline uppercase mb-2">Protocol 001.A</div>
                 <div className="text-xl font-serif text-foreground">Verified Technical Profile</div>
               </div>
-              <div className="h-2 w-2 rounded-full bg-emerald-700 animate-pulse" />
+              <div className="h-2 w-2 rounded-full bg-[#15803D] animate-pulse" />
             </div>
             
             <div className="space-y-8">
@@ -152,16 +152,16 @@ export default function HomePage() {
                 <div className="text-[10px] font-mono text-outline uppercase tracking-wider mb-4 border-l-2 border-border pl-3">Signal Validation Log</div>
                 <div className="flex flex-col gap-3 font-mono text-xs">
                   <div className="flex items-center gap-3 text-muted-foreground">
-                    <span className="text-emerald-700">✓</span>
+                    <span className="text-[#15803D]">✓</span>
                     <span>Technical Assessment Completed</span>
                   </div>
                   <div className="flex items-center gap-3 text-muted-foreground">
-                    <span className="text-emerald-700">✓</span>
+                    <span className="text-[#15803D]">✓</span>
                     <span>Project Architecture Verified</span>
                   </div>
                   <div className="flex items-center gap-3 text-muted-foreground">
-                    <span className="text-emerald-700">✓</span>
-                    <span>Identity Authenticated via GitHub</span>
+                    <span className="text-[#15803D]">✓</span>
+                    <span>Identity Proof Recorded</span>
                   </div>
                 </div>
               </div>

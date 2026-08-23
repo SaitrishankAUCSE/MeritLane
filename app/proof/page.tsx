@@ -17,8 +17,8 @@ export default function ProofCanvasPage() {
             <span className="text-[13px] font-medium text-[#0D0D0D] leading-tight">Canvas</span>
             <div className="absolute -bottom-2 left-0 w-full h-[2px] bg-[#0D0D0D]" />
           </div>
-          <Link href="#" className="text-[14px] text-[#737373] hover:text-[#0D0D0D] transition-colors">Discovery</Link>
-          <Link href="#" className="text-[14px] text-[#737373] hover:text-[#0D0D0D] transition-colors">Archives</Link>
+          <span className="text-[14px] text-[#737373]/50 cursor-not-allowed" title="Coming soon">Discovery</span>
+          <span className="text-[14px] text-[#737373]/50 cursor-not-allowed" title="Coming soon">Archives</span>
         </nav>
 
         <div className="h-9 w-9 rounded-full border border-[#D2D2D2] flex items-center justify-center text-[#737373] hover:text-[#0D0D0D] hover:border-[#0D0D0D] transition-all cursor-pointer bg-[#F3F3F1]">

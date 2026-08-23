@@ -111,9 +111,9 @@ export default function EmployerDashboardPage() {
                     Implemented custom ZK-SNARK circuits for privacy layer. Passed Trail of Bits audit with 0 critical findings.
                   </p>
                   <div className="border-t border-[#E5E5E5] pt-5">
-                    <a href="#" className="text-[14px] font-sans font-medium text-[#737373] hover:text-[#0D0D0D] transition-colors flex items-center gap-3">
+                    <span className="text-[14px] font-sans font-medium text-[#D2D2D2] flex items-center gap-3 cursor-not-allowed" title="IPFS record not linked in demo">
                       <LinkIcon className="h-3.5 w-3.5" /> View IPFS record
-                    </a>
+                    </span>
                   </div>
                 </div>
               </div>
