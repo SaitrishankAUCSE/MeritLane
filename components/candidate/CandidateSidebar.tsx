@@ -48,12 +48,17 @@ export function CandidateSidebar() {
   return (
     <aside className={`scrollbar-hide hidden lg:flex shrink-0 flex-col border-r border-[#E5E5E5] bg-[#FAFAFA] h-[100dvh] overflow-y-auto transition-all duration-300 ${isCollapsed ? "w-[80px]" : "w-[220px]"}`}>
       {/* Brand */}
-      <div className={`flex h-20 items-center shrink-0 ${isCollapsed ? "justify-center px-0" : "px-8"}`}>
-        {isCollapsed ? (
-          <img src="/logo-m.png" alt="M" className="h-8 w-auto" />
-        ) : (
-          <img src="/logo-full.png" alt="Meritlane" className="h-8 w-auto" />
-        )}
+      <div className={`flex h-20 items-center shrink-0 relative overflow-hidden transition-all duration-300 ${isCollapsed ? "justify-center px-0" : "px-8"}`}>
+        <img 
+          src="/logo-m.png" 
+          alt="M" 
+          className={`h-8 w-auto absolute left-1/2 -translate-x-1/2 transition-opacity duration-300 ${isCollapsed ? "opacity-100" : "opacity-0"}`} 
+        />
+        <img 
+          src="/logo-full.png" 
+          alt="Meritlane" 
+          className={`h-8 w-auto absolute left-8 transition-opacity duration-300 ${isCollapsed ? "opacity-0 pointer-events-none" : "opacity-100"}`} 
+        />
       </div>
 
       {/* Navigation */}
@@ -69,11 +74,11 @@ export function CandidateSidebar() {
                 href={item.href}
                 aria-current="page"
                 title={isCollapsed ? item.name : undefined}
-                className={`flex items-center py-2 h-10 text-[14px] font-sans text-[#0D0D0D] bg-[#FFFFFF] relative transition-colors ${isCollapsed ? "justify-center px-0 rounded-md mx-1" : "px-4"}`}
+                className={`flex items-center py-2 h-10 text-[14px] font-sans text-[#0D0D0D] bg-[#FFFFFF] relative overflow-hidden whitespace-nowrap transition-all duration-300 ${isCollapsed ? "justify-center px-0 rounded-md mx-3" : "px-4"}`}
               >
-                <Icon className={`h-[18px] w-[18px] ${isCollapsed ? "" : "mr-4"}`} aria-hidden="true" />
-                {!isCollapsed && item.name}
-                <div className={`absolute bg-[#0D0D0D] ${isCollapsed ? "left-0 top-1/2 -translate-y-1/2 h-4 w-[2px] rounded-r-md" : "right-0 top-0 bottom-0 w-[1px]"}`} />
+                <Icon className={`h-[18px] w-[18px] shrink-0 transition-all duration-300 ${isCollapsed ? "mr-0" : "mr-4"}`} aria-hidden="true" />
+                <span className={`transition-all duration-300 ${isCollapsed ? "opacity-0 w-0 hidden" : "opacity-100 w-auto"}`}>{item.name}</span>
+                <div className={`absolute bg-[#0D0D0D] transition-all duration-300 ${isCollapsed ? "left-0 top-1/2 -translate-y-1/2 h-4 w-[2px] rounded-r-md" : "right-0 top-0 bottom-0 w-[1px]"}`} />
               </Link>
             )
           }
@@ -83,10 +88,10 @@ export function CandidateSidebar() {
               key={item.name}
               href={item.href}
               title={isCollapsed ? item.name : undefined}
-              className={`flex items-center py-2 h-10 text-[14px] font-sans text-[#737373] hover:text-[#0D0D0D] hover:bg-[#FFFFFF]/50 transition-colors relative ${isCollapsed ? "justify-center px-0 rounded-md mx-1" : "px-4"}`}
+              className={`flex items-center py-2 h-10 text-[14px] font-sans text-[#737373] hover:text-[#0D0D0D] hover:bg-[#FFFFFF]/50 relative overflow-hidden whitespace-nowrap transition-all duration-300 ${isCollapsed ? "justify-center px-0 rounded-md mx-3" : "px-4"}`}
             >
-              <Icon className={`h-[18px] w-[18px] opacity-70 ${isCollapsed ? "" : "mr-4"}`} aria-hidden="true" />
-              {!isCollapsed && item.name}
+              <Icon className={`h-[18px] w-[18px] opacity-70 shrink-0 transition-all duration-300 ${isCollapsed ? "mr-0" : "mr-4"}`} aria-hidden="true" />
+              <span className={`transition-all duration-300 ${isCollapsed ? "opacity-0 w-0 hidden" : "opacity-100 w-auto"}`}>{item.name}</span>
             </Link>
           );
         })}
@@ -94,23 +99,14 @@ export function CandidateSidebar() {
 
       {/* Bottom Nav / Action */}
       <div className={`py-6 border-t border-[#E5E5E5] shrink-0 ${isCollapsed ? "px-2 flex flex-col items-center" : "px-6"}`}>
-        {!isCollapsed ? (
-          <button 
-            onClick={() => router.push('/candidate/dashboard')}
-            className="flex items-center gap-2 w-full text-left py-2 text-[#0D0D0D] hover:text-[#0D0D0D] transition-colors mb-6"
-          >
-            <span className="font-mono text-[11px] text-[#0D0D0D] font-bold">[+]</span>
-            <span className="font-sans text-[11px] font-bold uppercase tracking-[0.1em]">Add evidence</span>
-          </button>
-        ) : (
-          <button 
-            onClick={() => router.push('/candidate/dashboard')}
-            title="Add evidence"
-            className="flex items-center justify-center p-2 mb-6 text-[#0D0D0D] hover:text-[#0D0D0D] hover:bg-[#FFFFFF]/50 rounded-md transition-colors"
-          >
-            <span className="font-mono text-[11px] text-[#0D0D0D] font-bold">[+]</span>
-          </button>
-        )}
+        <button 
+          onClick={() => router.push('/candidate/dashboard')}
+          title={isCollapsed ? "Add evidence" : undefined}
+          className={`flex items-center transition-all duration-300 text-[#0D0D0D] hover:text-[#0D0D0D] overflow-hidden whitespace-nowrap ${isCollapsed ? "justify-center p-2 mb-6 hover:bg-[#FFFFFF]/50 rounded-md mx-4" : "gap-2 w-full text-left py-2 mb-6"}`}
+        >
+          <span className="font-mono text-[11px] text-[#0D0D0D] font-bold shrink-0">[+]</span>
+          <span className={`font-sans text-[11px] font-bold uppercase tracking-[0.1em] transition-all duration-300 ${isCollapsed ? "opacity-0 w-0 hidden" : "opacity-100 w-auto"}`}>Add evidence</span>
+        </button>
         
         {/* User Context Menu Container */}
         <div ref={menuRef} className={`relative flex items-center ${isCollapsed ? "justify-center" : "justify-between"} pt-6 border-t border-[#E5E5E5] mb-4`}>
@@ -167,21 +163,18 @@ export function CandidateSidebar() {
             aria-haspopup="menu"
             aria-expanded={isUserMenuOpen}
             aria-label="User account menu"
-            className={`flex items-center gap-3 cursor-pointer group p-1.5 -ml-1.5 rounded-lg transition-colors text-left ${isUserMenuOpen ? "bg-[#F3F3F1]" : "hover:bg-[#F3F3F1]"}`}
+            className={`flex items-center gap-3 cursor-pointer group p-1.5 -ml-1.5 rounded-lg transition-colors text-left overflow-hidden whitespace-nowrap ${isUserMenuOpen ? "bg-[#F3F3F1]" : "hover:bg-[#F3F3F1]"}`}
             onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
           >
             <div className="h-8 w-8 rounded-full bg-[#E5E5E5] border border-[#D2D2D2] group-hover:border-[#737373] flex items-center justify-center overflow-hidden text-xs transition-colors shrink-0">
               {avatarUrl ? <img src={avatarUrl} alt="Profile" className="h-full w-full object-cover" /> : name.charAt(0).toUpperCase()}
             </div>
-            {!isCollapsed && (
-              <div className="text-[13px] text-[#0D0D0D] font-medium truncate transition-colors">
-                {name}
-              </div>
-            )}
+            <div className={`text-[13px] text-[#0D0D0D] font-medium truncate transition-all duration-300 ${isCollapsed ? "opacity-0 w-0 hidden" : "opacity-100 w-auto"}`}>
+              {name}
+            </div>
           </button>
           
-          {/* Toggle Button */}
-          {!isCollapsed && (
+          <div className={`overflow-hidden transition-all duration-300 ${isCollapsed ? "opacity-0 max-w-0" : "opacity-100 max-w-10"}`}>
             <button
               type="button"
               onClick={() => setIsCollapsed(!isCollapsed)}
@@ -191,22 +184,20 @@ export function CandidateSidebar() {
             >
               <PanelLeftClose className="h-[18px] w-[18px]" aria-hidden="true" />
             </button>
-          )}
+          </div>
         </div>
         
-        {isCollapsed && (
-          <div className="flex justify-center mt-2">
-            <button
-              type="button"
-              onClick={() => setIsCollapsed(!isCollapsed)}
-              className="p-1.5 text-[#737373] hover:text-[#0D0D0D] hover:bg-[#FFFFFF] rounded-md transition-colors"
-              aria-label="Expand sidebar"
-              aria-expanded={!isCollapsed}
-            >
-              <PanelLeftOpen className="h-[18px] w-[18px]" aria-hidden="true" />
-            </button>
-          </div>
-        )}
+        <div className={`flex justify-center overflow-hidden transition-all duration-300 ${isCollapsed ? "mt-2 opacity-100 max-h-10" : "mt-0 opacity-0 max-h-0"}`}>
+          <button
+            type="button"
+            onClick={() => setIsCollapsed(!isCollapsed)}
+            className="p-1.5 text-[#737373] hover:text-[#0D0D0D] hover:bg-[#FFFFFF] rounded-md transition-colors"
+            aria-label="Expand sidebar"
+            aria-expanded={!isCollapsed}
+          >
+            <PanelLeftOpen className="h-[18px] w-[18px]" aria-hidden="true" />
+          </button>
+        </div>
       </div>
     </aside>
   );
