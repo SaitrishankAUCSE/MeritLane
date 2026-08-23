@@ -95,25 +95,25 @@ export default function HomePage() {
         >
           <motion.div variants={fadeUp} className="mb-6 flex items-center gap-3">
             <span className="h-px w-8 bg-foreground"></span>
-            <span className="text-[10px] font-mono tracking-[0.2em] uppercase text-outline">The Meritlane Standard</span>
+            <span className="text-[12px] font-sans font-medium tracking-widest uppercase text-muted-foreground">The Meritlane Standard</span>
           </motion.div>
-          <motion.h1 variants={fadeUp} className="text-5xl sm:text-6xl lg:text-7xl font-playfair text-foreground tracking-tight leading-[1.05]">
+          <motion.h1 variants={fadeUp} className="text-[40px] sm:text-[48px] md:text-[60px] lg:text-[72px] font-serif text-foreground tracking-tight leading-[1.05]">
             Proof of skill.<br/>
-            <span className="text-muted-foreground">Not just credentials.</span>
+            <span className="text-[#525252]">Not just credentials.</span>
           </motion.h1>
-          <motion.p variants={fadeUp} className="mt-8 text-lg text-muted-foreground max-w-xl leading-relaxed">
+          <motion.p variants={fadeUp} className="mt-8 text-[17px] lg:text-[18px] text-[#525252] max-w-xl leading-[1.6]">
             Meritlane is a technical talent verification institution. We audit code, validate engineering capabilities, and establish immutable proof of skill—so you can hire based on evidence, not pedigree.
           </motion.p>
           <motion.div variants={fadeUp} className="mt-12 flex flex-wrap gap-4">
             <Link href="/employer/dashboard">
-              <Button size="lg" className="bg-foreground text-background border border-foreground rounded-none px-8 py-7 text-sm font-medium tracking-wide hover:bg-background hover:text-foreground transition-all">
-                Start Hiring Verified Talent
-              </Button>
+              <Button className="bg-[#0D0D0D] text-[#FFFFFF] h-11 px-6 rounded-[6px] text-[14px] font-medium font-sans hover:bg-[#222222] transition-colors border-none">
+                  Start hiring verified talent
+                </Button>
             </Link>
             <Link href="/signup">
-              <Button size="lg" variant="outline" className="rounded-none border-border px-8 py-7 text-sm font-medium tracking-wide hover:bg-surface-low transition-all">
-                Get Verified as an Engineer
-              </Button>
+              <Button variant="outline" className="h-11 px-6 rounded-[6px] text-[14px] font-medium font-sans border-border hover:bg-surface-low transition-colors text-foreground">
+                  Get verified as an engineer
+                </Button>
             </Link>
           </motion.div>
         </motion.div>
@@ -130,18 +130,18 @@ export default function HomePage() {
             
             <div className="flex items-center justify-between mb-8 pb-6 border-b border-border">
               <div>
-                <div className="text-[10px] font-mono tracking-widest text-outline uppercase mb-2">Protocol 001.A</div>
-                <div className="text-xl font-serif text-foreground">Verified Technical Profile</div>
+                <div className="text-[11px] font-mono tracking-widest text-[#737373] uppercase mb-2">Protocol 001.A</div>
+                <div className="text-[22px] font-serif text-foreground">Verified Technical Profile</div>
               </div>
               <div className="h-2 w-2 rounded-full bg-[#15803D] animate-pulse" />
             </div>
             
             <div className="space-y-8">
               <div>
-                <div className="text-[10px] font-mono text-outline uppercase tracking-wider mb-4 border-l-2 border-border pl-3">Audited Stack</div>
+                <div className="text-[11px] font-mono text-[#737373] uppercase tracking-wider mb-4 border-l-2 border-border pl-3">Audited Stack</div>
                 <div className="flex flex-wrap gap-3">
                   {['React', 'TypeScript', 'Go', 'PostgreSQL'].map(skill => (
-                    <span key={skill} className="px-3 py-1.5 bg-surface-low border border-border text-foreground text-xs font-mono">
+                    <span key={skill} className="px-3 py-1.5 bg-surface border border-[#E5E5E5] text-[#0D0D0D] text-[14px] font-sans font-medium rounded-sm">
                       {skill}
                     </span>
                   ))}
@@ -149,7 +149,7 @@ export default function HomePage() {
               </div>
               
               <div>
-                <div className="text-[10px] font-mono text-outline uppercase tracking-wider mb-4 border-l-2 border-border pl-3">Signal Validation Log</div>
+                <div className="text-[11px] font-mono text-[#737373] uppercase tracking-wider mb-4 border-l-2 border-border pl-3">Signal Validation Log</div>
                 <div className="flex flex-col gap-3 font-mono text-xs">
                   <div className="flex items-center gap-3 text-muted-foreground">
                     <span className="text-[#15803D]">✓</span>
