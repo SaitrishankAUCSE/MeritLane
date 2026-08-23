@@ -46,7 +46,7 @@ export function CandidateSidebar() {
       className="scrollbar-hide hidden lg:flex shrink-0 flex-col border-r border-[#E5E5E5] bg-[#FAFAFA] h-[100dvh] overflow-y-auto"
     >
       {/* Brand */}
-      <div className="flex h-20 items-center shrink-0 relative overflow-hidden px-8">
+      <div className="flex h-20 items-center shrink-0 relative overflow-hidden w-full">
         <AnimatePresence initial={false} mode="wait">
           {isCollapsed ? (
             <motion.img 
@@ -88,7 +88,7 @@ export function CandidateSidebar() {
               title={isCollapsed ? item.name : undefined}
               className={`flex items-center h-10 text-[14px] font-sans relative overflow-hidden rounded-md transition-colors ${isActive ? "text-[#0D0D0D] bg-[#FFFFFF]" : "text-[#737373] hover:text-[#0D0D0D] hover:bg-[#FFFFFF]/50"}`}
             >
-              <div className="w-20 flex justify-center shrink-0">
+              <div className="w-12 flex justify-center shrink-0">
                 <Icon className={`h-[18px] w-[18px] ${isActive ? "" : "opacity-70"}`} aria-hidden="true" />
               </div>
               <AnimatePresence initial={false}>
@@ -98,7 +98,7 @@ export function CandidateSidebar() {
                     animate={{ opacity: 1, width: "auto" }}
                     exit={{ opacity: 0, width: 0 }}
                     transition={{ duration: 0.3, ease: "easeInOut" }}
-                    className="whitespace-nowrap -ml-6"
+                    className="whitespace-nowrap"
                   >
                     {item.name}
                   </motion.span>
@@ -133,7 +133,7 @@ export function CandidateSidebar() {
                 animate={{ opacity: 1, width: "auto" }}
                 exit={{ opacity: 0, width: 0 }}
                 transition={{ duration: 0.3, ease: "easeInOut" }}
-                className="font-sans text-[11px] font-bold uppercase tracking-[0.1em] whitespace-nowrap -ml-2"
+                className="font-sans text-[11px] font-bold uppercase tracking-[0.1em] whitespace-nowrap ml-1"
               >
                 Add evidence
               </motion.span>
@@ -192,11 +192,13 @@ export function CandidateSidebar() {
           {/* Avatar Button */}
           <button 
             type="button"
-            className={`flex items-center cursor-pointer group p-1.5 rounded-lg transition-colors text-left overflow-hidden ${isUserMenuOpen ? "bg-[#F3F3F1]" : "hover:bg-[#F3F3F1]"}`}
+            className={`flex items-center cursor-pointer group p-1 rounded-lg transition-colors text-left overflow-hidden w-full ${isUserMenuOpen ? "bg-[#F3F3F1]" : "hover:bg-[#F3F3F1]"}`}
             onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
           >
-            <div className="h-8 w-8 rounded-full bg-[#E5E5E5] border border-[#D2D2D2] group-hover:border-[#737373] flex items-center justify-center overflow-hidden text-xs transition-colors shrink-0">
-              {avatarUrl ? <img src={avatarUrl} alt="Profile" className="h-full w-full object-cover" /> : name.charAt(0).toUpperCase()}
+            <div className="w-10 flex justify-center shrink-0">
+              <div className="h-8 w-8 rounded-full bg-[#E5E5E5] border border-[#D2D2D2] group-hover:border-[#737373] flex items-center justify-center overflow-hidden text-xs transition-colors shrink-0">
+                {avatarUrl ? <img src={avatarUrl} alt="Profile" className="h-full w-full object-cover" /> : name.charAt(0).toUpperCase()}
+              </div>
             </div>
             
             <AnimatePresence initial={false}>
@@ -206,7 +208,7 @@ export function CandidateSidebar() {
                   animate={{ opacity: 1, width: "auto" }}
                   exit={{ opacity: 0, width: 0 }}
                   transition={{ duration: 0.3, ease: "easeInOut" }}
-                  className="text-[13px] text-[#0D0D0D] font-medium truncate whitespace-nowrap ml-3"
+                  className="text-[13px] text-[#0D0D0D] font-medium truncate whitespace-nowrap ml-1"
                 >
                   {name}
                 </motion.div>
