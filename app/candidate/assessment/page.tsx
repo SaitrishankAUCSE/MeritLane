@@ -258,7 +258,7 @@ function AssessmentContentWrapper() {
   }
 
   if (initializing || loading || !content) {
-    return <MeritlaneLoader level="page" text="Initializing" />;
+    return <div className="flex h-full w-full items-center justify-center"><MeritlaneLoader level="section" text="Initializing" /></div>;
   }
 
   if (!hasStarted) {
@@ -414,7 +414,7 @@ function AssessmentContentWrapper() {
 
 export default function AssessmentPage() {
   return (
-    <Suspense fallback={<MeritlaneLoader level="page" text="Loading" />}>
+    <Suspense fallback={<div className="flex h-full w-full items-center justify-center"><MeritlaneLoader level="section" text="Loading" /></div>}>
       <AssessmentContentWrapper />
     </Suspense>
   );
