@@ -6,6 +6,7 @@ import { SiteFooter } from "@/components/chrome/SiteFooter";
 import { AuthProvider } from "@/lib/auth/AuthContext";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Analytics } from "@vercel/analytics/react";
+import { GlobalBackButton } from "@/components/ui/GlobalBackButton";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -102,6 +103,7 @@ export default function RootLayout({
           </ThemeProvider>
         </AuthProvider>
         <Analytics />
+        <GlobalBackButton />
       </body>
     </html>
   );
