@@ -7,7 +7,7 @@ export function Workspace({ children, className }: { children: React.ReactNode; 
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
         <div className="absolute top-[-12%] right-[-8%] h-[42vw] w-[42vw] rounded-full bg-[radial-gradient(circle,rgba(168,162,255,0.07)_0%,transparent_70%)]" />
       </div>
-      <div className="relative mx-auto max-w-7xl">{children}</div>
+      <div className="relative mx-auto max-w-[1600px]">{children}</div>
     </div>
   );
 }

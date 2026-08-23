@@ -14,7 +14,7 @@ export function SiteFooter() {
 
   return (
     <footer className={`border-t pt-12 pb-8 ${isPublicHome ? "border-[var(--color-border)] bg-transparent" : "border-border"}`}>
-      <div className="mx-auto max-w-7xl px-5 sm:px-8 lg:px-16">
+      <div className="mx-auto w-full max-w-[1600px] px-6 lg:px-10">
         <div className="grid grid-cols-2 gap-8 md:grid-cols-4 lg:grid-cols-5">
           <div className="col-span-2 lg:col-span-2">
             <h3 className="font-serif text-lg font-medium tracking-tight">Meritlane</h3>

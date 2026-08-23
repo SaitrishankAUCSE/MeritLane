@@ -51,7 +51,7 @@ export default function Navbar() {
 
   return (
     <header className={`sticky top-0 z-50 w-full border-b backdrop-blur-md ${isPublicHome ? "theme-public border-[var(--color-border)] bg-[var(--color-background)]/90" : "border-border bg-background/85"}`}>
-      <div className="mx-auto flex h-14 max-w-7xl items-center justify-between px-5 sm:px-8 lg:px-16">
+      <div className="mx-auto flex h-14 w-full max-w-[1600px] items-center justify-between px-6 lg:px-10">
         <Link
           href={isUserAdmin ? "/admin" : user ? "/dashboard" : "/"}
           className="flex items-center"

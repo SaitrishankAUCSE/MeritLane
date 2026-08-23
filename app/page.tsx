@@ -86,7 +86,7 @@ export default function HomePage() {
       <MeritlaneIntro />
       
       {/* HERO: Editorial Statement */}
-      <section className="relative px-6 pt-32 pb-24 sm:pt-40 sm:pb-32 lg:px-8 max-w-7xl mx-auto flex flex-col lg:flex-row items-center gap-16 border-b border-border/40">
+      <section className="relative px-6 pt-32 pb-24 sm:pt-40 sm:pb-32 lg:px-10 w-full max-w-[1600px] mx-auto flex flex-col lg:flex-row items-center gap-16 border-b border-border/40">
         <motion.div 
           initial="hidden" 
           animate="visible" 
@@ -190,7 +190,7 @@ export default function HomePage() {
 
       {/* HOW IT WORKS */}
       <section className="py-32 bg-background">
-        <div className="mx-auto max-w-7xl px-6 lg:px-8">
+        <div className="mx-auto w-full max-w-[1600px] px-6 lg:px-10">
           <motion.div 
             initial="hidden"
             whileInView="visible"
@@ -218,7 +218,7 @@ export default function HomePage() {
 
       {/* EVIDENCE SECTION */}
       <section className="py-32 bg-surface border-y border-border/40">
-        <div className="mx-auto max-w-7xl px-6 lg:px-8">
+        <div className="mx-auto w-full max-w-[1600px] px-6 lg:px-10">
           <motion.div 
             initial="hidden"
             whileInView="visible"
