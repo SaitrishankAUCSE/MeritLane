@@ -21,7 +21,7 @@ export function MobileNav({ role }: { role: "candidate" | "employer" | "admin" }
     { name: "Identity", href: "/candidate/profile", icon: Fingerprint },
     { name: "Evidence", href: "/candidate/dashboard", icon: LayoutDashboard },
     { name: "Provenance", href: "/candidate/provenance", icon: Network },
-    { name: "Verification", href: "/candidate/assessment", icon: ShieldCheck },
+    { name: "Verification", href: "/candidate/verification", icon: ShieldCheck },
   ];
 
   const employerItems: NavItem[] = [

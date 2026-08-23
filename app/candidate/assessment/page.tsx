@@ -179,7 +179,7 @@ function AssessmentContentWrapper() {
         setOutput((prev) => prev + "Evaluating hidden test suites...\n[====================] 100%\nAll tests passed successfully.\nCryptographic signature generated.");
         setTimeout(() => {
           logFunnelEvent("assessment_passed", { skill: skillParam });
-          router.push("/candidate/dashboard?verified=true");
+          router.push("/candidate/verification");
         }, 2000);
       } else {
         setOutput((prev) => prev + "Evaluating hidden test suites...\n" + (data.message || "Integrity score below threshold."));
@@ -223,7 +223,7 @@ function AssessmentContentWrapper() {
                You have already successfully passed the technical assessment for {skillParam}. Your cryptographic proof is permanently recorded.
              </p>
              <button 
-               onClick={() => router.push("/candidate/dashboard")}
+               onClick={() => router.push("/candidate/verification")}
                className="px-6 py-2 h-10 border border-[#D2D2D2] text-[#737373] font-sans text-[14px] font-medium rounded-md hover:border-[#0D0D0D] hover:text-[#0D0D0D] transition-all w-full"
              >
                Return to workspace
@@ -247,7 +247,7 @@ function AssessmentContentWrapper() {
              </div>
            </div>
            <button 
-             onClick={() => router.push("/candidate/dashboard")}
+             onClick={() => router.push("/candidate/verification")}
              className="px-6 py-2 h-10 border border-[#D2D2D2] text-[#737373] font-sans text-[14px] font-medium rounded-md hover:border-[#0D0D0D] hover:text-[#0D0D0D] transition-all w-full"
            >
              Return to workspace
@@ -295,7 +295,7 @@ function AssessmentContentWrapper() {
                 Start assessment
               </button>
               <button 
-                onClick={() => router.push("/candidate/dashboard")}
+                onClick={() => router.push("/candidate/verification")}
                 className="px-6 py-2 h-10 border border-[#D2D2D2] text-[#737373] font-sans text-[14px] font-medium rounded-md hover:border-[#0D0D0D] hover:text-[#0D0D0D] transition-all"
               >
                 Cancel
