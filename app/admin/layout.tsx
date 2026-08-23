@@ -7,6 +7,7 @@ import { Loader2, ShieldAlert, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { auth } from "@/lib/firebase/config";
 import { signOut } from "firebase/auth";
+import { MeritlaneLoader } from "@/components/ui/MeritlaneLoader";
 
 const ADMIN_EMAIL = "saitrishankb9@gmail.com";
 
@@ -23,12 +24,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   }, [user, loading, router]);
 
   if (loading) {
-    return (
-      <div className="flex min-h-[60vh] flex-col items-center justify-center space-y-4">
-        <Loader2 className="h-8 w-8 animate-spin text-zinc-400" />
-        <p className="text-sm font-medium text-zinc-500">Authenticating administrator...</p>
-      </div>
-    );
+    return <MeritlaneLoader level="page" text="Authenticating" />;
   }
 
   if (!user) {

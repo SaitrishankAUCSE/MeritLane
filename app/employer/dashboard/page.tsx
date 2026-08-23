@@ -5,12 +5,13 @@ import { useAuth } from "@/lib/auth/AuthContext";
 import { Bell, Command, Settings, HelpCircle, FileText, Activity, ShieldCheck, CheckCircle2, FileCheck, Code, Users, Network, Fingerprint, LayoutDashboard, ChevronDown, Link as LinkIcon } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { MeritlaneLoader } from "@/components/ui/MeritlaneLoader";
 
 export default function EmployerDashboardPage() {
   const { user, loading } = useAuth();
   
   if (loading) {
-    return <div className="h-full w-full flex items-center justify-center"><div className="h-4 w-4 border-2 border-[#737373] border-t-[#0D0D0D] animate-spin rounded-md"></div></div>;
+    return <MeritlaneLoader level="page" text="Authenticating" />;
   }
 
   return (

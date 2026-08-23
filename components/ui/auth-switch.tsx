@@ -11,6 +11,7 @@ import { useRouter } from "next/navigation";
 import { Loader2, ShieldCheck, AlertCircle, CheckCircle2, Users, Briefcase } from "lucide-react";
 import { Button } from "./Button";
 import { Input } from "./Input";
+import { MeritlaneLoader } from "@/components/ui/MeritlaneLoader";
 
 const ADMIN_EMAIL = "saitrishankb9@gmail.com";
 
@@ -185,11 +186,7 @@ export function AuthSwitch({ defaultMode = "login" }: AuthSwitchProps) {
 
   // Prevent UI flash while evaluating an existing valid session
   if (authLoading || (user && profileLoading) || (user && userRole)) {
-    return (
-      <div className="flex min-h-[80vh] items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-outline" />
-      </div>
-    ); 
+    return <MeritlaneLoader level="page" text="Authenticating" />;
   }
 
   return (

@@ -35,8 +35,10 @@ import {
   Zap,
   CheckCheck,
   Trash2,
-  LogOut
+  LogOut,
+  ShieldQuestion
 } from "lucide-react";
+import { MeritlaneLoader } from "@/components/ui/MeritlaneLoader";
 import { ReviewConsole } from "@/components/admin/ReviewConsole";
 
 import { collection, onSnapshot, doc, updateDoc, serverTimestamp, getDocs, writeBatch } from "firebase/firestore";
@@ -747,8 +749,7 @@ export default function AdminDashboardPage() {
                         <tr>
                           <td colSpan={6} className="px-6 py-12 text-center">
                             <div className="flex flex-col items-center justify-center space-y-3">
-                              <Loader2 className="h-5 w-5 animate-spin text-outline" />
-                              <p className="text-sm font-medium text-muted-foreground">Loading directory...</p>
+                              <MeritlaneLoader level="section" text="Loading directory" />
                             </div>
                           </td>
                         </tr>
@@ -892,8 +893,7 @@ export default function AdminDashboardPage() {
               <CardContent className="p-0">
                 {!hasLoadedCandidates ? (
                   <div className="p-12 text-center text-xs text-muted-foreground flex flex-col items-center justify-center space-y-3">
-                    <Loader2 className="h-5 w-5 animate-spin text-outline" />
-                    <p className="font-medium">Loading audit logs...</p>
+                    <MeritlaneLoader level="section" text="Loading audit logs" />
                   </div>
                 ) : auditLogs.length === 0 ? (
                   <div className="p-12 text-center text-xs text-muted-foreground">

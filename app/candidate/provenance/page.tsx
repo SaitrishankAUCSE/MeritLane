@@ -6,6 +6,7 @@ import { PublicProofRecord } from "@/components/public-record/PublicProofRecord"
 import { db } from "@/lib/firebase/config";
 import { doc, getDoc } from "firebase/firestore";
 import { Loader2 } from "lucide-react";
+import { MeritlaneLoader } from "@/components/ui/MeritlaneLoader";
 
 export default function CandidateProvenancePage() {
   const { user, loading } = useAuth();
@@ -35,11 +36,7 @@ export default function CandidateProvenancePage() {
   }, [user, loading]);
 
   if (loading || fetching) {
-    return (
-      <div className="h-full w-full flex items-center justify-center bg-[#FAFAFA]">
-        <div className="h-4 w-4 border-2 border-[#737373] border-t-[#0D0D0D] animate-spin rounded-full"></div>
-      </div>
-    );
+    return <MeritlaneLoader level="page" text="Fetching Record" />;
   }
 
   if (!candidate) {

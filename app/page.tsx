@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/Badge";
 import { getPlatformStats, getVerifiedCandidates } from "@/lib/firebase/home";
 import { CandidateProfile } from "@/lib/firebase/candidate";
 import { MeritlaneIntro } from "@/components/landing/MeritlaneIntro";
+import { MeritlaneLoader } from "@/components/ui/MeritlaneLoader";
 import { useAuth } from "@/lib/auth/AuthContext";
 import { motion } from "framer-motion";
 
@@ -77,11 +78,7 @@ export default function HomePage() {
   };
 
   if (authLoading || user) {
-    return (
-      <div className="min-h-[80vh] flex items-center justify-center bg-[var(--color-background)]">
-        <Loader2 className="w-8 h-8 animate-spin text-zinc-400" />
-      </div>
-    );
+    return <MeritlaneLoader level="page" text="Authenticating" />;
   }
 
   return (

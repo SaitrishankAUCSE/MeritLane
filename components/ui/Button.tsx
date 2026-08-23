@@ -1,6 +1,5 @@
-import React from "react";
-import { Loader2 } from "lucide-react";
 import Link from "next/link";
+import { MeritlaneLoader } from "@/components/ui/MeritlaneLoader";
 
 export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: "primary" | "secondary" | "outline" | "ghost" | "danger" | "tertiary" | "success";
@@ -59,7 +58,7 @@ export function Button({
   const content = (
     <>
       {loading ? (
-        <div className="h-3 w-3 border-[1.5px] border-current/30 border-t-current animate-spin rounded-full shrink-0" />
+        <MeritlaneLoader level="button" />
       ) : (
         leftIcon && <span className={size === "icon" ? "" : "shrink-0"}>{leftIcon}</span>
       )}

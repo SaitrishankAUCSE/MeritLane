@@ -7,6 +7,7 @@ import { Loader2, Play, CheckCircle2, Clock, AlertTriangle, TerminalSquare, File
 import { logFunnelEvent } from "@/lib/analytics/logEvent";
 import { getAssessmentContent, AssessmentContent } from "@/lib/assessments/content";
 import { db } from "@/lib/firebase/config";
+import { MeritlaneLoader } from "@/components/ui/MeritlaneLoader";
 import { doc, updateDoc, serverTimestamp, getDoc } from "firebase/firestore";
 
 function AssessmentContentWrapper() {
@@ -176,7 +177,7 @@ function AssessmentContentWrapper() {
   };
 
   if (initializing || loading || !content) {
-    return <div className="flex h-screen w-full items-center justify-center bg-[#FAFAFA]"><div className="h-4 w-4 border-2 border-[#737373] border-t-[#0D0D0D] animate-spin rounded-full"></div></div>;
+    return <MeritlaneLoader level="page" text="Initializing" />;
   }
 
   if (errorMsg) {
@@ -395,7 +396,7 @@ function AssessmentContentWrapper() {
 
 export default function AssessmentPage() {
   return (
-    <Suspense fallback={<div className="flex h-screen w-full items-center justify-center bg-[#FAFAFA]"><div className="h-4 w-4 border-2 border-[#737373] border-t-[#0D0D0D] animate-spin rounded-full"></div></div>}>
+    <Suspense fallback={<MeritlaneLoader level="page" text="Loading" />}>
       <AssessmentContentWrapper />
     </Suspense>
   );

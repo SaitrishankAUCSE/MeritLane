@@ -7,6 +7,7 @@ import { Loader2 } from "lucide-react";
 import { Role } from "@/lib/firebase/users";
 import { auth } from "@/lib/firebase/config";
 import { signOut } from "firebase/auth";
+import { MeritlaneLoader } from "@/components/ui/MeritlaneLoader";
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -72,11 +73,7 @@ export default function ProtectedRoute({ children, allowedRoles }: ProtectedRout
   }, [user, userProfile, isAdmin, loading, profileLoading, router, pathname, allowedRoles]);
 
   if (loading || profileLoading || !user || !isAuthorized) {
-    return (
-      <div className="flex h-screen w-full items-center justify-center bg-[#FAFAFA]">
-        <div className="h-4 w-4 border-2 border-[#737373] border-t-[#0D0D0D] animate-spin rounded-full"></div>
-      </div>
-    );
+    return <MeritlaneLoader level="page" text="Authenticating" />;
   }
 
   return <>{children}</>;

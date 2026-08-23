@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { Users, Briefcase, Loader2, ShieldCheck, AlertCircle } from "lucide-react";
+import { MeritlaneLoader } from "@/components/ui/MeritlaneLoader";
 import { createUserProfile } from "@/lib/firebase/users";
 import { useAuth } from "@/lib/auth/AuthContext";
 import { useRouter } from "next/navigation";
@@ -37,12 +38,7 @@ export default function RoleSelector() {
   };
 
   if (loading) {
-    return (
-      <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-surface">
-        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-        <p className="mt-4 text-sm font-medium text-muted-foreground">Setting up your profile...</p>
-      </div>
-    );
+    return <MeritlaneLoader level="page" text="Setting Up" />;
   }
 
   return (

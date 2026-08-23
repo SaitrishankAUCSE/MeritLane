@@ -5,6 +5,7 @@ import { useAuth } from "@/lib/auth/AuthContext";
 import { useRouter } from "next/navigation";
 import { fetchCandidateProfile, CandidateProfile, ProjectEntry } from "@/lib/firebase/candidate";
 import { FileCheck, Code, FolderOpen, ArrowRight, X, Loader2 } from "lucide-react";
+import { MeritlaneLoader } from "@/components/ui/MeritlaneLoader";
 import { db } from "@/lib/firebase/config";
 import { doc, updateDoc } from "firebase/firestore";
 import { TagInput } from "@/components/ui/TagInput";
@@ -97,7 +98,7 @@ export default function CandidateDashboardPage() {
   };
 
   if (loading) {
-    return <div className="h-full w-full flex items-center justify-center"><div className="h-4 w-4 border-2 border-[#737373] border-t-[#0D0D0D] animate-spin rounded-full"></div></div>;
+    return <MeritlaneLoader level="page" text="Authenticating" />;
   }
 
   return (

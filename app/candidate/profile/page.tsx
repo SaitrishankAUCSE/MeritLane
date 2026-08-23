@@ -6,6 +6,7 @@ import { fetchCandidateProfile, CandidateProfile } from "@/lib/firebase/candidat
 import { useRouter } from "next/navigation";
 import { ShieldCheck, Fingerprint, Link, BookOpen, Briefcase, ChevronRight, PenTool } from "lucide-react";
 import { ProfileForm } from "@/components/candidate/ProfileForm";
+import { MeritlaneLoader } from "@/components/ui/MeritlaneLoader";
 
 export default function CandidateProfilePage() {
   const { user, loading } = useAuth();
@@ -41,7 +42,7 @@ export default function CandidateProfilePage() {
   };
 
   if (loading || isInitializing) {
-    return <div className="h-full w-full flex items-center justify-center"><div className="h-4 w-4 border-2 border-[#737373] border-t-[#0D0D0D] animate-spin rounded-full"></div></div>;
+    return <MeritlaneLoader level="page" text="Authenticating" />;
   }
 
   if (isEditing) {
