@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Menu, X, Fingerprint, LayoutDashboard, Network, ShieldCheck, Activity, FileText, Command } from "lucide-react";
+import { Menu, X, Fingerprint, LayoutDashboard, Network, ShieldCheck, Search, Bookmark } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 
 export function MobileNav({ role }: { role: "candidate" | "employer" | "admin" }) {
@@ -25,10 +25,8 @@ export function MobileNav({ role }: { role: "candidate" | "employer" | "admin" }
   ];
 
   const employerItems: NavItem[] = [
-    { name: "Identity", href: "#", icon: Activity, disabled: true },
-    { name: "Evidence", href: "#", icon: FileText, disabled: true },
-    { name: "Provenance", href: "/employer/dashboard", icon: Command },
-    { name: "Verification", href: "#", icon: ShieldCheck, disabled: true },
+    { name: "Discover", href: "/employer/dashboard", icon: Search },
+    { name: "Shortlist", href: "/employer/shortlist", icon: Bookmark },
   ];
 
   const adminItems: NavItem[] = [

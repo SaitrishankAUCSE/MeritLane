@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { Activity, FileText, Command, ShieldCheck, Bookmark, Settings, HelpCircle, LogOut } from "lucide-react";
+import { Search, Bookmark, Settings, HelpCircle, LogOut, Activity } from "lucide-react";
 import { useAuth } from "@/lib/auth/AuthContext";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -11,13 +11,13 @@ export function EmployerSidebar() {
   const pathname = usePathname();
   const router = useRouter();
   const { user, handleSignOut } = useAuth();
+  
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
   const name = user?.displayName || "Employer";
   const avatarUrl = user?.photoURL || "";
 
-  // Close menu when clicking outside
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
@@ -32,72 +32,61 @@ export function EmployerSidebar() {
     };
   }, [isUserMenuOpen]);
 
-  // Close menu on route change
   useEffect(() => {
     setIsUserMenuOpen(false);
   }, [pathname]);
 
   const navItems = [
-    { name: "Identity", href: "#", icon: Activity, disabled: true },
-    { name: "Evidence", href: "#", icon: FileText, disabled: true },
-    { name: "Provenance", href: "/employer/dashboard", icon: Command },
+    { name: "Discover", href: "/employer/dashboard", icon: Search },
     { name: "Shortlist", href: "/employer/shortlist", icon: Bookmark },
   ];
 
   return (
-    <aside className="hidden lg:flex w-[220px] shrink-0 flex-col border-r border-[#E5E5E5] bg-[#FAFAFA] h-[100dvh]">
-      <div className="flex h-20 items-center px-8 shrink-0">
-        <img src="/logo-full.png" alt="Meritlane" className="h-8 w-auto" />
+    <aside className="transition-all duration-300 ease-in-out border-r bg-[#FAFAFA] h-[100dvh] lg:flex lg:flex-col sticky top-0 hidden border-[#E5E5E5] shrink-0 z-40 w-[220px]">
+      
+      {/* Logo Area */}
+      <div className="w-full flex justify-center mt-6 shrink-0 h-8">
+        <div className="w-[188px] flex justify-start px-4">
+          <img src="/logo-full.png" alt="Meritlane" className="h-6 w-auto" />
+        </div>
       </div>
 
-      <nav aria-label="Employer Navigation" className="flex-1 px-4 mt-6 space-y-1">
+      {/* Navigation */}
+      <nav aria-label="Employer Navigation" className="flex-1 mt-6 space-y-1 px-4">
         {navItems.map((item) => {
           const isActive = pathname === item.href;
           const Icon = item.icon;
-
-          if (isActive) {
-            return (
-              <Link 
-                key={item.name} 
-                href={item.href}
-                aria-current="page" 
-                className="flex items-center px-4 py-3 text-[14px] font-sans text-[#0D0D0D] bg-[#FFFFFF] relative transition-colors rounded-md"
-              >
-                <Icon className="mr-4 h-[18px] w-[18px]" aria-hidden="true" />
-                {item.name}
-                <div className="absolute bg-[#0D0D0D] right-0 top-1/2 -translate-y-1/2 h-4 w-[2px] rounded-l-md" />
-              </Link>
-            );
-          }
-
-          if (item.disabled) {
-            return (
-              <div key={item.name} aria-disabled="true" className="flex items-center px-4 py-3 text-[14px] font-sans text-[#D2D2D2] cursor-not-allowed transition-colors rounded-md" title="Coming soon">
-                <Icon className="mr-4 h-[18px] w-[18px] opacity-30" aria-hidden="true" />
-                {item.name}
-              </div>
-            );
-          }
-
+          
           return (
-            <Link key={item.name} href={item.href} className="flex items-center px-4 py-3 text-[14px] font-sans text-[#737373] hover:text-[#0D0D0D] hover:bg-[#FFFFFF]/50 transition-colors rounded-md">
-              <Icon className="mr-4 h-[18px] w-[18px] opacity-70" aria-hidden="true" />
-              {item.name}
+            <Link
+              key={item.name}
+              href={item.href}
+              aria-current={isActive ? "page" : undefined}
+              className={`flex items-center h-10 text-[14px] font-sans relative overflow-hidden rounded-md transition-colors ${isActive ? "text-[#0D0D0D] bg-[#FFFFFF]" : "text-[#737373] hover:text-[#0D0D0D] hover:bg-[#FFFFFF]/50"}`}
+            >
+              <div className="w-12 flex justify-center shrink-0">
+                <Icon className={`h-[18px] w-[18px] ${isActive ? "" : "opacity-70"}`} aria-hidden="true" />
+              </div>
+              <span className="whitespace-nowrap">
+                {item.name}
+              </span>
+              {isActive && (
+                <motion.div 
+                  layoutId="employerActiveTabIndicator"
+                  className="absolute bg-[#0D0D0D] transition-all right-0 top-0 bottom-0 w-[1px]" 
+                />
+              )}
             </Link>
           );
         })}
       </nav>
 
-      <div className="px-6 py-6 border-t border-[#E5E5E5] shrink-0">
-        <button disabled className="flex items-center gap-2 w-full text-left py-2 text-[#D2D2D2] cursor-not-allowed transition-colors mb-6" title="Coming soon">
-          <span className="font-mono text-[11px] text-[#D2D2D2] font-bold">[+]</span>
-          <span className="font-sans text-[11px] font-bold uppercase tracking-[0.1em]">New Request</span>
-        </button>
+      {/* Bottom Nav / Action */}
+      <div className="py-6 border-t border-[#E5E5E5] shrink-0 px-4">
         
         {/* User Context Menu Container */}
-        <div ref={menuRef} className="relative flex items-center justify-between pt-6 border-t border-[#E5E5E5] mb-4">
+        <div ref={menuRef} className="relative flex items-center justify-between mb-4 h-14">
           
-          {/* Popover Menu */}
           <AnimatePresence>
             {isUserMenuOpen && (
               <motion.div
@@ -105,7 +94,7 @@ export function EmployerSidebar() {
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 exit={{ opacity: 0, y: 10, scale: 0.95 }}
                 transition={{ duration: 0.15, ease: "easeOut" }}
-                className="absolute bottom-full left-0 right-0 mb-3 bg-[#FFFFFF] border border-[#E5E5E5] shadow-lg rounded-xl overflow-hidden py-1 z-50"
+                className="absolute bottom-full mb-3 bg-[#FFFFFF] border border-[#E5E5E5] shadow-lg rounded-xl overflow-hidden py-1 z-50 left-0 w-48"
               >
                 <div className="px-4 py-3 border-b border-[#E5E5E5] mb-1">
                   <div className="text-[13px] font-medium text-[#0D0D0D] truncate">{name}</div>
@@ -146,22 +135,23 @@ export function EmployerSidebar() {
           {/* Avatar Button */}
           <button 
             type="button"
-            aria-haspopup="menu"
-            aria-expanded={isUserMenuOpen}
-            aria-label="Employer account menu"
-            className={`flex items-center gap-3 cursor-pointer group p-1.5 -ml-1.5 rounded-lg transition-colors w-full text-left ${isUserMenuOpen ? "bg-[#F3F3F1]" : "hover:bg-[#F3F3F1]"}`}
+            className={`flex items-center cursor-pointer group p-1 rounded-lg transition-colors text-left overflow-hidden flex-1 ${isUserMenuOpen ? "bg-[#F3F3F1]" : "hover:bg-[#F3F3F1]"}`}
             onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
           >
-            <div className="h-8 w-8 rounded-full bg-[#E5E5E5] border border-[#D2D2D2] group-hover:border-[#737373] flex items-center justify-center overflow-hidden text-xs transition-colors shrink-0">
-              {avatarUrl ? <img src={avatarUrl} alt="Profile" className="h-full w-full object-cover" /> : name.charAt(0).toUpperCase()}
+            <div className="w-10 flex justify-center shrink-0">
+              <div className="h-8 w-8 rounded-full bg-[#E5E5E5] border border-[#D2D2D2] group-hover:border-[#737373] flex items-center justify-center overflow-hidden text-xs transition-colors shrink-0">
+                {avatarUrl ? <img src={avatarUrl} alt="Profile" className="h-full w-full object-cover" /> : name.charAt(0).toUpperCase()}
+              </div>
             </div>
-            <div className="text-[13px] text-[#0D0D0D] font-medium truncate transition-colors">
+            
+            <div className="text-[13px] text-[#0D0D0D] font-medium truncate whitespace-nowrap ml-1 pr-2">
               {name}
             </div>
           </button>
+          
         </div>
+        
       </div>
     </aside>
   );
 }
-
