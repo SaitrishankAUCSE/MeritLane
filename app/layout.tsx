@@ -7,7 +7,6 @@ import { AuthProvider } from "@/lib/auth/AuthContext";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Analytics } from "@vercel/analytics/react";
 import { GlobalBackButton } from "@/components/ui/GlobalBackButton";
-import { RootPageTransition } from "@/components/ui/RootPageTransition";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -100,7 +99,7 @@ export default function RootLayout({
           <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
             <Navbar />
             <main className="flex-1 flex flex-col">
-              <RootPageTransition>{children}</RootPageTransition>
+              {children}
             </main>
             <SiteFooter />
           </ThemeProvider>
@@ -111,3 +110,4 @@ export default function RootLayout({
     </html>
   );
 }
+

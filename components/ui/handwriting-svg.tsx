@@ -88,20 +88,9 @@ export function HandwritingSvg({
     return (
       <svg
         viewBox={`0 0 ${width} ${height}`}
-        className={cn("w-full h-auto text-muted-foreground", className)}
+        className={cn("w-full h-auto opacity-0", className)}
         aria-hidden={true}
-      >
-        <title>Handwriting SVG loading</title>
-        <text
-          x="50%"
-          y="50%"
-          textAnchor="middle"
-          dominantBaseline="middle"
-          fontSize={14}
-        >
-          Loading...
-        </text>
-      </svg>
+      />
     );
   }
 

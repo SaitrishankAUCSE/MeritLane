@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { Activity, FileText, Command, ShieldCheck, Settings, HelpCircle, LogOut } from "lucide-react";
+import { Activity, FileText, Command, ShieldCheck, Bookmark, Settings, HelpCircle, LogOut } from "lucide-react";
 import { useAuth } from "@/lib/auth/AuthContext";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -41,7 +41,7 @@ export function EmployerSidebar() {
     { name: "Identity", href: "#", icon: Activity, disabled: true },
     { name: "Evidence", href: "#", icon: FileText, disabled: true },
     { name: "Provenance", href: "/employer/dashboard", icon: Command },
-    { name: "Verification", href: "#", icon: ShieldCheck, disabled: true },
+    { name: "Shortlist", href: "/employer/shortlist", icon: Bookmark },
   ];
 
   return (

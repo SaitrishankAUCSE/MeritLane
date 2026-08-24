@@ -62,11 +62,12 @@ export async function POST(req: NextRequest) {
     const now = Date.now();
 
     // Check cooldown
-    if (userData.lastFailedAssessmentAt) {
-      const failedMs = userData.lastFailedAssessmentAt.toMillis();
+    if (userData.failedAssessments && userData.failedAssessments[skill]) {
+      const failedTimestamp = userData.failedAssessments[skill];
+      const failedMs = typeof failedTimestamp.toMillis === "function" ? failedTimestamp.toMillis() : failedTimestamp;
       const fourteenDaysMs = 14 * 24 * 60 * 60 * 1000;
       if (now - failedMs < fourteenDaysMs) {
-        return NextResponse.json({ error: "You are currently in a 14-day cooldown period." }, { status: 429 });
+        return NextResponse.json({ error: "You are currently in a 14-day cooldown period for this skill." }, { status: 429 });
       }
     }
 

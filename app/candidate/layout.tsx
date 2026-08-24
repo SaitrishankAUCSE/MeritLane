@@ -5,8 +5,6 @@ import ProtectedRoute from "@/components/ProtectedRoute";
 import { CandidateSidebar } from "@/components/candidate/CandidateSidebar";
 import { MobileNav } from "@/components/ui/MobileNav";
 
-import { PageTransition } from "@/components/ui/PageTransition";
-
 export default function CandidateLayout({ children }: { children: React.ReactNode }) {
   return (
     <ProtectedRoute allowedRoles={["candidate"]}>
@@ -14,7 +12,7 @@ export default function CandidateLayout({ children }: { children: React.ReactNod
         <MobileNav role="candidate" />
         <CandidateSidebar />
         <main className="flex-1 bg-[#FAFAFA] overflow-hidden">
-          <PageTransition>{children}</PageTransition>
+          {children}
         </main>
       </div>
     </ProtectedRoute>

@@ -202,7 +202,7 @@ export async function POST(req: NextRequest) {
     if (now - startedMs > (fortyFiveMinsMs + gracePeriodMs)) {
       // Time expired
       await userRef.update({
-        lastFailedAssessmentAt: FieldValue.serverTimestamp(),
+        [`failedAssessments.${skill}`]: FieldValue.serverTimestamp(),
         assessmentStartedAt: FieldValue.delete(),
         assessmentVariant: FieldValue.delete(),
         assessmentSkill: FieldValue.delete()
@@ -300,14 +300,17 @@ export async function POST(req: NextRequest) {
     }
 
     // Final Submission Handling
-    const mcqPassed = mcqScore === content.mcqs.length;
-    const codePassed = passedTests >= 4;
-    const passed = mcqPassed && codePassed;
+    const totalQuestions = content.mcqs.length + 5;
+    const totalCorrect = mcqScore + passedTests;
+    const score = Math.round((totalCorrect / totalQuestions) * 100);
+
+    const passed = score >= 80;
 
     if (passed) {
       await Promise.all([
         userRef.update({
           assessmentScores: {
+            [`${skill}_finalScore`]: score,
             [`${skill}_${variant}`]: passedTests,
             [`${skill}_mcq`]: mcqScore
           },
@@ -318,10 +321,10 @@ export async function POST(req: NextRequest) {
           assessmentSkill: FieldValue.delete()
         }),
         candidateRef.update({
-          verificationStatus: "verified",
-          verifiedAt: FieldValue.serverTimestamp(),
+          // verificationStatus is left untouched because verification is skill-specific
           [`verifiedSkills.${skill}`]: {
             status: "verified",
+            score: score,
             verifiedAt: Date.now()
           },
           updatedAt: Date.now()
@@ -329,28 +332,27 @@ export async function POST(req: NextRequest) {
       ]);
 
       return NextResponse.json({
-        success: true,
         passed: true,
-        mcqScore,
-        codeScore: passedTests,
-        message: "Congratulations! Your profile is now verified."
+        score: score,
+        status: "verified",
+        skill: skill
       });
     } else {
       // Failed - Enforce cooldown
       await userRef.update({
-        lastFailedAssessmentAt: FieldValue.serverTimestamp(),
+        [`failedAssessments.${skill}`]: FieldValue.serverTimestamp(),
         // Clear active session
         assessmentStartedAt: FieldValue.delete(),
         assessmentVariant: FieldValue.delete(),
         assessmentSkill: FieldValue.delete()
       });
 
+      const retryDate = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString();
       return NextResponse.json({
-        success: true,
         passed: false,
-        mcqScore,
-        codeScore: passedTests,
-        message: `Assessment failed. You passed ${mcqScore}/${content.mcqs.length} MCQs and ${passedTests}/5 tests. You can retry in 14 days.`
+        score: score,
+        status: "failed",
+        retryAvailableAt: retryDate
       });
     }
 

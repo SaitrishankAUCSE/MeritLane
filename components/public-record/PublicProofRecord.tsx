@@ -22,6 +22,8 @@ export function PublicProofRecord({ id, candidate, user, hideHeader = false }: P
     ? new Date(candidate.verifiedAt).toISOString()
     : (candidate.updatedAt ? new Date(candidate.updatedAt).toISOString() : new Date().toISOString());
 
+  const hasAnyVerifiedSkill = skills.some((skill: string) => candidate.verifiedSkills?.[skill]?.status === "verified");
+  const isPractitionerVerified = candidate.verificationStatus === "verified" || hasAnyVerifiedSkill;
   const totalProofs = skills.length + projects.length;
 
   return (
@@ -54,10 +56,16 @@ export function PublicProofRecord({ id, candidate, user, hideHeader = false }: P
             </h1>
             
             <div className="flex flex-wrap items-center gap-4 mb-6 text-[13px] font-sans font-medium">
-              <div className="flex items-center gap-2 text-[#15803D]">
-                <CheckCircle2 className="h-[14px] w-[14px] text-[#15803D]" />
-                <span>Verified Practitioner</span>
-              </div>
+              {isPractitionerVerified ? (
+                <div className="flex items-center gap-2 text-[#15803D]">
+                  <CheckCircle2 className="h-[14px] w-[14px] text-[#15803D]" />
+                  <span>Verified Practitioner</span>
+                </div>
+              ) : (
+                <div className="flex items-center gap-2 text-[#666666]">
+                  <span>Self-Declared Candidate</span>
+                </div>
+              )}
               <div className="w-px h-3 bg-[#E5E5E5]" />
               <div className="text-[#666666] lowercase tracking-normal font-mono text-[12px]">ID: {recordId}.eth</div>
             </div>

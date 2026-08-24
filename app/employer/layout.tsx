@@ -4,7 +4,6 @@ import React from "react";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import { EmployerSidebar } from "@/components/employer/EmployerSidebar";
 import { MobileNav } from "@/components/ui/MobileNav";
-import { PageTransition } from "@/components/ui/PageTransition";
 
 export default function EmployerLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -13,7 +12,7 @@ export default function EmployerLayout({ children }: { children: React.ReactNode
         <MobileNav role="employer" />
         <EmployerSidebar />
         <main className="flex-1 bg-[#FAFAFA] overflow-hidden">
-          <PageTransition>{children}</PageTransition>
+          {children}
         </main>
       </div>
     </ProtectedRoute>

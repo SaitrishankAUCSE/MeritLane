@@ -38,6 +38,7 @@ function AssessmentContentWrapper() {
   const [errorMsg, setErrorMsg] = useState("");
   const [cooldownDays, setCooldownDays] = useState<number | null>(null);
   const [hasStarted, setHasStarted] = useState(false);
+  const [assessmentResult, setAssessmentResult] = useState<{ passed: boolean; score: number; status: string; skill: string; retryAvailableAt?: string } | null>(null);
   
   const [content, setContent] = useState<AssessmentContent | null>(null);
   
@@ -57,8 +58,6 @@ function AssessmentContentWrapper() {
         router.replace("/login");
         return;
       }
-      
-      
 
       // Check if already verified and if skill exists
       const initAssessment = async () => {
@@ -77,7 +76,7 @@ function AssessmentContentWrapper() {
           if (!res.ok) {
             if (res.status === 403) setErrorMsg("SKILL NOT FOUND");
             else if (res.status === 429) {
-              setErrorMsg("ASSESSMENT NOT PASSED");
+              setErrorMsg("ASSESSMENT COOLDOWN ACTIVE");
               setCooldownDays(14);
             } else if (res.status === 409) setErrorMsg("ALREADY VERIFIED");
             else setErrorMsg(data.error || "Failed to start assessment");
@@ -101,20 +100,25 @@ function AssessmentContentWrapper() {
 
   useEffect(() => {
     let timer: NodeJS.Timeout;
-    if (hasStarted && timeLeft > 0 && !errorMsg) {
+    if (hasStarted && timeLeft > 0 && !errorMsg && !assessmentResult) {
       timer = setInterval(() => {
         setTimeLeft((prev) => prev - 1);
       }, 1000);
-    } else if (timeLeft <= 0 && hasStarted) {
+    } else if (timeLeft <= 0 && hasStarted && !assessmentResult) {
       handleFail();
     }
     return () => clearInterval(timer);
-  }, [hasStarted, timeLeft, errorMsg]);
+  }, [hasStarted, timeLeft, errorMsg, assessmentResult]);
 
   const handleFail = () => {
     if (!user) return;
-    localStorage.setItem(`meritlane_cooldown_${user.uid}_${skillParam}`, Date.now().toString());
-    setErrorMsg("ASSESSMENT NOT PASSED");
+    setAssessmentResult({
+      passed: false,
+      score: 0,
+      status: "failed",
+      skill: skillParam,
+      retryAvailableAt: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString()
+    });
   };
 
   const handleStart = () => {
@@ -167,9 +171,9 @@ function AssessmentContentWrapper() {
       if (!res.ok) {
         setOutput((prev) => prev + "\n" + (data.error || "Evaluation failed."));
         if (res.status !== 501) { 
-            setTimeout(() => {
-              handleFail();
-            }, 2000);
+          setTimeout(() => {
+            handleFail();
+          }, 1500);
         }
         setEvaluating(false);
         return;
@@ -177,15 +181,26 @@ function AssessmentContentWrapper() {
 
       if (data.passed) {
         setOutput((prev) => prev + "Evaluating hidden test suites...\n[====================] 100%\nAll tests passed successfully.\nCryptographic signature generated.");
+        logFunnelEvent("assessment_passed", { skill: skillParam });
         setTimeout(() => {
-          logFunnelEvent("assessment_passed", { skill: skillParam });
-          router.push("/candidate/verification");
-        }, 2000);
+          setAssessmentResult({
+            passed: true,
+            score: data.score,
+            status: "verified",
+            skill: skillParam
+          });
+        }, 1200);
       } else {
-        setOutput((prev) => prev + "Evaluating hidden test suites...\n" + (data.message || "Integrity score below threshold."));
+        setOutput((prev) => prev + "Evaluating hidden test suites...\nScore: " + data.score + "% (Required: 80%).");
         setTimeout(() => {
-          handleFail();
-        }, 2000);
+          setAssessmentResult({
+            passed: false,
+            score: data.score,
+            status: "failed",
+            skill: skillParam,
+            retryAvailableAt: data.retryAvailableAt
+          });
+        }, 1200);
       }
     } catch (e) {
       console.error(e);
@@ -193,6 +208,74 @@ function AssessmentContentWrapper() {
       setEvaluating(false);
     }
   };
+
+  // PASS RESULT SCREEN
+  if (assessmentResult && assessmentResult.passed) {
+    return (
+      <div className="flex h-[100dvh] w-full bg-[#FAFAFA] text-[#0D0D0D] font-sans items-center justify-center p-6">
+        <div className="max-w-md w-full border border-[#15803D]/30 bg-[#FFFFFF] rounded-2xl p-8 sm:p-10 shadow-sm text-center">
+          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-[#F0FDF4] text-[#15803D] border border-[#15803D]/20">
+            <CheckCircle2 className="h-7 w-7" />
+          </div>
+          <div className="text-[11px] font-mono uppercase tracking-[0.15em] text-[#15803D] mb-2 font-medium">✓ Assessment Verified</div>
+          <h2 className="text-[32px] font-serif text-[#0D0D0D] mb-1 leading-tight">{skillParam}</h2>
+          <div className="text-[44px] font-mono font-bold text-[#15803D] mb-3 leading-none">{assessmentResult.score}%</div>
+          <p className="text-[14px] text-[#737373] mb-8 font-sans leading-relaxed">
+            Your technical claim has been verified. Cryptographic proof has been generated and anchored to your public record.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-3">
+            <button 
+              onClick={() => router.push("/candidate/provenance")}
+              className="flex-1 px-5 h-11 border border-[#0D0D0D] bg-[#0D0D0D] text-[#FFFFFF] font-sans text-[14px] font-medium rounded-md hover:bg-[#222222] transition-all"
+            >
+              View Provenance
+            </button>
+            <button 
+              onClick={() => router.push("/candidate/dashboard")}
+              className="flex-1 px-5 h-11 border border-[#D2D2D2] text-[#0D0D0D] font-sans text-[14px] font-medium rounded-md hover:border-[#0D0D0D] hover:bg-[#F3F3F1] transition-all"
+            >
+              Return to Dashboard
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // FAIL RESULT SCREEN
+  if (assessmentResult && !assessmentResult.passed) {
+    const retryDateStr = assessmentResult.retryAvailableAt 
+      ? new Date(assessmentResult.retryAvailableAt).toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric' })
+      : new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric' });
+
+    return (
+      <div className="flex h-[100dvh] w-full bg-[#FAFAFA] text-[#0D0D0D] font-sans items-center justify-center p-6">
+        <div className="max-w-md w-full border border-[#B42318]/20 bg-[#FFFFFF] rounded-2xl p-8 sm:p-10 shadow-sm text-center">
+          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-[#FEF2F2] text-[#B42318] border border-[#B42318]/20">
+            <AlertTriangle className="h-7 w-7" />
+          </div>
+          <div className="text-[11px] font-mono uppercase tracking-[0.15em] text-[#B42318] mb-2 font-medium">Assessment Not Passed</div>
+          <h2 className="text-[32px] font-serif text-[#0D0D0D] mb-1 leading-tight">{skillParam}</h2>
+          <div className="text-[44px] font-mono font-bold text-[#B42318] mb-3 leading-none">{assessmentResult.score}%</div>
+          <p className="text-[14px] text-[#737373] mb-4 font-sans leading-relaxed">
+            80% is required to verify this skill.
+          </p>
+          <div className="border border-[#E5E5E5] bg-[#FAFAFA] p-4 rounded-md mb-8 text-left">
+            <div className="text-[12px] font-sans font-medium text-[#737373] mb-1">You can attempt this assessment again on:</div>
+            <div className="text-[14px] font-mono text-[#0D0D0D] font-medium">
+              {retryDateStr}
+            </div>
+          </div>
+          <button 
+            onClick={() => router.push("/candidate/dashboard")}
+            className="w-full px-5 h-11 border border-[#0D0D0D] bg-[#0D0D0D] text-[#FFFFFF] font-sans text-[14px] font-medium rounded-md hover:bg-[#222222] transition-all"
+          >
+            Return to Dashboard
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   if (errorMsg) {
     if (errorMsg === "SKILL NOT FOUND") {
@@ -238,12 +321,12 @@ function AssessmentContentWrapper() {
         <div className="max-w-md w-full border border-[#E5E5E5] bg-[#FFFFFF] rounded-md p-8 shadow-sm">
            <h2 className="text-[18px] font-serif text-[#B42318] mb-2">{errorMsg}</h2>
            <p className="text-[14px] text-[#737373] mb-6 font-sans">
-             Your submitted solution did not pass the integrity tests. To preserve the rigor of the Meritlane record, you have been placed in a mandatory cooldown.
+             You are currently in a mandatory 14-day cooldown for this skill.
            </p>
            <div className="border border-[#E5E5E5] bg-[#FAFAFA] p-5 rounded-md mb-8">
              <div className="text-[14px] font-sans font-medium text-[#737373] mb-1">Next Eligible Attempt</div>
              <div className="text-[14px] font-mono text-[#0D0D0D]">
-               {new Date(Date.now() + (cooldownDays || 14) * 24 * 60 * 60 * 1000).toLocaleDateString()}
+               {new Date(Date.now() + (cooldownDays || 14) * 24 * 60 * 60 * 1000).toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric' })}
              </div>
            </div>
            <button 

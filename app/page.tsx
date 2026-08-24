@@ -9,7 +9,6 @@ import { Badge } from "@/components/ui/Badge";
 import { getPlatformStats, getVerifiedCandidates } from "@/lib/firebase/home";
 import { CandidateProfile } from "@/lib/firebase/candidate";
 import { MeritlaneIntro } from "@/components/landing/MeritlaneIntro";
-import { MeritlaneLoader } from "@/components/ui/MeritlaneLoader";
 import { useAuth } from "@/lib/auth/AuthContext";
 import { motion } from "framer-motion";
 
@@ -29,7 +28,7 @@ const staggerContainer = {
 };
 
 export default function HomePage() {
-  const { user, loading: authLoading, profileLoading } = useAuth();
+  const { user } = useAuth();
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState("");
   const [stats, setStats] = useState({ registeredCandidates: 0, activeEmployers: 0, verifiedProfiles: 0 });
@@ -38,14 +37,8 @@ export default function HomePage() {
   const [displayedCandidates, setDisplayedCandidates] = useState<(CandidateProfile & { id: string })[]>([]);
 
   useEffect(() => {
-    if (!authLoading && user) {
-      router.replace("/dashboard");
-    }
-  }, [user, authLoading, router]);
-
-  useEffect(() => {
-    if (!authLoading && !user) {
-      async function loadData() {
+    async function loadData() {
+      try {
         const [fetchedStats, fetchedCandidates] = await Promise.all([
           getPlatformStats(),
           getVerifiedCandidates()
@@ -53,11 +46,14 @@ export default function HomePage() {
         setStats(fetchedStats);
         setCandidates(fetchedCandidates);
         setDisplayedCandidates(fetchedCandidates);
+      } catch (err) {
+        console.error("Failed to load home page data:", err);
+      } finally {
         setLoading(false);
       }
-      loadData();
     }
-  }, [user, authLoading]);
+    loadData();
+  }, []);
 
   const handleSearch = () => {
     if (!searchQuery.trim()) {
@@ -76,10 +72,6 @@ export default function HomePage() {
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter') handleSearch();
   };
-
-  if (authLoading || user) {
-    return <MeritlaneLoader level="page" text="Authenticating" />;
-  }
 
   return (
     <div className="flex flex-col theme-public bg-background min-h-screen w-full font-sans text-foreground">

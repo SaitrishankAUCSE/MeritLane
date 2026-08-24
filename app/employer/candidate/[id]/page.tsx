@@ -1,13 +1,15 @@
 import React from "react";
-import { adminDb } from "@/lib/firebase/admin";
-import { notFound } from "next/navigation";
+import { adminAuth, adminDb } from "@/lib/firebase/admin";
+import { notFound, redirect } from "next/navigation";
 import { PublicProofRecord } from "@/components/public-record/PublicProofRecord";
+import { EmployerDossierActions } from "@/components/employer/EmployerDossierActions";
+import { cookies, headers } from "next/headers";
 
 interface Props {
   params: Promise<{ id: string }>;
 }
 
-export default async function PublicProfilePage({ params }: Props) {
+export default async function EmployerCandidateDossierPage({ params }: Props) {
   const { id } = await params;
 
   let candidateDoc;
@@ -17,7 +19,7 @@ export default async function PublicProfilePage({ params }: Props) {
     candidateDoc = await adminDb!.collection("candidates").doc(id).get();
     userDoc = await adminDb!.collection("users").doc(id).get();
   } catch (err) {
-    console.error("Error fetching public profile:", err);
+    console.error("Error fetching profile:", err);
     notFound();
   }
 
@@ -26,21 +28,15 @@ export default async function PublicProfilePage({ params }: Props) {
   }
 
   const rawCandidate = candidateDoc.data()!;
-
   const verifiedSkills = rawCandidate.verifiedSkills || {};
   const hasVerifiedSkills = Object.values(verifiedSkills).some((s: any) => s?.status === "verified");
   const isCandidateVerified = rawCandidate.verificationStatus === "verified" || hasVerifiedSkills;
 
-  // Must have at least one verified skill or verified status to be publicly accessible
   if (!isCandidateVerified) {
-    notFound();
+    notFound(); // Employers should only see verified candidates
   }
 
   const rawUser = userDoc.exists ? userDoc.data()! : {};
-
-  // Deep clone to strip Firestore Timestamps and extract ONLY safe public fields
-  // CRITICAL SECURITY FIX: Do not pass the entire document to a Client Component
-  // or it will serialize private emails and failed assessment attempts to the browser.
   const parseTimestamp = (val: any) => val && typeof val === "object" && val.toDate ? val.toDate().toISOString() : val;
   
   const sanitizedVerifiedSkills: Record<string, any> = {};
@@ -71,6 +67,16 @@ export default async function PublicProfilePage({ params }: Props) {
     photoURL: rawUser.photoURL || "",
   };
 
-  return <PublicProofRecord id={id} candidate={candidate} user={user} />;
+  return (
+    <div className="relative min-h-screen bg-[#FAFAFA] flex flex-col">
+      {/* Client Component for floating shortlist button and navigation */}
+      <EmployerDossierActions candidateId={id} />
+      
+      {/* Reuse the Public Proof layout but hide its own top navbar */}
+      <div className="flex-1 mt-16 pb-24">
+        <PublicProofRecord id={id} candidate={candidate} user={user} hideHeader={true} />
+      </div>
+    </div>
+  );
 }
 

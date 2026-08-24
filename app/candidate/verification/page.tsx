@@ -7,6 +7,8 @@ import { useRouter } from "next/navigation";
 import { fetchCandidateProfile, CandidateProfile } from "@/lib/firebase/candidate";
 import { ShieldCheck, ArrowRight, ShieldAlert } from "lucide-react";
 import { MeritlaneLoader } from "@/components/ui/MeritlaneLoader";
+import { db } from "@/lib/firebase/config";
+import { doc, getDoc } from "firebase/firestore";
 
 export default function CandidateVerificationPage() {
   const { user, loading } = useAuth();
@@ -22,22 +24,37 @@ export default function CandidateVerificationPage() {
 
   useEffect(() => {
     if (user) {
-      fetchCandidateProfile(user.uid).then(p => {
+      Promise.all([
+        fetchCandidateProfile(user.uid),
+        getDoc(doc(db, "users", user.uid)).then(d => d.exists() ? d.data() : null).catch(() => null)
+      ]).then(([p, uData]) => {
         setProfile(p);
         
         // Check cooldowns
         if (p?.skills) {
           const cd: Record<string, number> = {};
+          const now = Date.now();
+          const fourteenDaysMs = 14 * 24 * 60 * 60 * 1000;
+
           p.skills.forEach(skill => {
-            const cooldownStr = localStorage.getItem(`meritlane_cooldown_${user.uid}_${skill}`);
-            if (cooldownStr) {
-              const cooldownTimestamp = parseInt(cooldownStr, 10);
-              const remainingDays = 14 - Math.floor((Date.now() - cooldownTimestamp) / (24 * 60 * 60 * 1000));
-              if (remainingDays > 0) {
-                cd[skill] = cooldownTimestamp;
-              } else {
-                localStorage.removeItem(`meritlane_cooldown_${user.uid}_${skill}`);
+            let timestamp: number | null = null;
+            
+            // Check Firestore failedAssessments
+            if (uData?.failedAssessments && uData.failedAssessments[skill]) {
+              const fa = uData.failedAssessments[skill];
+              timestamp = typeof fa?.toMillis === "function" ? fa.toMillis() : (typeof fa === "number" ? fa : (fa?.seconds ? fa.seconds * 1000 : null));
+            }
+
+            // Fallback: localStorage
+            if (!timestamp) {
+              const cooldownStr = localStorage.getItem(`meritlane_cooldown_${user.uid}_${skill}`);
+              if (cooldownStr) {
+                timestamp = parseInt(cooldownStr, 10);
               }
+            }
+
+            if (timestamp && (now - timestamp < fourteenDaysMs)) {
+              cd[skill] = timestamp;
             }
           });
           setCooldowns(cd);
