@@ -28,13 +28,27 @@ const staggerContainer = {
 };
 
 export default function HomePage() {
-  const { user } = useAuth();
+  const { user, role, loading: authLoading, profileLoading } = useAuth();
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState("");
   const [stats, setStats] = useState({ registeredCandidates: 0, activeEmployers: 0, verifiedProfiles: 0 });
   const [candidates, setCandidates] = useState<(CandidateProfile & { id: string })[]>([]);
   const [loading, setLoading] = useState(true);
   const [displayedCandidates, setDisplayedCandidates] = useState<(CandidateProfile & { id: string })[]>([]);
+
+  useEffect(() => {
+    if (!authLoading && !profileLoading && user) {
+      if (role === "employer") {
+        router.replace("/employer/dashboard");
+      } else if (role === "candidate") {
+        router.replace("/candidate/dashboard");
+      } else if (role === "admin" || user.email?.toLowerCase() === "saitrishankb9@gmail.com") {
+        router.replace("/admin");
+      } else {
+        router.replace("/dashboard");
+      }
+    }
+  }, [user, role, authLoading, profileLoading, router]);
 
   useEffect(() => {
     async function loadData() {
@@ -52,8 +66,10 @@ export default function HomePage() {
         setLoading(false);
       }
     }
-    loadData();
-  }, []);
+    if (!user) {
+      loadData();
+    }
+  }, [user]);
 
   const handleSearch = () => {
     if (!searchQuery.trim()) {
@@ -72,6 +88,14 @@ export default function HomePage() {
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter') handleSearch();
   };
+
+  if (authLoading || (user && profileLoading) || user) {
+    return (
+      <div className="flex min-h-screen w-full items-center justify-center bg-[#FAFAFA]">
+        <div className="h-6 w-6 border-2 border-[#D2D2D2] border-t-[#0D0D0D] rounded-full animate-spin" />
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col theme-public bg-background min-h-screen w-full font-sans text-foreground">

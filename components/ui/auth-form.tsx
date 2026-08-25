@@ -1,49 +1,63 @@
 "use client"
 
 import * as React from "react"
-import { ChevronLeft } from "lucide-react"
+import { ChevronLeft, AlertCircle } from "lucide-react"
 import { motion } from "framer-motion"
 import { useAuth } from "@/lib/auth/AuthContext"
-
-import { AlertCircle } from "lucide-react"
-
-function parseAuthError(error: any): string {
-  if (typeof error !== "object" || !error) return "An unexpected error occurred.";
-  const code = error.code || "";
-  const message = error.message || "";
-  
-  switch (code) {
-    case "auth/email-already-in-use":
-      return "This email is already registered. Please sign in instead.";
-    case "auth/invalid-email":
-      return "Please enter a valid email address.";
-    case "auth/user-not-found":
-    case "auth/wrong-password":
-    case "auth/invalid-credential":
-      return "Incorrect email or password. Please try again.";
-    case "auth/weak-password":
-      return "Your password is too weak. Please use at least 6 characters.";
-    case "auth/too-many-requests":
-      return "Too many unsuccessful attempts. Please try again later.";
-    case "auth/network-request-failed":
-      return "Network error. Please check your connection and try again.";
-    default:
-      if (message.includes("auth/email-already-in-use")) return "This email is already registered. Please sign in instead.";
-      if (message.includes("auth/invalid-credential")) return "Incorrect email or password. Please try again.";
-      return "An unexpected error occurred. Please try again.";
-  }
-}
-
 import { useRouter } from "next/navigation"
 import { signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, createUserWithEmailAndPassword } from "firebase/auth"
 import { auth } from "@/lib/firebase/config"
 import { createUserProfile } from "@/lib/firebase/users"
+
+function parseAuthError(error: any): string {
+  if (typeof error !== "object" || !error) return "An unexpected error occurred."
+  const code = error.code || ""
+  const message = error.message || ""
+  
+  switch (code) {
+    case "auth/email-already-in-use":
+      return "This email is already registered. Please sign in instead."
+    case "auth/invalid-email":
+      return "Please enter a valid email address."
+    case "auth/user-not-found":
+    case "auth/wrong-password":
+    case "auth/invalid-credential":
+      return "Incorrect email or password. Please try again."
+    case "auth/weak-password":
+      return "Your password is too weak. Please use at least 6 characters."
+    case "auth/too-many-requests":
+      return "Too many unsuccessful attempts. Please try again later."
+    case "auth/network-request-failed":
+      return "Network error. Please check your connection and try again."
+    default:
+      if (message.includes("auth/email-already-in-use")) return "This email is already registered. Please sign in instead."
+      if (message.includes("auth/invalid-credential")) return "Incorrect email or password. Please try again."
+      return "An unexpected error occurred. Please try again."
+  }
+}
 
 interface AuthFormProps {
   mode?: "login" | "signup"
 }
 
 export default function AuthForm({ mode = "login" }: AuthFormProps) {
+  const { user, role, loading, profileLoading } = useAuth()
+  const router = useRouter()
+
+  React.useEffect(() => {
+    if (!loading && !profileLoading && user) {
+      if (role === "employer") {
+        router.replace("/employer/dashboard")
+      } else if (role === "candidate") {
+        router.replace("/candidate/dashboard")
+      } else if (role === "admin" || user.email?.toLowerCase() === "saitrishankb9@gmail.com") {
+        router.replace("/admin")
+      } else {
+        router.replace("/dashboard")
+      }
+    }
+  }, [user, role, loading, profileLoading, router])
+
   return (
     <div className="min-h-[100dvh] w-full flex bg-[#FAFAFA] font-sans relative z-[60]">
       {/* Left side: Branding/Image */}
@@ -166,12 +180,7 @@ const SocialButtons: React.FC<{ mode: "login" | "signup" }> = ({ mode }) => {
           return
         }
         await refreshProfile()
-        const userRole = (userCred as any).role || "candidate"
-        if (userRole === "employer") {
-          router.push("/employer/dashboard")
-        } else {
-          router.push("/candidate/dashboard")
-        }
+        router.push("/dashboard")
       } else {
         await createUserProfile(userCred.user.uid, {
           email: userCred.user.email || "",
@@ -180,7 +189,7 @@ const SocialButtons: React.FC<{ mode: "login" | "signup" }> = ({ mode }) => {
           authProvider: "google"
         })
         await refreshProfile()
-        router.push("/candidate/dashboard")
+        router.push("/dashboard")
       }
     } catch (err: any) {
       console.error(err)
@@ -260,12 +269,7 @@ const LoginForm: React.FC<{ mode: "login" | "signup" }> = ({ mode }) => {
           return
         }
         await refreshProfile()
-        const userRole = (userCred as any).role || "candidate"
-        if (userRole === "employer") {
-          router.push("/employer/dashboard")
-        } else {
-          router.push("/candidate/dashboard")
-        }
+        router.push("/dashboard")
       } else {
         const userCred = await createUserWithEmailAndPassword(auth, email, password)
         await createUserProfile(userCred.user.uid, {
@@ -275,7 +279,7 @@ const LoginForm: React.FC<{ mode: "login" | "signup" }> = ({ mode }) => {
           authProvider: "password"
         })
         await refreshProfile()
-        router.push("/candidate/dashboard")
+        router.push("/dashboard")
       }
     } catch (err: any) {
       setError(parseAuthError(err))
