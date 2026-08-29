@@ -18,6 +18,14 @@ export interface SkillVerification {
   verifiedAt?: number;
 }
 
+export interface GithubEvidence {
+  totalCommits: number;
+  repoCount: number;
+  topLanguages: string[];
+  lastSynced: number;
+  githubUsername: string;
+}
+
 export interface CandidateProfile {
   name: string;
   email?: string;
@@ -29,6 +37,7 @@ export interface CandidateProfile {
   skills: string[];
   verifiedSkills?: Record<string, SkillVerification>;
   projects: ProjectEntry[];
+  githubEvidence?: GithubEvidence;
   verificationStatus: VerificationStatus;
   verificationReason?: string;
   verifiedByUid?: string;

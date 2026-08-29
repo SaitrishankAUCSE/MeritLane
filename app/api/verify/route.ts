@@ -321,7 +321,7 @@ export async function POST(req: NextRequest) {
           assessmentSkill: FieldValue.delete()
         }),
         candidateRef.update({
-          // verificationStatus is left untouched because verification is skill-specific
+          verificationStatus: "verified",
           [`verifiedSkills.${skill}`]: {
             status: "verified",
             score: score,

@@ -1,4 +1,4 @@
-﻿import { NextRequest, NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { adminAuth, adminDb } from "@/lib/firebase/admin";
 import { CandidateProfile } from "@/lib/firebase/candidate";
 import { JobPosting } from "@/lib/firebase/employer";
@@ -98,7 +98,7 @@ export async function POST(req: NextRequest) {
         );
         
         if (isVerified) {
-          matchReasons.push(reqSkill.trim() + " - cryptographically verified");
+          matchReasons.push(reqSkill.trim() + " - verified by MeritLane");
           matched = true;
         }
 

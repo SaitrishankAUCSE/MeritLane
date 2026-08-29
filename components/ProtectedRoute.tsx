@@ -14,10 +14,11 @@ interface ProtectedRouteProps {
 }
 
 export default function ProtectedRoute({ children, allowedRoles }: ProtectedRouteProps) {
-  const { user, userProfile, isAdmin, loading, profileLoading } = useAuth();
+  const { user, userProfile, isAdmin, loading, profileLoading, openAuthModal } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
   const [isAuthorized, setIsAuthorized] = useState(false);
+  const [authPrompted, setAuthPrompted] = useState(false);
 
   useEffect(() => {
     // Wait until Firebase authentication and profile resolution have completed
@@ -26,7 +27,10 @@ export default function ProtectedRoute({ children, allowedRoles }: ProtectedRout
     const enforceAuth = async () => {
       // 1. Not authenticated with Firebase
       if (!user) {
-        router.push(`/login?redirect=${encodeURIComponent(pathname)}`);
+        if (!authPrompted) {
+          setAuthPrompted(true);
+          openAuthModal("login");
+        }
         return;
       }
 
@@ -53,7 +57,10 @@ export default function ProtectedRoute({ children, allowedRoles }: ProtectedRout
       // If user has no Firestore profile
       if (!userProfile) {
         await signOut(auth);
-        router.push(`/login?redirect=${encodeURIComponent(pathname)}`);
+        if (!authPrompted) {
+          setAuthPrompted(true);
+          openAuthModal("login");
+        }
         return;
       }
 

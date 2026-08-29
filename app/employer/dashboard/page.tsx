@@ -1,17 +1,18 @@
-﻿"use client";
+"use client";
 
 import React, { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@/lib/auth/AuthContext";
 import { CheckCircle2, ExternalLink, Search, Bookmark, BookmarkCheck, ArrowRight, Filter } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { COMMON_SKILLS } from "@/lib/constants";
 import { MeritlaneLoader } from "@/components/ui/MeritlaneLoader";
+import { ContextGuide } from "@/components/ui/ContextGuide";
 import { getIdToken } from "firebase/auth";
 import { auth } from "@/lib/firebase/config";
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
 
-const COMMON_SKILLS = ["React", "Python", "Django", "JavaScript", "TypeScript", "Next.js", "Node.js", "SQL"];
 
 export default function EmployerDashboardPage() {
   const { user, loading } = useAuth();
@@ -77,7 +78,10 @@ export default function EmployerDashboardPage() {
         router.replace("/login");
         return;
       }
-      fetchCandidates();
+      const timeoutId = setTimeout(() => {
+        fetchCandidates();
+      }, 300);
+      return () => clearTimeout(timeoutId);
     }
   }, [loading, user, router, fetchCandidates]);
 
@@ -141,6 +145,19 @@ export default function EmployerDashboardPage() {
     <div className="flex h-full w-full flex-col overflow-hidden bg-[#FAFAFA]">
       <div className="flex-1 p-6 md:p-10 lg:p-14 overflow-y-auto scrollbar-hide">
         
+        <div className="max-w-[1000px] mx-auto">
+          <ContextGuide
+            storageKey="employer_dashboard"
+            title="Discovery Engine"
+            description="Unlike traditional job boards, MeritLane only shows candidates who have passed rigorous technical assessments. If a candidate appears here, their skills are objectively verified."
+            steps={[
+              { title: "Filter & Search", description: "Filter by verified technical domains or search for specific traits.", isCompleted: true },
+              { title: "Review Evidence", description: "Click a candidate to view their complete dossier and proof.", isCompleted: false },
+              { title: "Shortlist", description: "Save interesting candidates to your pipeline.", isCompleted: Object.values(shortlisted).some(v => v) }
+            ]}
+          />
+        </div>
+
         <div className="max-w-[1000px] mx-auto mb-10">
           <p className="text-[10px] font-mono font-bold uppercase tracking-[0.1em] text-[#15803D] mb-3">Discover Verified Talent</p>
           <h1 className="font-serif text-[42px] text-[#0D0D0D] leading-tight mb-2">Find people whose skills are proven.</h1>
@@ -239,7 +256,7 @@ export default function EmployerDashboardPage() {
                             </div>
                           )}
                           {verifiedSkillsList.length === 0 && (
-                            <div className="mt-4 text-[13px] text-[#737373] italic">No specific skills cryptographically verified yet.</div>
+                            <div className="mt-4 text-[13px] text-[#737373] italic">No specific skills verified by MeritLane yet.</div>
                           )}
                         </div>
                       </div>

@@ -8,7 +8,6 @@ import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
 import { getPlatformStats, getVerifiedCandidates } from "@/lib/firebase/home";
 import { CandidateProfile } from "@/lib/firebase/candidate";
-import { MeritlaneIntro } from "@/components/landing/MeritlaneIntro";
 import { useAuth } from "@/lib/auth/AuthContext";
 import { motion } from "framer-motion";
 
@@ -99,7 +98,6 @@ export default function HomePage() {
 
   return (
     <div className="flex flex-col theme-public bg-background min-h-screen w-full font-sans text-foreground">
-      <MeritlaneIntro />
       
       {/* HERO: Editorial Statement */}
       <section className="relative px-8 md:px-16 lg:px-24 pt-32 pb-24 sm:pt-40 sm:pb-32 w-full max-w-[1600px] mx-auto flex flex-col lg:flex-row items-center gap-16 border-b border-border/40">

@@ -13,6 +13,7 @@ export interface JobPosting {
 export interface EmployerProfile {
   roles: JobPosting[];
   shortlistedCandidates?: string[];
+  pipeline?: Record<string, "shortlisted" | "interviewing" | "offer" | "hired" | "rejected">;
   updatedAt: number;
 }
 

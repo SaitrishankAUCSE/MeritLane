@@ -9,6 +9,7 @@ import { ShieldCheck, ArrowRight, ShieldAlert } from "lucide-react";
 import { MeritlaneLoader } from "@/components/ui/MeritlaneLoader";
 import { db } from "@/lib/firebase/config";
 import { doc, getDoc } from "firebase/firestore";
+import { ContextGuide } from "@/components/ui/ContextGuide";
 
 export default function CandidateVerificationPage() {
   const { user, loading } = useAuth();
@@ -84,14 +85,25 @@ export default function CandidateVerificationPage() {
   return (
     <div className="w-full px-8 md:px-16 lg:px-24 py-12 mx-auto max-w-[1600px] h-full overflow-y-auto scrollbar-hide relative">
       
+      <ContextGuide 
+        storageKey="candidate_verification"
+        title="Verification Status"
+        description="This is where you initiate and track your formal skill assessments."
+        steps={[
+          { title: "Select Skill", description: "Choose an eligible skill to assess.", isCompleted: true },
+          { title: "Take Assessment", description: "Pass the timed assessment (Score ≥ 80%).", isCompleted: Object.values(profile?.verifiedSkills || {}).some(v => v.status === "verified") },
+          { title: "Get Verified", description: "Your skill is officially stamped and visible to employers.", isCompleted: Object.values(profile?.verifiedSkills || {}).some(v => v.status === "verified") }
+        ]}
+      />
+
       <div className="mb-12">
         <div className="text-[14px] font-sans font-medium text-[#737373] mb-3 flex items-center gap-2">
-          <ShieldCheck className="h-3 w-3" /> Verification Center
+          <ShieldCheck className="h-3 w-3" /> Verification Status
         </div>
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6 border-b border-[#E5E5E5] pb-6">
           <div>
-            <h1 className="font-serif text-[40px] sm:text-[48px] text-[#0D0D0D] leading-tight mb-2">Technical Assessment.</h1>
-            <div className="text-[14px] text-[#0D0D0D] font-sans">Transform your self-declared claims into cryptographically verifiable proof.</div>
+            <h1 className="font-serif text-[40px] sm:text-[48px] text-[#0D0D0D] leading-tight mb-2">Technical Verification</h1>
+            <div className="text-[14px] text-[#0D0D0D] font-sans">Transform your self-declared claims into verifiable proof.</div>
           </div>
         </div>
       </div>
@@ -127,8 +139,8 @@ export default function CandidateVerificationPage() {
                       <div className="text-[16px] font-medium text-[#0D0D0D] mb-1 font-serif">{skill}</div>
                       
                       {isVerified ? (
-                        <div className="text-[11px] font-mono text-[#15803D] uppercase tracking-[0.1em] flex items-center gap-1.5 mt-2">
-                          <ShieldCheck className="h-3.5 w-3.5" /> Cryptographically Verified
+                        <div className="flex items-center gap-1.5 text-[11px] font-sans font-medium text-[#15803D] bg-[#F0FDF4] px-2 py-1 rounded-sm border border-[#15803D]/20 mt-2 w-fit">
+                          <ShieldCheck className="h-3.5 w-3.5" /> Verified by MeritLane
                         </div>
                       ) : isOnCooldown ? (
                         <div className="text-[11px] font-mono text-[#B42318] uppercase tracking-[0.1em] flex items-center gap-1.5 mt-2">

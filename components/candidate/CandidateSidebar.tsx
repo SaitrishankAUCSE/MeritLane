@@ -5,7 +5,7 @@ import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth/AuthContext";
-import { Fingerprint, LayoutDashboard, Network, ShieldCheck, Settings, HelpCircle, PanelLeftClose, PanelLeftOpen, LogOut } from "lucide-react";
+import { Fingerprint, LayoutDashboard, Network, ShieldCheck, Settings, HelpCircle, PanelLeftClose, PanelLeftOpen, LogOut, Inbox } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 export function CandidateSidebar() {
@@ -36,6 +36,7 @@ export function CandidateSidebar() {
     { name: "Evidence", href: "/candidate/dashboard", icon: LayoutDashboard },
     { name: "Provenance", href: "/candidate/provenance", icon: Network },
     { name: "Verification", href: "/candidate/verification", icon: ShieldCheck },
+    { name: "Inbox", href: "/candidate/inbox", icon: Inbox },
   ];
 
   return (

@@ -21,7 +21,7 @@ export default function TermsOfServicePage() {
 
         <h2 className="font-serif text-2xl mt-10 mb-4">2. Description of Service</h2>
         <p className="mb-4">
-          Meritlane is a project-based engineering hiring and verification platform. We evaluate, audit, and provide cryptographic proof of skill for engineering candidates to be presented to prospective employers.
+          Meritlane is a project-based engineering hiring and verification platform. We evaluate, audit, and provide verified proof of skill for engineering candidates to be presented to prospective employers.
         </p>
 
         <h2 className="font-serif text-2xl mt-10 mb-4">3. User Conduct</h2>

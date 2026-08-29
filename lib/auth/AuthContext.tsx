@@ -14,6 +14,12 @@ interface AuthContextType {
   profileLoading: boolean;
   refreshProfile: () => Promise<void>;
   handleSignOut: () => Promise<void>;
+  showAuthModal: boolean;
+  authModalMode: "login" | "signup";
+  authModalCallback: (() => void) | null;
+  authModalInitialRole: "candidate" | "employer" | null;
+  openAuthModal: (mode?: "login" | "signup", callback?: () => void, initialRole?: "candidate" | "employer") => void;
+  closeAuthModal: () => void;
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -25,6 +31,12 @@ const AuthContext = createContext<AuthContextType>({
   profileLoading: true,
   refreshProfile: async () => {},
   handleSignOut: async () => {},
+  showAuthModal: false,
+  authModalMode: "login",
+  authModalCallback: null,
+  authModalInitialRole: null,
+  openAuthModal: () => {},
+  closeAuthModal: () => {},
 });
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
@@ -34,6 +46,30 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
   const [profileLoading, setProfileLoading] = useState(true);
+
+  // Modal State
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [authModalMode, setAuthModalMode] = useState<"login" | "signup">("login");
+  const [authModalCallback, setAuthModalCallback] = useState<(() => void) | null>(null);
+  const [authModalInitialRole, setAuthModalInitialRole] = useState<"candidate" | "employer" | null>(null);
+
+  const openAuthModal = useCallback((mode: "login" | "signup" = "login", callback?: () => void, initialRole?: "candidate" | "employer") => {
+    setAuthModalMode(mode);
+    if (callback) {
+      setAuthModalCallback(() => callback);
+    }
+    if (initialRole) {
+      setAuthModalInitialRole(initialRole);
+    } else {
+      setAuthModalInitialRole(null);
+    }
+    setShowAuthModal(true);
+  }, []);
+
+  const closeAuthModal = useCallback(() => {
+    setShowAuthModal(false);
+    setTimeout(() => setAuthModalCallback(null), 300); // Clear after animation
+  }, []);
 
   const [authError, setAuthError] = useState<string | null>(null);
 
@@ -175,7 +211,22 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   }
 
   return (
-    <AuthContext.Provider value={{ user, role, userProfile, isAdmin, loading, profileLoading, refreshProfile, handleSignOut }}>
+    <AuthContext.Provider value={{ 
+      user, 
+      role, 
+      userProfile, 
+      isAdmin, 
+      loading, 
+      profileLoading, 
+      refreshProfile, 
+      handleSignOut,
+      showAuthModal,
+      authModalMode,
+      authModalCallback,
+      authModalInitialRole,
+      openAuthModal,
+      closeAuthModal
+    }}>
       {children}
     </AuthContext.Provider>
   );

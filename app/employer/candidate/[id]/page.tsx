@@ -4,6 +4,7 @@ import { notFound, redirect } from "next/navigation";
 import { PublicProofRecord } from "@/components/public-record/PublicProofRecord";
 import { EmployerDossierActions } from "@/components/employer/EmployerDossierActions";
 import { cookies, headers } from "next/headers";
+import { ContextGuide } from "@/components/ui/ContextGuide";
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -74,6 +75,18 @@ export default async function EmployerCandidateDossierPage({ params }: Props) {
       
       {/* Reuse the Public Proof layout but hide its own top navbar */}
       <div className="flex-1 mt-16 pb-24">
+        <div className="max-w-[1000px] mx-auto px-6 mt-6">
+          <ContextGuide 
+            storageKey="employer_dossier"
+            title="Candidate Dossier"
+            description="You are viewing the objectively verified claims and evidence for this candidate."
+            steps={[
+              { title: "Review Claims", description: "All skills listed here have been formally assessed and passed.", isCompleted: true },
+              { title: "Review Evidence", description: "Click into repositories to inspect their code quality.", isCompleted: false },
+              { title: "Shortlist", description: "Use the top bar to save this candidate to your pipeline.", isCompleted: false }
+            ]}
+          />
+        </div>
         <PublicProofRecord id={id} candidate={candidate} user={user} hideHeader={true} />
       </div>
     </div>

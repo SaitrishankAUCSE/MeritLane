@@ -67,11 +67,11 @@ export function PublicProofRecord({ id, candidate, user, hideHeader = false }: P
                 </div>
               )}
               <div className="w-px h-3 bg-[#E5E5E5]" />
-              <div className="text-[#666666] lowercase tracking-normal font-mono text-[12px]">ID: {recordId}.eth</div>
+              <div className="text-[#666666] lowercase tracking-normal font-mono text-[12px]">ID: {recordId}</div>
             </div>
             
             <p className="max-w-2xl text-[18px] leading-[1.6] text-[#525252] font-cormorant italic">
-              Cryptographic assertion of skills and professional history. All claims below are backed by verifiable evidence evaluated by the Meritlane system.
+              Verified assertion of skills and professional history. All claims below are backed by verifiable evidence evaluated by the Meritlane system.
             </p>
           </div>
         </div>
@@ -91,13 +91,13 @@ export function PublicProofRecord({ id, candidate, user, hideHeader = false }: P
             </div>
             
             <div className="space-y-2">
-              <div className="text-[13px] font-sans font-medium text-[#737373]">Issuer Network</div>
-              <div className="text-[13px] text-[#737373]">Meritlane Core Protocol</div>
+              <div className="text-[13px] font-sans font-medium text-[#737373]">Verified By</div>
+              <div className="text-[13px] text-[#737373]">MeritLane Verification System</div>
             </div>
             
             <div className="space-y-2">
               <div className="text-[13px] font-sans font-medium text-[#737373]">Total Proofs</div>
-              <div className="text-[13px] text-[#737373]">{totalProofs} Evidence Nodes</div>
+              <div className="text-[13px] text-[#737373]">{totalProofs} Evidence Items</div>
             </div>
 
             {candidate.college && (
@@ -106,6 +106,36 @@ export function PublicProofRecord({ id, candidate, user, hideHeader = false }: P
                 <div className="text-[13px] text-[#0D0D0D]">{candidate.college}</div>
                 <div className="text-[12px] text-[#666666]">{candidate.branch}</div>
                 <div className="text-[11px] font-mono text-[#666666]">Class of {candidate.gradYear}</div>
+              </div>
+            )}
+
+            {candidate.githubEvidence && (
+              <div className="space-y-4 pt-4 border-t border-[#E5E5E5]">
+                <div className="flex items-center gap-2 text-[#15803D]">
+                  <Shield className="h-[14px] w-[14px]" />
+                  <div className="text-[13px] font-sans font-medium">Automated Evidence</div>
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  <div className="p-3 bg-white border border-[#E5E5E5] rounded-sm">
+                    <div className="text-[10px] font-mono text-[#737373] uppercase tracking-wider mb-1">Repos</div>
+                    <div className="text-[14px] font-serif text-[#0D0D0D]">{candidate.githubEvidence.repoCount}</div>
+                  </div>
+                  <div className="p-3 bg-white border border-[#E5E5E5] rounded-sm">
+                    <div className="text-[10px] font-mono text-[#737373] uppercase tracking-wider mb-1">Commits</div>
+                    <div className="text-[14px] font-serif text-[#0D0D0D]">~{candidate.githubEvidence.totalCommits}</div>
+                  </div>
+                </div>
+                <div>
+                  <div className="text-[10px] font-mono text-[#737373] uppercase tracking-wider mb-2">Verified Languages</div>
+                  <div className="flex gap-1.5 flex-wrap">
+                    {candidate.githubEvidence.topLanguages.map((lang: string) => (
+                      <span key={lang} className="text-[10px] font-mono bg-white border border-[#E5E5E5] text-[#0D0D0D] px-2 py-0.5 rounded-sm">{lang}</span>
+                    ))}
+                  </div>
+                </div>
+                <div className="text-[10px] font-mono text-[#666666] flex items-center gap-1.5 mt-2">
+                  <GitCommit className="h-3 w-3" /> Source: GitHub OAuth
+                </div>
               </div>
             )}
           </aside>
@@ -131,7 +161,7 @@ export function PublicProofRecord({ id, candidate, user, hideHeader = false }: P
                     </h3>
                     <div className="mb-4 text-[10px] font-mono uppercase tracking-[0.15em]">
                       {isVerified ? (
-                        <span className="text-[#15803D]">✓ Cryptographically Verified</span>
+                        <span className="text-[#15803D]">✓ Verified by MeritLane</span>
                       ) : (
                         <span className="text-[#666666]">Self-Declared (Unverified)</span>
                       )}
@@ -200,10 +230,10 @@ export function PublicProofRecord({ id, candidate, user, hideHeader = false }: P
             <div className="mt-20 pt-10 border-t border-[#E5E5E5] flex items-start gap-4">
               <Lock className="h-5 w-5 text-[#737373] shrink-0 mt-0.5" />
               <div>
-                <div className="text-[13px] font-sans font-medium text-[#0D0D0D] mb-2">Immutable Record</div>
+                <div className="text-[13px] font-sans font-medium text-[#0D0D0D] mb-2">Verified Record</div>
                 <div className="text-[13px] text-[#737373] leading-relaxed max-w-2xl">
-                  This public artifact is permanently stored and its underlying assertions cannot be modified by the candidate after verification. 
-                  Tampering with the source evidence invalidates the Meritlane cryptographic signature.
+                  This public record is maintained by MeritLane and reflects the candidate's verified assessment results and linked evidence. 
+                  Candidates cannot modify verified claims without re-assessment.
                 </div>
               </div>
             </div>
@@ -218,21 +248,21 @@ export function PublicProofRecord({ id, candidate, user, hideHeader = false }: P
               </h3>
               <div className="flex items-start gap-3 text-[12px] font-sans text-[#666666] leading-relaxed">
                 <Shield className="h-4 w-4 text-[#15803D] shrink-0 mt-0.5" />
-                This record is immutable. Any attempt to modify the underlying evidence will break the verification seal.
+                This record is protected. Verified claims can only be updated through re-assessment via the MeritLane platform.
               </div>
             </div>
 
             <div>
               <h3 className="text-[13px] font-sans font-medium text-[#737373] mb-6 border-b border-[#E5E5E5] pb-3">
-                Network Activity
+                Record Activity
               </h3>
               
               <div className="space-y-6">
                 <div className="relative pl-6">
                   <div className="absolute left-[3px] top-1.5 bottom-[-24px] w-[1px] bg-[#F3F3F1]" />
                   <div className="absolute left-0 top-1.5 h-2 w-2 rounded-full bg-[#15803D]" />
-                  <div className="text-[12px] font-sans font-medium text-[#0D0D0D] mb-1">Verification Seal Issued</div>
-                  <div className="text-[10px] font-mono text-[#666666]">TX: {recordId}</div>
+                  <div className="text-[12px] font-sans font-medium text-[#0D0D0D] mb-1">Verification Issued</div>
+                  <div className="text-[10px] font-mono text-[#666666]">Record: {recordId}</div>
                 </div>
 
                 <div className="relative pl-6">
@@ -245,7 +275,7 @@ export function PublicProofRecord({ id, candidate, user, hideHeader = false }: P
                 <div className="relative pl-6">
                   <div className="absolute left-[1px] top-1.5 h-1.5 w-1.5 rounded-full bg-[#D2D2D2]" />
                   <div className="text-[12px] font-sans text-[#666666] mb-1">Identity Claim Created</div>
-                  <div className="text-[10px] font-mono text-[#666666]">Wallet / Auth connected</div>
+                  <div className="text-[10px] font-mono text-[#666666]">Account authenticated</div>
                 </div>
               </div>
             </div>

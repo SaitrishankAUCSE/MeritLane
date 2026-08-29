@@ -5,6 +5,7 @@ import { useAuth } from "@/lib/auth/AuthContext";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Play, CheckCircle2, Clock, AlertTriangle, TerminalSquare, FileCode2, ShieldAlert } from "lucide-react";
 import { logFunnelEvent } from "@/lib/analytics/logEvent";
+import { ContextGuide } from "@/components/ui/ContextGuide";
 import { auth } from "@/lib/firebase/config";
 import { getIdToken } from "firebase/auth";
 
@@ -38,6 +39,7 @@ function AssessmentContentWrapper() {
   const [errorMsg, setErrorMsg] = useState("");
   const [cooldownDays, setCooldownDays] = useState<number | null>(null);
   const [hasStarted, setHasStarted] = useState(false);
+  const [infractionCount, setInfractionCount] = useState(0);
   const [assessmentResult, setAssessmentResult] = useState<{ passed: boolean; score: number; status: string; skill: string; retryAvailableAt?: string } | null>(null);
   
   const [content, setContent] = useState<AssessmentContent | null>(null);
@@ -110,6 +112,80 @@ function AssessmentContentWrapper() {
     return () => clearInterval(timer);
   }, [hasStarted, timeLeft, errorMsg, assessmentResult]);
 
+  // Anti-cheat (Tab visibility + Back button + Fullscreen exit)
+  useEffect(() => {
+    if (!hasStarted || assessmentResult) return;
+
+    // ensure we trap the back button immediately
+    window.history.pushState(null, '', window.location.href);
+
+    const triggerInfraction = (type: string) => {
+      setInfractionCount(prev => {
+        const count = prev + 1;
+        
+        // Record infraction telemetry
+        import("posthog-js").then((posthog) => {
+          posthog.default.capture("assessment_tab_infraction", { count, type });
+        });
+        
+        if (count >= 3) {
+          // Auto-fail or terminate session on 3rd strike
+          setErrorMsg("Assessment terminated due to repeated infractions. This has been recorded as a failure.");
+          setHasStarted(false);
+          setCooldownDays(14);
+          if (document.fullscreenElement) {
+            document.exitFullscreen().catch(e => console.warn(e));
+          }
+        } else {
+          let reason = "left the assessment window";
+          if (type === 'back_button') reason = "attempted to go back";
+          if (type === 'exited_fullscreen') reason = "exited fullscreen mode";
+          
+          alert(`Warning: You have ${reason} (${count}/3). Doing this 3 times will result in automatic failure.`);
+          
+          if (type === 'exited_fullscreen') {
+            document.documentElement.requestFullscreen().catch(e => console.warn(e));
+          }
+        }
+        return count;
+      });
+    };
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'hidden') {
+        triggerInfraction('hidden_tab');
+      }
+    };
+
+    const handlePopState = (e: PopStateEvent) => {
+      window.history.pushState(null, '', window.location.href);
+      triggerInfraction('back_button');
+    };
+
+    const handleFullscreenChange = () => {
+      if (!document.fullscreenElement) {
+        triggerInfraction('exited_fullscreen');
+      }
+    };
+
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      e.preventDefault();
+      e.returnValue = '';
+    };
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    window.addEventListener("popstate", handlePopState);
+    document.addEventListener("fullscreenchange", handleFullscreenChange);
+    window.addEventListener("beforeunload", handleBeforeUnload);
+
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+      window.removeEventListener("popstate", handlePopState);
+      document.removeEventListener("fullscreenchange", handleFullscreenChange);
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+    };
+  }, [hasStarted, assessmentResult]);
+
   const handleFail = () => {
     if (!user) return;
     setAssessmentResult({
@@ -124,6 +200,15 @@ function AssessmentContentWrapper() {
   const handleStart = () => {
     setHasStarted(true);
     setPhase('mcq');
+    
+    try {
+      if (document.documentElement.requestFullscreen) {
+        document.documentElement.requestFullscreen().catch(e => console.warn(e));
+      }
+    } catch (e) {
+      console.warn("Fullscreen API not supported", e);
+    }
+
     logFunnelEvent("assessment_started", { skill: skillParam });
   };
 
@@ -180,7 +265,7 @@ function AssessmentContentWrapper() {
       }
 
       if (data.passed) {
-        setOutput((prev) => prev + "Evaluating hidden test suites...\n[====================] 100%\nAll tests passed successfully.\nCryptographic signature generated.");
+        setOutput((prev) => prev + "Evaluating hidden test suites...\n[====================] 100%\nAll tests passed successfully.\nVerification record created.");
         logFunnelEvent("assessment_passed", { skill: skillParam });
         setTimeout(() => {
           setAssessmentResult({
@@ -221,7 +306,7 @@ function AssessmentContentWrapper() {
           <h2 className="text-[32px] font-serif text-[#0D0D0D] mb-1 leading-tight">{skillParam}</h2>
           <div className="text-[44px] font-mono font-bold text-[#15803D] mb-3 leading-none">{assessmentResult.score}%</div>
           <p className="text-[14px] text-[#737373] mb-8 font-sans leading-relaxed">
-            Your technical claim has been verified. Cryptographic proof has been generated and anchored to your public record.
+            Your technical claim has been verified. Your public proof record has been updated and is now visible to employers.
           </p>
           <div className="flex flex-col sm:flex-row gap-3">
             <button 
@@ -303,7 +388,7 @@ function AssessmentContentWrapper() {
           <div className="max-w-md w-full border border-[#E5E5E5] bg-[#FFFFFF] rounded-md p-8 shadow-sm">
              <h2 className="text-[18px] font-serif text-[#15803D] mb-2 flex items-center gap-2"><CheckCircle2 className="h-5 w-5" /> Already Verified</h2>
              <p className="text-[14px] text-[#737373] mb-8 font-sans">
-               You have already successfully passed the technical assessment for {skillParam}. Your cryptographic proof is permanently recorded.
+               You have already successfully passed the technical assessment for {skillParam}. Your verification is recorded and visible to employers.
              </p>
              <button 
                onClick={() => router.push("/candidate/verification")}
@@ -346,8 +431,19 @@ function AssessmentContentWrapper() {
 
   if (!hasStarted) {
     return (
-      <div className="flex h-[100dvh] w-full bg-[#FAFAFA] text-[#0D0D0D] font-sans items-center justify-center">
-        <div className="max-w-2xl w-full border border-[#E5E5E5] bg-[#FFFFFF] rounded-md p-10 shadow-sm">
+      <div className="flex min-h-[100dvh] w-full bg-[#FAFAFA] text-[#0D0D0D] font-sans items-center justify-center p-8">
+        <div className="max-w-2xl w-full flex flex-col gap-6">
+          <ContextGuide
+            storageKey="candidate_assessment"
+            title="Technical Assessment"
+            description="Assessments are timed, highly technical, and strictly monitored. Passing guarantees verification for this skill."
+            steps={[
+              { title: "Timed Format", description: "You will have 45 minutes to complete MCQs and a coding challenge." },
+              { title: "No Tab Switching", description: "Tab switching or leaving the window will result in immediate disqualification." },
+              { title: "Penalty", description: "Failing results in a mandatory 14-day cooldown for this skill." }
+            ]}
+          />
+          <div className="border border-[#E5E5E5] bg-[#FFFFFF] rounded-md p-10 shadow-sm">
             <p className="text-[14px] text-[#737373] mb-6 font-sans">You are about to begin:</p>
             
             <h2 className="text-[24px] font-serif text-[#0D0D0D] mb-8 border-b border-[#E5E5E5] pb-6">
@@ -384,6 +480,7 @@ function AssessmentContentWrapper() {
                 Cancel
               </button>
             </div>
+          </div>
         </div>
       </div>
     );

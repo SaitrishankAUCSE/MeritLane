@@ -123,12 +123,12 @@ export default function ProofCanvasPage() {
                   <span className="font-mono text-[12px] text-[#15803D]">Verified</span>
                 </div>
                 <div>
-                  <div className="font-mono text-[11px] text-[#666666] mb-1">Hash:</div>
-                  <div className="font-mono text-[13px] text-[#0D0D0D]">0x9A...2F11</div>
+                  <div className="font-mono text-[11px] text-[#666666] mb-1">Status:</div>
+                  <div className="font-mono text-[13px] text-[#0D0D0D]">Authenticated</div>
                 </div>
                 <div>
                   <div className="font-mono text-[11px] text-[#666666] mb-1">Validator:</div>
-                  <div className="font-mono text-[13px] text-[#0D0D0D]">Meritlane<br/>Protocol</div>
+                  <div className="font-mono text-[13px] text-[#0D0D0D]">Meritlane<br/>Auditors</div>
                 </div>
               </div>
             </div>

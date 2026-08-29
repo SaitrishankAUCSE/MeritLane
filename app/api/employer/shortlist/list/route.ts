@@ -63,7 +63,9 @@ export async function GET(req: NextRequest) {
       });
     }
 
-    return NextResponse.json({ candidates: sanitizedCandidates }, { status: 200 });
+    const pipeline = employerDoc.data()?.pipeline || {};
+
+    return NextResponse.json({ candidates: sanitizedCandidates, pipeline }, { status: 200 });
   } catch (e: any) {
     console.error("Shortlist LIST GET error:", e);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });

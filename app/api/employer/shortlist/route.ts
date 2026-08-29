@@ -33,7 +33,8 @@ export async function POST(req: NextRequest) {
     
     // Idempotent addition
     await employerRef.set({
-      shortlistedCandidates: FieldValue.arrayUnion(candidateId)
+      shortlistedCandidates: FieldValue.arrayUnion(candidateId),
+      [`pipeline.${candidateId}`]: "shortlisted"
     }, { merge: true });
 
     return NextResponse.json({ success: true, shortlisted: true }, { status: 200 });

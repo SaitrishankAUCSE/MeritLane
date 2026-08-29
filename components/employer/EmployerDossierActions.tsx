@@ -18,6 +18,11 @@ export function EmployerDossierActions({ candidateId }: { candidateId: string })
   useEffect(() => {
     if (!user) return;
     
+    // Track dossier view
+    import("posthog-js").then((posthog) => {
+      posthog.default.capture("candidate_dossier_view", { candidateId });
+    });
+    
     const checkShortlist = async () => {
       try {
         const token = await getIdToken(auth.currentUser!, true);
@@ -63,7 +68,7 @@ export function EmployerDossierActions({ candidateId }: { candidateId: string })
   };
 
   return (
-    <div className="fixed top-0 left-0 lg:left-[240px] right-0 h-16 bg-[#FAFAFA]/90 backdrop-blur-md border-b border-[#E5E5E5] z-[100] flex items-center justify-between px-6 lg:px-12 transition-all duration-300">
+    <div className="fixed top-16 lg:top-0 left-0 lg:left-[220px] right-0 h-16 bg-[#FAFAFA]/90 backdrop-blur-md border-b border-[#E5E5E5] z-[40] flex items-center justify-between px-6 lg:px-12 transition-all duration-300">
       <button 
         onClick={() => router.back()} 
         className="flex items-center gap-2 text-[13px] font-sans font-medium text-[#737373] hover:text-[#0D0D0D] transition-colors"

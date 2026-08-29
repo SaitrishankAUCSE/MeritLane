@@ -7,6 +7,8 @@ import { AuthProvider } from "@/lib/auth/AuthContext";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Analytics } from "@vercel/analytics/react";
 import { GlobalBackButton } from "@/components/ui/GlobalBackButton";
+import { GlobalAuthModal } from "@/components/ui/AuthModal";
+import { PostHogProvider } from "@/providers/PostHogProvider";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -95,15 +97,18 @@ export default function RootLayout({
             })
           }}
         />
-        <AuthProvider>
-          <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-            <Navbar />
-            <main className="flex-1 flex flex-col">
-              {children}
-            </main>
-            <SiteFooter />
-          </ThemeProvider>
-        </AuthProvider>
+        <PostHogProvider>
+          <AuthProvider>
+            <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+              <Navbar />
+              <main className="flex-1 flex flex-col">
+                {children}
+              </main>
+              <SiteFooter />
+              <GlobalAuthModal />
+            </ThemeProvider>
+          </AuthProvider>
+        </PostHogProvider>
         <Analytics />
         <GlobalBackButton />
       </body>

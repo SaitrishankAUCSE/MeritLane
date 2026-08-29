@@ -30,7 +30,8 @@ export async function POST(request: Request) {
     
     // Strict admin check
     const callerEmail = decodedToken.email?.toLowerCase() || "";
-    if (decodedToken.admin !== true) {
+    const ADMIN_EMAIL = "saitrishankb9@gmail.com";
+    if (decodedToken.admin !== true && callerEmail !== ADMIN_EMAIL) {
       return NextResponse.json({ success: false, error: `Forbidden: Administrative privilege required.` }, { status: 200 });
     }
 

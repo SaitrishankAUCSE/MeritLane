@@ -3,12 +3,14 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Menu, X, Fingerprint, LayoutDashboard, Network, ShieldCheck, Search, Bookmark } from "lucide-react";
+import { Menu, X, Fingerprint, LayoutDashboard, Network, ShieldCheck, Search, Bookmark, Inbox, Settings, HelpCircle, LogOut } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
+import { useAuth } from "@/lib/auth/AuthContext";
 
 export function MobileNav({ role }: { role: "candidate" | "employer" | "admin" }) {
   const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
+  const { handleSignOut } = useAuth();
 
   type NavItem = {
     name: string;
@@ -22,11 +24,16 @@ export function MobileNav({ role }: { role: "candidate" | "employer" | "admin" }
     { name: "Evidence", href: "/candidate/dashboard", icon: LayoutDashboard },
     { name: "Provenance", href: "/candidate/provenance", icon: Network },
     { name: "Verification", href: "/candidate/verification", icon: ShieldCheck },
+    { name: "Inbox", href: "/candidate/inbox", icon: Inbox },
+    { name: "Settings", href: "/candidate/settings", icon: Settings },
+    { name: "Support", href: "/candidate/support", icon: HelpCircle },
   ];
 
   const employerItems: NavItem[] = [
     { name: "Discover", href: "/employer/dashboard", icon: Search },
     { name: "Shortlist", href: "/employer/shortlist", icon: Bookmark },
+    { name: "Settings", href: "/employer/settings", icon: Settings },
+    { name: "Support", href: "/employer/support", icon: HelpCircle },
   ];
 
   const adminItems: NavItem[] = [
@@ -34,6 +41,11 @@ export function MobileNav({ role }: { role: "candidate" | "employer" | "admin" }
   ];
 
   const items: NavItem[] = role === "candidate" ? candidateItems : role === "employer" ? employerItems : adminItems;
+
+  const onSignOut = async () => {
+    setIsOpen(false);
+    await handleSignOut();
+  };
 
   return (
     <div className="lg:hidden flex items-center justify-between px-6 h-16 border-b border-[#E5E5E5] bg-[#FAFAFA] shrink-0">
@@ -68,7 +80,7 @@ export function MobileNav({ role }: { role: "candidate" | "employer" | "admin" }
             
             <nav className="flex-1 overflow-y-auto p-6 space-y-2">
               {items.map((item) => {
-                const isActive = pathname === item.href;
+                const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
                 const Icon = item.icon;
 
                 if (item.disabled) {
@@ -96,6 +108,17 @@ export function MobileNav({ role }: { role: "candidate" | "employer" | "admin" }
                   </Link>
                 );
               })}
+
+              {/* Sign Out */}
+              <div className="pt-4 mt-4 border-t border-[#E5E5E5]">
+                <button 
+                  onClick={onSignOut}
+                  className="flex items-center px-4 py-4 text-[16px] font-sans text-[#737373] hover:text-[#B42318] rounded-md transition-colors w-full"
+                >
+                  <LogOut className="mr-4 h-[20px] w-[20px]" />
+                  Sign Out
+                </button>
+              </div>
             </nav>
           </motion.div>
         )}

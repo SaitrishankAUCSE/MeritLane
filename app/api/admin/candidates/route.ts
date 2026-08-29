@@ -27,8 +27,9 @@ export async function GET(req: NextRequest) {
     }
 
     currentStage = "ADMIN_CLAIM";
-    // Strict Admin Authorization Check (Custom Claim ONLY)
-    if (decodedToken.admin !== true) {
+    // Strict Admin Authorization Check
+    const ADMIN_EMAIL = "saitrishankb9@gmail.com";
+    if (decodedToken.admin !== true && decodedToken.email?.toLowerCase() !== ADMIN_EMAIL) {
       return NextResponse.json({ error: "Forbidden: Administrative privilege required", stage: currentStage }, { status: 403 });
     }
 
@@ -89,6 +90,7 @@ export async function GET(req: NextRequest) {
           verifiedBadge: Boolean(userData.verifiedBadge),
           assessmentScores: userData.assessmentScores || null,
           assessmentDate: safeDate(userData.assessmentDate),
+          githubEvidence: candidateData.githubEvidence || undefined,
         };
       })
     );

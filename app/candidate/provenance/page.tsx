@@ -6,6 +6,7 @@ import { PublicProofRecord } from "@/components/public-record/PublicProofRecord"
 import { db } from "@/lib/firebase/config";
 import { doc, getDoc } from "firebase/firestore";
 import { MeritlaneLoader } from "@/components/ui/MeritlaneLoader";
+import { ContextGuide } from "@/components/ui/ContextGuide";
 
 export default function CandidateProvenancePage() {
   const { user, loading } = useAuth();
@@ -48,6 +49,16 @@ export default function CandidateProvenancePage() {
 
   return (
     <div className="w-full px-8 md:px-16 lg:px-24 py-12 mx-auto max-w-[1600px] h-full overflow-y-auto scrollbar-hide relative">
+      <ContextGuide 
+        storageKey="candidate_provenance"
+        title="Public Proof Record"
+        description="This is how employers and the public view your verified claims. It updates automatically as you pass assessments."
+        steps={[
+          { title: "Review", description: "This is a live preview of your public record.", isCompleted: true },
+          { title: "Share", description: "Use your public link in job applications.", isCompleted: false },
+          { title: "Discover", description: "Employers can discover this profile if you have passed assessments.", isCompleted: Object.values((candidate as any)?.verifiedSkills || {}).some((v: any) => v.status === "verified") }
+        ]}
+      />
       <div className="mb-12">
         <div className="text-[14px] font-sans font-medium text-[#737373] mb-3">
           Output Layer

@@ -51,7 +51,7 @@ export function ProofTrace({
 
     const lines = [
       `> INITIATING PROOF TRACE FOR [${candidateName.toUpperCase()}]`,
-      `> FETCHING IMMUTABLE ASSESSMENT LOGS...`,
+      `> FETCHING ASSESSMENT LOGS...`,
       `> ASSESSMENT TYPE: ${testName}`,
       `> SECURE TIMESTAMP: ${dateStr}`,
       `> REPLAYING EVALUATION PIPELINE...`
@@ -84,7 +84,7 @@ export function ProofTrace({
   const getNoDataLines = () => {
     const base = [
       `> INITIATING PROOF TRACE FOR [${candidateName.toUpperCase()}]`,
-      `> FETCHING IMMUTABLE ASSESSMENT LOGS...`
+      `> FETCHING ASSESSMENT LOGS...`
     ];
 
     if (status === "verified") {

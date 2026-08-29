@@ -9,6 +9,8 @@ import { MeritlaneLoader } from "@/components/ui/MeritlaneLoader";
 import { db } from "@/lib/firebase/config";
 import { doc, updateDoc } from "firebase/firestore";
 import { TagInput } from "@/components/ui/TagInput";
+import { motion, AnimatePresence } from "framer-motion";
+import { ContextGuide } from "@/components/ui/ContextGuide";
 
 export default function CandidateDashboardPage() {
   const { user, loading } = useAuth();
@@ -115,6 +117,19 @@ export default function CandidateDashboardPage() {
   return (
     <div className="w-full px-8 md:px-16 lg:px-24 py-12 mx-auto max-w-[1600px] h-full overflow-y-auto scrollbar-hide relative">
       
+      <ContextGuide 
+        storageKey="candidate_dashboard"
+        title="Evidence Workspace"
+        description="This is where you prove you actually know the skills you claimed in your profile. Without evidence, your profile cannot pass the manual audit."
+        steps={[
+          { title: "Review Claims", description: "Check the skills listed under Evidence Coverage.", isCompleted: true },
+          { title: "Add Evidence", description: "Link a GitHub repository or project URL.", isCompleted: (profile?.projects?.length || 0) > 0 },
+          { title: "Coverage", description: "Ensure every claimed skill has supporting evidence.", isCompleted: (profile?.skills?.length || 0) > 0 && (profile?.projects?.length || 0) >= (profile?.skills?.length || 1) }
+        ]}
+        ctaLabel="Ready for Assessment?"
+        ctaHref="/candidate/assessment"
+      />
+
       <div className="mb-12">
         <div className="text-[14px] font-sans font-medium text-[#737373] mb-3 flex items-center gap-2">
           <FolderOpen className="h-3 w-3" /> Evidence Workspace
@@ -256,137 +271,147 @@ export default function CandidateDashboardPage() {
       </div>
 
       {/* Add Evidence Modal */}
-      {isModalOpen && (
-        <div 
-          className="fixed inset-0 z-50 flex items-center justify-center bg-[#0D0D0D]/40 backdrop-blur-sm p-4"
-          onClick={() => setIsModalOpen(false)}
-        >
-          <div 
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="modal-evidence-title"
-            onClick={(e) => e.stopPropagation()}
-            className="bg-[#FFFFFF] rounded-xl shadow-2xl w-full max-w-lg overflow-hidden flex flex-col"
-          >
-            <div className="flex items-center justify-between px-6 py-5 border-b border-[#E5E5E5]">
-              <h2 id="modal-evidence-title" className="text-[16px] font-bold text-[#0D0D0D]">Add Supporting Evidence</h2>
-              <button 
-                type="button"
-                onClick={() => setIsModalOpen(false)} 
-                className="text-[#737373] hover:text-[#0D0D0D]"
-                aria-label="Close modal"
-              >
-                <X className="h-5 w-5" aria-hidden="true" />
-              </button>
-            </div>
-            
-            <form onSubmit={handleSaveEvidence} className="p-6 flex flex-col gap-5">
-              {errorMsg && (
-                <div role="alert" className="text-[13px] text-[#B42318] bg-[#B42318]/10 p-3 rounded-md">
-                  {errorMsg}
-                </div>
-              )}
-              
-              <div className="space-y-1.5">
-                <label htmlFor="evidence-project-title" className="text-[13px] font-medium text-[#0D0D0D]">Project Title <span className="text-[#B42318]">*</span></label>
-                <input 
-                  id="evidence-project-title"
-                  type="text" 
-                  value={newProject.title}
-                  onChange={(e) => setNewProject({...newProject, title: e.target.value})}
-                  className="w-full border border-[#E5E5E5] rounded-md px-3 py-2 text-[14px] outline-none focus:border-[#0D0D0D] transition-colors"
-                  placeholder="e.g. Meritlane Backend Services"
-                  required
-                />
-              </div>
-
-              <div className="space-y-1.5">
-                <label htmlFor="evidence-repo-url" className="text-[13px] font-medium text-[#0D0D0D]">Repository URL <span className="text-[#B42318]">*</span></label>
-                <input 
-                  id="evidence-repo-url"
-                  type="url" 
-                  value={newProject.repoUrl}
-                  onChange={(e) => setNewProject({...newProject, repoUrl: e.target.value})}
-                  className="w-full border border-[#E5E5E5] rounded-md px-3 py-2 text-[14px] outline-none focus:border-[#0D0D0D] transition-colors"
-                  placeholder="https://github.com/username/project"
-                  required
-                />
-              </div>
-
-              <div className="space-y-1.5">
-                <label htmlFor="evidence-live-url" className="text-[13px] font-medium text-[#0D0D0D]">Live URL <span className="text-[#737373] font-normal">(Optional)</span></label>
-                <input 
-                  id="evidence-live-url"
-                  type="url" 
-                  value={newProject.liveUrl}
-                  onChange={(e) => setNewProject({...newProject, liveUrl: e.target.value})}
-                  className="w-full border border-[#E5E5E5] rounded-md px-3 py-2 text-[14px] outline-none focus:border-[#0D0D0D] transition-colors"
-                  placeholder="https://myproject.com"
-                />
-              </div>
-
-              <div className="space-y-1.5">
-                <label htmlFor="evidence-description" className="text-[13px] font-medium text-[#0D0D0D]">Description <span className="text-[#737373] font-normal">(Optional)</span></label>
-                <textarea 
-                  id="evidence-description"
-                  value={newProject.description}
-                  onChange={(e) => setNewProject({...newProject, description: e.target.value})}
-                  className="w-full border border-[#E5E5E5] rounded-md px-3 py-2 text-[14px] outline-none focus:border-[#0D0D0D] transition-colors resize-none h-20"
-                  placeholder="Describe what you built and how it works..."
-                />
-              </div>
-
-              <div className="space-y-1.5">
-                <label className="text-[13px] font-medium text-[#0D0D0D]">Other Features & Skills <span className="text-[#737373] font-normal">(Optional)</span></label>
-                <TagInput 
-                  tags={newProject.skillsUsed || []} 
-                  onChange={(tags) => setNewProject({...newProject, skillsUsed: tags})}
-                  placeholder="e.g. Postgres, AWS, Real-time (press Enter)"
-                />
-              </div>
-
-              <div className="space-y-1.5">
-                <label htmlFor="evidence-supports-claim" className="text-[13px] font-medium text-[#0D0D0D]">Supports Claim <span className="text-[#B42318]">*</span></label>
-                <select 
-                  id="evidence-supports-claim"
-                  aria-describedby="evidence-supports-claim-desc"
-                  value={newProject.supportsClaim}
-                  onChange={(e) => setNewProject({...newProject, supportsClaim: e.target.value})}
-                  className="w-full border border-[#E5E5E5] rounded-md px-3 py-2 text-[14px] outline-none focus:border-[#0D0D0D] transition-colors bg-transparent"
-                  required
-                >
-                  {skills.length === 0 ? (
-                    <option value="">No skills found in Identity</option>
-                  ) : (
-                    skills.map((skill) => (
-                      <option key={skill} value={skill}>{skill}</option>
-                    ))
-                  )}
-                </select>
-                <p id="evidence-supports-claim-desc" className="text-[11px] text-[#737373]">Select the skill this evidence proves.</p>
-              </div>
-
-              <div className="flex justify-end gap-3 mt-4">
+      <AnimatePresence>
+        {isModalOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="absolute inset-0 bg-[#0D0D0D]/40 backdrop-blur-sm"
+              onClick={() => setIsModalOpen(false)}
+            />
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95, y: 10 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 10 }}
+              transition={{ type: "spring", bounce: 0, duration: 0.3 }}
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="modal-evidence-title"
+              className="relative z-10 bg-[#FFFFFF] rounded-xl shadow-2xl w-full max-w-lg overflow-hidden flex flex-col border border-[#E5E5E5]"
+            >
+              <div className="flex items-center justify-between px-6 py-5 border-b border-[#E5E5E5] bg-[#FAFAFA]">
+                <h2 id="modal-evidence-title" className="text-[16px] font-serif text-[#0D0D0D]">Add Supporting Evidence</h2>
                 <button 
                   type="button"
-                  onClick={() => setIsModalOpen(false)}
-                  className="px-4 py-2 text-[13px] font-medium text-[#737373] hover:text-[#0D0D0D] transition-colors"
+                  onClick={() => setIsModalOpen(false)} 
+                  className="flex h-8 w-8 items-center justify-center rounded-full text-[#737373] hover:text-[#0D0D0D] hover:bg-[#E5E5E5] transition-colors"
+                  aria-label="Close modal"
                 >
-                  Cancel
-                </button>
-                <button 
-                  type="submit"
-                  disabled={saving}
-                  className="flex items-center gap-2 px-4 py-2 bg-[#0D0D0D] text-[#FFFFFF] hover:bg-[#222222] rounded-md text-[13px] font-medium transition-colors disabled:opacity-70"
-                >
-                  {saving && <div className="h-3.5 w-3.5 rounded-full border-[1.5px] border-[#FFFFFF]/30 border-t-[#FFFFFF] animate-spin" />}
-                  Link Evidence
+                  <X className="h-4 w-4" aria-hidden="true" />
                 </button>
               </div>
-            </form>
+              
+              <form onSubmit={handleSaveEvidence} className="p-6 flex flex-col gap-5">
+                {errorMsg && (
+                  <div role="alert" className="text-[13px] text-[#B42318] bg-[#B42318]/10 p-3 rounded-md">
+                    {errorMsg}
+                  </div>
+                )}
+                
+                <div className="space-y-1.5">
+                  <label htmlFor="evidence-project-title" className="text-[13px] font-medium text-[#0D0D0D]">Project Title <span className="text-[#B42318]">*</span></label>
+                  <input 
+                    id="evidence-project-title"
+                    type="text" 
+                    value={newProject.title}
+                    onChange={(e) => setNewProject({...newProject, title: e.target.value})}
+                    className="w-full border border-[#E5E5E5] rounded-md px-3 py-2 text-[14px] outline-none focus:border-[#0D0D0D] transition-colors"
+                    placeholder="e.g. Meritlane Backend Services"
+                    required
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <label htmlFor="evidence-repo-url" className="text-[13px] font-medium text-[#0D0D0D]">Repository URL <span className="text-[#B42318]">*</span></label>
+                  <input 
+                    id="evidence-repo-url"
+                    type="url" 
+                    value={newProject.repoUrl}
+                    onChange={(e) => setNewProject({...newProject, repoUrl: e.target.value})}
+                    className="w-full border border-[#E5E5E5] rounded-md px-3 py-2 text-[14px] outline-none focus:border-[#0D0D0D] transition-colors"
+                    placeholder="https://github.com/username/project"
+                    required
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <label htmlFor="evidence-live-url" className="text-[13px] font-medium text-[#0D0D0D]">Live URL <span className="text-[#737373] font-normal">(Optional)</span></label>
+                  <input 
+                    id="evidence-live-url"
+                    type="url" 
+                    value={newProject.liveUrl}
+                    onChange={(e) => setNewProject({...newProject, liveUrl: e.target.value})}
+                    className="w-full border border-[#E5E5E5] rounded-md px-3 py-2 text-[14px] outline-none focus:border-[#0D0D0D] transition-colors"
+                    placeholder="https://myproject.com"
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <label htmlFor="evidence-description" className="text-[13px] font-medium text-[#0D0D0D]">Description <span className="text-[#737373] font-normal">(Optional)</span></label>
+                  <textarea 
+                    id="evidence-description"
+                    value={newProject.description}
+                    onChange={(e) => setNewProject({...newProject, description: e.target.value})}
+                    className="w-full border border-[#E5E5E5] rounded-md px-3 py-2 text-[14px] outline-none focus:border-[#0D0D0D] transition-colors resize-none h-20"
+                    placeholder="Describe what you built and how it works..."
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-[13px] font-medium text-[#0D0D0D]">Other Features & Skills <span className="text-[#737373] font-normal">(Optional)</span></label>
+                  <TagInput 
+                    tags={newProject.skillsUsed || []} 
+                    onChange={(tags) => setNewProject({...newProject, skillsUsed: tags})}
+                    placeholder="e.g. Postgres, AWS, Real-time (press Enter)"
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <label htmlFor="evidence-supports-claim" className="text-[13px] font-medium text-[#0D0D0D]">Supports Claim <span className="text-[#B42318]">*</span></label>
+                  <select 
+                    id="evidence-supports-claim"
+                    aria-describedby="evidence-supports-claim-desc"
+                    value={newProject.supportsClaim}
+                    onChange={(e) => setNewProject({...newProject, supportsClaim: e.target.value})}
+                    className="w-full border border-[#E5E5E5] rounded-md px-3 py-2 text-[14px] outline-none focus:border-[#0D0D0D] transition-colors bg-transparent"
+                    required
+                  >
+                    {skills.length === 0 ? (
+                      <option value="">No skills found in Identity</option>
+                    ) : (
+                      skills.map((skill) => (
+                        <option key={skill} value={skill}>{skill}</option>
+                      ))
+                    )}
+                  </select>
+                  <p id="evidence-supports-claim-desc" className="text-[11px] text-[#737373]">Select the skill this evidence proves.</p>
+                </div>
+
+                <div className="flex justify-end gap-3 mt-4 pt-4 border-t border-[#E5E5E5]">
+                  <button 
+                    type="button"
+                    onClick={() => setIsModalOpen(false)}
+                    className="px-4 py-2 text-[13px] font-medium text-[#737373] hover:text-[#0D0D0D] transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <button 
+                    type="submit"
+                    disabled={saving}
+                    className="flex items-center gap-2 px-5 py-2 bg-[#0D0D0D] text-[#FFFFFF] hover:bg-[#222222] rounded-md text-[13px] font-medium transition-colors disabled:opacity-70"
+                  >
+                    {saving && <div className="h-3.5 w-3.5 rounded-full border-[1.5px] border-[#FFFFFF]/30 border-t-[#FFFFFF] animate-spin" />}
+                    Link Evidence
+                  </button>
+                </div>
+              </form>
+            </motion.div>
           </div>
-        </div>
-      )}
+        )}
+      </AnimatePresence>
     </div>
   );
 }

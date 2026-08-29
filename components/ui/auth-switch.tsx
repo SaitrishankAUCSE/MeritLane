@@ -5,13 +5,13 @@ import { motion, AnimatePresence } from "framer-motion";
 import { signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, createUserWithEmailAndPassword, signOut } from "firebase/auth";
 import { auth } from "@/lib/firebase/config";
 import { useAuth } from "@/lib/auth/AuthContext";
-import { fetchCandidateProfile } from "@/lib/firebase/candidate";
-import { createUserProfile } from "@/lib/firebase/users";
+import { createUserProfile, fetchUserProfile } from "@/lib/firebase/users";
 import { useRouter } from "next/navigation";
 import { ShieldCheck, AlertCircle, CheckCircle2, Users, Briefcase } from "lucide-react";
 import { Button } from "./Button";
 import { Input } from "./Input";
 import { MeritlaneLoader } from "@/components/ui/MeritlaneLoader";
+import posthog from "posthog-js";
 
 const ADMIN_EMAIL = "saitrishankb9@gmail.com";
 
@@ -20,6 +20,7 @@ interface AuthSwitchProps {
 }
 
 export function AuthSwitch({ defaultMode = "login" }: AuthSwitchProps) {
+  const { user, role: userRole, loading: authLoading, profileLoading, refreshProfile, authModalInitialRole } = useAuth();
   const [mode, setMode] = useState<"login" | "signup">(defaultMode);
   
   // Shared state
@@ -28,9 +29,8 @@ export function AuthSwitch({ defaultMode = "login" }: AuthSwitchProps) {
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [loadingAction, setLoadingAction] = useState(false);
-  const [role, setRole] = useState<"candidate" | "employer" | null>(null);
+  const [role, setRole] = useState<"candidate" | "employer" | null>(authModalInitialRole);
 
-  const { user, role: userRole, loading: authLoading, profileLoading, refreshProfile } = useAuth();
   const router = useRouter();
 
   // Handle URL messages
@@ -71,11 +71,13 @@ export function AuthSwitch({ defaultMode = "login" }: AuthSwitchProps) {
       const tokenResult = await userCred.user.getIdTokenResult(true);
       if (tokenResult.claims.admin === true || userCred.user.email?.toLowerCase() === ADMIN_EMAIL) {
         await refreshProfile();
+        posthog.identify(userCred.user.uid, { email: userCred.user.email, role: 'admin' });
+        posthog.capture("user_logged_in", { method: 'email', role: 'admin' });
         router.push("/admin");
         return;
       }
 
-      const profile = await fetchCandidateProfile(userCred.user.uid);
+      const profile = await fetchUserProfile(userCred.user.uid);
       if (!profile) {
         await signOut(auth);
         setError("Account doesn't exist. Please sign up first.");
@@ -84,6 +86,8 @@ export function AuthSwitch({ defaultMode = "login" }: AuthSwitchProps) {
       }
       
       await refreshProfile();
+      posthog.identify(userCred.user.uid, { email: userCred.user.email });
+      posthog.capture("user_logged_in", { method: 'email' });
     } catch (err: any) {
       if (err.code === "auth/invalid-credential" || err.code === "auth/user-not-found") {
         setError("Incorrect email or password.");
@@ -118,6 +122,8 @@ export function AuthSwitch({ defaultMode = "login" }: AuthSwitchProps) {
         displayName: ""
       });
       await refreshProfile();
+      posthog.identify(userCred.user.uid, { email: userCred.user.email, role: role });
+      posthog.capture("user_signed_up", { method: 'email', role: role });
       
     } catch (err: any) {
       if (err.code === "auth/email-already-in-use") {
@@ -147,11 +153,13 @@ export function AuthSwitch({ defaultMode = "login" }: AuthSwitchProps) {
         const tokenResult = await userCred.user.getIdTokenResult(true);
         if (tokenResult.claims.admin === true || userCred.user.email?.toLowerCase() === ADMIN_EMAIL) {
           await refreshProfile();
+          posthog.identify(userCred.user.uid, { email: userCred.user.email, role: 'admin' });
+          posthog.capture("user_logged_in", { method: 'google', role: 'admin' });
           router.push("/admin");
           return;
         }
 
-        const profile = await fetchCandidateProfile(userCred.user.uid);
+        const profile = await fetchUserProfile(userCred.user.uid);
         if (!profile) {
           await signOut(auth);
           setError("Account doesn't exist. Please sign up first.");
@@ -159,9 +167,11 @@ export function AuthSwitch({ defaultMode = "login" }: AuthSwitchProps) {
           return;
         }
         await refreshProfile();
+        posthog.identify(userCred.user.uid, { email: userCred.user.email });
+        posthog.capture("user_logged_in", { method: 'google' });
       } else {
         // Signup Flow
-        const existingProfile = await fetchCandidateProfile(userCred.user.uid);
+        const existingProfile = await fetchUserProfile(userCred.user.uid);
         if (existingProfile) {
           await signOut(auth);
           setError("An account already exists. Please sign in.");
@@ -176,7 +186,8 @@ export function AuthSwitch({ defaultMode = "login" }: AuthSwitchProps) {
           authProvider: "google"
         });
         await refreshProfile();
-        
+        posthog.identify(userCred.user.uid, { email: userCred.user.email, role: role });
+        posthog.capture("user_signed_up", { method: 'google', role: role });
       }
     } catch (err: any) {
       setError(err.message || `Failed to sign ${mode === "login" ? "in" : "up"} with Google.`);

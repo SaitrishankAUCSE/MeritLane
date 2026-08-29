@@ -4,7 +4,8 @@ import * as React from "react"
 import { ChevronLeft, AlertCircle } from "lucide-react"
 import { motion } from "framer-motion"
 import { useAuth } from "@/lib/auth/AuthContext"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
+import Link from "next/link"
 import { signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, createUserWithEmailAndPassword } from "firebase/auth"
 import { auth } from "@/lib/firebase/config"
 import { createUserProfile } from "@/lib/firebase/users"
@@ -41,22 +42,24 @@ interface AuthFormProps {
 }
 
 export default function AuthForm({ mode = "login" }: AuthFormProps) {
-  const { user, role, loading, profileLoading } = useAuth()
+  const { user, role: userRole, loading, profileLoading } = useAuth()
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const urlRole = searchParams.get("role") as "candidate" | "employer" | null
 
   React.useEffect(() => {
     if (!loading && !profileLoading && user) {
-      if (role === "employer") {
+      if (userRole === "employer") {
         router.replace("/employer/dashboard")
-      } else if (role === "candidate") {
+      } else if (userRole === "candidate") {
         router.replace("/candidate/dashboard")
-      } else if (role === "admin" || user.email?.toLowerCase() === "saitrishankb9@gmail.com") {
+      } else if (userRole === "admin" || user.email?.toLowerCase() === "saitrishankb9@gmail.com") {
         router.replace("/admin")
       } else {
         router.replace("/dashboard")
       }
     }
-  }, [user, role, loading, profileLoading, router])
+  }, [user, userRole, loading, profileLoading, router])
 
   return (
     <div className="min-h-[100dvh] w-full flex bg-[#FAFAFA] font-sans relative z-[60]">
@@ -82,7 +85,7 @@ export default function AuthForm({ mode = "login" }: AuthFormProps) {
         <div className="relative z-10 max-w-lg mb-12">
           <h1 className="font-serif text-[48px] leading-tight mb-6 text-[#FFFFFF]">Prove your capability.</h1>
           <p className="font-sans text-[16px] text-[#A3A3A3] leading-relaxed">
-            Meritlane translates your self-declared skills into cryptographically verified claims, providing undeniable proof of your technical expertise.
+            Meritlane translates your self-declared skills into verified claims, providing undeniable proof of your technical expertise.
           </p>
         </div>
       </div>
@@ -110,9 +113,9 @@ export default function AuthForm({ mode = "login" }: AuthFormProps) {
           {/* Auth card */}
           <div className="rounded-xl border border-[#E5E5E5] bg-[#FFFFFF] px-8 py-10 shadow-sm">
             <Header mode={mode} />
-            <SocialButtons mode={mode} />
+            <SocialButtons mode={mode} initialRole={urlRole} />
             <Divider />
-            <LoginForm mode={mode} />
+            <LoginForm mode={mode} initialRole={urlRole} />
           </div>
 
           <TermsAndConditions />
@@ -159,7 +162,7 @@ const Header: React.FC<{ mode: "login" | "signup" }> = ({ mode }) => {
 
 /* ─── Google Sign-In ─── */
 
-const SocialButtons: React.FC<{ mode: "login" | "signup" }> = ({ mode }) => {
+const SocialButtons: React.FC<{ mode: "login" | "signup", initialRole?: "candidate" | "employer" | null }> = ({ mode, initialRole }) => {
   const router = useRouter()
   const { refreshProfile } = useAuth()
   const [loading, setLoading] = React.useState(false)
@@ -185,7 +188,7 @@ const SocialButtons: React.FC<{ mode: "login" | "signup" }> = ({ mode }) => {
         await createUserProfile(userCred.user.uid, {
           email: userCred.user.email || "",
           displayName: userCred.user.displayName || "New User",
-          role: "candidate",
+          role: initialRole || "candidate",
           authProvider: "google"
         })
         await refreshProfile()
@@ -245,7 +248,7 @@ const Divider: React.FC = () => (
 
 /* ─── Email / Password Form ─── */
 
-const LoginForm: React.FC<{ mode: "login" | "signup" }> = ({ mode }) => {
+const LoginForm: React.FC<{ mode: "login" | "signup", initialRole?: "candidate" | "employer" | null }> = ({ mode, initialRole }) => {
   const router = useRouter()
   const { refreshProfile } = useAuth()
 
@@ -275,7 +278,7 @@ const LoginForm: React.FC<{ mode: "login" | "signup" }> = ({ mode }) => {
         await createUserProfile(userCred.user.uid, {
           email: email,
           displayName: email.split("@")[0],
-          role: "candidate",
+          role: initialRole || "candidate",
           authProvider: "password"
         })
         await refreshProfile()
@@ -365,8 +368,8 @@ const LoginForm: React.FC<{ mode: "login" | "signup" }> = ({ mode }) => {
 const TermsAndConditions: React.FC = () => (
   <p className="mt-5 text-center text-[11px] leading-relaxed text-[#737373]">
     By continuing, you agree to Meritlane&apos;s{" "}
-    <span className="font-medium text-[#0D0D0D]">Terms of Service</span>{" "}
+    <Link href="/terms" className="font-medium text-[#0D0D0D] hover:underline transition-all">Terms of Service</Link>{" "}
     and{" "}
-    <span className="font-medium text-[#0D0D0D]">Privacy Policy</span>.
+    <Link href="/privacy" className="font-medium text-[#0D0D0D] hover:underline transition-all">Privacy Policy</Link>.
   </p>
 )

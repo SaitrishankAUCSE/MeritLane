@@ -17,6 +17,58 @@ export function ReviewConsole({
   handleExecuteAction,
   FEEDBACK_PRESETS,
 }: any) {
+  const [runningAudit, setRunningAudit] = React.useState(false);
+
+  const handleAutomatedAudit = () => {
+    if (!selectedCandidate) return;
+    setRunningAudit(true);
+    
+    // Simulate heuristic AI processing
+    setTimeout(() => {
+      let report = "SYSTEM AUDIT REPORT\n-------------------\n";
+      const c = selectedCandidate;
+      const gh = c.githubEvidence;
+      const hasGh = gh && gh.totalCommits > 10;
+      const scores = c.assessmentScores;
+      const passedTest = scores && scores.passed === true;
+      const hasProjects = c.projects && c.projects.length > 0;
+
+      if (hasGh) {
+        report += `✓ Verified GitHub: ${gh.totalCommits} commits across ${gh.repoCount} repositories.\n`;
+      } else {
+        report += `✗ Insufficient or missing GitHub evidence.\n`;
+      }
+
+      if (passedTest) {
+        report += `✓ Technical Assessment: Passed (${scores.score} points).\n`;
+      } else {
+        report += `✗ Technical Assessment: Not passed or not taken.\n`;
+      }
+
+      if (hasProjects) {
+        report += `✓ Portfolio: Contains ${c.projects.length} project artifacts.\n`;
+      } else {
+        report += `✗ Portfolio: Missing project artifacts.\n`;
+      }
+
+      report += "\nRECOMMENDATION: ";
+
+      if (hasGh && passedTest && hasProjects) {
+        report += "Highly Qualified. Verify object.";
+        setActionType("verified");
+      } else if (!passedTest) {
+        report += "Does not meet technical bar. Reject object.";
+        setActionType("rejected");
+      } else {
+        report += "Incomplete portfolio evidence. Request changes.";
+        setActionType("changes_required");
+      }
+
+      setActionReason(report);
+      setRunningAudit(false);
+    }, 1500);
+  };
+
   return (
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-[80vh] min-h-[600px]">
       {/* ZONE 1: REVIEW QUEUE (Col 1-3) */}
@@ -132,7 +184,24 @@ export function ReviewConsole({
             <>
               {!actionType ? (
                 <>
-                  <Button variant="success" className="w-full justify-start" leftIcon={<ShieldCheck className="h-4 w-4" />} onClick={() => { setActionType("verified"); setActionReason("Standard verification approval."); handleExecuteAction("verified"); }}>
+                  <div className="mb-4 bg-surface-low p-4 border border-border rounded-lg">
+                    <p className="text-xs text-muted-foreground mb-3 font-sans">Run a quick automated pass over candidate artifacts to generate a baseline recommendation.</p>
+                    <Button 
+                      className="w-full justify-center bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200" 
+                      onClick={handleAutomatedAudit}
+                      disabled={runningAudit}
+                    >
+                      {runningAudit ? "Running checks..." : "Run Automated Checks"}
+                    </Button>
+                  </div>
+                  
+                  <div className="relative flex items-center py-2">
+                    <div className="flex-grow border-t border-border"></div>
+                    <span className="flex-shrink-0 mx-4 text-muted-foreground text-[10px] uppercase font-bold tracking-widest">Manual Override</span>
+                    <div className="flex-grow border-t border-border"></div>
+                  </div>
+
+                  <Button variant="success" className="w-full justify-start" leftIcon={<ShieldCheck className="h-4 w-4" />} onClick={() => { setActionType("verified"); setActionReason("Standard verification approval."); }}>
                     Verify Object
                   </Button>
                   <Button variant="secondary" className="w-full justify-start" leftIcon={<AlertTriangle className="h-4 w-4" />} onClick={() => setActionType("changes_required")}>
@@ -145,7 +214,7 @@ export function ReviewConsole({
               ) : (
                 <div className="space-y-3 animate-in slide-in-from-bottom-2">
                   <label className="text-xs font-bold font-data uppercase tracking-widest text-foreground">
-                    {actionType === "changes_required" ? "Required Changes" : "Rejection Reason"}
+                    {actionType === "verified" ? "Verification Audit Summary" : actionType === "changes_required" ? "Required Changes" : "Rejection Reason"}
                   </label>
                   <textarea 
                     value={actionReason} 

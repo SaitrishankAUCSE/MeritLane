@@ -10,7 +10,7 @@ import { signOut } from "firebase/auth";
 import { Button } from "@/components/ui/Button";
 
 export default function Navbar() {
-  const { user, userProfile, isAdmin, loading, profileLoading, handleSignOut } = useAuth();
+  const { user, userProfile, isAdmin, loading, profileLoading, handleSignOut, openAuthModal } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -96,19 +96,19 @@ export default function Navbar() {
             </>
           ) : (
             <div className="hidden items-center gap-5 md:flex">
-              <Link href="/login" className="text-sm text-muted-foreground hover:text-foreground">
+              <button onClick={() => openAuthModal("login")} className="text-sm text-muted-foreground hover:text-foreground transition-colors font-medium">
                 Log in
-              </Link>
-              <Link href="/signup" className="text-sm text-muted-foreground hover:text-foreground">
+              </button>
+              <button onClick={() => openAuthModal("signup", undefined, "candidate")} className="text-sm text-muted-foreground hover:text-foreground transition-colors font-medium">
                 Register
-              </Link>
-              <Button href="/signup" variant="primary" size="sm">Hire Talent</Button>
+              </button>
+              <Button onClick={() => openAuthModal("signup", undefined, "employer")} variant="primary" size="sm">Hire Talent</Button>
             </div>
           )}
 
           {/* Mobile menu toggle */}
           <button
-            className="flex h-9 w-9 items-center justify-center text-muted-foreground hover:text-foreground sm:hidden"
+            className="flex h-9 w-9 items-center justify-center text-muted-foreground hover:text-foreground md:hidden"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             aria-label="Toggle navigation menu"
           >
@@ -118,12 +118,12 @@ export default function Navbar() {
       </div>
 
       {mobileMenuOpen && (
-        <div className="border-t border-border px-5 py-4 md:hidden">
+        <div className="border-t border-border px-5 py-4 md:hidden bg-background">
           {!isResolvingAuth && !user ? (
             <div className="flex flex-col gap-2">
-              <Button href="/login" variant="secondary" className="w-full justify-center">Log in</Button>
-              <Button href="/signup" variant="secondary" className="w-full justify-center">Register</Button>
-              <Button href="/signup" variant="primary" className="w-full justify-center">Hire Talent</Button>
+              <Button onClick={() => { setMobileMenuOpen(false); openAuthModal("login"); }} variant="secondary" className="w-full justify-center">Log in</Button>
+              <Button onClick={() => { setMobileMenuOpen(false); openAuthModal("signup", undefined, "candidate"); }} variant="secondary" className="w-full justify-center">Register</Button>
+              <Button onClick={() => { setMobileMenuOpen(false); openAuthModal("signup", undefined, "employer"); }} variant="primary" className="w-full justify-center">Hire Talent</Button>
             </div>
           ) : !isResolvingAuth && user ? (
             <div className="flex flex-col gap-4">
@@ -203,10 +203,16 @@ function ProfileDropdown({ user, userProfile, isAdmin, handleSignOut }: { user: 
                 Profile
               </Link>
             )}
-            <Link href="/settings" className="flex w-full items-center px-3.5 py-2 text-sm text-muted-foreground hover:text-foreground" onClick={() => setOpen(false)}>
-              <Settings className="mr-2.5 h-4 w-4" />
-              Settings
-            </Link>
+            {!isAdmin && (
+              <Link 
+                href={userProfile?.role === "candidate" ? "/candidate/settings" : "/employer/settings"} 
+                className="flex w-full items-center px-3.5 py-2 text-sm text-muted-foreground hover:text-foreground" 
+                onClick={() => setOpen(false)}
+              >
+                <Settings className="mr-2.5 h-4 w-4" />
+                Settings
+              </Link>
+            )}
           </div>
           <div className="border-t border-border py-1">
             <button

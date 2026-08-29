@@ -97,42 +97,7 @@ export default function SettingsPage() {
           </div>
         </div>
 
-        {/* Preferences Block */}
-        <div className="border border-[#E5E5E5] bg-[#FFFFFF] rounded-xl overflow-hidden">
-          <div className="border-b border-[#E5E5E5] px-6 py-5">
-            <h2 className="text-base font-bold text-[#0D0D0D]">Preferences &amp; Notifications</h2>
-            <p className="mt-1 text-xs text-[#666666]">Customize your workspace experience.</p>
-          </div>
-          <div className="px-6 py-5 space-y-4">
-            <div className="flex items-center justify-between border-b border-[#E5E5E5] pb-4">
-              <div className="space-y-1">
-                <span className="block text-sm font-semibold text-[#0D0D0D]">Email Notifications</span>
-                <span className="block text-xs text-[#666666]">Receive updates about your verification status</span>
-              </div>
-              <div className="w-10 h-5 bg-[#15803D] rounded-full relative cursor-pointer">
-                <div className="w-4 h-4 bg-[#FFFFFF] rounded-full absolute right-0.5 top-0.5 shadow-sm"></div>
-              </div>
-            </div>
-            <div className="flex items-center justify-between border-b border-[#E5E5E5] pb-4">
-              <div className="space-y-1">
-                <span className="block text-sm font-semibold text-[#0D0D0D]">Workspace Theme</span>
-                <span className="block text-xs text-[#666666]">Meritlane defaults to Dark Mode</span>
-              </div>
-              <span className="text-xs font-mono text-[#666666] uppercase tracking-widest bg-[#F3F3F1] px-2 py-1 rounded border border-[#E5E5E5]">
-                Locked (Dark)
-              </span>
-            </div>
-            <div className="flex items-center justify-between">
-              <div className="space-y-1">
-                <span className="block text-sm font-semibold text-[#0D0D0D]">Public Profile Visibility</span>
-                <span className="block text-xs text-[#666666]">Allow employers to search your public record</span>
-              </div>
-              <div className="w-10 h-5 bg-[#15803D] rounded-full relative cursor-pointer">
-                <div className="w-4 h-4 bg-[#FFFFFF] rounded-full absolute right-0.5 top-0.5 shadow-sm"></div>
-              </div>
-            </div>
-          </div>
-        </div>
+
 
         {/* Professional Session Management Block */}
         <div className="border border-[#E5E5E5] bg-[#FFFFFF] rounded-xl overflow-hidden">
@@ -193,6 +158,7 @@ export default function SettingsPage() {
                     Cancel
                   </button>
                   <button
+                    onClick={() => alert("Account deletion requires an email request to privacy@meritlane.app during the beta phase.")}
                     className="flex items-center gap-2 text-xs font-semibold uppercase tracking-widest px-4 py-2 border border-[#B42318] bg-[#B42318]/10 text-[#B42318] hover:bg-[#B42318] hover:text-[#FFFFFF] rounded-md transition-colors shadow-sm"
                   >
                     <ShieldAlert className="h-3.5 w-3.5" />

@@ -35,10 +35,19 @@ import {
   CheckCheck,
   Trash2,
   LogOut,
-  ShieldQuestion
+  ShieldQuestion,
+  BarChart4, 
+  Users, 
+  AlertCircle, 
+  ChevronDown, 
+  ShieldAlert, 
+  GitBranch, 
+  TerminalSquare, 
+  MessageSquareCode
 } from "lucide-react";
 import { MeritlaneLoader } from "@/components/ui/MeritlaneLoader";
 import { ReviewConsole } from "@/components/admin/ReviewConsole";
+import { ContextGuide } from "@/components/ui/ContextGuide";
 
 import { collection, onSnapshot, doc, updateDoc, serverTimestamp, getDocs, writeBatch } from "firebase/firestore";
 import { db, auth } from "@/lib/firebase/config";
@@ -71,6 +80,11 @@ interface CandidateAdminRecord {
   updatedAt: number | null;
   assessmentScores: Record<string, any> | null;
   assessmentDate: any;
+  githubEvidence?: {
+    totalCommits: number;
+    repoCount: number;
+    topLanguages: string[];
+  };
 }
 
 const FEEDBACK_PRESETS = [
@@ -168,6 +182,7 @@ export default function AdminDashboardPage() {
             updatedAt: candidateData.updatedAt || null,
             assessmentScores: candidateData.assessmentScores || null,
             assessmentDate: candidateData.assessmentDate || null,
+            githubEvidence: candidateData.githubEvidence || undefined,
           });
         });
 
@@ -485,6 +500,16 @@ export default function AdminDashboardPage() {
       )}
 
       <div className="mx-auto max-w-[1600px] px-4 sm:px-6 lg:px-8 space-y-8">
+        <ContextGuide 
+          storageKey="admin_dashboard"
+          title="Admin Verification Workspace"
+          description="You are responsible for reviewing candidate evidence and formally verifying their skills. Verified candidates are immediately visible to employers."
+          steps={[
+            { title: "Review Queue", description: "Monitor the 'Pending Review' queue for new candidates.", isCompleted: queueCandidates.length === 0 },
+            { title: "Inspect Evidence", description: "Review their Identity details and linked GitHub repositories.", isCompleted: false },
+            { title: "Decision", description: "Verify, Request Changes, or Reject based on the evidence provided.", isCompleted: false }
+          ]}
+        />
         {/* Header */}
         <div className="flex flex-col justify-between gap-4 border-b border-border pb-6 sm:flex-row sm:items-center">
           <div>
@@ -884,8 +909,8 @@ export default function AdminDashboardPage() {
         {activeTab === "audit" && (
           <div className="space-y-6">
             <div>
-              <h2 className="text-base font-bold text-foreground">Administrative Decision History</h2>
-              <p className="text-xs text-muted-foreground">Immutable audit log of all verification decisions and reasons.</p>
+              <h2 className="text-xl font-serif text-foreground">Audit Log</h2>
+              <p className="text-xs text-muted-foreground">Historical audit log of all verification decisions and reasons.</p>
             </div>
 
             <Card>
