@@ -1,375 +1,345 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import { ChevronLeft, AlertCircle } from "lucide-react"
-import { motion } from "framer-motion"
-import { useAuth } from "@/lib/auth/AuthContext"
-import { useRouter, useSearchParams } from "next/navigation"
-import Link from "next/link"
-import { signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, createUserWithEmailAndPassword } from "firebase/auth"
-import { auth } from "@/lib/firebase/config"
-import { createUserProfile } from "@/lib/firebase/users"
-
-function parseAuthError(error: any): string {
-  if (typeof error !== "object" || !error) return "An unexpected error occurred."
-  const code = error.code || ""
-  const message = error.message || ""
-  
-  switch (code) {
-    case "auth/email-already-in-use":
-      return "This email is already registered. Please sign in instead."
-    case "auth/invalid-email":
-      return "Please enter a valid email address."
-    case "auth/user-not-found":
-    case "auth/wrong-password":
-    case "auth/invalid-credential":
-      return "Incorrect email or password. Please try again."
-    case "auth/weak-password":
-      return "Your password is too weak. Please use at least 6 characters."
-    case "auth/too-many-requests":
-      return "Too many unsuccessful attempts. Please try again later."
-    case "auth/network-request-failed":
-      return "Network error. Please check your connection and try again."
-    default:
-      if (message.includes("auth/email-already-in-use")) return "This email is already registered. Please sign in instead."
-      if (message.includes("auth/invalid-credential")) return "Incorrect email or password. Please try again."
-      return "An unexpected error occurred. Please try again."
-  }
-}
+import React, { useState, useEffect } from "react";
+import { signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, createUserWithEmailAndPassword } from "firebase/auth";
+import { doc, setDoc } from "firebase/firestore";
+import { auth, db } from "@/lib/firebase/config";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { useAuth } from "@/lib/auth/AuthContext";
+import { motion, AnimatePresence } from "framer-motion";
+import posthog from "posthog-js";
 
 interface AuthFormProps {
-  mode?: "login" | "signup"
+  mode: "login" | "signup";
 }
 
-export default function AuthForm({ mode = "login" }: AuthFormProps) {
-  const { user, role: userRole, loading, profileLoading } = useAuth()
-  const router = useRouter()
-  const searchParams = useSearchParams()
-  const urlRole = searchParams.get("role") as "candidate" | "employer" | null
+type Role = "candidate" | "employer" | "admin";
 
-  React.useEffect(() => {
-    if (!loading && !profileLoading && user) {
-      if (userRole === "employer") {
-        router.replace("/employer/dashboard")
+export function AuthForm({ mode: initialMode }: AuthFormProps) {
+  const [mode, setMode] = useState<"login" | "signup">(initialMode);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [loadingAction, setLoadingAction] = useState(false);
+  const [showRoleSelector, setShowRoleSelector] = useState(false);
+  const [selectedRole, setSelectedRole] = useState<"candidate" | "employer">("candidate");
+
+  const router = useRouter();
+  const { user, userRole, loading: authLoading, profileLoading, refreshAuth } = useAuth();
+
+  useEffect(() => {
+    if (user && !authLoading && !profileLoading) {
+      if (userRole === "admin") {
+        router.push("/admin");
+      } else if (userRole === "employer") {
+        router.push("/employer/dashboard");
       } else if (userRole === "candidate") {
-        router.replace("/candidate/dashboard")
-      } else if (userRole === "admin" || user.email?.toLowerCase() === "saitrishankb9@gmail.com") {
-        router.replace("/admin")
+        router.push("/candidate/dashboard");
       } else {
-        router.replace("/dashboard")
+        setShowRoleSelector(true);
       }
     }
-  }, [user, userRole, loading, profileLoading, router])
+  }, [user, userRole, authLoading, profileLoading, router]);
+
+  const handleEmailAuth = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoadingAction(true);
+    setError(null);
+    try {
+      if (mode === "signup") {
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        await setDoc(doc(db, "users", userCredential.user.uid), {
+          email: userCredential.user.email,
+          role: selectedRole,
+          createdAt: new Date().toISOString(),
+        });
+        posthog.capture("user_signed_up", { method: 'email', role: selectedRole });
+        await refreshAuth();
+      } else {
+        await signInWithEmailAndPassword(auth, email, password);
+        posthog.capture("user_logged_in", { method: 'email' });
+      }
+    } catch (err: any) {
+      if (err.code === "auth/invalid-credential") {
+        setError("No account found with those credentials.");
+      } else if (err.code === "auth/email-already-in-use") {
+        setError("An account already exists with this email.");
+      } else {
+        setError(err.message || "Authentication failed. Please try again.");
+      }
+      setLoadingAction(false);
+    }
+  };
+
+  const handleGoogleAuth = async () => {
+    setLoadingAction(true);
+    setError(null);
+    try {
+      const provider = new GoogleAuthProvider();
+      await signInWithPopup(auth, provider);
+      posthog.capture(mode === "login" ? "user_logged_in" : "user_signed_up", { method: 'google' });
+    } catch (err: any) {
+      setError(err.message || "Failed to authenticate with Google.");
+      setLoadingAction(false);
+    }
+  };
+
+  const handleRoleSelection = async (role: Role) => {
+    setLoadingAction(true);
+    setError(null);
+    try {
+      if (!user) throw new Error("No authenticated user found.");
+      if (!db) throw new Error("Firestore not initialized");
+
+      await setDoc(doc(db, "users", user.uid), {
+        email: user.email,
+        role: role,
+        createdAt: new Date().toISOString(),
+      });
+      await refreshAuth();
+    } catch (err: any) {
+      setError(err.message || "Failed to save role.");
+      setLoadingAction(false);
+    }
+  };
+
+  if (authLoading || profileLoading || (user && userRole)) {
+    return <div className="min-h-screen bg-black"></div>; 
+  }
 
   return (
-    <div className="min-h-[100dvh] w-full flex bg-[#FAFAFA] font-sans relative z-[60]">
-      {/* Left side: Branding/Image */}
-      <div className="hidden lg:flex w-1/2 bg-[#0D0D0D] text-[#FFFFFF] relative overflow-hidden flex-col justify-between p-12 lg:p-20">
-        <div
-          className="pointer-events-none absolute inset-0 opacity-[0.07]"
-          style={{
-            backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32' width='32' height='32' fill='none' stroke='rgb(255 255 255 / 1)'%3e%3cpath d='M0 .5H31.5V32'/%3e%3c/svg%3e")`,
-          }}
-        />
-        <div
-          className="pointer-events-none absolute inset-0"
-          style={{
-            background: "radial-gradient(ellipse 80% 80% at 50% 50%, transparent 0%, #0D0D0D 100%)",
-          }}
-        />
-        <div className="relative z-10">
-          <span className="font-serif text-3xl font-medium tracking-tight text-[#FFFFFF]">
-            Meritlane
-          </span>
-        </div>
-        <div className="relative z-10 max-w-lg mb-12">
-          <h1 className="font-serif text-[48px] leading-tight mb-6 text-[#FFFFFF]">Prove your capability.</h1>
-          <p className="font-sans text-[16px] text-[#A3A3A3] leading-relaxed">
-            Meritlane translates your self-declared skills into verified claims, providing undeniable proof of your technical expertise.
-          </p>
-        </div>
-      </div>
-
-      {/* Right side: Form */}
-      <div className="w-full lg:w-1/2 flex flex-col items-center justify-center p-6 sm:p-12 relative min-h-[100dvh]">
-        {/* Mobile Logo */}
-        <div className="absolute top-8 left-8 lg:hidden">
-          <span className="font-serif text-xl font-medium tracking-tight text-[#0D0D0D]">
-            Meritlane
-          </span>
-        </div>
-        
+    <div className="min-h-screen w-full flex flex-col md:flex-row bg-white overflow-hidden">
+      {/* Left Side: Premium Brand Area with Animation */}
+      <div className="relative hidden md:flex flex-col justify-between w-full md:w-5/12 lg:w-1/2 bg-black text-white p-8 lg:p-12 overflow-hidden">
         <motion.div
-          initial={{ opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3, ease: "easeOut" }}
-          className="relative z-10 w-full max-w-[420px]"
-        >
-          {/* Back button */}
-          <div className="mb-6">
-            <BackButton />
+          animate={{
+            scale: [1, 1.1, 1],
+            opacity: [0.3, 0.4, 0.3],
+          }}
+          transition={{
+            duration: 8,
+            repeat: Infinity,
+            ease: "easeInOut"
+          }}
+          className="absolute -top-[50%] -left-[50%] w-[200%] h-[200%] bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-zinc-800/30 via-black to-black pointer-events-none"
+        />
+
+        <div className="relative z-10">
+          <Link href="/" className="inline-flex items-center gap-2 text-xl font-bold tracking-tight text-white hover:opacity-80 transition-opacity">
+            <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="black" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
+              </svg>
+            </div>
+            Meritlane
+          </Link>
+        </div>
+
+        <div className="relative z-10 max-w-lg mt-12 md:mt-0">
+          <motion.h1
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2, duration: 0.8 }}
+            className="text-4xl lg:text-5xl font-medium tracking-tight leading-[1.1] mb-6 text-white"
+          >
+            Proof of skill.<br/>
+            <span className="text-zinc-500">Not just credentials.</span>
+          </motion.h1>
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3, duration: 0.8 }}
+            className="text-lg text-zinc-400"
+          >
+            Join the platform where verified engineering talent connects with top tier employers through rigorous, objective assessment.
+          </motion.p>
+        </div>
+
+        <div className="relative z-10">
+          <div className="flex gap-4 items-center">
+            <div className="w-10 h-10 rounded-full border border-zinc-800 flex items-center justify-center bg-zinc-900/50 backdrop-blur-sm">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-zinc-400"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+            </div>
+            <p className="text-sm font-medium text-zinc-500 uppercase tracking-widest">
+              Verified Pipeline
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Right Side: Auth Form Area */}
+      <div className="w-full md:w-7/12 lg:w-1/2 flex items-center justify-center p-6 sm:p-12 bg-white relative">
+        <div className="w-full max-w-[420px]">
+          <div className="md:hidden mb-8 flex justify-center">
+             <Link href="/" className="inline-flex items-center gap-2 text-xl font-bold tracking-tight text-black">
+              <div className="w-8 h-8 bg-black rounded-full flex items-center justify-center">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
+                </svg>
+              </div>
+              Meritlane
+            </Link>
           </div>
 
-          {/* Auth card */}
-          <div className="rounded-xl border border-[#E5E5E5] bg-[#FFFFFF] px-8 py-10 shadow-sm">
-            <Header mode={mode} />
-            <SocialButtons mode={mode} initialRole={urlRole} />
-            <Divider />
-            <LoginForm mode={mode} initialRole={urlRole} />
-          </div>
+          <AnimatePresence mode="wait">
+            {showRoleSelector ? (
+              <motion.div
+                key="role-selector"
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+                className="space-y-6"
+              >
+                <div className="text-center mb-8">
+                  <h2 className="text-2xl font-semibold tracking-tight text-zinc-900 mb-2">Select your role</h2>
+                  <p className="text-sm text-zinc-500">How do you want to use Meritlane?</p>
+                </div>
+                
+                {error && (
+                  <div className="p-3 bg-red-50 border border-red-100 text-red-600 text-sm rounded-lg text-center">
+                    {error}
+                  </div>
+                )}
 
-          <TermsAndConditions />
-        </motion.div>
+                <div className="grid grid-cols-2 gap-4">
+                  <button
+                    onClick={() => handleRoleSelection("candidate")}
+                    disabled={loadingAction}
+                    className="flex flex-col items-center justify-center p-6 border-2 border-zinc-200 rounded-2xl hover:border-black hover:bg-zinc-50 transition-all group disabled:opacity-50"
+                  >
+                    <div className="w-12 h-12 bg-zinc-100 rounded-full flex items-center justify-center mb-4 group-hover:bg-black group-hover:text-white transition-colors">
+                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                    </div>
+                    <span className="font-semibold text-zinc-900">Candidate</span>
+                    <span className="text-xs text-zinc-500 mt-1 text-center">Get verified</span>
+                  </button>
+
+                  <button
+                    onClick={() => handleRoleSelection("employer")}
+                    disabled={loadingAction}
+                    className="flex flex-col items-center justify-center p-6 border-2 border-zinc-200 rounded-2xl hover:border-black hover:bg-zinc-50 transition-all group disabled:opacity-50"
+                  >
+                    <div className="w-12 h-12 bg-zinc-100 rounded-full flex items-center justify-center mb-4 group-hover:bg-black group-hover:text-white transition-colors">
+                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="20" height="14" x="2" y="7" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+                    </div>
+                    <span className="font-semibold text-zinc-900">Employer</span>
+                    <span className="text-xs text-zinc-500 mt-1 text-center">Hire talent</span>
+                  </button>
+                </div>
+              </motion.div>
+            ) : (
+              <motion.div
+                key="auth-form"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="space-y-6"
+              >
+                <div className="mb-8">
+                  <h2 className="text-3xl font-semibold tracking-tight text-zinc-900 mb-2">
+                    {mode === "login" ? "Welcome back" : "Create an account"}
+                  </h2>
+                  <p className="text-sm text-zinc-500">
+                    {mode === "login" 
+                      ? "Enter your details to sign in to your account" 
+                      : "Start building your verified engineering track record"}
+                  </p>
+                </div>
+
+                {/* Mode Switcher Tabs */}
+                <div className="flex p-1 bg-zinc-100 rounded-lg">
+                  <button
+                    type="button"
+                    onClick={() => setMode("login")}
+                    className={`flex-1 text-sm py-2 rounded-md transition-all font-medium ${mode === 'login' ? 'bg-white text-zinc-900 shadow-sm' : 'text-zinc-500 hover:text-zinc-900'}`}
+                  >
+                    Sign In
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setMode("signup")}
+                    className={`flex-1 text-sm py-2 rounded-md transition-all font-medium ${mode === 'signup' ? 'bg-white text-zinc-900 shadow-sm' : 'text-zinc-500 hover:text-zinc-900'}`}
+                  >
+                    Sign Up
+                  </button>
+                </div>
+
+                {error && (
+                  <div className="p-3 bg-red-50 border border-red-100 text-red-600 text-sm rounded-lg">
+                    {error}
+                  </div>
+                )}
+
+                <button
+                  onClick={handleGoogleAuth}
+                  disabled={loadingAction}
+                  className="w-full flex items-center justify-center gap-2 bg-white text-zinc-900 border border-zinc-200 rounded-lg p-3 hover:bg-zinc-50 focus:outline-none focus:ring-2 focus:ring-zinc-900 transition-colors disabled:opacity-50 text-sm font-semibold shadow-sm"
+                >
+                  <svg className="w-5 h-5" viewBox="0 0 24 24">
+                    <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+                    <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+                    <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+                    <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+                  </svg>
+                  Continue with Google
+                </button>
+
+                <div className="flex items-center gap-3 py-2">
+                  <div className="flex-1 h-px bg-zinc-200"></div>
+                  <span className="text-[10px] font-semibold text-zinc-400 uppercase tracking-widest">Or with email</span>
+                  <div className="flex-1 h-px bg-zinc-200"></div>
+                </div>
+
+                <form onSubmit={handleEmailAuth} className="space-y-4">
+                  {mode === "signup" && (
+                    <div className="space-y-3 pb-2">
+                      <label className="text-[11px] font-bold tracking-widest text-zinc-500 uppercase">Select Role</label>
+                      <div className="flex gap-3">
+                        <label className={`flex-1 relative border rounded-xl p-3 cursor-pointer transition-all ${selectedRole === 'candidate' ? 'border-zinc-900 bg-zinc-50 ring-1 ring-zinc-900' : 'border-zinc-200 hover:border-zinc-300'}`}>
+                          <input type="radio" name="role" value="candidate" checked={selectedRole === 'candidate'} onChange={() => setSelectedRole('candidate')} className="sr-only" />
+                          <div className="flex items-center gap-2">
+                            <div className={`w-4 h-4 rounded-full border flex items-center justify-center ${selectedRole === 'candidate' ? 'border-zinc-900' : 'border-zinc-300'}`}>
+                              {selectedRole === 'candidate' && <div className="w-2 h-2 rounded-full bg-zinc-900" />}
+                            </div>
+                            <span className="text-sm font-medium text-zinc-900">Candidate</span>
+                          </div>
+                        </label>
+                        <label className={`flex-1 relative border rounded-xl p-3 cursor-pointer transition-all ${selectedRole === 'employer' ? 'border-zinc-900 bg-zinc-50 ring-1 ring-zinc-900' : 'border-zinc-200 hover:border-zinc-300'}`}>
+                          <input type="radio" name="role" value="employer" checked={selectedRole === 'employer'} onChange={() => setSelectedRole('employer')} className="sr-only" />
+                          <div className="flex items-center gap-2">
+                            <div className={`w-4 h-4 rounded-full border flex items-center justify-center ${selectedRole === 'employer' ? 'border-zinc-900' : 'border-zinc-300'}`}>
+                              {selectedRole === 'employer' && <div className="w-2 h-2 rounded-full bg-zinc-900" />}
+                            </div>
+                            <span className="text-sm font-medium text-zinc-900">Employer</span>
+                          </div>
+                        </label>
+                      </div>
+                    </div>
+                  )}
+
+                  <div>
+                    <label className="text-[11px] font-bold tracking-widest text-zinc-900 uppercase block mb-1.5">Email Address</label>
+                    <input type="email" required value={email} onChange={e => setEmail(e.target.value)} disabled={loadingAction} placeholder="you@example.com" className="w-full px-4 py-3 rounded-xl border border-zinc-200 focus:border-zinc-900 focus:ring-1 focus:ring-zinc-900 outline-none transition-all text-sm placeholder:text-zinc-400" />
+                  </div>
+                  
+                  <div>
+                    <label className="text-[11px] font-bold tracking-widest text-zinc-900 uppercase block mb-1.5">Password</label>
+                    <input type="password" required value={password} onChange={e => setPassword(e.target.value)} disabled={loadingAction} placeholder="••••••••" className="w-full px-4 py-3 rounded-xl border border-zinc-200 focus:border-zinc-900 focus:ring-1 focus:ring-zinc-900 outline-none transition-all text-sm placeholder:text-zinc-400" />
+                  </div>
+
+                  <button type="submit" disabled={loadingAction} className="w-full bg-black hover:bg-zinc-800 text-white rounded-xl py-3 px-4 text-sm font-semibold transition-colors shadow-sm disabled:opacity-50 mt-2">
+                    {loadingAction ? "Please wait..." : mode === "signup" ? "Create Account" : "Sign In to Meritlane"}
+                  </button>
+                </form>
+
+                <p className="text-xs text-center text-zinc-500 mt-6">
+                  By continuing, you agree to our <Link href="/terms" className="underline hover:text-zinc-900">Terms of Service</Link> and <Link href="/privacy" className="underline hover:text-zinc-900">Privacy Policy</Link>.
+                </p>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
       </div>
     </div>
-  )
+  );
 }
-
-const BackButton: React.FC = () => {
-  const router = useRouter()
-  return (
-    <button
-      type="button"
-      onClick={() => router.push("/")}
-      className="flex items-center gap-1.5 text-[13px] font-medium text-[#737373] transition-colors hover:text-[#0D0D0D]"
-    >
-      <ChevronLeft size={14} />
-      Back
-    </button>
-  )
-}
-
-const Header: React.FC<{ mode: "login" | "signup" }> = ({ mode }) => {
-  const router = useRouter()
-  return (
-    <div className="mb-5 text-center">
-      <h1 className="font-serif text-[22px] text-[#0D0D0D]">
-        {mode === "login" ? "Sign in to Meritlane" : "Create your account"}
-      </h1>
-      <p className="mt-1.5 text-[13px] text-[#737373]">
-        {mode === "login" ? "Don\u2019t have an account? " : "Already have an account? "}
-        <button
-          type="button"
-          onClick={() => router.push(mode === "login" ? "/signup" : "/login")}
-          className="font-medium text-[#0D0D0D] hover:underline"
-        >
-          {mode === "login" ? "Create one" : "Sign in"}
-        </button>
-      </p>
-    </div>
-  )
-}
-
-/* ─── Google Sign-In ─── */
-
-const SocialButtons: React.FC<{ mode: "login" | "signup", initialRole?: "candidate" | "employer" | null }> = ({ mode, initialRole }) => {
-  const router = useRouter()
-  const { refreshProfile } = useAuth()
-  const [loading, setLoading] = React.useState(false)
-  const [googleError, setGoogleError] = React.useState("")
-
-  const onGoogle = async () => {
-    setLoading(true)
-    setGoogleError("")
-    try {
-      const provider = new GoogleAuthProvider()
-      const userCred = await signInWithPopup(auth, provider)
-
-      if (mode === "login") {
-        const tokenResult = await userCred.user.getIdTokenResult(true)
-        if (tokenResult.claims.admin === true || userCred.user.email?.toLowerCase() === "saitrishankb9@gmail.com") {
-          await refreshProfile()
-          router.push("/admin")
-          return
-        }
-        await refreshProfile()
-        router.push("/dashboard")
-      } else {
-        await createUserProfile(userCred.user.uid, {
-          email: userCred.user.email || "",
-          displayName: userCred.user.displayName || "New User",
-          role: initialRole || "candidate",
-          authProvider: "google"
-        })
-        await refreshProfile()
-        router.push("/dashboard")
-      }
-    } catch (err: any) {
-      console.error(err)
-      setGoogleError(parseAuthError(err))
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  return (
-    <div className="mb-0">
-      {googleError && (
-        <div className="mb-3 flex items-start gap-2.5 rounded-md border border-red-500/20 bg-red-50/50 dark:bg-red-950/20 px-3 py-3 text-[13px] text-red-600 dark:text-red-400" role="alert">
-          <AlertCircle className="h-4 w-4 shrink-0 mt-0.5" />
-          <p className="leading-snug">{googleError}</p>
-        </div>
-      )}
-      <button
-        type="button"
-        onClick={onGoogle}
-        disabled={loading}
-        aria-busy={loading}
-        className="flex h-10 w-full items-center justify-center gap-2.5 rounded-md border border-[#E5E5E5] bg-[#FFFFFF] text-[13px] font-medium text-[#0D0D0D] transition-colors hover:bg-[#F3F3F1] active:bg-[#EAEAE7] disabled:opacity-60"
-      >
-        {loading ? (
-          <span className="flex items-center gap-2">
-            <span className="inline-block h-3.5 w-3.5 animate-spin rounded-full border-[1.5px] border-[#737373]/30 border-t-[#0D0D0D]" aria-hidden="true" />
-            Authenticating…
-          </span>
-        ) : (
-          <>
-            <svg className="h-4 w-4" viewBox="0 0 24 24" aria-hidden="true">
-              <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
-              <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
-              <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
-              <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
-            </svg>
-            Continue with Google
-          </>
-        )}
-      </button>
-    </div>
-  )
-}
-
-const Divider: React.FC = () => (
-  <div className="my-5 flex items-center gap-3">
-    <div className="h-px w-full bg-[#E5E5E5]" />
-    <span className="text-[11px] font-medium uppercase tracking-wider text-[#D2D2D2]">or</span>
-    <div className="h-px w-full bg-[#E5E5E5]" />
-  </div>
-)
-
-/* ─── Email / Password Form ─── */
-
-const LoginForm: React.FC<{ mode: "login" | "signup", initialRole?: "candidate" | "employer" | null }> = ({ mode, initialRole }) => {
-  const router = useRouter()
-  const { refreshProfile } = useAuth()
-
-  const [email, setEmail] = React.useState("")
-  const [password, setPassword] = React.useState("")
-  const [loading, setLoading] = React.useState(false)
-  const [error, setError] = React.useState("")
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setError("")
-    setLoading(true)
-
-    try {
-      if (mode === "login") {
-        const userCred = await signInWithEmailAndPassword(auth, email, password)
-        const tokenResult = await userCred.user.getIdTokenResult(true)
-        if (tokenResult.claims.admin === true || email.toLowerCase() === "saitrishankb9@gmail.com") {
-          await refreshProfile()
-          router.push("/admin")
-          return
-        }
-        await refreshProfile()
-        router.push("/dashboard")
-      } else {
-        const userCred = await createUserWithEmailAndPassword(auth, email, password)
-        await createUserProfile(userCred.user.uid, {
-          email: email,
-          displayName: email.split("@")[0],
-          role: initialRole || "candidate",
-          authProvider: "password"
-        })
-        await refreshProfile()
-        router.push("/dashboard")
-      }
-    } catch (err: any) {
-      setError(parseAuthError(err))
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      {error && (
-        <div id="auth-form-error" className="mb-4 flex items-start gap-2.5 rounded-md border border-red-500/20 bg-red-50/50 dark:bg-red-950/20 px-3 py-3 text-[13px] text-red-600 dark:text-red-400" role="alert">
-          <AlertCircle className="h-4 w-4 shrink-0 mt-0.5" />
-          <p className="leading-snug">{error}</p>
-        </div>
-      )}
-
-      {/* Email */}
-      <div>
-        <label htmlFor="auth-email" className="mb-1.5 block text-[13px] font-medium text-[#0D0D0D]">
-          Email address
-        </label>
-        <input
-          id="auth-email"
-          type="email"
-          value={email}
-          onChange={e => setEmail(e.target.value)}
-          placeholder="you@example.com"
-          required
-          autoComplete="email"
-          aria-invalid={!!error}
-          aria-describedby={error ? "auth-form-error" : undefined}
-          className="auth-input"
-        />
-      </div>
-
-      {/* Password */}
-      <div>
-        <div className="mb-1.5 flex items-center justify-between">
-          <label htmlFor="auth-password" className="text-[13px] font-medium text-[#0D0D0D]">
-            Password
-          </label>
-          {mode === "login" && (
-            <span className="text-[12px] text-[#737373]">
-              Forgot password?
-            </span>
-          )}
-        </div>
-        <input
-          id="auth-password"
-          type="password"
-          value={password}
-          onChange={e => setPassword(e.target.value)}
-          placeholder="••••••••"
-          required
-          autoComplete={mode === "login" ? "current-password" : "new-password"}
-          aria-invalid={!!error}
-          aria-describedby={error ? "auth-form-error" : undefined}
-          className="auth-input"
-        />
-      </div>
-
-      {/* Submit */}
-      <button
-        type="submit"
-        disabled={loading}
-        aria-busy={loading}
-        className="flex h-10 w-full items-center justify-center rounded-md bg-[#0D0D0D] text-[13px] font-medium text-[#FFFFFF] transition-colors hover:bg-[#222222] active:bg-[#000000] disabled:opacity-60"
-      >
-        {loading ? (
-          <span className="flex items-center gap-2">
-            <span className="inline-block h-3.5 w-3.5 animate-spin rounded-full border-[1.5px] border-[#FFFFFF]/30 border-t-[#FFFFFF]" aria-hidden="true" />
-            {mode === "login" ? "Signing in…" : "Creating account…"}
-          </span>
-        ) : (
-          mode === "login" ? "Sign in" : "Create account"
-        )}
-      </button>
-    </form>
-  )
-}
-
-const TermsAndConditions: React.FC = () => (
-  <p className="mt-5 text-center text-[11px] leading-relaxed text-[#737373]">
-    By continuing, you agree to Meritlane&apos;s{" "}
-    <Link href="/terms" className="font-medium text-[#0D0D0D] hover:underline transition-all">Terms of Service</Link>{" "}
-    and{" "}
-    <Link href="/privacy" className="font-medium text-[#0D0D0D] hover:underline transition-all">Privacy Policy</Link>.
-  </p>
-)
