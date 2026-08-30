@@ -68,3 +68,12 @@ If the API returns a non-200 status or fails entirely, the component catches it 
 ## Known Limitations
 - The dataset is static. Any new colleges established after the compilation of the JSON file will not appear automatically unless the dataset is manually updated.
 - Results are capped at 50. If a very common letter like "A" is typed, the user will only see the top 50, but typing more specific characters narrows it down properly.
+
+## Manual Institution Fallback
+- **Why it exists**: While the 38k+ dataset is massive, some candidates might still legitimately attend new or unlisted institutions. A strict requirement forcing them to select from the dataset might block perfectly valid users.
+- **How "Other" works**: If a user searches and fails to find their institution, a fallback option "Other — My institution isn't listed" is available at the bottom of the list. Clicking it seamlessly transitions the component into manual-entry mode.
+- **How manual values are saved**: The manually entered value overrides the dataset-search string. The Autocomplete component uses the exact same onChange event handlers, ensuring the underlying form state and Firebase persistence mechanisms operate transparently.
+- **Distinction between dataset institutions and candidate-entered institutions**: Because the database saves the string natively, we do not fabricate metadata. Manual entries are not marked as UGC Verified or Officially Recognized automatically—they remain simply candidate-provided strings.
+- **Validation behavior**: The component strictly binds to standard whitespace trimming (trimStart()) while allowing standard punctuation and character combinations for Indian institutions.
+- **Limitations**: Since there is no distinction field (like source: manual vs source: dataset) in the current schema, all saved institutions are loaded exactly as string values upon revisiting the profile.
+
