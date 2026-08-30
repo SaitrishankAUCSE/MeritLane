@@ -1,9 +1,5 @@
 import { NextResponse } from 'next/server';
-import { promises as fs } from 'fs';
-import path from 'path';
-
-// In-memory cache to prevent re-reading file on every request
-let cachedColleges: any[] | null = null;
+import collegesData from '@/lib/data/colleges.json';
 
 export async function GET(request: Request) {
   try {
@@ -14,18 +10,7 @@ export async function GET(request: Request) {
       return NextResponse.json({ results: [] });
     }
 
-    if (!cachedColleges) {
-      const dataPath = path.join(process.cwd(), 'lib', 'data', 'colleges.json');
-      try {
-        const fileContents = await fs.readFile(dataPath, 'utf8');
-        cachedColleges = JSON.parse(fileContents);
-      } catch (err) {
-        // Fallback to indian_colleges.json if the big one is missing
-        const fallbackPath = path.join(process.cwd(), 'lib', 'indian_colleges.json');
-        const fileContents = await fs.readFile(fallbackPath, 'utf8');
-        cachedColleges = JSON.parse(fileContents);
-      }
-    }
+    const cachedColleges = collegesData as any[];
 
     // Custom scoring algorithm to prioritize:
     // 1. Exact acronyms (e.g. "IIT", "NIT")
