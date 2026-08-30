@@ -4,6 +4,7 @@ import React, { createContext, useContext, useEffect, useState, useCallback } fr
 import { User, onAuthStateChanged, signOut } from "firebase/auth";
 import { auth } from "@/lib/firebase/config";
 import { fetchUserProfile, UserProfile, Role } from "@/lib/firebase/users";
+import { useRouter } from "next/navigation";
 
 interface AuthContextType {
   user: User | null;
@@ -53,22 +54,18 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [authModalCallback, setAuthModalCallback] = useState<(() => void) | null>(null);
   const [authModalInitialRole, setAuthModalInitialRole] = useState<"candidate" | "employer" | null>(null);
 
+  const router = useRouter();
+
   const openAuthModal = useCallback((mode: "login" | "signup" = "login", callback?: () => void, initialRole?: "candidate" | "employer") => {
-    setAuthModalMode(mode);
-    if (callback) {
-      setAuthModalCallback(() => callback);
-    }
-    if (initialRole) {
-      setAuthModalInitialRole(initialRole);
+    if (mode === "signup") {
+      router.push("/signup");
     } else {
-      setAuthModalInitialRole(null);
+      router.push("/login");
     }
-    setShowAuthModal(true);
-  }, []);
+  }, [router]);
 
   const closeAuthModal = useCallback(() => {
-    setShowAuthModal(false);
-    setTimeout(() => setAuthModalCallback(null), 300); // Clear after animation
+    // No-op as we no longer use the modal
   }, []);
 
   const [authError, setAuthError] = useState<string | null>(null);
