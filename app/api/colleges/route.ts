@@ -10,7 +10,7 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const q = searchParams.get('q')?.toLowerCase() || '';
 
-    if (!q || q.length < 2) {
+    if (!q || q.length < 1) {
       return NextResponse.json({ results: [] });
     }
 
