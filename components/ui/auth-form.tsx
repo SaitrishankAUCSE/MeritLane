@@ -26,7 +26,7 @@ export function AuthForm({ mode: initialMode }: AuthFormProps) {
   const [selectedRole, setSelectedRole] = useState<"candidate" | "employer">("candidate");
 
   const router = useRouter();
-  const { user, userRole, loading: authLoading, profileLoading, refreshAuth } = useAuth();
+  const { user, role: userRole, loading: authLoading, profileLoading, refreshProfile: refreshAuth } = useAuth();
 
   useEffect(() => {
     if (user && !authLoading && !profileLoading) {
