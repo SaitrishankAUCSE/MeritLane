@@ -5,6 +5,7 @@ export interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> 
   label?: string;
   helperText?: string;
   error?: string;
+  rightElement?: React.ReactNode;
 }
 
 export function Input({
@@ -14,6 +15,7 @@ export function Input({
   id,
   className = "",
   disabled,
+  rightElement,
   ...props
 }: InputProps) {
   const reactId = React.useId();
@@ -36,9 +38,14 @@ export function Input({
           disabled={disabled}
           aria-invalid={!!error}
           aria-describedby={describedBy}
-          className={`w-full h-[42px] px-3 py-2 bg-surface text-foreground text-[14px] font-sans border rounded-md transition-colors placeholder:text-muted-foreground focus:outline-none focus:border-outline focus-visible:ring-1 focus-visible:ring-foreground disabled:opacity-50 ${error ? "border-danger text-danger" : "border-border"} ${className}`}
+          className={`w-full h-[42px] px-3 py-2 bg-surface text-foreground text-[14px] font-sans border rounded-md transition-colors placeholder:text-muted-foreground focus:outline-none focus:border-outline focus-visible:ring-1 focus-visible:ring-foreground disabled:opacity-50 ${error ? "border-danger text-danger pr-10" : "border-border"} ${rightElement ? "pr-10" : ""} ${className}`}
           {...props}
         />
+        {rightElement && !error && (
+          <div className="absolute inset-y-0 right-0 flex items-center pr-3">
+            {rightElement}
+          </div>
+        )}
         {error && (
           <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
             <AlertCircle className="h-4 w-4 text-danger" aria-hidden="true" />

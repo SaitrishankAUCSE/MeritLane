@@ -116,7 +116,7 @@ export default function HomePage() {
             <span className="text-[#525252]">Not just credentials.</span>
           </motion.h1>
           <motion.p variants={fadeUp} className="mt-8 text-[18px] lg:text-[20px] text-[#525252] max-w-xl leading-[1.6]">
-            Meritlane is a technical talent verification institution. We audit code, validate engineering capabilities, and establish immutable proof of skill—so you can hire based on evidence, not pedigree.
+            Meritlane is a technical talent verification institution. We audit code, validate engineering capabilities, and establish verifiable proof of skill—so you can hire based on evidence, not pedigree.
           </motion.p>
           <motion.div variants={fadeUp} className="mt-12 flex flex-wrap gap-4">
             <Link href="/employer/dashboard">

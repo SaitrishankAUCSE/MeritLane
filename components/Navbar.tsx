@@ -8,12 +8,14 @@ import { useRouter, usePathname } from "next/navigation";
 import { auth } from "@/lib/firebase/config";
 import { signOut } from "firebase/auth";
 import { Button } from "@/components/ui/Button";
+import { LogoutConfirmModal } from "@/components/ui/LogoutConfirmModal";
 
 export default function Navbar() {
   const { user, userProfile, isAdmin, loading, profileLoading, handleSignOut, openAuthModal } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
 
   useEffect(() => {
     setMobileMenuOpen(false);
@@ -50,7 +52,8 @@ export default function Navbar() {
       : "/candidate/dashboard";
 
   return (
-    <header className={`sticky top-0 z-50 w-full border-b backdrop-blur-md ${isPublicHome ? "theme-public border-[var(--color-border)] bg-[var(--color-background)]/90" : "border-border bg-background/85"}`}>
+    <>
+      <header className={`sticky top-0 z-50 w-full border-b backdrop-blur-md ${isPublicHome ? "theme-public border-[var(--color-border)] bg-[var(--color-background)]/90" : "border-border bg-background/85"}`}>
       <div className="mx-auto flex h-16 w-full max-w-[1600px] items-center justify-between px-8 md:px-16 lg:px-24">
         <Link
           href={isUserAdmin ? "/admin" : user ? "/dashboard" : "/"}
@@ -91,7 +94,7 @@ export default function Navbar() {
                 user={user}
                 userProfile={userProfile}
                 isAdmin={isUserAdmin}
-                handleSignOut={handleSignOut}
+                onSignOutClick={() => setShowLogoutModal(true)}
               />
             </>
           ) : (
@@ -146,10 +149,16 @@ export default function Navbar() {
         </div>
       )}
     </header>
+    <LogoutConfirmModal 
+      isOpen={showLogoutModal} 
+      onConfirm={handleSignOut} 
+      onCancel={() => setShowLogoutModal(false)} 
+    />
+    </>
   );
 }
 
-function ProfileDropdown({ user, userProfile, isAdmin, handleSignOut }: { user: any, userProfile: any, isAdmin: boolean, handleSignOut: () => void }) {
+function ProfileDropdown({ user, userProfile, isAdmin, onSignOutClick }: { user: any, userProfile: any, isAdmin: boolean, onSignOutClick: () => void }) {
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
@@ -218,7 +227,7 @@ function ProfileDropdown({ user, userProfile, isAdmin, handleSignOut }: { user: 
             <button
               onClick={() => {
                 setOpen(false);
-                handleSignOut();
+                onSignOutClick();
               }}
               className="flex w-full items-center px-3.5 py-2 text-sm text-muted-foreground hover:text-foreground"
             >

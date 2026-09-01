@@ -4,12 +4,13 @@ import React, { useEffect, useState } from "react";
 import { useAuth } from "@/lib/auth/AuthContext";
 import { useRouter } from "next/navigation";
 import { LogOut, User as UserIcon, Mail, Key, ShieldAlert } from "lucide-react";
+import { LogoutConfirmModal } from "@/components/ui/LogoutConfirmModal";
 
 export default function SettingsPage() {
   const { user, userProfile, loading, profileLoading, handleSignOut } = useAuth();
   const router = useRouter();
   
-  const [confirmSignOut, setConfirmSignOut] = useState(false);
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
 
   useEffect(() => {
@@ -117,30 +118,13 @@ export default function SettingsPage() {
                 <span className="block text-sm font-semibold text-[#0D0D0D]">Sign Out</span>
                 <span className="block text-xs text-[#666666]">Securely end your current session on this device.</span>
               </div>
-              {confirmSignOut ? (
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={() => setConfirmSignOut(false)}
-                    className="text-xs font-semibold uppercase tracking-widest px-4 py-2 text-[#737373] hover:text-[#0D0D0D] transition-colors"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    onClick={handleSignOut}
-                    className="text-xs font-semibold uppercase tracking-widest px-4 py-2 bg-[#0D0D0D] text-[#FFFFFF] hover:bg-[#222222] rounded-md transition-colors shadow-sm"
-                  >
-                    Confirm Sign Out
-                  </button>
-                </div>
-              ) : (
-                <button
-                  onClick={() => setConfirmSignOut(true)}
-                  className="flex items-center gap-2 text-xs font-semibold uppercase tracking-widest px-4 py-2 border border-[#E5E5E5] hover:bg-[#F3F3F1] text-[#0D0D0D] rounded-md transition-colors"
-                >
-                  <LogOut className="h-3.5 w-3.5" />
-                  Sign Out
-                </button>
-              )}
+              <button
+                onClick={() => setShowLogoutModal(true)}
+                className="flex items-center gap-2 text-xs font-semibold uppercase tracking-widest px-4 py-2 border border-[#E5E5E5] hover:bg-[#F3F3F1] text-[#0D0D0D] rounded-md transition-colors"
+              >
+                <LogOut className="h-3.5 w-3.5" />
+                Sign Out
+              </button>
             </div>
 
             {/* Delete Account Row */}
@@ -179,6 +163,11 @@ export default function SettingsPage() {
         </div>
         
       </div>
+      <LogoutConfirmModal 
+        isOpen={showLogoutModal} 
+        onConfirm={handleSignOut} 
+        onCancel={() => setShowLogoutModal(false)} 
+      />
     </div>
   );
 }

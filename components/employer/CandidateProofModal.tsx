@@ -188,6 +188,20 @@ export function CandidateProofModal({ candidate, isOpen, onClose }: CandidatePro
               ) : (
                 <p className="text-sm text-muted-foreground italic">No assessment signals on record.</p>
               )}
+              
+              {candidate.verifiedSkills && Object.entries(candidate.verifiedSkills).map(([skill, data]: [string, any]) => {
+                if (data.aiFeedback) {
+                  return (
+                    <div key={`ai-${skill}`} className="mt-4 border border-[#15803D]/20 bg-[#F0FDF4]/50 p-4 rounded-md shadow-sm">
+                      <div className="text-[10px] font-bold text-[#15803D] uppercase tracking-widest mb-2 flex items-center gap-1">✨ AI Senior Engineer Review: {skill}</div>
+                      <p className="text-xs text-foreground leading-relaxed font-medium">
+                        {data.aiFeedback}
+                      </p>
+                    </div>
+                  );
+                }
+                return null;
+              })}
             </div>
 
             <div>

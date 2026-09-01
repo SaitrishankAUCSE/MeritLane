@@ -26,6 +26,7 @@ export function AuthSwitch({ defaultMode = "login" }: AuthSwitchProps) {
   // Shared state
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [loadingAction, setLoadingAction] = useState(false);
@@ -89,10 +90,12 @@ export function AuthSwitch({ defaultMode = "login" }: AuthSwitchProps) {
       posthog.identify(userCred.user.uid, { email: userCred.user.email });
       posthog.capture("user_logged_in", { method: 'email' });
     } catch (err: any) {
-      if (err.code === "auth/invalid-credential" || err.code === "auth/user-not-found") {
-        setError("Incorrect email or password.");
+      if (err.code === "auth/invalid-credential" || err.code === "auth/user-not-found" || err.code === "auth/wrong-password") {
+        setError("Unable to sign in. Please check your email and password and try again.");
+      } else if (err.code === "auth/network-request-failed") {
+        setError("We couldn't connect right now. Please check your connection and try again.");
       } else {
-        setError("Unable to sign in with these credentials.");
+        setError("Authentication failed. Please try again.");
       }
       setLoadingAction(false);
     }
@@ -128,8 +131,10 @@ export function AuthSwitch({ defaultMode = "login" }: AuthSwitchProps) {
     } catch (err: any) {
       if (err.code === "auth/email-already-in-use") {
         setError("An account with this email already exists. Please sign in.");
+      } else if (err.code === "auth/network-request-failed") {
+        setError("We couldn't connect right now. Please check your connection and try again.");
       } else {
-        setError(err.message || "Failed to create an account.");
+        setError("Failed to create an account. Please try again.");
       }
       setLoadingAction(false);
     }
@@ -306,12 +311,27 @@ export function AuthSwitch({ defaultMode = "login" }: AuthSwitchProps) {
               />
               <Input
                 label="Password"
-                type="password"
+                type={showPassword ? "text" : "password"}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
                 required
+                autoComplete={mode === "signup" ? "new-password" : "current-password"}
                 helperText={mode === "signup" ? "Must be at least 6 characters long." : undefined}
+                rightElement={
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="text-muted-foreground hover:text-foreground focus:outline-none flex items-center justify-center"
+                    aria-label={showPassword ? "Hide password" : "Show password"}
+                  >
+                    {showPassword ? (
+                      <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>
+                    ) : (
+                      <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                    )}
+                  </button>
+                }
               />
               <Button 
                 type="submit" 
@@ -319,7 +339,7 @@ export function AuthSwitch({ defaultMode = "login" }: AuthSwitchProps) {
                 loading={loadingAction} 
                 variant="primary"
               >
-                {mode === "login" ? "Sign In" : "Create Account"}
+                {loadingAction ? (mode === "login" ? "Signing in..." : "Creating Account...") : (mode === "login" ? "Sign In" : "Create Account")}
               </Button>
             </form>
           </motion.div>

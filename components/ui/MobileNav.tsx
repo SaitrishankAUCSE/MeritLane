@@ -6,10 +6,12 @@ import { usePathname } from "next/navigation";
 import { Menu, X, Fingerprint, LayoutDashboard, Network, ShieldCheck, Search, Bookmark, Inbox, Settings, HelpCircle, LogOut } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 import { useAuth } from "@/lib/auth/AuthContext";
+import { LogoutConfirmModal } from "@/components/ui/LogoutConfirmModal";
 
 export function MobileNav({ role }: { role: "candidate" | "employer" | "admin" }) {
   const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
   const { handleSignOut } = useAuth();
 
   type NavItem = {
@@ -42,9 +44,8 @@ export function MobileNav({ role }: { role: "candidate" | "employer" | "admin" }
 
   const items: NavItem[] = role === "candidate" ? candidateItems : role === "employer" ? employerItems : adminItems;
 
-  const onSignOut = async () => {
-    setIsOpen(false);
-    await handleSignOut();
+  const onSignOut = () => {
+    setShowLogoutModal(true);
   };
 
   return (
@@ -123,6 +124,11 @@ export function MobileNav({ role }: { role: "candidate" | "employer" | "admin" }
           </motion.div>
         )}
       </AnimatePresence>
+      <LogoutConfirmModal 
+        isOpen={showLogoutModal} 
+        onConfirm={handleSignOut} 
+        onCancel={() => setShowLogoutModal(false)} 
+      />
     </div>
   );
 }

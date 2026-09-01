@@ -6,6 +6,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { Search, Bookmark, Settings, HelpCircle, LogOut, Activity } from "lucide-react";
 import { useAuth } from "@/lib/auth/AuthContext";
 import { motion, AnimatePresence } from "framer-motion";
+import { LogoutConfirmModal } from "@/components/ui/LogoutConfirmModal";
 
 export function EmployerSidebar() {
   const pathname = usePathname();
@@ -13,6 +14,7 @@ export function EmployerSidebar() {
   const { user, handleSignOut } = useAuth();
   
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
   const name = user?.displayName || "Employer";
@@ -42,6 +44,7 @@ export function EmployerSidebar() {
   ];
 
   return (
+    <>
     <aside className="transition-all duration-300 ease-in-out border-r bg-[#FAFAFA] h-[100dvh] lg:flex lg:flex-col sticky top-0 hidden border-[#E5E5E5] shrink-0 z-40 w-[220px]">
       
       {/* Logo Area */}
@@ -120,7 +123,7 @@ export function EmployerSidebar() {
                   <button 
                     onClick={() => {
                       setIsUserMenuOpen(false);
-                      handleSignOut();
+                      setShowLogoutModal(true);
                     }}
                     className="flex items-center gap-3 w-full text-left px-2 py-1.5 text-[13px] text-[#B42318] hover:bg-[#B42318]/10 rounded-md transition-colors"
                   >
@@ -153,5 +156,7 @@ export function EmployerSidebar() {
         
       </div>
     </aside>
+    <LogoutConfirmModal isOpen={showLogoutModal} onConfirm={handleSignOut} onCancel={() => setShowLogoutModal(false)} />
+    </>
   );
 }

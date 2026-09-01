@@ -122,6 +122,7 @@ export function ProfileForm({ initialData, onSave, onCancel, isNew = false }: Pr
             onChange={(val) => setFormData((prev) => ({ ...prev, college: val }))}
             placeholder="Institution Name"
             fetchOptions={fetchIndianColleges}
+            allowManualEntry={true}
           />
           <Autocomplete
             label="Degree / Branch"

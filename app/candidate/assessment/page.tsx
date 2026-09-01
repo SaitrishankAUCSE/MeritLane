@@ -40,7 +40,7 @@ function AssessmentContentWrapper() {
   const [cooldownDays, setCooldownDays] = useState<number | null>(null);
   const [hasStarted, setHasStarted] = useState(false);
   const [infractionCount, setInfractionCount] = useState(0);
-  const [assessmentResult, setAssessmentResult] = useState<{ passed: boolean; score: number; status: string; skill: string; retryAvailableAt?: string } | null>(null);
+  const [assessmentResult, setAssessmentResult] = useState<{ passed: boolean; score: number; status: string; skill: string; retryAvailableAt?: string; aiFeedback?: string } | null>(null);
   
   const [content, setContent] = useState<AssessmentContent | null>(null);
   
@@ -265,25 +265,27 @@ function AssessmentContentWrapper() {
       }
 
       if (data.passed) {
-        setOutput((prev) => prev + "Evaluating hidden test suites...\n[====================] 100%\nAll tests passed successfully.\nVerification record created.");
+        setOutput((prev) => prev + "Evaluating hidden test suites & generating AI feedback...\n[====================] 100%\nAll tests passed successfully.\nVerification record created.");
         logFunnelEvent("assessment_passed", { skill: skillParam });
         setTimeout(() => {
           setAssessmentResult({
             passed: true,
             score: data.score,
             status: "verified",
-            skill: skillParam
+            skill: skillParam,
+            aiFeedback: data.aiFeedback
           });
         }, 1200);
       } else {
-        setOutput((prev) => prev + "Evaluating hidden test suites...\nScore: " + data.score + "% (Required: 80%).");
+        setOutput((prev) => prev + "Evaluating hidden test suites & generating AI feedback...\nScore: " + data.score + "% (Required: 80%).");
         setTimeout(() => {
           setAssessmentResult({
             passed: false,
             score: data.score,
             status: "failed",
             skill: skillParam,
-            retryAvailableAt: data.retryAvailableAt
+            retryAvailableAt: data.retryAvailableAt,
+            aiFeedback: data.aiFeedback
           });
         }, 1200);
       }
@@ -305,9 +307,17 @@ function AssessmentContentWrapper() {
           <div className="text-[11px] font-mono uppercase tracking-[0.15em] text-[#15803D] mb-2 font-medium">✓ Assessment Verified</div>
           <h2 className="text-[32px] font-serif text-[#0D0D0D] mb-1 leading-tight">{skillParam}</h2>
           <div className="text-[44px] font-mono font-bold text-[#15803D] mb-3 leading-none">{assessmentResult.score}%</div>
-          <p className="text-[14px] text-[#737373] mb-8 font-sans leading-relaxed">
+          <p className="text-[14px] text-[#737373] mb-6 font-sans leading-relaxed">
             Your technical claim has been verified. Your public proof record has been updated and is now visible to employers.
           </p>
+          {assessmentResult.aiFeedback && (
+            <div className="border border-[#15803D]/20 bg-[#F0FDF4]/50 p-4 rounded-md mb-8 text-left">
+              <div className="text-[12px] font-sans font-bold uppercase tracking-wider text-[#15803D] mb-1">✨ AI Code Review</div>
+              <div className="text-[13px] font-sans text-[#0D0D0D] leading-relaxed">
+                {assessmentResult.aiFeedback}
+              </div>
+            </div>
+          )}
           <div className="flex flex-col sm:flex-row gap-3">
             <button 
               onClick={() => router.push("/candidate/provenance")}
@@ -345,12 +355,20 @@ function AssessmentContentWrapper() {
           <p className="text-[14px] text-[#737373] mb-4 font-sans leading-relaxed">
             80% is required to verify this skill.
           </p>
-          <div className="border border-[#E5E5E5] bg-[#FAFAFA] p-4 rounded-md mb-8 text-left">
+          <div className="border border-[#E5E5E5] bg-[#FAFAFA] p-4 rounded-md mb-6 text-left">
             <div className="text-[12px] font-sans font-medium text-[#737373] mb-1">You can attempt this assessment again on:</div>
             <div className="text-[14px] font-mono text-[#0D0D0D] font-medium">
               {retryDateStr}
             </div>
           </div>
+          {assessmentResult.aiFeedback && (
+            <div className="border border-[#B42318]/20 bg-[#FEF2F2]/50 p-4 rounded-md mb-8 text-left">
+              <div className="text-[12px] font-sans font-bold uppercase tracking-wider text-[#B42318] mb-1">✨ AI Code Review</div>
+              <div className="text-[13px] font-sans text-[#0D0D0D] leading-relaxed">
+                {assessmentResult.aiFeedback}
+              </div>
+            </div>
+          )}
           <button 
             onClick={() => router.push("/candidate/dashboard")}
             className="w-full px-5 h-11 border border-[#0D0D0D] bg-[#0D0D0D] text-[#FFFFFF] font-sans text-[14px] font-medium rounded-md hover:bg-[#222222] transition-all"

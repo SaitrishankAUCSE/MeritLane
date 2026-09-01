@@ -7,6 +7,7 @@ import { Role } from "@/lib/firebase/users";
 import { auth } from "@/lib/firebase/config";
 import { signOut } from "firebase/auth";
 import { MeritlaneLoader } from "@/components/ui/MeritlaneLoader";
+import { fetchCandidateProfile } from "@/lib/firebase/candidate";
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -67,8 +68,23 @@ export default function ProtectedRoute({ children, allowedRoles }: ProtectedRout
       // Role-based authorization for candidate/employer routes
       const normalizedRole = (userProfile.role || "").trim().toLowerCase() as Role;
       if (allowedRoles && !allowedRoles.includes(normalizedRole)) {
-        router.push(normalizedRole === "candidate" ? "/candidate/dashboard" : "/employer/dashboard");
+        router.push("/dashboard");
         return;
+      }
+
+      // Candidate Onboarding Guard
+      if (normalizedRole === "candidate" && pathname !== "/candidate/profile") {
+        try {
+          const profile = await fetchCandidateProfile(user.uid);
+          const isProfileIncomplete = !profile || (!profile.name && (!profile.skills || profile.skills.length === 0));
+          if (isProfileIncomplete) {
+            router.replace("/candidate/profile");
+            return;
+          }
+        } catch (error) {
+          router.replace("/candidate/profile");
+          return;
+        }
       }
 
       // Fully Authorized

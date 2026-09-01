@@ -306,6 +306,44 @@ export async function POST(req: NextRequest) {
 
     const passed = score >= 80;
 
+    // Call OpenRouter for AI Code Review
+    let aiFeedback = "";
+    if (process.env.OPENROUTER_API_KEY) {
+      try {
+        const aiResponse = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+          method: "POST",
+          headers: {
+            "Authorization": `Bearer ${process.env.OPENROUTER_API_KEY}`,
+            "Content-Type": "application/json",
+            "HTTP-Referer": "https://meritlane.com",
+            "X-Title": "MeritLane"
+          },
+          body: JSON.stringify({
+            model: "anthropic/claude-3.5-sonnet",
+            messages: [
+              {
+                role: "system",
+                content: "You are a Senior Software Engineer reviewing a candidate's code submission. Keep your feedback concise (2-3 sentences max). Focus on style, robustness, and efficiency. Do NOT provide a grade or talk about passing/failing. Be constructive."
+              },
+              {
+                role: "user",
+                content: `Here is the candidate's Python code:\n\n${code}\n\nExecution stdout:\n${stdout}\nExecution stderr:\n${stderr || compile_output}`
+              }
+            ]
+          })
+        });
+        
+        if (aiResponse.ok) {
+          const aiData = await aiResponse.json();
+          aiFeedback = aiData.choices?.[0]?.message?.content || "";
+        } else {
+          console.error("OpenRouter API error", await aiResponse.text());
+        }
+      } catch (err) {
+        console.error("Failed to fetch AI feedback", err);
+      }
+    }
+
     if (passed) {
       await Promise.all([
         userRef.update({
@@ -321,11 +359,12 @@ export async function POST(req: NextRequest) {
           assessmentSkill: FieldValue.delete()
         }),
         candidateRef.update({
-          verificationStatus: "verified",
+          verificationStatus: "pending",
           [`verifiedSkills.${skill}`]: {
-            status: "verified",
+            status: "pending",
             score: score,
-            verifiedAt: Date.now()
+            verifiedAt: Date.now(),
+            aiFeedback: aiFeedback
           },
           updatedAt: Date.now()
         })
@@ -334,13 +373,15 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({
         passed: true,
         score: score,
-        status: "verified",
-        skill: skill
+        status: "pending",
+        skill: skill,
+        aiFeedback: aiFeedback
       });
     } else {
       // Failed - Enforce cooldown
       await userRef.update({
         [`failedAssessments.${skill}`]: FieldValue.serverTimestamp(),
+        [`failedAssessmentsFeedback.${skill}`]: aiFeedback,
         // Clear active session
         assessmentStartedAt: FieldValue.delete(),
         assessmentVariant: FieldValue.delete(),
@@ -352,7 +393,8 @@ export async function POST(req: NextRequest) {
         passed: false,
         score: score,
         status: "failed",
-        retryAvailableAt: retryDate
+        retryAvailableAt: retryDate,
+        aiFeedback: aiFeedback
       });
     }
 

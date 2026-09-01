@@ -7,6 +7,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth/AuthContext";
 import { Fingerprint, LayoutDashboard, Network, ShieldCheck, Settings, HelpCircle, PanelLeftClose, PanelLeftOpen, LogOut, Inbox } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { LogoutConfirmModal } from "@/components/ui/LogoutConfirmModal";
 
 export function CandidateSidebar() {
   const pathname = usePathname();
@@ -14,6 +15,7 @@ export function CandidateSidebar() {
   const { user, handleSignOut } = useAuth();
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
   const name = user?.displayName || "User";
@@ -40,6 +42,7 @@ export function CandidateSidebar() {
   ];
 
   return (
+    <>
     <motion.aside 
       initial={false}
       animate={{ width: isCollapsed ? 80 : 220 }}
@@ -178,7 +181,7 @@ export function CandidateSidebar() {
                   <button 
                     onClick={() => {
                       setIsUserMenuOpen(false);
-                      handleSignOut();
+                      setShowLogoutModal(true);
                     }}
                     className="flex items-center gap-3 w-full text-left px-2 py-1.5 text-[13px] text-[#B42318] hover:bg-[#B42318]/10 rounded-md transition-colors"
                   >
@@ -231,5 +234,7 @@ export function CandidateSidebar() {
         
       </div>
     </motion.aside>
+    <LogoutConfirmModal isOpen={showLogoutModal} onConfirm={handleSignOut} onCancel={() => setShowLogoutModal(false)} />
+    </>
   );
 }
