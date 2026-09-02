@@ -113,12 +113,13 @@ export default function HomePage() {
             <span className="text-[12px] font-sans font-medium tracking-widest uppercase text-muted-foreground">The Meritlane Standard</span>
           </motion.div>
           <motion.h1 variants={fadeUp} className="text-[40px] sm:text-[48px] md:text-[60px] lg:text-[72px] font-serif text-foreground tracking-tight leading-[1.08]">
-            <span className="block text-emerald-700 dark:text-emerald-500 mb-2 sm:mb-3">
+            <span className="block text-emerald-700 dark:text-emerald-500 mb-2 sm:mb-3 min-h-[1.25em]">
               <HandwritingText
-                text="Meritlane."
+                words={["Meritlane.", "Proof of skill.", "Audited code.", "Verified talent.", "Not pedigree."]}
                 height="1.05em"
-                duration={1.5}
+                duration={1.4}
                 delay={0.1}
+                interval={3200}
               />
             </span>
             <motion.span 
