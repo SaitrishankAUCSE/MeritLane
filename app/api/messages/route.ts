@@ -23,8 +23,17 @@ export async function POST(req: NextRequest) {
     }
     
     // Get employer profile for name
-    const employerProfile = await adminDb.collection("employers").doc(senderUid).get();
-    const employerName = employerProfile.data()?.companyName || "An Employer";
+    let employerName = "Verified Employer";
+    try {
+      const employerProfile = await adminDb.collection("employers").doc(senderUid).get();
+      if (employerProfile.exists && employerProfile.data()?.companyName) {
+        employerName = employerProfile.data()?.companyName;
+      } else if (userDoc.data()?.name) {
+        employerName = userDoc.data()?.name;
+      }
+    } catch {
+      if (userDoc.data()?.name) employerName = userDoc.data()?.name;
+    }
 
     const { recipientId, content } = await req.json();
     if (!recipientId || !content) {
@@ -40,9 +49,9 @@ export async function POST(req: NextRequest) {
       read: false
     };
 
-    await adminDb.collection("messages").add(newMessage);
+    const docRef = await adminDb.collection("messages").add(newMessage);
 
-    return NextResponse.json({ success: true }, { status: 200 });
+    return NextResponse.json({ success: true, messageId: docRef.id }, { status: 200 });
   } catch (e: any) {
     console.error("Messages POST error:", e);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
@@ -57,18 +66,33 @@ export async function GET(req: NextRequest) {
     }
 
     const token = authHeader.split("Bearer ")[1];
-    const decodedToken = await adminAuth!.verifyIdToken(token);
+    if (!adminAuth || !adminDb) {
+      return NextResponse.json({ error: "Firebase admin not initialized" }, { status: 500 });
+    }
+
+    const decodedToken = await adminAuth.verifyIdToken(token);
     const candidateUid = decodedToken.uid;
 
-    const messagesSnapshot = await adminDb!.collection("messages")
+    // Fetch messages without requiring a composite index
+    const messagesSnapshot = await adminDb.collection("messages")
       .where("recipientUid", "==", candidateUid)
-      .orderBy("timestamp", "desc")
       .get();
 
-    const messages = messagesSnapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data()
-    }));
+    const messages = messagesSnapshot.docs.map(doc => {
+      const data = doc.data();
+      return {
+        id: doc.id,
+        senderUid: data.senderUid || "",
+        senderName: data.senderName || "Verified Employer",
+        recipientUid: data.recipientUid || candidateUid,
+        content: data.content || "",
+        timestamp: data.timestamp || Date.now(),
+        read: data.read || false,
+      };
+    });
+
+    // In-memory sort by timestamp descending
+    messages.sort((a, b) => b.timestamp - a.timestamp);
 
     return NextResponse.json({ messages }, { status: 200 });
   } catch (e: any) {
