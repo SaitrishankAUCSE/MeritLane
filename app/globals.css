@@ -17,10 +17,10 @@
   --color-muted-foreground: #78716C;
   --color-border: #E7E2DA;
   --color-outline: #C8C0B5;
-  --color-primary: #1C1917;
+  --color-primary: #15803D;
   --color-primary-foreground: #FAFAF9;
-  --color-accent: #16A34A;
-  --color-success: #16A34A;
+  --color-accent: #15803D;
+  --color-success: #15803D;
   --color-warning: #B45309;
   --color-danger: #C0392B;
   --color-info: #4A6FA5;
@@ -100,10 +100,10 @@ h1, h2, h3, h4, h5, h6 {
   --color-muted-foreground: #78716C;
   --color-border: #E7E2DA;
   --color-outline: #C8C0B5;
-  --color-primary: #1C1917;
+  --color-primary: #15803D;
   --color-primary-foreground: #FAFAF9;
-  --color-accent: #16A34A;
-  --color-success: #16A34A;
+  --color-accent: #15803D;
+  --color-success: #15803D;
   --color-warning: #B45309;
   --color-danger: #C0392B;
 

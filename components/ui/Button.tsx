@@ -36,11 +36,11 @@ export function Button({
 
   const variantStyles = {
     primary:
-      "bg-[#0D0D0D]/70 backdrop-blur-md border border-white/20 shadow-[0_4px_14px_0_rgba(0,0,0,0.25),inset_0_-2px_6px_0_rgba(0,0,0,0.3),inset_0_2px_4px_0_rgba(255,255,255,0.15)] text-[#FFFFFF] hover:bg-[#0D0D0D]/80 active:scale-95",
+      "bg-[#15803D] hover:bg-[#166534] border border-[#15803D]/60 shadow-[0_4px_14px_0_rgba(21,128,61,0.25),inset_0_-2px_6px_0_rgba(0,0,0,0.15),inset_0_2px_4px_0_rgba(255,255,255,0.2)] text-[#FFFFFF] active:scale-95",
     secondary:
       "bg-white/70 backdrop-blur-md border border-white/60 shadow-[0_4px_14px_0_rgba(0,0,0,0.08),inset_0_-2px_6px_0_rgba(0,0,0,0.05),inset_0_2px_4px_0_rgba(255,255,255,1)] text-[#0D0D0D] hover:bg-white/80 active:scale-95",
     outline:
-      "bg-white/70 backdrop-blur-md border border-white/60 shadow-[0_4px_14px_0_rgba(0,0,0,0.08),inset_0_-2px_6px_0_rgba(0,0,0,0.05),inset_0_2px_4px_0_rgba(255,255,255,1)] text-[#0D0D0D] hover:bg-white/80 active:scale-95",
+      "bg-white border border-[#E7E2DA] shadow-xs text-[#1C1917] hover:bg-[#F2EFE9] hover:border-[#C8C0B5] active:scale-95",
     ghost:
       "bg-transparent hover:bg-white/40 hover:backdrop-blur-sm border border-transparent hover:border-white/40 text-[#525252] hover:text-[#0D0D0D] hover:shadow-[0_2px_8px_0_rgba(0,0,0,0.05)] active:scale-95",
     tertiary:

@@ -100,99 +100,148 @@ export default function HomePage() {
   return (
     <div className="flex flex-col theme-public bg-background min-h-screen w-full font-sans text-foreground">
       
-      {/* HERO: Editorial Statement */}
-      <section className="relative px-8 md:px-16 lg:px-24 pt-32 pb-24 sm:pt-40 sm:pb-32 w-full max-w-[1600px] mx-auto flex flex-col lg:flex-row items-center gap-16 border-b border-border/40">
+      {/* HERO: Centered Editorial Statement with Highlighted Handwriting Animation */}
+      <section className="relative px-6 sm:px-12 md:px-16 lg:px-24 pt-28 pb-24 sm:pt-36 sm:pb-32 w-full max-w-[1400px] mx-auto flex flex-col items-center text-center border-b border-border/40">
+        
+        {/* Top Eyebrow Badge */}
+        <motion.div 
+          initial="hidden"
+          animate="visible"
+          variants={fadeUp}
+          className="mb-8 inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-emerald-50/80 border border-emerald-200/70 text-emerald-800 shadow-xs"
+        >
+          <span className="h-2 w-2 rounded-full bg-[#15803D] animate-pulse" />
+          <span className="text-[11.5px] font-mono font-medium tracking-wider uppercase">
+            The Meritlane Standard • Technical Talent Registry
+          </span>
+        </motion.div>
+
+        {/* HIGHLIGHTED CENTERPIECE: The Animated Handwriting Word */}
         <motion.div 
           initial="hidden" 
           animate="visible" 
-          variants={staggerContainer}
-          className="flex-1 text-left"
+          variants={fadeUp}
+          className="w-full flex justify-center items-center mb-4 sm:mb-6 min-h-[1.4em]"
         >
-          <motion.div variants={fadeUp} className="mb-6 flex items-center gap-3">
-            <span className="h-px w-8 bg-foreground"></span>
-            <span className="text-[12px] font-sans font-medium tracking-widest uppercase text-muted-foreground">The Meritlane Standard</span>
-          </motion.div>
-          <motion.h1 variants={fadeUp} className="text-[40px] sm:text-[48px] md:text-[60px] lg:text-[72px] font-serif text-foreground tracking-tight leading-[1.08]">
-            <span className="block text-emerald-700 dark:text-emerald-500 mb-2 sm:mb-3 min-h-[1.25em]">
-              <HandwritingText
-                words={["Meritlane.", "Proof of skill.", "Audited code.", "Verified talent.", "Not pedigree."]}
-                height="1.05em"
-                duration={1.4}
-                delay={0.1}
-                interval={3200}
-              />
-            </span>
-            <motion.span 
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 1.3, duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
-              className="block"
-            >
-              Proof of skill.<br/>
-              <span className="text-[#525252]">Not just credentials.</span>
-            </motion.span>
-          </motion.h1>
-          <motion.p variants={fadeUp} className="mt-8 text-[18px] lg:text-[20px] text-[#525252] max-w-xl leading-[1.6]">
-            Meritlane is a technical talent verification institution. We audit code, validate engineering capabilities, and establish verifiable proof of skill—so you can hire based on evidence, not pedigree.
-          </motion.p>
-          <motion.div variants={fadeUp} className="mt-12 flex flex-wrap gap-4">
-            <Link href="/employer/dashboard">
-              <Button className="bg-[#0D0D0D] text-[#FFFFFF] h-12 px-8 rounded-[6px] text-[16px] font-medium font-sans hover:bg-[#222222] transition-colors border-none">
-                  Start hiring verified talent
-                </Button>
-            </Link>
-            <Link href="/signup">
-              <Button variant="outline" className="h-12 px-8 rounded-[6px] text-[16px] font-medium font-sans border-border hover:bg-surface-low transition-colors text-foreground">
-                  Get verified as an engineer
-                </Button>
-            </Link>
-          </motion.div>
+          <HandwritingText
+            words={["Meritlane.", "Proof of skill.", "Audited code.", "Verified talent.", "Not pedigree."]}
+            height="1.35em"
+            duration={1.4}
+            delay={0.1}
+            interval={3200}
+            className="text-emerald-700 dark:text-emerald-500 font-normal"
+          />
         </motion.div>
 
-        {/* Visual Artifact (Illustrative Blueprint) */}
-        <motion.div 
-          initial={{ opacity: 0, x: 20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 1, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
-          className="flex-1 w-full max-w-lg lg:max-w-none relative"
+        {/* Editorial Headline */}
+        <motion.h1 
+          initial="hidden"
+          animate="visible"
+          variants={fadeUp}
+          className="text-[44px] sm:text-[56px] md:text-[68px] lg:text-[76px] font-serif text-foreground tracking-tight leading-[1.08] max-w-4xl mx-auto mb-6"
         >
-          <div className="bg-surface border border-border p-8 relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-16 h-16 bg-border opacity-20" style={{ clipPath: 'polygon(100% 0, 0 0, 100% 100%)' }} />
+          Proof of skill.<br/>
+          <span className="text-[#78716C] font-normal italic">Not just credentials.</span>
+        </motion.h1>
+
+        {/* Subtitle */}
+        <motion.p 
+          initial="hidden"
+          animate="visible"
+          variants={fadeUp}
+          className="text-[17px] sm:text-[19px] lg:text-[20px] text-[#525252] max-w-2xl mx-auto leading-[1.65] mb-10"
+        >
+          Meritlane is a technical talent verification institution. We audit code, validate engineering capabilities, and establish verifiable proof of skill—so you can hire based on evidence, not pedigree.
+        </motion.p>
+
+        {/* Action Buttons */}
+        <motion.div 
+          initial="hidden"
+          animate="visible"
+          variants={fadeUp}
+          className="flex flex-wrap items-center justify-center gap-4 mb-16 sm:mb-20"
+        >
+          <Link href="/employer/dashboard">
+            <Button className="bg-[#15803D] text-[#FFFFFF] h-12 px-8 rounded-full text-[15px] font-medium font-sans hover:bg-[#166534] shadow-[0_4px_16px_rgba(21,128,61,0.25)] transition-all border border-emerald-600/30">
+              Start hiring verified talent
+            </Button>
+          </Link>
+          <Link href="/signup">
+            <Button variant="outline" className="h-12 px-8 rounded-full text-[15px] font-medium font-sans border-border bg-surface hover:bg-surface-low text-foreground transition-all">
+              Get verified as an engineer
+            </Button>
+          </Link>
+        </motion.div>
+
+        {/* Repositioned Artifact: Architectural Blueprint Showcase directly beneath hero */}
+        <motion.div 
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.9, delay: 0.35, ease: [0.16, 1, 0.3, 1] }}
+          className="w-full max-w-4xl mx-auto"
+        >
+          <div className="bg-surface border border-border rounded-xl shadow-[0_8px_30px_rgba(0,0,0,0.04)] p-6 sm:p-8 relative overflow-hidden text-left">
+            <div className="absolute top-0 right-0 w-24 h-24 bg-emerald-500/5 rounded-bl-full pointer-events-none" />
             
-            <div className="flex items-center justify-between mb-8 pb-6 border-b border-border">
-              <div>
-                <div className="text-[11px] font-mono tracking-widest text-[#737373] uppercase mb-2">Protocol 001.A</div>
-                <div className="text-[22px] font-serif text-foreground">Verified Technical Profile</div>
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8 pb-6 border-b border-border">
+              <div className="flex items-center gap-3">
+                <div className="h-3 w-3 rounded-full bg-[#15803D] animate-pulse shadow-[0_0_8px_rgba(21,128,61,0.4)]" />
+                <div>
+                  <div className="text-[11px] font-mono tracking-widest text-[#737373] uppercase">Protocol 001.A • Live Verification Record</div>
+                  <div className="text-[20px] sm:text-[22px] font-serif text-foreground">Verified Engineering Profile</div>
+                </div>
               </div>
-              <div className="h-2 w-2 rounded-full bg-[#15803D] animate-pulse" />
+              <div className="flex items-center gap-2 px-3 py-1 bg-emerald-50 border border-emerald-200/80 rounded-full text-emerald-800 text-[11px] font-mono font-medium self-start sm:self-auto">
+                <CheckCircle className="h-3.5 w-3.5 text-[#15803D]" />
+                <span>STATUS: AUDITED & SIGNED</span>
+              </div>
             </div>
             
-            <div className="space-y-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               <div>
-                <div className="text-[11px] font-mono text-[#737373] uppercase tracking-wider mb-4 border-l-2 border-border pl-3">Audited Stack</div>
-                <div className="flex flex-wrap gap-3">
-                  {['React', 'TypeScript', 'Go', 'PostgreSQL'].map(skill => (
-                    <span key={skill} className="px-3 py-1.5 bg-surface border border-[#E5E5E5] text-[#0D0D0D] text-[14px] font-sans font-medium rounded-sm">
-                      {skill}
-                    </span>
+                <div className="text-[11px] font-mono text-[#737373] uppercase tracking-wider mb-4 border-l-2 border-[#15803D] pl-3">
+                  Audited Capability Stack
+                </div>
+                <div className="flex flex-wrap gap-2.5">
+                  {[
+                    { name: "React", level: "Senior / Audited" },
+                    { name: "TypeScript", level: "Production Rigor" },
+                    { name: "Go", level: "Concurrent Systems" },
+                    { name: "PostgreSQL", level: "Optimized Schemas" }
+                  ].map(item => (
+                    <div key={item.name} className="flex items-center gap-2 px-3 py-1.5 bg-surface-low border border-border text-foreground text-[13px] font-sans font-medium rounded-md">
+                      <span>{item.name}</span>
+                      <span className="text-[10px] font-mono text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200/50">Verified</span>
+                    </div>
                   ))}
                 </div>
               </div>
               
               <div>
-                <div className="text-[11px] font-mono text-[#737373] uppercase tracking-wider mb-4 border-l-2 border-border pl-3">Signal Validation Log</div>
+                <div className="text-[11px] font-mono text-[#737373] uppercase tracking-wider mb-4 border-l-2 border-[#15803D] pl-3">
+                  Signal Validation Log
+                </div>
                 <div className="flex flex-col gap-3 font-mono text-xs">
-                  <div className="flex items-center gap-3 text-muted-foreground">
-                    <span className="text-[#15803D]">✓</span>
-                    <span>Technical Assessment Completed</span>
+                  <div className="flex items-center justify-between p-2 bg-surface-low/60 rounded border border-border/60">
+                    <span className="flex items-center gap-2.5 text-foreground">
+                      <span className="text-[#15803D] font-bold">✓</span>
+                      <span>Technical Assessment Completed</span>
+                    </span>
+                    <span className="text-emerald-700 font-medium">94% Index</span>
                   </div>
-                  <div className="flex items-center gap-3 text-muted-foreground">
-                    <span className="text-[#15803D]">✓</span>
-                    <span>Project Architecture Verified</span>
+                  <div className="flex items-center justify-between p-2 bg-surface-low/60 rounded border border-border/60">
+                    <span className="flex items-center gap-2.5 text-foreground">
+                      <span className="text-[#15803D] font-bold">✓</span>
+                      <span>Project Architecture Audited</span>
+                    </span>
+                    <span className="text-emerald-700 font-medium">Verified</span>
                   </div>
-                  <div className="flex items-center gap-3 text-muted-foreground">
-                    <span className="text-[#15803D]">✓</span>
-                    <span>Identity Proof Recorded</span>
+                  <div className="flex items-center justify-between p-2 bg-surface-low/60 rounded border border-border/60">
+                    <span className="flex items-center gap-2.5 text-foreground">
+                      <span className="text-[#15803D] font-bold">✓</span>
+                      <span>Identity & Provenance Hash Stored</span>
+                    </span>
+                    <span className="text-muted-foreground text-[11px]">0x7f9a...88c2</span>
                   </div>
                 </div>
               </div>
