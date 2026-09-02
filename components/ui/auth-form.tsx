@@ -167,78 +167,48 @@ export function AuthForm({ mode: initialMode }: AuthFormProps) {
   return (
     <div className="min-h-screen w-full flex flex-col md:flex-row bg-white overflow-hidden">
       {/* Left Side: Premium Brand Area with Animation */}
-      {/* Left Side: Editorial Brand Showcase with Authentic Meritlane Architectural Emblem */}
-      <div className="relative hidden md:flex flex-col justify-between w-full md:w-5/12 lg:w-1/2 bg-[#051711] text-white p-8 lg:p-12 overflow-hidden border-r border-[#0D2E23]">
-        {/* Ambient forest glow and subtle grid texture */}
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,_var(--tw-gradient-stops))] from-[#064E3B]/40 via-[#031D15] to-[#02130E] pointer-events-none" />
-        <div className="absolute inset-0 opacity-[0.03] bg-[radial-gradient(#FAFAF9_1px,transparent_1px)] [background-size:24px_24px] pointer-events-none" />
-
+      {/* Left Side: Authentic Institutional Provenance Column (Editorial Limestone Paper, Not Generic Dark AI/SaaS) */}
+      <div className="relative hidden md:flex flex-col justify-between w-full md:w-5/12 lg:w-1/2 bg-[#F8F6F3] text-[#1C1917] p-8 lg:p-14 border-r border-[#E7E2DA]">
+        
         {/* Top Header: Official Meritlane Brand */}
         <div className="relative z-10 flex items-center justify-between">
-          <Link href="/" className="inline-flex items-center gap-3 group">
-            <img src="/logo-m.png" alt="Meritlane Emblem" className="h-8 w-auto object-contain bg-white/95 rounded-md p-1 shadow-sm" />
-            <span className="font-serif text-2xl tracking-tight text-[#F8F6F3]">Meritlane</span>
+          <Link href="/" className="inline-flex items-center gap-3">
+            <img src="/logo-m.png" alt="Meritlane Emblem" className="h-8 w-auto object-contain" />
+            <span className="font-serif text-2xl tracking-tight text-[#1C1917]">Meritlane</span>
           </Link>
-          <div className="text-[11px] font-mono tracking-widest text-[#529471] uppercase px-2.5 py-1 rounded-full bg-[#064E3B]/40 border border-[#064E3B]/60">
-            Audit Registry
+          <div className="text-[11px] font-mono tracking-widest text-[#064E3B] uppercase px-3 py-1 rounded-full bg-[#064E3B]/10 border border-[#064E3B]/20 font-medium">
+            Technical Audit Registry
           </div>
         </div>
 
-        {/* Center: Luxury Architectural Drafting Blueprint Artwork & Typography */}
+        {/* Centerpiece: Clean Architectural Monogram on Paper */}
         <div className="relative z-10 max-w-lg my-auto py-8">
-          <motion.div 
-            initial={{ opacity: 0, scale: 0.96 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.8 }}
-            className="mb-8 rounded-xl overflow-hidden border border-[#0B3D2E] shadow-[0_12px_40px_rgba(0,0,0,0.4)] relative group"
-          >
+          <div className="mb-8 rounded-2xl overflow-hidden border border-[#E7E2DA] shadow-[0_8px_30px_rgba(0,0,0,0.04)] bg-white p-3">
             <img 
-              src="/images/auth-banner.jpg" 
-              alt="Meritlane Technical Architectural Emblem" 
-              className="w-full h-64 object-cover object-center transform group-hover:scale-102 transition-transform duration-700" 
+              src="/images/meritlane-editorial-monogram.jpg" 
+              alt="The Meritlane Standard • Technical Talent Registry" 
+              className="w-full h-auto object-contain rounded-xl"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-[#051711] via-transparent to-transparent opacity-80" />
-            <div className="absolute bottom-3 left-4 right-4 flex items-center justify-between text-[11px] font-mono text-[#86EFAC]/80">
-              <span>PROTOCOL 001.A</span>
-              <span>PROOF OF SKILL</span>
-            </div>
-          </motion.div>
+          </div>
 
-          <motion.h1
-            initial={{ opacity: 0, y: 15 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2, duration: 0.7 }}
-            className="text-3xl lg:text-4xl font-serif tracking-tight leading-[1.15] mb-4 text-[#FAFAF9]"
-          >
+          <h1 className="text-3xl lg:text-[38px] font-serif tracking-tight leading-[1.12] mb-4 text-[#1C1917]">
             Proof of skill.<br/>
-            <span className="text-[#A3B899] font-normal italic">Not just credentials.</span>
-          </motion.h1>
-          <motion.p
-            initial={{ opacity: 0, y: 15 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3, duration: 0.7 }}
-            className="text-[15px] text-[#A8B2A6] leading-relaxed"
-          >
-            The technical talent verification institution. Where engineers prove competence through verifiable code audits, not institutional pedigree.
-          </motion.p>
+            <span className="text-[#78716C] font-normal italic">Not just credentials.</span>
+          </h1>
+          <p className="text-[15px] text-[#525252] leading-relaxed font-sans">
+            Meritlane is a technical talent verification institution. We audit code, validate engineering capabilities, and establish verifiable proof of skill—so you can hire based on evidence, not pedigree.
+          </p>
         </div>
 
-        {/* Bottom Provenance Credential Strip */}
-        <div className="relative z-10 pt-4 border-t border-[#0D3628]">
-          <div className="flex items-center justify-between">
-            <div className="flex gap-3 items-center">
-              <div className="w-8 h-8 rounded-full border border-[#0B4F3A] flex items-center justify-center bg-[#064E3B]/30 text-[#86EFAC]">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
-              </div>
-              <div>
-                <p className="text-[11px] font-mono font-medium text-[#F8F6F3] tracking-wider uppercase">
-                  Audited Talent Pipeline
-                </p>
-                <p className="text-[10px] font-mono text-[#529471]">Cryptographically verified records</p>
-              </div>
-            </div>
-            <span className="text-[10px] font-mono text-[#529471]">EST. 2024</span>
+        {/* Bottom Provenance Line */}
+        <div className="relative z-10 pt-5 border-t border-[#E7E2DA] flex items-center justify-between text-[#78716C]">
+          <div className="flex items-center gap-2.5">
+            <span className="h-2 w-2 rounded-full bg-[#064E3B]" />
+            <span className="text-[11px] font-mono uppercase tracking-wider">
+              Cryptographically Audited Records
+            </span>
           </div>
+          <span className="text-[11px] font-mono">EST. 2024</span>
         </div>
       </div>
 
