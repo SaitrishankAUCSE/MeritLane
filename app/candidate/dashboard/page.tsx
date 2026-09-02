@@ -117,6 +117,7 @@ export default function CandidateDashboardPage() {
   return (
     <div className="w-full px-4 sm:px-8 md:px-16 lg:px-24 py-8 sm:py-12 mx-auto max-w-[1600px] h-full overflow-y-auto scrollbar-hide relative">
       
+      {/* Top Protocol Status & Context Guide */}
       <ContextGuide 
         storageKey="candidate_dashboard"
         title="Evidence Workspace"
@@ -130,141 +131,210 @@ export default function CandidateDashboardPage() {
         ctaHref="/candidate/assessment"
       />
 
-      <div className="mb-10 sm:mb-12">
-        <div className="text-[14px] font-sans font-medium text-[#737373] mb-3 flex items-center gap-2">
-          <FolderOpen className="h-3 w-3" /> Evidence Workspace
+      {/* Page Header with Institutional Provenance Line and Primary CTA */}
+      <div className="mb-10">
+        <div className="flex items-center gap-2 mb-3">
+          <span className="h-2 w-2 rounded-full bg-[#064E3B] animate-pulse" />
+          <span className="text-[12px] font-mono tracking-widest text-[#064E3B] uppercase font-medium">
+            Protocol 001.B • Technical Evidence Layer
+          </span>
         </div>
-        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 sm:gap-6 border-b border-[#E5E5E5] pb-6">
+        
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6 border-b border-[#E7E2DA] pb-8">
           <div>
-            <h1 className="font-serif text-[28px] sm:text-[40px] lg:text-[48px] text-[#0D0D0D] leading-tight mb-2">Build your proof.</h1>
-            <div className="text-[14px] text-[#0D0D0D] font-sans">Provide the material that supports the claims made in your Identity.</div>
+            <h1 className="font-serif text-[32px] sm:text-[44px] lg:text-[50px] text-[#1C1917] leading-[1.08] mb-3">
+              Build your proof.
+            </h1>
+            <p className="text-[15px] text-[#525252] font-sans max-w-2xl leading-relaxed">
+              Link code repositories, production URLs, and verifiable technical artifacts that validate the engineering capabilities declared in your identity.
+            </p>
           </div>
-          <button 
-            type="button"
-            onClick={() => setIsModalOpen(true)}
-            aria-haspopup="dialog"
-            aria-expanded={isModalOpen}
-            className="flex items-center justify-center gap-2 px-5 h-10 border border-[#0D0D0D] bg-[#0D0D0D] text-[#FFFFFF] hover:bg-[#222222] hover:text-[#FFFFFF] rounded-md text-[14px] font-sans font-medium transition-all font-bold w-full sm:w-auto shrink-0"
-          >
-            [+] Add evidence
-          </button>
+
+          <div className="flex items-center gap-3 shrink-0">
+            <button 
+              type="button"
+              onClick={() => setIsModalOpen(true)}
+              aria-haspopup="dialog"
+              aria-expanded={isModalOpen}
+              className="flex items-center justify-center gap-2 px-6 h-11 bg-[#064E3B] text-[#FFFFFF] hover:bg-[#022c22] rounded-full text-[14px] font-sans font-medium transition-all shadow-[0_4px_14px_rgba(6,78,59,0.2)] active:scale-95"
+            >
+              <span>+</span> Add Evidence
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Executive Telemetry & Verification Readiness Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 mb-10">
+        <div className="bg-white border border-[#E7E2DA] rounded-xl p-5 shadow-[0_2px_8px_rgba(0,0,0,0.02)] relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-16 h-16 bg-[#064E3B]/5 rounded-bl-full pointer-events-none" />
+          <div className="text-[11px] font-mono uppercase tracking-wider text-[#78716C] mb-1">Declared Skills</div>
+          <div className="text-[32px] font-serif text-[#1C1917] font-normal leading-none my-2">{skills.length}</div>
+          <div className="text-[12px] font-sans text-[#78716C]">Self-declared in your Identity</div>
+        </div>
+
+        <div className="bg-white border border-[#E7E2DA] rounded-xl p-5 shadow-[0_2px_8px_rgba(0,0,0,0.02)] relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-16 h-16 bg-[#064E3B]/5 rounded-bl-full pointer-events-none" />
+          <div className="text-[11px] font-mono uppercase tracking-wider text-[#78716C] mb-1">Linked Artifacts</div>
+          <div className="text-[32px] font-serif text-[#1C1917] font-normal leading-none my-2">{projects.length}</div>
+          <div className="text-[12px] font-sans text-[#78716C]">Supporting code repositories</div>
+        </div>
+
+        <div className="bg-white border border-[#E7E2DA] rounded-xl p-5 shadow-[0_2px_8px_rgba(0,0,0,0.02)] relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-16 h-16 bg-[#064E3B]/10 rounded-bl-full pointer-events-none" />
+          <div className="text-[11px] font-mono uppercase tracking-wider text-[#064E3B] mb-1">Verified Badges</div>
+          <div className="text-[32px] font-serif text-[#064E3B] font-normal leading-none my-2">
+            {Object.values(profile?.verifiedSkills || {}).filter((v: any) => v.status === "verified").length}
+          </div>
+          <div className="text-[12px] font-sans text-[#064E3B]">Audited & signed assessments</div>
         </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
         
-        {/* Left Column: Evidence Coverage */}
-        <div className="space-y-8">
-          <h2 className="text-[12px] font-mono uppercase tracking-[0.1em] text-[#666666] mb-6">Evidence Coverage</h2>
+        {/* Left Column: Evidence Coverage by Skill */}
+        <div className="space-y-6">
+          <div className="flex items-center justify-between pb-2 border-b border-[#E7E2DA]">
+            <h2 className="text-[12px] font-mono uppercase tracking-[0.15em] text-[#78716C]">Evidence Coverage</h2>
+            <span className="text-[11px] font-mono text-[#064E3B]">{skills.length} Capabilities</span>
+          </div>
           
-          <div className="space-y-6">
+          <div className="space-y-4">
             {skills.map((skill, index) => {
               const isVerified = profile?.verifiedSkills?.[skill]?.status === "verified";
               const itemsCount = projects.filter(p => p.supportsClaim === skill).length;
               
               return (
-                <div key={index} className="border border-[#E5E5E5] bg-[#FFFFFF] p-5 rounded-lg">
-                  <div className="flex justify-between items-end mb-3">
-                    <div className="text-[14px] font-medium text-[#0D0D0D]">{skill}</div>
-                    <div className={`text-[10px] font-mono ${isVerified ? 'text-[#15803D]' : 'text-[#666666]'}`}>
-                      {isVerified ? (itemsCount > 0 ? `${itemsCount} ITEM${itemsCount > 1 ? 'S' : ''}` : 'VERIFIED') : `${itemsCount} ITEM${itemsCount !== 1 ? 'S' : ''}`}
+                <div key={index} className={`border rounded-xl p-5 transition-all ${isVerified ? 'border-[#064E3B]/30 bg-[#F0FDF4]/50 shadow-[0_2px_12px_rgba(6,78,59,0.05)]' : 'border-[#E7E2DA] bg-white hover:border-[#C8C0B5]'}`}>
+                  <div className="flex justify-between items-start mb-3">
+                    <div>
+                      <div className="text-[15px] font-medium text-[#1C1917] font-sans">{skill}</div>
+                      <div className="text-[11px] text-[#78716C] mt-0.5">
+                        {itemsCount > 0 ? `${itemsCount} linked artifact${itemsCount > 1 ? 's' : ''}` : 'No evidence attached yet'}
+                      </div>
                     </div>
+                    <span className={`text-[10px] font-mono uppercase px-2 py-0.5 rounded-full font-medium ${isVerified ? 'bg-[#064E3B]/10 text-[#064E3B] border border-[#064E3B]/20' : 'bg-[#F2EFE9] text-[#78716C] border border-[#E7E2DA]'}`}>
+                      {isVerified ? 'Verified' : itemsCount > 0 ? 'Linked' : 'Pending'}
+                    </span>
                   </div>
                   
-                  <div className="flex gap-1 mb-3">
-                    <div className={`h-2 flex-1 rounded-sm ${isVerified ? 'bg-[#15803D]' : 'bg-[#E5E5E5]'}`}></div>
-                    <div className={`h-2 flex-1 rounded-sm ${isVerified ? 'bg-[#15803D]' : 'bg-[#E5E5E5]'}`}></div>
-                    <div className={`h-2 flex-1 rounded-sm ${isVerified ? 'bg-[#15803D]' : 'bg-[#E5E5E5]'}`}></div>
-                    <div className={`h-2 flex-1 rounded-sm ${isVerified ? 'bg-[#15803D]' : 'bg-[#E5E5E5]'}`}></div>
+                  {/* Segmented Progress Tracker */}
+                  <div className="flex gap-1.5 mb-4">
+                    <div className={`h-1.5 flex-1 rounded-full ${itemsCount > 0 || isVerified ? 'bg-[#064E3B]' : 'bg-[#E7E2DA]'}`} />
+                    <div className={`h-1.5 flex-1 rounded-full ${itemsCount > 1 || isVerified ? 'bg-[#064E3B]' : 'bg-[#E7E2DA]'}`} />
+                    <div className={`h-1.5 flex-1 rounded-full ${isVerified ? 'bg-[#064E3B]' : 'bg-[#E7E2DA]'}`} />
                   </div>
                   
                   {isVerified ? (
-                    <>
-                      <div className="text-[11px] text-[#15803D] mb-4">Verification successful.</div>
-                      <div className="w-full flex items-center justify-center gap-2 text-[14px] font-sans font-medium border border-[#E5E5E5] text-[#15803D] bg-[#F0FDF4] py-2 h-10 rounded-md">
-                        ✓ Verified
-                      </div>
-                    </>
+                    <div className="w-full flex items-center justify-center gap-2 text-[13px] font-sans font-medium text-[#064E3B] bg-[#064E3B]/10 border border-[#064E3B]/20 py-2.5 rounded-lg">
+                      <FileCheck className="h-4 w-4 text-[#064E3B]" /> Audit Record Verified
+                    </div>
                   ) : (
-                    <>
-                      <div className="text-[11px] text-[#666666] mb-4">{itemsCount > 0 ? 'Verification pending.' : 'No supporting evidence yet.'}</div>
-                      <button 
-                        onClick={() => router.push(`/candidate/assessment?skill=${encodeURIComponent(skill)}`)}
-                        className="w-full flex items-center justify-center gap-2 text-[14px] font-sans font-medium border border-[#0D0D0D] text-[#FFFFFF] bg-[#0D0D0D] py-2 h-10 rounded-md hover:bg-[#222222] hover:text-[#FFFFFF] transition-all font-bold"
-                      >
-                        Start verification <ArrowRight className="h-3 w-3" />
-                      </button>
-                    </>
+                    <button 
+                      onClick={() => router.push(`/candidate/assessment?skill=${encodeURIComponent(skill)}`)}
+                      className="w-full flex items-center justify-center gap-2 text-[13px] font-sans font-medium border border-[#064E3B] text-[#FFFFFF] bg-[#064E3B] hover:bg-[#022c22] py-2.5 rounded-lg transition-all shadow-xs"
+                    >
+                      Take Verification Assessment <ArrowRight className="h-3.5 w-3.5" />
+                    </button>
                   )}
                 </div>
               );
             })}
             
             {skills.length === 0 && (
-              <div className="text-[13px] text-[#737373] p-4 border border-[#E5E5E5] border-dashed rounded-lg text-center">
-                Add skills in your Identity to see them here.
+              <div className="text-[13px] text-[#78716C] p-6 border border-dashed border-[#E7E2DA] rounded-xl text-center bg-[#F8F6F3]">
+                Declare your technical skills in your Identity section to establish your evidence coverage track.
               </div>
             )}
           </div>
         </div>
 
-        {/* Right Column: Evidence Objects */}
-        <div className="lg:col-span-2 space-y-8">
-          <h2 className="text-[12px] font-mono uppercase tracking-[0.1em] text-[#666666] mb-6">Linked Artifacts</h2>
+        {/* Right Column: Linked Technical Artifacts */}
+        <div className="lg:col-span-2 space-y-6">
+          <div className="flex items-center justify-between pb-2 border-b border-[#E7E2DA]">
+            <h2 className="text-[12px] font-mono uppercase tracking-[0.15em] text-[#78716C]">Linked Technical Artifacts</h2>
+            <span className="text-[11px] font-mono text-[#78716C]">{projects.length} Repositories</span>
+          </div>
           
-          <div className="space-y-6">
-            
+          <div className="space-y-5">
             {projects.length === 0 ? (
-               <div className="text-[14px] text-[#737373] p-8 border border-[#E5E5E5] border-dashed rounded-lg text-center bg-[#FAFAFA]">
-                 No evidence linked yet. Click [+] Add evidence to prove your skills.
+               <div className="p-12 border border-dashed border-[#E7E2DA] rounded-xl text-center bg-[#FFFFFF] shadow-sm">
+                 <div className="h-10 w-10 mx-auto rounded-full bg-[#064E3B]/10 text-[#064E3B] flex items-center justify-center mb-4">
+                   <Code className="h-5 w-5" />
+                 </div>
+                 <h3 className="text-base font-serif text-[#1C1917] mb-2">No evidence linked yet</h3>
+                 <p className="text-sm text-[#78716C] max-w-md mx-auto mb-6">
+                   Attach your GitHub repositories or live projects so our audit protocol can inspect your architectural capability.
+                 </p>
+                 <button 
+                   type="button" 
+                   onClick={() => setIsModalOpen(true)}
+                   className="px-6 py-2.5 bg-[#064E3B] text-white rounded-full text-[13px] font-medium hover:bg-[#022c22] transition-colors shadow-sm"
+                 >
+                   + Link First Repository
+                 </button>
                </div>
             ) : (
               projects.map((project, idx) => (
-                <div key={project.id || idx} className="border border-[#E5E5E5] bg-[#FFFFFF] p-6 rounded-lg group hover:border-[#D2D2D2] transition-colors">
-                    <div className="flex items-start justify-between mb-4">
+                <div key={project.id || idx} className="border border-[#E7E2DA] bg-white p-6 sm:p-7 rounded-xl hover:border-[#064E3B]/40 hover:shadow-[0_4px_20px_rgba(0,0,0,0.03)] transition-all relative">
+                    <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 mb-4">
                       <div>
-                        <h3 className="text-[16px] font-sans font-medium text-[#0D0D0D] mb-1">{project.title}</h3>
-                        <div className="text-[12px] font-sans font-medium text-[#666666] flex items-center gap-2">
-                          <FileCheck className="h-3.5 w-3.5" /> Project Repository
+                        <div className="flex items-center gap-2.5 mb-1">
+                          <h3 className="text-[18px] font-serif text-[#1C1917]">{project.title}</h3>
+                          {project.liveUrl && (
+                            <a href={project.liveUrl} target="_blank" rel="noopener noreferrer" className="text-[11px] font-mono text-[#064E3B] bg-[#064E3B]/10 px-2 py-0.5 rounded border border-[#064E3B]/20 hover:underline">
+                              Live Demo ↗
+                            </a>
+                          )}
+                        </div>
+                        <div className="text-[12px] font-mono text-[#78716C] flex items-center gap-2">
+                          <FileCheck className="h-3.5 w-3.5 text-[#064E3B]" />
+                          <span className="truncate max-w-xs sm:max-w-md">{project.repoUrl}</span>
                         </div>
                       </div>
-                      <div className="flex gap-3 text-[11px] font-sans font-medium text-[#666666]">
-                        <a href={project.repoUrl} target="_blank" rel="noopener noreferrer" className="hover:text-[#0D0D0D] transition-colors">View</a>
-                        <button onClick={() => handleRemoveEvidence(project.id)} className="hover:text-[#B42318] transition-colors">Remove</button>
+                      <div className="flex items-center gap-3 text-[12px] font-sans shrink-0">
+                        <a href={project.repoUrl} target="_blank" rel="noopener noreferrer" className="text-[#064E3B] font-medium hover:underline">
+                          View Code ↗
+                        </a>
+                        <span className="text-[#E7E2DA]">|</span>
+                        <button onClick={() => handleRemoveEvidence(project.id)} className="text-[#B42318] hover:underline">
+                          Remove
+                        </button>
                       </div>
                     </div>
 
                     {project.description && (
-                      <div className="text-[13px] text-[#404040] mb-4 whitespace-pre-wrap leading-relaxed">
+                      <p className="text-[14px] text-[#525252] mb-5 leading-relaxed font-sans">
                         {project.description}
-                      </div>
+                      </p>
                     )}
                     
                     {project.skillsUsed && project.skillsUsed.length > 0 && (
-                      <div className="flex flex-wrap gap-2 mb-2">
+                      <div className="flex flex-wrap gap-2 mb-5">
                         {project.skillsUsed.map(skill => (
-                          <span key={skill} className="px-2 py-1 bg-[#F3F3F1] border border-[#E5E5E5] rounded-md text-[11px] font-mono text-[#404040]">
+                          <span key={skill} className="px-2.5 py-1 bg-[#F8F6F3] border border-[#E7E2DA] rounded-md text-[11px] font-mono text-[#525252]">
                             {skill}
                           </span>
                         ))}
                       </div>
                     )}
 
-                    {/* Proof Thread */}
-                  <div className="mt-6 border-t border-[#E5E5E5] pt-6">
-                    <div className="text-[10px] font-sans font-medium text-[#666666] mb-4">Supports Claim:</div>
-                    <div className="relative border-l border-[#E5E5E5] pl-4 space-y-4">
-                      <div className="relative">
-                        <div className="absolute -left-[18.5px] top-1.5 h-2 w-2 rounded-full bg-[#15803D]" />
-                        <div className="text-[13px] font-medium text-[#0D0D0D]">{project.supportsClaim || "Unspecified"}</div>
-                        <div className="text-[11px] text-[#666666] mt-1">Status: Evidence Linked</div>
+                    {/* Audit Provenance Thread */}
+                    <div className="border-t border-[#E7E2DA] pt-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-[12px]">
+                      <div className="flex items-center gap-2">
+                        <span className="h-2 w-2 rounded-full bg-[#064E3B]" />
+                        <span className="text-[#78716C]">Supports Claim:</span>
+                        <span className="font-medium text-[#1C1917] bg-[#F2EFE9] px-2 py-0.5 rounded text-[11px] font-mono">
+                          {project.supportsClaim || "General Technical Capability"}
+                        </span>
+                      </div>
+                      <div className="text-[11px] font-mono text-[#064E3B] font-medium">
+                        STATUS: ARTIFACT ATTACHED
                       </div>
                     </div>
-                  </div>
                 </div>
               ))
             )}
-            
           </div>
         </div>
 
@@ -399,9 +469,9 @@ export default function CandidateDashboardPage() {
                     Cancel
                   </button>
                   <button 
-                    type="submit"
+                    type="submit" 
                     disabled={saving}
-                    className="flex items-center gap-2 px-5 py-2 bg-[#0D0D0D] text-[#FFFFFF] hover:bg-[#222222] rounded-md text-[13px] font-medium transition-colors disabled:opacity-70"
+                    className="flex items-center gap-2 px-6 py-2 bg-[#064E3B] text-[#FFFFFF] hover:bg-[#022c22] rounded-full text-[13px] font-medium transition-colors disabled:opacity-70 shadow-xs"
                   >
                     {saving && <div className="h-3.5 w-3.5 rounded-full border-[1.5px] border-[#FFFFFF]/30 border-t-[#FFFFFF] animate-spin" />}
                     Link Evidence

@@ -142,17 +142,22 @@ export default function CandidateProfilePage() {
         />
       )}
 
+      {/* Page Header */}
       <div className="mb-10">
-        <div className="text-[14px] font-sans font-medium text-[#737373] mb-3 flex items-center gap-2">
-          <Fingerprint className="h-3 w-3" /> Technical identity
+        <div className="flex items-center gap-2 mb-3">
+          <span className="h-2 w-2 rounded-full bg-[#064E3B] animate-pulse" />
+          <span className="text-[12px] font-mono tracking-widest text-[#064E3B] uppercase font-medium">
+            Protocol 001.A • Core Identity & Engineering Declaration
+          </span>
         </div>
-        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 sm:gap-6 border-b border-[#E5E5E5] pb-6">
+
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6 border-b border-[#E7E2DA] pb-8">
           <div>
-            <h1 className="font-serif text-[28px] sm:text-[40px] lg:text-[48px] text-[#0D0D0D] leading-tight mb-2">{name}</h1>
-            <div className="text-[14px] text-[#0D0D0D] font-sans">{primaryDomain}</div>
+            <h1 className="font-serif text-[32px] sm:text-[44px] lg:text-[50px] text-[#1C1917] leading-[1.08] mb-2">{name}</h1>
+            <div className="text-[15px] text-[#525252] font-sans">{primaryDomain}</div>
           </div>
-          <button onClick={() => setIsEditing(true)} className="flex items-center justify-center gap-2 px-5 h-10 border border-[#D2D2D2] bg-transparent text-[#0D0D0D] hover:text-[#0D0D0D] hover:bg-[#F3F3F1] hover:border-[#0D0D0D] rounded-md text-[14px] font-sans font-medium transition-all w-full sm:w-auto">
-            <PenTool className="h-3.5 w-3.5" /> Edit identity
+          <button onClick={() => setIsEditing(true)} className="flex items-center justify-center gap-2 px-6 h-11 border border-[#E7E2DA] bg-white text-[#1C1917] hover:bg-[#F2EFE9] rounded-full text-[14px] font-sans font-medium transition-all shadow-xs w-full sm:w-auto">
+            <PenTool className="h-3.5 w-3.5" /> Edit Identity
           </button>
         </div>
       </div>
@@ -164,9 +169,9 @@ export default function CandidateProfilePage() {
         <div className="md:col-span-2 space-y-10">
           
           <section>
-            <div className="flex items-center justify-between mb-4 border-b border-[#E5E5E5] pb-3">
-              <h2 className="text-[14px] font-sans font-medium text-[#737373]">Technical claims</h2>
-              <button onClick={() => router.push('/candidate/dashboard')} className="text-[14px] font-sans font-medium text-[#737373] hover:text-[#0D0D0D] transition-colors">Add evidence</button>
+            <div className="flex items-center justify-between mb-4 border-b border-[#E7E2DA] pb-3">
+              <h2 className="text-[12px] font-mono uppercase tracking-[0.15em] text-[#78716C]">Declared Capabilities</h2>
+              <button onClick={() => router.push('/candidate/dashboard')} className="text-[12px] font-mono text-[#064E3B] hover:underline font-medium">+ Add Evidence</button>
             </div>
             
             <div className="space-y-4">
@@ -175,15 +180,15 @@ export default function CandidateProfilePage() {
                 const isFailed = profile?.verifiedSkills?.[skill]?.status === "failed";
                 
                 return (
-                  <div key={idx} className={`border p-5 rounded-md flex flex-col sm:flex-row sm:items-center justify-between gap-4 group transition-colors ${isVerified ? 'border-[#15803D]/30 bg-[#F0FDF4]' : 'border-[#E5E5E5] bg-[#FAFAFA] hover:border-[#D2D2D2]'}`}>
+                  <div key={idx} className={`border p-5 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 group transition-all ${isVerified ? 'border-[#064E3B]/30 bg-[#F0FDF4]/50 shadow-xs' : 'border-[#E7E2DA] bg-white hover:border-[#C8C0B5]'}`}>
                     <div className="flex items-center gap-4">
-                      <div className={`h-10 w-10 shrink-0 border rounded-md flex items-center justify-center font-mono text-[14px] ${isVerified ? 'bg-[#FFFFFF] border-[#15803D]/30 text-[#15803D]' : 'bg-transparent border-[#D2D2D2] text-[#0D0D0D]'}`}>
+                      <div className={`h-11 w-11 shrink-0 rounded-xl flex items-center justify-center font-mono text-[13px] font-bold ${isVerified ? 'bg-[#064E3B]/10 border border-[#064E3B]/20 text-[#064E3B]' : 'bg-[#F8F6F3] border border-[#E7E2DA] text-[#1C1917]'}`}>
                         {skill.substring(0, 2).toUpperCase()}
                       </div>
                       <div>
-                        <div className="text-[14px] font-medium text-[#0D0D0D] mb-1 font-serif">{skill}</div>
-                        <div className={`text-[10px] font-mono uppercase tracking-[0.15em] ${isVerified ? 'text-[#15803D]' : 'text-[#666666]'}`}>
-                          State: {isVerified ? 'Verified' : 'Declared'}
+                        <div className="text-[16px] font-medium text-[#1C1917] mb-1 font-serif">{skill}</div>
+                        <div className={`text-[10px] font-mono uppercase tracking-[0.15em] ${isVerified ? 'text-[#064E3B] font-semibold' : 'text-[#78716C]'}`}>
+                          State: {isVerified ? 'Verified & Audited' : 'Self-Declared'}
                         </div>
                       </div>
                     </div>
@@ -191,21 +196,18 @@ export default function CandidateProfilePage() {
                     <div className="text-right">
                       {isVerified ? (
                         <>
-                          <div className="text-[10px] text-[#15803D] font-mono uppercase tracking-[0.1em] mb-2">Verified by MeritLane</div>
-                          <div className="text-[14px] font-sans font-medium text-[#15803D] flex items-center justify-end gap-1.5 h-9">
-                            ✓ Verified
+                          <div className="text-[10px] text-[#064E3B] font-mono uppercase tracking-[0.1em] mb-1">Signed by Meritlane Protocol</div>
+                          <div className="text-[13px] font-sans font-medium text-[#064E3B] flex items-center justify-end gap-1.5 h-8">
+                            <ShieldCheck className="h-4 w-4" /> Verified
                           </div>
                         </>
                       ) : (
-                        <>
-                          <div className="text-[10px] text-[#666666] font-mono uppercase tracking-[0.1em] mb-2">No evidence.</div>
-                          <button 
-                            onClick={() => router.push('/candidate/dashboard')}
-                            className="text-[14px] font-sans font-medium text-[#0D0D0D] border border-[#D2D2D2] px-4 h-9 rounded-md hover:bg-[#F3F3F1] hover:text-[#0D0D0D] hover:border-[#E5E5E5] transition-colors"
-                          >
-                            Add evidence
-                          </button>
-                        </>
+                        <button 
+                          onClick={() => router.push('/candidate/dashboard')}
+                          className="text-[13px] font-sans font-medium text-[#064E3B] border border-[#064E3B]/40 px-4 h-8 rounded-full hover:bg-[#064E3B]/5 transition-colors"
+                        >
+                          Attach Evidence
+                        </button>
                       )}
                     </div>
                   </div>

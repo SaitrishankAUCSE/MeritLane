@@ -85,14 +85,21 @@ export default function CandidateVerificationPage() {
         ]}
       />
 
-      <div className="mb-10 sm:mb-12">
-        <div className="text-[14px] font-sans font-medium text-[#737373] mb-3 flex items-center gap-2">
-          <ShieldCheck className="h-3 w-3" /> Verification Status
+      <div className="mb-10">
+        <div className="flex items-center gap-2 mb-3">
+          <span className="h-2 w-2 rounded-full bg-[#064E3B] animate-pulse" />
+          <span className="text-[12px] font-mono tracking-widest text-[#064E3B] uppercase font-medium">
+            Protocol 002.A • Skill Verification Engine
+          </span>
         </div>
-        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 sm:gap-6 border-b border-[#E5E5E5] pb-6">
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6 border-b border-[#E7E2DA] pb-8">
           <div>
-            <h1 className="font-serif text-[28px] sm:text-[40px] lg:text-[48px] text-[#0D0D0D] leading-tight mb-2">Technical Verification</h1>
-            <div className="text-[14px] text-[#0D0D0D] font-sans">Transform your self-declared claims into verifiable proof.</div>
+            <h1 className="font-serif text-[32px] sm:text-[44px] lg:text-[50px] text-[#1C1917] leading-[1.08] mb-3">
+              Technical Verification
+            </h1>
+            <p className="text-[15px] text-[#525252] font-sans max-w-2xl leading-relaxed">
+              Transform your self-declared engineering claims into immutable, cryptographically verifiable proof through monitored assessments.
+            </p>
           </div>
         </div>
       </div>
@@ -100,23 +107,24 @@ export default function CandidateVerificationPage() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
         <div className="md:col-span-2 space-y-6">
           
-          <div className="flex items-center justify-between mb-4 border-b border-[#E5E5E5] pb-3">
-            <h2 className="text-[14px] font-sans font-medium text-[#737373]">Eligible skills</h2>
+          <div className="flex items-center justify-between mb-4 border-b border-[#E7E2DA] pb-3">
+            <h2 className="text-[12px] font-mono uppercase tracking-[0.15em] text-[#78716C]">Eligible Technical Capabilities</h2>
+            <span className="text-[11px] font-mono text-[#064E3B]">{skills.length} Capabilities</span>
           </div>
 
           {isFetching ? (
-            <div className="flex flex-col items-center justify-center py-20 text-[#737373]">
-              <div className="h-6 w-6 border-2 border-[#D2D2D2] border-t-[#0D0D0D] rounded-full animate-spin mb-4" />
-              <p className="text-[13px] font-sans">Loading verification records...</p>
+            <div className="flex flex-col items-center justify-center py-20 text-[#78716C]">
+              <div className="h-6 w-6 border-2 border-[#E7E2DA] border-t-[#064E3B] rounded-full animate-spin mb-4" />
+              <p className="text-[13px] font-mono">Retrieving verification audit logs...</p>
             </div>
           ) : skills.length === 0 ? (
-            <div className="border border-dashed border-[#D2D2D2] p-10 rounded-md text-center bg-[#FAFAFA]">
-              <div className="text-[14px] text-[#0D0D0D] font-serif mb-2">No technical claims found.</div>
-              <p className="text-[13px] text-[#737373] font-sans mb-6">
-                Add skills in your Identity section to become eligible for verification assessments.
+            <div className="border border-dashed border-[#E7E2DA] p-12 rounded-xl text-center bg-white shadow-xs">
+              <div className="text-[16px] text-[#1C1917] font-serif mb-2">No technical claims declared</div>
+              <p className="text-[13px] text-[#78716C] font-sans mb-6 max-w-md mx-auto">
+                Add skills in your Identity section to establish candidate eligibility for monitored verification assessments.
               </p>
               <Link href="/candidate/profile">
-                <Button variant="outline">Edit Identity</Button>
+                <Button className="bg-[#064E3B] hover:bg-[#022c22] text-white">Edit Identity</Button>
               </Link>
             </div>
           ) : (
@@ -143,14 +151,14 @@ export default function CandidateVerificationPage() {
                 return (
                   <div 
                     key={skill} 
-                    className="border border-[#E7E2DA] rounded-2xl p-5 bg-white flex flex-col justify-between hover:shadow-sm transition-all"
+                    className={`border rounded-xl p-5 flex flex-col justify-between transition-all ${isVerified ? 'border-[#064E3B]/30 bg-[#F0FDF4]/50 shadow-[0_2px_12px_rgba(6,78,59,0.05)]' : 'border-[#E7E2DA] bg-white hover:border-[#C8C0B5]'}`}
                   >
                     <div>
                       <div className="flex items-center justify-between mb-3">
-                        <span className="text-[15px] font-semibold text-[#1C1917] font-sans">{skill}</span>
+                        <span className="text-[15px] font-serif font-medium text-[#1C1917]">{skill}</span>
                         {isVerified ? (
-                          <span className="flex items-center gap-1 text-[11px] font-mono font-medium uppercase text-[#16A34A] bg-[#F0FDF4] px-2 py-0.5 rounded-full border border-[#16A34A]/20">
-                            <ShieldCheck className="h-3 w-3" /> Verified
+                          <span className="flex items-center gap-1 text-[11px] font-mono font-medium uppercase text-[#064E3B] bg-[#064E3B]/10 px-2 py-0.5 rounded-full border border-[#064E3B]/20">
+                            <ShieldCheck className="h-3 w-3 text-[#064E3B]" /> Verified
                           </span>
                         ) : inCooldown ? (
                           <span className="flex items-center gap-1 text-[11px] font-mono font-medium uppercase text-[#B42318] bg-[#FEF2F2] px-2 py-0.5 rounded-full border border-[#B42318]/20">
@@ -158,28 +166,28 @@ export default function CandidateVerificationPage() {
                           </span>
                         ) : (
                           <span className="text-[11px] font-mono font-medium uppercase text-[#78716C] bg-[#F8F6F3] px-2 py-0.5 rounded-full border border-[#E7E2DA]">
-                            Not Verified
+                            Pending Audit
                           </span>
                         )}
                       </div>
-                      <p className="text-[13px] text-[#78716C] font-sans mb-3 leading-relaxed">
+                      <p className="text-[13px] text-[#78716C] font-sans mb-4 leading-relaxed">
                         {isVerified 
-                          ? `Verified with score of ${score ? `${score}%` : "80%+"}${verifiedAt ? ` on ${verifiedAt}` : ""}. Visible to employers in candidate discovery.`
+                          ? `Audited score: ${score ? `${score}%` : "80%+"}${verifiedAt ? ` on ${verifiedAt}` : ""}. Active on public verification records.`
                           : inCooldown 
                           ? `Assessment cooldown active. Available to retake in approximately ${daysRemaining} day${daysRemaining !== 1 ? "s" : ""}.`
-                          : "Take a timed, 45-minute technical assessment to formally verify this skill."}
+                          : "Take a timed, monitored technical assessment to establish verifiable proof."}
                       </p>
                     </div>
 
                     <div className="pt-3 border-t border-[#E7E2DA] flex items-center justify-between">
                       {isVerified ? (
                         <>
-                          <div className="flex items-center gap-1.5 text-[12px] text-[#16A34A] font-medium">
-                            <Award className="h-4 w-4" /> {score ? `${score}% score` : "Passed"}
+                          <div className="flex items-center gap-1.5 text-[12px] text-[#064E3B] font-medium font-mono">
+                            <Award className="h-4 w-4 text-[#064E3B]" /> {score ? `${score}% index` : "Passed"}
                           </div>
                           {user && (
                             <Link href={`/p/${user.uid}`}>
-                              <Button variant="outline" size="sm" className="text-[12px] h-8">
+                              <Button variant="outline" size="sm" className="text-[12px] h-8 rounded-full">
                                 View Public Record
                               </Button>
                             </Link>
@@ -191,9 +199,9 @@ export default function CandidateVerificationPage() {
                         </span>
                       ) : (
                         <Link href={`/candidate/assessment?skill=${encodeURIComponent(skill)}`} className="w-full flex justify-end">
-                          <Button size="sm" className="gap-1 text-[12px]">
+                          <button className="flex items-center gap-1 text-[12px] font-medium px-4 py-2 bg-[#064E3B] hover:bg-[#022c22] text-white rounded-full transition-colors shadow-xs">
                             Start Assessment <ArrowRight className="h-3.5 w-3.5" />
-                          </Button>
+                          </button>
                         </Link>
                       )}
                     </div>
