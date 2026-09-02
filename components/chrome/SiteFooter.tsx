@@ -3,17 +3,14 @@
 import { usePathname } from "next/navigation";
 import { Footerdemo } from "@/components/ui/footer-section";
 
-const PUBLIC_PATHS = new Set(["/", "/login", "/signup"]);
-
 export function SiteFooter() {
   const pathname = usePathname();
-  const isPublicHome = pathname === "/";
-  const isApp = pathname ? (!PUBLIC_PATHS.has(pathname) && !pathname.startsWith("/p/")) : false;
 
-  if (isApp) return null;
+  // The footer must ONLY be present on the homepage ("/")
+  if (pathname !== "/") return null;
 
   return (
-    <div className={isPublicHome ? "theme-public" : ""}>
+    <div className="theme-public">
       <Footerdemo />
     </div>
   );

@@ -6,12 +6,12 @@ export default function ProofCanvasPage() {
   return (
     <div className="min-h-screen bg-[#111214] text-[#FAFAFA] font-sans selection:bg-[#FAFAFA] selection:text-[#0D0D0D]">
       {/* Top Nav */}
-      <header className="flex h-[100px] items-center justify-between px-12 border-b border-[#E5E5E5]/50">
-        <div className="font-serif text-[32px] font-medium tracking-tight text-[#0D0D0D]">
+      <header className="flex h-[72px] sm:h-[100px] items-center justify-between px-6 sm:px-12 border-b border-[#E5E5E5]/50">
+        <Link href="/" className="font-serif text-[26px] sm:text-[32px] font-medium tracking-tight text-[#0D0D0D]">
           Meritlane
-        </div>
+        </Link>
         
-        <nav className="flex items-center gap-14 mr-20">
+        <nav className="hidden md:flex items-center gap-10 lg:gap-14 mr-10 lg:mr-20">
           <div className="flex flex-col relative group cursor-pointer">
             <span className="text-[13px] font-medium text-[#0D0D0D] leading-tight">Proof</span>
             <span className="text-[13px] font-medium text-[#0D0D0D] leading-tight">Canvas</span>
@@ -21,16 +21,16 @@ export default function ProofCanvasPage() {
           <span className="text-[14px] text-[#737373]/50 cursor-not-allowed" title="Coming soon">Archives</span>
         </nav>
 
-        <div className="h-9 w-9 rounded-full border border-[#D2D2D2] flex items-center justify-center text-[#737373] hover:text-[#0D0D0D] hover:border-[#0D0D0D] transition-all cursor-pointer bg-[#F3F3F1]">
+        <Link href="/login" className="h-9 w-9 rounded-full border border-[#D2D2D2] flex items-center justify-center text-[#737373] hover:text-[#0D0D0D] hover:border-[#0D0D0D] transition-all cursor-pointer bg-[#F3F3F1]">
           <User className="h-4 w-4" />
-        </div>
+        </Link>
       </header>
 
       {/* Main Content */}
-      <main className="max-w-[1400px] mx-auto px-12 py-16 flex gap-24">
+      <main className="max-w-[1400px] mx-auto px-6 sm:px-12 py-10 sm:py-16 flex flex-col lg:flex-row gap-12 lg:gap-24">
         
-        {/* Left Column (Sticky-ish) */}
-        <div className="w-[320px] shrink-0">
+        {/* Left Column */}
+        <div className="w-full lg:w-[320px] shrink-0">
           <div className="mb-14">
             <h1 className="font-serif text-[52px] leading-none mb-6">Elena Rostova</h1>
             <div className="flex items-center justify-between">
@@ -79,15 +79,15 @@ export default function ProofCanvasPage() {
         </div>
 
         {/* Right Column (Timeline) */}
-        <div className="flex-1 relative pb-32">
+        <div className="flex-1 relative pb-20 sm:pb-32">
           {/* Top Button */}
-          <div className="absolute right-0 top-0">
+          <div className="flex justify-end mb-8">
             <button className="border border-[#D2D2D2] hover:bg-[#F3F3F1] text-[#0D0D0D] hover:text-[#0D0D0D] px-5 py-2.5 text-[10px] font-sans font-bold uppercase tracking-[0.15em] transition-colors rounded-sm flex items-center gap-2">
               <span className="font-mono text-[12px] font-medium">[+]</span> VERIFY OBJECT
             </button>
           </div>
 
-          <div className="pt-24 pl-8">
+          <div className="pl-6 sm:pl-8">
             
             {/* Timeline Item 1 */}
             <div className="relative mb-24">

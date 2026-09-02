@@ -20,11 +20,11 @@ export function CandidateProofModal({ candidate, isOpen, onClose }: CandidatePro
       <div className="bg-surface w-full max-w-4xl max-h-[90vh] overflow-y-auto rounded-none border border-border shadow-sm flex flex-col">
         
         {/* MODAL DOSSIER HEADER */}
-        <div className="sticky top-0 z-10 border-b border-border bg-surface/95 backdrop-blur px-8 py-5 flex items-center justify-between">
-          <div>
+        <div className="sticky top-0 z-10 border-b border-border bg-surface/95 backdrop-blur px-4 sm:px-8 py-4 sm:py-5 flex items-start justify-between gap-3">
+          <div className="min-w-0 flex-1">
             <h4 className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1">Verified Technical Profile</h4>
-            <div className="flex items-center gap-3">
-              <h2 className="text-2xl font-black text-foreground tracking-tight">{candidate.name}</h2>
+            <div className="flex items-center gap-3 flex-wrap">
+              <h2 className="text-xl sm:text-2xl font-black text-foreground tracking-tight truncate">{candidate.name}</h2>
               <ProofTrace 
                 status={candidate.verificationStatus || "unverified"} 
                 assessmentScores={candidate.assessmentScores} 
@@ -33,14 +33,14 @@ export function CandidateProofModal({ candidate, isOpen, onClose }: CandidatePro
                 size="sm"
               />
             </div>
-            <p className="text-sm font-semibold text-muted-foreground mt-1 uppercase tracking-wider">
+            <p className="text-xs sm:text-sm font-semibold text-muted-foreground mt-1 uppercase tracking-wider truncate">
               {candidate.branch || "Software Engineering"} · {candidate.college || "N/A"} · {candidate.gradYear || "N/A"}
             </p>
           </div>
           
           <button 
             onClick={onClose} 
-            className="flex h-10 w-10 items-center justify-center rounded-sm border border-border text-muted-foreground hover:bg-surface-low hover:text-foreground transition-colors bg-surface"
+            className="flex h-9 w-9 sm:h-10 sm:w-10 shrink-0 items-center justify-center rounded-sm border border-border text-muted-foreground hover:bg-surface-low hover:text-foreground transition-colors bg-surface"
             aria-label="Close modal"
           >
             <X className="h-4 w-4" />
@@ -48,8 +48,49 @@ export function CandidateProofModal({ candidate, isOpen, onClose }: CandidatePro
         </div>
 
         {/* DOSSIER BODY */}
-        <div className="p-8 space-y-12">
+        <div className="p-4 sm:p-8 space-y-8 sm:space-y-10">
           
+          {/* SECTION: CANDIDATE EVIDENCE SUMMARY (Factual, no AI rankings) */}
+          <section className="bg-surface-low border border-border p-5 rounded-md">
+            <h3 className="text-xs font-bold text-foreground uppercase tracking-widest mb-3">
+              Evidence Summary
+            </h3>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-left">
+              <div>
+                <span className="text-[10px] font-mono text-muted-foreground uppercase tracking-wider block mb-1">
+                  Verified Skills
+                </span>
+                <span className="text-base font-bold text-foreground">
+                  {Object.values(candidate.verifiedSkills || {}).filter((s: any) => s?.status === "verified").length}
+                </span>
+              </div>
+              <div>
+                <span className="text-[10px] font-mono text-muted-foreground uppercase tracking-wider block mb-1">
+                  Verified Projects
+                </span>
+                <span className="text-base font-bold text-foreground">
+                  {candidate.projects?.length || 0}
+                </span>
+              </div>
+              <div>
+                <span className="text-[10px] font-mono text-muted-foreground uppercase tracking-wider block mb-1">
+                  GitHub Repos
+                </span>
+                <span className="text-base font-bold text-foreground">
+                  {candidate.githubEvidence?.repoCount || (candidate.githubUrl ? "Linked" : "None")}
+                </span>
+              </div>
+              <div>
+                <span className="text-[10px] font-mono text-muted-foreground uppercase tracking-wider block mb-1">
+                  Education
+                </span>
+                <span className="text-xs font-semibold text-foreground truncate block">
+                  {candidate.college || "Self-taught"}
+                </span>
+              </div>
+            </div>
+          </section>
+
           {/* SECTION: MATCH COVERAGE */}
           <section>
             <div className="flex items-end gap-3 mb-4">

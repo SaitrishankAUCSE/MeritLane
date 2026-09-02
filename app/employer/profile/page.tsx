@@ -22,20 +22,20 @@ export default function EmployerProfilePage() {
 
   return (
     <div className="flex flex-col h-full bg-[#FAFAFA] overflow-y-auto">
-      <div className="p-8 lg:p-12 max-w-[850px] w-full mx-auto space-y-8">
+      <div className="p-4 sm:p-8 lg:p-12 max-w-[850px] w-full mx-auto space-y-6 sm:space-y-8">
         {/* Header */}
         <div className="border-b border-[#E5E5E5] pb-6">
-          <h1 className="font-serif text-[32px] font-bold text-[#0D0D0D] leading-tight">
+          <h1 className="font-serif text-[26px] sm:text-[32px] font-bold text-[#0D0D0D] leading-tight">
             Employer Identity
           </h1>
-          <p className="text-[14px] text-[#737373] font-sans mt-1">
+          <p className="text-[13px] sm:text-[14px] text-[#737373] font-sans mt-1">
             Your public company profile displayed to candidates when you reach out or send interview invitations.
           </p>
         </div>
 
         {/* Company Card Header Preview */}
-        <div className="bg-white border border-[#E5E5E5] rounded-2xl p-6 sm:p-8 shadow-sm flex items-start gap-5">
-          <div className="h-16 w-16 rounded-2xl bg-[#0D0D0D] text-white flex items-center justify-center font-serif text-[26px] font-bold shrink-0">
+        <div className="bg-white border border-[#E5E5E5] rounded-2xl p-4 sm:p-8 shadow-sm flex items-start gap-4 sm:gap-5">
+          <div className="h-12 w-12 sm:h-16 sm:w-16 rounded-2xl bg-[#0D0D0D] text-white flex items-center justify-center font-serif text-[20px] sm:text-[26px] font-bold shrink-0">
             {companyName.charAt(0).toUpperCase()}
           </div>
           <div className="flex-1">

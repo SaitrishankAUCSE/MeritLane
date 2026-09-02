@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, createUserWithEmailAndPassword } from "firebase/auth";
+import { signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, createUserWithEmailAndPassword, signOut } from "firebase/auth";
 import { doc, setDoc } from "firebase/firestore";
 import { auth, db } from "@/lib/firebase/config";
 import { useRouter } from "next/navigation";
@@ -39,23 +39,79 @@ export function AuthForm({ mode: initialMode }: AuthFormProps) {
     }
   }, [user, userRole, authLoading, profileLoading, router]);
 
+  const [emailStatus, setEmailStatus] = useState<{
+    valid?: boolean;
+    error?: string;
+    suggestion?: string;
+    exists?: boolean;
+  }>({});
+
+  const validateEmailFormatAndSpelling = async (val: string) => {
+    if (!val || val.length < 5 || !val.includes("@")) {
+      setEmailStatus({});
+      return;
+    }
+    try {
+      const res = await fetch("/api/auth/validate-email", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: val }),
+      });
+      const data = await res.json();
+      setEmailStatus(data);
+    } catch {
+      // Non-blocking fallback
+    }
+  };
+
   const handleEmailAuth = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoadingAction(true);
     setError(null);
+
+    // 1. Perform email format & spelling verification
+    const trimmedEmail = email.trim().toLowerCase();
+    try {
+      const verifyRes = await fetch("/api/auth/validate-email", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: trimmedEmail }),
+      });
+      const verifyData = await verifyRes.json();
+      if (!verifyData.valid) {
+        setError(verifyData.error || "Please enter a valid email address.");
+        return;
+      }
+      if (mode === "signup" && verifyData.exists) {
+        setError("An account already exists with this email address. Please sign in instead.");
+        return;
+      }
+      if (mode === "login" && verifyData.exists === false) {
+        setError("No account found with this email. Please check your spelling or sign up.");
+        return;
+      }
+    } catch {
+      // Continue if network fails
+    }
+
+    setLoadingAction(true);
     try {
       if (mode === "signup") {
         if (!db) throw new Error("Firestore not initialized");
-        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        const userCredential = await createUserWithEmailAndPassword(auth, trimmedEmail, password);
         await setDoc(doc(db, "users", userCredential.user.uid), {
           email: userCredential.user.email,
           role: selectedRole,
           createdAt: new Date().toISOString(),
         });
         posthog.capture("user_signed_up", { method: 'email', role: selectedRole });
-        await refreshAuth();
+        
+        // After signup: Sign out so user must log in again to begin profile onboarding
+        await signOut(auth);
+        setLoadingAction(false);
+        router.push("/login?signedUp=true");
+        return;
       } else {
-        await signInWithEmailAndPassword(auth, email, password);
+        await signInWithEmailAndPassword(auth, trimmedEmail, password);
         posthog.capture("user_logged_in", { method: 'email' });
       }
     } catch (err: any) {
@@ -169,7 +225,7 @@ export function AuthForm({ mode: initialMode }: AuthFormProps) {
       </div>
 
       {/* Right Side: Auth Form Area */}
-      <div className="w-full md:w-7/12 lg:w-1/2 flex items-center justify-center p-6 sm:p-12 bg-white relative">
+      <div className="w-full md:w-7/12 lg:w-1/2 flex items-center justify-center p-4 sm:p-8 md:p-12 bg-white relative">
         <div className="w-full max-w-[420px]">
           <div className="md:hidden mb-8 flex justify-center">
              <Link href="/" className="inline-flex items-center gap-2 text-xl font-bold tracking-tight text-black">
@@ -236,6 +292,11 @@ export function AuthForm({ mode: initialMode }: AuthFormProps) {
                 className="space-y-6"
               >
                 <div className="mb-8">
+                  {typeof window !== "undefined" && new URLSearchParams(window.location.search).get("signedUp") === "true" && (
+                    <div className="mb-4 p-3.5 bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs rounded-xl flex items-center gap-2">
+                      <span className="font-bold">Account created!</span> Please log in with your credentials to set up your profile.
+                    </div>
+                  )}
                   <h2 className="text-3xl font-semibold tracking-tight text-zinc-900 mb-2">
                     {mode === "login" ? "Welcome back" : "Create an account"}
                   </h2>
@@ -319,7 +380,45 @@ export function AuthForm({ mode: initialMode }: AuthFormProps) {
 
                   <div>
                     <label className="text-[11px] font-bold tracking-widest text-zinc-900 uppercase block mb-1.5">Email Address</label>
-                    <input type="email" required value={email} onChange={e => setEmail(e.target.value)} disabled={loadingAction} placeholder="you@example.com" className="w-full px-4 py-3 rounded-xl border border-zinc-200 focus:border-zinc-900 focus:ring-1 focus:ring-zinc-900 outline-none transition-all text-sm placeholder:text-zinc-400" />
+                    <input 
+                      type="email" 
+                      required 
+                      value={email} 
+                      onChange={e => {
+                        setEmail(e.target.value);
+                        if (emailStatus.error || emailStatus.suggestion) setEmailStatus({});
+                      }} 
+                      onBlur={e => validateEmailFormatAndSpelling(e.target.value)}
+                      disabled={loadingAction} 
+                      placeholder="you@example.com" 
+                      className={`w-full px-4 py-3 rounded-xl border ${
+                        emailStatus.error ? "border-amber-400 focus:border-amber-500 focus:ring-amber-500" : "border-zinc-200 focus:border-zinc-900 focus:ring-zinc-900"
+                      } focus:ring-1 outline-none transition-all text-sm placeholder:text-zinc-400`} 
+                    />
+
+                    {/* Email Typo / Format Feedback */}
+                    {emailStatus.suggestion && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setEmail(emailStatus.suggestion!);
+                          setEmailStatus({});
+                        }}
+                        className="mt-1.5 text-[11px] text-amber-700 bg-amber-50 border border-amber-200 px-2.5 py-1 rounded-lg hover:bg-amber-100 transition-colors flex items-center gap-1 text-left"
+                      >
+                        <span>Did you mean <strong>{emailStatus.suggestion}</strong>? Click to apply.</span>
+                      </button>
+                    )}
+                    {emailStatus.error && !emailStatus.suggestion && (
+                      <p className="mt-1.5 text-[11px] text-red-600">
+                        {emailStatus.error}
+                      </p>
+                    )}
+                    {mode === "signup" && emailStatus.exists && (
+                      <p className="mt-1.5 text-[11px] text-amber-700 font-medium">
+                        An account already exists with this email. Please switch to Sign In.
+                      </p>
+                    )}
                   </div>
                   
                   <div>

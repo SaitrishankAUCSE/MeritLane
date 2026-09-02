@@ -210,8 +210,9 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Assessment time expired" }, { status: 400 });
     }
 
-    // Evaluate MCQs
-    const content = getAssessmentContent(skill);
+    // Evaluate MCQs with candidate's randomized question seed
+    const candidateSeed = userData.assessmentSeed || uid;
+    const content = getAssessmentContent(skill, candidateSeed);
     let mcqScore = 0;
     if (answers && Array.isArray(answers)) {
       answers.forEach((ans: number, idx: number) => {

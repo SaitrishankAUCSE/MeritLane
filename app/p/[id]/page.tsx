@@ -59,6 +59,7 @@ export default async function PublicProfilePage({ params }: Props) {
     skills: rawCandidate.skills || [],
     projects: rawCandidate.projects || [],
     college: rawCandidate.college || "",
+    degree: rawCandidate.degree || "",
     branch: rawCandidate.branch || "",
     gradYear: rawCandidate.gradYear || "",
     verificationStatus: rawCandidate.verificationStatus || (hasVerifiedSkills ? "verified" : "draft"),

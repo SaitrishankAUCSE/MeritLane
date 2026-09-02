@@ -61,13 +61,59 @@ export function AuthSwitch({ defaultMode = "login" }: AuthSwitchProps) {
     }
   }, [user, userRole, authLoading, profileLoading, router]);
 
+  const [emailStatus, setEmailStatus] = useState<{
+    valid?: boolean;
+    error?: string;
+    suggestion?: string;
+    exists?: boolean;
+  }>({});
+
+  const validateEmailFormatAndSpelling = async (val: string) => {
+    if (!val || val.length < 5 || !val.includes("@")) {
+      setEmailStatus({});
+      return;
+    }
+    try {
+      const res = await fetch("/api/auth/validate-email", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: val }),
+      });
+      const data = await res.json();
+      setEmailStatus(data);
+    } catch {
+      // Non-blocking fallback
+    }
+  };
+
   const handleEmailLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoadingAction(true);
     setError(null);
     setSuccessMessage(null);
+
+    const trimmed = email.trim().toLowerCase();
     try {
-      const userCred = await signInWithEmailAndPassword(auth, email, password);
+      const verifyRes = await fetch("/api/auth/validate-email", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: trimmed }),
+      });
+      const verifyData = await verifyRes.json();
+      if (!verifyData.valid) {
+        setError(verifyData.error || "Please enter a valid email address.");
+        return;
+      }
+      if (verifyData.exists === false) {
+        setError("No account found with this email. Please check your spelling or sign up.");
+        return;
+      }
+    } catch {
+      // Non-blocking fallback
+    }
+
+    setLoadingAction(true);
+    try {
+      const userCred = await signInWithEmailAndPassword(auth, trimmed, password);
       
       const tokenResult = await userCred.user.getIdTokenResult(true);
       if (tokenResult.claims.admin === true || userCred.user.email?.toLowerCase() === ADMIN_EMAIL) {
@@ -112,21 +158,48 @@ export function AuthSwitch({ defaultMode = "login" }: AuthSwitchProps) {
       return;
     }
 
-    setLoadingAction(true);
     setError(null);
     setSuccessMessage(null);
+
+    const trimmed = email.trim().toLowerCase();
+    try {
+      const verifyRes = await fetch("/api/auth/validate-email", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: trimmed }),
+      });
+      const verifyData = await verifyRes.json();
+      if (!verifyData.valid) {
+        setError(verifyData.error || "Please enter a valid email address.");
+        return;
+      }
+      if (verifyData.exists) {
+        setError("An account already exists with this email address. Please sign in.");
+        return;
+      }
+    } catch {
+      // Non-blocking fallback
+    }
+
+    setLoadingAction(true);
     
     try {
-      const userCred = await createUserWithEmailAndPassword(auth, email, password);
+      const userCred = await createUserWithEmailAndPassword(auth, trimmed, password);
       await createUserProfile(userCred.user.uid, {
-        email: userCred.user.email || email,
+        email: userCred.user.email || trimmed,
         role: role,
         authProvider: "password",
         displayName: ""
       });
-      await refreshProfile();
       posthog.identify(userCred.user.uid, { email: userCred.user.email, role: role });
       posthog.capture("user_signed_up", { method: 'email', role: role });
+
+      // Sign out so user must log in again to begin profile setup
+      await signOut(auth);
+      setSuccessMessage("Account created successfully! Please sign in with your password to complete your profile setup.");
+      setMode("login");
+      setLoadingAction(false);
+      return;
       
     } catch (err: any) {
       if (err.code === "auth/email-already-in-use") {
@@ -301,14 +374,42 @@ export function AuthSwitch({ defaultMode = "login" }: AuthSwitchProps) {
                 </div>
               )}
 
-              <Input
-                label="Email Address"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="you@example.com"
-                required
-              />
+              <div>
+                <Input
+                  label="Email Address"
+                  type="email"
+                  value={email}
+                  onChange={(e) => {
+                    setEmail(e.target.value);
+                    if (emailStatus.error || emailStatus.suggestion) setEmailStatus({});
+                  }}
+                  onBlur={(e) => validateEmailFormatAndSpelling(e.target.value)}
+                  placeholder="you@example.com"
+                  required
+                />
+                {emailStatus.suggestion && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setEmail(emailStatus.suggestion!);
+                      setEmailStatus({});
+                    }}
+                    className="mt-1 text-[11px] text-amber-700 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded hover:bg-amber-100 transition-colors flex items-center gap-1 text-left"
+                  >
+                    <span>Did you mean <strong>{emailStatus.suggestion}</strong>? Click to apply.</span>
+                  </button>
+                )}
+                {emailStatus.error && !emailStatus.suggestion && (
+                  <p className="mt-1 text-[11px] text-danger">
+                    {emailStatus.error}
+                  </p>
+                )}
+                {mode === "signup" && emailStatus.exists && (
+                  <p className="mt-1 text-[11px] text-amber-700 font-medium">
+                    An account already exists with this email. Please switch to Sign In.
+                  </p>
+                )}
+              </div>
               <Input
                 label="Password"
                 type={showPassword ? "text" : "password"}

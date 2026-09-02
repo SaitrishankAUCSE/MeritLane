@@ -107,7 +107,7 @@ export default function CandidateProfilePage() {
 
   if (isEditing) {
     return (
-      <div className="w-full px-8 md:px-16 lg:px-24 py-12 mx-auto max-w-[1600px] h-full overflow-y-auto scrollbar-hide">
+      <div className="w-full px-4 sm:px-8 md:px-16 lg:px-24 py-8 sm:py-12 mx-auto max-w-[1600px] h-full overflow-y-auto scrollbar-hide">
         <ProfileForm 
           initialData={profile} 
           onSave={handleSave} 
@@ -125,7 +125,7 @@ export default function CandidateProfilePage() {
   const isProfileIncomplete = !profile?.name || !profile?.skills || profile.skills.length === 0;
 
   return (
-    <div className="w-full px-8 md:px-16 lg:px-24 py-12 mx-auto max-w-[1600px] h-full overflow-y-auto scrollbar-hide">
+    <div className="w-full px-4 sm:px-8 md:px-16 lg:px-24 py-8 sm:py-12 mx-auto max-w-[1600px] h-full overflow-y-auto scrollbar-hide">
       
       {!isProfileIncomplete && (
         <ContextGuide 
@@ -146,12 +146,12 @@ export default function CandidateProfilePage() {
         <div className="text-[14px] font-sans font-medium text-[#737373] mb-3 flex items-center gap-2">
           <Fingerprint className="h-3 w-3" /> Technical identity
         </div>
-        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6 border-b border-[#E5E5E5] pb-6">
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 sm:gap-6 border-b border-[#E5E5E5] pb-6">
           <div>
-            <h1 className="font-serif text-[40px] sm:text-[48px] text-[#0D0D0D] leading-tight mb-2">{name}</h1>
+            <h1 className="font-serif text-[28px] sm:text-[40px] lg:text-[48px] text-[#0D0D0D] leading-tight mb-2">{name}</h1>
             <div className="text-[14px] text-[#0D0D0D] font-sans">{primaryDomain}</div>
           </div>
-          <button onClick={() => setIsEditing(true)} className="flex items-center gap-2 px-5 h-10 border border-[#D2D2D2] bg-transparent text-[#0D0D0D] hover:text-[#0D0D0D] hover:bg-[#F3F3F1] hover:border-[#0D0D0D] rounded-md text-[14px] font-sans font-medium transition-all">
+          <button onClick={() => setIsEditing(true)} className="flex items-center justify-center gap-2 px-5 h-10 border border-[#D2D2D2] bg-transparent text-[#0D0D0D] hover:text-[#0D0D0D] hover:bg-[#F3F3F1] hover:border-[#0D0D0D] rounded-md text-[14px] font-sans font-medium transition-all w-full sm:w-auto">
             <PenTool className="h-3.5 w-3.5" /> Edit identity
           </button>
         </div>
@@ -315,6 +315,19 @@ export default function CandidateProfilePage() {
                 <Briefcase className="h-[14px] w-[14px] text-[#737373] group-hover:text-[#0D0D0D]" /> <span className="font-mono">External Resume</span>
               </a>
             </div>
+
+            {profile?.atsScore !== undefined && (
+              <div className="mt-4 pt-4 border-t border-[#E5E5E5]">
+                <div className="flex items-center justify-between">
+                  <span className="text-[11px] font-mono uppercase text-[#737373]">ATS Readiness</span>
+                  <span className={`text-[12px] font-bold font-mono px-2 py-0.5 rounded-full ${
+                    profile.atsScore >= 80 ? "bg-[#F0FDF4] text-[#16A34A]" : "bg-[#FFFBEB] text-[#D97706]"
+                  }`}>
+                    {profile.atsScore}/100
+                  </span>
+                </div>
+              </div>
+            )}
           </div>
 
           <div className="border border-[#E5E5E5] bg-[#FAFAFA] p-6 rounded-md">
@@ -325,8 +338,10 @@ export default function CandidateProfilePage() {
                   <BookOpen className="h-[14px] w-[14px] text-[#737373] mt-1 shrink-0" />
                   <div>
                     <div className="text-[14px] text-[#0D0D0D] font-serif mb-1">{profile?.college || "University"}</div>
-                    <div className="text-[12px] text-[#666666] font-sans">{profile?.branch || "Computer Science"}</div>
-                    <div className="text-[10px] font-mono tracking-[0.1em] text-[#D2D2D2] uppercase mt-2">Class of {profile?.gradYear || "2024"}</div>
+                    <div className="text-[12px] text-[#666666] font-sans">
+                      {profile?.degree ? `${profile.degree} · ` : ""}{profile?.branch || "Computer Science"}
+                    </div>
+                    <div className="text-[10px] font-mono tracking-[0.1em] text-[#737373] uppercase mt-2">Class of {profile?.gradYear || "2024"}</div>
                   </div>
                 </div>
               </div>

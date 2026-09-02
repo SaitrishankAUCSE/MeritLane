@@ -526,7 +526,7 @@ export default function AdminDashboardPage() {
             </p>
           </div>
 
-          <div className="flex items-center gap-2.5">
+          <div className="flex flex-wrap items-center gap-2 sm:gap-2.5">
             <Button 
               variant="danger" 
               size="sm" 
@@ -651,7 +651,7 @@ export default function AdminDashboardPage() {
         </div>
 
         {/* Admin Navigation Tabs — Cutshort style */}
-        <div className="flex items-center gap-8 border-b border-border">
+        <div className="flex items-center gap-6 sm:gap-8 border-b border-border overflow-x-auto scrollbar-hide shrink-0 pb-1">
           <button
             onClick={() => setActiveTab("queue")}
             className={`flex items-center gap-2 border-b-2 pb-3 text-sm font-medium transition-colors ${

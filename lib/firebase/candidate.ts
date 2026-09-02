@@ -31,10 +31,16 @@ export interface CandidateProfile {
   name: string;
   email?: string;
   college: string;
+  degree?: string;
   branch: string;
   gradYear: string;
   githubUrl: string;
   resumeUrl: string;
+  resumeText?: string;
+  atsScore?: number;
+  atsRating?: "Needs Work" | "Good" | "Strong" | "Excellent";
+  atsSummary?: string;
+  atsAnalyzedAt?: number;
   skills: string[];
   verifiedSkills?: Record<string, SkillVerification>;
   projects: ProjectEntry[];

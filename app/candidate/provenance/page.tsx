@@ -42,7 +42,7 @@ export default function ProvenancePage() {
   }, [user, loading]);
 
   return (
-    <div className="w-full px-8 md:px-16 lg:px-24 py-12 mx-auto max-w-[1600px] h-full overflow-y-auto scrollbar-hide relative">
+    <div className="w-full px-4 sm:px-8 md:px-16 lg:px-24 py-8 sm:py-12 mx-auto max-w-[1600px] h-full overflow-y-auto scrollbar-hide relative">
       <ContextGuide 
         storageKey="candidate_provenance"
         title="Public Proof Record"
@@ -53,21 +53,21 @@ export default function ProvenancePage() {
           { title: "Discover", description: "Employers can discover this profile if you have passed assessments.", isCompleted: Object.values((candidate as any)?.verifiedSkills || {}).some((v: any) => v.status === "verified") }
         ]}
       />
-      <div className="mb-12">
+      <div className="mb-10 sm:mb-12">
         <div className="text-[14px] font-sans font-medium text-[#737373] mb-3">
           Output Layer
         </div>
-        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6 border-b border-[#E5E5E5] pb-6">
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 sm:gap-6 border-b border-[#E5E5E5] pb-6">
           <div>
-            <h1 className="font-serif text-[40px] sm:text-[48px] text-[#0D0D0D] leading-tight mb-2">Provenance Record</h1>
+            <h1 className="font-serif text-[28px] sm:text-[40px] lg:text-[48px] text-[#0D0D0D] leading-tight mb-2">Provenance Record</h1>
             <p className="text-[14px] text-[#737373] font-sans">
               Live preview of your cryptographic engineering proof.
             </p>
           </div>
           {user && (
-            <div className="flex gap-4">
-              <Link href={`/p/${user.uid}`} target="_blank">
-                <Button variant="outline" className="gap-2">
+            <div className="flex gap-4 w-full sm:w-auto">
+              <Link href={`/p/${user.uid}`} target="_blank" className="w-full sm:w-auto">
+                <Button variant="outline" className="gap-2 w-full sm:w-auto justify-center">
                   <ExternalLink className="h-4 w-4" /> Open Public URL
                 </Button>
               </Link>

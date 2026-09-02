@@ -6,6 +6,7 @@ import { CandidateSidebar } from "@/components/candidate/CandidateSidebar";
 import { MobileNav } from "@/components/ui/MobileNav";
 import { ToastProvider } from "@/components/ui/Toast";
 import { CandidateMessageNotifier } from "@/components/candidate/CandidateMessageNotifier";
+import { ProfileCompletionGuard } from "@/components/candidate/ProfileCompletionGuard";
 
 export default function CandidateLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -15,7 +16,9 @@ export default function CandidateLayout({ children }: { children: React.ReactNod
           <MobileNav role="candidate" />
           <CandidateSidebar />
           <main className="flex-1 bg-[#F8F6F3] overflow-hidden">
-            {children}
+            <ProfileCompletionGuard>
+              {children}
+            </ProfileCompletionGuard>
           </main>
         </div>
         {/* Polls silently for new inbox messages and fires toast notifications */}

@@ -70,9 +70,9 @@ export function ReviewConsole({
   };
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-[80vh] min-h-[600px]">
+    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:h-[80vh]">
       {/* ZONE 1: REVIEW QUEUE (Col 1-3) */}
-      <div className="lg:col-span-3 border border-border bg-surface flex flex-col h-full overflow-hidden">
+      <div className="lg:col-span-3 border border-border bg-surface flex flex-col max-h-[300px] lg:max-h-none h-full overflow-hidden">
         <div className="p-4 border-b border-border bg-surface-low">
           <h2 className="font-label text-muted-foreground uppercase tracking-widest text-xs">Review Queue</h2>
           <p className="text-[10px] text-muted-foreground mt-1 font-data">{queueCandidates.length} Pending</p>

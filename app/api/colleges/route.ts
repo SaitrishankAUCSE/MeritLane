@@ -12,44 +12,43 @@ export async function GET(request: Request) {
 
     const cachedColleges = collegesData as any[];
 
-    // Custom scoring algorithm to prioritize:
-    // 1. Exact acronyms (e.g. "IIT", "NIT")
-    // 2. Starts with query
-    // 3. Contains query
-    const results = cachedColleges!
-      .map(college => {
-        // Handle different JSON structures (name vs college_name)
-        const name = college.name || college.college_name || college;
-        const nameStr = typeof name === 'string' ? name : String(name);
-        const nameLower = nameStr.toLowerCase();
-        
-        let score = 0;
-        
-        if (nameLower === q) score = 100;
-        else if (nameLower.startsWith(q)) score = 50;
-        else if (nameLower.includes(q)) score = 10;
-        
-        return {
-          ... (typeof college === 'object' ? college : { name: college }),
-          name: nameStr,
-          score
-        };
-      })
-      .filter(item => item.score > 0)
-      .sort((a, b) => {
-        if (a.score !== b.score) return b.score - a.score;
-        return a.name.localeCompare(b.name);
-      })
-      .slice(0, 50)
-      .map(item => {
-        // Format for Autocomplete display
-        const city = item.city || item.district;
-        const state = item.state;
-        const location = [city, state].filter(Boolean).join(', ');
-        return `${item.name}${location ? ` (${location})` : ''}`;
-      });
+    const tokens = q.trim().split(/\s+/).filter(Boolean);
 
-    return NextResponse.json({ results });
+    // Scoring algorithm prioritizing exact phrase match, prefix match, and token-level coverage
+    const scored: Array<{ name: string; score: number }> = [];
+
+    for (let i = 0; i < cachedColleges.length; i++) {
+      const item = cachedColleges[i];
+      const name = item.name || item.college_name || item;
+      const nameStr = typeof name === 'string' ? name : String(name);
+      const searchHaystack = (item.searchStr || nameStr).toLowerCase();
+
+      let score = 0;
+      if (searchHaystack === q) {
+        score = 200;
+      } else if (searchHaystack.startsWith(q)) {
+        score = 150;
+      } else if (searchHaystack.includes(q)) {
+        score = 100;
+      } else if (tokens.length > 1 && tokens.every(token => searchHaystack.includes(token))) {
+        // Boost if matches word boundaries
+        const startsWithFirst = searchHaystack.startsWith(tokens[0]);
+        score = startsWithFirst ? 80 : 50;
+      }
+
+      if (score > 0) {
+        scored.push({ name: nameStr, score });
+      }
+    }
+
+    scored.sort((a, b) => {
+      if (a.score !== b.score) return b.score - a.score;
+      return a.name.localeCompare(b.name);
+    });
+
+    const results = scored.slice(0, 50).map(s => s.name);
+
+    return NextResponse.json({ results, colleges: results });
 
   } catch (error: any) {
     console.error("Colleges API Error:", error);

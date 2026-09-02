@@ -18,17 +18,24 @@ export function LogoutConfirmModal({ isOpen, onConfirm, onCancel }: LogoutConfir
     setMounted(true);
   }, []);
 
-  // Prevent background scrolling when open
+  // Prevent background scrolling and handle Escape key
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = "hidden";
+      const handleKeyDown = (e: KeyboardEvent) => {
+        if (e.key === "Escape" && !isLoggingOut) {
+          onCancel();
+        }
+      };
+      window.addEventListener("keydown", handleKeyDown);
+      return () => {
+        document.body.style.overflow = "unset";
+        window.removeEventListener("keydown", handleKeyDown);
+      };
     } else {
       document.body.style.overflow = "unset";
     }
-    return () => {
-      document.body.style.overflow = "unset";
-    };
-  }, [isOpen]);
+  }, [isOpen, isLoggingOut, onCancel]);
 
   const handleConfirm = async () => {
     setIsLoggingOut(true);

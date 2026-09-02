@@ -61,18 +61,28 @@ export async function POST(req: NextRequest) {
 
     const now = Date.now();
 
-    // Check cooldown
+    // Check cooldown — integrity terminations use a 21-day window; normal failures use 14-day
     if (userData.failedAssessments && userData.failedAssessments[skill]) {
       const failedTimestamp = userData.failedAssessments[skill];
       const failedMs = typeof failedTimestamp.toMillis === "function" ? failedTimestamp.toMillis() : failedTimestamp;
-      const fourteenDaysMs = 14 * 24 * 60 * 60 * 1000;
-      if (now - failedMs < fourteenDaysMs) {
-        return NextResponse.json({ error: "You are currently in a 14-day cooldown period for this skill." }, { status: 429 });
+
+      // Detect integrity termination (written by /api/terminate-assessment)
+      const isIntegrityTermination = !!(userData.integrityTerminations && userData.integrityTerminations[skill]);
+      const cooldownMs = isIntegrityTermination ? 21 * 24 * 60 * 60 * 1000 : 14 * 24 * 60 * 60 * 1000;
+      const cooldownLabel = isIntegrityTermination ? "21-day integrity cooldown" : "14-day cooldown";
+
+      if (now - failedMs < cooldownMs) {
+        return NextResponse.json({
+          error: `You are currently in a ${cooldownLabel} period for this skill.`,
+          cooldownDays: isIntegrityTermination ? 21 : 14,
+          retryAvailableAt: new Date(failedMs + cooldownMs).toISOString(),
+        }, { status: 429 });
       }
     }
 
-    // Get the content for the requested skill
-    const content = getAssessmentContent(skill);
+    // Get candidate-specific randomized content for the requested skill
+    // user uid provides the seed so the candidate receives distinct questions and randomized options
+    const content = getAssessmentContent(skill, uid);
     
     // Sanitize content to remove answers
     const sanitizedContent = {
@@ -102,11 +112,12 @@ export async function POST(req: NextRequest) {
     // Assign a variant (A or B)
     const newVariant = Math.random() > 0.5 ? "A" : "B";
 
-    // Start a fresh session
+    // Start a fresh session with seed
     await userRef.update({
       assessmentStartedAt: FieldValue.serverTimestamp(),
       assessmentVariant: newVariant,
-      assessmentSkill: skill
+      assessmentSkill: skill,
+      assessmentSeed: uid
     });
 
     const updatedDoc = await userRef.get();

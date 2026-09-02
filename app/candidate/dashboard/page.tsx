@@ -115,7 +115,7 @@ export default function CandidateDashboardPage() {
   }
 
   return (
-    <div className="w-full px-8 md:px-16 lg:px-24 py-12 mx-auto max-w-[1600px] h-full overflow-y-auto scrollbar-hide relative">
+    <div className="w-full px-4 sm:px-8 md:px-16 lg:px-24 py-8 sm:py-12 mx-auto max-w-[1600px] h-full overflow-y-auto scrollbar-hide relative">
       
       <ContextGuide 
         storageKey="candidate_dashboard"
@@ -130,13 +130,13 @@ export default function CandidateDashboardPage() {
         ctaHref="/candidate/assessment"
       />
 
-      <div className="mb-12">
+      <div className="mb-10 sm:mb-12">
         <div className="text-[14px] font-sans font-medium text-[#737373] mb-3 flex items-center gap-2">
           <FolderOpen className="h-3 w-3" /> Evidence Workspace
         </div>
-        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6 border-b border-[#E5E5E5] pb-6">
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 sm:gap-6 border-b border-[#E5E5E5] pb-6">
           <div>
-            <h1 className="font-serif text-[40px] sm:text-[48px] text-[#0D0D0D] leading-tight mb-2">Build your proof.</h1>
+            <h1 className="font-serif text-[28px] sm:text-[40px] lg:text-[48px] text-[#0D0D0D] leading-tight mb-2">Build your proof.</h1>
             <div className="text-[14px] text-[#0D0D0D] font-sans">Provide the material that supports the claims made in your Identity.</div>
           </div>
           <button 
@@ -144,7 +144,7 @@ export default function CandidateDashboardPage() {
             onClick={() => setIsModalOpen(true)}
             aria-haspopup="dialog"
             aria-expanded={isModalOpen}
-            className="px-5 h-10 border border-[#0D0D0D] bg-[#0D0D0D] text-[#FFFFFF] hover:bg-[#222222] hover:text-[#FFFFFF] rounded-md text-[14px] font-sans font-medium transition-all font-bold shrink-0"
+            className="flex items-center justify-center gap-2 px-5 h-10 border border-[#0D0D0D] bg-[#0D0D0D] text-[#FFFFFF] hover:bg-[#222222] hover:text-[#FFFFFF] rounded-md text-[14px] font-sans font-medium transition-all font-bold w-full sm:w-auto shrink-0"
           >
             [+] Add evidence
           </button>

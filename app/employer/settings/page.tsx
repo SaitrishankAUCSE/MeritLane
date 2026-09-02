@@ -13,13 +13,13 @@ export default function EmployerSettingsPage() {
 
   return (
     <div className="flex flex-col h-full bg-[#FAFAFA] overflow-y-auto">
-      <div className="p-8 lg:p-12 max-w-[850px] w-full mx-auto space-y-8">
+      <div className="p-4 sm:p-8 lg:p-12 max-w-[850px] w-full mx-auto space-y-6 sm:space-y-8">
         {/* Header */}
         <div className="border-b border-[#E5E5E5] pb-6">
-          <h1 className="font-serif text-[32px] font-bold text-[#0D0D0D] leading-tight">
+          <h1 className="font-serif text-[26px] sm:text-[32px] font-bold text-[#0D0D0D] leading-tight">
             Employer Settings
           </h1>
-          <p className="text-[14px] text-[#737373] font-sans mt-1">
+          <p className="text-[13px] sm:text-[14px] text-[#737373] font-sans mt-1">
             Manage your recruiting account, hiring team preferences, and platform credentials.
           </p>
         </div>

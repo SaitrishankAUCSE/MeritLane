@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Menu, X, Fingerprint, LayoutDashboard, Network, ShieldCheck, Search, Bookmark, Inbox, Settings, HelpCircle, LogOut } from "lucide-react";
@@ -13,6 +13,17 @@ export function MobileNav({ role }: { role: "candidate" | "employer" | "admin" }
   const [isOpen, setIsOpen] = useState(false);
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   const { handleSignOut } = useAuth();
+
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [isOpen]);
 
   type NavItem = {
     name: string;
@@ -34,6 +45,7 @@ export function MobileNav({ role }: { role: "candidate" | "employer" | "admin" }
   const employerItems: NavItem[] = [
     { name: "Discover", href: "/employer/dashboard", icon: Search },
     { name: "Shortlist", href: "/employer/shortlist", icon: Bookmark },
+    { name: "Company Profile", href: "/employer/profile", icon: Fingerprint },
     { name: "Settings", href: "/employer/settings", icon: Settings },
     { name: "Support", href: "/employer/support", icon: HelpCircle },
   ];

@@ -1,23 +1,43 @@
+export const COMMON_DEGREES = [
+  "B.Tech - Bachelor of Technology",
+  "B.E. - Bachelor of Engineering",
+  "B.Sc - Bachelor of Science",
+  "BCA - Bachelor of Computer Applications",
+  "M.Tech - Master of Technology",
+  "M.E. - Master of Engineering",
+  "M.Sc - Master of Science",
+  "MCA - Master of Computer Applications",
+  "B.S. - Bachelor of Science (4-Year)",
+  "Dual Degree (B.Tech + M.Tech)",
+  "Ph.D. - Doctor of Philosophy",
+  "Other Degree / Diploma"
+];
+
 export const COMMON_BRANCHES = [
   "Computer Science and Engineering",
   "Information Technology",
-  "Electronics and Communication Engineering",
-  "Electrical and Electronics Engineering",
+  "Artificial Intelligence and Machine Learning (AI & ML)",
+  "Artificial Intelligence and Data Science (AI & DS)",
+  "Data Science",
+  "Cyber Security",
+  "Electronics and Communication Engineering (ECE)",
+  "Electrical and Electronics Engineering (EEE)",
   "Mechanical Engineering",
   "Civil Engineering",
-  "Artificial Intelligence and Data Science",
-  "Artificial Intelligence and Machine Learning",
-  "Cyber Security",
+  "Computer Science and Business Systems (CSBS)",
+  "Information Science and Engineering (ISE)",
   "Aerospace Engineering",
-  "Chemical Engineering",
-  "Biotechnology",
   "Robotics and Automation",
-  "Computer Science and Business Systems",
-  "Information Science and Engineering",
+  "Biotechnology",
+  "Chemical Engineering",
   "Mechatronics Engineering",
-  "Electronics and Instrumentation",
+  "Electronics and Instrumentation Engineering (EIE)",
   "Automobile Engineering",
-  "Metallurgical Engineering"
+  "Metallurgical and Materials Engineering",
+  "Mathematics and Computing",
+  "Software Engineering",
+  "Cloud Computing & DevOps",
+  "Other Branch"
 ];
 
 export const YEARS = Array.from({ length: 15 }, (_, i) => (new Date().getFullYear() + 4 - i).toString());
@@ -33,13 +53,14 @@ export const COMMON_SKILLS = [
 ];
 
 export const fetchIndianColleges = async (query: string): Promise<string[]> => {
-  if (!query || query.length < 2) return [];
+  if (!query || query.trim().length < 1) return [];
   try {
-    const res = await fetch(`/api/colleges?q=${encodeURIComponent(query)}`);
+    const res = await fetch(`/api/colleges?q=${encodeURIComponent(query.trim())}`);
     if (!res.ok) return [];
     const data = await res.json();
-    return data.colleges || [];
+    return data.results || data.colleges || [];
   } catch (e) {
+    console.error("Failed to fetch colleges:", e);
     return [];
   }
 };

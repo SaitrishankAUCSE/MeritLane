@@ -41,18 +41,18 @@ export default function EmployerSupportPage() {
 
   return (
     <div className="flex flex-col h-full bg-[#FAFAFA] overflow-y-auto">
-      <div className="p-8 lg:p-12 max-w-[900px] w-full mx-auto space-y-10">
+      <div className="p-4 sm:p-8 lg:p-12 max-w-[900px] w-full mx-auto space-y-8 sm:space-y-10">
         {/* Header */}
         <div className="border-b border-[#E5E5E5] pb-6">
           <div className="flex items-center gap-3 mb-2">
-            <div className="h-10 w-10 rounded-xl bg-[#0D0D0D] text-white flex items-center justify-center">
+            <div className="h-10 w-10 rounded-xl bg-[#0D0D0D] text-white flex items-center justify-center shrink-0">
               <HelpCircle className="h-5 w-5" />
             </div>
             <div>
-              <h1 className="font-serif text-[32px] font-bold text-[#0D0D0D] leading-tight">
+              <h1 className="font-serif text-[26px] sm:text-[32px] font-bold text-[#0D0D0D] leading-tight">
                 Employer Help & Support
               </h1>
-              <p className="text-[14px] text-[#737373] font-sans">
+              <p className="text-[13px] sm:text-[14px] text-[#737373] font-sans">
                 Assistance with candidate discovery, hiring pipelines, and verification standards.
               </p>
             </div>

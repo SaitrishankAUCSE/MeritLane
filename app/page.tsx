@@ -10,6 +10,7 @@ import { getPlatformStats, getVerifiedCandidates } from "@/lib/firebase/home";
 import { CandidateProfile } from "@/lib/firebase/candidate";
 import { useAuth } from "@/lib/auth/AuthContext";
 import { motion } from "framer-motion";
+import { HandwritingText } from "@/components/ui/handwriting-text";
 
 const fadeUp: any = {
   hidden: { opacity: 0, y: 30 },
@@ -111,9 +112,24 @@ export default function HomePage() {
             <span className="h-px w-8 bg-foreground"></span>
             <span className="text-[12px] font-sans font-medium tracking-widest uppercase text-muted-foreground">The Meritlane Standard</span>
           </motion.div>
-          <motion.h1 variants={fadeUp} className="text-[40px] sm:text-[48px] md:text-[60px] lg:text-[72px] font-serif text-foreground tracking-tight leading-[1.05]">
-            Proof of skill.<br/>
-            <span className="text-[#525252]">Not just credentials.</span>
+          <motion.h1 variants={fadeUp} className="text-[40px] sm:text-[48px] md:text-[60px] lg:text-[72px] font-serif text-foreground tracking-tight leading-[1.08]">
+            <span className="block text-emerald-700 dark:text-emerald-500 mb-2 sm:mb-3">
+              <HandwritingText
+                text="Meritlane."
+                height="1.05em"
+                duration={1.5}
+                delay={0.1}
+              />
+            </span>
+            <motion.span 
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 1.3, duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+              className="block"
+            >
+              Proof of skill.<br/>
+              <span className="text-[#525252]">Not just credentials.</span>
+            </motion.span>
           </motion.h1>
           <motion.p variants={fadeUp} className="mt-8 text-[18px] lg:text-[20px] text-[#525252] max-w-xl leading-[1.6]">
             Meritlane is a technical talent verification institution. We audit code, validate engineering capabilities, and establish verifiable proof of skill—so you can hire based on evidence, not pedigree.

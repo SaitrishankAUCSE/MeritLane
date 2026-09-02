@@ -43,11 +43,12 @@ export default function DashboardRouter() {
       return;
     }
 
-    // Candidate — check if they have a profile started
+    // Candidate — check if they have a completed profile
     if (role === "candidate") {
       fetchCandidateProfile(user.uid)
         .then((profile) => {
-          if (profile && (profile.name || (profile.skills && profile.skills.length > 0))) {
+          const isComplete = !!(profile && profile.name?.trim() && profile.skills && profile.skills.length > 0);
+          if (isComplete) {
             router.replace("/candidate/dashboard");
           } else {
             router.replace("/candidate/profile");

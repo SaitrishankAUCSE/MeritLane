@@ -25,6 +25,7 @@ export interface Toast {
 
 interface ToastContextValue {
   toast: (opts: Omit<Toast, "id">) => void;
+  addToast: (opts: Omit<Toast, "id">) => void;
 }
 
 const ToastContext = createContext<ToastContextValue | null>(null);
@@ -133,7 +134,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   return (
-    <ToastContext.Provider value={{ toast }}>
+    <ToastContext.Provider value={{ toast, addToast: toast }}>
       {children}
 
       {/* Toast viewport — fixed bottom-right */}

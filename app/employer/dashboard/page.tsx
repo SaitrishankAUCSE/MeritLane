@@ -23,6 +23,7 @@ import { COMMON_SKILLS } from "@/lib/constants";
 import { MeritlaneLoader } from "@/components/ui/MeritlaneLoader";
 import { ContextGuide } from "@/components/ui/ContextGuide";
 import { Input } from "@/components/ui/Input";
+import { ErrorState } from "@/components/ui/ErrorState";
 import { Button } from "@/components/ui/Button";
 import { MessageModal } from "@/components/employer/MessageModal";
 
@@ -198,17 +199,19 @@ export default function EmployerDashboardPage() {
   if (errorMsg) {
     return (
       <div className="flex h-full w-full items-center justify-center p-10 bg-[#FAFAFA]">
-        <div className="border border-[#E5E5E5] p-10 bg-white rounded-md max-w-md w-full">
-          <h2 className="text-[20px] font-serif text-[#B42318] mb-4">Access Denied</h2>
-          <p className="text-[14px] text-[#737373]">{errorMsg}</p>
-        </div>
+        <ErrorState
+          title="Unable to load candidates"
+          description={errorMsg}
+          onRetry={fetchCandidates}
+          retryLabel="Try again"
+        />
       </div>
     );
   }
 
   return (
     <div className="flex h-full w-full flex-col overflow-hidden bg-[#FAFAFA]">
-      <div className="flex-1 p-6 md:p-10 lg:p-14 overflow-y-auto scrollbar-hide">
+      <div className="flex-1 p-4 sm:p-8 md:p-10 lg:p-14 overflow-y-auto scrollbar-hide">
         {/* Context Guide */}
         <div className="max-w-[1000px] mx-auto">
           <ContextGuide
@@ -224,8 +227,8 @@ export default function EmployerDashboardPage() {
         </div>
 
         {/* Hero Header */}
-        <div className="max-w-[1000px] mx-auto mb-10">
-          <div className="flex items-center gap-2 mb-3">
+        <div className="max-w-[1000px] mx-auto mb-8 sm:mb-10">
+          <div className="flex items-center gap-2 mb-3 flex-wrap">
             <span className="text-[11px] font-mono font-bold uppercase tracking-[0.1em] text-[#15803D] bg-[#15803D]/10 px-2.5 py-1 rounded-full">
               Verified Talent Hub
             </span>
@@ -233,17 +236,17 @@ export default function EmployerDashboardPage() {
               · Powered by OpenRouter AI Analysis
             </span>
           </div>
-          <h1 className="font-serif text-[42px] text-[#0D0D0D] leading-tight mb-2">
+          <h1 className="font-serif text-[28px] sm:text-[36px] lg:text-[42px] text-[#0D0D0D] leading-tight mb-2">
             Find people whose skills are proven.
           </h1>
-          <p className="text-[16px] text-[#737373] font-sans">
+          <p className="text-[14px] sm:text-[16px] text-[#737373] font-sans">
             Inspect technical candidates backed by verified assessments, project evidence, and AI hiring briefs.
           </p>
         </div>
 
         {/* Search & Filter Controls */}
         <div className="max-w-[1000px] mx-auto">
-          <div className="mb-8 bg-white border border-[#E5E5E5] p-6 rounded-2xl shadow-[0_2px_10px_rgba(0,0,0,0.02)] space-y-5">
+          <div className="mb-8 bg-white border border-[#E5E5E5] p-4 sm:p-6 rounded-2xl shadow-[0_2px_10px_rgba(0,0,0,0.02)] space-y-4 sm:space-y-5">
             {/* Search Bar */}
             <div className="relative">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-[#737373]" />
@@ -352,12 +355,12 @@ export default function EmployerDashboardPage() {
                 return (
                   <div
                     key={c.uid}
-                    className="group border border-[#E5E5E5] rounded-2xl bg-white p-6 md:p-8 hover:shadow-[0_8px_30px_rgba(0,0,0,0.04)] transition-all duration-300"
+                    className="group border border-[#E5E5E5] rounded-2xl bg-white p-4 sm:p-6 md:p-8 hover:shadow-[0_8px_30px_rgba(0,0,0,0.04)] transition-all duration-300"
                   >
-                    <div className="flex flex-col md:flex-row md:items-start justify-between gap-6">
+                    <div className="flex flex-col md:flex-row md:items-start justify-between gap-5 sm:gap-6">
                       {/* Candidate Identity & Evidence */}
-                      <div className="flex items-start gap-6">
-                        <div className="h-16 w-16 shrink-0 rounded-2xl bg-[#F3F3F1] border border-[#E5E5E5] flex items-center justify-center text-[#0D0D0D] font-serif text-[26px]">
+                      <div className="flex items-start gap-4 sm:gap-6">
+                        <div className="h-12 w-12 sm:h-16 sm:w-16 shrink-0 rounded-2xl bg-[#F3F3F1] border border-[#E5E5E5] flex items-center justify-center text-[#0D0D0D] font-serif text-[20px] sm:text-[26px]">
                           {c.name ? c.name.charAt(0).toUpperCase() : "C"}
                         </div>
                         <div>

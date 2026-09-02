@@ -21,6 +21,9 @@ import { Button } from "@/components/ui/Button";
 import { MessageModal } from "@/components/employer/MessageModal";
 import { ContextGuide } from "@/components/ui/ContextGuide";
 
+import { useToast } from "@/components/ui/Toast";
+import { ErrorState } from "@/components/ui/ErrorState";
+
 const PIPELINE_STAGES = [
   { id: "shortlisted", label: "Shortlisted", color: "bg-blue-50 text-blue-700 border-blue-200" },
   { id: "interviewing", label: "Interviewing", color: "bg-amber-50 text-amber-700 border-amber-200" },
@@ -31,6 +34,7 @@ const PIPELINE_STAGES = [
 
 export default function EmployerShortlistPage() {
   const { user, loading } = useAuth();
+  const { addToast } = useToast();
   const [candidates, setCandidates] = useState<any[]>([]);
   const [pipeline, setPipeline] = useState<Record<string, string>>({});
   const [fetching, setFetching] = useState(true);
@@ -51,6 +55,7 @@ export default function EmployerShortlistPage() {
   const fetchCandidates = useCallback(async () => {
     if (!user) return;
     setFetching(true);
+    setErrorMsg("");
     try {
       const token = await user.getIdToken(true);
       const res = await fetch("/api/employer/shortlist/list", {
@@ -59,7 +64,7 @@ export default function EmployerShortlistPage() {
 
       if (!res.ok) {
         const data = await res.json();
-        setErrorMsg(data.error || "Failed to fetch shortlist");
+        setErrorMsg(data.error || "Unable to load your shortlist. Your data has not been changed.");
         setFetching(false);
         return;
       }
@@ -70,7 +75,7 @@ export default function EmployerShortlistPage() {
       setFetching(false);
     } catch (e) {
       console.error(e);
-      setErrorMsg("Internal system error");
+      setErrorMsg("Unable to load your shortlist. Please check your connection and try again.");
       setFetching(false);
     }
   }, [user]);
@@ -89,7 +94,7 @@ export default function EmployerShortlistPage() {
     setPipeline((prev) => ({ ...prev, [candidateId]: stage }));
     try {
       const token = await user?.getIdToken(true);
-      await fetch("/api/employer/pipeline", {
+      const res = await fetch("/api/employer/pipeline", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -97,6 +102,12 @@ export default function EmployerShortlistPage() {
         },
         body: JSON.stringify({ candidateId, stage }),
       });
+      if (res.ok) {
+        addToast({
+          type: "success",
+          title: "Pipeline stage updated.",
+        });
+      }
     } catch (e) {
       console.error("Failed to update pipeline stage:", e);
     }
@@ -114,7 +125,14 @@ export default function EmployerShortlistPage() {
         },
         body: JSON.stringify({ candidateId }),
       });
-      if (!res.ok) fetchCandidates();
+      if (!res.ok) {
+        fetchCandidates();
+      } else {
+        addToast({
+          type: "info",
+          title: "Candidate removed from shortlist.",
+        });
+      }
     } catch {
       fetchCandidates();
     }
@@ -156,10 +174,12 @@ export default function EmployerShortlistPage() {
   if (errorMsg) {
     return (
       <div className="flex h-full w-full items-center justify-center p-10 bg-[#FAFAFA]">
-        <div className="border border-[#E5E5E5] p-10 bg-white rounded-md max-w-md w-full">
-          <h2 className="text-[20px] font-serif text-[#B42318] mb-4">Access Denied</h2>
-          <p className="text-[14px] text-[#737373]">{errorMsg}</p>
-        </div>
+        <ErrorState
+          title="Unable to load shortlist"
+          description={errorMsg}
+          onRetry={fetchCandidates}
+          retryLabel="Try again"
+        />
       </div>
     );
   }
@@ -182,21 +202,21 @@ export default function EmployerShortlistPage() {
 
   return (
     <div className="flex h-full w-full flex-col overflow-hidden bg-[#FAFAFA]">
-      <div className="flex-1 p-6 md:p-10 lg:p-14 overflow-y-auto scrollbar-hide">
+      <div className="flex-1 p-4 sm:p-8 md:p-10 lg:p-14 overflow-y-auto scrollbar-hide">
         {/* Page Header */}
         <div className="max-w-[1000px] mx-auto mb-8 border-b border-[#E5E5E5] pb-8">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
               <div className="flex items-center gap-3 text-[#0D0D0D] mb-2">
                 <BookMarked className="h-7 w-7 text-[#0D0D0D]" />
-                <h1 className="font-serif text-[38px] leading-tight">Shortlist & Pipeline</h1>
+                <h1 className="font-serif text-[28px] sm:text-[34px] lg:text-[38px] leading-tight">Shortlist & Pipeline</h1>
               </div>
-              <p className="text-[15px] text-[#737373] font-sans">
+              <p className="text-[14px] sm:text-[15px] text-[#737373] font-sans">
                 Manage your saved candidates, track interview progression, and message verified talent.
               </p>
             </div>
-            <Link href="/employer/dashboard">
-              <Button variant="outline" className="text-[13px] border-[#E5E5E5]">
+            <Link href="/employer/dashboard" className="w-full sm:w-auto">
+              <Button variant="outline" className="text-[13px] border-[#E5E5E5] w-full sm:w-auto justify-center">
                 + Discover More Talent
               </Button>
             </Link>
@@ -294,11 +314,11 @@ export default function EmployerShortlistPage() {
                 return (
                   <div
                     key={c.uid}
-                    className="border border-[#E5E5E5] rounded-2xl bg-white p-6 md:p-8 hover:shadow-[0_8px_30px_rgba(0,0,0,0.04)] transition-all duration-300"
+                    className="border border-[#E5E5E5] rounded-2xl bg-white p-4 sm:p-6 md:p-8 hover:shadow-[0_8px_30px_rgba(0,0,0,0.04)] transition-all duration-300"
                   >
-                    <div className="flex flex-col md:flex-row md:items-start justify-between gap-6">
-                      <div className="flex items-start gap-6">
-                        <div className="h-16 w-16 shrink-0 rounded-2xl bg-[#F3F3F1] border border-[#E5E5E5] flex items-center justify-center text-[#0D0D0D] font-serif text-[26px]">
+                    <div className="flex flex-col md:flex-row md:items-start justify-between gap-5 sm:gap-6">
+                      <div className="flex items-start gap-4 sm:gap-6">
+                        <div className="h-12 w-12 sm:h-16 sm:w-16 shrink-0 rounded-2xl bg-[#F3F3F1] border border-[#E5E5E5] flex items-center justify-center text-[#0D0D0D] font-serif text-[20px] sm:text-[26px]">
                           {c.name ? c.name.charAt(0).toUpperCase() : "C"}
                         </div>
                         <div>
