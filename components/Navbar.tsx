@@ -53,11 +53,11 @@ export default function Navbar() {
 
   return (
     <>
-      <header className={`sticky top-0 z-50 w-full border-b backdrop-blur-md ${isPublicHome ? "theme-public border-[var(--color-border)] bg-[var(--color-background)]/90" : "border-border bg-background/85"}`}>
-      <div className="mx-auto flex h-16 w-full max-w-[1600px] items-center justify-between px-8 md:px-16 lg:px-24">
+      <header className={`sticky top-0 z-50 w-full border-b backdrop-blur-md ${isPublicHome ? "theme-public border-[var(--color-border)] bg-[var(--color-background)]/95" : "border-border bg-background/85"}`}>
+      <div className="flex h-16 w-full items-center justify-between px-6 sm:px-8 md:px-10 lg:px-12">
         <Link
           href={isUserAdmin ? "/admin" : user ? "/dashboard" : "/"}
-          className="flex items-center"
+          className="flex items-center shrink-0"
         >
           <img src="/logo-full.png" alt="Meritlane" className="h-6 w-auto" />
           {isUserAdmin && (
@@ -98,14 +98,19 @@ export default function Navbar() {
               />
             </>
           ) : (
-            <div className="hidden items-center gap-5 md:flex">
-              <button onClick={() => openAuthModal("login")} className="text-sm text-muted-foreground hover:text-foreground transition-colors font-medium">
+            <div className="hidden items-center gap-6 md:flex">
+              <button onClick={() => openAuthModal("login")} className="text-sm text-[#78716C] hover:text-[#1C1917] transition-colors font-medium">
                 Log in
               </button>
-              <button onClick={() => openAuthModal("signup", undefined, "candidate")} className="text-sm text-muted-foreground hover:text-foreground transition-colors font-medium">
+              <button onClick={() => openAuthModal("signup", undefined, "candidate")} className="text-sm text-[#78716C] hover:text-[#1C1917] transition-colors font-medium">
                 Register
               </button>
-              <Button onClick={() => openAuthModal("signup", undefined, "employer")} variant="primary" size="sm">Hire Talent</Button>
+              <button 
+                onClick={() => openAuthModal("signup", undefined, "employer")}
+                className="px-5 h-9 bg-[#064E3B] text-white hover:bg-[#022c22] rounded text-[13px] font-sans font-medium transition-colors shadow-xs"
+              >
+                Hire Talent
+              </button>
             </div>
           )}
 

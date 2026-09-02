@@ -156,7 +156,7 @@ export default function HomePage() {
           Meritlane is a technical talent verification institution. We audit code, validate engineering capabilities, and establish verifiable proof of skill—so you can hire based on evidence, not pedigree.
         </motion.p>
 
-        {/* Action Buttons */}
+        {/* Action Buttons: Institutional Form Factor */}
         <motion.div 
           initial="hidden"
           animate="visible"
@@ -164,38 +164,33 @@ export default function HomePage() {
           className="flex flex-wrap items-center justify-center gap-4 mb-14"
         >
           <Link href="/employer/dashboard">
-            <Button className="bg-[#064E3B] text-[#FFFFFF] h-12 px-8 rounded-full text-[15px] font-medium font-sans hover:bg-[#022c22] shadow-[0_4px_16px_rgba(6,78,59,0.25)] transition-all border border-[#064E3B]">
+            <button className="bg-[#064E3B] text-[#FFFFFF] h-11 px-7 rounded text-[14px] font-medium font-sans hover:bg-[#022c22] transition-colors shadow-xs">
               Start hiring verified talent
-            </Button>
+            </button>
           </Link>
           <Link href="/signup">
-            <Button variant="outline" className="h-12 px-8 rounded-full text-[15px] font-medium font-sans border-border bg-surface hover:bg-surface-low text-foreground transition-all">
+            <button className="h-11 px-7 rounded text-[14px] font-medium font-sans border border-[#E7E2DA] bg-white hover:bg-[#F8F6F3] text-[#1C1917] transition-colors shadow-xs">
               Get verified as an engineer
-            </Button>
+            </button>
           </Link>
         </motion.div>
 
-        {/* Live Blueprint Proof Showcase: Fills the hero gracefully with existing component data */}
+        {/* Live Blueprint Proof Showcase: Clean Academic Document Standard */}
         <motion.div 
           initial={{ opacity: 0, y: 25 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
           className="w-full max-w-4xl mx-auto"
         >
-          <div className="bg-surface border border-border rounded-xl shadow-[0_8px_30px_rgba(0,0,0,0.04)] p-6 sm:p-8 relative overflow-hidden text-left">
-            <div className="absolute top-0 right-0 w-24 h-24 bg-[#064E3B]/5 rounded-bl-full pointer-events-none" />
-            
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8 pb-6 border-b border-border">
-              <div className="flex items-center gap-3">
-                <div className="h-3 w-3 rounded-full bg-[#064E3B] animate-pulse shadow-[0_0_8px_rgba(6,78,59,0.4)]" />
-                <div>
-                  <div className="text-[11px] font-mono tracking-widest text-[#737373] uppercase">Protocol 001.A • Live Verification Record</div>
-                  <div className="text-[20px] sm:text-[22px] font-serif text-foreground">Verified Engineering Profile</div>
-                </div>
+          <div className="bg-white border border-[#E7E2DA] p-6 sm:p-8 relative text-left shadow-xs">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8 pb-6 border-b border-[#E7E2DA]">
+              <div>
+                <div className="text-[11px] font-mono tracking-widest text-[#78716C] uppercase mb-1">Live Candidate Record Preview</div>
+                <div className="text-[22px] sm:text-[24px] font-serif text-[#1C1917] font-normal">Audited Engineering Profile</div>
               </div>
-              <div className="flex items-center gap-2 px-3 py-1 bg-emerald-50 border border-emerald-200/80 rounded-full text-[#064E3B] text-[11px] font-mono font-medium self-start sm:self-auto">
+              <div className="flex items-center gap-2 px-3 py-1 bg-[#064E3B]/10 border border-[#064E3B]/20 text-[#064E3B] text-[11px] font-mono font-medium self-start sm:self-auto">
                 <CheckCircle className="h-3.5 w-3.5 text-[#064E3B]" />
-                <span>STATUS: AUDITED & SIGNED</span>
+                <span>AUDITED & SIGNED</span>
               </div>
             </div>
             

@@ -114,10 +114,10 @@ export function CandidateSidebar() {
                 aria-current={isActive ? "page" : undefined}
                 title={isCollapsed ? item.name : undefined}
                 className={`
-                  relative flex items-center h-9 rounded-lg text-[13.5px] font-medium
+                  relative flex items-center h-9 rounded text-[13.5px] font-medium
                   transition-all duration-150 group overflow-hidden
                   ${isActive
-                    ? "bg-[#1C1917] text-[#FAFAF9] shadow-sm"
+                    ? "bg-[#F0EDE8] text-[#1C1917] font-semibold border-l-2 border-[#064E3B]"
                     : "text-[#78716C] hover:text-[#1C1917] hover:bg-[#F2EFE9]"
                   }
                 `}

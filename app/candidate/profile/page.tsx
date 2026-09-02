@@ -142,21 +142,18 @@ export default function CandidateProfilePage() {
         />
       )}
 
-      {/* Page Header */}
-      <div className="mb-10">
-        <div className="flex items-center gap-2 mb-3">
-          <span className="h-2 w-2 rounded-full bg-[#064E3B] animate-pulse" />
-          <span className="text-[12px] font-mono tracking-widest text-[#064E3B] uppercase font-medium">
-            Protocol 001.A • Core Identity & Engineering Declaration
-          </span>
+      {/* Page Header: Candidate Identity Dossier */}
+      <div className="mb-10 border-b border-[#E7E2DA] pb-7">
+        <div className="text-[12px] font-mono tracking-[0.15em] text-[#78716C] uppercase mb-2">
+          Candidate Identity & Capabilities
         </div>
 
-        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6 border-b border-[#E7E2DA] pb-8">
+        <div className="flex flex-col sm:flex-row sm:items-baseline justify-between gap-6">
           <div>
-            <h1 className="font-serif text-[32px] sm:text-[44px] lg:text-[50px] text-[#1C1917] leading-[1.08] mb-2">{name}</h1>
-            <div className="text-[15px] text-[#525252] font-sans">{primaryDomain}</div>
+            <h1 className="font-serif text-[34px] sm:text-[42px] text-[#1C1917] leading-[1.1] mb-2 font-normal">{name}</h1>
+            <div className="text-[14px] text-[#525252] font-sans">{primaryDomain}</div>
           </div>
-          <button onClick={() => setIsEditing(true)} className="flex items-center justify-center gap-2 px-6 h-11 border border-[#E7E2DA] bg-white text-[#1C1917] hover:bg-[#F2EFE9] rounded-full text-[14px] font-sans font-medium transition-all shadow-xs w-full sm:w-auto">
+          <button onClick={() => setIsEditing(true)} className="flex items-center justify-center gap-2 px-5 h-10 border border-[#E7E2DA] bg-white text-[#1C1917] hover:bg-[#F8F6F3] rounded text-[13px] font-sans font-medium transition-colors shadow-xs w-full sm:w-auto">
             <PenTool className="h-3.5 w-3.5" /> Edit Identity
           </button>
         </div>
@@ -170,7 +167,7 @@ export default function CandidateProfilePage() {
           
           <section>
             <div className="flex items-center justify-between mb-4 border-b border-[#E7E2DA] pb-3">
-              <h2 className="text-[12px] font-mono uppercase tracking-[0.15em] text-[#78716C]">Declared Capabilities</h2>
+              <h2 className="text-[12px] font-mono uppercase tracking-[0.15em] text-[#1C1917]">Declared Capabilities</h2>
               <button onClick={() => router.push('/candidate/dashboard')} className="text-[12px] font-mono text-[#064E3B] hover:underline font-medium">+ Add Evidence</button>
             </div>
             
@@ -180,31 +177,28 @@ export default function CandidateProfilePage() {
                 const isFailed = profile?.verifiedSkills?.[skill]?.status === "failed";
                 
                 return (
-                  <div key={idx} className={`border p-5 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 group transition-all ${isVerified ? 'border-[#064E3B]/30 bg-[#F0FDF4]/50 shadow-xs' : 'border-[#E7E2DA] bg-white hover:border-[#C8C0B5]'}`}>
+                  <div key={idx} className={`border p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition-colors bg-white ${isVerified ? 'border-[#064E3B]/40' : 'border-[#E7E2DA]'}`}>
                     <div className="flex items-center gap-4">
-                      <div className={`h-11 w-11 shrink-0 rounded-xl flex items-center justify-center font-mono text-[13px] font-bold ${isVerified ? 'bg-[#064E3B]/10 border border-[#064E3B]/20 text-[#064E3B]' : 'bg-[#F8F6F3] border border-[#E7E2DA] text-[#1C1917]'}`}>
+                      <div className={`h-10 w-10 shrink-0 border flex items-center justify-center font-mono text-[12px] ${isVerified ? 'bg-[#064E3B]/10 border-[#064E3B]/20 text-[#064E3B]' : 'bg-[#F8F6F3] border-[#E7E2DA] text-[#1C1917]'}`}>
                         {skill.substring(0, 2).toUpperCase()}
                       </div>
                       <div>
-                        <div className="text-[16px] font-medium text-[#1C1917] mb-1 font-serif">{skill}</div>
-                        <div className={`text-[10px] font-mono uppercase tracking-[0.15em] ${isVerified ? 'text-[#064E3B] font-semibold' : 'text-[#78716C]'}`}>
-                          State: {isVerified ? 'Verified & Audited' : 'Self-Declared'}
+                        <div className="text-[16px] font-serif text-[#1C1917] mb-0.5">{skill}</div>
+                        <div className="text-[11px] font-mono uppercase tracking-wider text-[#78716C]">
+                          STATUS: {isVerified ? 'VERIFIED' : 'DECLARED'}
                         </div>
                       </div>
                     </div>
                     
                     <div className="text-right">
                       {isVerified ? (
-                        <>
-                          <div className="text-[10px] text-[#064E3B] font-mono uppercase tracking-[0.1em] mb-1">Signed by Meritlane Protocol</div>
-                          <div className="text-[13px] font-sans font-medium text-[#064E3B] flex items-center justify-end gap-1.5 h-8">
-                            <ShieldCheck className="h-4 w-4" /> Verified
-                          </div>
-                        </>
+                        <div className="text-[12px] font-mono text-[#064E3B]">
+                          ✓ Audit Verified
+                        </div>
                       ) : (
                         <button 
                           onClick={() => router.push('/candidate/dashboard')}
-                          className="text-[13px] font-sans font-medium text-[#064E3B] border border-[#064E3B]/40 px-4 h-8 rounded-full hover:bg-[#064E3B]/5 transition-colors"
+                          className="text-[12px] font-sans font-medium text-[#1C1917] border border-[#E7E2DA] px-4 h-8 rounded hover:bg-[#F8F6F3] transition-colors"
                         >
                           Attach Evidence
                         </button>

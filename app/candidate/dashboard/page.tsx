@@ -131,22 +131,19 @@ export default function CandidateDashboardPage() {
         ctaHref="/candidate/assessment"
       />
 
-      {/* Page Header with Institutional Provenance Line and Primary CTA */}
-      <div className="mb-10">
-        <div className="flex items-center gap-2 mb-3">
-          <span className="h-2 w-2 rounded-full bg-[#064E3B] animate-pulse" />
-          <span className="text-[12px] font-mono tracking-widest text-[#064E3B] uppercase font-medium">
-            Protocol 001.B • Technical Evidence Layer
-          </span>
+      {/* Page Header: Academic & Credential Registry Authority */}
+      <div className="mb-10 border-b border-[#E7E2DA] pb-7">
+        <div className="text-[12px] font-mono tracking-[0.15em] text-[#78716C] uppercase mb-2">
+          Evidence Workspace
         </div>
         
-        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6 border-b border-[#E7E2DA] pb-8">
+        <div className="flex flex-col sm:flex-row sm:items-baseline justify-between gap-6">
           <div>
-            <h1 className="font-serif text-[32px] sm:text-[44px] lg:text-[50px] text-[#1C1917] leading-[1.08] mb-3">
+            <h1 className="font-serif text-[34px] sm:text-[42px] text-[#1C1917] leading-[1.1] mb-2 font-normal">
               Build your proof.
             </h1>
-            <p className="text-[15px] text-[#525252] font-sans max-w-2xl leading-relaxed">
-              Link code repositories, production URLs, and verifiable technical artifacts that validate the engineering capabilities declared in your identity.
+            <p className="text-[14px] text-[#525252] font-sans max-w-2xl leading-relaxed">
+              Link repositories, architectural artifacts, and live production deployments to establish evidence for your technical capabilities.
             </p>
           </div>
 
@@ -156,7 +153,7 @@ export default function CandidateDashboardPage() {
               onClick={() => setIsModalOpen(true)}
               aria-haspopup="dialog"
               aria-expanded={isModalOpen}
-              className="flex items-center justify-center gap-2 px-6 h-11 bg-[#064E3B] text-[#FFFFFF] hover:bg-[#022c22] rounded-full text-[14px] font-sans font-medium transition-all shadow-[0_4px_14px_rgba(6,78,59,0.2)] active:scale-95"
+              className="flex items-center justify-center gap-2 px-5 h-10 bg-[#064E3B] text-[#FFFFFF] hover:bg-[#022c22] rounded text-[13px] font-sans font-medium transition-colors shadow-xs"
             >
               <span>+</span> Add Evidence
             </button>
@@ -164,29 +161,26 @@ export default function CandidateDashboardPage() {
         </div>
       </div>
 
-      {/* Executive Telemetry & Verification Readiness Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 mb-10">
-        <div className="bg-white border border-[#E7E2DA] rounded-xl p-5 shadow-[0_2px_8px_rgba(0,0,0,0.02)] relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-16 h-16 bg-[#064E3B]/5 rounded-bl-full pointer-events-none" />
-          <div className="text-[11px] font-mono uppercase tracking-wider text-[#78716C] mb-1">Declared Skills</div>
-          <div className="text-[32px] font-serif text-[#1C1917] font-normal leading-none my-2">{skills.length}</div>
-          <div className="text-[12px] font-sans text-[#78716C]">Self-declared in your Identity</div>
+      {/* Institutional Telemetry Ledger */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-10">
+        <div className="bg-white border border-[#E7E2DA] p-6 shadow-xs">
+          <div className="text-[11px] font-mono uppercase tracking-[0.15em] text-[#78716C] mb-2">Declared Capabilities</div>
+          <div className="text-[34px] font-serif text-[#1C1917] leading-none mb-2">{skills.length}</div>
+          <div className="text-[12px] font-sans text-[#78716C]">Self-declared technical claims</div>
         </div>
 
-        <div className="bg-white border border-[#E7E2DA] rounded-xl p-5 shadow-[0_2px_8px_rgba(0,0,0,0.02)] relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-16 h-16 bg-[#064E3B]/5 rounded-bl-full pointer-events-none" />
-          <div className="text-[11px] font-mono uppercase tracking-wider text-[#78716C] mb-1">Linked Artifacts</div>
-          <div className="text-[32px] font-serif text-[#1C1917] font-normal leading-none my-2">{projects.length}</div>
-          <div className="text-[12px] font-sans text-[#78716C]">Supporting code repositories</div>
+        <div className="bg-white border border-[#E7E2DA] p-6 shadow-xs">
+          <div className="text-[11px] font-mono uppercase tracking-[0.15em] text-[#78716C] mb-2">Linked Repositories</div>
+          <div className="text-[34px] font-serif text-[#1C1917] leading-none mb-2">{projects.length}</div>
+          <div className="text-[12px] font-sans text-[#78716C]">Supporting code artifacts</div>
         </div>
 
-        <div className="bg-white border border-[#E7E2DA] rounded-xl p-5 shadow-[0_2px_8px_rgba(0,0,0,0.02)] relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-16 h-16 bg-[#064E3B]/10 rounded-bl-full pointer-events-none" />
-          <div className="text-[11px] font-mono uppercase tracking-wider text-[#064E3B] mb-1">Verified Badges</div>
-          <div className="text-[32px] font-serif text-[#064E3B] font-normal leading-none my-2">
+        <div className="bg-white border border-[#E7E2DA] p-6 shadow-xs">
+          <div className="text-[11px] font-mono uppercase tracking-[0.15em] text-[#064E3B] mb-2">Verified Badges</div>
+          <div className="text-[34px] font-serif text-[#064E3B] leading-none mb-2">
             {Object.values(profile?.verifiedSkills || {}).filter((v: any) => v.status === "verified").length}
           </div>
-          <div className="text-[12px] font-sans text-[#064E3B]">Audited & signed assessments</div>
+          <div className="text-[12px] font-sans text-[#064E3B]">Audited assessment records</div>
         </div>
       </div>
 
@@ -194,9 +188,9 @@ export default function CandidateDashboardPage() {
         
         {/* Left Column: Evidence Coverage by Skill */}
         <div className="space-y-6">
-          <div className="flex items-center justify-between pb-2 border-b border-[#E7E2DA]">
-            <h2 className="text-[12px] font-mono uppercase tracking-[0.15em] text-[#78716C]">Evidence Coverage</h2>
-            <span className="text-[11px] font-mono text-[#064E3B]">{skills.length} Capabilities</span>
+          <div className="flex items-center justify-between pb-3 border-b border-[#E7E2DA]">
+            <h2 className="text-[12px] font-mono uppercase tracking-[0.15em] text-[#1C1917]">Evidence Coverage</h2>
+            <span className="text-[11px] font-mono text-[#78716C]">{skills.length} Total</span>
           </div>
           
           <div className="space-y-4">
@@ -205,36 +199,29 @@ export default function CandidateDashboardPage() {
               const itemsCount = projects.filter(p => p.supportsClaim === skill).length;
               
               return (
-                <div key={index} className={`border rounded-xl p-5 transition-all ${isVerified ? 'border-[#064E3B]/30 bg-[#F0FDF4]/50 shadow-[0_2px_12px_rgba(6,78,59,0.05)]' : 'border-[#E7E2DA] bg-white hover:border-[#C8C0B5]'}`}>
+                <div key={index} className={`border p-5 transition-colors bg-white ${isVerified ? 'border-[#064E3B]/40' : 'border-[#E7E2DA]'}`}>
                   <div className="flex justify-between items-start mb-3">
                     <div>
-                      <div className="text-[15px] font-medium text-[#1C1917] font-sans">{skill}</div>
-                      <div className="text-[11px] text-[#78716C] mt-0.5">
-                        {itemsCount > 0 ? `${itemsCount} linked artifact${itemsCount > 1 ? 's' : ''}` : 'No evidence attached yet'}
+                      <div className="text-[15px] font-serif text-[#1C1917]">{skill}</div>
+                      <div className="text-[12px] text-[#78716C] font-sans mt-0.5">
+                        {itemsCount > 0 ? `${itemsCount} linked artifact${itemsCount > 1 ? 's' : ''}` : 'No evidence linked'}
                       </div>
                     </div>
-                    <span className={`text-[10px] font-mono uppercase px-2 py-0.5 rounded-full font-medium ${isVerified ? 'bg-[#064E3B]/10 text-[#064E3B] border border-[#064E3B]/20' : 'bg-[#F2EFE9] text-[#78716C] border border-[#E7E2DA]'}`}>
-                      {isVerified ? 'Verified' : itemsCount > 0 ? 'Linked' : 'Pending'}
+                    <span className={`text-[10px] font-mono tracking-wider uppercase px-2 py-0.5 border ${isVerified ? 'bg-[#064E3B]/10 text-[#064E3B] border-[#064E3B]/20' : 'bg-[#F8F6F3] text-[#78716C] border-[#E7E2DA]'}`}>
+                      {isVerified ? 'VERIFIED' : itemsCount > 0 ? 'LINKED' : 'PENDING'}
                     </span>
                   </div>
                   
-                  {/* Segmented Progress Tracker */}
-                  <div className="flex gap-1.5 mb-4">
-                    <div className={`h-1.5 flex-1 rounded-full ${itemsCount > 0 || isVerified ? 'bg-[#064E3B]' : 'bg-[#E7E2DA]'}`} />
-                    <div className={`h-1.5 flex-1 rounded-full ${itemsCount > 1 || isVerified ? 'bg-[#064E3B]' : 'bg-[#E7E2DA]'}`} />
-                    <div className={`h-1.5 flex-1 rounded-full ${isVerified ? 'bg-[#064E3B]' : 'bg-[#E7E2DA]'}`} />
-                  </div>
-                  
                   {isVerified ? (
-                    <div className="w-full flex items-center justify-center gap-2 text-[13px] font-sans font-medium text-[#064E3B] bg-[#064E3B]/10 border border-[#064E3B]/20 py-2.5 rounded-lg">
-                      <FileCheck className="h-4 w-4 text-[#064E3B]" /> Audit Record Verified
+                    <div className="w-full text-center text-[12px] font-mono text-[#064E3B] bg-[#064E3B]/5 border border-[#064E3B]/20 py-2 mt-4">
+                      ✓ Audit Record Verified
                     </div>
                   ) : (
                     <button 
                       onClick={() => router.push(`/candidate/assessment?skill=${encodeURIComponent(skill)}`)}
-                      className="w-full flex items-center justify-center gap-2 text-[13px] font-sans font-medium border border-[#064E3B] text-[#FFFFFF] bg-[#064E3B] hover:bg-[#022c22] py-2.5 rounded-lg transition-all shadow-xs"
+                      className="w-full flex items-center justify-center gap-2 text-[12px] font-sans font-medium border border-[#1C1917] text-[#1C1917] hover:bg-[#1C1917] hover:text-white py-2 rounded-none transition-colors mt-4"
                     >
-                      Take Verification Assessment <ArrowRight className="h-3.5 w-3.5" />
+                      Take Assessment <ArrowRight className="h-3.5 w-3.5" />
                     </button>
                   )}
                 </div>
@@ -242,8 +229,8 @@ export default function CandidateDashboardPage() {
             })}
             
             {skills.length === 0 && (
-              <div className="text-[13px] text-[#78716C] p-6 border border-dashed border-[#E7E2DA] rounded-xl text-center bg-[#F8F6F3]">
-                Declare your technical skills in your Identity section to establish your evidence coverage track.
+              <div className="text-[13px] text-[#78716C] p-6 border border-dashed border-[#E7E2DA] text-center bg-white">
+                Declare your technical skills in Identity to establish your audit track.
               </div>
             )}
           </div>
@@ -251,85 +238,80 @@ export default function CandidateDashboardPage() {
 
         {/* Right Column: Linked Technical Artifacts */}
         <div className="lg:col-span-2 space-y-6">
-          <div className="flex items-center justify-between pb-2 border-b border-[#E7E2DA]">
-            <h2 className="text-[12px] font-mono uppercase tracking-[0.15em] text-[#78716C]">Linked Technical Artifacts</h2>
+          <div className="flex items-center justify-between pb-3 border-b border-[#E7E2DA]">
+            <h2 className="text-[12px] font-mono uppercase tracking-[0.15em] text-[#1C1917]">Linked Technical Artifacts</h2>
             <span className="text-[11px] font-mono text-[#78716C]">{projects.length} Repositories</span>
           </div>
           
-          <div className="space-y-5">
+          <div className="space-y-4">
             {projects.length === 0 ? (
-               <div className="p-12 border border-dashed border-[#E7E2DA] rounded-xl text-center bg-[#FFFFFF] shadow-sm">
-                 <div className="h-10 w-10 mx-auto rounded-full bg-[#064E3B]/10 text-[#064E3B] flex items-center justify-center mb-4">
-                   <Code className="h-5 w-5" />
-                 </div>
-                 <h3 className="text-base font-serif text-[#1C1917] mb-2">No evidence linked yet</h3>
+               <div className="p-12 border border-dashed border-[#E7E2DA] text-center bg-white">
+                 <h3 className="text-base font-serif text-[#1C1917] mb-2 font-normal">No evidence linked yet</h3>
                  <p className="text-sm text-[#78716C] max-w-md mx-auto mb-6">
-                   Attach your GitHub repositories or live projects so our audit protocol can inspect your architectural capability.
+                   Attach code repositories or production links to establish evidentiary proof for audit review.
                  </p>
                  <button 
                    type="button" 
                    onClick={() => setIsModalOpen(true)}
-                   className="px-6 py-2.5 bg-[#064E3B] text-white rounded-full text-[13px] font-medium hover:bg-[#022c22] transition-colors shadow-sm"
+                   className="px-5 py-2 bg-[#064E3B] text-white text-[13px] font-medium hover:bg-[#022c22] transition-colors"
                  >
-                   + Link First Repository
+                   + Link Repository
                  </button>
                </div>
             ) : (
               projects.map((project, idx) => (
-                <div key={project.id || idx} className="border border-[#E7E2DA] bg-white p-6 sm:p-7 rounded-xl hover:border-[#064E3B]/40 hover:shadow-[0_4px_20px_rgba(0,0,0,0.03)] transition-all relative">
-                    <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 mb-4">
+                <div key={project.id || idx} className="border border-[#E7E2DA] bg-white p-6 transition-colors hover:border-[#1C1917]">
+                    <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 mb-3">
                       <div>
-                        <div className="flex items-center gap-2.5 mb-1">
-                          <h3 className="text-[18px] font-serif text-[#1C1917]">{project.title}</h3>
+                        <div className="flex items-center gap-2 mb-1">
+                          <h3 className="text-[17px] font-serif text-[#1C1917] font-normal">{project.title}</h3>
                           {project.liveUrl && (
-                            <a href={project.liveUrl} target="_blank" rel="noopener noreferrer" className="text-[11px] font-mono text-[#064E3B] bg-[#064E3B]/10 px-2 py-0.5 rounded border border-[#064E3B]/20 hover:underline">
+                            <a href={project.liveUrl} target="_blank" rel="noopener noreferrer" className="text-[11px] font-mono text-[#064E3B] bg-[#064E3B]/5 px-2 py-0.5 border border-[#064E3B]/20 hover:underline">
                               Live Demo ↗
                             </a>
                           )}
                         </div>
-                        <div className="text-[12px] font-mono text-[#78716C] flex items-center gap-2">
-                          <FileCheck className="h-3.5 w-3.5 text-[#064E3B]" />
-                          <span className="truncate max-w-xs sm:max-w-md">{project.repoUrl}</span>
+                        <div className="text-[12px] font-mono text-[#78716C]">
+                          {project.repoUrl}
                         </div>
                       </div>
                       <div className="flex items-center gap-3 text-[12px] font-sans shrink-0">
-                        <a href={project.repoUrl} target="_blank" rel="noopener noreferrer" className="text-[#064E3B] font-medium hover:underline">
-                          View Code ↗
+                        <a href={project.repoUrl} target="_blank" rel="noopener noreferrer" className="text-[#1C1917] underline hover:text-[#064E3B]">
+                          View Source ↗
                         </a>
                         <span className="text-[#E7E2DA]">|</span>
-                        <button onClick={() => handleRemoveEvidence(project.id)} className="text-[#B42318] hover:underline">
+                        <button onClick={() => handleRemoveEvidence(project.id)} className="text-[#78716C] hover:text-[#B42318]">
                           Remove
                         </button>
                       </div>
                     </div>
 
                     {project.description && (
-                      <p className="text-[14px] text-[#525252] mb-5 leading-relaxed font-sans">
+                      <p className="text-[13.5px] text-[#525252] mb-4 leading-relaxed font-sans">
                         {project.description}
                       </p>
                     )}
                     
                     {project.skillsUsed && project.skillsUsed.length > 0 && (
-                      <div className="flex flex-wrap gap-2 mb-5">
+                      <div className="flex flex-wrap gap-2 mb-4">
                         {project.skillsUsed.map(skill => (
-                          <span key={skill} className="px-2.5 py-1 bg-[#F8F6F3] border border-[#E7E2DA] rounded-md text-[11px] font-mono text-[#525252]">
+                          <span key={skill} className="px-2 py-0.5 bg-[#F8F6F3] border border-[#E7E2DA] text-[11px] font-mono text-[#525252]">
                             {skill}
                           </span>
                         ))}
                       </div>
                     )}
 
-                    {/* Audit Provenance Thread */}
-                    <div className="border-t border-[#E7E2DA] pt-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-[12px]">
+                    {/* Audit Ledger Line */}
+                    <div className="border-t border-[#E7E2DA] pt-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-[12px]">
                       <div className="flex items-center gap-2">
-                        <span className="h-2 w-2 rounded-full bg-[#064E3B]" />
                         <span className="text-[#78716C]">Supports Claim:</span>
-                        <span className="font-medium text-[#1C1917] bg-[#F2EFE9] px-2 py-0.5 rounded text-[11px] font-mono">
+                        <span className="font-mono text-[#1C1917] bg-[#F8F6F3] px-2 py-0.5 border border-[#E7E2DA] text-[11px]">
                           {project.supportsClaim || "General Technical Capability"}
                         </span>
                       </div>
-                      <div className="text-[11px] font-mono text-[#064E3B] font-medium">
-                        STATUS: ARTIFACT ATTACHED
+                      <div className="text-[11px] font-mono text-[#064E3B]">
+                        [ ARTIFACT ATTACHED ]
                       </div>
                     </div>
                 </div>
