@@ -36,7 +36,7 @@ export function Button({
 
   const variantStyles = {
     primary:
-      "bg-[#15803D] hover:bg-[#166534] border border-[#15803D]/60 shadow-[0_4px_14px_0_rgba(21,128,61,0.25),inset_0_-2px_6px_0_rgba(0,0,0,0.15),inset_0_2px_4px_0_rgba(255,255,255,0.2)] text-[#FFFFFF] active:scale-95",
+      "bg-[#064E3B] hover:bg-[#022c22] border border-[#064E3B]/80 shadow-[0_4px_14px_0_rgba(6,78,59,0.25),inset_0_-2px_6px_0_rgba(0,0,0,0.2),inset_0_2px_4px_0_rgba(255,255,255,0.15)] text-[#FFFFFF] active:scale-95",
     secondary:
       "bg-white/70 backdrop-blur-md border border-white/60 shadow-[0_4px_14px_0_rgba(0,0,0,0.08),inset_0_-2px_6px_0_rgba(0,0,0,0.05),inset_0_2px_4px_0_rgba(255,255,255,1)] text-[#0D0D0D] hover:bg-white/80 active:scale-95",
     outline:
@@ -48,7 +48,7 @@ export function Button({
     danger:
       "bg-[#B42318]/70 backdrop-blur-md border border-[#B42318]/50 shadow-[0_4px_14px_0_rgba(180,35,24,0.25),inset_0_-2px_6px_0_rgba(0,0,0,0.2),inset_0_2px_4px_0_rgba(255,255,255,0.2)] text-white hover:bg-[#B42318]/80 active:scale-95",
     success:
-      "bg-[#15803D]/70 backdrop-blur-md border border-[#15803D]/50 shadow-[0_4px_14px_0_rgba(21,128,61,0.25),inset_0_-2px_6px_0_rgba(0,0,0,0.2),inset_0_2px_4px_0_rgba(255,255,255,0.2)] text-white hover:bg-[#15803D]/80 active:scale-95",
+      "bg-[#064E3B]/80 backdrop-blur-md border border-[#064E3B]/60 shadow-[0_4px_14px_0_rgba(6,78,59,0.25),inset_0_-2px_6px_0_rgba(0,0,0,0.2),inset_0_2px_4px_0_rgba(255,255,255,0.2)] text-white hover:bg-[#064E3B] active:scale-95",
   };
 
   const appliedVariant = variant === "outline" ? "secondary" : variant;
