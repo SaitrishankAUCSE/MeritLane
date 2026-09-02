@@ -167,59 +167,77 @@ export function AuthForm({ mode: initialMode }: AuthFormProps) {
   return (
     <div className="min-h-screen w-full flex flex-col md:flex-row bg-white overflow-hidden">
       {/* Left Side: Premium Brand Area with Animation */}
-      <div className="relative hidden md:flex flex-col justify-between w-full md:w-5/12 lg:w-1/2 bg-black text-white p-8 lg:p-12 overflow-hidden">
-        <motion.div
-          animate={{
-            scale: [1, 1.1, 1],
-            opacity: [0.3, 0.4, 0.3],
-          }}
-          transition={{
-            duration: 8,
-            repeat: Infinity,
-            ease: "easeInOut"
-          }}
-          className="absolute -top-[50%] -left-[50%] w-[200%] h-[200%] bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-zinc-800/30 via-black to-black pointer-events-none"
-        />
+      {/* Left Side: Editorial Brand Showcase with Authentic Meritlane Architectural Emblem */}
+      <div className="relative hidden md:flex flex-col justify-between w-full md:w-5/12 lg:w-1/2 bg-[#051711] text-white p-8 lg:p-12 overflow-hidden border-r border-[#0D2E23]">
+        {/* Ambient forest glow and subtle grid texture */}
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,_var(--tw-gradient-stops))] from-[#064E3B]/40 via-[#031D15] to-[#02130E] pointer-events-none" />
+        <div className="absolute inset-0 opacity-[0.03] bg-[radial-gradient(#FAFAF9_1px,transparent_1px)] [background-size:24px_24px] pointer-events-none" />
 
-        <div className="relative z-10">
-          <Link href="/" className="inline-flex items-center gap-2 text-xl font-bold tracking-tight text-white hover:opacity-80 transition-opacity">
-            <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="black" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
-              </svg>
-            </div>
-            Meritlane
+        {/* Top Header: Official Meritlane Brand */}
+        <div className="relative z-10 flex items-center justify-between">
+          <Link href="/" className="inline-flex items-center gap-3 group">
+            <img src="/logo-m.png" alt="Meritlane Emblem" className="h-8 w-auto object-contain bg-white/95 rounded-md p-1 shadow-sm" />
+            <span className="font-serif text-2xl tracking-tight text-[#F8F6F3]">Meritlane</span>
           </Link>
+          <div className="text-[11px] font-mono tracking-widest text-[#529471] uppercase px-2.5 py-1 rounded-full bg-[#064E3B]/40 border border-[#064E3B]/60">
+            Audit Registry
+          </div>
         </div>
 
-        <div className="relative z-10 max-w-lg mt-12 md:mt-0">
+        {/* Center: Luxury Architectural Drafting Blueprint Artwork & Typography */}
+        <div className="relative z-10 max-w-lg my-auto py-8">
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.96 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.8 }}
+            className="mb-8 rounded-xl overflow-hidden border border-[#0B3D2E] shadow-[0_12px_40px_rgba(0,0,0,0.4)] relative group"
+          >
+            <img 
+              src="/images/auth-banner.jpg" 
+              alt="Meritlane Technical Architectural Emblem" 
+              className="w-full h-64 object-cover object-center transform group-hover:scale-102 transition-transform duration-700" 
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-[#051711] via-transparent to-transparent opacity-80" />
+            <div className="absolute bottom-3 left-4 right-4 flex items-center justify-between text-[11px] font-mono text-[#86EFAC]/80">
+              <span>PROTOCOL 001.A</span>
+              <span>PROOF OF SKILL</span>
+            </div>
+          </motion.div>
+
           <motion.h1
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2, duration: 0.8 }}
-            className="text-4xl lg:text-5xl font-medium tracking-tight leading-[1.1] mb-6 text-white"
+            transition={{ delay: 0.2, duration: 0.7 }}
+            className="text-3xl lg:text-4xl font-serif tracking-tight leading-[1.15] mb-4 text-[#FAFAF9]"
           >
             Proof of skill.<br/>
-            <span className="text-zinc-500">Not just credentials.</span>
+            <span className="text-[#A3B899] font-normal italic">Not just credentials.</span>
           </motion.h1>
           <motion.p
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3, duration: 0.8 }}
-            className="text-lg text-zinc-400"
+            transition={{ delay: 0.3, duration: 0.7 }}
+            className="text-[15px] text-[#A8B2A6] leading-relaxed"
           >
-            Join the platform where verified engineering talent connects with top tier employers through rigorous, objective assessment.
+            The technical talent verification institution. Where engineers prove competence through verifiable code audits, not institutional pedigree.
           </motion.p>
         </div>
 
-        <div className="relative z-10">
-          <div className="flex gap-4 items-center">
-            <div className="w-10 h-10 rounded-full border border-zinc-800 flex items-center justify-center bg-zinc-900/50 backdrop-blur-sm">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-zinc-400"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+        {/* Bottom Provenance Credential Strip */}
+        <div className="relative z-10 pt-4 border-t border-[#0D3628]">
+          <div className="flex items-center justify-between">
+            <div className="flex gap-3 items-center">
+              <div className="w-8 h-8 rounded-full border border-[#0B4F3A] flex items-center justify-center bg-[#064E3B]/30 text-[#86EFAC]">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+              </div>
+              <div>
+                <p className="text-[11px] font-mono font-medium text-[#F8F6F3] tracking-wider uppercase">
+                  Audited Talent Pipeline
+                </p>
+                <p className="text-[10px] font-mono text-[#529471]">Cryptographically verified records</p>
+              </div>
             </div>
-            <p className="text-sm font-medium text-zinc-500 uppercase tracking-widest">
-              Verified Pipeline
-            </p>
+            <span className="text-[10px] font-mono text-[#529471]">EST. 2024</span>
           </div>
         </div>
       </div>
@@ -228,13 +246,9 @@ export function AuthForm({ mode: initialMode }: AuthFormProps) {
       <div className="w-full md:w-7/12 lg:w-1/2 flex items-center justify-center p-4 sm:p-8 md:p-12 bg-white relative">
         <div className="w-full max-w-[420px]">
           <div className="md:hidden mb-8 flex justify-center">
-             <Link href="/" className="inline-flex items-center gap-2 text-xl font-bold tracking-tight text-black">
-              <div className="w-8 h-8 bg-black rounded-full flex items-center justify-center">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
-                </svg>
-              </div>
-              Meritlane
+             <Link href="/" className="inline-flex items-center gap-2 text-xl font-bold tracking-tight text-foreground">
+              <img src="/logo-m.png" alt="Meritlane" className="h-7 w-auto" />
+              <span className="font-serif text-xl">Meritlane</span>
             </Link>
           </div>
 
@@ -449,7 +463,7 @@ export function AuthForm({ mode: initialMode }: AuthFormProps) {
                     </div>
                   </div>
 
-                  <button type="submit" disabled={loadingAction} className="w-full bg-black hover:bg-zinc-800 text-white rounded-xl py-3 px-4 text-sm font-semibold transition-colors shadow-sm disabled:opacity-50 mt-2 flex items-center justify-center gap-2">
+                  <button type="submit" disabled={loadingAction} className="w-full bg-[#064E3B] hover:bg-[#022c22] text-white rounded-xl py-3 px-4 text-sm font-semibold transition-colors shadow-sm disabled:opacity-50 mt-2 flex items-center justify-center gap-2">
                     {loadingAction ? (
                       <>
                         <svg className="animate-spin h-4 w-4 text-white opacity-70" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
