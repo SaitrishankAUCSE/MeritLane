@@ -64,7 +64,7 @@ function AssessmentContentWrapper() {
       // Check if already verified and if skill exists
       const initAssessment = async () => {
         try {
-          const token = await getIdToken(auth.currentUser!, true);
+          const token = await user.getIdToken(true);
           const res = await fetch("/api/start-assessment", {
             method: "POST",
             headers: {
@@ -236,7 +236,7 @@ function AssessmentContentWrapper() {
     }
 
     try {
-      const token = await getIdToken(auth.currentUser!, true);
+      const token = user ? await user.getIdToken(true) : "";
       const res = await fetch("/api/verify", {
         method: "POST",
         headers: {

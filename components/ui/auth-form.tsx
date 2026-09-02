@@ -45,6 +45,7 @@ export function AuthForm({ mode: initialMode }: AuthFormProps) {
     setError(null);
     try {
       if (mode === "signup") {
+        if (!db) throw new Error("Firestore not initialized");
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
         await setDoc(doc(db, "users", userCredential.user.uid), {
           email: userCredential.user.email,
