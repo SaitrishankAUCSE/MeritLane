@@ -35,6 +35,14 @@ export function ContextGuide({
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
+    // If the user has visited before, never show any guide
+    const isReturningUser = localStorage.getItem("meritlane_returning_user");
+    if (isReturningUser) return;
+
+    // First visit — mark them as a returning user for every future visit
+    localStorage.setItem("meritlane_returning_user", "true");
+
+    // Still respect individual per-page dismissals made during the first visit
     const dismissed = localStorage.getItem(`meritlane_guide_dismissed_${storageKey}`);
     if (!dismissed) setIsVisible(true);
   }, [storageKey]);
