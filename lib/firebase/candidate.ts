@@ -16,6 +16,7 @@ export type VerificationStatus = "draft" | "pending" | "verified" | "changes_req
 export interface SkillVerification {
   status: "verified" | "failed";
   verifiedAt?: number;
+  score?: number;
 }
 
 export interface GithubEvidence {

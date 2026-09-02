@@ -71,7 +71,7 @@ export default async function EmployerCandidateDossierPage({ params }: Props) {
   return (
     <div className="relative min-h-screen bg-[#FAFAFA] flex flex-col">
       {/* Client Component for floating shortlist button and navigation */}
-      <EmployerDossierActions candidateId={id} />
+      <EmployerDossierActions candidateId={id} candidateName={candidate.name} />
       
       {/* Reuse the Public Proof layout but hide its own top navbar */}
       <div className="flex-1 mt-16 pb-24">
