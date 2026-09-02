@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { useAuth } from "@/lib/auth/AuthContext";
 import { Role } from "@/lib/firebase/users";
@@ -14,20 +14,33 @@ interface ProtectedRouteProps {
   allowedRoles?: (Role | "admin")[];
 }
 
+// Session cache to prevent re-fetching profile on every internal tab switch
+const verifiedCandidateCache = new Set<string>();
+
 export default function ProtectedRoute({ children, allowedRoles }: ProtectedRouteProps) {
   const { user, userProfile, isAdmin, loading, profileLoading, openAuthModal } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
-  const [isAuthorized, setIsAuthorized] = useState(false);
+  
+  // Fast initial authorization if user already loaded in AuthContext
+  const [isAuthorized, setIsAuthorized] = useState(() => {
+    if (!user || !userProfile) return false;
+    const normalizedRole = (userProfile.role || "").trim().toLowerCase() as Role;
+    if (allowedRoles && !allowedRoles.includes(normalizedRole)) return false;
+    return true;
+  });
+
   const [authPrompted, setAuthPrompted] = useState(false);
+  const checkedCandidateUid = useRef<string | null>(null);
 
   useEffect(() => {
-    // Wait until Firebase authentication and profile resolution have completed
+    // Wait until initial Firebase auth resolution
     if (loading || profileLoading) return;
 
     const enforceAuth = async () => {
-      // 1. Not authenticated with Firebase
+      // 1. Not authenticated
       if (!user) {
+        setIsAuthorized(false);
         if (!authPrompted) {
           setAuthPrompted(true);
           openAuthModal("login");
@@ -47,16 +60,16 @@ export default function ProtectedRoute({ children, allowedRoles }: ProtectedRout
         return;
       }
 
-      // 3. Normal User Routing (Non-Admin)
-      // If a non-admin attempts to access an admin-only route
+      // 3. Normal User Routing (Non-Admin trying to hit /admin)
       if (allowedRoles?.includes("admin") && !isUserAdmin) {
         const dest = userProfile?.role === "employer" ? "/employer/dashboard" : "/candidate/dashboard";
         router.push(dest);
         return;
       }
 
-      // If user has no Firestore profile
+      // 4. No Firestore profile
       if (!userProfile) {
+        setIsAuthorized(false);
         await signOut(auth);
         if (!authPrompted) {
           setAuthPrompted(true);
@@ -65,25 +78,34 @@ export default function ProtectedRoute({ children, allowedRoles }: ProtectedRout
         return;
       }
 
-      // Role-based authorization for candidate/employer routes
+      // 5. Role match check
       const normalizedRole = (userProfile.role || "").trim().toLowerCase() as Role;
       if (allowedRoles && !allowedRoles.includes(normalizedRole)) {
+        setIsAuthorized(false);
         router.push("/dashboard");
         return;
       }
 
-      // Candidate Onboarding Guard
-      if (normalizedRole === "candidate" && pathname !== "/candidate/profile") {
+      // 6. Candidate Incomplete Profile Check (Only once per candidate UID)
+      if (
+        normalizedRole === "candidate" &&
+        pathname !== "/candidate/profile" &&
+        !verifiedCandidateCache.has(user.uid) &&
+        checkedCandidateUid.current !== user.uid
+      ) {
+        checkedCandidateUid.current = user.uid;
         try {
           const profile = await fetchCandidateProfile(user.uid);
           const isProfileIncomplete = !profile || (!profile.name && (!profile.skills || profile.skills.length === 0));
           if (isProfileIncomplete) {
+            setIsAuthorized(false);
             router.replace("/candidate/profile");
             return;
           }
-        } catch (error) {
-          router.replace("/candidate/profile");
-          return;
+          verifiedCandidateCache.add(user.uid);
+        } catch {
+          // If error fetching, proceed gracefully without blocking
+          verifiedCandidateCache.add(user.uid);
         }
       }
 
@@ -92,9 +114,18 @@ export default function ProtectedRoute({ children, allowedRoles }: ProtectedRout
     };
 
     enforceAuth();
-  }, [user, userProfile, isAdmin, loading, profileLoading, router, pathname, allowedRoles]);
+  }, [user, userProfile, isAdmin, loading, profileLoading, router, pathname, allowedRoles, authPrompted, openAuthModal]);
 
-  if (loading || profileLoading || !user || !isAuthorized) {
+  // Only show full page loader on cold initial boot when no user state exists yet
+  if ((loading || profileLoading) && !user) {
+    return <MeritlaneLoader level="page" text="Authenticating" />;
+  }
+
+  if (!user && !loading) {
+    return <MeritlaneLoader level="page" text="Authenticating" />;
+  }
+
+  if (!isAuthorized && !loading && !profileLoading) {
     return <MeritlaneLoader level="page" text="Authenticating" />;
   }
 

@@ -92,8 +92,17 @@ export default function CandidateProfilePage() {
     }
   };
 
-  if (loading || isInitializing) {
+  if (loading && !user) {
     return <MeritlaneLoader level="page" text="Authenticating" />;
+  }
+
+  if (isInitializing) {
+    return (
+      <div className="w-full h-full flex flex-col items-center justify-center py-20 text-[#737373]">
+        <div className="h-6 w-6 border-2 border-[#D2D2D2] border-t-[#0D0D0D] rounded-full animate-spin mb-4" />
+        <p className="text-[13px] font-sans">Loading identity...</p>
+      </div>
+    );
   }
 
   if (isEditing) {

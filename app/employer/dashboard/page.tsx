@@ -191,7 +191,7 @@ export default function EmployerDashboardPage() {
     return (b.matchedRequiredSkillCount || 0) - (a.matchedRequiredSkillCount || 0);
   });
 
-  if (loading) {
+  if (loading && !user) {
     return <MeritlaneLoader level="page" text="Authenticating" />;
   }
 

@@ -110,7 +110,7 @@ export default function CandidateDashboardPage() {
     }
   };
 
-  if (loading) {
+  if (loading && !user) {
     return <MeritlaneLoader level="page" text="Authenticating" />;
   }
 

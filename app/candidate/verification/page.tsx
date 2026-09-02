@@ -1,21 +1,22 @@
-
 "use client";
 
 import React, { useEffect, useState } from "react";
 import { useAuth } from "@/lib/auth/AuthContext";
 import { useRouter } from "next/navigation";
 import { fetchCandidateProfile, CandidateProfile } from "@/lib/firebase/candidate";
-import { ShieldCheck, ArrowRight, ShieldAlert } from "lucide-react";
-import { MeritlaneLoader } from "@/components/ui/MeritlaneLoader";
+import { ShieldCheck, ArrowRight, ShieldAlert, Award, Clock } from "lucide-react";
 import { db } from "@/lib/firebase/config";
 import { doc, getDoc } from "firebase/firestore";
 import { ContextGuide } from "@/components/ui/ContextGuide";
+import Link from "next/link";
+import { Button } from "@/components/ui/Button";
 
 export default function CandidateVerificationPage() {
   const { user, loading } = useAuth();
   const router = useRouter();
   const [profile, setProfile] = useState<CandidateProfile | null>(null);
   const [cooldowns, setCooldowns] = useState<Record<string, number>>({});
+  const [isFetching, setIsFetching] = useState(true);
 
   useEffect(() => {
     if (!loading && !user) {
@@ -60,25 +61,13 @@ export default function CandidateVerificationPage() {
           });
           setCooldowns(cd);
         }
+        setIsFetching(false);
+      }).catch((e) => {
+        console.error(e);
+        setIsFetching(false);
       });
     }
   }, [user]);
-
-  if (loading || (!profile && user)) {
-    return (
-      <div className="h-full w-full flex items-center justify-center bg-[#FAFAFA]">
-        <MeritlaneLoader text="Loading Verification" />
-      </div>
-    );
-  }
-
-  if (!profile) {
-    return (
-      <div className="h-full w-full flex items-center justify-center bg-[#FAFAFA] text-[#666666] font-mono text-[11px] uppercase tracking-widest">
-        Profile not initialized.
-      </div>
-    );
-  }
 
   const skills = profile?.skills || [];
 
@@ -115,63 +104,74 @@ export default function CandidateVerificationPage() {
             <h2 className="text-[14px] font-sans font-medium text-[#737373]">Eligible skills</h2>
           </div>
 
-          {skills.length === 0 ? (
+          {isFetching ? (
+            <div className="flex flex-col items-center justify-center py-20 text-[#737373]">
+              <div className="h-6 w-6 border-2 border-[#D2D2D2] border-t-[#0D0D0D] rounded-full animate-spin mb-4" />
+              <p className="text-[13px] font-sans">Loading verification records...</p>
+            </div>
+          ) : skills.length === 0 ? (
             <div className="border border-dashed border-[#D2D2D2] p-10 rounded-md text-center bg-[#FAFAFA]">
               <div className="text-[14px] text-[#0D0D0D] font-serif mb-2">No technical claims found.</div>
-              <div className="text-[13px] text-[#737373] mb-6 font-sans">Add skills to your Identity before they can be verified.</div>
-              <button 
-                onClick={() => router.push("/candidate/profile")}
-                className="text-[14px] font-sans font-medium text-[#0D0D0D] border border-[#D2D2D2] px-5 h-10 rounded-md hover:bg-[#F3F3F1] transition-colors"
-              >
-                Go to Identity
-              </button>
+              <p className="text-[13px] text-[#737373] font-sans mb-6">
+                Add skills in your Identity section to become eligible for verification assessments.
+              </p>
+              <Link href="/candidate/profile">
+                <Button variant="outline">Edit Identity</Button>
+              </Link>
             </div>
           ) : (
-            <div className="space-y-4">
-              {skills.map((skill, idx) => {
+            <div className="grid gap-4 sm:grid-cols-2">
+              {skills.map((skill) => {
                 const isVerified = profile?.verifiedSkills?.[skill]?.status === "verified";
-                const cooldownTimestamp = cooldowns[skill];
-                const isOnCooldown = !!cooldownTimestamp;
-                
+                const cooldownTs = cooldowns[skill];
+                const inCooldown = !!cooldownTs;
+
                 return (
-                  <div key={idx} className={`border p-6 rounded-md flex flex-col sm:flex-row sm:items-center justify-between gap-6 transition-colors ${isVerified ? "border-[#15803D]/30 bg-[#F0FDF4]" : "border-[#E5E5E5] bg-[#FFFFFF] hover:border-[#D2D2D2]"}`}>
+                  <div 
+                    key={skill} 
+                    className="border border-[#E5E5E5] rounded-xl p-5 bg-white flex flex-col justify-between hover:shadow-sm transition-all"
+                  >
                     <div>
-                      <div className="text-[16px] font-medium text-[#0D0D0D] mb-1 font-serif">{skill}</div>
-                      
-                      {isVerified ? (
-                        <div className="flex items-center gap-1.5 text-[11px] font-sans font-medium text-[#15803D] bg-[#F0FDF4] px-2 py-1 rounded-sm border border-[#15803D]/20 mt-2 w-fit">
-                          <ShieldCheck className="h-3.5 w-3.5" /> Verified by MeritLane
-                        </div>
-                      ) : isOnCooldown ? (
-                        <div className="text-[11px] font-mono text-[#B42318] uppercase tracking-[0.1em] flex items-center gap-1.5 mt-2">
-                          <ShieldAlert className="h-3.5 w-3.5" /> Assessment Cooldown Active
-                        </div>
-                      ) : (
-                        <div className="text-[12px] font-sans text-[#737373]">
-                          Eligible for remote assessment. Requires ~45 minutes.
-                        </div>
-                      )}
+                      <div className="flex items-center justify-between mb-3">
+                        <span className="text-[16px] font-bold text-[#0D0D0D] font-sans">{skill}</span>
+                        {isVerified ? (
+                          <span className="flex items-center gap-1 text-[11px] font-mono font-semibold uppercase text-[#15803D] bg-[#15803D]/10 px-2 py-0.5 rounded-sm">
+                            <ShieldCheck className="h-3 w-3" /> Verified
+                          </span>
+                        ) : inCooldown ? (
+                          <span className="flex items-center gap-1 text-[11px] font-mono font-semibold uppercase text-[#B42318] bg-[#B42318]/10 px-2 py-0.5 rounded-sm">
+                            <Clock className="h-3 w-3" /> Cooldown
+                          </span>
+                        ) : (
+                          <span className="text-[11px] font-mono font-semibold uppercase text-[#737373] bg-[#F3F3F1] px-2 py-0.5 rounded-sm">
+                            Unverified
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-[12px] text-[#737373] font-sans mb-4">
+                        {isVerified 
+                          ? "This skill is verified and visible to employers in discovery." 
+                          : inCooldown 
+                          ? "Assessment cooldown active. Please review course material before re-attempting." 
+                          : "Take a timed assessment to formally verify this skill."}
+                      </p>
                     </div>
-                    
-                    <div className="shrink-0 text-right">
+
+                    <div className="pt-3 border-t border-[#E5E5E5] flex justify-end">
                       {isVerified ? (
-                        <button 
-                          onClick={() => router.push("/candidate/provenance")}
-                          className="text-[13px] font-sans font-medium text-[#15803D] bg-transparent border border-[#15803D]/20 px-4 h-9 rounded-md hover:bg-[#15803D]/10 transition-colors"
-                        >
-                          View Record
-                        </button>
-                      ) : isOnCooldown ? (
-                        <div className="text-[12px] font-mono text-[#0D0D0D]">
-                          Available on {new Date(cooldownTimestamp + (14 * 24 * 60 * 60 * 1000)).toLocaleDateString()}
+                        <div className="flex items-center gap-1.5 text-[12px] text-[#15803D] font-medium font-sans">
+                          <Award className="h-4 w-4" /> Assessment Passed
                         </div>
+                      ) : inCooldown ? (
+                        <span className="text-[12px] text-[#737373] font-mono">
+                          Available in 14 days
+                        </span>
                       ) : (
-                        <button 
-                          onClick={() => router.push(`/candidate/assessment?skill=${encodeURIComponent(skill)}`)}
-                          className="flex items-center gap-2 text-[13px] font-sans font-medium bg-[#0D0D0D] text-[#FFFFFF] px-5 h-9 rounded-md hover:bg-[#222222] transition-colors"
-                        >
-                          Start assessment <ArrowRight className="h-3.5 w-3.5" />
-                        </button>
+                        <Link href={`/candidate/assessment?skill=${encodeURIComponent(skill)}`}>
+                          <Button size="sm" className="gap-1 text-[12px]">
+                            Start Assessment <ArrowRight className="h-3.5 w-3.5" />
+                          </Button>
+                        </Link>
                       )}
                     </div>
                   </div>
@@ -179,22 +179,30 @@ export default function CandidateVerificationPage() {
               })}
             </div>
           )}
+
         </div>
 
+        {/* Verification Sidebar Info */}
         <div className="space-y-6">
-          <div className="border border-[#E5E5E5] bg-[#FFFFFF] p-6 rounded-md">
-            <h3 className="text-[14px] font-sans font-medium text-[#0D0D0D] mb-2 font-serif">Assessment Protocol</h3>
-            <p className="text-[13px] text-[#737373] font-sans leading-relaxed mb-4">
-              Technical assessments are heavily proctored. Navigating away, attempting to extract source code, or utilizing unauthorized external APIs will immediately terminate the session and place your account on a 14-day cooldown.
-            </p>
-            <div className="text-[12px] font-sans font-medium text-[#B42318] flex items-center gap-2">
-              <ShieldAlert className="h-3.5 w-3.5" /> 1 attempt per 14 days
-            </div>
+          <div className="bg-white border border-[#E5E5E5] rounded-xl p-6 shadow-sm">
+            <h3 className="text-[15px] font-serif font-bold text-[#0D0D0D] mb-3">Verification Rules</h3>
+            <ul className="space-y-3 text-[13px] text-[#737373] font-sans">
+              <li className="flex items-start gap-2">
+                <span className="text-[#0D0D0D] font-bold">•</span> Passing threshold is 80% or higher.
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-[#0D0D0D] font-bold">•</span> Timed challenges are anti-cheat monitored.
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-[#0D0D0D] font-bold">•</span> Failed assessments trigger a 14-day cooldown period.
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-[#0D0D0D] font-bold">•</span> Verified skills appear automatically on public proof records.
+              </li>
+            </ul>
           </div>
         </div>
-
       </div>
     </div>
   );
 }
-

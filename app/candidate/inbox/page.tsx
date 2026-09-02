@@ -4,7 +4,6 @@ import React, { useEffect, useState } from "react";
 import { useAuth } from "@/lib/auth/AuthContext";
 import { useRouter } from "next/navigation";
 import { Inbox, MessageSquare } from "lucide-react";
-import { MeritlaneLoader } from "@/components/ui/MeritlaneLoader";
 import { ContextGuide } from "@/components/ui/ContextGuide";
 import { getIdToken } from "firebase/auth";
 import { auth } from "@/lib/firebase/config";
@@ -53,8 +52,6 @@ export default function CandidateInboxPage() {
     }
   }, [user, loading, router]);
 
-  if (loading || fetching) return <MeritlaneLoader level="page" text="Loading Inbox" />;
-
   return (
     <div className="flex flex-col h-full bg-[#FAFAFA] overflow-y-auto">
       <div className="p-8 lg:p-12 max-w-[900px] w-full mx-auto">
@@ -80,7 +77,12 @@ export default function CandidateInboxPage() {
           </div>
         </div>
 
-        {messages.length === 0 ? (
+        {fetching ? (
+          <div className="flex flex-col items-center justify-center py-20 text-[#737373]">
+            <div className="h-6 w-6 border-2 border-[#D2D2D2] border-t-[#0D0D0D] rounded-full animate-spin mb-4" />
+            <p className="text-[13px] font-sans">Loading messages...</p>
+          </div>
+        ) : messages.length === 0 ? (
           <div className="border border-dashed border-[#D2D2D2] rounded-2xl p-16 text-center bg-transparent">
             <MessageSquare className="h-8 w-8 mx-auto text-[#D2D2D2] mb-4" />
             <h2 className="text-[18px] font-serif text-[#0D0D0D] mb-2">No messages yet</h2>

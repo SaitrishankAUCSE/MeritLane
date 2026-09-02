@@ -151,7 +151,7 @@ export default function EmployerShortlistPage() {
     }
   };
 
-  if (loading) return <MeritlaneLoader level="page" text="Authenticating" />;
+  if (loading && !user) return <MeritlaneLoader level="page" text="Authenticating" />;
   if (errorMsg) {
     return (
       <div className="flex h-full w-full items-center justify-center p-10 bg-[#FAFAFA]">
