@@ -21,6 +21,7 @@ import {
   Clock,
   Info
 } from "lucide-react";
+import { ContextGuide } from "@/components/ui/ContextGuide";
 
 interface Message {
   id: string;
@@ -375,27 +376,43 @@ export default function CandidateInboxPage() {
           </>
         ) : (
           /* No message selected placeholder */
-          <div className="flex-1 flex flex-col items-center justify-center gap-4 bg-[#F9F9F8]">
-            <div className="h-16 w-16 rounded-3xl bg-white border border-[#E5E5E5] shadow-sm flex items-center justify-center">
-              <Mail className="h-7 w-7 text-[#ABABAB]" />
-            </div>
-            <div className="text-center">
-              <p className="text-[16px] font-serif text-[#0D0D0D] mb-1">
-                {fetching ? "Loading inbox..." : messages.length === 0 ? "Your inbox is empty" : "Select a message"}
-              </p>
-              <p className="text-[13px] text-[#ABABAB] max-w-xs font-sans">
-                {messages.length === 0
-                  ? "Employer interview invitations will appear here once you are shortlisted."
-                  : "Choose a message from the list to read it here."}
-              </p>
-            </div>
-            {!fetching && messages.length === 0 && (
-              <div className="flex items-center gap-1.5 mt-2 text-[12px] font-mono text-[#737373] border border-[#E5E5E5] bg-white px-3 py-1.5 rounded-full">
-                <Clock className="h-3 w-3" />
-                <span>Pass assessments to appear in discovery</span>
-                <ChevronRight className="h-3 w-3" />
+          <div className="flex-1 flex flex-col items-center justify-center bg-[#F9F9F8] p-6 lg:p-10 overflow-y-auto">
+            <div className="w-full max-w-[460px]">
+              <ContextGuide
+                storageKey="candidate_inbox"
+                title="How your Inbox works"
+                description="Employers reach out here after reviewing your verified profile. You cannot contact them first — they must find you through skill verification."
+                steps={[
+                  { title: "Get verified", description: "Pass skill assessments so employers can discover your verified proof of work." },
+                  { title: "Get shortlisted", description: "An employer reviews your dossier and saves you to their pipeline." },
+                  { title: "Receive a message", description: "The employer sends an interview invitation here. It will appear in the left panel." },
+                ]}
+                ctaLabel="View my verification status"
+                ctaHref="/candidate/verification"
+              />
+              <div className="flex flex-col items-center gap-4 mt-6">
+                <div className="h-14 w-14 rounded-2xl bg-white border border-[#E7E2DA] shadow-sm flex items-center justify-center">
+                  <Mail className="h-6 w-6 text-[#A8A29E]" />
+                </div>
+                <div className="text-center">
+                  <p className="text-[15px] font-semibold text-[#1C1917] mb-1">
+                    {fetching ? "Loading inbox..." : messages.length === 0 ? "No messages yet" : "Select a message"}
+                  </p>
+                  <p className="text-[13px] text-[#78716C] max-w-xs">
+                    {messages.length === 0
+                      ? "Employer interview invitations will appear here once you are shortlisted."
+                      : "Choose a message from the list on the left."}
+                  </p>
+                </div>
+                {!fetching && messages.length === 0 && (
+                  <div className="flex items-center gap-1.5 text-[12px] text-[#78716C] border border-[#E7E2DA] bg-white px-3 py-1.5 rounded-full">
+                    <Clock className="h-3 w-3" />
+                    <span>Pass assessments to appear in employer discovery</span>
+                    <ChevronRight className="h-3 w-3" />
+                  </div>
+                )}
               </div>
-            )}
+            </div>
           </div>
         )}
       </div>

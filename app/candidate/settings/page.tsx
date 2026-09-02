@@ -5,6 +5,7 @@ import { useAuth } from "@/lib/auth/AuthContext";
 import { useRouter } from "next/navigation";
 import { LogOut, User as UserIcon, Mail, Key, ShieldAlert } from "lucide-react";
 import { LogoutConfirmModal } from "@/components/ui/LogoutConfirmModal";
+import { ContextGuide } from "@/components/ui/ContextGuide";
 
 export default function SettingsPage() {
   const { user, userProfile, loading, profileLoading, handleSignOut } = useAuth();
@@ -37,6 +38,17 @@ export default function SettingsPage() {
           Manage your account preferences and session credentials.
         </p>
       </div>
+
+      <ContextGuide
+        storageKey="candidate_settings"
+        title="Your Account Settings"
+        description="Manage your session, review your verified identity details, and control your account security."
+        steps={[
+          { title: "Review your identity", description: "Your email and role are locked to your verified account — no changes needed." },
+          { title: "Manage your session", description: "Use Sign Out to securely end your session on this device at any time." },
+          { title: "Account security", description: "Two-factor authentication and password changes are coming soon for extra protection." },
+        ]}
+      />
 
       <div className="space-y-6">
         <div className="border border-[#E5E5E5] bg-[#FFFFFF] rounded-xl overflow-hidden">

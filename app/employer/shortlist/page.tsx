@@ -19,6 +19,7 @@ import { useRouter } from "next/navigation";
 import { MeritlaneLoader } from "@/components/ui/MeritlaneLoader";
 import { Button } from "@/components/ui/Button";
 import { MessageModal } from "@/components/employer/MessageModal";
+import { ContextGuide } from "@/components/ui/ContextGuide";
 
 const PIPELINE_STAGES = [
   { id: "shortlisted", label: "Shortlisted", color: "bg-blue-50 text-blue-700 border-blue-200" },
@@ -200,6 +201,22 @@ export default function EmployerShortlistPage() {
               </Button>
             </Link>
           </div>
+        </div>
+
+        {/* First-time guide */}
+        <div className="max-w-[1000px] mx-auto">
+          <ContextGuide
+            storageKey="employer_shortlist"
+            title="Your Hiring Pipeline"
+            description="This is where you manage every candidate you've saved from the Discover page. Move them through stages as your process progresses."
+            steps={[
+              { title: "Shortlist candidates", description: "Go to Discover, open a candidate's dossier, and click 'Save to Shortlist' to add them here." },
+              { title: "Track pipeline stages", description: "Use the stage selector on each card to move candidates from Shortlisted → Interviewing → Offer Extended → Hired." },
+              { title: "Message directly", description: "Click 'Message' on any candidate card to send them an interview invitation right from this page." },
+            ]}
+            ctaLabel="Discover candidates"
+            ctaHref="/employer/dashboard"
+          />
         </div>
 
         <div className="max-w-[1000px] mx-auto">
