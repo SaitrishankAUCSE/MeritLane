@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import Link from "next/link";
-import { Search, MapPin, Briefcase, Building2, ArrowRight, ShieldCheck, FileText, CheckCircle2 } from "lucide-react";
+import { Search, MapPin, Briefcase, Building2, ArrowRight, ShieldCheck, FileText, CheckCircle2, Sparkles } from "lucide-react";
 import { Job } from "@/lib/firebase/jobs";
 import { COMMON_SKILLS } from "@/lib/constants";
 import { useAuth } from "@/lib/auth/AuthContext";
@@ -11,6 +11,7 @@ import { fetchCandidateProfile } from "@/lib/firebase/candidate";
 export default function CandidateJobsPage() {
   const { user } = useAuth();
   const [jobs, setJobs] = useState<Job[]>([]);
+  const [candidateProfile, setCandidateProfile] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
@@ -18,6 +19,7 @@ export default function CandidateJobsPage() {
   const [workMode, setWorkMode] = useState("all");
   const [employmentType, setEmploymentType] = useState("all");
   const [applicationsCount, setApplicationsCount] = useState<number>(0);
+  const [feedMode, setFeedMode] = useState<"all" | "matched">("all");
 
   const loadJobs = useCallback(async () => {
     setLoading(true);
@@ -52,7 +54,12 @@ export default function CandidateJobsPage() {
     if (!user) return;
     (async () => {
       try {
-        const token = await user.getIdToken(true);
+        const [profileData, token] = await Promise.all([
+          fetchCandidateProfile(user.uid),
+          user.getIdToken(true),
+        ]);
+        if (profileData) setCandidateProfile(profileData);
+
         const res = await fetch("/api/candidate/applications", {
           headers: { Authorization: `Bearer ${token}` },
         });
@@ -65,6 +72,60 @@ export default function CandidateJobsPage() {
       }
     })();
   }, [user]);
+
+  // Extract all candidate skills (declared + verified)
+  const candidateSkills = useMemo(() => {
+    if (!candidateProfile) return [];
+    const declared: string[] = Array.isArray(candidateProfile.skills) ? candidateProfile.skills : [];
+    const verified: string[] = Object.keys(candidateProfile.verifiedSkills || {}).filter(
+      (k) => candidateProfile.verifiedSkills[k]?.status === "verified"
+    );
+    return Array.from(new Set([...declared, ...verified].map((s) => s.trim().toLowerCase())));
+  }, [candidateProfile]);
+
+  // Compute skill match statistics for any job
+  const getJobMatchStats = useCallback(
+    (job: Job) => {
+      if (candidateSkills.length === 0 || !job.requiredSkills || job.requiredSkills.length === 0) {
+        return { matchCount: 0, totalRequired: job.requiredSkills?.length || 0, percent: 0, matchedSkills: [] };
+      }
+      const matched = job.requiredSkills.filter((sk) =>
+        candidateSkills.some(
+          (cs) =>
+            cs === sk.trim().toLowerCase() ||
+            cs.includes(sk.trim().toLowerCase()) ||
+            sk.trim().toLowerCase().includes(cs)
+        )
+      );
+      const total = job.requiredSkills.length || 1;
+      const percent = Math.round((matched.length / total) * 100);
+      return {
+        matchCount: matched.length,
+        totalRequired: job.requiredSkills.length,
+        percent,
+        matchedSkills: matched,
+      };
+    },
+    [candidateSkills]
+  );
+
+  // Count of matched roles
+  const matchedJobsCount = useMemo(() => {
+    if (candidateSkills.length === 0) return 0;
+    return jobs.filter((j) => getJobMatchStats(j).matchCount > 0).length;
+  }, [jobs, candidateSkills, getJobMatchStats]);
+
+  // Filtered jobs according to feed mode
+  const displayedJobs = useMemo(() => {
+    if (feedMode === "matched") {
+      return jobs
+        .map((job) => ({ job, stats: getJobMatchStats(job) }))
+        .filter(({ stats }) => stats.matchCount > 0)
+        .sort((a, b) => b.stats.percent - a.stats.percent)
+        .map(({ job }) => job);
+    }
+    return jobs;
+  }, [jobs, feedMode, getJobMatchStats]);
 
   return (
     <div className="w-full min-h-full bg-[#FAF8F5] pb-24">
@@ -90,6 +151,11 @@ export default function CandidateJobsPage() {
             </div>
             <div className="w-px h-10 bg-[#E7E2DA]" />
             <div className="text-right">
+              <div className="text-[10px] font-mono text-[#78716C] uppercase tracking-wider mb-0.5">Profile Matches</div>
+              <div className="text-[24px] font-semibold text-[#064E3B]">{matchedJobsCount}</div>
+            </div>
+            <div className="w-px h-10 bg-[#E7E2DA] hidden sm:block" />
+            <div className="text-right">
               <div className="text-[10px] font-mono text-[#78716C] uppercase tracking-wider mb-0.5">Dispatched</div>
               <div className="text-[24px] font-semibold text-[#1C1917]">{applicationsCount}</div>
             </div>
@@ -108,6 +174,43 @@ export default function CandidateJobsPage() {
 
       {/* ── Main Container ── */}
       <div className="max-w-[1400px] mx-auto px-6 sm:px-10 py-8 space-y-6">
+        
+        {/* ── Match Switch Segmented Control ── */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#E7E2DA] pb-4">
+          <div className="inline-flex p-1 bg-[#F5F1EB] rounded-full border border-[#E7E2DA] self-start">
+            <button
+              type="button"
+              onClick={() => setFeedMode("all")}
+              className={`px-5 py-2 rounded-full text-[12px] font-mono font-semibold transition-all ${
+                feedMode === "all"
+                  ? "bg-[#1C1917] text-white shadow-xs"
+                  : "text-[#78716C] hover:text-[#1C1917]"
+              }`}
+            >
+              All Opportunities ({jobs.length})
+            </button>
+            <button
+              type="button"
+              onClick={() => setFeedMode("matched")}
+              className={`flex items-center gap-2 px-5 py-2 rounded-full text-[12px] font-mono font-semibold transition-all ${
+                feedMode === "matched"
+                  ? "bg-[#064E3B] text-white shadow-xs"
+                  : "text-[#78716C] hover:text-[#1C1917]"
+              }`}
+            >
+              <Sparkles className="h-3.5 w-3.5" />
+              <span>Matched to My Skills ({matchedJobsCount})</span>
+            </button>
+          </div>
+
+          {feedMode === "matched" && (
+            <div className="text-[12px] font-mono text-[#064E3B] flex items-center gap-2 bg-[#064E3B]/10 px-3.5 py-1.5 rounded-full border border-[#064E3B]/20">
+              <CheckCircle2 className="h-3.5 w-3.5 shrink-0" />
+              <span>Ranked by highest capability overlap with your dossier</span>
+            </div>
+          )}
+        </div>
+
         {/* Search & Filter Matrix */}
         <div className="border border-[#E7E2DA] bg-white p-5 rounded-2xl shadow-xs space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
@@ -205,99 +308,146 @@ export default function CandidateJobsPage() {
               RETRY QUERY
             </button>
           </div>
-        ) : jobs.length === 0 ? (
+        ) : displayedJobs.length === 0 ? (
           <div className="border border-dashed border-[#C8BFB0] bg-white p-16 text-center rounded-2xl">
             <Briefcase className="h-10 w-10 text-[#C8BFB0] mx-auto mb-4" />
             <h2 className="text-[18px] font-semibold text-[#1C1917] mb-2 tracking-tight">
-              No matching roles found
+              {feedMode === "matched" ? "No skill-matched roles found" : "No matching roles found"}
             </h2>
             <p className="text-[13px] text-[#78716C] font-sans max-w-md mx-auto mb-6">
-              There are currently no active job postings matching your selected filters. Try broadening your search or resetting capability filters.
+              {feedMode === "matched"
+                ? candidateSkills.length === 0
+                  ? "Your profile has no declared or verified skills yet. Add your skills in your profile or pass an assessment to see personalized matches."
+                  : "None of the currently active roles match your declared or verified technical capabilities. Try switching to 'All Opportunities' or explore assessments to verify additional skills."
+                : "There are currently no active job postings matching your selected filters. Try broadening your search or resetting capability filters."}
             </p>
-            <button
-              onClick={() => {
-                setSearchTerm("");
-                setSelectedSkill("");
-                setWorkMode("all");
-                setEmploymentType("all");
-              }}
-              className="px-5 py-2.5 bg-[#1C1917] hover:bg-[#064E3B] text-white text-[11px] font-mono font-semibold rounded-full transition-colors tracking-wider uppercase"
-            >
-              Reset All Filters
-            </button>
+            <div className="flex items-center justify-center gap-3 flex-wrap">
+              {feedMode === "matched" ? (
+                <>
+                  <button
+                    onClick={() => setFeedMode("all")}
+                    className="px-5 py-2.5 bg-[#1C1917] hover:bg-[#064E3B] text-white text-[11px] font-mono font-semibold rounded-full transition-colors tracking-wider uppercase"
+                  >
+                    View All Opportunities
+                  </button>
+                  <Link href="/candidate/verification">
+                    <button className="px-5 py-2.5 border border-[#E7E2DA] bg-[#FAF8F5] hover:bg-white text-[#1C1917] text-[11px] font-mono font-semibold rounded-full transition-colors tracking-wider uppercase">
+                      Take Skill Assessment
+                    </button>
+                  </Link>
+                </>
+              ) : (
+                <button
+                  onClick={() => {
+                    setSearchTerm("");
+                    setSelectedSkill("");
+                    setWorkMode("all");
+                    setEmploymentType("all");
+                  }}
+                  className="px-5 py-2.5 bg-[#1C1917] hover:bg-[#064E3B] text-white text-[11px] font-mono font-semibold rounded-full transition-colors tracking-wider uppercase"
+                >
+                  Reset All Filters
+                </button>
+              )}
+            </div>
           </div>
         ) : (
           <div className="space-y-4">
             <div className="flex items-center justify-between text-[11px] font-mono text-[#78716C] uppercase tracking-wider px-2">
-              <span>ACTIVE OPPORTUNITIES: {jobs.length}</span>
+              <span>
+                {feedMode === "matched" ? "MATCHED OPPORTUNITIES" : "ACTIVE OPPORTUNITIES"}: {displayedJobs.length}
+              </span>
               <span>VERIFIED HIRING REGISTRY</span>
             </div>
 
             <div className="grid grid-cols-1 gap-4">
-              {jobs.map((job) => (
-                <div
-                  key={job.id}
-                  className="border border-[#E7E2DA] bg-white p-6 sm:p-7 rounded-2xl hover:border-[#1C1917] transition-all shadow-xs group"
-                >
-                  <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
-                    <div className="space-y-2 flex-1">
-                      <div className="flex items-center gap-2.5 flex-wrap">
-                        <span className="text-[10px] font-mono font-semibold uppercase tracking-[0.14em] text-[#064E3B] bg-[#064E3B]/10 px-2.5 py-0.5 rounded-full border border-[#064E3B]/20">
-                          {job.workMode.toUpperCase()}
-                        </span>
-                        <span className="text-[10px] font-mono uppercase tracking-[0.14em] text-[#78716C] bg-[#FAF8F5] px-2.5 py-0.5 rounded-full border border-[#E7E2DA]">
-                          {job.employmentType.replace("-", " ").toUpperCase()}
-                        </span>
-                        {job.salaryRange && (
-                          <span className="text-[11px] font-mono text-[#1C1917] font-semibold bg-[#FAF8F5] px-2.5 py-0.5 rounded-full border border-[#E7E2DA]">
-                            {job.salaryRange}
+              {displayedJobs.map((job) => {
+                const stats = getJobMatchStats(job);
+                return (
+                  <div
+                    key={job.id}
+                    className="border border-[#E7E2DA] bg-white p-6 sm:p-7 rounded-2xl hover:border-[#1C1917] transition-all shadow-xs group"
+                  >
+                    <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+                      <div className="space-y-2 flex-1">
+                        <div className="flex items-center gap-2.5 flex-wrap">
+                          <span className="text-[10px] font-mono font-semibold uppercase tracking-[0.14em] text-[#064E3B] bg-[#064E3B]/10 px-2.5 py-0.5 rounded-full border border-[#064E3B]/20">
+                            {job.workMode.toUpperCase()}
                           </span>
-                        )}
-                      </div>
-
-                      <h2 className="text-[20px] sm:text-[22px] font-bold tracking-tight text-[#1C1917] group-hover:text-[#064E3B] transition-colors">
-                        {job.title}
-                      </h2>
-
-                      <div className="flex items-center gap-4 text-[13px] text-[#78716C] flex-wrap font-sans">
-                        <span className="flex items-center gap-1.5 font-medium text-[#1C1917]">
-                          <Building2 className="h-4 w-4 text-[#78716C]" />
-                          {job.companyName}
-                        </span>
-                        <span className="flex items-center gap-1.5">
-                          <MapPin className="h-4 w-4 text-[#78716C]" />
-                          {job.location}
-                        </span>
-                      </div>
-
-                      <p className="text-[13px] text-[#525252] line-clamp-2 leading-relaxed pt-1">
-                        {job.description}
-                      </p>
-
-                      {/* Required Skills */}
-                      <div className="flex items-center gap-1.5 flex-wrap pt-2">
-                        {job.requiredSkills.map((sk) => (
-                          <span
-                            key={sk}
-                            className="text-[10px] font-mono bg-[#FAF8F5] text-[#1C1917] border border-[#E7E2DA] px-2.5 py-0.5 rounded-full"
-                          >
-                            {sk}
+                          <span className="text-[10px] font-mono uppercase tracking-[0.14em] text-[#78716C] bg-[#FAF8F5] px-2.5 py-0.5 rounded-full border border-[#E7E2DA]">
+                            {job.employmentType.replace("-", " ").toUpperCase()}
                           </span>
-                        ))}
-                      </div>
-                    </div>
+                          {job.salaryRange && (
+                            <span className="text-[11px] font-mono text-[#1C1917] font-semibold bg-[#FAF8F5] px-2.5 py-0.5 rounded-full border border-[#E7E2DA]">
+                              {job.salaryRange}
+                            </span>
+                          )}
 
-                    <div className="sm:text-right shrink-0 pt-2 sm:pt-0">
-                      <Link href={`/candidate/jobs/${job.id}`}>
-                        <button className="flex items-center justify-center gap-2 px-5 py-2.5 bg-[#1C1917] group-hover:bg-[#064E3B] text-white text-[12px] font-mono font-semibold tracking-wider uppercase rounded-full transition-colors shadow-2xs">
-                          <span>REVIEW & APPLY</span>
-                          <ArrowRight className="h-3.5 w-3.5" />
-                        </button>
-                      </Link>
+                          {/* Skill Match Indicator */}
+                          {stats.matchCount > 0 && (
+                            <span className="text-[10px] font-mono font-bold uppercase tracking-[0.12em] text-[#064E3B] bg-[#064E3B]/10 px-2.5 py-0.5 rounded-full border border-[#064E3B]/25 flex items-center gap-1">
+                              <CheckCircle2 className="h-3 w-3" />
+                              <span>{stats.percent}% Match ({stats.matchCount}/{stats.totalRequired} skills)</span>
+                            </span>
+                          )}
+                        </div>
+
+                        <h2 className="text-[20px] sm:text-[22px] font-bold tracking-tight text-[#1C1917] group-hover:text-[#064E3B] transition-colors">
+                          {job.title}
+                        </h2>
+
+                        <div className="flex items-center gap-4 text-[13px] text-[#78716C] flex-wrap font-sans">
+                          <span className="flex items-center gap-1.5 font-medium text-[#1C1917]">
+                            <Building2 className="h-4 w-4 text-[#78716C]" />
+                            {job.companyName}
+                          </span>
+                          <span className="flex items-center gap-1.5">
+                            <MapPin className="h-4 w-4 text-[#78716C]" />
+                            {job.location}
+                          </span>
+                        </div>
+
+                        <p className="text-[13px] text-[#525252] line-clamp-2 leading-relaxed pt-1">
+                          {job.description}
+                        </p>
+
+                        {/* Required Skills with Match Highlights */}
+                        <div className="flex items-center gap-1.5 flex-wrap pt-2">
+                          {job.requiredSkills.map((sk) => {
+                            const isMatched = candidateSkills.some(
+                              (cs) =>
+                                cs === sk.trim().toLowerCase() ||
+                                cs.includes(sk.trim().toLowerCase()) ||
+                                sk.trim().toLowerCase().includes(cs)
+                            );
+                            return (
+                              <span
+                                key={sk}
+                                className={`text-[10px] font-mono px-2.5 py-0.5 rounded-full border transition-colors ${
+                                  isMatched
+                                    ? "bg-[#064E3B]/10 text-[#064E3B] border-[#064E3B]/30 font-semibold"
+                                    : "bg-[#FAF8F5] text-[#78716C] border-[#E7E2DA]"
+                                }`}
+                              >
+                                {isMatched ? "✓ " : ""}{sk}
+                              </span>
+                            );
+                          })}
+                        </div>
+                      </div>
+
+                      <div className="sm:text-right shrink-0 pt-2 sm:pt-0">
+                        <Link href={`/candidate/jobs/${job.id}`}>
+                          <button className="flex items-center justify-center gap-2 px-5 py-2.5 bg-[#1C1917] group-hover:bg-[#064E3B] text-white text-[12px] font-mono font-semibold tracking-wider uppercase rounded-full transition-colors shadow-2xs">
+                            <span>REVIEW & APPLY</span>
+                            <ArrowRight className="h-3.5 w-3.5" />
+                          </button>
+                        </Link>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         )}
