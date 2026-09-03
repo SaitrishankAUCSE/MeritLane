@@ -50,9 +50,10 @@
   --color-danger: var(--color-danger);
   --color-info: var(--color-info);
 
-  /* Three fonts — no more, no less */
-  --font-sans: var(--font-sans), "DM Sans", system-ui, sans-serif;
-  --font-serif: var(--font-serif), "Instrument Serif", Georgia, serif;
+  /* Single unified modern font style across the entire website */
+  --font-sans: var(--font-sans), "DM Sans", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-serif: var(--font-sans), "DM Sans", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-signature: var(--font-signature), "Caveat", cursive;
   --font-mono: var(--font-mono), "JetBrains Mono", ui-monospace, monospace;
 }
 
@@ -73,18 +74,35 @@ body {
   min-height: 100vh;
 }
 
-/* Headings — tighter tracking, warm weight */
+/* Headings — professional, high-impact block letter styling */
 h1, h2, h3, h4, h5, h6 {
-  letter-spacing: -0.025em;
+  font-family: var(--font-sans);
+  letter-spacing: -0.02em;
   line-height: 1.25;
-  font-weight: 600;
+  font-weight: 700;
   color: var(--color-foreground);
 }
 
-/* Serif headings stay editorial */
+/* Dedicated block letter headings */
+.heading-block, .block-heading {
+  font-family: var(--font-sans);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--color-foreground);
+}
+
+/* Override any font-serif utility to strictly use the clean sans font */
 .font-serif {
-  letter-spacing: -0.01em;
-  line-height: 1.2;
+  font-family: var(--font-sans) !important;
+  letter-spacing: -0.02em;
+}
+
+/* Distinct cursive signature moniker — applied ONLY to candidate name */
+.font-signature, .name-cursive {
+  font-family: var(--font-signature), "Caveat", cursive !important;
+  font-weight: 600;
+  letter-spacing: 0.02em;
 }
 
 /* Public theme */

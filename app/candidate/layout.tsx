@@ -15,7 +15,7 @@ export default function CandidateLayout({ children }: { children: React.ReactNod
         <div className="flex flex-col lg:flex-row h-[100dvh] w-full bg-[#F8F6F3] text-[#1C1917] font-sans overflow-hidden">
           <MobileNav role="candidate" />
           <CandidateSidebar />
-          <main className="flex-1 bg-[#F8F6F3] overflow-hidden">
+          <main className="flex-1 bg-[#F8F6F3] overflow-y-auto min-h-0 h-full">
             <ProfileCompletionGuard>
               {children}
             </ProfileCompletionGuard>

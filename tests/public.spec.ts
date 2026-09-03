@@ -1,37 +1,29 @@
 import { test, expect } from '@playwright/test';
 
 test.describe('Public Pages & Navigation', () => {
-  test('Landing Page renders correctly', async ({ page, isMobile }) => {
+  test('Landing Page renders correctly', async ({ page }) => {
     await page.goto('/');
 
     // Main header and titles
-    await expect(page.getByRole('heading', { name: /MeritLane/i }).first()).toBeVisible();
-    await expect(page.getByRole('heading', { name: /Proof of skill beats/i })).toBeVisible();
+    await expect(page.getByRole('heading', { name: /Proof of skill/i }).first()).toBeVisible();
     
     // Check CTA buttons
-    const proveSkillsBtn = page.getByRole('button', { name: /Prove your skills/i }).first();
-    await expect(proveSkillsBtn).toBeVisible();
+    const hiringBtn = page.getByRole('button', { name: /Start hiring verified talent/i });
+    await expect(hiringBtn).toBeVisible();
 
-    // Navigation links
-    if (isMobile) {
-      await page.getByRole('button', { name: /Toggle navigation menu/i }).click();
-    }
-    await expect(page.getByRole('link', { name: /Sign in/i }).first()).toBeVisible();
+    const verifyBtn = page.getByRole('button', { name: /Get verified as an engineer/i });
+    await expect(verifyBtn).toBeVisible();
   });
 
   test('Signup Page renders correctly', async ({ page }) => {
     await page.goto('/signup');
 
-    await expect(page.getByRole('heading', { name: /Join Meritlane/i })).toBeVisible();
-
-    // Check Role Selection
-    await expect(page.getByRole('button', { name: /^Candidate$/ })).toBeVisible();
-    await expect(page.getByRole('button', { name: /^Employer$/ })).toBeVisible();
+    await expect(page.getByRole('heading', { name: /Create an account/i })).toBeVisible();
 
     // Email signup form
-    await expect(page.getByLabel(/Email address/i)).toBeVisible();
-    await expect(page.getByLabel(/Password/i)).toBeVisible();
-    await expect(page.getByRole('button', { name: /Create account/i })).toBeVisible();
+    await expect(page.locator('input[type="email"]')).toBeVisible();
+    await expect(page.locator('input[type="password"]')).toBeVisible();
+    await expect(page.getByRole('button', { name: /Sign Up/i }).first()).toBeVisible();
 
     // Google SSO button
     await expect(page.getByRole('button', { name: /Continue with Google/i })).toBeVisible();
@@ -40,14 +32,25 @@ test.describe('Public Pages & Navigation', () => {
   test('Login Page renders correctly', async ({ page }) => {
     await page.goto('/login');
 
-    await expect(page.getByRole('heading', { name: /Sign In to Meritlane/i })).toBeVisible();
+    await expect(page.getByRole('heading', { name: /Welcome back/i })).toBeVisible();
 
     // Email login form
-    await expect(page.getByLabel(/Email address/i)).toBeVisible();
-    await expect(page.getByLabel(/Password/i)).toBeVisible();
-    await expect(page.locator('button[type="submit"]')).toBeVisible();
+    await expect(page.locator('input[type="email"]')).toBeVisible();
+    await expect(page.locator('input[type="password"]')).toBeVisible();
+    await expect(page.getByRole('button', { name: /Sign In/i }).first()).toBeVisible();
 
     // Google SSO button
     await expect(page.getByRole('button', { name: /Continue with Google/i })).toBeVisible();
   });
+
+  test('How Verification Works Methodology Page renders correctly', async ({ page }) => {
+    await page.goto('/how-verification-works');
+
+    await expect(page.getByRole('heading', { name: /How MeritLane Verification Works/i })).toBeVisible();
+    await expect(page.getByText(/Verification Methodology/i)).toBeVisible();
+    await expect(page.getByText(/45-Minute Server Timer/i)).toBeVisible();
+    await expect(page.getByText(/Fullscreen & Tab Monitoring/i)).toBeVisible();
+    await expect(page.getByText(/80% Threshold Standard/i)).toBeVisible();
+  });
 });
+

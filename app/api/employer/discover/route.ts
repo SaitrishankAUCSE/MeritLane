@@ -30,12 +30,24 @@ export async function POST(req: NextRequest) {
     let roleId = null;
     let filterSkills: string[] = [];
     let searchQuery = "";
+    let minScore = 0;
+    let requireLiveProject = false;
+    let requireGithub = false;
+    let minCommits = 0;
+    let matchMode: "any" | "all" = "any";
+    let gradYearFilter = "";
     
     try {
       const body = await req.json();
       roleId = body.roleId;
       if (body.skills && Array.isArray(body.skills)) filterSkills = body.skills;
       if (body.searchQuery) searchQuery = body.searchQuery.trim().toLowerCase();
+      if (typeof body.minScore === "number") minScore = body.minScore;
+      if (typeof body.requireLiveProject === "boolean") requireLiveProject = body.requireLiveProject;
+      if (typeof body.requireGithub === "boolean") requireGithub = body.requireGithub;
+      if (typeof body.minCommits === "number") minCommits = body.minCommits;
+      if (body.matchMode === "all") matchMode = "all";
+      if (body.gradYear) gradYearFilter = body.gradYear.trim();
     } catch (e) {
     }
 
@@ -68,9 +80,29 @@ export async function POST(req: NextRequest) {
       const data = doc.data() as CandidateProfile;
       const uid = doc.id;
 
+      // Filter: gradYear
+      if (gradYearFilter && gradYearFilter !== "all" && data.gradYear !== gradYearFilter) {
+        continue;
+      }
+
+      // Filter: requireLiveProject
+      const projects = data.projects || [];
+      if (requireLiveProject && !projects.some((p: any) => p.liveUrl && p.liveUrl.trim().length > 0)) {
+        continue;
+      }
+
+      // Filter: requireGithub / minCommits
+      const githubUrl = data.githubUrl || "";
+      const githubEvidence = data.githubEvidence;
+      if (requireGithub && !githubUrl && !githubEvidence) {
+        continue;
+      }
+      if (minCommits > 0 && (!githubEvidence || (githubEvidence.totalCommits || 0) < minCommits)) {
+        continue;
+      }
+
       const matchReasons: string[] = [];
       const candidateSkills = data.skills || [];
-      const projects = data.projects || [];
       
       let assessmentScores: Record<string, number> = {};
       try {
@@ -82,6 +114,18 @@ export async function POST(req: NextRequest) {
           }
         }
       } catch (err) {
+      }
+
+      // Filter: minScore
+      if (minScore > 0) {
+        const verifiedSkillScores = Object.values(data.verifiedSkills || {})
+          .map((s) => s.score)
+          .filter((score): score is number => typeof score === "number");
+        const allScores = [...verifiedSkillScores, ...Object.values(assessmentScores)];
+        const maxScore = allScores.length > 0 ? Math.max(...allScores) : 0;
+        if (maxScore < minScore) {
+          continue;
+        }
       }
 
       let matchedRequiredSkillCount = 0;
@@ -154,7 +198,13 @@ export async function POST(req: NextRequest) {
         }
       }
 
-      const isIncluded = requiredSkills.length === 0 || matchedRequiredSkillCount > 0;
+      // Check matchMode ("all" requires every required skill to be matched)
+      const isIncluded =
+        requiredSkills.length === 0 ||
+        (matchMode === "all"
+          ? matchedRequiredSkillCount === requiredSkills.length
+          : matchedRequiredSkillCount > 0);
+
       if (!isIncluded) {
         continue;
       }
@@ -171,7 +221,10 @@ export async function POST(req: NextRequest) {
         totalRequiredSkillCount: requiredSkills.length,
         projects: projects,
         githubUrl: data.githubUrl,
+        githubEvidence: data.githubEvidence,
         resumeUrl: data.resumeUrl,
+        atsScore: data.atsScore,
+        atsRating: data.atsRating,
         verificationStatus: data.verificationStatus,
         assessmentScores,
         verifiedSkills: data.verifiedSkills || {},

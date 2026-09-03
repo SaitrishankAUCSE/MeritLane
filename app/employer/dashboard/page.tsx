@@ -16,6 +16,7 @@ import {
   Code2,
   Layers,
   GraduationCap,
+  Briefcase,
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -39,6 +40,15 @@ export default function EmployerDashboardPage() {
   const [selectedSkills, setSelectedSkills] = useState<string[]>([]);
   const [sortBy, setSortBy] = useState<"match" | "skills" | "projects">("match");
 
+  // Advanced Filter States
+  const [minScore, setMinScore] = useState<number>(0);
+  const [requireLiveProject, setRequireLiveProject] = useState<boolean>(false);
+  const [requireGithub, setRequireGithub] = useState<boolean>(false);
+  const [minCommits, setMinCommits] = useState<number>(0);
+  const [matchMode, setMatchMode] = useState<"any" | "all">("any");
+  const [gradYearFilter, setGradYearFilter] = useState<string>("all");
+  const [showAdvancedFilters, setShowAdvancedFilters] = useState<boolean>(false);
+
   // Messaging state
   const [messagingTarget, setMessagingTarget] = useState<{ id: string; name: string } | null>(null);
 
@@ -61,6 +71,12 @@ export default function EmployerDashboardPage() {
         body: JSON.stringify({
           searchQuery,
           skills: selectedSkills,
+          minScore,
+          requireLiveProject,
+          requireGithub,
+          minCommits,
+          matchMode,
+          gradYear: gradYearFilter,
         }),
       });
 
@@ -92,7 +108,17 @@ export default function EmployerDashboardPage() {
       setErrorMsg("Internal system error");
       setFetching(false);
     }
-  }, [user, searchQuery, selectedSkills]);
+  }, [
+    user,
+    searchQuery,
+    selectedSkills,
+    minScore,
+    requireLiveProject,
+    requireGithub,
+    minCommits,
+    matchMode,
+    gradYearFilter,
+  ]);
 
   useEffect(() => {
     if (!loading) {
@@ -226,22 +252,64 @@ export default function EmployerDashboardPage() {
           />
         </div>
 
-        {/* Hero Header */}
+        {/* Hero Header & Institutional Telemetry */}
         <div className="max-w-[1000px] mx-auto mb-8 sm:mb-10">
-          <div className="flex items-center gap-2 mb-3 flex-wrap">
-            <span className="text-[11px] font-mono font-bold uppercase tracking-[0.1em] text-[#15803D] bg-[#15803D]/10 px-2.5 py-1 rounded-full">
-              Verified Talent Hub
-            </span>
-            <span className="text-[12px] text-[#737373] font-sans">
-              · Powered by OpenRouter AI Analysis
-            </span>
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-3">
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="text-[11px] font-mono font-bold uppercase tracking-[0.1em] text-[#064E3B] bg-[#064E3B]/10 px-2.5 py-1 rounded-full">
+                Institutional Talent Registry
+              </span>
+              <span className="text-[12px] text-[#737373] font-mono">
+                · Monitored Assessment Directory
+              </span>
+            </div>
+            <Link href="/employer/jobs">
+              <button className="flex items-center gap-2 px-4 py-2 border border-[#E7E2DA] bg-white hover:bg-[#FAF8F5] text-[12px] font-mono font-semibold rounded-full text-[#1C1917] transition-colors shadow-2xs">
+                <Briefcase className="h-3.5 w-3.5 text-[#064E3B]" />
+                <span>MANAGE JOBS & APPLICANTS</span>
+                <ArrowRight className="h-3 w-3" />
+              </button>
+            </Link>
           </div>
-          <h1 className="font-serif text-[28px] sm:text-[36px] lg:text-[42px] text-[#0D0D0D] leading-tight mb-2">
-            Find people whose skills are proven.
+          <h1 className="text-[26px] sm:text-[34px] lg:text-[38px] font-bold uppercase tracking-[0.06em] text-[#0D0D0D] leading-tight mb-2">
+            FIND PEOPLE WHOSE SKILLS ARE PROVEN.
           </h1>
-          <p className="text-[14px] sm:text-[16px] text-[#737373] font-sans">
-            Inspect technical candidates backed by verified assessments, project evidence, and AI hiring briefs.
+          <p className="text-[14px] sm:text-[16px] text-[#737373] font-sans mb-6">
+            Inspect technical candidates backed by timed assessments, audited Git evidence, and verified project artifacts.
           </p>
+
+          {/* Institutional Telemetry Strip */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-2">
+            <div className="bg-white border border-[#E5E5E5] p-4 rounded-xl shadow-xs">
+              <div className="text-[11px] font-mono uppercase tracking-wider text-[#737373] mb-1">
+                Verified Engineers
+              </div>
+              <div className="text-[26px] font-serif text-[#0D0D0D] font-normal leading-none">
+                {candidates.length}
+              </div>
+              <div className="text-[11px] text-[#737373] mt-1">Evaluated practitioners in pool</div>
+            </div>
+
+            <div className="bg-white border border-[#E5E5E5] p-4 rounded-xl shadow-xs">
+              <div className="text-[11px] font-mono uppercase tracking-wider text-[#064E3B] mb-1">
+                High Scorers (≥85%)
+              </div>
+              <div className="text-[26px] font-serif text-[#064E3B] font-normal leading-none">
+                {candidates.filter(c => Object.values(c.verifiedSkills || {}).some((v: any) => (v.score || 0) >= 85)).length}
+              </div>
+              <div className="text-[11px] text-[#737373] mt-1">Distinction level evaluations</div>
+            </div>
+
+            <div className="bg-white border border-[#E5E5E5] p-4 rounded-xl shadow-xs">
+              <div className="text-[11px] font-mono uppercase tracking-wider text-[#737373] mb-1">
+                Audited Projects
+              </div>
+              <div className="text-[26px] font-serif text-[#0D0D0D] font-normal leading-none">
+                {candidates.reduce((acc, c) => acc + (c.projects?.length || 0), 0)}
+              </div>
+              <div className="text-[11px] text-[#737373] mt-1">Linked code repositories</div>
+            </div>
+          </div>
         </div>
 
         {/* Search & Filter Controls */}
@@ -290,8 +358,135 @@ export default function EmployerDashboardPage() {
                   onClick={() => setSelectedSkills([])}
                   className="px-2.5 py-1 text-[12px] text-[#737373] hover:text-[#0D0D0D] underline decoration-[#D2D2D2] underline-offset-4"
                 >
-                  Clear filters
+                  Clear skills
                 </button>
+              )}
+            </div>
+
+            {/* Advanced Filters Toggle & Drawer */}
+            <div className="pt-2">
+              <div className="flex items-center justify-between">
+                <button
+                  type="button"
+                  onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
+                  className="flex items-center gap-1.5 text-[12px] font-semibold text-[#0D0D0D] hover:text-[#737373] transition-colors"
+                >
+                  <Layers className="h-3.5 w-3.5" />
+                  {showAdvancedFilters ? "Hide Advanced Filters" : "Show Advanced Search Filters"}
+                  {(minScore > 0 || requireLiveProject || requireGithub || minCommits > 0 || matchMode === "all" || gradYearFilter !== "all") && (
+                    <span className="h-2 w-2 rounded-full bg-[#15803D]" />
+                  )}
+                </button>
+
+                {(minScore > 0 || requireLiveProject || requireGithub || minCommits > 0 || matchMode === "all" || gradYearFilter !== "all") && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setMinScore(0);
+                      setRequireLiveProject(false);
+                      setRequireGithub(false);
+                      setMinCommits(0);
+                      setMatchMode("any");
+                      setGradYearFilter("all");
+                    }}
+                    className="text-[12px] text-[#B42318] hover:underline"
+                  >
+                    Reset advanced filters
+                  </button>
+                )}
+              </div>
+
+              {showAdvancedFilters && (
+                <div className="mt-4 p-4 rounded-xl bg-[#FAFAFA] border border-[#E5E5E5] grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-[12px]">
+                  {/* Verified Score Threshold */}
+                  <div>
+                    <label className="block font-semibold text-[#0D0D0D] mb-1.5">
+                      Minimum Verified Score
+                    </label>
+                    <select
+                      value={minScore}
+                      onChange={(e) => setMinScore(Number(e.target.value))}
+                      className="w-full bg-white border border-[#E5E5E5] rounded-lg px-2.5 py-1.5 text-[#0D0D0D] outline-none"
+                    >
+                      <option value={0}>Any Score</option>
+                      <option value={80}>Verified (≥ 80%)</option>
+                      <option value={90}>Top Tier (≥ 90%)</option>
+                    </select>
+                  </div>
+
+                  {/* Evidence Artifacts */}
+                  <div>
+                    <label className="block font-semibold text-[#0D0D0D] mb-1.5">
+                      Required Evidence
+                    </label>
+                    <div className="space-y-1.5 pt-0.5">
+                      <label className="flex items-center gap-2 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={requireLiveProject}
+                          onChange={(e) => setRequireLiveProject(e.target.checked)}
+                          className="rounded border-[#E5E5E5] text-[#0D0D0D] focus:ring-0"
+                        />
+                        <span>Has Live Deployed App</span>
+                      </label>
+                      <label className="flex items-center gap-2 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={requireGithub}
+                          onChange={(e) => setRequireGithub(e.target.checked)}
+                          className="rounded border-[#E5E5E5] text-[#0D0D0D] focus:ring-0"
+                        />
+                        <span>GitHub Account Linked</span>
+                      </label>
+                    </div>
+                  </div>
+
+                  {/* GitHub Activity & Matching */}
+                  <div>
+                    <label className="block font-semibold text-[#0D0D0D] mb-1.5">
+                      GitHub Activity &amp; Mode
+                    </label>
+                    <select
+                      value={minCommits}
+                      onChange={(e) => setMinCommits(Number(e.target.value))}
+                      className="w-full bg-white border border-[#E5E5E5] rounded-lg px-2.5 py-1.5 text-[#0D0D0D] outline-none mb-2"
+                    >
+                      <option value={0}>Any Commit History</option>
+                      <option value={25}>≥ 25 Total Commits</option>
+                      <option value={50}>≥ 50 Total Commits</option>
+                    </select>
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => setMatchMode(matchMode === "any" ? "all" : "any")}
+                        className={`text-[11px] px-2 py-0.5 rounded border transition-colors ${
+                          matchMode === "all"
+                            ? "bg-[#0D0D0D] text-white border-[#0D0D0D]"
+                            : "bg-white text-[#737373] border-[#E5E5E5]"
+                        }`}
+                      >
+                        {matchMode === "all" ? "Must Match ALL Skills" : "Match ANY Selected Skill"}
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Graduation Cohort */}
+                  <div>
+                    <label className="block font-semibold text-[#0D0D0D] mb-1.5">
+                      Graduation Year
+                    </label>
+                    <select
+                      value={gradYearFilter}
+                      onChange={(e) => setGradYearFilter(e.target.value)}
+                      className="w-full bg-white border border-[#E5E5E5] rounded-lg px-2.5 py-1.5 text-[#0D0D0D] outline-none"
+                    >
+                      <option value="all">All Cohorts</option>
+                      <option value="2024">2024 Graduates</option>
+                      <option value="2025">2025 Graduates</option>
+                      <option value="2026">2026+ Graduates</option>
+                    </select>
+                  </div>
+                </div>
               )}
             </div>
 
@@ -408,6 +603,36 @@ export default function EmployerDashboardPage() {
                               Claimed skills under assessment verification.
                             </div>
                           )}
+
+                          {/* Evidence Strip: GitHub & ATS signals */}
+                          <div className="flex flex-wrap items-center gap-2.5 mt-3 text-[11px] font-mono text-[#737373]">
+                            {c.githubEvidence && (
+                              <div className="flex items-center gap-1.5 bg-[#F5F5F4] px-2.5 py-1 rounded-md text-[#44403C]">
+                                <Code2 className="h-3.5 w-3.5 text-[#1C1917]" />
+                                <span>{c.githubEvidence.totalCommits || 0} commits</span>
+                                <span>· {c.githubEvidence.repoCount || 0} repos</span>
+                                {c.githubEvidence.topLanguages?.length > 0 && (
+                                  <span className="text-[#78716C]">
+                                    ({c.githubEvidence.topLanguages.slice(0, 2).join(", ")})
+                                  </span>
+                                )}
+                              </div>
+                            )}
+
+                            {typeof c.atsScore === "number" && (
+                              <div className="flex items-center gap-1.5 bg-[#F0FDF4] border border-[#BBF7D0] px-2.5 py-1 rounded-md text-[#166534]">
+                                <span>ATS: {c.atsScore}/100</span>
+                                {c.atsRating && <span className="font-bold">({c.atsRating})</span>}
+                              </div>
+                            )}
+
+                            {c.projects?.some((p: any) => p.liveUrl) && (
+                              <div className="flex items-center gap-1 bg-[#EEF2FF] border border-[#C7D2FE] px-2.5 py-1 rounded-md text-[#3730A3]">
+                                <ExternalLink className="h-3 w-3" />
+                                <span>Live Demo Available</span>
+                              </div>
+                            )}
+                          </div>
                         </div>
                       </div>
 

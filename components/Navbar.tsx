@@ -74,10 +74,12 @@ export default function Navbar() {
             ) : userProfile?.role === "employer" ? (
               <>
                 <NavLink href="/employer/dashboard" current={pathname}>Dashboard</NavLink>
+                <NavLink href="/employer/jobs" current={pathname}>Jobs</NavLink>
               </>
             ) : (
               <>
                 <NavLink href="/candidate/dashboard" current={pathname}>Dashboard</NavLink>
+                <NavLink href="/jobs" current={pathname}>Jobs</NavLink>
                 <NavLink href="/candidate/assessment" current={pathname}>Assessment</NavLink>
               </>
             )}
@@ -99,6 +101,9 @@ export default function Navbar() {
             </>
           ) : (
             <div className="hidden items-center gap-6 md:flex">
+              <Link href="/jobs" className="text-sm text-[#78716C] hover:text-[#1C1917] transition-colors font-medium">
+                Jobs
+              </Link>
               <button onClick={() => openAuthModal("login")} className="text-sm text-[#78716C] hover:text-[#1C1917] transition-colors font-medium">
                 Log in
               </button>
@@ -107,7 +112,7 @@ export default function Navbar() {
               </button>
               <button 
                 onClick={() => openAuthModal("signup", undefined, "employer")}
-                className="px-5 h-9 bg-[#064E3B] text-white hover:bg-[#022c22] rounded text-[13px] font-sans font-medium transition-colors shadow-xs"
+                className="px-5 h-9 bg-[#064E3B] text-white hover:bg-[#022c22] rounded-full text-[13px] font-sans font-medium transition-colors shadow-xs"
               >
                 Hire Talent
               </button>

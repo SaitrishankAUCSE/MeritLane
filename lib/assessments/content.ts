@@ -531,6 +531,305 @@ FROM node:20-alpine AS runner
 `
       }
     ]
+  },
+
+  // 9. MACHINE LEARNING / AI
+  "machine learning": {
+    mcqPool: [
+      {
+        question: "How does L2 regularization (Ridge) prevent overfitting in neural networks and linear models?",
+        options: [
+          "It forces feature weights strictly to zero, producing sparse models",
+          "It adds a penalty proportional to the sum of squared weights to the loss function, penalizing excessively large weights",
+          "It doubles the learning rate automatically",
+          "It removes outlier samples from the training set"
+        ],
+        answerIndex: 1,
+      },
+      {
+        question: "In transformer architectures, why is Scaled Dot-Product Attention scaled by 1/sqrt(d_k)?",
+        options: [
+          "To speed up matrix multiplication in CUDA cores",
+          "To prevent dot products from growing excessively large in high dimensions, which would push softmax into regions with vanishing gradients",
+          "To enforce non-negativity across attention weights",
+          "To make the matrix strictly orthogonal"
+        ],
+        answerIndex: 1,
+      },
+      {
+        question: "What is the primary indicator of data leakage during model training?",
+        options: [
+          "Low training accuracy and high validation accuracy",
+          "Unusually high validation or test performance because target or future information was present in the feature pipeline",
+          "Slow gradient descent convergence",
+          "High batch normalization variance"
+        ],
+        answerIndex: 1,
+      },
+      {
+        question: "What is the difference between PyTorch `tensor.detach()` and `torch.no_grad()`?",
+        options: [
+          "`tensor.detach()` deletes the tensor from GPU memory immediately",
+          "`tensor.detach()` returns a new tensor detached from the current autograd graph, while `torch.no_grad()` is a context manager that disables gradient computation entirely",
+          "There is no difference; they are exact aliases",
+          "`torch.no_grad()` only works with CPU tensors"
+        ],
+        answerIndex: 1,
+      }
+    ],
+    codingPool: [
+      {
+        id: "ml-cosine-similarity",
+        title: "Vector Cosine Similarity & Normalization",
+        language: "python",
+        instructions: "Write a pure Python function `cosine_similarity(vec_a, vec_b)` that computes the cosine similarity between two numeric lists.\n\nRequirements:\n1. Return a float rounded to 4 decimal places.\n2. Return 0.0 if either vector has a magnitude of 0 or vectors have differing lengths.\n3. Do not use external libraries (e.g. numpy).",
+        initialCode: `import math
+
+def cosine_similarity(vec_a, vec_b):
+    # Compute dot product and magnitudes
+    if not vec_a or not vec_b or len(vec_a) != len(vec_b):
+        return 0.0
+    # Complete calculation
+    return 0.0
+`
+      },
+      {
+        id: "ml-min-max-scaler",
+        title: "Dataset Feature Normalizer",
+        language: "python",
+        instructions: "Write a function `min_max_scale(dataset)` that normalizes a list of numeric lists (rows x columns) column-wise to the range [0.0, 1.0].\n\nRequirements:\n1. If max == min for a column, scale all values in that column to 0.0.\n2. Return the new matrix with all float values rounded to 3 decimal places.",
+        initialCode: `def min_max_scale(dataset):
+    if not dataset or not dataset[0]:
+        return []
+    # Implement column-wise min-max scaling
+    return []
+`
+      }
+    ]
+  },
+
+  // 10. NEXT.JS / FULLSTACK
+  "next.js": {
+    mcqPool: [
+      {
+        question: "In the Next.js App Router, what is the default rendering paradigm for components inside the `app/` directory?",
+        options: [
+          "Client Components (`use client`)",
+          "React Server Components (RSC) rendered on the server with zero client bundle impact",
+          "Static HTML without hydration",
+          "Edge Workers exclusively"
+        ],
+        answerIndex: 1,
+      },
+      {
+        question: "How do Next.js Server Actions mutate data securely?",
+        options: [
+          "By sending unencrypted WebSockets to third-party endpoints",
+          "By defining async functions marked with `'use server'` that execute securely on the server with built-in CSRF protection and cache revalidation",
+          "By compiling client JavaScript into WebAssembly",
+          "By using browser localStorage synchronization"
+        ],
+        answerIndex: 1,
+      },
+      {
+        question: "What is the function of `revalidateTag(tag)` in Next.js caching architecture?",
+        options: [
+          "It forces a hard refresh of the browser window",
+          "It purges and revalidates cached fetch requests on-demand that were tagged with the matching cache key",
+          "It deletes database collections",
+          "It recompiles the production build"
+        ],
+        answerIndex: 1,
+      }
+    ],
+    codingPool: [
+      {
+        id: "nextjs-api-route",
+        title: "Secure Next.js Route Handler",
+        language: "typescript",
+        instructions: "Implement a Next.js App Router route handler `POST(req: Request)` in TypeScript that:\n1. Parses JSON `{ email: string, tier: string }`.\n2. Validates that `email` contains '@' and `tier` is one of ['free', 'pro', 'enterprise'].\n3. Returns 400 with `{ error: 'Invalid payload' }` if validation fails.\n4. Returns 200 with `{ success: true, user: { email, tier } }` on success.",
+        initialCode: `import { NextResponse } from "next/server";
+
+export async function POST(req: Request) {
+  try {
+    const body = await req.json();
+    // Validate email and tier
+    return NextResponse.json({ success: true });
+  } catch {
+    return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
+  }
+}
+`
+      }
+    ]
+  },
+
+  // 11. RUST / SYSTEMS
+  rust: {
+    mcqPool: [
+      {
+        question: "What does the Rust borrow checker enforce at compile time regarding references?",
+        options: [
+          "You can have any number of mutable references simultaneously",
+          "You can have either any number of immutable references (`&T`) OR exactly one mutable reference (`&mut T`), but never both at the same time",
+          "All memory must be allocated on the heap",
+          "Variables cannot be moved across functions"
+        ],
+        answerIndex: 1,
+      },
+      {
+        question: "In Rust, what is the purpose of `Arc<Mutex<T>>` for multi-threaded programming?",
+        options: [
+          "`Arc` provides thread-safe reference-counting to share ownership, while `Mutex` provides mutual exclusion to safely mutate inner data across threads",
+          "`Arc` compresses data in memory and `Mutex` converts it to JSON",
+          "`Arc` is single-threaded only",
+          "It turns Rust code into asynchronous JavaScript"
+        ],
+        answerIndex: 0,
+      },
+      {
+        question: "How does Rust achieve memory safety without a garbage collector?",
+        options: [
+          "Through manual `free()` invocations like C",
+          "Through strict compile-time ownership, move semantics, and automatic deterministic dropping when variables go out of scope",
+          "By running all code inside a virtual machine sandbox",
+          "By disabling dynamic memory allocation"
+        ],
+        answerIndex: 1,
+      }
+    ],
+    codingPool: [
+      {
+        id: "rust-safe-dedup",
+        title: "Sorted Vector Deduplication",
+        language: "rust",
+        instructions: "Write a Rust function `pub fn dedup_sorted(vec: &mut Vec<i32>)` that removes duplicate elements in-place from a sorted vector without allocating a new vector.",
+        initialCode: `pub fn dedup_sorted(vec: &mut Vec<i32>) {
+    if vec.is_empty() {
+        return;
+    }
+    // Remove adjacent duplicates in-place
+}
+`
+      }
+    ]
+  },
+
+  // 12. CLOUD / KUBERNETES / AWS
+  aws: {
+    mcqPool: [
+      {
+        question: "In Kubernetes architecture, what is the role of the Kubelet?",
+        options: [
+          "It acts as the primary etcd database store",
+          "It is the node agent that communicates with the control plane, ensuring containers described in PodSpecs are running and healthy",
+          "It routes public internet DNS queries",
+          "It compiles container source code"
+        ],
+        answerIndex: 1,
+      },
+      {
+        question: "In AWS IAM, what is the security principle of 'Least Privilege'?",
+        options: [
+          "Granting admin permissions to all developers to avoid access roadblocks",
+          "Granting identities only the absolute minimum permissions necessary to perform their specific operational tasks",
+          "Using root credentials for all automated API calls",
+          "Disabling MFA across all service accounts"
+        ],
+        answerIndex: 1,
+      },
+      {
+        question: "What is the difference between Kubernetes Liveness and Readiness probes?",
+        options: [
+          "They are identical checks",
+          "Liveness determines if the container needs to be restarted, while Readiness determines if the container is ready to accept network traffic from Services",
+          "Readiness restarts the host machine, while Liveness deletes the namespace",
+          "Liveness is for storage volumes only"
+        ],
+        answerIndex: 1,
+      }
+    ],
+    codingPool: [
+      {
+        id: "k8s-deployment-manifest",
+        title: "Production Kubernetes Deployment Manifest",
+        language: "yaml",
+        instructions: "Write a valid Kubernetes `Deployment` manifest for `meritlane-api`:\n1. 3 replicas.\n2. Container image `meritlane/api:v1` on containerPort 8080.\n3. Resource requests (cpu: 250m, memory: 512Mi) and limits (cpu: 500m, memory: 1Gi).\n4. HTTP Readiness probe on path `/healthz` port 8080.",
+        initialCode: `apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: meritlane-api
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: meritlane-api
+  template:
+    metadata:
+      labels:
+        app: meritlane-api
+    spec:
+      containers:
+      - name: api
+        image: meritlane/api:v1
+        # Add ports, resources, and readinessProbe
+`
+      }
+    ]
+  },
+
+  // 13. MOBILE (REACT NATIVE / FLUTTER)
+  "react native": {
+    mcqPool: [
+      {
+        question: "Why should you use `FlatList` instead of `ScrollView` in React Native when rendering large collections of items?",
+        options: [
+          "`ScrollView` is deprecated in React Native 0.70+",
+          "`FlatList` lazily renders only the items currently on screen (windowing), drastically reducing memory footprint and improving frame rates",
+          "`FlatList` does not support touch events",
+          "`ScrollView` cannot be styled with Flexbox"
+        ],
+        answerIndex: 1,
+      },
+      {
+        question: "In React Native's New Architecture (Fabric), how does JavaScript communicate with native UI components?",
+        options: [
+          "Through asynchronous JSON serialization over the legacy C++ Bridge",
+          "Directly via C++ JSI (JavaScript Interface), allowing synchronous, typed communication and thread-safe direct calls",
+          "Using HTTP localhost servers on the mobile device",
+          "Through WebSockets"
+        ],
+        answerIndex: 1,
+      },
+      {
+        question: "What is the purpose of `react-native-reanimated` worklets?",
+        options: [
+          "To compile JavaScript into APK files",
+          "To run animation calculations directly on the UI thread at 60/120 FPS without blocking the JavaScript runtime thread",
+          "To handle push notifications in the background",
+          "To store encrypted SQLite databases"
+        ],
+        answerIndex: 1,
+      }
+    ],
+    codingPool: [
+      {
+        id: "rn-search-filter",
+        title: "Optimized Mobile Search Filter Hook",
+        language: "typescript",
+        instructions: "Implement a React Native custom hook `useFilteredList(items: string[], query: string)` in TypeScript that:\n1. Returns filtered items matching `query` case-insensitively.\n2. Debounces filtering so re-filtering only runs 200ms after query changes.\n3. Returns `{ filteredItems: string[], isSearching: boolean }`.",
+        initialCode: `import { useState, useEffect, useMemo } from 'react';
+
+export function useFilteredList(items: string[], query: string) {
+  const [debouncedQuery, setDebouncedQuery] = useState(query);
+  const [isSearching, setIsSearching] = useState(false);
+
+  // Implement debouncing and filtering
+  return { filteredItems: items, isSearching };
+}
+`
+      }
+    ]
   }
 };
 
@@ -541,8 +840,8 @@ const SKILL_ALIASES: Record<string, string> = {
   ts: "typescript",
   "node.js": "typescript",
   nodejs: "typescript",
-  nextjs: "react",
-  "next.js": "react",
+  nextjs: "next.js",
+  "next.js": "next.js",
   vue: "react",
   "vue.js": "react",
   angular: "react",
@@ -560,18 +859,28 @@ const SKILL_ALIASES: Record<string, string> = {
   sqlite: "sql",
   database: "sql",
   databases: "sql",
-  kubernetes: "docker",
-  k8s: "docker",
+  kubernetes: "aws",
+  k8s: "aws",
+  aws: "aws",
+  cloud: "aws",
   devops: "docker",
   "ci/cd": "docker",
   fastapi: "python",
   flask: "python",
   django: "python",
-  "machine learning": "python",
-  "deep learning": "python",
-  pytorch: "python",
-  tensorflow: "python",
-  pandas: "python",
+  "machine learning": "machine learning",
+  "deep learning": "machine learning",
+  ml: "machine learning",
+  ai: "machine learning",
+  "data science": "machine learning",
+  pytorch: "machine learning",
+  tensorflow: "machine learning",
+  pandas: "machine learning",
+  rust: "rust",
+  "react native": "react native",
+  "react-native": "react native",
+  flutter: "react native",
+  mobile: "react native",
   "spring boot": "java",
   spring: "java"
 };

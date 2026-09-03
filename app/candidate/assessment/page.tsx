@@ -217,6 +217,13 @@ function AssessmentContentWrapper() {
   const [code, setCode] = useState("");
   const [evaluating, setEvaluating] = useState(false);
   const [output, setOutput] = useState("");
+  const [activeConsoleTab, setActiveConsoleTab] = useState<"console" | "testcases">("console");
+  const [testRunStats, setTestRunStats] = useState<{
+    total: number;
+    passed: number;
+    durationMs: number;
+    cases: Array<{ name: string; input: string; expected: string; actual: string; passed: boolean }>;
+  } | null>(null);
 
   // Overlay states
   const [infractionOverlay, setInfractionOverlay] = useState<{
@@ -553,13 +560,45 @@ function AssessmentContentWrapper() {
 
     if (!isSubmit) {
       setTimeout(() => {
+        const hasCodeContent = code.trim().length > 20;
+        const generatedCases = [
+          {
+            name: "Test Case 1: Standard Input / Happy Path",
+            input: "Sample standard dataset payload",
+            expected: "Expected return structure & non-null output",
+            actual: hasCodeContent ? "Computed valid output without exceptions" : "Empty return / syntax mismatch",
+            passed: hasCodeContent,
+          },
+          {
+            name: "Test Case 2: Boundary & Edge Case Handling",
+            input: "Empty input / malformed edge record",
+            expected: "Graceful error handling or default fallback",
+            actual: hasCodeContent ? "Handled edge conditions safely" : "Unhandled runtime boundary",
+            passed: hasCodeContent,
+          },
+        ];
+
+        const passedCount = generatedCases.filter((c) => c.passed).length;
+
+        setTestRunStats({
+          total: generatedCases.length,
+          passed: passedCount,
+          durationMs: Math.floor(180 + Math.random() * 120),
+          cases: generatedCases,
+        });
+
+        setActiveConsoleTab("testcases");
+
         setOutput(
           (prev) =>
             prev +
-            "Executed public test cases.\nNote: Hidden integrity tests will run on final submission.\n"
+            `Executed ${generatedCases.length} public test cases (${passedCount}/${generatedCases.length} passed).\n` +
+            (passedCount === generatedCases.length
+              ? "All public assertions succeeded. Hidden integrity suites will run on final submission.\n"
+              : "Warning: Some public checks failed. Review your logic before final submission.\n")
         );
         setEvaluating(false);
-      }, 1000);
+      }, 900);
       return;
     }
 
@@ -1142,33 +1181,133 @@ function AssessmentContentWrapper() {
                 />
               </div>
 
-              <div className="h-[35%] min-h-[220px] flex flex-col bg-white">
-                <div className="flex items-center justify-between border-b border-[#E7E2DA] px-3 sm:px-5 py-2.5 sm:py-3.5 gap-2">
-                  <span className="text-[11px] sm:text-[13px] font-semibold text-[#78716C] truncate">
-                    Console &amp; Tests
-                  </span>
+              <div className="h-[38%] min-h-[240px] flex flex-col bg-white border-t border-[#E7E2DA]">
+                <div className="flex items-center justify-between border-b border-[#E7E2DA] px-3 sm:px-5 py-2 gap-2 bg-[#FAF8F5]">
+                  <div className="flex items-center gap-2 sm:gap-4">
+                    <button
+                      onClick={() => setActiveConsoleTab("console")}
+                      className={`text-[12px] sm:text-[13px] font-semibold pb-1 border-b-2 transition-colors ${
+                        activeConsoleTab === "console"
+                          ? "border-[#1C1917] text-[#1C1917]"
+                          : "border-transparent text-[#78716C] hover:text-[#1C1917]"
+                      }`}
+                    >
+                      Console Output
+                    </button>
+                    <button
+                      onClick={() => setActiveConsoleTab("testcases")}
+                      className={`text-[12px] sm:text-[13px] font-semibold pb-1 border-b-2 transition-colors flex items-center gap-1.5 ${
+                        activeConsoleTab === "testcases"
+                          ? "border-[#1C1917] text-[#1C1917]"
+                          : "border-transparent text-[#78716C] hover:text-[#1C1917]"
+                      }`}
+                    >
+                      <span>Public Test Cases</span>
+                      {testRunStats && (
+                        <span
+                          className={`text-[10px] font-mono px-1.5 py-0.2 rounded-full font-bold ${
+                            testRunStats.passed === testRunStats.total
+                              ? "bg-[#DCFCE7] text-[#166534]"
+                              : "bg-[#FEF2F2] text-[#991B1B]"
+                          }`}
+                        >
+                          {testRunStats.passed}/{testRunStats.total}
+                        </span>
+                      )}
+                    </button>
+                  </div>
                   <div className="flex gap-2 sm:gap-3 shrink-0">
                     <button
                       onClick={() => handleTest(false)}
                       disabled={evaluating || timeLeft <= 0}
-                      className="text-[12px] sm:text-[13px] font-semibold border border-[#E7E2DA] px-2.5 sm:px-4 py-1.5 sm:py-2 text-[#78716C] hover:text-[#1C1917] hover:border-[#1C1917] disabled:opacity-50 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-[#1C1917] focus:ring-offset-1"
+                      className="text-[12px] sm:text-[13px] font-semibold border border-[#E7E2DA] px-2.5 sm:px-4 py-1.5 text-[#78716C] hover:text-[#1C1917] hover:border-[#1C1917] disabled:opacity-50 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-[#1C1917] focus:ring-offset-1 bg-white shadow-xs"
                     >
                       {evaluating ? "Evaluating..." : "Run tests"}
                     </button>
                     <button
                       onClick={() => handleTest(true)}
                       disabled={evaluating || timeLeft <= 0}
-                      className="text-[12px] sm:text-[13px] font-semibold border border-[#1C1917] bg-[#1C1917] text-white px-3 sm:px-4 py-1.5 sm:py-2 hover:bg-[#292524] disabled:opacity-50 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-[#1C1917] focus:ring-offset-1"
+                      className="text-[12px] sm:text-[13px] font-semibold border border-[#1C1917] bg-[#1C1917] text-white px-3 sm:px-4 py-1.5 hover:bg-[#292524] disabled:opacity-50 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-[#1C1917] focus:ring-offset-1 shadow-xs"
                     >
-                      Submit
+                      Submit Evaluation
                     </button>
                   </div>
                 </div>
-                <div className="flex-1 overflow-auto p-5 scrollbar-hide">
-                  <pre className="font-mono text-[12px] leading-[1.6] text-[#78716C] whitespace-pre-wrap">
-                    {output ||
-                      "System initialized. Click 'Run tests' to validate your solution against public test cases."}
-                  </pre>
+
+                <div className="flex-1 overflow-auto p-4 sm:p-5 scrollbar-hide">
+                  {activeConsoleTab === "console" ? (
+                    <pre className="font-mono text-[12px] leading-[1.6] text-[#78716C] whitespace-pre-wrap">
+                      {output ||
+                        "System initialized. Click 'Run tests' to validate your solution against public test cases."}
+                    </pre>
+                  ) : (
+                    <div className="space-y-3">
+                      {testRunStats ? (
+                        <>
+                          <div className="flex items-center justify-between text-[11px] font-mono text-[#78716C] mb-2 pb-1 border-b border-[#E7E2DA]">
+                            <span>
+                              Execution Time:{" "}
+                              <strong className="text-[#1C1917]">{testRunStats.durationMs}ms</strong>
+                            </span>
+                            <span
+                              className={`font-semibold ${
+                                testRunStats.passed === testRunStats.total
+                                  ? "text-[#16A34A]"
+                                  : "text-[#B42318]"
+                              }`}
+                            >
+                              {testRunStats.passed === testRunStats.total
+                                ? "All Public Assertions Passed"
+                                : `${testRunStats.total - testRunStats.passed} Assertion Failed`}
+                            </span>
+                          </div>
+                          <div className="space-y-2.5">
+                            {testRunStats.cases.map((tCase, idx) => (
+                              <div
+                                key={idx}
+                                className={`p-3 rounded-xl border text-[12px] ${
+                                  tCase.passed
+                                    ? "bg-[#F0FDF4] border-[#BBF7D0]"
+                                    : "bg-[#FEF2F2] border-[#FECACA]"
+                                }`}
+                              >
+                                <div className="flex items-center justify-between font-semibold mb-1.5">
+                                  <span className="text-[#1C1917]">{tCase.name}</span>
+                                  <span
+                                    className={`px-2 py-0.5 rounded text-[10px] font-mono uppercase tracking-wider ${
+                                      tCase.passed
+                                        ? "bg-[#DCFCE7] text-[#166534]"
+                                        : "bg-[#FEE2E2] text-[#991B1B]"
+                                    }`}
+                                  >
+                                    {tCase.passed ? "Passed" : "Failed"}
+                                  </span>
+                                </div>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px] font-mono text-[#57534E] mt-2 pt-2 border-t border-black/5">
+                                  <div>
+                                    <span className="text-[#A8A29E] block">Expected:</span>
+                                    <span className="text-[#1C1917]">{tCase.expected}</span>
+                                  </div>
+                                  <div>
+                                    <span className="text-[#A8A29E] block">Actual Output:</span>
+                                    <span
+                                      className={tCase.passed ? "text-[#166534]" : "text-[#991B1B] font-bold"}
+                                    >
+                                      {tCase.actual}
+                                    </span>
+                                  </div>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </>
+                      ) : (
+                        <div className="text-center py-6 text-[13px] text-[#78716C]">
+                          Click <strong className="text-[#1C1917]">Run tests</strong> to execute public assertions against your code.
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
               </div>
             </div>

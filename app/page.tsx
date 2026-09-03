@@ -247,46 +247,106 @@ export default function HomePage() {
         </motion.div>
       </section>
 
-      {/* THESIS SECTION */}
-      <section className="py-32 bg-surface-low border-b border-border/40">
-        <motion.div 
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, margin: "-100px" }}
-          variants={fadeUp}
-          className="mx-auto max-w-5xl px-6 lg:px-8 text-center"
-        >
-          <h2 className="text-3xl sm:text-4xl md:text-5xl font-serif text-foreground tracking-tight leading-tight mb-10">
-            Traditional hiring asks where you studied.
-            <br />
-            <span className="text-muted-foreground italic">Meritlane asks what you can prove.</span>
-          </h2>
-          <div className="w-px h-16 bg-border mx-auto"></div>
-        </motion.div>
-      </section>
-
-      {/* HOW IT WORKS */}
-      <section className="py-32 bg-background">
-        <div className="mx-auto w-full max-w-[1600px] px-8 md:px-16 lg:px-24">
+      {/* THESIS & METHODOLOGY SECTION */}
+      <section className="py-20 sm:py-24 bg-[#FAF8F5] border-b border-[#E7E2DA]">
+        <div className="mx-auto max-w-5xl px-6 lg:px-8 text-center mb-16">
           <motion.div 
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true, margin: "-100px" }}
+            variants={fadeUp}
+          >
+            <div className="text-[11px] font-mono uppercase tracking-[0.2em] text-[#78716C] mb-4">
+              Institutional Evaluation Standard
+            </div>
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-serif text-[#1C1917] tracking-tight leading-tight mb-8">
+              Traditional hiring asks where you studied.
+              <br />
+              <span className="text-[#78716C] italic font-normal">Meritlane asks what you can prove.</span>
+            </h2>
+
+            {/* Side-by-Side Institutional Evaluation Contrast Matrix */}
+            <div className="grid grid-cols-1 md:grid-cols-2 border border-[#E7E2DA] bg-white text-left divide-y md:divide-y-0 md:divide-x divide-[#E7E2DA] shadow-xs mt-10">
+              <div className="p-6 sm:p-8">
+                <div className="text-[10px] font-mono text-[#78716C] uppercase tracking-[0.18em] mb-2">
+                  Legacy Paradigm
+                </div>
+                <h3 className="font-serif text-[20px] text-[#1C1917] mb-4">
+                  Self-Reported Resume Claims
+                </h3>
+                <ul className="space-y-3 text-[13px] text-[#525252] font-sans">
+                  <li className="flex items-start gap-2.5">
+                    <span className="text-[#B42318] font-mono text-[12px] pt-0.5">✕</span>
+                    <span>Keyword stuffing calibrated for keyword scrapers</span>
+                  </li>
+                  <li className="flex items-start gap-2.5">
+                    <span className="text-[#B42318] font-mono text-[12px] pt-0.5">✕</span>
+                    <span>Pedigree bias prioritizing university rankings over raw competency</span>
+                  </li>
+                  <li className="flex items-start gap-2.5">
+                    <span className="text-[#B42318] font-mono text-[12px] pt-0.5">✕</span>
+                    <span>Unverified GitHub repos, forks, or copy-pasted tutorial code</span>
+                  </li>
+                  <li className="flex items-start gap-2.5">
+                    <span className="text-[#B42318] font-mono text-[12px] pt-0.5">✕</span>
+                    <span>Lengthy 5-stage interview loops re-testing basic fundamentals</span>
+                  </li>
+                </ul>
+              </div>
+
+              <div className="p-6 sm:p-8 bg-[#064E3B]/[0.02]">
+                <div className="text-[10px] font-mono text-[#064E3B] uppercase tracking-[0.18em] mb-2 font-semibold">
+                  Meritlane Standard
+                </div>
+                <h3 className="font-serif text-[20px] text-[#064E3B] mb-4">
+                  Audited Proof & Monitored Exams
+                </h3>
+                <ul className="space-y-3 text-[13px] text-[#1C1917] font-sans">
+                  <li className="flex items-start gap-2.5">
+                    <span className="text-[#064E3B] font-mono text-[12px] pt-0.5">✓</span>
+                    <span>45-minute timed examinations scored against an 80% passing standard</span>
+                  </li>
+                  <li className="flex items-start gap-2.5">
+                    <span className="text-[#064E3B] font-mono text-[12px] pt-0.5">✓</span>
+                    <span>Automated Git audit verifying commit volume, history, and syntax</span>
+                  </li>
+                  <li className="flex items-start gap-2.5">
+                    <span className="text-[#064E3B] font-mono text-[12px] pt-0.5">✓</span>
+                    <span>Inspected production systems and live technical artifacts</span>
+                  </li>
+                  <li className="flex items-start gap-2.5">
+                    <span className="text-[#064E3B] font-mono text-[12px] pt-0.5">✓</span>
+                    <span>Single immutable public dossier link for instant employer trust</span>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </motion.div>
+        </div>
+
+        {/* HOW IT WORKS: 01, 02, 03 */}
+        <div className="mx-auto w-full max-w-[1400px] px-6 sm:px-12 md:px-16 pt-8">
+          <div className="text-[11px] font-mono uppercase tracking-[0.2em] text-[#78716C] mb-8 pb-3 border-b border-[#E7E2DA]">
+            Protocol Verification Sequence
+          </div>
+          <motion.div 
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: "-50px" }}
             variants={staggerContainer}
-            className="grid grid-cols-1 md:grid-cols-3 gap-x-16 gap-y-16"
+            className="grid grid-cols-1 md:grid-cols-3 gap-8"
           >
             {[
               { num: "01", title: "Build your proof", desc: "Connect your repositories, detail architecture decisions, and document technical contributions. Your work is the foundation." },
               { num: "02", title: "Get verified", desc: "Undergo rigorous technical assessments and code audits. We validate claims, establishing an irrefutable baseline of capability." },
               { num: "03", title: "Get discovered", desc: "Share your verified public record or join the private talent pool where top employers actively seek out validated engineering excellence." }
             ].map((step, i) => (
-              <motion.div key={i} variants={fadeUp} className="border-t border-border pt-8 relative group">
-                <div className="text-[10px] font-mono text-muted-foreground mb-4">{step.num}</div>
-                <h3 className="text-xl font-serif text-foreground mb-4">{step.title}</h3>
-                <p className="text-sm text-muted-foreground leading-relaxed">
+              <motion.div key={i} variants={fadeUp} className="border border-[#E7E2DA] bg-white p-6 sm:p-8 relative group hover:border-[#1C1917] transition-colors">
+                <div className="text-[12px] font-mono font-semibold text-[#064E3B] mb-4">STEP {step.num}</div>
+                <h3 className="text-[20px] font-serif text-[#1C1917] mb-3">{step.title}</h3>
+                <p className="text-[13px] text-[#525252] leading-relaxed">
                   {step.desc}
                 </p>
-                <div className="absolute top-0 left-0 w-0 h-px bg-foreground transition-all duration-500 group-hover:w-full" />
               </motion.div>
             ))}
           </motion.div>

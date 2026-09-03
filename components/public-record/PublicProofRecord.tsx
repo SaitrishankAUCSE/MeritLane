@@ -73,7 +73,7 @@ export function PublicProofRecord({ id, candidate, user, hideHeader = false }: P
           </div>
           
           <div className="flex-1 mt-1 sm:mt-2">
-            <h1 className="font-serif text-[32px] sm:text-[42px] lg:text-[48px] text-[#1C1917] tracking-tight leading-[1.1] mb-3 sm:mb-4">
+            <h1 className="font-signature text-[42px] sm:text-[54px] lg:text-[60px] text-[#1C1917] leading-none mb-3 sm:mb-4 font-semibold">
               {name}
             </h1>
             

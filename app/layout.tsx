@@ -1,17 +1,15 @@
 import type { Metadata } from "next";
-import { DM_Sans, Instrument_Serif, JetBrains_Mono } from "next/font/google";
+import { DM_Sans, JetBrains_Mono, Caveat } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
 import { SiteFooter } from "@/components/chrome/SiteFooter";
 import { AuthProvider } from "@/lib/auth/AuthContext";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Analytics } from "@vercel/analytics/react";
-import { GlobalBackButton } from "@/components/ui/GlobalBackButton";
 import { GlobalAuthModal } from "@/components/ui/AuthModal";
 import { PostHogProvider } from "@/providers/PostHogProvider";
 
 // Primary UI font — DM Sans: humanist, warm, reads naturally at every weight
-// Used by Figma, Webflow editorial, premium hiring platforms
 const dmSans = DM_Sans({
   subsets: ["latin"],
   weight: ["300", "400", "500", "600", "700"],
@@ -19,12 +17,11 @@ const dmSans = DM_Sans({
   display: "swap",
 });
 
-// Editorial serif — for public hero headings and section titles only
-const instrumentSerif = Instrument_Serif({
+// Dedicated cursive signature font for candidate name display
+const caveatSignature = Caveat({
   subsets: ["latin"],
-  weight: ["400"],
-  style: ["normal", "italic"],
-  variable: "--font-serif",
+  weight: ["500", "600", "700"],
+  variable: "--font-signature",
   display: "swap",
 });
 
@@ -66,7 +63,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${dmSans.variable} ${instrumentSerif.variable} ${jetbrainsMono.variable} h-full antialiased`}>
+    <html lang="en" className={`${dmSans.variable} ${caveatSignature.variable} ${jetbrainsMono.variable} h-full antialiased`}>
       <body className="flex min-h-full flex-col bg-background font-sans text-foreground">
         <script
           type="application/ld+json"
@@ -94,7 +91,6 @@ export default function RootLayout({
           </AuthProvider>
         </PostHogProvider>
         <Analytics />
-        <GlobalBackButton />
       </body>
     </html>
   );

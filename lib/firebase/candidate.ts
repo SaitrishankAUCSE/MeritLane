@@ -42,6 +42,7 @@ export interface CandidateProfile {
   atsSummary?: string;
   atsAnalyzedAt?: number;
   skills: string[];
+  candidateKey?: string;          // Unique registry key e.g. ML-3F8A2C1D
   verifiedSkills?: Record<string, SkillVerification>;
   projects: ProjectEntry[];
   githubEvidence?: GithubEvidence;
@@ -75,7 +76,24 @@ export const fetchCandidateProfile = async (uid: string): Promise<CandidateProfi
   return null;
 };
 
+const generateCandidateKey = (): string => {
+  const hex = () => Math.floor(Math.random() * 16).toString(16).toUpperCase();
+  return `ML-${Array.from({ length: 8 }, hex).join("")}`;
+};
+
 export const saveCandidateProfile = async (uid: string, profile: Partial<CandidateProfile>) => {
   const docRef = doc(db, "candidates", uid);
-  await setDoc(docRef, { ...profile, updatedAt: Date.now() }, { merge: true });
+
+  // Auto-generate a unique candidate key for brand-new profiles
+  let candidateKey = profile.candidateKey;
+  if (!candidateKey) {
+    const existing = await getDoc(docRef);
+    if (!existing.exists() || !existing.data()?.candidateKey) {
+      candidateKey = generateCandidateKey();
+    } else {
+      candidateKey = existing.data()!.candidateKey;
+    }
+  }
+
+  await setDoc(docRef, { ...profile, candidateKey, updatedAt: Date.now() }, { merge: true });
 };
