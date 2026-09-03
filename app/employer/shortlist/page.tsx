@@ -25,11 +25,11 @@ import { useToast } from "@/components/ui/Toast";
 import { ErrorState } from "@/components/ui/ErrorState";
 
 const PIPELINE_STAGES = [
-  { id: "shortlisted", label: "Shortlisted", color: "bg-blue-50 text-blue-700 border-blue-200" },
-  { id: "interviewing", label: "Interviewing", color: "bg-amber-50 text-amber-700 border-amber-200" },
-  { id: "offer", label: "Offer Extended", color: "bg-purple-50 text-purple-700 border-purple-200" },
-  { id: "hired", label: "Hired", color: "bg-emerald-50 text-emerald-700 border-emerald-200" },
-  { id: "rejected", label: "Archived / Rejected", color: "bg-zinc-100 text-zinc-600 border-zinc-200" },
+  { id: "shortlisted", label: "Shortlisted", color: "bg-[#FAF8F5] text-[#1C1917] border-[#E7E2DA]" },
+  { id: "interviewing", label: "Interviewing", color: "bg-amber-50/80 text-amber-900 border-amber-200" },
+  { id: "offer", label: "Offer Extended", color: "bg-emerald-50 text-[#064E3B] border-emerald-200" },
+  { id: "hired", label: "Hired", color: "bg-[#1C1917] text-white border-[#1C1917]" },
+  { id: "rejected", label: "Archived / Rejected", color: "bg-[#F5F5F4] text-[#78716C] border-[#E7E2DA]" },
 ];
 
 export default function EmployerShortlistPage() {
@@ -381,10 +381,10 @@ export default function EmployerShortlistPage() {
                             variant="outline"
                             size="sm"
                             onClick={() => toggleAiSummary(c.uid)}
-                            className="gap-1.5 text-[12px] bg-gradient-to-r from-violet-50 to-indigo-50 border-indigo-200 text-indigo-900 hover:border-indigo-300"
+                            className="gap-1.5 text-[12px] border-[#E7E2DA] bg-[#FAF8F5] text-[#1C1917] hover:bg-[#F5F1EB]"
                           >
-                            <Sparkles className="h-3.5 w-3.5 text-indigo-600" />
-                            {activeAiCard === c.uid ? "Hide AI Brief" : "AI Brief"}
+                            <Sparkles className="h-3.5 w-3.5 text-[#064E3B]" />
+                            {activeAiCard === c.uid ? "Hide Synthesis" : "Evidence Synthesis"}
                           </Button>
 
                           <Button
@@ -416,21 +416,26 @@ export default function EmployerShortlistPage() {
                       </div>
                     </div>
 
-                    {/* Expandable AI Recruiter Summary */}
+                    {/* Expandable Evidence Synthesis */}
                     {activeAiCard === c.uid && (
-                      <div className="mt-6 pt-5 border-t border-indigo-100 bg-gradient-to-br from-indigo-50/50 to-purple-50/30 rounded-xl p-5 border">
-                        <div className="flex items-center gap-2 mb-2 text-indigo-950 font-semibold text-[13px]">
-                          <Sparkles className="h-4 w-4 text-indigo-600" /> AI Recruiter Summary
+                      <div className="mt-6 pt-5 border-t border-[#E7E2DA] bg-[#FAF8F5] rounded-xl p-5 border border-[#E7E2DA]">
+                        <div className="flex items-center justify-between mb-2">
+                          <div className="flex items-center gap-2 text-[#1C1917] font-semibold text-[13px]">
+                            <Sparkles className="h-4 w-4 text-[#064E3B]" /> Candidate Evidence Synthesis
+                          </div>
+                          <span className="text-[10px] font-mono uppercase tracking-wider text-[#064E3B] bg-white px-2.5 py-0.5 rounded-full border border-[#064E3B]/20">
+                            Meritlane Verification Protocol
+                          </span>
                         </div>
                         {loadingAi[c.uid] ? (
-                          <div className="py-4 flex items-center gap-3 text-indigo-600">
-                            <div className="h-4 w-4 border-2 border-indigo-300 border-t-indigo-600 rounded-full animate-spin" />
-                            <span className="text-[13px] text-zinc-500 font-sans">
-                              Evaluating verified project signals with OpenRouter...
+                          <div className="py-4 flex items-center gap-3 text-[#78716C]">
+                            <div className="h-4 w-4 border-2 border-[#E7E2DA] border-t-[#064E3B] rounded-full animate-spin" />
+                            <span className="text-[13px] text-[#78716C] font-mono uppercase tracking-wider">
+                              Evaluating verified project signals and code claims…
                             </span>
                           </div>
                         ) : (
-                          <p className="text-[13px] text-zinc-700 leading-relaxed font-sans">
+                          <p className="text-[13px] text-[#333333] leading-relaxed font-sans">
                             {aiSummaries[c.uid] || "Summary unavailable."}
                           </p>
                         )}

@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Menu, X, Fingerprint, LayoutDashboard, Network, ShieldCheck, Search, Bookmark, Inbox, Settings, HelpCircle, LogOut } from "lucide-react";
+import { Menu, X, Fingerprint, LayoutDashboard, Network, ShieldCheck, Search, Bookmark, Inbox, Settings, HelpCircle, LogOut, Briefcase, FileText } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 import { useAuth } from "@/lib/auth/AuthContext";
 import { LogoutConfirmModal } from "@/components/ui/LogoutConfirmModal";
@@ -37,6 +37,8 @@ export function MobileNav({ role }: { role: "candidate" | "employer" | "admin" }
     { name: "Evidence", href: "/candidate/dashboard", icon: LayoutDashboard },
     { name: "Provenance", href: "/candidate/provenance", icon: Network },
     { name: "Verification", href: "/candidate/verification", icon: ShieldCheck },
+    { name: "Jobs", href: "/candidate/jobs", icon: Briefcase },
+    { name: "Applications", href: "/candidate/applications", icon: FileText },
     { name: "Inbox", href: "/candidate/inbox", icon: Inbox },
     { name: "Settings", href: "/candidate/settings", icon: Settings },
     { name: "Support", href: "/candidate/support", icon: HelpCircle },
@@ -45,6 +47,7 @@ export function MobileNav({ role }: { role: "candidate" | "employer" | "admin" }
   const employerItems: NavItem[] = [
     { name: "Discover", href: "/employer/dashboard", icon: Search },
     { name: "Shortlist", href: "/employer/shortlist", icon: Bookmark },
+    { name: "Job Postings", href: "/employer/jobs", icon: Briefcase },
     { name: "Company Profile", href: "/employer/profile", icon: Fingerprint },
     { name: "Settings", href: "/employer/settings", icon: Settings },
     { name: "Support", href: "/employer/support", icon: HelpCircle },

@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { Search, Bookmark, Settings, HelpCircle, LogOut, Activity, ChevronUp } from "lucide-react";
+import { Search, Bookmark, Briefcase, Settings, HelpCircle, LogOut, Activity, ChevronUp } from "lucide-react";
 import { useAuth } from "@/lib/auth/AuthContext";
 import { motion, AnimatePresence } from "framer-motion";
 import { LogoutConfirmModal } from "@/components/ui/LogoutConfirmModal";
@@ -45,8 +45,9 @@ export function EmployerSidebar() {
   }, [pathname]);
 
   const navItems = [
-    { name: "Discover",  href: "/employer/dashboard", icon: Search   },
-    { name: "Shortlist", href: "/employer/shortlist",  icon: Bookmark },
+    { name: "Discover",     href: "/employer/dashboard", icon: Search    },
+    { name: "Shortlist",    href: "/employer/shortlist", icon: Bookmark  },
+    { name: "Job Postings", href: "/employer/jobs",      icon: Briefcase },
   ];
 
   return (

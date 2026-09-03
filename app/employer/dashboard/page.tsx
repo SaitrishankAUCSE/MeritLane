@@ -325,9 +325,63 @@ export default function EmployerDashboardPage() {
                 onKeyDown={(e) => {
                   if (e.key === "Enter") fetchCandidates();
                 }}
-                className="pl-12 h-14 bg-[#FAFAFA] border-[#E5E5E5] text-[15px] focus-visible:ring-1 focus-visible:ring-[#0D0D0D] rounded-xl"
+                className="pl-12 pr-10 h-14 bg-[#FAFAFA] border-[#E5E5E5] text-[15px] focus-visible:ring-1 focus-visible:ring-[#0D0D0D] rounded-xl"
               />
+              {searchQuery && (
+                <button
+                  type="button"
+                  onClick={() => setSearchQuery("")}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-[#737373] hover:text-[#0D0D0D] text-sm font-bold p-1"
+                  title="Clear search"
+                >
+                  ✕
+                </button>
+              )}
             </div>
+
+            {/* Active Filter Indicators */}
+            {(selectedSkills.length > 0 || searchQuery.trim()) && (
+              <div className="flex items-center gap-2 flex-wrap text-[12px] pt-1">
+                <span className="text-[#737373] font-mono text-[11px] uppercase tracking-wider">Active:</span>
+                {searchQuery.trim() && (
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#FAFAFA] border border-[#E5E5E5] text-[#0D0D0D] text-[12px] font-medium">
+                    Keyword: &ldquo;{searchQuery}&rdquo;
+                    <button
+                      type="button"
+                      onClick={() => setSearchQuery("")}
+                      className="hover:text-[#B42318] text-[#737373] ml-1 font-bold"
+                    >
+                      ×
+                    </button>
+                  </span>
+                )}
+                {selectedSkills.map((sk) => (
+                  <span
+                    key={sk}
+                    className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#0D0D0D] text-white text-[12px] font-medium shadow-xs"
+                  >
+                    {sk}
+                    <button
+                      type="button"
+                      onClick={() => toggleSkillFilter(sk)}
+                      className="hover:text-red-300 ml-1 font-bold"
+                    >
+                      ×
+                    </button>
+                  </span>
+                ))}
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSearchQuery("");
+                    setSelectedSkills([]);
+                  }}
+                  className="text-[12px] font-mono text-[#B42318] hover:underline ml-1"
+                >
+                  Clear all
+                </button>
+              </div>
+            )}
 
             {/* Skill Filter Chips */}
             <div className="flex items-center gap-2.5 flex-wrap pt-1">
@@ -533,7 +587,12 @@ export default function EmployerDashboardPage() {
                 onClick={() => {
                   setSearchQuery("");
                   setSelectedSkills([]);
-                  fetchCandidates();
+                  setMinScore(0);
+                  setRequireLiveProject(false);
+                  setRequireGithub(false);
+                  setMinCommits(0);
+                  setMatchMode("any");
+                  setGradYearFilter("all");
                 }}
               >
                 Clear all filters
@@ -627,7 +686,7 @@ export default function EmployerDashboardPage() {
                             )}
 
                             {c.projects?.some((p: any) => p.liveUrl) && (
-                              <div className="flex items-center gap-1 bg-[#EEF2FF] border border-[#C7D2FE] px-2.5 py-1 rounded-md text-[#3730A3]">
+                              <div className="flex items-center gap-1 bg-[#FAF8F5] border border-[#E7E2DA] px-2.5 py-1 rounded-md text-[#1C1917]">
                                 <ExternalLink className="h-3 w-3" />
                                 <span>Live Demo Available</span>
                               </div>
@@ -653,10 +712,10 @@ export default function EmployerDashboardPage() {
                             variant="outline"
                             size="sm"
                             onClick={() => toggleAiSummary(c.uid)}
-                            className="gap-1.5 text-[12px] bg-gradient-to-r from-violet-50 to-indigo-50 border-indigo-200 text-indigo-900 hover:border-indigo-300"
+                            className="gap-1.5 text-[12px] border-[#E7E2DA] bg-[#FAF8F5] text-[#1C1917] hover:bg-[#F5F1EB]"
                           >
-                            <Sparkles className="h-3.5 w-3.5 text-indigo-600" />
-                            {activeAiCard === c.uid ? "Hide AI Brief" : "AI Brief"}
+                            <Sparkles className="h-3.5 w-3.5 text-[#064E3B]" />
+                            {activeAiCard === c.uid ? "Hide Synthesis" : "Evidence Synthesis"}
                           </Button>
 
                           <Button
@@ -695,26 +754,26 @@ export default function EmployerDashboardPage() {
                       </div>
                     </div>
 
-                    {/* Expandable AI Recruiter Brief */}
+                    {/* Expandable Candidate Evidence Synthesis */}
                     {activeAiCard === c.uid && (
-                      <div className="mt-6 pt-5 border-t border-indigo-100 bg-gradient-to-br from-indigo-50/50 to-purple-50/30 rounded-xl p-5 border">
+                      <div className="mt-6 pt-5 border-t border-[#E7E2DA] bg-[#FAF8F5] rounded-xl p-5 border border-[#E7E2DA]">
                         <div className="flex items-center justify-between mb-2">
-                          <div className="flex items-center gap-2 text-indigo-950 font-semibold text-[13px]">
-                            <Sparkles className="h-4 w-4 text-indigo-600" /> AI Candidate Evaluation Brief
+                          <div className="flex items-center gap-2 text-[#1C1917] font-semibold text-[13px]">
+                            <Sparkles className="h-4 w-4 text-[#064E3B]" /> Candidate Evidence Synthesis
                           </div>
-                          <span className="text-[10px] font-mono uppercase tracking-wider text-indigo-600 bg-white px-2 py-0.5 rounded-full border border-indigo-200">
-                            Model: Gemini 2.0 Flash
+                          <span className="text-[10px] font-mono uppercase tracking-wider text-[#064E3B] bg-white px-2.5 py-0.5 rounded-full border border-[#064E3B]/20">
+                            Meritlane Verification Protocol
                           </span>
                         </div>
                         {loadingAi[c.uid] ? (
-                          <div className="py-4 flex items-center gap-3 text-indigo-600">
-                            <div className="h-4 w-4 border-2 border-indigo-300 border-t-indigo-600 rounded-full animate-spin" />
-                            <span className="text-[13px] text-zinc-500 font-sans">
-                              Synthesizing verified engineering evidence and code claims...
+                          <div className="py-4 flex items-center gap-3 text-[#78716C]">
+                            <div className="h-4 w-4 border-2 border-[#E7E2DA] border-t-[#064E3B] rounded-full animate-spin" />
+                            <span className="text-[13px] text-[#78716C] font-mono uppercase tracking-wider">
+                              Synthesizing verified engineering evidence and code claims…
                             </span>
                           </div>
                         ) : (
-                          <p className="text-[13px] text-zinc-700 leading-relaxed font-sans">
+                          <p className="text-[13px] text-[#333333] leading-relaxed font-sans">
                             {aiSummaries[c.uid] || "Summary unavailable."}
                           </p>
                         )}

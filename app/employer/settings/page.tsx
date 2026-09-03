@@ -57,23 +57,23 @@ export default function EmployerSettingsPage() {
           </div>
         </div>
 
-        {/* AI Intelligence Config */}
-        <div className="bg-white border border-[#E5E5E5] rounded-2xl overflow-hidden shadow-sm">
-          <div className="px-6 py-5 border-b border-[#E5E5E5] bg-[#FAFAFA]">
-            <h2 className="text-[15px] font-bold text-[#0D0D0D] flex items-center gap-2">
-              <Sparkles className="h-4 w-4 text-indigo-600" /> AI Recruiter Intelligence
+        {/* Verification Engine Config */}
+        <div className="bg-white border border-[#E7E2DA] rounded-2xl overflow-hidden shadow-xs">
+          <div className="px-6 py-5 border-b border-[#E7E2DA] bg-[#FAF8F5]">
+            <h2 className="text-[15px] font-bold text-[#1C1917] flex items-center gap-2">
+              <Sparkles className="h-4 w-4 text-[#064E3B]" /> Technical Evaluation Engine
             </h2>
           </div>
           <div className="p-6 space-y-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-[14px] font-medium text-[#0D0D0D]">Evaluation Model</p>
-                <p className="text-[12px] text-[#737373]">
-                  Connected via OpenRouter (`google/gemini-2.0-flash-001`) for instant candidate code analysis.
+                <p className="text-[14px] font-medium text-[#1C1917]">Evidence & Provenance Synthesis</p>
+                <p className="text-[12px] text-[#78716C] font-sans">
+                  Automated architectural code audits, timed test suite proctoring, and GitHub commit graph verification.
                 </p>
               </div>
-              <span className="text-[11px] font-mono font-bold text-indigo-700 bg-indigo-50 border border-indigo-200 px-2.5 py-1 rounded-full">
-                Active
+              <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-[#064E3B] bg-[#064E3B]/10 border border-[#064E3B]/20 px-2.5 py-1 rounded-full">
+                Active Protocol
               </span>
             </div>
           </div>

@@ -82,7 +82,7 @@ export default function CandidateApplicationsPage() {
             </h1>
           </div>
 
-          <Link href="/jobs">
+          <Link href="/candidate/jobs">
             <button className="px-5 py-2.5 bg-[#1C1917] hover:bg-[#064E3B] text-white text-[12px] font-mono font-semibold uppercase tracking-wider rounded-full transition-colors shadow-xs">
               EXPLORE MORE ROLES →
             </button>
@@ -111,7 +111,7 @@ export default function CandidateApplicationsPage() {
             <p className="text-[13px] text-[#78716C] font-sans max-w-md mx-auto mb-6">
               You have not submitted your dossier to any job openings yet. Ensure your profile completion is 100% and browse active engineering roles.
             </p>
-            <Link href="/jobs">
+            <Link href="/candidate/jobs">
               <button className="px-6 py-2.5 bg-[#064E3B] hover:bg-[#043327] text-white text-[12px] font-mono font-semibold uppercase tracking-wider rounded-full transition-colors shadow-xs">
                 BROWSE VERIFIED JOBS
               </button>
@@ -157,7 +157,7 @@ export default function CandidateApplicationsPage() {
                   </div>
 
                   <div className="shrink-0">
-                    <Link href={`/jobs/${app.jobId}`}>
+                    <Link href={`/candidate/jobs/${app.jobId}`}>
                       <button className="flex items-center justify-center gap-1.5 px-4 py-2 border border-[#E7E2DA] bg-white hover:bg-[#FAF8F5] text-[12px] font-mono font-semibold text-[#1C1917] rounded-full transition-colors shadow-2xs">
                         <span>VIEW ROLE</span>
                         <ExternalLink className="h-3 w-3" />

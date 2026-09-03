@@ -28,6 +28,7 @@ export default function Navbar() {
     pathname?.startsWith("/employer") || 
     pathname?.startsWith("/admin") ||
     pathname?.startsWith("/proof") ||
+    pathname?.startsWith("/jobs") ||
     pathname === "/login" ||
     pathname === "/signup"
   ) {
@@ -79,7 +80,7 @@ export default function Navbar() {
             ) : (
               <>
                 <NavLink href="/candidate/dashboard" current={pathname}>Dashboard</NavLink>
-                <NavLink href="/jobs" current={pathname}>Jobs</NavLink>
+                <NavLink href="/candidate/jobs" current={pathname}>Jobs</NavLink>
                 <NavLink href="/candidate/assessment" current={pathname}>Assessment</NavLink>
               </>
             )}
@@ -101,9 +102,6 @@ export default function Navbar() {
             </>
           ) : (
             <div className="hidden items-center gap-6 md:flex">
-              <Link href="/jobs" className="text-sm text-[#78716C] hover:text-[#1C1917] transition-colors font-medium">
-                Jobs
-              </Link>
               <button onClick={() => openAuthModal("login")} className="text-sm text-[#78716C] hover:text-[#1C1917] transition-colors font-medium">
                 Log in
               </button>

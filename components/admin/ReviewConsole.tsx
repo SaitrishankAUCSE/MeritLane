@@ -155,7 +155,7 @@ export function ReviewConsole({
                         <p className="text-sm text-muted-foreground mb-4">{proj.description}</p>
                         <div className="flex gap-3">
                           {proj.repoUrl && <a href={proj.repoUrl} target="_blank" rel="noreferrer" className="text-xs font-bold font-data text-muted-foreground hover:text-foreground">Source ↗</a>}
-                          {proj.liveUrl && <a href={proj.liveUrl} target="_blank" rel="noreferrer" className="text-xs font-bold font-data text-accent hover:text-indigo-400">Demo ↗</a>}
+                          {proj.liveUrl && <a href={proj.liveUrl} target="_blank" rel="noreferrer" className="text-xs font-bold font-data text-accent hover:text-[#064E3B]">Demo ↗</a>}
                         </div>
                       </div>
                     ))}
@@ -187,7 +187,7 @@ export function ReviewConsole({
                   <div className="mb-4 bg-surface-low p-4 border border-border rounded-lg">
                     <p className="text-xs text-muted-foreground mb-3 font-sans">Run a quick automated pass over candidate artifacts to generate a baseline recommendation.</p>
                     <Button 
-                      className="w-full justify-center bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200" 
+                      className="w-full justify-center bg-[#FAF8F5] hover:bg-white text-[#1C1917] border border-[#E7E2DA]" 
                       onClick={handleAutomatedAudit}
                       disabled={runningAudit}
                     >

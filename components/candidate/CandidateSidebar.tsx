@@ -62,7 +62,7 @@ export function CandidateSidebar() {
     { name: "Evidence",     href: "/candidate/dashboard",    icon: LayoutDashboard },
     { name: "Provenance",   href: "/candidate/provenance",   icon: Network },
     { name: "Verification", href: "/candidate/verification", icon: ShieldCheck },
-    { name: "Jobs",         href: "/jobs",                   icon: Briefcase },
+    { name: "Jobs",         href: "/candidate/jobs",         icon: Briefcase },
     { name: "Applications", href: "/candidate/applications", icon: FileText },
     { name: "Inbox",        href: "/candidate/inbox",        icon: Inbox },
   ];
