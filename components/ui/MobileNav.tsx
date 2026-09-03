@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Menu, X, Fingerprint, LayoutDashboard, Network, ShieldCheck, Search, Bookmark, Inbox, Settings, HelpCircle, LogOut, Briefcase, FileText } from "lucide-react";
+import { Menu, X, Fingerprint, LayoutDashboard, Network, ShieldCheck, Search, Bookmark, Inbox, Settings, HelpCircle, LogOut, Briefcase, FileText, Users } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 import { useAuth } from "@/lib/auth/AuthContext";
 import { LogoutConfirmModal } from "@/components/ui/LogoutConfirmModal";
@@ -48,6 +48,7 @@ export function MobileNav({ role }: { role: "candidate" | "employer" | "admin" }
     { name: "Discover", href: "/employer/dashboard", icon: Search },
     { name: "Shortlist", href: "/employer/shortlist", icon: Bookmark },
     { name: "Job Postings", href: "/employer/jobs", icon: Briefcase },
+    { name: "Applicants", href: "/employer/applicants", icon: Users },
     { name: "Company Profile", href: "/employer/profile", icon: Fingerprint },
     { name: "Settings", href: "/employer/settings", icon: Settings },
     { name: "Support", href: "/employer/support", icon: HelpCircle },

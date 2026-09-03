@@ -274,15 +274,22 @@ export default function CandidateJobDetailPage() {
                 </p>
               </div>
             ) : hasApplied ? (
-              /* Already Applied Confirmation */
               <div className="border border-[#064E3B]/30 bg-[#064E3B]/[0.04] p-5 rounded-xl text-center space-y-2">
                 <CheckCircle2 className="h-8 w-8 text-[#064E3B] mx-auto" />
                 <div className="text-[14px] font-bold uppercase tracking-wide text-[#064E3B]">
                   APPLICATION SUBMITTED
                 </div>
                 <p className="text-[12px] text-[#78716C] leading-relaxed">
-                  Your verified candidate dossier has been delivered to {job.companyName} for review.
+                  Your verified candidate dossier has been delivered to {job.companyName || "the hiring organization"} for review.
                 </p>
+                <div className="pt-1">
+                  <Link
+                    href="/candidate/applications"
+                    className="inline-flex items-center gap-1 text-[11px] font-mono text-[#064E3B] font-semibold hover:underline"
+                  >
+                    View in My Applications →
+                  </Link>
+                </div>
               </div>
             ) : !user ? (
               /* Unauthenticated Call to Action */
