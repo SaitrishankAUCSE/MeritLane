@@ -22,7 +22,10 @@ export function AuthForm({ mode: initialMode }: AuthFormProps) {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [loadingAction, setLoadingAction] = useState(false);
+  const [isSigningUp, setIsSigningUp] = useState(false);
+  const [signupSuccess, setSignupSuccess] = useState(false);
   const [showRoleSelector, setShowRoleSelector] = useState(false);
   const [selectedRole, setSelectedRole] = useState<"candidate" | "employer">("candidate");
 
@@ -30,6 +33,9 @@ export function AuthForm({ mode: initialMode }: AuthFormProps) {
   const { user, role: userRole, loading: authLoading, profileLoading, refreshProfile: refreshAuth } = useAuth();
 
   useEffect(() => {
+    // If signup is in progress or just completed, do NOT navigate to dashboard
+    if (isSigningUp || signupSuccess) return;
+
     if (user && !authLoading && !profileLoading) {
       if (userRole) {
         router.push("/dashboard");
@@ -37,7 +43,7 @@ export function AuthForm({ mode: initialMode }: AuthFormProps) {
         setShowRoleSelector(true);
       }
     }
-  }, [user, userRole, authLoading, profileLoading, router]);
+  }, [user, userRole, authLoading, profileLoading, router, isSigningUp, signupSuccess]);
 
   const [emailStatus, setEmailStatus] = useState<{
     valid?: boolean;
@@ -67,6 +73,7 @@ export function AuthForm({ mode: initialMode }: AuthFormProps) {
   const handleEmailAuth = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
+    setSuccessMessage(null);
 
     // 1. Perform email format & spelling verification
     const trimmedEmail = email.trim().toLowerCase();
@@ -96,6 +103,7 @@ export function AuthForm({ mode: initialMode }: AuthFormProps) {
     setLoadingAction(true);
     try {
       if (mode === "signup") {
+        setIsSigningUp(true);
         if (!db) throw new Error("Firestore not initialized");
         const userCredential = await createUserWithEmailAndPassword(auth, trimmedEmail, password);
         await setDoc(doc(db, "users", userCredential.user.uid), {
@@ -105,16 +113,25 @@ export function AuthForm({ mode: initialMode }: AuthFormProps) {
         });
         posthog.capture("user_signed_up", { method: 'email', role: selectedRole });
         
-        // After signup: Sign out so user must log in again to begin profile onboarding
+        // Immediately sign out so user MUST log in again with credentials
         await signOut(auth);
+        
+        setSignupSuccess(true);
+        setIsSigningUp(false);
         setLoadingAction(false);
-        router.push("/login?signedUp=true");
+        setPassword("");
+        setSuccessMessage("Account created successfully! Please sign in with your credentials to access your dashboard.");
+        setMode("login");
+        router.replace("/login?signedUp=true");
         return;
       } else {
+        // If coming from a successful signup, reset the signupSuccess state so login can proceed
+        setSignupSuccess(false);
         await signInWithEmailAndPassword(auth, trimmedEmail, password);
         posthog.capture("user_logged_in", { method: 'email' });
       }
     } catch (err: any) {
+      setIsSigningUp(false);
       if (err.code === "auth/invalid-credential" || err.code === "auth/user-not-found" || err.code === "auth/wrong-password") {
         setError("Unable to sign in. Please check your email and password and try again.");
       } else if (err.code === "auth/email-already-in-use") {
@@ -160,8 +177,12 @@ export function AuthForm({ mode: initialMode }: AuthFormProps) {
     }
   };
 
-  if (authLoading || profileLoading || (user && userRole)) {
-    return <div className="min-h-screen bg-black"></div>; 
+  if (!isSigningUp && !signupSuccess && (authLoading || profileLoading || (user && userRole))) {
+    return (
+      <div className="min-h-screen bg-[#FAF8F5] flex items-center justify-center">
+        <div className="h-6 w-6 border-2 border-[#E7E2DA] border-t-[#1C1917] rounded-full animate-spin" />
+      </div>
+    ); 
   }
 
   return (
@@ -269,10 +290,20 @@ export function AuthForm({ mode: initialMode }: AuthFormProps) {
                 className="space-y-4"
               >
                 <div className="mb-3">
-                  {typeof window !== "undefined" && new URLSearchParams(window.location.search).get("signedUp") === "true" && (
-                    <div className="mb-3 p-2.5 bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs rounded flex items-center gap-2 font-mono">
-                      <span className="font-bold">Record created.</span> Please authenticate to complete your verification file.
-                    </div>
+                  {(successMessage || (typeof window !== "undefined" && new URLSearchParams(window.location.search).get("signedUp") === "true")) && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -6 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="mb-4 p-3 bg-[#F0FDF4] border border-[#86EFAC] text-[#166534] text-[13px] rounded-xl flex items-start gap-2.5 font-sans shadow-xs"
+                    >
+                      <svg className="w-4 h-4 text-[#16A34A] shrink-0 mt-0.5" viewBox="0 0 20 20" fill="currentColor">
+                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z" clipRule="evenodd" />
+                      </svg>
+                      <div>
+                        <span className="font-semibold block text-[#14532D]">Account Created Successfully</span>
+                        <span className="text-[#166534] text-[12px]">Please sign in with your credentials to enter the registry.</span>
+                      </div>
+                    </motion.div>
                   )}
                   <h2 className="text-[22px] font-semibold tracking-tight text-[#1C1917] mb-1">
                     {mode === "login" ? "Institutional Access Portal" : "Establish Registry Record"}

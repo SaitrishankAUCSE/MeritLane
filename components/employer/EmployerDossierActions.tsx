@@ -135,10 +135,10 @@ export function EmployerDossierActions({ candidateId, candidateName = "Candidate
 
   return (
     <>
-      <div className="fixed top-16 lg:top-0 left-0 lg:left-[220px] right-0 h-16 bg-[#FAFAFA]/95 backdrop-blur-md border-b border-[#E5E5E5] z-[40] flex items-center justify-between px-6 lg:px-12 transition-all duration-300">
+      <div className="fixed top-16 lg:top-0 left-0 lg:left-[240px] right-0 h-16 bg-[#FAF8F5]/95 backdrop-blur-md border-b border-[#E7E2DA] z-[40] flex items-center justify-between px-6 lg:px-12 transition-all duration-300">
         <button 
           onClick={() => router.back()} 
-          className="flex items-center gap-2 text-[13px] font-sans font-medium text-[#737373] hover:text-[#0D0D0D] transition-colors"
+          className="flex items-center gap-2 text-[13px] font-sans font-medium text-[#78716C] hover:text-[#1C1917] transition-colors"
         >
           <ArrowLeft className="h-4 w-4" />
           Back
