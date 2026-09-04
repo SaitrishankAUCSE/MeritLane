@@ -98,17 +98,9 @@ export function useUnsavedChanges(
   const router = useRouter();
   const [pendingHref, setPendingHref] = React.useState<string | null>(null);
 
-  // Browser-level unload guard (refresh / close tab)
-  useEffect(() => {
-    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
-      if (isDirty) {
-        e.preventDefault();
-        e.returnValue = "";
-      }
-    };
-    window.addEventListener("beforeunload", handleBeforeUnload);
-    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
-  }, [isDirty]);
+  // Note: We deliberately avoid window.addEventListener("beforeunload", ...) to prevent
+  // the intrusive native browser "Leave site? Changes you made may not be saved." popup on logouts.
+  // In-app navigation is safely guarded via guardedNavigate and GuardModal.
 
   const guardedNavigate = (href: string) => {
     if (isDirty) {
