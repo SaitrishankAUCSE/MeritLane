@@ -85,44 +85,53 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // Get candidate-specific randomized content for the requested skill
-    // user uid provides the seed so the candidate receives distinct questions and randomized options
-    const content = getAssessmentContent(skill, uid);
-    
-    // Sanitize content to remove answers
-    const sanitizedContent = {
-      mcqs: content.mcqs.map((mcq) => ({
-        question: mcq.question,
-        options: mcq.options
-      })),
-      coding: content.coding
-    };
-
     // Check if an attempt is already active
     if (userData.assessmentStartedAt && userData.assessmentSkill === skill) {
       const startedMs = userData.assessmentStartedAt.toMillis();
       const fortyFiveMinsMs = 45 * 60 * 1000;
       
       if (now - startedMs < fortyFiveMinsMs) {
+        const activeSeed = userData.assessmentSeed || uid;
+        const activeContent = getAssessmentContent(skill, activeSeed);
+        const sanitizedActiveContent = {
+          mcqs: activeContent.mcqs.map((mcq) => ({
+            question: mcq.question,
+            options: mcq.options
+          })),
+          coding: activeContent.coding
+        };
+
         return NextResponse.json({ 
           message: "Resuming session",
           startedAt: startedMs,
           variant: userData.assessmentVariant || "A",
           skill: skill,
-          content: sanitizedContent
+          content: sanitizedActiveContent
         }, { status: 200 });
       }
     }
 
+    // Generate a fresh unique attempt seed so questions and options are dynamically shuffled every time
+    const freshAttemptSeed = `${uid}_${Date.now()}_${Math.floor(Math.random() * 1000000)}`;
+    const freshContent = getAssessmentContent(skill, freshAttemptSeed);
+
+    const sanitizedFreshContent = {
+      mcqs: freshContent.mcqs.map((mcq) => ({
+        question: mcq.question,
+        options: mcq.options
+      })),
+      coding: freshContent.coding
+    };
+
     // Assign a variant (A or B)
     const newVariant = Math.random() > 0.5 ? "A" : "B";
 
-    // Start a fresh session with seed
+    // Start a fresh session with dynamic seed
     await userRef.update({
       assessmentStartedAt: FieldValue.serverTimestamp(),
       assessmentVariant: newVariant,
       assessmentSkill: skill,
-      assessmentSeed: uid
+      assessmentSeed: freshAttemptSeed
     });
 
     const updatedDoc = await userRef.get();
@@ -133,7 +142,7 @@ export async function POST(req: NextRequest) {
       startedAt: startedAt,
       variant: newVariant,
       skill: skill,
-      content: sanitizedContent
+      content: sanitizedFreshContent
     }, { status: 200 });
 
   } catch (error: any) {

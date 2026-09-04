@@ -240,6 +240,8 @@ function AssessmentContentWrapper() {
   const isTerminatedRef = useRef(false);
   // Tracks if termination server call is in progress
   const terminatingRef = useRef(false);
+  // Ref for synchronized line numbers scrolling
+  const lineNumbersRef = useRef<HTMLDivElement>(null);
 
   // ── Init assessment ─────────────────────────────────────────────────────────
 
@@ -1158,26 +1160,26 @@ function AssessmentContentWrapper() {
         )}
 
         {phase === "coding" && (
-          <div className="flex flex-col lg:flex-row flex-1 overflow-hidden p-3 gap-3 bg-[#F4F1EA]">
+          <div className="flex flex-col lg:flex-row flex-1 overflow-hidden p-3 gap-3 bg-[#F4F1EA] min-h-0">
             {/* Left Pane: LeetCode Problem Description & Guidelines */}
-            <div className="w-full lg:w-[45%] lg:max-w-[580px] bg-white border border-[#E7E2DA] rounded-xl flex flex-col h-[42vh] lg:h-full shrink-0 overflow-hidden shadow-xs">
+            <div className="w-full lg:w-[42%] lg:max-w-[560px] bg-white border border-[#E7E2DA] rounded-xl flex flex-col h-[38vh] lg:h-full shrink-0 overflow-hidden shadow-xs min-h-0">
               {/* Problem Tab Header */}
-              <div className="flex items-center justify-between border-b border-[#E7E2DA] bg-[#FAF8F5] px-4 py-2.5">
-                <div className="flex items-center gap-2">
-                  <span className="text-[11px] font-mono font-semibold uppercase tracking-wider text-[#064E3B] bg-[#064E3B]/10 px-2 py-0.5 rounded">
-                    Coding Challenge
+              <div className="flex items-center justify-between border-b border-[#E7E2DA] bg-[#FAF8F5] px-4 py-2.5 shrink-0">
+                <div className="flex items-center gap-2 truncate mr-2">
+                  <span className="text-[11px] font-mono font-semibold uppercase tracking-wider text-[#064E3B] bg-[#064E3B]/10 px-2 py-0.5 rounded shrink-0">
+                    Challenge
                   </span>
-                  <span className="text-[13px] font-sans font-semibold text-[#1C1917]">
+                  <span className="text-[13px] font-sans font-semibold text-[#1C1917] truncate">
                     {content.coding.title}
                   </span>
                 </div>
-                <span className="text-[11px] font-mono text-[#78716C] bg-white border border-[#E7E2DA] px-2 py-0.5 rounded">
+                <span className="text-[11px] font-mono text-[#78716C] bg-white border border-[#E7E2DA] px-2 py-0.5 rounded shrink-0">
                   {content.coding.language?.toUpperCase() || "JAVASCRIPT"}
                 </span>
               </div>
 
               {/* Problem Content */}
-              <div className="flex-1 overflow-y-auto p-6 space-y-6">
+              <div className="flex-1 overflow-y-auto p-5 sm:p-6 space-y-6 min-h-0">
                 <div>
                   <h3 className="text-[12px] font-mono font-medium text-[#78716C] uppercase tracking-wider mb-2">
                     Description &amp; Specifications
@@ -1199,11 +1201,11 @@ function AssessmentContentWrapper() {
             </div>
 
             {/* Right Pane: LeetCode Code Editor + Test Console */}
-            <div className="flex flex-1 flex-col gap-3 min-h-0">
+            <div className="flex flex-1 flex-col gap-3 min-h-0 overflow-hidden">
               {/* Top Section: Code Editor Pane */}
-              <div className="flex-1 bg-white border border-[#E7E2DA] rounded-xl flex flex-col overflow-hidden shadow-xs min-h-[300px]">
+              <div className="flex-1 min-h-0 bg-white border border-[#E7E2DA] rounded-xl flex flex-col overflow-hidden shadow-xs">
                 {/* Editor Header Bar */}
-                <div className="flex items-center justify-between border-b border-[#E7E2DA] bg-[#FAF8F5] px-4 py-2">
+                <div className="flex items-center justify-between border-b border-[#E7E2DA] bg-[#FAF8F5] px-4 py-2 shrink-0">
                   <div className="flex items-center gap-2">
                     <Code className="h-4 w-4 text-[#064E3B]" />
                     <span className="text-[12px] font-mono font-medium text-[#1C1917]">
@@ -1215,10 +1217,13 @@ function AssessmentContentWrapper() {
                   </span>
                 </div>
 
-                {/* Editor Area with Line Numbers */}
-                <div className="flex-1 relative flex overflow-hidden bg-[#FAFAF9]">
+                {/* Editor Area with Synchronous Line Numbers Scroll */}
+                <div className="flex-1 min-h-0 relative flex overflow-hidden bg-[#FAFAF9]">
                   {/* Line Numbers Column */}
-                  <div className="w-11 py-4 select-none text-right pr-3 font-mono text-[12px] text-[#A8A29E] bg-[#F5F5F4] border-r border-[#E7E2DA] leading-[1.6]">
+                  <div
+                    ref={lineNumbersRef}
+                    className="w-12 py-4 select-none text-right pr-3 font-mono text-[12px] text-[#A8A29E] bg-[#F5F5F4] border-r border-[#E7E2DA] leading-[1.6] overflow-hidden shrink-0 pointer-events-none"
+                  >
                     {(code || "").split("\n").map((_, i) => (
                       <div key={i}>{i + 1}</div>
                     ))}
@@ -1227,18 +1232,23 @@ function AssessmentContentWrapper() {
                   <textarea
                     value={code}
                     onChange={(e) => setCode(e.target.value)}
+                    onScroll={(e) => {
+                      if (lineNumbersRef.current) {
+                        lineNumbersRef.current.scrollTop = e.currentTarget.scrollTop;
+                      }
+                    }}
                     spellCheck={false}
                     aria-label="Code editor"
-                    className="flex-1 resize-none bg-transparent font-mono text-[13px] leading-[1.6] text-[#1C1917] outline-none p-4 selection:bg-[#064E3B] selection:text-white"
+                    className="flex-1 min-h-0 h-full resize-none overflow-y-auto overflow-x-auto bg-transparent font-mono text-[13px] leading-[1.6] text-[#1C1917] outline-none p-4 selection:bg-[#064E3B] selection:text-white"
                     placeholder="// Write your main function solution here..."
                   />
                 </div>
               </div>
 
               {/* Bottom Section: Testcase Console & Action Buttons */}
-              <div className="h-[220px] lg:h-[240px] bg-white border border-[#E7E2DA] rounded-xl flex flex-col overflow-hidden shadow-xs shrink-0">
+              <div className="h-[210px] lg:h-[230px] bg-white border border-[#E7E2DA] rounded-xl flex flex-col overflow-hidden shadow-xs shrink-0">
                 {/* Console Tab Header */}
-                <div className="flex items-center justify-between border-b border-[#E7E2DA] bg-[#FAF8F5] px-4 py-2">
+                <div className="flex items-center justify-between border-b border-[#E7E2DA] bg-[#FAF8F5] px-4 py-2 shrink-0">
                   <div className="flex items-center gap-4">
                     <button
                       onClick={() => setActiveConsoleTab("console")}

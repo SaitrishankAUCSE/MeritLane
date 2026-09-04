@@ -69,6 +69,36 @@ export const QUESTION_BANKS: Record<string, { mcqPool: MCQ[]; codingPool: Coding
           "It compiles JSX directly to binary bytecode"
         ],
         answerIndex: 1,
+      },
+      {
+        question: "What is the primary difference between `useLayoutEffect` and `useEffect` in React?",
+        options: [
+          "`useLayoutEffect` runs on a background web worker thread",
+          "`useLayoutEffect` fires synchronously after all DOM mutations but before the browser paints",
+          "`useLayoutEffect` is only supported in Class Components",
+          "`useLayoutEffect` cannot accept a dependency array"
+        ],
+        answerIndex: 1,
+      },
+      {
+        question: "In React 18+, what is the purpose of the `useTransition` hook?",
+        options: [
+          "To trigger CSS animation keyframes",
+          "To mark state updates as non-urgent transitions, keeping the interface responsive during heavy render work",
+          "To navigate between Next.js routes",
+          "To handle HTTP redirects"
+        ],
+        answerIndex: 1,
+      },
+      {
+        question: "How does React manage synthetic events compared to native browser events?",
+        options: [
+          "It attaches native event listeners to individual DOM elements directly",
+          "It uses top-level event delegation at the root container to normalize cross-browser inconsistencies and optimize memory",
+          "It intercepts events in the browser kernel",
+          "It converts all events to JSON WebSockets"
+        ],
+        answerIndex: 1,
       }
     ],
     codingPool: [
@@ -100,6 +130,23 @@ export default function Counter() {
  * @return {JSX.Element}
  */
 export default function TodoList({ initialTasks = [] }) {
+    // Write your code here
+    
+}
+`
+      },
+      {
+        id: "react-accordion",
+        title: "Single-Expanded Accordion Item",
+        language: "javascript",
+        instructions: "Implement an Accordion component that takes an array of `{ id, title, content }` items and ensures only one panel is expanded at a time.\n\nRequirements:\n1. Clicking an expanded header collapses it.\n2. Clicking a collapsed header expands it and closes any other open panel.",
+        initialCode: `import React, { useState } from 'react';
+
+/**
+ * @param {Array<{id: string, title: string, content: string}>} items
+ * @return {JSX.Element}
+ */
+export default function Accordion({ items = [] }) {
     // Write your code here
     
 }
@@ -153,6 +200,26 @@ export default function TodoList({ initialTasks = [] }) {
           "The thread terminates, and the JVM queries the thread's UncaughtExceptionHandler before releasing thread resources",
           "The exception is automatically re-routed to the main thread",
           "The thread is restarted automatically"
+        ],
+        answerIndex: 1,
+      },
+      {
+        question: "What is the key benefit of Java Virtual Threads (Project Loom)?",
+        options: [
+          "They eliminate the need for Garbage Collection",
+          "They are lightweight user-mode threads managed by the JVM that drastically reduce memory and scheduling overhead for I/O-bound tasks",
+          "They run directly on GPU compute shaders",
+          "They remove the Java memory barrier"
+        ],
+        answerIndex: 1,
+      },
+      {
+        question: "In Java memory model, what does the `volatile` keyword guarantee for a variable?",
+        options: [
+          "Atomic compound operations (like count++)",
+          "Visibility of writes across threads and prevents instruction reordering around reads/writes",
+          "Automatic disk backup",
+          "Object immutability"
         ],
         answerIndex: 1,
       }
@@ -243,6 +310,26 @@ public class LRUCache<K, V> {
           "It caches the return value automatically"
         ],
         answerIndex: 1,
+      },
+      {
+        question: "What is the key difference between `is` and `==` in Python?",
+        options: [
+          "`is` checks for value equality, while `==` checks for memory identity",
+          "`is` checks for object identity (same memory address), while `==` checks for equality of values",
+          "They are synonymous in Python 3.10+",
+          "`is` can only be used with boolean literals"
+        ],
+        answerIndex: 1,
+      },
+      {
+        question: "What does the `__slots__` attribute do in a Python class definition?",
+        options: [
+          "It encrypts private class variables",
+          "It prevents the creation of `__dict__` per instance, reducing memory overhead and restricting allowed attributes",
+          "It makes the class a singleton",
+          "It enables multi-threading support"
+        ],
+        answerIndex: 1,
       }
     ],
     codingPool: [
@@ -305,6 +392,26 @@ public class LRUCache<K, V> {
           "It prevents mutating methods like `push`, `pop`, or index assignments from compiling",
           "It causes the array to be deeply cloned on every read",
           "It turns array elements into symbols"
+        ],
+        answerIndex: 1,
+      },
+      {
+        question: "What is the difference between `type` and `interface` in TypeScript regarding declaration merging?",
+        options: [
+          "Types support declaration merging, but interfaces do not",
+          "Interfaces with the same name automatically merge declarations, whereas type aliases cannot be reopened",
+          "Neither supports declaration merging",
+          "They are identical under all conditions"
+        ],
+        answerIndex: 1,
+      },
+      {
+        question: "What is a JavaScript closure?",
+        options: [
+          "A method that immediately deletes all parent variables",
+          "A function bundled together with references to its lexical environment, allowing access to outer scope variables even after outer function execution has finished",
+          "A synchronous try/catch block",
+          "An event listener attached to the window object"
         ],
         answerIndex: 1,
       }
@@ -882,11 +989,30 @@ const SKILL_ALIASES: Record<string, string> = {
   spring: "java"
 };
 
-// ─── PSEUDO-RANDOM SEED SHUFFLE ───────────────────────────────────────────────
+// ─── HIGH-ENTROPY PSEUDO-RANDOM SEED SHUFFLE ─────────────────────────────────
 
-function seededRandom(seed: number) {
-  const x = Math.sin(seed++) * 10000;
-  return x - Math.floor(x);
+/**
+ * 32-bit FNV-1a hash algorithm to generate high-entropy integer seeds from any string.
+ */
+function hashString32(str: string): number {
+  let hash = 0x811c9dc5;
+  for (let i = 0; i < str.length; i++) {
+    hash ^= str.charCodeAt(i);
+    hash = Math.imul(hash, 0x01000193);
+  }
+  return hash >>> 0;
+}
+
+/**
+ * Mulberry32 PRNG generator for uniform, cycle-free deterministic random numbers.
+ */
+function mulberry32(seed: number) {
+  return function () {
+    let t = (seed += 0x6d2b79f5);
+    t = Math.imul(t ^ (t >>> 15), t | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
 }
 
 /**
@@ -894,8 +1020,9 @@ function seededRandom(seed: number) {
  */
 function shuffleArray<T>(array: T[], seed?: number): T[] {
   const arr = [...array];
+  const rand = seed !== undefined ? mulberry32(seed) : Math.random;
   for (let i = arr.length - 1; i > 0; i--) {
-    const r = seed !== undefined ? seededRandom(seed + i) : Math.random();
+    const r = rand();
     const j = Math.floor(r * (i + 1));
     [arr[i], arr[j]] = [arr[j], arr[i]];
   }
@@ -922,26 +1049,31 @@ export function resolveSkillKey(skillName: string): string {
  * Requirements met:
  * 1. React has React MCQs & coding challenge.
  * 2. Java has Java MCQs & coding challenge.
- * 3. Questions are selected and shuffled dynamically per user/seed.
+ * 3. Questions are selected and shuffled dynamically per attempt seed.
  * 4. Option choices are shuffled while maintaining the correct answer index.
  */
 export function getAssessmentContent(skillName: string, userSeed?: string | number): AssessmentContent {
   const key = resolveSkillKey(skillName);
   const bank = QUESTION_BANKS[key] || QUESTION_BANKS.python;
 
-  let seedNum = typeof userSeed === "number" ? userSeed : Date.now();
-  if (typeof userSeed === "string") {
-    seedNum = userSeed.split("").reduce((acc, ch) => acc + ch.charCodeAt(0), 0);
+  let seedNum: number;
+  if (typeof userSeed === "number") {
+    seedNum = userSeed >>> 0;
+  } else if (typeof userSeed === "string" && userSeed.length > 0) {
+    seedNum = hashString32(userSeed);
+  } else {
+    seedNum = hashString32(`${Date.now()}_${Math.random()}`);
   }
 
-  // 1. Shuffle and pick MCQs
+  // 1. Shuffle and pick 3 distinct MCQs from the pool
   const shuffledPool = shuffleArray(bank.mcqPool, seedNum);
   const selectedMcqs = shuffledPool.slice(0, Math.min(3, shuffledPool.length));
 
   // 2. Shuffle option choices for each MCQ while preserving the correct answer
   const randomizedMcqs: MCQ[] = selectedMcqs.map((mcq, mIdx) => {
     const correctAnswerText = mcq.options[mcq.answerIndex];
-    const shuffledOptions = shuffleArray(mcq.options, seedNum + mIdx * 17);
+    const mcqSeed = (seedNum + mIdx * 10007) >>> 0;
+    const shuffledOptions = shuffleArray(mcq.options, mcqSeed);
     const newAnswerIndex = shuffledOptions.indexOf(correctAnswerText);
     return {
       question: mcq.question,
@@ -951,9 +1083,10 @@ export function getAssessmentContent(skillName: string, userSeed?: string | numb
     };
   });
 
-  // 3. Pick a coding challenge
+  // 3. Pick a coding challenge dynamically from the pool
   const codingPool = bank.codingPool;
-  const codingIndex = Math.abs(seedNum) % codingPool.length;
+  const codingRand = mulberry32((seedNum + 54321) >>> 0)();
+  const codingIndex = Math.floor(codingRand * codingPool.length);
   const selectedCoding = codingPool[codingIndex] || codingPool[0];
 
   return {
@@ -961,3 +1094,4 @@ export function getAssessmentContent(skillName: string, userSeed?: string | numb
     coding: selectedCoding,
   };
 }
+
