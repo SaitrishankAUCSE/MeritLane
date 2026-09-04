@@ -76,18 +76,15 @@ export const QUESTION_BANKS: Record<string, { mcqPool: MCQ[]; codingPool: Coding
         id: "react-counter",
         title: "Bounded Counter Component",
         language: "javascript",
-        instructions: "Implement a React functional component `Counter` with 'Increment' and 'Decrement' buttons and a 'Reset' button. Requirements:\n1. The count must never drop below 0.\n2. When count reaches 10, disable the Increment button.\n3. Display an alert tag 'Max reached' when count is 10.",
+        instructions: "Implement a React functional component `Counter` with 'Increment', 'Decrement', and 'Reset' buttons.\n\nRequirements:\n1. The count must never drop below 0.\n2. When count reaches 10, disable the Increment button.\n3. Display an alert text 'Max reached' when count is 10.",
         initialCode: `import React, { useState } from 'react';
 
+/**
+ * @return {JSX.Element}
+ */
 export default function Counter() {
-  const [count, setCount] = useState(0);
-
-  return (
-    <div className="p-4 border rounded-lg max-w-sm">
-      <h2 className="text-xl font-bold mb-2">Count: {count}</h2>
-      {/* Implement buttons and logic here */}
-    </div>
-  );
+    // Write your code here
+    
 }
 `
       },
@@ -95,16 +92,16 @@ export default function Counter() {
         id: "react-todo-filter",
         title: "Searchable Todo Filter",
         language: "javascript",
-        instructions: "Create a React component `TodoList` that manages an array of tasks ({ id, text, completed }). Requirements:\n1. Provide a text input that filters visible tasks by substring match.\n2. Provide checkboxes to toggle task completion status.\n3. Show a count badge with total remaining active (uncompleted) tasks.",
+        instructions: "Create a React component `TodoList` that manages an array of tasks ({ id, text, completed }).\n\nRequirements:\n1. Provide a text input that filters visible tasks by substring match.\n2. Provide checkboxes to toggle task completion status.\n3. Show a count badge with total remaining active (uncompleted) tasks.",
         initialCode: `import React, { useState, useMemo } from 'react';
 
+/**
+ * @param {Array<{id: number, text: string, completed: boolean}>} initialTasks
+ * @return {JSX.Element}
+ */
 export default function TodoList({ initialTasks = [] }) {
-  // Implement state and filter logic
-  return (
-    <div>
-      {/* Filter input and task list */}
-    </div>
-  );
+    // Write your code here
+    
 }
 `
       }

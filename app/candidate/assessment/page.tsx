@@ -12,6 +12,7 @@ import {
   Monitor,
   Maximize2,
   XCircle,
+  Code,
 } from "lucide-react";
 import { logFunnelEvent } from "@/lib/analytics/logEvent";
 import { auth } from "@/lib/firebase/config";
@@ -27,6 +28,7 @@ export interface CodingChallenge {
   title: string;
   instructions: string;
   initialCode: string;
+  language?: string;
 }
 
 export interface AssessmentContent {
@@ -1156,50 +1158,93 @@ function AssessmentContentWrapper() {
         )}
 
         {phase === "coding" && (
-          <div className="flex flex-col lg:flex-row flex-1 overflow-hidden">
-            <div className="w-full lg:w-[40%] lg:max-w-[600px] border-b lg:border-b-0 lg:border-r border-[#E7E2DA] bg-white flex flex-col h-[40vh] lg:h-auto shrink-0">
-              <div className="p-5 border-b border-[#E7E2DA]">
-                <h2 className="text-[14px] font-semibold text-[#78716C]">
-                  {content.coding.title}
-                </h2>
+          <div className="flex flex-col lg:flex-row flex-1 overflow-hidden p-3 gap-3 bg-[#F4F1EA]">
+            {/* Left Pane: LeetCode Problem Description & Guidelines */}
+            <div className="w-full lg:w-[45%] lg:max-w-[580px] bg-white border border-[#E7E2DA] rounded-xl flex flex-col h-[42vh] lg:h-full shrink-0 overflow-hidden shadow-xs">
+              {/* Problem Tab Header */}
+              <div className="flex items-center justify-between border-b border-[#E7E2DA] bg-[#FAF8F5] px-4 py-2.5">
+                <div className="flex items-center gap-2">
+                  <span className="text-[11px] font-mono font-semibold uppercase tracking-wider text-[#064E3B] bg-[#064E3B]/10 px-2 py-0.5 rounded">
+                    Coding Challenge
+                  </span>
+                  <span className="text-[13px] font-sans font-semibold text-[#1C1917]">
+                    {content.coding.title}
+                  </span>
+                </div>
+                <span className="text-[11px] font-mono text-[#78716C] bg-white border border-[#E7E2DA] px-2 py-0.5 rounded">
+                  {content.coding.language?.toUpperCase() || "JAVASCRIPT"}
+                </span>
               </div>
-              <div className="flex-1 overflow-auto p-6 scrollbar-hide">
-                <pre className="whitespace-pre-wrap font-mono text-[13px] leading-[1.8] text-[#78716C]">
-                  {content.coding.instructions}
-                </pre>
-                <div className="mt-10 border-l border-[#E7E2DA] pl-5 py-2">
-                  <h3 className="text-[13px] font-semibold text-[#16A34A] mb-2">
-                    Security &amp; Integrity Notice
+
+              {/* Problem Content */}
+              <div className="flex-1 overflow-y-auto p-6 space-y-6">
+                <div>
+                  <h3 className="text-[12px] font-mono font-medium text-[#78716C] uppercase tracking-wider mb-2">
+                    Description &amp; Specifications
                   </h3>
+                  <div className="text-[14px] leading-relaxed text-[#1C1917] whitespace-pre-wrap font-sans space-y-3 bg-[#FAF8F5] p-4 rounded-lg border border-[#E7E2DA]">
+                    {content.coding.instructions}
+                  </div>
+                </div>
+
+                <div className="border border-[#E7E2DA] rounded-lg p-4 bg-white">
+                  <h4 className="text-[12px] font-mono font-semibold uppercase tracking-wider text-[#064E3B] mb-1.5 flex items-center gap-1.5">
+                    <ShieldAlert className="h-3.5 w-3.5" /> Examination Rule
+                  </h4>
                   <p className="text-[12px] leading-relaxed text-[#78716C]">
-                    You have exactly one attempt. Navigating away or refreshing does not pause the
-                    server timer. Expiration triggers automatic scoring and enforces a 14-day
-                    cooldown. Integrity violations trigger a 21-day cooldown.
+                    Complete the main function implementation. Your function will be compiled and evaluated against hidden automated test cases.
                   </p>
                 </div>
               </div>
             </div>
 
-            <div className="flex flex-1 flex-col bg-[#F8F6F3]">
-              <div className="flex-1 overflow-hidden relative border-b border-[#E7E2DA]">
-                <textarea
-                  value={code}
-                  onChange={(e) => setCode(e.target.value)}
-                  spellCheck={false}
-                  aria-label="Code editor"
-                  className="h-full w-full resize-none bg-transparent font-mono text-[14px] leading-[1.6] text-[#1C1917] outline-none p-6 pb-20 selection:bg-[#1C1917] selection:text-white"
-                  placeholder="Write your implementation here..."
-                />
+            {/* Right Pane: LeetCode Code Editor + Test Console */}
+            <div className="flex flex-1 flex-col gap-3 min-h-0">
+              {/* Top Section: Code Editor Pane */}
+              <div className="flex-1 bg-white border border-[#E7E2DA] rounded-xl flex flex-col overflow-hidden shadow-xs min-h-[300px]">
+                {/* Editor Header Bar */}
+                <div className="flex items-center justify-between border-b border-[#E7E2DA] bg-[#FAF8F5] px-4 py-2">
+                  <div className="flex items-center gap-2">
+                    <Code className="h-4 w-4 text-[#064E3B]" />
+                    <span className="text-[12px] font-mono font-medium text-[#1C1917]">
+                      Solution.{content.coding.language === 'python' ? 'py' : content.coding.language === 'java' ? 'java' : 'js'}
+                    </span>
+                  </div>
+                  <span className="text-[11px] font-sans text-[#78716C]">
+                    Implement main function
+                  </span>
+                </div>
+
+                {/* Editor Area with Line Numbers */}
+                <div className="flex-1 relative flex overflow-hidden bg-[#FAFAF9]">
+                  {/* Line Numbers Column */}
+                  <div className="w-11 py-4 select-none text-right pr-3 font-mono text-[12px] text-[#A8A29E] bg-[#F5F5F4] border-r border-[#E7E2DA] leading-[1.6]">
+                    {(code || "").split("\n").map((_, i) => (
+                      <div key={i}>{i + 1}</div>
+                    ))}
+                  </div>
+                  {/* Code Input */}
+                  <textarea
+                    value={code}
+                    onChange={(e) => setCode(e.target.value)}
+                    spellCheck={false}
+                    aria-label="Code editor"
+                    className="flex-1 resize-none bg-transparent font-mono text-[13px] leading-[1.6] text-[#1C1917] outline-none p-4 selection:bg-[#064E3B] selection:text-white"
+                    placeholder="// Write your main function solution here..."
+                  />
+                </div>
               </div>
 
-              <div className="h-[38%] min-h-[240px] flex flex-col bg-white border-t border-[#E7E2DA]">
-                <div className="flex items-center justify-between border-b border-[#E7E2DA] px-3 sm:px-5 py-2 gap-2 bg-[#FAF8F5]">
-                  <div className="flex items-center gap-2 sm:gap-4">
+              {/* Bottom Section: Testcase Console & Action Buttons */}
+              <div className="h-[220px] lg:h-[240px] bg-white border border-[#E7E2DA] rounded-xl flex flex-col overflow-hidden shadow-xs shrink-0">
+                {/* Console Tab Header */}
+                <div className="flex items-center justify-between border-b border-[#E7E2DA] bg-[#FAF8F5] px-4 py-2">
+                  <div className="flex items-center gap-4">
                     <button
                       onClick={() => setActiveConsoleTab("console")}
-                      className={`text-[12px] sm:text-[13px] font-semibold pb-1 border-b-2 transition-colors ${
+                      className={`text-[12px] font-sans font-semibold pb-1 border-b-2 transition-colors ${
                         activeConsoleTab === "console"
-                          ? "border-[#1C1917] text-[#1C1917]"
+                          ? "border-[#064E3B] text-[#064E3B]"
                           : "border-transparent text-[#78716C] hover:text-[#1C1917]"
                       }`}
                     >
@@ -1207,16 +1252,16 @@ function AssessmentContentWrapper() {
                     </button>
                     <button
                       onClick={() => setActiveConsoleTab("testcases")}
-                      className={`text-[12px] sm:text-[13px] font-semibold pb-1 border-b-2 transition-colors flex items-center gap-1.5 ${
+                      className={`text-[12px] font-sans font-semibold pb-1 border-b-2 transition-colors flex items-center gap-1.5 ${
                         activeConsoleTab === "testcases"
-                          ? "border-[#1C1917] text-[#1C1917]"
+                          ? "border-[#064E3B] text-[#064E3B]"
                           : "border-transparent text-[#78716C] hover:text-[#1C1917]"
                       }`}
                     >
-                      <span>Public Test Cases</span>
+                      <span>Test Cases</span>
                       {testRunStats && (
                         <span
-                          className={`text-[10px] font-mono px-1.5 py-0.2 rounded-full font-bold ${
+                          className={`text-[10px] font-mono px-1.5 py-0.5 rounded font-bold ${
                             testRunStats.passed === testRunStats.total
                               ? "bg-[#DCFCE7] text-[#166534]"
                               : "bg-[#FEF2F2] text-[#991B1B]"
@@ -1227,94 +1272,70 @@ function AssessmentContentWrapper() {
                       )}
                     </button>
                   </div>
-                  <div className="flex gap-2 sm:gap-3 shrink-0">
+
+                  <div className="flex items-center gap-2">
                     <button
                       onClick={() => handleTest(false)}
                       disabled={evaluating || timeLeft <= 0}
-                      className="text-[12px] sm:text-[13px] font-semibold border border-[#E7E2DA] px-2.5 sm:px-4 py-1.5 text-[#78716C] hover:text-[#1C1917] hover:border-[#1C1917] disabled:opacity-50 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-[#1C1917] focus:ring-offset-1 bg-white shadow-xs"
+                      className="text-[12px] font-sans font-semibold border border-[#E7E2DA] px-3 py-1.5 text-[#1C1917] hover:bg-[#FAF8F5] disabled:opacity-50 rounded-lg transition-colors bg-white shadow-2xs"
                     >
-                      {evaluating ? "Evaluating..." : "Run tests"}
+                      {evaluating ? "Running..." : "Run Code"}
                     </button>
                     <button
                       onClick={() => handleTest(true)}
                       disabled={evaluating || timeLeft <= 0}
-                      className="text-[12px] sm:text-[13px] font-semibold border border-[#1C1917] bg-[#1C1917] text-white px-3 sm:px-4 py-1.5 hover:bg-[#292524] disabled:opacity-50 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-[#1C1917] focus:ring-offset-1 shadow-xs"
+                      className="text-[12px] font-sans font-semibold bg-[#064E3B] text-white px-4 py-1.5 hover:bg-[#043327] disabled:opacity-50 rounded-lg transition-colors shadow-2xs"
                     >
-                      Submit Evaluation
+                      Submit
                     </button>
                   </div>
                 </div>
 
-                <div className="flex-1 overflow-auto p-4 sm:p-5 scrollbar-hide">
+                {/* Console Log or Test Output */}
+                <div className="flex-1 overflow-y-auto p-4 font-mono text-[12px] leading-relaxed text-[#1C1917] scrollbar-hide bg-[#FAFAF9]">
                   {activeConsoleTab === "console" ? (
-                    <pre className="font-mono text-[12px] leading-[1.6] text-[#78716C] whitespace-pre-wrap">
-                      {output ||
-                        "System initialized. Click 'Run tests' to validate your solution against public test cases."}
+                    <pre className="whitespace-pre-wrap text-[#57534E]">
+                      {output || "Ready. Click 'Run Code' to execute against sample test cases."}
                     </pre>
                   ) : (
-                    <div className="space-y-3">
+                    <div className="space-y-3 font-sans">
                       {testRunStats ? (
                         <>
-                          <div className="flex items-center justify-between text-[11px] font-mono text-[#78716C] mb-2 pb-1 border-b border-[#E7E2DA]">
-                            <span>
-                              Execution Time:{" "}
-                              <strong className="text-[#1C1917]">{testRunStats.durationMs}ms</strong>
-                            </span>
-                            <span
-                              className={`font-semibold ${
-                                testRunStats.passed === testRunStats.total
-                                  ? "text-[#16A34A]"
-                                  : "text-[#B42318]"
-                              }`}
-                            >
-                              {testRunStats.passed === testRunStats.total
-                                ? "All Public Assertions Passed"
-                                : `${testRunStats.total - testRunStats.passed} Assertion Failed`}
+                          <div className="flex items-center justify-between text-[11px] font-mono text-[#78716C] pb-2 border-b border-[#E7E2DA]">
+                            <span>Execution Time: <strong className="text-[#1C1917]">{testRunStats.durationMs}ms</strong></span>
+                            <span className={testRunStats.passed === testRunStats.total ? "text-[#064E3B] font-semibold" : "text-[#B42318] font-semibold"}>
+                              {testRunStats.passed === testRunStats.total ? "All Test Cases Passed" : `${testRunStats.total - testRunStats.passed} Test Case Failed`}
                             </span>
                           </div>
-                          <div className="space-y-2.5">
+                          <div className="space-y-2">
                             {testRunStats.cases.map((tCase, idx) => (
                               <div
                                 key={idx}
-                                className={`p-3 rounded-xl border text-[12px] ${
+                                className={`p-2.5 rounded-lg border text-[12px] ${
                                   tCase.passed
                                     ? "bg-[#F0FDF4] border-[#BBF7D0]"
                                     : "bg-[#FEF2F2] border-[#FECACA]"
                                 }`}
                               >
-                                <div className="flex items-center justify-between font-semibold mb-1.5">
+                                <div className="flex items-center justify-between font-semibold mb-1">
                                   <span className="text-[#1C1917]">{tCase.name}</span>
-                                  <span
-                                    className={`px-2 py-0.5 rounded text-[10px] font-mono uppercase tracking-wider ${
-                                      tCase.passed
-                                        ? "bg-[#DCFCE7] text-[#166534]"
-                                        : "bg-[#FEE2E2] text-[#991B1B]"
-                                    }`}
-                                  >
+                                  <span className={`px-1.5 py-0.5 rounded text-[10px] font-mono uppercase ${
+                                    tCase.passed ? "bg-[#DCFCE7] text-[#166534]" : "bg-[#FEE2E2] text-[#991B1B]"
+                                  }`}>
                                     {tCase.passed ? "Passed" : "Failed"}
                                   </span>
                                 </div>
-                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px] font-mono text-[#57534E] mt-2 pt-2 border-t border-black/5">
-                                  <div>
-                                    <span className="text-[#A8A29E] block">Expected:</span>
-                                    <span className="text-[#1C1917]">{tCase.expected}</span>
-                                  </div>
-                                  <div>
-                                    <span className="text-[#A8A29E] block">Actual Output:</span>
-                                    <span
-                                      className={tCase.passed ? "text-[#166534]" : "text-[#991B1B] font-bold"}
-                                    >
-                                      {tCase.actual}
-                                    </span>
-                                  </div>
+                                <div className="grid grid-cols-2 gap-2 text-[11px] font-mono text-[#57534E] mt-1 pt-1 border-t border-black/5">
+                                  <div>Expected: <span className="text-[#1C1917]">{tCase.expected}</span></div>
+                                  <div>Actual: <span className={tCase.passed ? "text-[#166534]" : "text-[#991B1B] font-bold"}>{tCase.actual}</span></div>
                                 </div>
                               </div>
                             ))}
                           </div>
                         </>
                       ) : (
-                        <div className="text-center py-6 text-[13px] text-[#78716C]">
-                          Click <strong className="text-[#1C1917]">Run tests</strong> to execute public assertions against your code.
+                        <div className="text-center py-5 text-[13px] text-[#78716C]">
+                          Click <strong className="text-[#1C1917]">Run Code</strong> to execute test assertions.
                         </div>
                       )}
                     </div>
