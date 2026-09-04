@@ -187,8 +187,8 @@ export default function CandidateDashboardPage() {
               </span>
             </div>
 
-            <h1 className="font-signature text-[42px] sm:text-[52px] text-[#1C1917] leading-none py-1 font-semibold">
-              {profile?.name || "Candidate Evidence Terminal"}
+            <h1 className="font-serif text-[38px] sm:text-[46px] text-[#1C1917] leading-none py-1 font-semibold">
+              {profile?.name || "Candidate Engineering Record"}
             </h1>
 
             {(profile?.college || profile?.branch) && (

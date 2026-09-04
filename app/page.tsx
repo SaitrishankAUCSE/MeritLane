@@ -236,9 +236,9 @@ export default function HomePage() {
                   <div className="flex items-center justify-between p-2 bg-surface-low/60 rounded border border-border/60">
                     <span className="flex items-center gap-2.5 text-foreground">
                       <span className="text-[#064E3B] font-bold">✓</span>
-                      <span>Identity & Provenance Hash Stored</span>
+                      <span>Identity &amp; Background Registered</span>
                     </span>
-                    <span className="text-muted-foreground text-[11px]">0x7f9a...88c2</span>
+                    <span className="text-[#064E3B] font-medium text-[11px]">Recorded</span>
                   </div>
                 </div>
               </div>
@@ -299,7 +299,7 @@ export default function HomePage() {
                   Meritlane Standard
                 </div>
                 <h3 className="font-serif text-[20px] text-[#064E3B] mb-4">
-                  Audited Proof & Monitored Exams
+                  Audited Proof &amp; Monitored Exams
                 </h3>
                 <ul className="space-y-3 text-[13px] text-[#1C1917] font-sans">
                   <li className="flex items-start gap-2.5">
@@ -327,7 +327,7 @@ export default function HomePage() {
         {/* HOW IT WORKS: 01, 02, 03 */}
         <div className="mx-auto w-full max-w-[1400px] px-6 sm:px-12 md:px-16 pt-8">
           <div className="text-[11px] font-mono uppercase tracking-[0.2em] text-[#78716C] mb-8 pb-3 border-b border-[#E7E2DA]">
-            Protocol Verification Sequence
+            Candidate Evaluation Workflow
           </div>
           <motion.div 
             initial="hidden"
@@ -337,9 +337,9 @@ export default function HomePage() {
             className="grid grid-cols-1 md:grid-cols-3 gap-8"
           >
             {[
-              { num: "01", title: "Build your proof", desc: "Connect your repositories, detail architecture decisions, and document technical contributions. Your work is the foundation." },
-              { num: "02", title: "Get verified", desc: "Undergo rigorous technical assessments and code audits. We validate claims, establishing an irrefutable baseline of capability." },
-              { num: "03", title: "Get discovered", desc: "Share your verified public record or join the private talent pool where top employers actively seek out validated engineering excellence." }
+              { num: "01", title: "Build your record", desc: "Connect your repositories, detail architecture decisions, and document technical contributions. Your work is the foundation." },
+              { num: "02", title: "Get evaluated", desc: "Undergo rigorous technical assessments and code audits. We validate claims, establishing an objective baseline of capability." },
+              { num: "03", title: "Get hired", desc: "Share your verified public record or join the talent network where hiring managers review validated engineering records." }
             ].map((step, i) => (
               <motion.div key={i} variants={fadeUp} className="border border-[#E7E2DA] bg-white p-6 sm:p-8 relative group hover:border-[#1C1917] transition-colors">
                 <div className="text-[12px] font-mono font-semibold text-[#064E3B] mb-4">STEP {step.num}</div>
@@ -509,7 +509,7 @@ export default function HomePage() {
                 Instantly discover candidates whose skills are already audited and verified. Reduce hiring risk and engineering interview hours by trusting the Meritlane standard.
               </p>
               <div className="flex items-center text-sm font-medium text-foreground group-hover:translate-x-2 transition-transform">
-                Initiate Hiring Protocol <ArrowRight className="ml-2 h-4 w-4" />
+                Discover Verified Talent <ArrowRight className="ml-2 h-4 w-4" />
               </div>
             </div>
           </div>

@@ -103,11 +103,11 @@ export default function ProofCanvasPage() {
               </div>
 
               <h3 className="font-serif text-[38px] text-[#0D0D0D] leading-tight mb-5">
-                Project: Aegis Consensus Protocol
+                Project: Aegis Distributed Storage Engine
               </h3>
 
               <p className="text-[15px] text-[#737373] leading-relaxed max-w-2xl mb-8">
-                Designed and implemented a zero-knowledge proof based consensus mechanism reducing latency by 40%. Authored primary whitepaper and led a team of 5 engineers through deployment.
+                Designed and implemented a distributed log storage engine reducing replication latency by 40%. Authored technical architecture specs and led a team of 5 engineers through production rollout.
               </p>
 
               <div className="flex items-center gap-4 mb-10">
