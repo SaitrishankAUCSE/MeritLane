@@ -4,176 +4,120 @@ import Link from "next/link";
 
 export default function ProofCanvasPage() {
   return (
-    <div className="min-h-screen bg-[#111214] text-[#FAFAFA] font-sans selection:bg-[#FAFAFA] selection:text-[#0D0D0D]">
+    <div className="min-h-screen bg-[#FAF8F5] text-[#1C1917] font-sans selection:bg-[#064E3B] selection:text-white">
       {/* Top Nav */}
-      <header className="flex h-[72px] sm:h-[100px] items-center justify-between px-6 sm:px-12 border-b border-[#E5E5E5]/50">
-        <Link href="/" className="font-serif text-[26px] sm:text-[32px] font-medium tracking-tight text-[#0D0D0D]">
-          Meritlane
+      <header className="flex h-[72px] sm:h-[80px] items-center justify-between px-6 sm:px-12 border-b border-[#E7E2DA] bg-white">
+        <Link href="/" className="font-sans text-[22px] sm:text-[24px] font-semibold tracking-tight text-[#1C1917] flex items-center gap-2">
+          <img src="/logo-m.png" alt="Meritlane" className="h-6 w-auto" />
+          <span>Meritlane</span>
         </Link>
         
-        <nav className="hidden md:flex items-center gap-10 lg:gap-14 mr-10 lg:mr-20">
-          <div className="flex flex-col relative group cursor-pointer">
-            <span className="text-[13px] font-medium text-[#0D0D0D] leading-tight">Proof</span>
-            <span className="text-[13px] font-medium text-[#0D0D0D] leading-tight">Canvas</span>
-            <div className="absolute -bottom-2 left-0 w-full h-[2px] bg-[#0D0D0D]" />
-          </div>
-          <span className="text-[14px] text-[#737373]/50 cursor-not-allowed" title="Coming soon">Discovery</span>
-          <span className="text-[14px] text-[#737373]/50 cursor-not-allowed" title="Coming soon">Archives</span>
+        <nav className="hidden md:flex items-center gap-8">
+          <Link href="/employer/dashboard" className="text-[13px] font-medium text-[#78716C] hover:text-[#1C1917] transition-colors">
+            Candidate Directory
+          </Link>
+          <Link href="/signup" className="text-[13px] font-medium text-[#064E3B] hover:text-[#043327] transition-colors">
+            Get Evaluated
+          </Link>
         </nav>
 
-        <Link href="/login" className="h-9 w-9 rounded-full border border-[#D2D2D2] flex items-center justify-center text-[#737373] hover:text-[#0D0D0D] hover:border-[#0D0D0D] transition-all cursor-pointer bg-[#F3F3F1]">
-          <User className="h-4 w-4" />
+        <Link href="/login" className="h-9 px-4 rounded border border-[#E7E2DA] flex items-center justify-center text-[12px] font-medium text-[#1C1917] hover:bg-[#FAF8F5] transition-all cursor-pointer bg-white">
+          Sign In
         </Link>
       </header>
 
       {/* Main Content */}
-      <main className="max-w-[1400px] mx-auto px-6 sm:px-12 py-10 sm:py-16 flex flex-col lg:flex-row gap-12 lg:gap-24">
+      <main className="max-w-[1200px] mx-auto px-6 sm:px-12 py-10 sm:py-14 flex flex-col lg:flex-row gap-10 lg:gap-16">
         
         {/* Left Column */}
-        <div className="w-full lg:w-[320px] shrink-0">
-          <div className="mb-14">
-            <h1 className="font-serif text-[52px] leading-none mb-6">Elena Rostova</h1>
-            <div className="flex items-center justify-between">
-              <div>
-                <div className="text-[10px] font-mono text-[#666666] uppercase tracking-widest mb-1">ID:</div>
-                <div className="font-mono text-[13px] text-[#0D0D0D]">0x7F...3B9A</div>
+        <div className="w-full lg:w-[320px] shrink-0 space-y-8">
+          <div className="p-6 bg-white border border-[#E7E2DA] rounded-lg">
+            <h1 className="font-sans text-[32px] font-semibold tracking-tight text-[#1C1917] mb-2">Elena Rostova</h1>
+            <div className="text-[13px] text-[#78716C] font-sans mb-4">Senior Systems Engineer</div>
+            <div className="border-t border-[#E7E2DA] pt-3 text-[12px] font-mono text-[#78716C]">
+              Record: #ER-9042
+            </div>
+          </div>
+
+          <div className="p-6 bg-white border border-[#E7E2DA] rounded-lg">
+            <h2 className="text-[11px] font-mono font-medium uppercase tracking-wider text-[#78716C] mb-4">Evaluated Competencies</h2>
+            <div className="space-y-3">
+              <div className="flex items-center justify-between py-2 border-b border-[#E7E2DA]/60">
+                <span className="text-[13px] font-medium text-[#1C1917]">Distributed Systems</span>
+                <span className="text-[11px] font-mono font-medium text-[#064E3B] bg-[#064E3B]/10 px-2 py-0.5 rounded">Verified [94%]</span>
               </div>
-              <div className="w-px h-8 bg-[#E5E5E5]" />
-              <div className="w-[140px]">
-                <div className="text-[13px] text-[#737373] font-medium leading-snug">Senior Systems<br/>Engineer</div>
+              <div className="flex items-center justify-between py-2 border-b border-[#E7E2DA]/60">
+                <span className="text-[13px] font-medium text-[#1C1917]">Rust</span>
+                <span className="text-[11px] font-mono font-medium text-[#064E3B] bg-[#064E3B]/10 px-2 py-0.5 rounded">Verified [88%]</span>
+              </div>
+              <div className="flex items-center justify-between py-2">
+                <span className="text-[13px] font-medium text-[#1C1917]">High-Throughput IO</span>
+                <span className="text-[11px] font-mono font-medium text-[#78716C] bg-[#FAF8F5] border border-[#E7E2DA] px-2 py-0.5 rounded">Claimed</span>
               </div>
             </div>
           </div>
 
-          <div className="mb-14">
-            <h2 className="text-[10px] font-sans font-bold uppercase tracking-[0.15em] text-[#666666] mb-6">Core Competencies</h2>
-            <div className="space-y-0">
-              <div className="flex items-center justify-between py-4 border-b border-[#E5E5E5]">
-                <span className="text-[15px] font-medium">Distributed Systems</span>
-                <span className="font-mono text-[12px] text-[#15803D]">L4</span>
-              </div>
-              <div className="flex items-center justify-between py-4 border-b border-[#E5E5E5]">
-                <span className="text-[15px] font-medium">Rust</span>
-                <span className="font-mono text-[12px] text-[#15803D]">L3</span>
-              </div>
-              <div className="flex items-center justify-between py-4 border-b border-[#E5E5E5]">
-                <span className="text-[15px] font-medium">Cryptography</span>
-                <span className="font-mono text-[12px] text-[#A16207]">L2</span>
-              </div>
-            </div>
-          </div>
-
-          <div>
-            <h2 className="text-[10px] font-sans font-bold uppercase tracking-[0.15em] text-[#666666] mb-6">Artifacts</h2>
-            <div className="space-y-0">
-              <div className="flex items-center py-4 border-b border-[#E5E5E5]">
-                <FileText className="h-4 w-4 text-[#737373] mr-4" />
-                <span className="font-mono text-[13px] text-[#737373]">thesis_final.pdf</span>
-              </div>
-              <div className="flex items-center py-4 border-b border-[#E5E5E5]">
-                <Code className="h-4 w-4 text-[#737373] mr-4" />
-                <span className="font-mono text-[13px] text-[#737373]">github.com/erostova</span>
-              </div>
+          <div className="p-6 bg-white border border-[#E7E2DA] rounded-lg">
+            <h2 className="text-[11px] font-mono font-medium uppercase tracking-wider text-[#78716C] mb-4">Technical Repositories</h2>
+            <div className="space-y-2">
+              <a href="https://github.com" target="_blank" rel="noreferrer" className="flex items-center text-[13px] text-[#064E3B] hover:underline gap-2">
+                <Code className="h-4 w-4 shrink-0" />
+                <span>github.com/erostova</span>
+              </a>
             </div>
           </div>
         </div>
 
-        {/* Right Column (Timeline) */}
-        <div className="flex-1 relative pb-20 sm:pb-32">
-          {/* Top Button */}
-          <div className="flex justify-end mb-8">
-            <button className="border border-[#D2D2D2] hover:bg-[#F3F3F1] text-[#0D0D0D] hover:text-[#0D0D0D] px-5 py-2.5 text-[10px] font-sans font-bold uppercase tracking-[0.15em] transition-colors rounded-sm flex items-center gap-2">
-              <span className="font-mono text-[12px] font-medium">[+]</span> VERIFY OBJECT
-            </button>
+        {/* Right Column: Evidence Timeline */}
+        <div className="flex-1 space-y-8">
+          <div className="p-6 sm:p-8 bg-white border border-[#E7E2DA] rounded-lg">
+            <div className="flex items-center justify-between mb-4">
+              <span className="text-[11px] font-mono font-semibold text-[#064E3B] bg-[#064E3B]/10 px-2.5 py-1 rounded border border-[#064E3B]/20">
+                ✓ AUDITED PROJECT ARTIFACT
+              </span>
+              <span className="text-[12px] font-mono text-[#78716C]">2023 – Present</span>
+            </div>
+
+            <h3 className="text-[22px] font-sans font-semibold text-[#1C1917] mb-3">
+              Project: Aegis Distributed Storage Engine
+            </h3>
+
+            <p className="text-[14px] text-[#525252] leading-relaxed mb-6">
+              Designed and implemented a distributed log storage engine reducing replication latency by 40%. Authored technical architecture specs and led a team of 5 engineers through production rollout.
+            </p>
+
+            <div className="p-4 bg-[#FAF8F5] border border-[#E7E2DA] rounded flex items-center justify-between flex-wrap gap-3">
+              <div className="flex items-center gap-2">
+                <CheckCircle2 className="h-4 w-4 text-[#064E3B]" />
+                <span className="text-[12px] font-sans font-medium text-[#064E3B]">Code correctness &amp; architecture audited</span>
+              </div>
+              <span className="text-[12px] font-mono text-[#78716C]">Evaluator: Meritlane Board</span>
+            </div>
           </div>
 
-          <div className="pl-6 sm:pl-8">
-            
-            {/* Timeline Item 1 */}
-            <div className="relative mb-24">
-              {/* Vertical line passing through */}
-              <div className="absolute -left-[33px] top-3 bottom-[-96px] w-[2px] bg-[#E5E5E5]" />
-              {/* Timeline Dot */}
-              <div className="absolute -left-[36px] top-1.5 h-2 w-2 rounded-full bg-[#15803D]" />
-
-              <div className="flex items-center gap-4 mb-4">
-                <div className="text-[11px] font-mono text-[#0D0D0D] tracking-widest uppercase">2023 -<br/>Present</div>
-                <div className="w-1.5 h-1.5 bg-[#D2D2D2]" />
-                <div className="text-[11px] font-sans font-bold text-[#0D0D0D] tracking-[0.15em] uppercase">Lead<br/>Architect</div>
-              </div>
-
-              <h3 className="font-serif text-[38px] text-[#0D0D0D] leading-tight mb-5">
-                Project: Aegis Distributed Storage Engine
-              </h3>
-
-              <p className="text-[15px] text-[#737373] leading-relaxed max-w-2xl mb-8">
-                Designed and implemented a distributed log storage engine reducing replication latency by 40%. Authored technical architecture specs and led a team of 5 engineers through production rollout.
-              </p>
-
-              <div className="flex items-center gap-4 mb-10">
-                <span className="text-[10px] font-sans font-bold uppercase tracking-[0.15em] text-[#666666]">Claims:</span>
-                <span className="text-[14px] font-medium text-[#0D0D0D]">Distributed Systems</span>
-                <span className="text-[14px] font-medium text-[#0D0D0D] ml-4">Cryptography</span>
-              </div>
-
-              {/* Verification Block */}
-              <div className="border-t border-[#E5E5E5] pt-5 flex items-start gap-12">
-                <div className="flex items-center gap-2">
-                  <CheckCircle2 className="h-4 w-4 text-[#15803D]" />
-                  <span className="font-mono text-[12px] text-[#15803D]">Verified</span>
-                </div>
-                <div>
-                  <div className="font-mono text-[11px] text-[#666666] mb-1">Status:</div>
-                  <div className="font-mono text-[13px] text-[#0D0D0D]">Authenticated</div>
-                </div>
-                <div>
-                  <div className="font-mono text-[11px] text-[#666666] mb-1">Validator:</div>
-                  <div className="font-mono text-[13px] text-[#0D0D0D]">Meritlane<br/>Auditors</div>
-                </div>
-              </div>
+          <div className="p-6 sm:p-8 bg-white border border-[#E7E2DA] rounded-lg">
+            <div className="flex items-center justify-between mb-4">
+              <span className="text-[11px] font-mono font-semibold text-[#064E3B] bg-[#064E3B]/10 px-2.5 py-1 rounded border border-[#064E3B]/20">
+                ✓ AUDITED PROJECT ARTIFACT
+              </span>
+              <span className="text-[12px] font-mono text-[#78716C]">2021 – 2023</span>
             </div>
 
-            {/* Timeline Item 2 */}
-            <div className="relative">
-              {/* Timeline Dot */}
-              <div className="absolute -left-[36px] top-1.5 h-2 w-2 rounded-full bg-[#A16207]" />
+            <h3 className="text-[22px] font-sans font-semibold text-[#1C1917] mb-3">
+              Core Infrastructure V2
+            </h3>
 
-              <div className="flex items-center gap-4 mb-4">
-                <div className="text-[11px] font-mono text-[#0D0D0D] tracking-widest uppercase">2021 -<br/>2023</div>
-                <div className="w-1.5 h-1.5 bg-[#D2D2D2]" />
-                <div className="text-[11px] font-sans font-bold text-[#0D0D0D] tracking-[0.15em] uppercase">Senior<br/>Engineer</div>
+            <p className="text-[14px] text-[#525252] leading-relaxed mb-6">
+              Migrated legacy monolithic architecture to highly available microservices using Rust. Improved system throughput by 3x.
+            </p>
+
+            <div className="p-4 bg-[#FAF8F5] border border-[#E7E2DA] rounded flex items-center justify-between flex-wrap gap-3">
+              <div className="flex items-center gap-2">
+                <CheckCircle2 className="h-4 w-4 text-[#064E3B]" />
+                <span className="text-[12px] font-sans font-medium text-[#064E3B]">Benchmarked performance verified</span>
               </div>
-
-              <h3 className="font-serif text-[38px] text-[#0D0D0D] leading-tight mb-5">
-                Core Infrastructure V2
-              </h3>
-
-              <p className="text-[15px] text-[#737373] leading-relaxed max-w-2xl mb-8">
-                Migrated legacy monolithic architecture to highly available microservices using Rust. Improved system throughput by 3x.
-              </p>
-
-              <div className="flex items-center gap-4 mb-10">
-                <span className="text-[10px] font-sans font-bold uppercase tracking-[0.15em] text-[#666666]">Claims:</span>
-                <span className="text-[14px] font-medium text-[#0D0D0D]">Rust</span>
-              </div>
-
-              {/* Verification Block */}
-              <div className="border-t border-[#E5E5E5] pt-5 flex items-start gap-12">
-                <div className="flex items-center gap-2">
-                  <Clock className="h-4 w-4 text-[#A16207]" />
-                  <span className="font-mono text-[12px] text-[#A16207]">Under<br/>Review</span>
-                </div>
-                <div>
-                  <div className="font-mono text-[11px] text-[#666666] mb-1">Hash:</div>
-                  <div className="font-mono text-[13px] text-[#0D0D0D]">0x3C...8B90</div>
-                </div>
-                <div>
-                  <div className="font-mono text-[11px] text-[#666666] mb-1">Validator:</div>
-                  <div className="font-mono text-[13px] text-[#0D0D0D]">Peer<br/>Network</div>
-                </div>
-              </div>
+              <span className="text-[12px] font-mono text-[#78716C]">Evaluator: Meritlane Board</span>
             </div>
-
           </div>
         </div>
 
