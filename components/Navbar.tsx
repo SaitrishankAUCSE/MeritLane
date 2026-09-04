@@ -29,8 +29,11 @@ export default function Navbar() {
     pathname?.startsWith("/admin") ||
     pathname?.startsWith("/proof") ||
     pathname?.startsWith("/jobs") ||
+    pathname?.startsWith("/p/") ||
+    pathname === "/dashboard" ||
     pathname === "/login" ||
-    pathname === "/signup"
+    pathname === "/signup" ||
+    (!loading && user && (pathname === "/" || pathname === "/dashboard"))
   ) {
     return null;
   }
@@ -41,7 +44,7 @@ export default function Navbar() {
   const isPublicProfile = pathname?.startsWith("/p/") ?? false;
   const isEmployerDashboard = pathname === "/employer/dashboard";
 
-  if (isCandidateDashboard || isCandidateProfile || isPublicProfile || isEmployerDashboard) return null;
+  if (isCandidateDashboard || isCandidateProfile || isPublicProfile || isEmployerDashboard || isPublicProfile) return null;
 
   const isUserAdmin = isAdmin || user?.email?.toLowerCase() === "saitrishankb9@gmail.com";
   const isResolvingAuth = loading || (!isUserAdmin && user && profileLoading);

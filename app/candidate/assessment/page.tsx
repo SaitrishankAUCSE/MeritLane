@@ -242,50 +242,61 @@ function AssessmentContentWrapper() {
   // ── Init assessment ─────────────────────────────────────────────────────────
 
   useEffect(() => {
-    if (!loading) {
-      if (!user || !userProfile) {
-        router.replace("/login");
-        return;
-      }
+    // Wait until firebase auth has completely settled
+    if (loading) return;
 
-      const initAssessment = async () => {
-        try {
-          const token = await user.getIdToken(true);
-          const res = await fetch("/api/start-assessment", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${token}`,
-            },
-            body: JSON.stringify({ skill: skillParam }),
-          });
+    if (!user) {
+      router.replace("/login");
+      return;
+    }
 
-          const data = await res.json();
-          if (!res.ok) {
-            if (res.status === 403) setErrorMsg("SKILL NOT FOUND");
-            else if (res.status === 429) {
-              setErrorMsg("ASSESSMENT COOLDOWN ACTIVE");
-              setCooldownDays(data.cooldownDays || 14);
-              if (data.retryAvailableAt) setRetryAvailableAt(data.retryAvailableAt);
-            } else if (res.status === 409) setErrorMsg("ALREADY VERIFIED");
-            else setErrorMsg(data.error || "Failed to start assessment");
-            setInitializing(false);
-            return;
-          }
+    let isMounted = true;
 
-          setContent(data.content);
-          setCode(data.content.coding.initialCode);
+    const initAssessment = async () => {
+      try {
+        const token = await user.getIdToken();
+        const res = await fetch("/api/start-assessment", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ skill: skillParam }),
+        });
+
+        const data = await res.json();
+        if (!isMounted) return;
+
+        if (!res.ok) {
+          if (res.status === 403) setErrorMsg("SKILL NOT FOUND");
+          else if (res.status === 429) {
+            setErrorMsg("ASSESSMENT COOLDOWN ACTIVE");
+            setCooldownDays(data.cooldownDays || 14);
+            if (data.retryAvailableAt) setRetryAvailableAt(data.retryAvailableAt);
+          } else if (res.status === 409) setErrorMsg("ALREADY VERIFIED");
+          else setErrorMsg(data.error || "Failed to start assessment");
           setInitializing(false);
-        } catch (err) {
-          console.error(err);
+          return;
+        }
+
+        setContent(data.content);
+        setCode(data.content.coding.initialCode);
+        setInitializing(false);
+      } catch (err) {
+        console.error(err);
+        if (isMounted) {
           setErrorMsg("SYSTEM ERROR");
           setInitializing(false);
         }
-      };
+      }
+    };
 
-      initAssessment();
-    }
-  }, [user, userProfile, loading, router, skillParam]);
+    initAssessment();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [user, loading, router, skillParam]);
 
   // ── Timer ───────────────────────────────────────────────────────────────────
 

@@ -49,13 +49,18 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Candidate profile not found" }, { status: 404 });
     }
 
-    const candidateData = candidateDoc.data() || {};
+    const candidateData = candidateDoc.exists ? (candidateDoc.data() || {}) : {};
     const userData = userDoc.data() || {};
     
-    // Validate skill belongs to candidate
+    // Validate skill belongs to candidate (check candidateDoc skills or userDoc declared skills)
     const normalizedSkill = skill.toLowerCase().trim();
-    const hasSkill = (candidateData.skills || []).some((s: string) => s.toLowerCase().trim() === normalizedSkill);
-    if (!hasSkill) {
+    const candidateSkills: string[] = [
+      ...(candidateData.skills || []),
+      ...(userData.skills || [])
+    ];
+    
+    const hasSkill = candidateSkills.some((s: string) => s && s.toLowerCase().trim() === normalizedSkill);
+    if (!hasSkill && candidateSkills.length > 0) {
       return NextResponse.json({ error: "Requested skill is not part of your profile" }, { status: 403 });
     }
 
