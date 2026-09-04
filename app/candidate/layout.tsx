@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { usePathname } from "next/navigation";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import { CandidateSidebar } from "@/components/candidate/CandidateSidebar";
 import { MobileNav } from "@/components/ui/MobileNav";
@@ -9,6 +10,25 @@ import { CandidateMessageNotifier } from "@/components/candidate/CandidateMessag
 import { ProfileCompletionGuard } from "@/components/candidate/ProfileCompletionGuard";
 
 export default function CandidateLayout({ children }: { children: React.ReactNode }) {
+  const pathname = usePathname();
+  const isAssessment = pathname?.startsWith("/candidate/assessment");
+
+  if (isAssessment) {
+    return (
+      <ProtectedRoute allowedRoles={["candidate"]}>
+        <ToastProvider>
+          <div className="h-[100dvh] w-screen bg-[#F8F6F3] text-[#1C1917] font-sans overflow-hidden fixed inset-0 flex flex-col">
+            <main className="flex-1 h-full w-full overflow-hidden flex flex-col min-h-0">
+              <ProfileCompletionGuard>
+                {children}
+              </ProfileCompletionGuard>
+            </main>
+          </div>
+        </ToastProvider>
+      </ProtectedRoute>
+    );
+  }
+
   return (
     <ProtectedRoute allowedRoles={["candidate"]}>
       <ToastProvider>
@@ -27,3 +47,4 @@ export default function CandidateLayout({ children }: { children: React.ReactNod
     </ProtectedRoute>
   );
 }
+
