@@ -41,6 +41,7 @@ export interface AssessmentContent {
 interface InfractionOverlayProps {
   violationCount: number;
   maxViolations: number;
+  reason?: string;
   onRestoreFullscreen: () => void;
   requiresUserGesture: boolean;
 }
@@ -48,6 +49,7 @@ interface InfractionOverlayProps {
 function InfractionOverlay({
   violationCount,
   maxViolations,
+  reason,
   onRestoreFullscreen,
   requiresUserGesture,
 }: InfractionOverlayProps) {
@@ -66,11 +68,11 @@ function InfractionOverlay({
       role="alertdialog"
       aria-modal="true"
       aria-label="Assessment integrity warning"
-      className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/80 backdrop-blur-sm p-6"
+      className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/85 backdrop-blur-md p-6"
     >
       <div className="w-full max-w-md bg-white rounded-2xl border border-[#E7E2DA] shadow-2xl overflow-hidden">
         {/* Top accent */}
-        <div className={`h-1 w-full ${isFinal ? "bg-[#B42318]" : "bg-[#D97706]"}`} />
+        <div className={`h-1.5 w-full ${isFinal ? "bg-[#B42318]" : "bg-[#D97706]"}`} />
 
         <div className="p-8">
           <div
@@ -87,40 +89,41 @@ function InfractionOverlay({
 
           <div className="text-center">
             <div
-              className={`text-[11px] font-mono uppercase tracking-[0.15em] mb-2 font-medium ${
+              className={`text-[11px] font-mono uppercase tracking-[0.15em] mb-2 font-semibold ${
                 isFinal ? "text-[#B42318]" : "text-[#D97706]"
               }`}
             >
-              Integrity Warning — {violationCount} / {maxViolations}
+              Integrity Warning — Warning {violationCount} of {maxViolations}
             </div>
 
-            <h2 className="text-[22px] font-semibold text-[#1C1917] mb-3 leading-tight">
-              {isFinal ? "Assessment terminated" : "Fullscreen mode exited"}
+            <h2 className="text-[20px] font-semibold text-[#1C1917] mb-2 leading-tight">
+              {isFinal ? "Assessment Terminated" : reason || "Proctoring Violation Detected"}
             </h2>
 
-            <p className="text-[14px] text-[#78716C] leading-relaxed mb-6">
+            <div className="bg-[#FAF8F5] border border-[#E7E2DA] rounded-xl p-3.5 mb-5 text-[12px] font-mono text-[#78716C] text-left">
+              <span className="font-semibold text-[#1C1917]">Integrity Policy:</span> Switching tabs, minimising the window, or navigating away is strictly monitored and recorded.
+            </div>
+
+            <p className="text-[13px] text-[#78716C] leading-relaxed mb-6">
               {isFinal ? (
                 <>
-                  Your assessment has been terminated due to repeated integrity
-                  violations. This has been recorded. A 21-day cooldown is now
-                  active.
+                  Your assessment has been automatically terminated due to reaching {maxViolations} integrity violations. A mandatory <strong className="text-[#B42318]">21-day cooldown</strong> has been applied to your record.
                 </>
               ) : requiresUserGesture ? (
                 <>
-                  Your assessment must remain in fullscreen mode.{" "}
-                  <span className="text-[#1C1917] font-medium">
-                    {remaining} violation{remaining !== 1 ? "s" : ""} remaining
-                  </span>{" "}
-                  before automatic termination. Click below to return to fullscreen.
+                  Your assessment must remain in active fullscreen focus.{" "}
+                  <strong className="text-[#1C1917]">
+                    {remaining} warning{remaining !== 1 ? "s" : ""} remaining
+                  </strong>{" "}
+                  before immediate termination and 21-day cooldown. Click below to return.
                 </>
               ) : (
                 <>
-                  Your assessment must remain in fullscreen mode. Fullscreen
-                  will be restored automatically.{" "}
-                  <span className="text-[#1C1917] font-medium">
-                    {remaining} violation{remaining !== 1 ? "s" : ""} remaining
-                  </span>{" "}
-                  before automatic termination.
+                  Your assessment must remain in active fullscreen focus.{" "}
+                  <strong className="text-[#1C1917]">
+                    {remaining} warning{remaining !== 1 ? "s" : ""} remaining
+                  </strong>{" "}
+                  before automatic termination. Fullscreen is restoring.
                 </>
               )}
             </p>
@@ -131,9 +134,10 @@ function InfractionOverlay({
                 onClick={onRestoreFullscreen}
                 className="w-full h-11 bg-[#1C1917] text-white text-[14px] font-semibold rounded-xl
                            hover:bg-[#292524] transition-colors focus:outline-none focus:ring-2
-                           focus:ring-[#1C1917] focus:ring-offset-2"
+                           focus:ring-[#1C1917] focus:ring-offset-2 flex items-center justify-center gap-2"
               >
-                Return to Fullscreen
+                <Maximize2 className="h-4 w-4" />
+                Return to Assessment
               </button>
             )}
           </div>
@@ -230,6 +234,7 @@ function AssessmentContentWrapper() {
   // Overlay states
   const [infractionOverlay, setInfractionOverlay] = useState<{
     count: number;
+    reason: string;
     requiresUserGesture: boolean;
   } | null>(null);
   const [fullscreenUnsupported, setFullscreenUnsupported] = useState(false);
@@ -389,39 +394,55 @@ function AssessmentContentWrapper() {
     // Trap back button
     window.history.pushState(null, "", window.location.href);
 
-    const triggerInfraction = (type: string) => {
+    const triggerInfraction = (type: string, reasonLabel: string) => {
       if (isTerminatedRef.current) return;
 
       setInfractionCount((prev) => {
         const count = prev + 1;
 
+        // Persist infraction to server in real time
+        if (auth.currentUser) {
+          auth.currentUser.getIdToken().then((token: string) => {
+            fetch("/api/candidate/record-infraction", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`
+              },
+              body: JSON.stringify({
+                skill: skillParam,
+                type,
+                count,
+                timestamp: Date.now()
+              })
+            }).catch(() => {});
+          }).catch(() => {});
+        }
+
         // Analytics
         import("posthog-js").then((posthog) => {
-          posthog.default.capture("assessment_fullscreen_violation", { count, type, skill: skillParam });
+          posthog.default.capture("assessment_fullscreen_violation", { count, type, reason: reasonLabel, skill: skillParam });
         }).catch(() => {});
 
         if (count >= MAX_VIOLATIONS) {
-          // Third violation — terminate
+          // Third violation — terminate immediately
           handleIntegrityTerminate();
-          setInfractionOverlay({ count, requiresUserGesture: false });
+          setInfractionOverlay({ count, reason: reasonLabel, requiresUserGesture: false });
           return count;
         }
 
         // Show in-app overlay warning
-        // Attempt auto-restore after 3 seconds (if browser allows without user gesture)
         const tryAutoRestore = type === "exited_fullscreen" || type === "hidden_tab";
 
-        setInfractionOverlay({ count, requiresUserGesture: !tryAutoRestore });
+        setInfractionOverlay({ count, reason: reasonLabel, requiresUserGesture: !tryAutoRestore });
 
         if (tryAutoRestore) {
           setTimeout(async () => {
             if (isTerminatedRef.current) return;
             const restored = await requestFullscreenSafe();
             if (restored) {
-              // Successfully restored — clear overlay after brief confirmation
               setTimeout(() => setInfractionOverlay(null), 600);
             } else {
-              // Browser requires user gesture — keep overlay with manual button
               setInfractionOverlay((prev) =>
                 prev ? { ...prev, requiresUserGesture: true } : prev
               );
@@ -435,20 +456,26 @@ function AssessmentContentWrapper() {
 
     const handleVisibilityChange = () => {
       if (document.visibilityState === "hidden") {
-        triggerInfraction("hidden_tab");
+        triggerInfraction("hidden_tab", "Tab Switched or Window Minimized");
+      }
+    };
+
+    const handleWindowBlur = () => {
+      if (!isRestoringFullscreenRef.current && hasStarted && !isTerminatedRef.current) {
+        triggerInfraction("window_blur", "Switched Away / Focus Lost from Examination");
       }
     };
 
     const handlePopState = () => {
       window.history.pushState(null, "", window.location.href);
-      triggerInfraction("back_button");
+      triggerInfraction("back_button", "Browser Navigation Attempted");
     };
 
     const handleFullscreenChange = () => {
       // Skip if MeritLane itself triggered the change (restoration or initial entry)
       if (isRestoringFullscreenRef.current) return;
       if (!document.fullscreenElement && hasStarted && !isTerminatedRef.current) {
-        triggerInfraction("exited_fullscreen");
+        triggerInfraction("exited_fullscreen", "Fullscreen Mode Exited");
       }
     };
 
@@ -482,6 +509,7 @@ function AssessmentContentWrapper() {
     };
 
     document.addEventListener("visibilitychange", handleVisibilityChange);
+    window.addEventListener("blur", handleWindowBlur);
     window.addEventListener("popstate", handlePopState);
     document.addEventListener("fullscreenchange", handleFullscreenChange);
     window.addEventListener("beforeunload", handleBeforeUnload);
@@ -491,6 +519,7 @@ function AssessmentContentWrapper() {
 
     return () => {
       document.removeEventListener("visibilitychange", handleVisibilityChange);
+      window.removeEventListener("blur", handleWindowBlur);
       window.removeEventListener("popstate", handlePopState);
       document.removeEventListener("fullscreenchange", handleFullscreenChange);
       window.removeEventListener("beforeunload", handleBeforeUnload);
@@ -1084,6 +1113,7 @@ function AssessmentContentWrapper() {
         <InfractionOverlay
           violationCount={infractionOverlay.count}
           maxViolations={MAX_VIOLATIONS}
+          reason={infractionOverlay.reason}
           requiresUserGesture={infractionOverlay.requiresUserGesture}
           onRestoreFullscreen={async () => {
             const ok = await requestFullscreenSafe();
