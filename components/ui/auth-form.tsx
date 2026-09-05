@@ -131,15 +131,20 @@ export function AuthForm({ mode: initialMode }: AuthFormProps) {
         posthog.capture("user_logged_in", { method: 'email' });
       }
     } catch (err: any) {
+      console.error("Auth error details:", err);
       setIsSigningUp(false);
       if (err.code === "auth/invalid-credential" || err.code === "auth/user-not-found" || err.code === "auth/wrong-password") {
         setError("Unable to sign in. Please check your email and password and try again.");
       } else if (err.code === "auth/email-already-in-use") {
-        setError("An account already exists with this email address.");
+        setError("An account already exists with this email address. Please sign in instead.");
+      } else if (err.code === "auth/weak-password") {
+        setError("Password is too weak. Please use at least 6 characters.");
       } else if (err.code === "auth/network-request-failed") {
         setError("We couldn't connect right now. Please check your connection and try again.");
+      } else if (err.code === "auth/operation-not-allowed") {
+        setError("Email/password sign-in is not enabled in Firebase Console.");
       } else {
-        setError("Authentication failed. Please try again.");
+        setError(err.message || "Authentication failed. Please try again.");
       }
       setLoadingAction(false);
     }
