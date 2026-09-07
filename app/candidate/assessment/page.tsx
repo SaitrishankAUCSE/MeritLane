@@ -57,8 +57,10 @@ export interface CodingChallenge {
 export interface AssessmentContent {
   mcqs: MCQ[];
   coding?: CodingChallenge;
+  codingTasks?: CodingChallenge[];
   hasCoding: boolean;
   timeLimitMinutes: number;
+  assessmentType?: "coding_capable" | "mcq_only";
 }
 
 // ─── Infraction Overlay ───────────────────────────────────────────────────────
@@ -238,13 +240,27 @@ function AssessmentContentWrapper() {
     skill: string;
     retryAvailableAt?: string;
     aiFeedback?: string;
+    assessmentScores?: {
+      easy: number;
+      easyPassed: boolean;
+      medium: number;
+      mediumPassed: boolean;
+      mcq: number;
+      mcqPassed: boolean;
+      overall: number;
+    };
   } | null>(null);
 
   const [content, setContent] = useState<AssessmentContent | null>(null);
   const [phase, setPhase] = useState<"intro" | "mcq" | "coding">("intro");
   const [mcqIndex, setMcqIndex] = useState(0);
   const [mcqAnswers, setMcqAnswers] = useState<(number | undefined)[]>([]);
-  const [timeLeft, setTimeLeft] = useState<number>(60 * 60);
+  // Bank-aware dual-task: codeEasy = Task 1 (easy), codeMedium = Task 2 (medium-hard)
+  const [activeCodingTaskIdx, setActiveCodingTaskIdx] = useState<0 | 1>(0);
+  const [codeEasy, setCodeEasy] = useState("");
+  const [codeMedium, setCodeMedium] = useState("");
+  // Default to 90 min (5400s) for coding-capable; will be corrected from server data
+  const [timeLeft, setTimeLeft] = useState<number>(90 * 60);
   const [selectedLanguage, setSelectedLanguage] = useState<string>("python");
   const [showSubmitModal, setShowSubmitModal] = useState<boolean>(false);
   const [code, setCode] = useState("");
@@ -375,9 +391,29 @@ function AssessmentContentWrapper() {
           }
         }
 
+        // ── Bank-aware dual-task: codingTasks[0]=easy, codingTasks[1]=medium ──
+        if (data.content.codingTasks && Array.isArray(data.content.codingTasks)) {
+          const easyTask = data.content.codingTasks[0];
+          const mediumTask = data.content.codingTasks[1];
+          setCodeEasy(restoredDraft?.codeEasy || easyTask?.initialCode || "");
+          setCodeMedium(restoredDraft?.codeMedium || mediumTask?.initialCode || "");
+          // Also set legacy `code` to easy task for initial editor display
+          setCode(restoredDraft?.codeEasy || easyTask?.initialCode || "");
+          if (!restoredDraft?.selectedLanguage) setSelectedLanguage("python");
+        }
+
+        if (restoredDraft?.customInput && typeof restoredDraft.customInput === "string") {
+          setCustomInput(restoredDraft.customInput);
+        }
+
         if (data.startedAt) {
           const elapsed = Math.floor((Date.now() - data.startedAt) / 1000);
-          setTimeLeft(Math.max(0, 3600 - elapsed));
+          // Use timeLimitMinutes from server (90 for coding, 35 for MCQ-only)
+          const totalSecs = (data.content.timeLimitMinutes || 90) * 60;
+          setTimeLeft(Math.max(0, totalSecs - elapsed));
+        } else {
+          const totalSecs = (data.content.timeLimitMinutes || 90) * 60;
+          setTimeLeft(totalSecs);
         }
         setInitializing(false);
       } catch (err) {
@@ -897,6 +933,14 @@ function AssessmentContentWrapper() {
 
     try {
       const token = user ? await user.getIdToken(true) : "";
+      const isDualTask = !!(content?.codingTasks && content.codingTasks.length >= 2);
+      const activeCode = isDualTask
+        ? (activeCodingTaskIdx === 0 ? codeEasy : codeMedium)
+        : code;
+      const activeQuestion = isDualTask
+        ? content!.codingTasks![activeCodingTaskIdx]
+        : content?.coding;
+
       const res = await fetch("/api/verify", {
         method: "POST",
         headers: {
@@ -905,9 +949,10 @@ function AssessmentContentWrapper() {
         },
         body: JSON.stringify({
           skill: skillParam,
-          code,
+          code: activeCode,
           language: selectedLanguage,
           isPublicTest: true,
+          questionId: activeQuestion?.id,
           customInput: (activeConsoleTab === "custom" && customInput.trim()) ? customInput.trim() : undefined,
         }),
       });
@@ -981,6 +1026,7 @@ function AssessmentContentWrapper() {
 
     try {
       const token = user ? await user.getIdToken(true) : "";
+      const isDualTask = !!(content?.codingTasks && content.codingTasks.length >= 2);
       const res = await fetch("/api/verify", {
         method: "POST",
         headers: {
@@ -990,7 +1036,11 @@ function AssessmentContentWrapper() {
         body: JSON.stringify({
           skill: skillParam,
           answers: mcqAnswers,
-          code,
+          // Dual-task: send easy + medium separately
+          easyCode: isDualTask ? codeEasy : undefined,
+          mediumCode: isDualTask ? codeMedium : undefined,
+          // Legacy fallback
+          code: isDualTask ? undefined : code,
           language: selectedLanguage,
           isPublicTest: false,
         }),
@@ -1029,6 +1079,7 @@ function AssessmentContentWrapper() {
             status: "verified",
             skill: skillParam,
             aiFeedback: data.aiFeedback,
+            assessmentScores: data.assessmentScores,
           });
         }, 600);
       } else {
@@ -1049,6 +1100,7 @@ function AssessmentContentWrapper() {
             skill: skillParam,
             retryAvailableAt: data.retryAvailableAt,
             aiFeedback: data.aiFeedback,
+            assessmentScores: data.assessmentScores,
           });
         }, 600);
       }
@@ -1361,10 +1413,36 @@ function AssessmentContentWrapper() {
           <div className="text-[44px] font-mono font-bold text-[#16A34A] mb-3 leading-none">
             {assessmentResult.score}%
           </div>
-          <p className="text-[14px] text-[#78716C] mb-6 leading-relaxed">
+          <p className="text-[14px] text-[#78716C] mb-5 leading-relaxed">
             Your technical claim has been verified. Your public proof record has been updated and
             is now visible to eligible employers.
           </p>
+          {/* Proof Trace: Component Scores */}
+          {assessmentResult.assessmentScores && (
+            <div className="border border-[#16A34A]/25 bg-[#F0FDF4]/60 rounded p-4 mb-5 text-left">
+              <div className="text-[10px] font-mono uppercase tracking-[0.15em] text-[#16A34A] mb-3 font-semibold">Proof Trace</div>
+              <div className="flex flex-col gap-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-[12px] text-[#78716C] font-medium">EASY Task</span>
+                  <span className={`text-[12px] font-mono font-semibold ${assessmentResult.assessmentScores.easyPassed ? 'text-[#16A34A]' : 'text-[#B42318]'}`}>
+                    {assessmentResult.assessmentScores.easyPassed ? '✓ 100%' : `✗ ${assessmentResult.assessmentScores.easy}%`}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-[12px] text-[#78716C] font-medium">MEDIUM Task</span>
+                  <span className={`text-[12px] font-mono font-semibold ${assessmentResult.assessmentScores.mediumPassed ? 'text-[#16A34A]' : 'text-[#B42318]'}`}>
+                    {assessmentResult.assessmentScores.mediumPassed ? `✓ ${assessmentResult.assessmentScores.medium}%` : `✗ ${assessmentResult.assessmentScores.medium}%`}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-[12px] text-[#78716C] font-medium">MCQ</span>
+                  <span className={`text-[12px] font-mono font-semibold ${assessmentResult.assessmentScores.mcqPassed ? 'text-[#16A34A]' : 'text-[#B42318]'}`}>
+                    {assessmentResult.assessmentScores.mcqPassed ? `✓ ${assessmentResult.assessmentScores.mcq}%` : `✗ ${assessmentResult.assessmentScores.mcq}%`}
+                  </span>
+                </div>
+              </div>
+            </div>
+          )}
           {assessmentResult.aiFeedback && (
             <div className="border border-[#16A34A]/20 bg-[#F0FDF4]/50 p-4 rounded mb-8 text-left">
               <div className="text-[11px] font-semibold uppercase tracking-wider text-[#16A34A] mb-1.5">
@@ -1434,9 +1512,35 @@ function AssessmentContentWrapper() {
             {assessmentResult.score}%
           </div>
           <p className="text-[14px] text-[#78716C] mb-4 leading-relaxed">
-            80% is required to verify this skill.
+            80% is required to verify this skill. Review the component breakdown below.
           </p>
-          <div className="border border-[#E7E2DA] bg-[#F8F6F3] p-4 rounded mb-6 text-left">
+          {/* Proof Trace: Component Scores */}
+          {assessmentResult.assessmentScores && (
+            <div className="border border-[#B42318]/20 bg-[#FEF2F2]/60 rounded p-4 mb-4 text-left">
+              <div className="text-[10px] font-mono uppercase tracking-[0.15em] text-[#B42318] mb-3 font-semibold">Proof Trace</div>
+              <div className="flex flex-col gap-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-[12px] text-[#78716C] font-medium">EASY Task <span className="text-[10px] text-[#A8A29E]">(must be 100%)</span></span>
+                  <span className={`text-[12px] font-mono font-semibold ${assessmentResult.assessmentScores.easyPassed ? 'text-[#16A34A]' : 'text-[#B42318]'}`}>
+                    {assessmentResult.assessmentScores.easyPassed ? '✓ 100%' : `✗ ${assessmentResult.assessmentScores.easy}%`}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-[12px] text-[#78716C] font-medium">MEDIUM Task <span className="text-[10px] text-[#A8A29E]">(≥ 60%)</span></span>
+                  <span className={`text-[12px] font-mono font-semibold ${assessmentResult.assessmentScores.mediumPassed ? 'text-[#16A34A]' : 'text-[#B42318]'}`}>
+                    {assessmentResult.assessmentScores.mediumPassed ? `✓ ${assessmentResult.assessmentScores.medium}%` : `✗ ${assessmentResult.assessmentScores.medium}%`}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-[12px] text-[#78716C] font-medium">MCQ <span className="text-[10px] text-[#A8A29E]">(≥ 70%)</span></span>
+                  <span className={`text-[12px] font-mono font-semibold ${assessmentResult.assessmentScores.mcqPassed ? 'text-[#16A34A]' : 'text-[#B42318]'}`}>
+                    {assessmentResult.assessmentScores.mcqPassed ? `✓ ${assessmentResult.assessmentScores.mcq}%` : `✗ ${assessmentResult.assessmentScores.mcq}%`}
+                  </span>
+                </div>
+              </div>
+            </div>
+          )}
+          <div className="border border-[#E7E2DA] bg-[#F8F6F3] p-4 rounded mb-5 text-left">
             <div className="text-[12px] font-medium text-[#78716C] mb-1">
               Next eligible attempt
             </div>

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { adminAuth, adminDb } from "@/lib/firebase/admin";
 import { FieldValue } from 'firebase-admin/firestore';
 import { getAssessmentContent } from "@/lib/assessments/content";
+import { getBankForSkill, selectAssignment, sanitiseCodingQuestion, sanitiseMcqs } from "@/lib/assessments/selector";
 
 export async function POST(req: NextRequest) {
   try {
@@ -30,7 +31,7 @@ export async function POST(req: NextRequest) {
     let decodedToken;
     try {
       decodedToken = await adminAuth.verifyIdToken(idToken);
-    } catch (e) {
+    } catch {
       return NextResponse.json({ error: "Invalid token" }, { status: 401 });
     }
 
@@ -52,7 +53,7 @@ export async function POST(req: NextRequest) {
     const candidateData = candidateDoc.exists ? (candidateDoc.data() || {}) : {};
     const userData = userDoc.data() || {};
     
-    // Validate skill belongs to candidate (check candidateDoc skills or userDoc declared skills)
+    // Validate skill belongs to candidate
     const normalizedSkill = skill.toLowerCase().trim();
     const candidateSkills: string[] = [
       ...(candidateData.skills || []),
@@ -66,15 +67,13 @@ export async function POST(req: NextRequest) {
 
     const now = Date.now();
 
-    // Check cooldown — integrity terminations use a 21-day window; normal failures use 14-day
+    // Check cooldown (unchanged)
     const isDev = process.env.NODE_ENV === "development";
     const bypassCooldown = isDev && (body.resetCooldown === true || req.nextUrl.searchParams.get("resetCooldown") === "true" || req.headers.get("x-dev-bypass-cooldown") === "true");
 
     if (!bypassCooldown && userData.failedAssessments && userData.failedAssessments[skill]) {
       const failedTimestamp = userData.failedAssessments[skill];
       const failedMs = typeof failedTimestamp.toMillis === "function" ? failedTimestamp.toMillis() : failedTimestamp;
-
-      // Detect integrity termination (written by /api/terminate-assessment)
       const isIntegrityTermination = !!(userData.integrityTerminations && userData.integrityTerminations[skill]);
       const cooldownMs = isIntegrityTermination ? 21 * 24 * 60 * 60 * 1000 : 14 * 24 * 60 * 60 * 1000;
       const cooldownLabel = isIntegrityTermination ? "21-day integrity cooldown" : "14-day cooldown";
@@ -88,75 +87,142 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // Check if an attempt is already active
+    // ─── Bank-aware path (Python and future skills) ─────────────────────────────
+    const bank = await getBankForSkill(skill);
+    const hasBankSupport = !!bank;
+
+    // Time limits per approved spec:
+    // Coding-capable: 90 min | MCQ-only: 35 min
+    const timeLimitMinutes = hasBankSupport ? 90 : 35;
+    const sessionWindowMs = timeLimitMinutes * 60 * 1000;
+    const gracePeriodMs = 2 * 60 * 1000;
+
+    // Resume active session if within window
     if (userData.assessmentStartedAt && userData.assessmentSkill === skill) {
-      const startedMs = userData.assessmentStartedAt.toMillis();
-      const sixtyMinsMs = 60 * 60 * 1000;
-      
-      if (now - startedMs < sixtyMinsMs) {
-        const activeSeed = userData.assessmentSeed || uid;
-        const activeContent = getAssessmentContent(skill, activeSeed);
-        const sanitizedActiveContent = {
-          mcqs: activeContent.mcqs.map((mcq) => ({
-            question: mcq.question,
-            options: mcq.options,
-            difficulty: mcq.difficulty,
-            topic: mcq.topic
-          })),
-          coding: activeContent.coding,
-          hasCoding: activeContent.hasCoding,
-          timeLimitMinutes: 60
-        };
+      const startedMs = userData.assessmentStartedAt.toMillis?.() || userData.assessmentStartedAt;
+      if (now - startedMs < sessionWindowMs) {
+        // Build resume content
+        let resumeContent: Record<string, unknown>;
+
+        if (hasBankSupport && userData.assessmentEasyQuestionId && userData.assessmentMediumQuestionId) {
+          // Bank-aware resume
+          const seenAll = [...(bank!.easy), ...(bank!.mediumHard)];
+          const easyQ = seenAll.find(q => q.id === userData.assessmentEasyQuestionId);
+          const mediumQ = seenAll.find(q => q.id === userData.assessmentMediumQuestionId);
+          const mcqIds: string[] = userData.assessmentMcqIds || [];
+          const mcqItems = bank!.mcqs.filter(m => mcqIds.includes(m.id));
+
+          resumeContent = {
+            codingTasks: easyQ && mediumQ ? [sanitiseCodingQuestion(easyQ), sanitiseCodingQuestion(mediumQ)] : [],
+            coding: easyQ ? sanitiseCodingQuestion(easyQ) : undefined,
+            mcqs: sanitiseMcqs(mcqItems),
+            hasCoding: true,
+            timeLimitMinutes,
+            assessmentType: "coding_capable",
+          };
+        } else {
+          // Legacy content resume
+          const activeSeed = userData.assessmentSeed || uid;
+          const activeContent = getAssessmentContent(skill, activeSeed);
+          resumeContent = {
+            mcqs: activeContent.mcqs.map((mcq) => ({
+              question: mcq.question,
+              options: mcq.options,
+              difficulty: mcq.difficulty,
+              topic: mcq.topic
+            })),
+            coding: activeContent.coding,
+            hasCoding: activeContent.hasCoding,
+            timeLimitMinutes,
+          };
+        }
 
         return NextResponse.json({ 
           message: "Resuming session",
           startedAt: startedMs,
           variant: userData.assessmentVariant || "A",
-          skill: skill,
-          content: sanitizedActiveContent
+          skill,
+          content: resumeContent
         }, { status: 200 });
       }
     }
 
-    // Generate a fresh unique attempt seed so questions and options are dynamically shuffled every time
-    const freshAttemptSeed = `${uid}_${Date.now()}_${Math.floor(Math.random() * 1000000)}`;
-    const freshContent = getAssessmentContent(skill, freshAttemptSeed);
-
-    const sanitizedFreshContent = {
-      mcqs: freshContent.mcqs.map((mcq) => ({
-        question: mcq.question,
-        options: mcq.options,
-        difficulty: mcq.difficulty,
-        topic: mcq.topic
-      })),
-      coding: freshContent.coding,
-      hasCoding: freshContent.hasCoding,
-      timeLimitMinutes: 60
+    // ─── Start fresh session ────────────────────────────────────────────────────
+    let freshContent: Record<string, unknown>;
+    const firestoreUpdates: Record<string, unknown> = {
+      assessmentStartedAt: FieldValue.serverTimestamp(),
+      assessmentVariant: "A",
+      assessmentSkill: skill,
     };
 
-    // Assign a variant (A by default to align with standard problem templates)
-    const newVariant = "A";
+    if (hasBankSupport && bank) {
+      // Read candidate's seen questions for this skill
+      const seenRaw = candidateData.seenQuestions?.[normalizedSkill] || {};
+      const seen = {
+        coding: Array.isArray(seenRaw.coding) ? seenRaw.coding : [],
+        mcq: Array.isArray(seenRaw.mcq) ? seenRaw.mcq : [],
+      };
 
-    // Start a fresh session with dynamic seed
-    await userRef.update({
-      assessmentStartedAt: FieldValue.serverTimestamp(),
-      assessmentVariant: newVariant,
-      assessmentSkill: skill,
-      assessmentSeed: freshAttemptSeed
-    });
+      // Select non-repeating assignment
+      const assignment = selectAssignment(bank, seen, skill);
 
+      // Store question IDs in user session
+      firestoreUpdates.assessmentEasyQuestionId = assignment.easyId;
+      firestoreUpdates.assessmentMediumQuestionId = assignment.mediumId;
+      firestoreUpdates.assessmentMcqIds = assignment.mcqIds;
+      // Clear legacy seed
+      firestoreUpdates.assessmentSeed = FieldValue.delete();
+
+      // Append seen questions to candidate doc (fire-and-forget, don't block response)
+      candidateRef.update({
+        [`seenQuestions.${normalizedSkill}.coding`]: FieldValue.arrayUnion(assignment.easyId, assignment.mediumId),
+        [`seenQuestions.${normalizedSkill}.mcq`]: FieldValue.arrayUnion(...assignment.mcqIds),
+      }).catch((e: Error) => console.error("[seenQuestions update failed]", e.message));
+
+      freshContent = {
+        codingTasks: [
+          sanitiseCodingQuestion(assignment.easy),
+          sanitiseCodingQuestion(assignment.medium),
+        ],
+        coding: sanitiseCodingQuestion(assignment.easy), // backward compat for page.tsx
+        mcqs: sanitiseMcqs(assignment.mcqs),
+        hasCoding: true,
+        timeLimitMinutes,
+        assessmentType: "coding_capable",
+      };
+    } else {
+      // Legacy path: randomise with seed
+      const freshSeed = `${uid}_${Date.now()}_${Math.floor(Math.random() * 1000000)}`;
+      firestoreUpdates.assessmentSeed = freshSeed;
+      const legacyContent = getAssessmentContent(skill, freshSeed);
+
+      freshContent = {
+        mcqs: legacyContent.mcqs.map((mcq) => ({
+          question: mcq.question,
+          options: mcq.options,
+          difficulty: mcq.difficulty,
+          topic: mcq.topic
+        })),
+        coding: legacyContent.coding,
+        hasCoding: legacyContent.hasCoding,
+        timeLimitMinutes,
+        assessmentType: hasBankSupport ? "coding_capable" : "mcq_only",
+      };
+    }
+
+    await userRef.update(firestoreUpdates);
     const updatedDoc = await userRef.get();
-    const startedAt = updatedDoc.data()?.assessmentStartedAt?.toMillis() || Date.now();
+    const startedAt = updatedDoc.data()?.assessmentStartedAt?.toMillis?.() || Date.now();
 
     return NextResponse.json({ 
       message: "Assessment started",
-      startedAt: startedAt,
-      variant: newVariant,
-      skill: skill,
-      content: sanitizedFreshContent
+      startedAt,
+      variant: "A",
+      skill,
+      content: freshContent
     }, { status: 200 });
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Error starting assessment:", error);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }

@@ -26,9 +26,14 @@ export interface CodingChallenge {
 
 export interface AssessmentContent {
   mcqs: MCQ[];
+  /** Single task (legacy) */
   coding?: CodingChallenge;
+  /** Dual-task bank-aware mode: [0] = easy, [1] = medium-hard */
+  codingTasks?: CodingChallenge[];
   hasCoding: boolean;
   timeLimitMinutes: number;
+  /** "coding_capable" (bank) | "mcq_only" (legacy MCQ) */
+  assessmentType?: "coding_capable" | "mcq_only";
 }
 
 export const COMMON_SUPPORTED_LANGUAGES: SupportedLanguage[] = [

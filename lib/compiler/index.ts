@@ -1,6 +1,7 @@
 import ts from "typescript";
 import vm from "node:vm";
 import { spawn } from "node:child_process";
+import type { TestCase } from "@/lib/assessments/bank/types";
 
 export interface TestCaseResult {
   name: string;
@@ -1167,7 +1168,162 @@ async function executeCpp(code: string, isPublicTest: boolean = false): Promise<
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// 5. MAIN ENTRY POINT
+// 5. BANK-AWARE PYTHON EXECUTOR (question-ID driven test selection)
+// ─────────────────────────────────────────────────────────────────────────────
+
+async function executePythonForQuestion(
+  code: string,
+  questionId: string,
+  isPublicTest: boolean,
+  customInput?: string
+): Promise<ExecutionResult | null> {
+  const startTime = Date.now();
+
+  // Load question from bank (server-side only import)
+  let question: import("@/lib/assessments/bank/types").CodingQuestion | undefined;
+  try {
+    const { getPythonBank } = await import("@/lib/assessments/bank/python");
+    const bank = getPythonBank();
+    question = [...bank.easy, ...bank.mediumHard].find(q => q.id === questionId);
+  } catch {
+    return null;
+  }
+  if (!question) return null;
+
+  // Select test cases: 5 public OR all 50 for final submission
+  const testCases: TestCase[] = isPublicTest
+    ? question.publicTests.slice(0, 5)
+    : [...question.publicTests, ...question.hiddenTests].slice(0, 50);
+
+  const codeB64 = Buffer.from(code).toString("base64");
+  const testDataB64 = Buffer.from(JSON.stringify(testCases)).toString("base64");
+  const funcName = question.functionName;
+
+  // ── Python harness ──────────────────────────────────────────────────────────
+  // FLOAT_TOL = 0.01: abs(result - expected) < 0.01 (user-approved tolerance)
+  // ────────────────────────────────────────────────────────────────────────────
+  const runner = `
+import sys, io, json, base64, traceback
+
+FLOAT_TOL = 0.01  # abs(result - expected) < 0.01 per specification
+
+real_stdout = sys.stdout
+captured = io.StringIO()
+sys.stdout = captured
+
+candidate_code = base64.b64decode("${codeB64}").decode("utf-8")
+namespace = {}
+try:
+    exec(compile(candidate_code, "Solution.py", "exec"), namespace)
+except Exception:
+    sys.stdout = real_stdout
+    lines = traceback.format_exc().strip().split("\\n")
+    filtered = [l for l in lines if "runner" not in l and "frozen importlib" not in l]
+    print(json.dumps({"compileSuccess": False, "error": "\\n".join(filtered), "stdout": captured.getvalue(), "cases": []}))
+    sys.exit(0)
+
+func = namespace.get("${funcName}")
+if not func or not callable(func):
+    for k, v in namespace.items():
+        if callable(v) and not k.startswith("__"):
+            func = v; break
+if not func:
+    sys.stdout = real_stdout
+    print(json.dumps({"compileSuccess": False, "error": "Function '${funcName}' not found. Please define it exactly as specified.", "stdout": captured.getvalue(), "cases": []}))
+    sys.exit(0)
+
+test_cases = json.loads(base64.b64decode("${testDataB64}").decode("utf-8"))
+
+def check_matches(actual, expected):
+    # Float comparison: abs(result - expected) < 0.01 (FLOAT_TOL)
+    if isinstance(expected, (int, float)) and isinstance(actual, (int, float)):
+        if isinstance(expected, float) or isinstance(actual, float):
+            return abs(float(actual) - float(expected)) < FLOAT_TOL
+        return actual == expected
+    if isinstance(expected, dict) and isinstance(actual, dict):
+        if set(actual.keys()) != set(expected.keys()): return False
+        return all(check_matches(actual[k], expected[k]) for k in expected)
+    if isinstance(expected, list) and isinstance(actual, list):
+        if len(actual) != len(expected): return False
+        return all(check_matches(a, e) for a, e in zip(actual, expected))
+    return actual == expected
+
+cases = []
+for tc in test_cases:
+    try:
+        sys.stdout = captured
+        actual = func(*tc["inputArgs"])
+        sys.stdout = real_stdout
+        passed = check_matches(actual, tc["expected"])
+        inp_r = repr(tc["inputArgs"][0] if len(tc["inputArgs"]) == 1 else tc["inputArgs"])
+        cases.append({"name": tc["name"], "input": inp_r[:200], "expected": repr(tc["expected"])[:200], "actual": repr(actual)[:200], "passed": passed})
+    except Exception as ex:
+        sys.stdout = real_stdout
+        cases.append({"name": tc["name"], "input": "", "expected": repr(tc["expected"])[:200], "actual": f"{type(ex).__name__}: {str(ex)}", "passed": False})
+
+custom_b64 = "${customInput ? Buffer.from(customInput).toString('base64') : ''}"
+if custom_b64:
+    try:
+        c_raw = base64.b64decode(custom_b64).decode("utf-8").strip()
+        if c_raw:
+            sys.stdout = captured
+            c_actual = func(c_raw)
+            sys.stdout = real_stdout
+            cases.insert(0, {"name": "Custom Input", "input": c_raw[:100], "expected": "(custom)", "actual": repr(c_actual)[:200], "passed": True})
+    except Exception as cx:
+        sys.stdout = real_stdout
+        cases.insert(0, {"name": "Custom Input", "input": "", "expected": "(custom)", "actual": f"{type(cx).__name__}: {str(cx)}", "passed": False})
+
+sys.stdout = real_stdout
+print(json.dumps({"compileSuccess": True, "error": None, "stdout": captured.getvalue(), "cases": cases}))
+`;
+
+  return new Promise((resolve) => {
+    let proc: ReturnType<typeof spawn> | null = null;
+    try {
+      proc = spawn("python", ["-c", runner]);
+    } catch {
+      return resolve(null);
+    }
+
+    const timer = setTimeout(() => {
+      proc?.kill("SIGKILL");
+      resolve({
+        success: false, compileSuccess: false,
+        stdout: "", stderr: "Time Limit Exceeded (5000ms). Check for infinite loops or O(n²) complexity.",
+        durationMs: Date.now() - startTime, cases: [], passedTests: 0,
+        totalTests: isPublicTest ? 5 : 50,
+      });
+    }, 5000);
+
+    let stdoutBuf = "", stderrBuf = "";
+    proc?.stdout?.on("data", (c: Buffer) => { stdoutBuf += c.toString(); });
+    proc?.stderr?.on("data", (c: Buffer) => { stderrBuf += c.toString(); });
+    proc.on("error", () => { clearTimeout(timer); resolve(null); });
+    proc.on("close", () => {
+      clearTimeout(timer);
+      try {
+        const parsed = JSON.parse(stdoutBuf.trim());
+        const passedCount = (parsed.cases || []).filter((c: { passed: boolean }) => c.passed).length;
+        resolve({
+          success: parsed.compileSuccess && passedCount > 0,
+          compileSuccess: parsed.compileSuccess,
+          stdout: parsed.stdout || "",
+          stderr: parsed.error || stderrBuf || "",
+          durationMs: Date.now() - startTime,
+          cases: parsed.cases || [],
+          passedTests: passedCount,
+          totalTests: (parsed.cases || []).length || (isPublicTest ? 5 : 50),
+        });
+      } catch {
+        resolve(null);
+      }
+    });
+  });
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 6. MAIN ENTRY POINT
 // ─────────────────────────────────────────────────────────────────────────────
 
 export async function executeCode(options: {
@@ -1177,34 +1333,39 @@ export async function executeCode(options: {
   isPublicTest?: boolean;
   variant?: string;
   customInput?: string;
+  /** Bank question ID — when present, routes to the bank-aware executor */
+  questionId?: string;
 }): Promise<ExecutionResult> {
-  const { skill, code, language, isPublicTest = false, variant = "A", customInput } = options;
+  const { skill, code, language, isPublicTest = false, variant = "A", customInput, questionId } = options;
   const targetLang = (language || skill || "").toLowerCase().trim();
 
-  // Python / Django / Machine Learning
+  // ── Bank-aware path: use question-specific test suite ──────────────────────
+  if (questionId) {
+    if (targetLang.includes("python") || targetLang.includes("django") || targetLang.includes("machine learning")) {
+      const res = await executePythonForQuestion(code, questionId, isPublicTest, customInput);
+      if (res) return res;
+      // Fall through to legacy path on error
+    }
+  }
+
+  // ── Legacy path (skill-based routing, unchanged) ───────────────────────────
   if (targetLang.includes("python") || targetLang.includes("django") || targetLang.includes("machine learning")) {
     const localRes = await executePythonLocal(code, variant, isPublicTest, customInput);
-    if (localRes) {
-      return localRes;
-    }
+    if (localRes) return localRes;
     return executePythonGodbolt(code, variant, isPublicTest);
   }
 
-  // Java
   if (targetLang.includes("java") && !targetLang.includes("javascript")) {
     return executeJava(code, isPublicTest);
   }
 
-  // C++ / C
   if (targetLang.includes("c++") || targetLang.includes("cpp") || targetLang === "c") {
     return executeCpp(code, isPublicTest);
   }
 
-  // SQL
   if (targetLang.includes("sql") || targetLang.includes("postgres") || targetLang.includes("mysql")) {
     return executeSql(code, isPublicTest);
   }
 
-  // JavaScript / TypeScript / React / Next.js / Go / Docker / Others
   return executeJsTs(code, skill, isPublicTest, customInput);
 }
