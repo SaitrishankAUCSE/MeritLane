@@ -173,7 +173,7 @@ export function EmployerDossierActions({ candidateId, candidateName = "Candidate
               <select
                 value={pipelineStage}
                 onChange={(e) => handleStageChange(e.target.value)}
-                className="text-[12px] font-medium bg-white border border-[#E7E2DA] rounded-lg px-3 py-1.5 text-[#1C1917] outline-none cursor-pointer hover:border-[#1C1917] transition-colors"
+                className="text-[12px] font-medium bg-white border border-[#E7E2DA] rounded px-3 py-1.5 text-[#1C1917] outline-none cursor-pointer hover:border-[#1C1917] transition-colors"
               >
                 {PIPELINE_STAGES.map((s) => (
                   <option key={s.id} value={s.id}>
@@ -205,7 +205,7 @@ export function EmployerDossierActions({ candidateId, candidateName = "Candidate
       {/* Floating Collapsible Evidence Summary Card */}
       {showAiCard && (
         <div className="fixed top-36 right-6 lg:right-12 max-w-md w-full z-30 animate-in fade-in slide-in-from-top-3 duration-200">
-          <div className="bg-white border border-[#E7E2DA] rounded-2xl shadow-xl p-5 relative overflow-hidden">
+          <div className="bg-white border border-[#E7E2DA] rounded shadow-xl p-5 relative overflow-hidden">
             <div className="flex items-center justify-between pb-3 border-b border-[#F5F1EB] mb-3">
               <div className="flex items-center gap-2">
                 <Sparkles className="h-4 w-4 text-[#064E3B]" />

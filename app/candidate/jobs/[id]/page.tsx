@@ -147,7 +147,7 @@ export default function CandidateJobDetailPage() {
             {error || "The requested job posting could not be found or has been removed."}
           </p>
           <Link href="/candidate/jobs">
-            <button className="px-5 py-2.5 bg-[#1C1917] text-white text-[12px] font-mono font-semibold rounded-full hover:bg-[#064E3B] transition-colors uppercase">
+            <button className="px-5 py-2.5 bg-[#1C1917] text-white text-[12px] font-mono font-semibold rounded hover:bg-[#064E3B] transition-colors uppercase">
               Return to Roles
             </button>
           </Link>
@@ -184,14 +184,14 @@ export default function CandidateJobDetailPage() {
           <div className="border border-[#E7E2DA] bg-white p-7 sm:p-9 rounded-2xl shadow-xs">
             {/* Metadata Tags */}
             <div className="flex items-center gap-2.5 flex-wrap mb-3">
-              <span className="text-[10px] font-mono font-semibold uppercase tracking-[0.14em] text-[#064E3B] bg-[#064E3B]/10 px-3 py-1 rounded-full border border-[#064E3B]/20">
+              <span className="text-[10px] font-mono font-semibold uppercase tracking-[0.14em] text-[#064E3B] bg-[#064E3B]/10 px-3 py-1 rounded border border-[#064E3B]/20">
                 {job.workMode.toUpperCase()}
               </span>
-              <span className="text-[10px] font-mono uppercase tracking-[0.14em] text-[#78716C] bg-[#FAF8F5] px-3 py-1 rounded-full border border-[#E7E2DA]">
+              <span className="text-[10px] font-mono uppercase tracking-[0.14em] text-[#78716C] bg-[#FAF8F5] px-3 py-1 rounded border border-[#E7E2DA]">
                 {job.employmentType.replace("-", " ").toUpperCase()}
               </span>
               {job.salaryRange && (
-                <span className="text-[12px] font-mono text-[#1C1917] font-semibold bg-[#FAF8F5] px-3 py-1 rounded-full border border-[#E7E2DA]">
+                <span className="text-[12px] font-mono text-[#1C1917] font-semibold bg-[#FAF8F5] px-3 py-1 rounded border border-[#E7E2DA]">
                   {job.salaryRange}
                 </span>
               )}
@@ -298,7 +298,7 @@ export default function CandidateJobDetailPage() {
                   Sign in with your verified MeritLane candidate credentials to submit your application.
                 </p>
                 <Link href={`/login?redirect=/candidate/jobs/${job.id}`}>
-                  <button className="w-full h-11 bg-[#1C1917] hover:bg-[#064E3B] text-white text-[12px] font-mono font-semibold uppercase tracking-wider rounded-full transition-colors shadow-2xs">
+                  <button className="w-full h-11 bg-[#1C1917] hover:bg-[#064E3B] text-white text-[12px] font-mono font-semibold uppercase tracking-wider rounded transition-colors shadow-2xs">
                     AUTHENTICATE TO APPLY
                   </button>
                 </Link>
@@ -324,7 +324,7 @@ export default function CandidateJobDetailPage() {
                       {completion?.percentage || 0}%
                     </span>
                   </div>
-                  <div className="w-full bg-[#E7E2DA] h-2 rounded-full overflow-hidden">
+                  <div className="w-full bg-[#E7E2DA] h-2 rounded overflow-hidden">
                     <div
                       className={`h-full transition-all duration-500 ${
                         completion?.isComplete ? "bg-[#064E3B]" : "bg-[#B45309]"
@@ -351,7 +351,7 @@ export default function CandidateJobDetailPage() {
                     </ul>
                     <div className="pt-2">
                       <Link href="/candidate/profile">
-                        <button className="w-full h-10 border border-[#B45309] bg-white hover:bg-[#FFFBEB] text-[#92400E] text-[11px] font-mono font-semibold uppercase tracking-wider rounded-full transition-colors">
+                        <button className="w-full h-10 border border-[#B45309] bg-white hover:bg-[#FFFBEB] text-[#92400E] text-[11px] font-mono font-semibold uppercase tracking-wider rounded transition-colors">
                           COMPLETE PROFILE NOW →
                         </button>
                       </Link>
@@ -375,7 +375,7 @@ export default function CandidateJobDetailPage() {
                 <button
                   onClick={handleApply}
                   disabled={applying || !completion?.isComplete || (completion?.percentage || 0) < 100}
-                  className="w-full h-11 bg-[#064E3B] hover:bg-[#043327] text-white text-[12px] font-mono font-semibold uppercase tracking-wider rounded-full transition-colors shadow-xs disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                  className="w-full h-11 bg-[#064E3B] hover:bg-[#043327] text-white text-[12px] font-mono font-semibold uppercase tracking-wider rounded transition-colors shadow-xs disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 >
                   {applying ? (
                     <>

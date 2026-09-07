@@ -134,7 +134,7 @@ export default function CandidateVerificationPage() {
                 Declare skills in your Identity record to become eligible for proctored examinations.
               </p>
               <Link href="/candidate/profile">
-                <button className="text-[11px] font-mono font-semibold px-5 py-2.5 bg-[#1C1917] hover:bg-[#064E3B] text-white transition-colors tracking-[0.06em] rounded-full">
+                <button className="text-[11px] font-mono font-semibold px-5 py-2.5 bg-[#1C1917] hover:bg-[#064E3B] text-white transition-colors tracking-[0.06em] rounded">
                   OPEN IDENTITY RECORD
                 </button>
               </Link>
@@ -205,7 +205,7 @@ export default function CandidateVerificationPage() {
                       {isVerified ? (
                         user && (
                           <Link href={`/p/${user.uid}`} target="_blank">
-                            <button className="flex items-center gap-1 text-[10px] font-mono text-[#064E3B] border border-[#064E3B]/30 px-3 py-1 hover:bg-[#064E3B]/5 transition-colors rounded-full">
+                            <button className="flex items-center gap-1 text-[10px] font-mono text-[#064E3B] border border-[#064E3B]/30 px-3 py-1 hover:bg-[#064E3B]/5 transition-colors rounded">
                               VIEW <ExternalLink className="h-2.5 w-2.5" />
                             </button>
                           </Link>
@@ -214,7 +214,7 @@ export default function CandidateVerificationPage() {
                         <span className="text-[10px] font-mono text-[#78716C]">Locked</span>
                       ) : (
                         <Link href={`/candidate/assessment?skill=${encodeURIComponent(skill)}`}>
-                          <button className="flex items-center gap-1 text-[10px] font-mono font-semibold bg-[#1C1917] hover:bg-[#064E3B] text-white px-3.5 py-1 transition-colors rounded-full">
+                          <button className="flex items-center gap-1 text-[10px] font-mono font-semibold bg-[#1C1917] hover:bg-[#064E3B] text-white px-3.5 py-1 transition-colors rounded">
                             EXAMINE <ArrowRight className="h-2.5 w-2.5" />
                           </button>
                         </Link>
@@ -246,7 +246,7 @@ export default function CandidateVerificationPage() {
                       : "Unknown date";
                     return (
                       <div key={s} className="flex items-center gap-4 py-3 first:pt-0 last:pb-0">
-                        <div className="h-1.5 w-1.5 rounded-full bg-[#064E3B] shrink-0" />
+                        <div className="h-1.5 w-1.5 rounded bg-[#064E3B] shrink-0" />
                         <div className="flex-1 text-[12px] font-sans text-[#1C1917]">
                           <span className="font-medium">{s}</span>
                           <span className="text-[#78716C]"> — proctored examination passed</span>

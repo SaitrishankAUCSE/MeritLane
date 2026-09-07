@@ -194,9 +194,9 @@ export function ProofTrace({
             <div className="flex items-center justify-between bg-[#1A1A1A] border-b border-zinc-800 px-4 py-3 select-none">
               <div className="flex items-center gap-3">
                 <div className="flex items-center gap-1.5" aria-hidden="true">
-                  <div className="h-3 w-3 rounded-full bg-red-500/80"></div>
-                  <div className="h-3 w-3 rounded-full bg-amber-500/80"></div>
-                  <div className="h-3 w-3 rounded-full bg-emerald-500/80"></div>
+                  <div className="h-3 w-3 rounded bg-red-500/80"></div>
+                  <div className="h-3 w-3 rounded bg-amber-500/80"></div>
+                  <div className="h-3 w-3 rounded bg-emerald-500/80"></div>
                 </div>
                 <span id="proof-trace-title" className="text-[10px] font-mono text-zinc-400 tracking-wider">meritlane-proof-layer ~ sh</span>
               </div>

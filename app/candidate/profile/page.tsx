@@ -126,7 +126,7 @@ export default function CandidateProfilePage() {
               <span className="text-[10px] font-mono tracking-[0.2em] text-[#78716C] uppercase">
                 Candidate Identity Record · Meritlane Registry
               </span>
-              <span className="inline-flex items-center gap-1 text-[11px] font-mono font-semibold text-[#064E3B] bg-[#064E3B]/10 px-2.5 py-0.5 rounded-full border border-[#064E3B]/20">
+              <span className="inline-flex items-center gap-1 text-[11px] font-mono font-semibold text-[#064E3B] bg-[#064E3B]/10 px-2.5 py-0.5 rounded border border-[#064E3B]/20">
                 KEY: {candidateKey}
               </span>
             </div>
@@ -159,7 +159,7 @@ export default function CandidateProfilePage() {
           </div>
           <button
             onClick={() => setIsEditing(true)}
-            className="flex items-center gap-2 px-4 py-2 border border-[#E7E2DA] bg-white hover:bg-[#F5F1EB] text-[#1C1917] text-[11px] font-mono font-semibold transition-colors shrink-0 tracking-[0.06em] rounded-full shadow-2xs"
+            className="flex items-center gap-2 px-4 py-2 border border-[#E7E2DA] bg-white hover:bg-[#F5F1EB] text-[#1C1917] text-[11px] font-mono font-semibold transition-colors shrink-0 tracking-[0.06em] rounded shadow-2xs"
           >
             <PenTool className="h-3 w-3" />
             EDIT IDENTITY
@@ -191,7 +191,7 @@ export default function CandidateProfilePage() {
                 </p>
                 <button
                   onClick={() => setIsEditing(true)}
-                  className="text-[11px] font-mono font-semibold px-4 py-2 bg-[#1C1917] hover:bg-[#064E3B] text-white transition-colors rounded-full"
+                  className="text-[11px] font-mono font-semibold px-4 py-2 bg-[#1C1917] hover:bg-[#064E3B] text-white transition-colors rounded"
                 >
                   ADD CAPABILITIES
                 </button>
@@ -246,7 +246,7 @@ export default function CandidateProfilePage() {
                         ) : (
                           <button
                             onClick={() => router.push(`/candidate/verification`)}
-                            className="text-[10px] font-mono font-semibold text-[#1C1917] border border-[#E7E2DA] px-3 py-1 hover:bg-[#F5F1EB] transition-colors rounded-full"
+                            className="text-[10px] font-mono font-semibold text-[#1C1917] border border-[#E7E2DA] px-3 py-1 hover:bg-[#F5F1EB] transition-colors rounded"
                           >
                             ASSESS →
                           </button>
@@ -289,7 +289,7 @@ export default function CandidateProfilePage() {
                   </p>
                   <button
                     onClick={() => setIsEditing(true)}
-                    className="text-[11px] font-mono text-[#1C1917] border border-[#E7E2DA] px-4 py-2 hover:bg-[#F5F1EB] transition-colors rounded-full"
+                    className="text-[11px] font-mono text-[#1C1917] border border-[#E7E2DA] px-4 py-2 hover:bg-[#F5F1EB] transition-colors rounded"
                   >
                     ADD EDUCATION
                   </button>

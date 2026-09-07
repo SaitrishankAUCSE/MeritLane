@@ -1,42 +1,30 @@
-import { collection, getDocs, query, where, getCountFromServer } from "firebase/firestore";
-import { db } from "./config";
-import { CandidateProfile } from "./candidate";
+// lib/firebase/home.ts
+// Stats and public candidate data are fetched via server API routes to avoid
+// client-side Firestore permission errors on unauthenticated reads.
 
-export async function getPlatformStats() {
-  const usersRef = collection(db, "users");
-  const candidatesRef = collection(db, "candidates");
-  
+export interface PlatformStats {
+  registeredCandidates: number;
+  activeEmployers: number;
+  verifiedProfiles: number;
+}
+
+export async function getPlatformStats(): Promise<PlatformStats> {
   try {
-    const [candidateCount, employerCount, verifiedCount] = await Promise.all([
-      getCountFromServer(query(usersRef, where("role", "==", "candidate"))),
-      getCountFromServer(query(usersRef, where("role", "==", "employer"))),
-      getCountFromServer(query(candidatesRef, where("verificationStatus", "==", "verified")))
-    ]);
-
-    return {
-      registeredCandidates: candidateCount.data().count,
-      activeEmployers: employerCount.data().count,
-      verifiedProfiles: verifiedCount.data().count,
-    };
-  } catch (err) {
-    console.error("Error fetching stats:", err);
-    return {
-      registeredCandidates: 0,
-      activeEmployers: 0,
-      verifiedProfiles: 0,
-    };
+    const res = await fetch("/api/stats", { cache: "no-store" });
+    if (!res.ok) throw new Error("Stats API unavailable");
+    return await res.json();
+  } catch {
+    return { registeredCandidates: 0, activeEmployers: 0, verifiedProfiles: 0 };
   }
 }
 
-export async function getVerifiedCandidates(): Promise<(CandidateProfile & { id: string })[]> {
+export async function getVerifiedCandidates(): Promise<any[]> {
   try {
-    const candidatesRef = collection(db, "candidates");
-    const q = query(candidatesRef, where("verificationStatus", "==", "verified"));
-    const snapshot = await getDocs(q);
-    
-    return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as CandidateProfile & { id: string }));
-  } catch (err) {
-    console.error("Error fetching verified candidates:", err);
+    const res = await fetch("/api/public/candidates", { cache: "no-store" });
+    if (!res.ok) throw new Error("Public candidates API unavailable");
+    const data = await res.json();
+    return data.candidates || [];
+  } catch {
     return [];
   }
 }

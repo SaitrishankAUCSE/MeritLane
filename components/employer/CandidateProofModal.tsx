@@ -258,7 +258,7 @@ export function CandidateProofModal({ candidate, isOpen, onClose }: CandidatePro
                 
                 {candidate.assessmentScores && Object.keys(candidate.assessmentScores).length > 0 && (
                   <div className="relative pt-2">
-                    <div className="absolute -left-[17px] top-3 h-1.5 w-1.5 rounded-full bg-[#064E3B] ring-4 ring-white" />
+                    <div className="absolute -left-[17px] top-3 h-1.5 w-1.5 rounded bg-[#064E3B] ring-4 ring-white" />
                     <p className="text-xs font-bold text-foreground">Standardized Assessment</p>
                     <p className="text-[10px] text-muted-foreground font-medium uppercase mt-0.5 tracking-wider">Source: Proctored Engine</p>
                   </div>
@@ -266,14 +266,14 @@ export function CandidateProofModal({ candidate, isOpen, onClose }: CandidatePro
 
                 {candidate.projects && candidate.projects.length > 0 && (
                   <div className="relative pt-2">
-                    <div className="absolute -left-[17px] top-3 h-1.5 w-1.5 rounded-full bg-foreground ring-4 ring-white" />
+                    <div className="absolute -left-[17px] top-3 h-1.5 w-1.5 rounded bg-foreground ring-4 ring-white" />
                     <p className="text-xs font-bold text-foreground">Portfolio Attached</p>
                     <p className="text-[10px] text-muted-foreground font-medium uppercase mt-0.5 tracking-wider">Source: Candidate Declaration</p>
                   </div>
                 )}
 
                 <div className="relative pt-2">
-                  <div className="absolute -left-[17px] top-3 h-1.5 w-1.5 rounded-full bg-zinc-300 ring-4 ring-white" />
+                  <div className="absolute -left-[17px] top-3 h-1.5 w-1.5 rounded bg-zinc-300 ring-4 ring-white" />
                   <p className="text-xs font-bold text-foreground">Identity Initialized</p>
                   <p className="text-[10px] text-muted-foreground font-medium uppercase mt-0.5 tracking-wider">Source: System</p>
                 </div>

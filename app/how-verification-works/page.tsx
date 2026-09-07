@@ -19,7 +19,7 @@ export default function HowVerificationWorksPage() {
           </Link>
           <Link
             href="/signup"
-            className="px-3 sm:px-4 py-1.5 sm:py-2 bg-[#1C1917] text-white text-[12px] sm:text-[13px] font-semibold rounded-xl hover:bg-[#292524] transition-colors"
+            className="px-3 sm:px-4 py-1.5 sm:py-2 bg-[#1C1917] text-white text-[12px] sm:text-[13px] font-semibold rounded hover:bg-[#292524] transition-colors"
           >
             Get Verified
           </Link>
@@ -29,7 +29,7 @@ export default function HowVerificationWorksPage() {
       {/* Hero */}
       <section className="px-4 sm:px-8 lg:px-16 pt-12 sm:pt-20 pb-12 sm:pb-16 border-b border-[#E7E2DA] bg-white text-center">
         <div className="max-w-3xl mx-auto">
-          <div className="inline-flex items-center gap-2 text-[11px] font-mono uppercase tracking-[0.15em] text-[#78716C] mb-4 border border-[#E7E2DA] px-3 py-1 rounded-full bg-[#F8F6F3]">
+          <div className="inline-flex items-center gap-2 text-[11px] font-mono uppercase tracking-[0.15em] text-[#78716C] mb-4 border border-[#E7E2DA] px-3 py-1 rounded bg-[#F8F6F3]">
             <Shield className="h-3 w-3 text-[#16A34A]" /> Verification Methodology
           </div>
           <h1 className="font-serif text-[42px] sm:text-[54px] text-[#1C1917] tracking-tight leading-[1.1] mb-6">
@@ -82,7 +82,7 @@ export default function HowVerificationWorksPage() {
           ].map((item, idx) => (
             <div
               key={idx}
-              className="flex items-start gap-6 border border-[#E7E2DA] bg-white rounded-2xl p-7 shadow-sm"
+              className="flex items-start gap-6 border border-[#E7E2DA] bg-white rounded p-7 shadow-sm"
             >
               <span className="font-mono text-[18px] font-bold text-[#78716C] shrink-0 mt-0.5">
                 {item.step}
@@ -104,7 +104,7 @@ export default function HowVerificationWorksPage() {
           </h2>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="border border-[#E7E2DA] bg-[#F8F6F3] rounded-2xl p-6">
+            <div className="border border-[#E7E2DA] bg-[#F8F6F3] rounded p-6">
               <div className="flex items-center gap-2.5 text-[15px] font-semibold text-[#1C1917] mb-3">
                 <Clock className="h-4 w-4 text-[#78716C]" /> 45-Minute Server Timer
               </div>
@@ -113,7 +113,7 @@ export default function HowVerificationWorksPage() {
               </p>
             </div>
 
-            <div className="border border-[#E7E2DA] bg-[#F8F6F3] rounded-2xl p-6">
+            <div className="border border-[#E7E2DA] bg-[#F8F6F3] rounded p-6">
               <div className="flex items-center gap-2.5 text-[15px] font-semibold text-[#1C1917] mb-3">
                 <Shield className="h-4 w-4 text-[#16A34A]" /> Fullscreen & Tab Monitoring
               </div>
@@ -122,7 +122,7 @@ export default function HowVerificationWorksPage() {
               </p>
             </div>
 
-            <div className="border border-[#E7E2DA] bg-[#F8F6F3] rounded-2xl p-6">
+            <div className="border border-[#E7E2DA] bg-[#F8F6F3] rounded p-6">
               <div className="flex items-center gap-2.5 text-[15px] font-semibold text-[#1C1917] mb-3">
                 <AlertCircle className="h-4 w-4 text-[#D97706]" /> Cooldown Periods
               </div>
@@ -131,7 +131,7 @@ export default function HowVerificationWorksPage() {
               </p>
             </div>
 
-            <div className="border border-[#E7E2DA] bg-[#F8F6F3] rounded-2xl p-6">
+            <div className="border border-[#E7E2DA] bg-[#F8F6F3] rounded p-6">
               <div className="flex items-center gap-2.5 text-[15px] font-semibold text-[#1C1917] mb-3">
                 <Award className="h-4 w-4 text-[#1C1917]" /> 80% Threshold Standard
               </div>
@@ -146,7 +146,7 @@ export default function HowVerificationWorksPage() {
       {/* What it means / does not mean */}
       <section className="px-4 sm:px-8 lg:px-16 py-12 sm:py-20 max-w-4xl mx-auto">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
-          <div className="border border-[#16A34A]/30 bg-white rounded-2xl p-6 sm:p-8 shadow-sm">
+          <div className="border border-[#16A34A]/30 bg-white rounded p-6 sm:p-8 shadow-sm">
             <div className="flex items-center gap-2 text-[15px] font-semibold text-[#16A34A] mb-4">
               <CheckCircle2 className="h-5 w-5" /> What Verification Means
             </div>
@@ -170,7 +170,7 @@ export default function HowVerificationWorksPage() {
             </ul>
           </div>
 
-          <div className="border border-[#E7E2DA] bg-white rounded-2xl p-8 shadow-sm">
+          <div className="border border-[#E7E2DA] bg-white rounded p-8 shadow-sm">
             <div className="flex items-center gap-2 text-[15px] font-semibold text-[#78716C] mb-4">
               <AlertCircle className="h-5 w-5" /> What Verification Does Not Mean
             </div>
@@ -199,7 +199,7 @@ export default function HowVerificationWorksPage() {
         <div className="mt-16 text-center">
           <Link
             href="/candidate/verification"
-            className="inline-flex items-center gap-2 px-6 h-12 bg-[#1C1917] text-white text-[14px] font-semibold rounded-xl hover:bg-[#292524] transition-colors shadow-sm"
+            className="inline-flex items-center gap-2 px-6 h-12 bg-[#1C1917] text-white text-[14px] font-semibold rounded hover:bg-[#292524] transition-colors shadow-sm"
           >
             Start Your Verification
             <ArrowRight className="h-4 w-4" />

@@ -96,11 +96,11 @@ export function MessageModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-in fade-in duration-200">
-      <div className="bg-white w-full max-w-lg rounded-2xl border border-[#E5E5E5] shadow-2xl flex flex-col overflow-hidden">
+      <div className="bg-white w-full max-w-lg rounded border border-[#E5E5E5] shadow-2xl flex flex-col overflow-hidden">
         {/* Header */}
         <div className="px-6 py-5 border-b border-[#E5E5E5] flex items-center justify-between bg-[#FAFAFA]">
           <div className="flex items-center gap-3">
-            <div className="h-9 w-9 rounded-xl bg-[#0D0D0D] text-white flex items-center justify-center">
+            <div className="h-9 w-9 rounded bg-[#0D0D0D] text-white flex items-center justify-center">
               <MessageSquare className="h-4 w-4" />
             </div>
             <div>
@@ -115,7 +115,7 @@ export function MessageModal({
           <button
             type="button"
             onClick={onClose}
-            className="p-1.5 rounded-lg text-[#737373] hover:text-[#0D0D0D] hover:bg-[#E5E5E5]/50 transition-colors"
+            className="p-1.5 rounded text-[#737373] hover:text-[#0D0D0D] hover:bg-[#E5E5E5]/50 transition-colors"
           >
             <X className="h-4 w-4" />
           </button>
@@ -124,7 +124,7 @@ export function MessageModal({
         {/* Content */}
         {sentSuccess ? (
           <div className="p-10 flex flex-col items-center justify-center text-center space-y-3">
-            <div className="h-12 w-12 rounded-full bg-[#15803D]/10 text-[#15803D] flex items-center justify-center">
+            <div className="h-12 w-12 rounded bg-[#15803D]/10 text-[#15803D] flex items-center justify-center">
               <CheckCircle2 className="h-6 w-6" />
             </div>
             <h4 className="font-serif text-[20px] text-[#0D0D0D]">Message Delivered</h4>
@@ -135,7 +135,7 @@ export function MessageModal({
         ) : (
           <form onSubmit={handleSend} className="p-6 space-y-5">
             {error && (
-              <div className="bg-red-500/10 border border-red-500/20 text-red-600 text-[13px] p-3 rounded-lg">
+              <div className="bg-red-500/10 border border-red-500/20 text-red-600 text-[13px] p-3 rounded">
                 {error}
               </div>
             )}
@@ -151,7 +151,7 @@ export function MessageModal({
                     key={idx}
                     type="button"
                     onClick={() => setContent(tmpl.text)}
-                    className="text-[12px] px-3 py-1 rounded-full border border-[#E5E5E5] bg-[#FAFAFA] hover:bg-white hover:border-[#0D0D0D] text-[#0D0D0D] font-medium transition-all"
+                    className="text-[12px] px-3 py-1 rounded border border-[#E5E5E5] bg-[#FAFAFA] hover:bg-white hover:border-[#0D0D0D] text-[#0D0D0D] font-medium transition-all"
                   >
                     {tmpl.title}
                   </button>
@@ -169,7 +169,7 @@ export function MessageModal({
                 value={content}
                 onChange={(e) => setContent(e.target.value)}
                 placeholder="Type your message, opportunity details, or interview scheduling link..."
-                className="w-full px-4 py-3 rounded-xl border border-[#E5E5E5] text-[14px] text-[#0D0D0D] focus:border-[#0D0D0D] focus:ring-1 focus:ring-[#0D0D0D] outline-none transition-all resize-none placeholder:text-[#737373]"
+                className="w-full px-4 py-3 rounded border border-[#E5E5E5] text-[14px] text-[#0D0D0D] focus:border-[#0D0D0D] focus:ring-1 focus:ring-[#0D0D0D] outline-none transition-all resize-none placeholder:text-[#737373]"
               />
             </div>
 

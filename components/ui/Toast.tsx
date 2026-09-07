@@ -79,7 +79,7 @@ function ToastCard({ toast, onDismiss }: { toast: Toast; onDismiss: (id: string)
       className={`
         flex items-start gap-3 w-full max-w-[340px] bg-white
         border border-[#E7E2DA] border-l-4 ${ACCENT[toast.type]}
-        rounded-xl shadow-lg px-4 py-3.5 pointer-events-auto
+        rounded shadow-lg px-4 py-3.5 pointer-events-auto
       `}
     >
       <div className="shrink-0 mt-0.5">{ICONS[toast.type]}</div>

@@ -31,7 +31,7 @@ export default function ProofCanvasPage() {
         
         {/* Left Column */}
         <div className="w-full lg:w-[320px] shrink-0 space-y-8">
-          <div className="p-6 bg-white border border-[#E7E2DA] rounded-lg">
+          <div className="p-6 bg-white border border-[#E7E2DA] rounded">
             <h1 className="font-sans text-[32px] font-semibold tracking-tight text-[#1C1917] mb-2">Elena Rostova</h1>
             <div className="text-[13px] text-[#78716C] font-sans mb-4">Senior Systems Engineer</div>
             <div className="border-t border-[#E7E2DA] pt-3 text-[12px] font-mono text-[#78716C]">
@@ -39,7 +39,7 @@ export default function ProofCanvasPage() {
             </div>
           </div>
 
-          <div className="p-6 bg-white border border-[#E7E2DA] rounded-lg">
+          <div className="p-6 bg-white border border-[#E7E2DA] rounded">
             <h2 className="text-[11px] font-mono font-medium uppercase tracking-wider text-[#78716C] mb-4">Evaluated Competencies</h2>
             <div className="space-y-3">
               <div className="flex items-center justify-between py-2 border-b border-[#E7E2DA]/60">
@@ -57,7 +57,7 @@ export default function ProofCanvasPage() {
             </div>
           </div>
 
-          <div className="p-6 bg-white border border-[#E7E2DA] rounded-lg">
+          <div className="p-6 bg-white border border-[#E7E2DA] rounded">
             <h2 className="text-[11px] font-mono font-medium uppercase tracking-wider text-[#78716C] mb-4">Technical Repositories</h2>
             <div className="space-y-2">
               <a href="https://github.com" target="_blank" rel="noreferrer" className="flex items-center text-[13px] text-[#064E3B] hover:underline gap-2">
@@ -70,7 +70,7 @@ export default function ProofCanvasPage() {
 
         {/* Right Column: Evidence Timeline */}
         <div className="flex-1 space-y-8">
-          <div className="p-6 sm:p-8 bg-white border border-[#E7E2DA] rounded-lg">
+          <div className="p-6 sm:p-8 bg-white border border-[#E7E2DA] rounded">
             <div className="flex items-center justify-between mb-4">
               <span className="text-[11px] font-mono font-semibold text-[#064E3B] bg-[#064E3B]/10 px-2.5 py-1 rounded border border-[#064E3B]/20">
                 ✓ AUDITED PROJECT ARTIFACT
@@ -95,7 +95,7 @@ export default function ProofCanvasPage() {
             </div>
           </div>
 
-          <div className="p-6 sm:p-8 bg-white border border-[#E7E2DA] rounded-lg">
+          <div className="p-6 sm:p-8 bg-white border border-[#E7E2DA] rounded">
             <div className="flex items-center justify-between mb-4">
               <span className="text-[11px] font-mono font-semibold text-[#064E3B] bg-[#064E3B]/10 px-2.5 py-1 rounded border border-[#064E3B]/20">
                 ✓ AUDITED PROJECT ARTIFACT

@@ -25,7 +25,7 @@ export default function EmployerSettingsPage() {
         </div>
 
         {/* Organization & Account Info */}
-        <div className="bg-white border border-[#E5E5E5] rounded-2xl overflow-hidden shadow-sm">
+        <div className="bg-white border border-[#E5E5E5] rounded overflow-hidden shadow-sm">
           <div className="px-6 py-5 border-b border-[#E5E5E5] bg-[#FAFAFA]">
             <h2 className="text-[15px] font-bold text-[#0D0D0D] flex items-center gap-2">
               <Building2 className="h-4 w-4 text-[#737373]" /> Organization Identity
@@ -58,7 +58,7 @@ export default function EmployerSettingsPage() {
         </div>
 
         {/* Verification Engine Config */}
-        <div className="bg-white border border-[#E7E2DA] rounded-2xl overflow-hidden shadow-xs">
+        <div className="bg-white border border-[#E7E2DA] rounded overflow-hidden shadow-xs">
           <div className="px-6 py-5 border-b border-[#E7E2DA] bg-[#FAF8F5]">
             <h2 className="text-[15px] font-bold text-[#1C1917] flex items-center gap-2">
               <Sparkles className="h-4 w-4 text-[#064E3B]" /> Technical Evaluation Engine
@@ -72,7 +72,7 @@ export default function EmployerSettingsPage() {
                   Automated architectural code audits, timed test suite proctoring, and GitHub commit graph verification.
                 </p>
               </div>
-              <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-[#064E3B] bg-[#064E3B]/10 border border-[#064E3B]/20 px-2.5 py-1 rounded-full">
+              <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-[#064E3B] bg-[#064E3B]/10 border border-[#064E3B]/20 px-2.5 py-1 rounded">
                 Active Protocol
               </span>
             </div>
@@ -80,7 +80,7 @@ export default function EmployerSettingsPage() {
         </div>
 
         {/* Notification Preferences */}
-        <div className="bg-white border border-[#E5E5E5] rounded-2xl overflow-hidden shadow-sm">
+        <div className="bg-white border border-[#E5E5E5] rounded overflow-hidden shadow-sm">
           <div className="px-6 py-5 border-b border-[#E5E5E5] bg-[#FAFAFA]">
             <h2 className="text-[15px] font-bold text-[#0D0D0D] flex items-center gap-2">
               <Bell className="h-4 w-4 text-[#737373]" /> Communications & Notifications
@@ -97,12 +97,12 @@ export default function EmployerSettingsPage() {
               <button
                 type="button"
                 onClick={() => setEmailNotifications(!emailNotifications)}
-                className={`w-12 h-6 flex items-center rounded-full p-1 transition-colors ${
+                className={`w-12 h-6 flex items-center rounded p-1 transition-colors ${
                   emailNotifications ? "bg-[#0D0D0D]" : "bg-[#E5E5E5]"
                 }`}
               >
                 <div
-                  className={`bg-white w-4 h-4 rounded-full shadow-md transform transition-transform ${
+                  className={`bg-white w-4 h-4 rounded shadow-md transform transition-transform ${
                     emailNotifications ? "translate-x-6" : "translate-x-0"
                   }`}
                 />
@@ -112,7 +112,7 @@ export default function EmployerSettingsPage() {
         </div>
 
         {/* Session Actions */}
-        <div className="bg-white border border-[#E5E5E5] rounded-2xl overflow-hidden shadow-sm">
+        <div className="bg-white border border-[#E5E5E5] rounded overflow-hidden shadow-sm">
           <div className="px-6 py-5 border-b border-[#E5E5E5] bg-[#FAFAFA]">
             <h2 className="text-[15px] font-bold text-[#0D0D0D]">Session Management</h2>
           </div>

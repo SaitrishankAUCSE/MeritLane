@@ -324,7 +324,7 @@ export function ProfileForm({ initialData, onSave, onCancel, isNew = false }: Pr
           aria-modal="true"
           className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/40 backdrop-blur-sm p-6"
         >
-          <div className="w-full max-w-sm bg-white rounded-2xl border border-[#E7E2DA] shadow-2xl overflow-hidden p-7">
+          <div className="w-full max-w-sm bg-white rounded border border-[#E7E2DA] shadow-2xl overflow-hidden p-7">
             <h2 className="text-[18px] font-semibold text-[#1C1917] mb-2 leading-tight">
               Unsaved changes
             </h2>
@@ -335,7 +335,7 @@ export function ProfileForm({ initialData, onSave, onCancel, isNew = false }: Pr
               <button
                 type="button"
                 onClick={() => setShowCancelConfirm(false)}
-                className="w-full h-11 bg-[#1C1917] text-white text-[14px] font-semibold rounded-xl hover:bg-[#292524] transition-colors"
+                className="w-full h-11 bg-[#1C1917] text-white text-[14px] font-semibold rounded hover:bg-[#292524] transition-colors"
               >
                 Continue Editing
               </button>
@@ -345,7 +345,7 @@ export function ProfileForm({ initialData, onSave, onCancel, isNew = false }: Pr
                   setShowCancelConfirm(false);
                   if (onCancel) onCancel();
                 }}
-                className="w-full h-11 border border-[#E7E2DA] text-[#78716C] text-[14px] font-semibold rounded-xl hover:border-[#B42318] hover:text-[#B42318] transition-colors"
+                className="w-full h-11 border border-[#E7E2DA] text-[#78716C] text-[14px] font-semibold rounded hover:border-[#B42318] hover:text-[#B42318] transition-colors"
               >
                 Leave Without Saving
               </button>
@@ -354,7 +354,7 @@ export function ProfileForm({ initialData, onSave, onCancel, isNew = false }: Pr
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="border border-[#E7E2DA] bg-white rounded-2xl p-4 sm:p-8 space-y-6 sm:space-y-8 shadow-sm">
+      <form onSubmit={handleSubmit} className="border border-[#E7E2DA] bg-white rounded p-4 sm:p-8 space-y-6 sm:space-y-8 shadow-sm">
         <div>
           <h2 className="text-[20px] sm:text-[22px] font-semibold text-[#1C1917] mb-2">{isNew ? "Establish your identity" : "Edit your identity"}</h2>
           <p className="text-[14px] text-[#78716C] font-sans">
@@ -363,7 +363,7 @@ export function ProfileForm({ initialData, onSave, onCancel, isNew = false }: Pr
         </div>
 
         {error && (
-          <div className="bg-[#FEF2F2] border border-[#B42318]/20 text-[#B42318] text-[14px] p-4 rounded-xl font-sans">
+          <div className="bg-[#FEF2F2] border border-[#B42318]/20 text-[#B42318] text-[14px] p-4 rounded font-sans">
             {error}
           </div>
         )}
@@ -468,7 +468,7 @@ export function ProfileForm({ initialData, onSave, onCancel, isNew = false }: Pr
             </div>
 
             {/* PDF Resume Upload & Claude-Grade ATS Architecture Analyzer */}
-            <div className="mt-6 border border-[#E7E2DA] bg-[#FAF8F5] rounded-2xl p-5 sm:p-7 shadow-xs">
+            <div className="mt-6 border border-[#E7E2DA] bg-[#FAF8F5] rounded p-5 sm:p-7 shadow-xs">
               <div className="flex flex-col sm:flex-row sm:items-baseline justify-between gap-2 mb-4 pb-3 border-b border-[#E7E2DA]">
                 <div>
                   <div className="text-[10px] font-mono tracking-[0.18em] text-[#064E3B] uppercase mb-1 font-semibold">
@@ -499,13 +499,13 @@ export function ProfileForm({ initialData, onSave, onCancel, isNew = false }: Pr
                   onDragLeave={() => setIsDragging(false)}
                   onDrop={handleFileDrop}
                   onClick={() => fileInputRef.current?.click()}
-                  className={`border-2 border-dashed rounded-xl p-6 text-center cursor-pointer transition-all ${
+                  className={`border-2 border-dashed rounded p-6 text-center cursor-pointer transition-all ${
                     isDragging
                       ? "border-[#064E3B] bg-[#064E3B]/[0.05]"
                       : "border-[#E7E2DA] bg-white hover:border-[#1C1917] hover:bg-[#F5F1EB]"
                   }`}
                 >
-                  <div className="mx-auto mb-3 h-10 w-10 bg-[#FAF8F5] border border-[#E7E2DA] rounded-lg flex items-center justify-center">
+                  <div className="mx-auto mb-3 h-10 w-10 bg-[#FAF8F5] border border-[#E7E2DA] rounded flex items-center justify-center">
                     <UploadCloud className="h-5 w-5 text-[#064E3B]" />
                   </div>
                   <div className="text-[14px] font-serif text-[#1C1917] mb-1 font-medium">
@@ -520,9 +520,9 @@ export function ProfileForm({ initialData, onSave, onCancel, isNew = false }: Pr
                 </div>
               ) : (
                 /* Selected File Card */
-                <div className="border border-[#E7E2DA] bg-white p-4 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-xs">
+                <div className="border border-[#E7E2DA] bg-white p-4 rounded flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-xs">
                   <div className="flex items-center gap-3">
-                    <div className="h-10 w-10 bg-[#064E3B]/10 border border-[#064E3B]/20 rounded-lg flex items-center justify-center shrink-0">
+                    <div className="h-10 w-10 bg-[#064E3B]/10 border border-[#064E3B]/20 rounded flex items-center justify-center shrink-0">
                       <FileText className="h-5 w-5 text-[#064E3B]" />
                     </div>
                     <div>
@@ -577,7 +577,7 @@ export function ProfileForm({ initialData, onSave, onCancel, isNew = false }: Pr
 
               {/* ATS Results & Role Matching Panel */}
               {atsResult && (
-                <div className="mt-6 border border-[#E7E2DA] bg-white rounded-xl p-5 sm:p-6 shadow-xs">
+                <div className="mt-6 border border-[#E7E2DA] bg-white rounded p-5 sm:p-6 shadow-xs">
                   {/* Top Score Banner */}
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4 border-b border-[#E7E2DA] pb-4">
                     <div className="flex items-center gap-4">
@@ -607,12 +607,12 @@ export function ProfileForm({ initialData, onSave, onCancel, isNew = false }: Pr
 
                   {/* 4-Pillar Enterprise Screening Dimensions */}
                   {atsResult.dimensionScores && (
-                    <div className="mb-5 bg-[#FAF8F5] border border-[#E7E2DA] p-4 rounded-xl">
+                    <div className="mb-5 bg-[#FAF8F5] border border-[#E7E2DA] p-4 rounded">
                       <div className="text-[10px] font-mono uppercase tracking-[0.16em] text-[#064E3B] font-semibold mb-3">
                         Enterprise Screening Metrics · Dimension Conformance
                       </div>
                       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center">
-                        <div className="bg-white border border-[#E7E2DA] p-3 rounded-lg shadow-2xs">
+                        <div className="bg-white border border-[#E7E2DA] p-3 rounded shadow-2xs">
                           <div className="text-[20px] font-mono font-bold text-[#1C1917]">
                             {atsResult.dimensionScores.impactQuantification}%
                           </div>
@@ -620,7 +620,7 @@ export function ProfileForm({ initialData, onSave, onCancel, isNew = false }: Pr
                             Impact &amp; Metrics
                           </div>
                         </div>
-                        <div className="bg-white border border-[#E7E2DA] p-3 rounded-lg shadow-2xs">
+                        <div className="bg-white border border-[#E7E2DA] p-3 rounded shadow-2xs">
                           <div className="text-[20px] font-mono font-bold text-[#1C1917]">
                             {atsResult.dimensionScores.actionAgency}%
                           </div>
@@ -628,7 +628,7 @@ export function ProfileForm({ initialData, onSave, onCancel, isNew = false }: Pr
                             Action Agency
                           </div>
                         </div>
-                        <div className="bg-white border border-[#E7E2DA] p-3 rounded-lg shadow-2xs">
+                        <div className="bg-white border border-[#E7E2DA] p-3 rounded shadow-2xs">
                           <div className="text-[20px] font-mono font-bold text-[#1C1917]">
                             {atsResult.dimensionScores.technicalStackDepth}%
                           </div>
@@ -636,7 +636,7 @@ export function ProfileForm({ initialData, onSave, onCancel, isNew = false }: Pr
                             Stack Rigor
                           </div>
                         </div>
-                        <div className="bg-white border border-[#E7E2DA] p-3 rounded-lg shadow-2xs">
+                        <div className="bg-white border border-[#E7E2DA] p-3 rounded shadow-2xs">
                           <div className="text-[20px] font-mono font-bold text-[#1C1917]">
                             {atsResult.dimensionScores.atsLayoutFidelity}%
                           </div>
@@ -664,7 +664,7 @@ export function ProfileForm({ initialData, onSave, onCancel, isNew = false }: Pr
 
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                         {atsResult.recommendedRoles.map((roleObj: any, rIdx: number) => (
-                          <div key={rIdx} className="border border-[#E7E2DA] bg-[#FAF8F5] p-3.5 rounded-lg flex flex-col justify-between">
+                          <div key={rIdx} className="border border-[#E7E2DA] bg-[#FAF8F5] p-3.5 rounded flex flex-col justify-between">
                             <div>
                               <div className="flex items-center justify-between gap-2 mb-1.5">
                                 <h5 className="font-serif text-[15px] font-medium text-[#1C1917]">
@@ -700,7 +700,7 @@ export function ProfileForm({ initialData, onSave, onCancel, isNew = false }: Pr
                   {/* Strengths and Improvements */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-[12px] border-t border-[#E7E2DA] pt-5">
                     {atsResult.strengths && atsResult.strengths.length > 0 && (
-                      <div className="bg-[#F0FDF4]/60 border border-[#16A34A]/25 rounded-lg p-3.5">
+                      <div className="bg-[#F0FDF4]/60 border border-[#16A34A]/25 rounded p-3.5">
                         <span className="font-semibold text-[#064E3B] font-mono text-[11px] block mb-2 uppercase tracking-wider">
                           ✓ Verified Strengths
                         </span>
@@ -716,7 +716,7 @@ export function ProfileForm({ initialData, onSave, onCancel, isNew = false }: Pr
                     )}
 
                     {atsResult.improvements && atsResult.improvements.length > 0 && (
-                      <div className="bg-[#FFFBEB]/60 border border-[#D97706]/25 rounded-lg p-3.5">
+                      <div className="bg-[#FFFBEB]/60 border border-[#D97706]/25 rounded p-3.5">
                         <span className="font-semibold text-[#D97706] font-mono text-[11px] block mb-2 uppercase tracking-wider">
                           ⚠ High-Impact Improvements
                         </span>

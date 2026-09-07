@@ -45,7 +45,7 @@ export default function EmployerSupportPage() {
         {/* Header */}
         <div className="border-b border-[#E5E5E5] pb-6">
           <div className="flex items-center gap-3 mb-2">
-            <div className="h-10 w-10 rounded-xl bg-[#0D0D0D] text-white flex items-center justify-center shrink-0">
+            <div className="h-10 w-10 rounded bg-[#0D0D0D] text-white flex items-center justify-center shrink-0">
               <HelpCircle className="h-5 w-5" />
             </div>
             <div>
@@ -60,7 +60,7 @@ export default function EmployerSupportPage() {
         </div>
 
         {/* Verification Standards Summary */}
-        <div className="bg-gradient-to-br from-white to-[#F9F9F8] border border-[#E5E5E5] rounded-2xl p-6 sm:p-8 shadow-sm">
+        <div className="bg-gradient-to-br from-white to-[#F9F9F8] border border-[#E5E5E5] rounded p-6 sm:p-8 shadow-sm">
           <div className="flex items-center gap-2.5 text-[#15803D] font-mono text-[12px] font-bold uppercase tracking-wider mb-2">
             <ShieldCheck className="h-4 w-4" /> The MeritLane Standard
           </div>
@@ -77,7 +77,7 @@ export default function EmployerSupportPage() {
           <h2 className="font-serif text-[22px] text-[#0D0D0D]">Frequently Asked Questions</h2>
           <div className="grid gap-4 sm:grid-cols-2">
             {FAQS.map((faq, idx) => (
-              <div key={idx} className="bg-white border border-[#E5E5E5] p-5 rounded-2xl shadow-sm space-y-2">
+              <div key={idx} className="bg-white border border-[#E5E5E5] p-5 rounded shadow-sm space-y-2">
                 <h3 className="text-[14px] font-bold text-[#0D0D0D]">{faq.q}</h3>
                 <p className="text-[13px] text-[#737373] leading-relaxed">{faq.a}</p>
               </div>
@@ -86,7 +86,7 @@ export default function EmployerSupportPage() {
         </div>
 
         {/* Support Inquiry Form */}
-        <div className="bg-white border border-[#E5E5E5] rounded-2xl p-6 sm:p-8 shadow-sm">
+        <div className="bg-white border border-[#E5E5E5] rounded p-6 sm:p-8 shadow-sm">
           <div className="flex items-center gap-2 mb-2 text-[#0D0D0D] font-bold text-[16px]">
             <Mail className="h-4 w-4 text-[#737373]" /> Contact Talent Partnerships Team
           </div>
@@ -95,7 +95,7 @@ export default function EmployerSupportPage() {
           </p>
 
           {sent ? (
-            <div className="p-8 border border-[#15803D]/20 bg-[#15803D]/5 rounded-xl text-center space-y-2">
+            <div className="p-8 border border-[#15803D]/20 bg-[#15803D]/5 rounded text-center space-y-2">
               <CheckCircle2 className="h-8 w-8 text-[#15803D] mx-auto" />
               <h4 className="font-serif text-[18px] text-[#0D0D0D]">Inquiry Received</h4>
               <p className="text-[13px] text-[#737373]">
@@ -114,7 +114,7 @@ export default function EmployerSupportPage() {
                   placeholder="e.g. Sourcing full-stack engineering cohorts"
                   value={subject}
                   onChange={(e) => setSubject(e.target.value)}
-                  className="w-full px-4 py-2.5 rounded-xl border border-[#E5E5E5] text-[14px] text-[#0D0D0D] focus:border-[#0D0D0D] focus:ring-1 focus:ring-[#0D0D0D] outline-none transition-all"
+                  className="w-full px-4 py-2.5 rounded border border-[#E5E5E5] text-[14px] text-[#0D0D0D] focus:border-[#0D0D0D] focus:ring-1 focus:ring-[#0D0D0D] outline-none transition-all"
                 />
               </div>
               <div>
@@ -127,7 +127,7 @@ export default function EmployerSupportPage() {
                   placeholder="Describe your hiring requirements, target tech stack, or platform question..."
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
-                  className="w-full px-4 py-3 rounded-xl border border-[#E5E5E5] text-[14px] text-[#0D0D0D] focus:border-[#0D0D0D] focus:ring-1 focus:ring-[#0D0D0D] outline-none transition-all resize-none"
+                  className="w-full px-4 py-3 rounded border border-[#E5E5E5] text-[14px] text-[#0D0D0D] focus:border-[#0D0D0D] focus:ring-1 focus:ring-[#0D0D0D] outline-none transition-all resize-none"
                 />
               </div>
               <div className="flex justify-end">

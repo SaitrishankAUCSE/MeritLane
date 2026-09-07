@@ -280,9 +280,9 @@ export function AuthSwitch({ defaultMode = "login" }: AuthSwitchProps) {
 
   return (
     <div className="flex min-h-[85vh] items-center justify-center px-4 py-12 overflow-hidden">
-      <div className="w-full max-w-md rounded-2xl border border-border/90 bg-surface p-8 sm:p-10 shadow-[0_4px_24px_rgba(0,0,0,0.03)]">
+      <div className="w-full max-w-md rounded border border-border/90 bg-surface p-8 sm:p-10 shadow-[0_4px_24px_rgba(0,0,0,0.03)]">
         <div className="text-center mb-8">
-          <div className="mx-auto mb-4 flex h-10 w-10 items-center justify-center rounded-xl bg-surface-low text-muted-foreground shadow-sm">
+          <div className="mx-auto mb-4 flex h-10 w-10 items-center justify-center rounded bg-surface-low text-muted-foreground shadow-sm">
             <ShieldCheck className="h-5 w-5" />
           </div>
           <h1 className="text-2xl font-serif tracking-tight text-foreground">
@@ -296,7 +296,7 @@ export function AuthSwitch({ defaultMode = "login" }: AuthSwitchProps) {
         </div>
 
         {/* Animated Switcher */}
-        <div className="relative flex rounded-xl bg-surface-low border border-border p-1 mb-8">
+        <div className="relative flex rounded bg-surface-low border border-border p-1 mb-8">
           <button
             onClick={() => { setMode("login"); setError(null); }}
             className={`relative flex-1 py-2 text-sm font-medium z-10 transition-colors ${mode === "login" ? "text-foreground" : "text-muted-foreground hover:text-foreground"}`}
@@ -310,21 +310,21 @@ export function AuthSwitch({ defaultMode = "login" }: AuthSwitchProps) {
             Sign Up
           </button>
           <motion.div
-            className="absolute top-1 bottom-1 w-[calc(50%-4px)] rounded-lg bg-surface shadow-sm border border-border/50"
+            className="absolute top-1 bottom-1 w-[calc(50%-4px)] rounded bg-surface shadow-sm border border-border/50"
             animate={{ left: mode === "login" ? "4px" : "calc(50%)" }}
             transition={{ type: "spring", bounce: 0.2, duration: 0.5 }}
           />
         </div>
 
         {error && (
-          <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="mb-5 flex items-start gap-2.5 rounded-lg border border-danger/40 bg-danger/10/80 p-3.5 text-xs text-danger">
+          <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="mb-5 flex items-start gap-2.5 rounded border border-danger/40 bg-danger/10/80 p-3.5 text-xs text-danger">
             <AlertCircle className="h-4 w-4 shrink-0 text-danger mt-0.5" />
             <span className="leading-relaxed">{error}</span>
           </motion.div>
         )}
 
         {successMessage && (
-          <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="mb-5 flex items-start gap-2.5 rounded-lg border border-[#15803D]/20 bg-[#15803D]/10 p-3.5 text-xs text-[#15803D]">
+          <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="mb-5 flex items-start gap-2.5 rounded border border-[#15803D]/20 bg-[#15803D]/10 p-3.5 text-xs text-[#15803D]">
             <CheckCircle2 className="h-4 w-4 shrink-0 text-success mt-0.5" />
             <span className="leading-relaxed">{successMessage}</span>
           </motion.div>
@@ -349,7 +349,7 @@ export function AuthSwitch({ defaultMode = "login" }: AuthSwitchProps) {
                     <button
                       type="button"
                       onClick={() => setRole("candidate")}
-                      className={`flex flex-col items-center gap-2 rounded-xl border p-3.5 text-sm font-medium transition-all duration-150 select-none ${
+                      className={`flex flex-col items-center gap-2 rounded border p-3.5 text-sm font-medium transition-all duration-150 select-none ${
                         role === "candidate"
                           ? "border-zinc-600 bg-surface-low/70 text-zinc-950 ring-1 ring-zinc-600 shadow-sm"
                           : "border-border bg-surface text-muted-foreground hover:border-border hover:bg-surface-low"
@@ -361,7 +361,7 @@ export function AuthSwitch({ defaultMode = "login" }: AuthSwitchProps) {
                     <button
                       type="button"
                       onClick={() => setRole("employer")}
-                      className={`flex flex-col items-center gap-2 rounded-xl border p-3.5 text-sm font-medium transition-all duration-150 select-none ${
+                      className={`flex flex-col items-center gap-2 rounded border p-3.5 text-sm font-medium transition-all duration-150 select-none ${
                         role === "employer"
                           ? "border-zinc-600 bg-surface-low/70 text-zinc-950 ring-1 ring-zinc-600 shadow-sm"
                           : "border-border bg-surface text-muted-foreground hover:border-border hover:bg-surface-low"

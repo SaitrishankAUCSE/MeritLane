@@ -85,9 +85,9 @@ export function ProfileCompletionGuard({ children }: ProfileCompletionGuardProps
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 15 }}
               transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-              className="max-w-md w-full bg-white border border-[#E7E2DA] rounded-2xl p-7 sm:p-8 shadow-2xl text-center"
+              className="max-w-md w-full bg-white border border-[#E7E2DA] rounded p-7 sm:p-8 shadow-2xl text-center"
             >
-              <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-[#F8F6F3] text-[#1C1917] border border-[#E7E2DA]">
+              <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded bg-[#F8F6F3] text-[#1C1917] border border-[#E7E2DA]">
                 <UserCheck className="h-7 w-7" />
               </div>
 
@@ -105,7 +105,7 @@ export function ProfileCompletionGuard({ children }: ProfileCompletionGuardProps
 
               <button
                 onClick={() => router.push("/candidate/profile")}
-                className="w-full h-11 bg-[#1C1917] hover:bg-[#292524] text-white text-[13px] font-semibold rounded-xl transition-all duration-150 flex items-center justify-center gap-2 shadow-sm focus:outline-none focus:ring-2 focus:ring-[#1C1917] focus:ring-offset-2"
+                className="w-full h-11 bg-[#1C1917] hover:bg-[#292524] text-white text-[13px] font-semibold rounded transition-all duration-150 flex items-center justify-center gap-2 shadow-sm focus:outline-none focus:ring-2 focus:ring-[#1C1917] focus:ring-offset-2"
               >
                 <span>Go to Profile Setup</span>
                 <ArrowRight className="h-4 w-4" />

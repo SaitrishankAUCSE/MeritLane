@@ -182,7 +182,7 @@ export default function EditJobPostingPage() {
               <select
                 value={status}
                 onChange={(e) => setStatus(e.target.value as JobStatus)}
-                className="h-9 px-3 bg-[#FAF8F5] border border-[#E7E2DA] rounded-full text-[12px] font-mono font-semibold text-[#1C1917] focus:outline-none"
+                className="h-9 px-3 bg-[#FAF8F5] border border-[#E7E2DA] rounded text-[12px] font-mono font-semibold text-[#1C1917] focus:outline-none"
               >
                 <option value="draft">DRAFT</option>
                 <option value="published">PUBLISHED</option>
@@ -292,7 +292,7 @@ export default function EditJobPostingPage() {
                 {skills.map((skill) => (
                   <span
                     key={skill}
-                    className="inline-flex items-center gap-1.5 px-3 py-1 bg-white border border-[#E7E2DA] rounded-full text-[12px] font-mono text-[#1C1917] shadow-2xs"
+                    className="inline-flex items-center gap-1.5 px-3 py-1 bg-white border border-[#E7E2DA] rounded text-[12px] font-mono text-[#1C1917] shadow-2xs"
                   >
                     <span>{skill}</span>
                     <button
@@ -349,7 +349,7 @@ export default function EditJobPostingPage() {
               type="button"
               disabled={saving}
               onClick={() => handleSave()}
-              className="px-7 h-11 bg-[#064E3B] hover:bg-[#043327] text-white text-[12px] font-mono font-semibold uppercase tracking-wider rounded-full transition-colors shadow-xs disabled:opacity-50 flex items-center justify-center gap-2"
+              className="px-7 h-11 bg-[#064E3B] hover:bg-[#043327] text-white text-[12px] font-mono font-semibold uppercase tracking-wider rounded transition-colors shadow-xs disabled:opacity-50 flex items-center justify-center gap-2"
             >
               {saving ? "SAVING CHANGES…" : "SAVE UPDATES"}
             </button>

@@ -18,9 +18,21 @@ service cloud.firestore {
     match /users/{userId} {
       allow read: if isOwner(userId) || isAdmin();
       allow create: if isOwner(userId);
-      // Owner cannot modify admin claims directly
+      // Owner cannot modify admin claims or assessment metadata directly
       allow update: if (isOwner(userId) && (
-        !request.resource.data.diff(resource.data).affectedKeys().hasAny(['admin'])
+        !request.resource.data.diff(resource.data).affectedKeys().hasAny([
+          'admin', 
+          'verifiedSkills', 
+          'assessmentScores', 
+          'failedAssessments', 
+          'failedAssessmentsFeedback', 
+          'integrityTerminations',
+          'assessmentStartedAt',
+          'assessmentSkill',
+          'assessmentVariant',
+          'assessmentSeed',
+          'assessmentDate'
+        ])
       )) || isAdmin();
       allow delete: if isAdmin();
     }
@@ -30,12 +42,12 @@ service cloud.firestore {
       allow read: if isOwner(userId) || isAdmin();
       // Candidates can create profile with draft or pending status, but cannot set admin audit fields
       allow create: if (isOwner(userId) && (
-        !request.resource.data.keys().hasAny(['verifiedBy', 'verifiedByUid', 'verifiedByEmail', 'verifiedAt']) &&
+        !request.resource.data.keys().hasAny(['verifiedBy', 'verifiedByUid', 'verifiedByEmail', 'verifiedAt', 'verifiedSkills']) &&
         (request.resource.data.verificationStatus in ['draft', 'pending'])
       )) || isAdmin();
       // Candidates can update profile (draft or pending) but cannot self-verify or tamper with audit fields
       allow update: if (isOwner(userId) && (
-        !request.resource.data.diff(resource.data).affectedKeys().hasAny(['verificationStatus', 'verifiedAt', 'verifiedBy', 'verifiedByUid', 'verifiedByEmail'])
+        !request.resource.data.diff(resource.data).affectedKeys().hasAny(['verificationStatus', 'verifiedAt', 'verifiedBy', 'verifiedByUid', 'verifiedByEmail', 'verifiedSkills'])
       )) || isAdmin();
       allow delete: if isAdmin();
     }

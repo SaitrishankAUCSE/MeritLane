@@ -113,7 +113,7 @@ export default function NewJobPostingPage() {
       </div>
 
       <div className="max-w-[1000px] mx-auto px-6 sm:px-10 py-8">
-        <div className="border border-[#E7E2DA] bg-white p-7 sm:p-10 rounded-2xl shadow-xs space-y-8">
+        <div className="border border-[#E7E2DA] bg-white p-7 sm:p-10 rounded shadow-xs space-y-8">
           <div>
             <div className="text-[10px] font-mono tracking-[0.2em] text-[#78716C] uppercase mb-1">
               Job Intake Formulation
@@ -127,7 +127,7 @@ export default function NewJobPostingPage() {
           </div>
 
           {error && (
-            <div className="p-4 bg-[#FEF2F2] border border-[#B42318]/20 rounded-xl text-[13px] text-[#B42318] flex items-center gap-2 font-sans">
+            <div className="p-4 bg-[#FEF2F2] border border-[#B42318]/20 rounded text-[13px] text-[#B42318] flex items-center gap-2 font-sans">
               <AlertCircle className="h-4 w-4 shrink-0" />
               <span>{error}</span>
             </div>
@@ -145,7 +145,7 @@ export default function NewJobPostingPage() {
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
                   placeholder="e.g. Senior Frontend Engineer"
-                  className="w-full h-11 px-4 bg-[#FAF8F5] border border-[#E7E2DA] rounded-xl text-[14px] text-[#1C1917] focus:outline-none focus:ring-1 focus:ring-[#1C1917]"
+                  className="w-full h-11 px-4 bg-[#FAF8F5] border border-[#E7E2DA] rounded text-[14px] text-[#1C1917] focus:outline-none focus:ring-1 focus:ring-[#1C1917]"
                 />
               </div>
 
@@ -158,7 +158,7 @@ export default function NewJobPostingPage() {
                   value={department}
                   onChange={(e) => setDepartment(e.target.value)}
                   placeholder="e.g. Core Infrastructure"
-                  className="w-full h-11 px-4 bg-[#FAF8F5] border border-[#E7E2DA] rounded-xl text-[14px] text-[#1C1917] focus:outline-none focus:ring-1 focus:ring-[#1C1917]"
+                  className="w-full h-11 px-4 bg-[#FAF8F5] border border-[#E7E2DA] rounded text-[14px] text-[#1C1917] focus:outline-none focus:ring-1 focus:ring-[#1C1917]"
                 />
               </div>
             </div>
@@ -172,7 +172,7 @@ export default function NewJobPostingPage() {
                 <select
                   value={workMode}
                   onChange={(e) => setWorkMode(e.target.value as WorkMode)}
-                  className="w-full h-11 px-4 bg-[#FAF8F5] border border-[#E7E2DA] rounded-xl text-[13px] text-[#1C1917] focus:outline-none focus:ring-1 focus:ring-[#1C1917]"
+                  className="w-full h-11 px-4 bg-[#FAF8F5] border border-[#E7E2DA] rounded text-[13px] text-[#1C1917] focus:outline-none focus:ring-1 focus:ring-[#1C1917]"
                 >
                   <option value="remote">Remote</option>
                   <option value="hybrid">Hybrid</option>
@@ -187,7 +187,7 @@ export default function NewJobPostingPage() {
                 <select
                   value={employmentType}
                   onChange={(e) => setEmploymentType(e.target.value as EmploymentType)}
-                  className="w-full h-11 px-4 bg-[#FAF8F5] border border-[#E7E2DA] rounded-xl text-[13px] text-[#1C1917] focus:outline-none focus:ring-1 focus:ring-[#1C1917]"
+                  className="w-full h-11 px-4 bg-[#FAF8F5] border border-[#E7E2DA] rounded text-[13px] text-[#1C1917] focus:outline-none focus:ring-1 focus:ring-[#1C1917]"
                 >
                   <option value="full-time">Full-Time</option>
                   <option value="part-time">Part-Time</option>
@@ -205,7 +205,7 @@ export default function NewJobPostingPage() {
                   value={location}
                   onChange={(e) => setLocation(e.target.value)}
                   placeholder="e.g. Bengaluru / Remote"
-                  className="w-full h-11 px-4 bg-[#FAF8F5] border border-[#E7E2DA] rounded-xl text-[14px] text-[#1C1917] focus:outline-none focus:ring-1 focus:ring-[#1C1917]"
+                  className="w-full h-11 px-4 bg-[#FAF8F5] border border-[#E7E2DA] rounded text-[14px] text-[#1C1917] focus:outline-none focus:ring-1 focus:ring-[#1C1917]"
                 />
               </div>
             </div>
@@ -220,7 +220,7 @@ export default function NewJobPostingPage() {
                 value={salaryRange}
                 onChange={(e) => setSalaryRange(e.target.value)}
                 placeholder="e.g. ₹14,00,000 - ₹22,00,000 PA"
-                className="w-full h-11 px-4 bg-[#FAF8F5] border border-[#E7E2DA] rounded-xl text-[14px] text-[#1C1917] focus:outline-none focus:ring-1 focus:ring-[#1C1917]"
+                className="w-full h-11 px-4 bg-[#FAF8F5] border border-[#E7E2DA] rounded text-[14px] text-[#1C1917] focus:outline-none focus:ring-1 focus:ring-[#1C1917]"
               />
             </div>
 
@@ -231,7 +231,7 @@ export default function NewJobPostingPage() {
               </label>
 
               {/* Active Pills */}
-              <div className="flex items-center gap-2 flex-wrap min-h-[40px] p-2 bg-[#FAF8F5] border border-[#E7E2DA] rounded-xl">
+              <div className="flex items-center gap-2 flex-wrap min-h-[40px] p-2 bg-[#FAF8F5] border border-[#E7E2DA] rounded">
                 {skills.length === 0 ? (
                   <span className="text-[12px] text-[#A8A29E] px-2 font-mono">
                     No capabilities added yet. Choose from below or type custom.
@@ -240,7 +240,7 @@ export default function NewJobPostingPage() {
                   skills.map((skill) => (
                     <span
                       key={skill}
-                      className="inline-flex items-center gap-1.5 px-3 py-1 bg-white border border-[#E7E2DA] rounded-full text-[12px] font-mono text-[#1C1917] shadow-2xs"
+                      className="inline-flex items-center gap-1.5 px-3 py-1 bg-white border border-[#E7E2DA] rounded text-[12px] font-mono text-[#1C1917] shadow-2xs"
                     >
                       <span>{skill}</span>
                       <button
@@ -268,12 +268,12 @@ export default function NewJobPostingPage() {
                     }
                   }}
                   placeholder="Type a capability and press Add…"
-                  className="flex-1 h-10 px-3.5 bg-white border border-[#E7E2DA] rounded-xl text-[13px] text-[#1C1917] focus:outline-none focus:ring-1 focus:ring-[#1C1917]"
+                  className="flex-1 h-10 px-3.5 bg-white border border-[#E7E2DA] rounded text-[13px] text-[#1C1917] focus:outline-none focus:ring-1 focus:ring-[#1C1917]"
                 />
                 <button
                   type="button"
                   onClick={() => handleAddSkill(skillInput)}
-                  className="px-4 h-10 border border-[#E7E2DA] bg-white hover:bg-[#FAF8F5] text-[12px] font-mono font-semibold rounded-xl"
+                  className="px-4 h-10 border border-[#E7E2DA] bg-white hover:bg-[#FAF8F5] text-[12px] font-mono font-semibold rounded"
                 >
                   ADD
                 </button>
@@ -287,7 +287,7 @@ export default function NewJobPostingPage() {
                     key={s}
                     type="button"
                     onClick={() => handleAddSkill(s)}
-                    className="text-[10px] font-mono px-2.5 py-0.5 border border-[#E7E2DA] bg-white hover:border-[#1C1917] rounded-full text-[#78716C] hover:text-[#1C1917]"
+                    className="text-[10px] font-mono px-2.5 py-0.5 border border-[#E7E2DA] bg-white hover:border-[#1C1917] rounded text-[#78716C] hover:text-[#1C1917]"
                   >
                     + {s}
                   </button>
@@ -305,7 +305,7 @@ export default function NewJobPostingPage() {
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 placeholder="Detail the technical responsibilities, engineering expectations, project domain, and team structure…"
-                className="w-full p-4 bg-[#FAF8F5] border border-[#E7E2DA] rounded-xl text-[14px] text-[#1C1917] focus:outline-none focus:ring-1 focus:ring-[#1C1917] font-sans leading-relaxed"
+                className="w-full p-4 bg-[#FAF8F5] border border-[#E7E2DA] rounded text-[14px] text-[#1C1917] focus:outline-none focus:ring-1 focus:ring-[#1C1917] font-sans leading-relaxed"
               />
             </div>
           </div>
@@ -316,7 +316,7 @@ export default function NewJobPostingPage() {
               type="button"
               disabled={saving}
               onClick={() => handleSubmit("draft")}
-              className="w-full sm:w-auto px-6 h-11 border border-[#E7E2DA] bg-white hover:bg-[#FAF8F5] text-[12px] font-mono font-semibold uppercase tracking-wider rounded-full transition-colors disabled:opacity-50 shadow-2xs"
+              className="w-full sm:w-auto px-6 h-11 border border-[#E7E2DA] bg-white hover:bg-[#FAF8F5] text-[12px] font-mono font-semibold uppercase tracking-wider rounded transition-colors disabled:opacity-50 shadow-2xs"
             >
               SAVE AS DRAFT
             </button>
@@ -325,7 +325,7 @@ export default function NewJobPostingPage() {
               type="button"
               disabled={saving}
               onClick={() => handleSubmit("published")}
-              className="w-full sm:w-auto px-7 h-11 bg-[#064E3B] hover:bg-[#043327] text-white text-[12px] font-mono font-semibold uppercase tracking-wider rounded-full transition-colors shadow-xs disabled:opacity-50 flex items-center justify-center gap-2"
+              className="w-full sm:w-auto px-7 h-11 bg-[#064E3B] hover:bg-[#043327] text-white text-[12px] font-mono font-semibold uppercase tracking-wider rounded transition-colors shadow-xs disabled:opacity-50 flex items-center justify-center gap-2"
             >
               {saving ? (
                 <>

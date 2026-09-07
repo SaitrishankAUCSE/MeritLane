@@ -105,18 +105,19 @@ export default function Navbar() {
             </>
           ) : (
             <div className="hidden items-center gap-6 md:flex">
-              <button onClick={() => openAuthModal("login")} className="text-sm text-[#78716C] hover:text-[#1C1917] transition-colors font-medium">
+              <button onClick={() => openAuthModal("login")} className="text-[13px] text-[#78716C] hover:text-[#1C1917] transition-colors font-medium">
                 Log in
               </button>
-              <button onClick={() => openAuthModal("signup", undefined, "candidate")} className="text-sm text-[#78716C] hover:text-[#1C1917] transition-colors font-medium">
+              <button onClick={() => openAuthModal("signup", undefined, "candidate")} className="text-[13px] text-[#78716C] hover:text-[#1C1917] transition-colors font-medium">
                 Register
               </button>
-              <button 
+              <Button
                 onClick={() => openAuthModal("signup", undefined, "employer")}
-                className="px-5 h-9 bg-[#064E3B] text-white hover:bg-[#022c22] rounded-full text-[13px] font-sans font-medium transition-colors shadow-xs"
+                variant="primary"
+                size="sm"
               >
-                Hire Talent
-              </button>
+                Employer Access
+              </Button>
             </div>
           )}
 
@@ -137,7 +138,7 @@ export default function Navbar() {
             <div className="flex flex-col gap-2">
               <Button onClick={() => { setMobileMenuOpen(false); openAuthModal("login"); }} variant="secondary" className="w-full justify-center">Log in</Button>
               <Button onClick={() => { setMobileMenuOpen(false); openAuthModal("signup", undefined, "candidate"); }} variant="secondary" className="w-full justify-center">Register</Button>
-              <Button onClick={() => { setMobileMenuOpen(false); openAuthModal("signup", undefined, "employer"); }} variant="primary" className="w-full justify-center">Hire Talent</Button>
+              <Button onClick={() => { setMobileMenuOpen(false); openAuthModal("signup", undefined, "employer"); }} variant="primary" className="w-full justify-center">Employer Access</Button>
             </div>
           ) : !isResolvingAuth && user ? (
             <div className="flex flex-col gap-4">
@@ -195,18 +196,18 @@ function ProfileDropdown({ user, userProfile, isAdmin, onSignOutClick }: { user:
     <div className="relative inline-block text-left" onClick={(e) => e.stopPropagation()}>
       <button
         onClick={() => setOpen(!open)}
-        className="flex items-center gap-2 p-1 text-sm text-muted-foreground hover:text-foreground"
+        className="flex items-center gap-2 px-2 py-1 rounded text-sm text-muted-foreground hover:text-foreground hover:bg-[#F2EFE9] transition-colors"
         aria-expanded={open}
         aria-haspopup="true"
       >
-        <div className="flex h-7 w-7 items-center justify-center overflow-hidden border border-border bg-surface-low text-xs">
+        <div className="flex h-7 w-7 items-center justify-center overflow-hidden border border-border bg-[#EAE6DF] text-xs font-medium text-[#1C1917]">
           {photoUrl ? (
             <img src={photoUrl} alt={displayName} className="h-full w-full object-cover" />
           ) : (
             initial
           )}
         </div>
-        <span className="hidden max-w-[120px] truncate font-data sm:inline-block">{displayName}</span>
+        <span className="hidden max-w-[120px] truncate text-[13px] sm:inline-block">{displayName}</span>
         <ChevronDown className={`h-3 w-3 transition-transform ${open ? "rotate-180" : ""}`} />
       </button>
 

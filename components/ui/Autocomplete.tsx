@@ -192,7 +192,7 @@ export function Autocomplete({
           disabled={disabled}
           className="absolute inset-y-0 right-0 flex items-center pr-3 text-muted-foreground focus:outline-none"
         >
-          {isLoading ? <div className="h-4 w-4 rounded-full border-[1.5px] border-[#E5E5E5] border-t-[#0D0D0D] animate-spin" /> : <ChevronDown className="h-4 w-4" />}
+          {isLoading ? <div className="h-4 w-4 rounded border-[1.5px] border-[#E5E5E5] border-t-[#0D0D0D] animate-spin" /> : <ChevronDown className="h-4 w-4" />}
         </button>
       </div>
 

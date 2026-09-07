@@ -16,7 +16,7 @@ export default function CandidateSupportPage() {
       </div>
 
       <div className="grid gap-6 sm:grid-cols-2">
-        <div className="border border-[#E5E5E5] bg-[#FFFFFF] rounded-xl p-6 transition-colors hover:border-[#D2D2D2]">
+        <div className="border border-[#E5E5E5] bg-[#FFFFFF] rounded p-6 transition-colors hover:border-[#D2D2D2]">
           <Mail className="h-6 w-6 text-[#0D0D0D] mb-4" />
           <h2 className="text-base font-bold text-[#0D0D0D] mb-2">Email Support</h2>
           <p className="text-sm text-[#737373] mb-4">
@@ -27,7 +27,7 @@ export default function CandidateSupportPage() {
           </a>
         </div>
 
-        <div className="border border-[#E5E5E5] bg-[#FFFFFF] rounded-xl p-6 transition-colors hover:border-[#D2D2D2]">
+        <div className="border border-[#E5E5E5] bg-[#FFFFFF] rounded p-6 transition-colors hover:border-[#D2D2D2]">
           <MessageSquare className="h-6 w-6 text-[#15803D] mb-4" />
           <h2 className="text-base font-bold text-[#0D0D0D] mb-2">Live Chat</h2>
           <p className="text-sm text-[#737373] mb-4">

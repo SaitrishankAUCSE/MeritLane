@@ -56,11 +56,11 @@ export function GlobalAuthModal() {
           >
             <button
               onClick={closeAuthModal}
-              className="absolute right-4 top-4 z-50 flex h-8 w-8 items-center justify-center rounded-full bg-surface-low text-muted-foreground hover:bg-surface-high hover:text-foreground transition-colors"
+              className="absolute right-4 top-4 z-50 flex h-8 w-8 items-center justify-center rounded bg-surface-low text-muted-foreground hover:bg-surface-high hover:text-foreground transition-colors"
             >
               <X className="h-4 w-4" />
             </button>
-            <div className="overflow-hidden rounded-2xl bg-surface shadow-2xl border border-border">
+            <div className="overflow-hidden rounded bg-surface shadow-2xl border border-border">
               <AuthSwitch defaultMode={authModalMode} />
             </div>
           </motion.div>

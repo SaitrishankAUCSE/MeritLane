@@ -13,15 +13,29 @@ import {
   Maximize2,
   XCircle,
   Code,
+  ChevronLeft,
+  ChevronRight,
+  ArrowRight,
+  ArrowLeft,
+  Check,
+  Flag,
+  RotateCcw,
+  Sparkles,
+  Terminal,
+  ShieldCheck,
 } from "lucide-react";
 import { logFunnelEvent } from "@/lib/analytics/logEvent";
 import { auth } from "@/lib/firebase/config";
 import { MeritlaneLoader } from "@/components/ui/MeritlaneLoader";
 import { AssessmentWatermark } from "@/components/candidate/AssessmentWatermark";
 
+import { COMMON_SUPPORTED_LANGUAGES, SupportedLanguage } from "@/lib/assessments/content";
+
 export interface MCQ {
   question: string;
   options: string[];
+  difficulty?: "easy" | "medium" | "hard";
+  topic?: string;
 }
 
 export interface CodingChallenge {
@@ -29,11 +43,14 @@ export interface CodingChallenge {
   instructions: string;
   initialCode: string;
   language?: string;
+  supportedLanguages?: SupportedLanguage[];
 }
 
 export interface AssessmentContent {
   mcqs: MCQ[];
-  coding: CodingChallenge;
+  coding?: CodingChallenge;
+  hasCoding: boolean;
+  timeLimitMinutes: number;
 }
 
 // ─── Infraction Overlay ───────────────────────────────────────────────────────
@@ -70,13 +87,13 @@ function InfractionOverlay({
       aria-label="Assessment integrity warning"
       className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/85 backdrop-blur-md p-6"
     >
-      <div className="w-full max-w-md bg-white rounded-2xl border border-[#E7E2DA] shadow-2xl overflow-hidden">
+      <div className="w-full max-w-md bg-white rounded border border-[#E7E2DA] shadow-2xl overflow-hidden">
         {/* Top accent */}
         <div className={`h-1.5 w-full ${isFinal ? "bg-[#B42318]" : "bg-[#D97706]"}`} />
 
         <div className="p-8">
           <div
-            className={`mx-auto mb-5 h-14 w-14 rounded-full flex items-center justify-center ${
+            className={`mx-auto mb-5 h-14 w-14 rounded flex items-center justify-center ${
               isFinal ? "bg-[#FEF2F2]" : "bg-[#FFFBEB]"
             }`}
           >
@@ -100,7 +117,7 @@ function InfractionOverlay({
               {isFinal ? "Assessment Terminated" : reason || "Proctoring Violation Detected"}
             </h2>
 
-            <div className="bg-[#FAF8F5] border border-[#E7E2DA] rounded-xl p-3.5 mb-5 text-[12px] font-mono text-[#78716C] text-left">
+            <div className="bg-[#FAF8F5] border border-[#E7E2DA] rounded p-3.5 mb-5 text-[12px] font-mono text-[#78716C] text-left">
               <span className="font-semibold text-[#1C1917]">Integrity Policy:</span> Switching tabs, minimising the window, or navigating away is strictly monitored and recorded.
             </div>
 
@@ -132,7 +149,7 @@ function InfractionOverlay({
               <button
                 ref={btnRef}
                 onClick={onRestoreFullscreen}
-                className="w-full h-11 bg-[#1C1917] text-white text-[14px] font-semibold rounded-xl
+                className="w-full h-11 bg-[#1C1917] text-white text-[14px] font-semibold rounded
                            hover:bg-[#292524] transition-colors focus:outline-none focus:ring-2
                            focus:ring-[#1C1917] focus:ring-offset-2 flex items-center justify-center gap-2"
               >
@@ -160,8 +177,8 @@ function FullscreenUnsupportedOverlay({ onRetry }: { onRetry: () => void }) {
       aria-label="Fullscreen required"
       className="fixed inset-0 z-[9999] flex items-center justify-center bg-[#F8F6F3] p-6"
     >
-      <div className="w-full max-w-md bg-white rounded-2xl border border-[#E7E2DA] shadow-xl p-8 text-center">
-        <div className="mx-auto mb-5 h-14 w-14 rounded-full bg-[#FEF2F2] flex items-center justify-center">
+      <div className="w-full max-w-md bg-white rounded border border-[#E7E2DA] shadow-xl p-8 text-center">
+        <div className="mx-auto mb-5 h-14 w-14 rounded bg-[#FEF2F2] flex items-center justify-center">
           <Monitor className="h-7 w-7 text-[#B42318]" />
         </div>
         <h2 className="text-[20px] font-semibold text-[#1C1917] mb-3">Fullscreen required</h2>
@@ -172,7 +189,7 @@ function FullscreenUnsupportedOverlay({ onRetry }: { onRetry: () => void }) {
         <button
           ref={btnRef}
           onClick={onRetry}
-          className="w-full h-11 bg-[#1C1917] text-white text-[14px] font-semibold rounded-xl
+          className="w-full h-11 bg-[#1C1917] text-white text-[14px] font-semibold rounded
                      hover:bg-[#292524] transition-colors focus:outline-none focus:ring-2
                      focus:ring-[#1C1917] focus:ring-offset-2 flex items-center justify-center gap-2"
         >
@@ -218,12 +235,20 @@ function AssessmentContentWrapper() {
   const [content, setContent] = useState<AssessmentContent | null>(null);
   const [phase, setPhase] = useState<"intro" | "mcq" | "coding">("intro");
   const [mcqIndex, setMcqIndex] = useState(0);
-  const [mcqAnswers, setMcqAnswers] = useState<number[]>([]);
-  const [timeLeft, setTimeLeft] = useState<number>(45 * 60);
+  const [mcqAnswers, setMcqAnswers] = useState<(number | undefined)[]>([]);
+  const [timeLeft, setTimeLeft] = useState<number>(60 * 60);
+  const [selectedLanguage, setSelectedLanguage] = useState<string>("python");
+  const [showSubmitModal, setShowSubmitModal] = useState<boolean>(false);
   const [code, setCode] = useState("");
   const [evaluating, setEvaluating] = useState(false);
   const [output, setOutput] = useState("");
-  const [activeConsoleTab, setActiveConsoleTab] = useState<"console" | "testcases">("console");
+  const [activeConsoleTab, setActiveConsoleTab] = useState<"console" | "testcases" | "custom">("console");
+  const [customInput, setCustomInput] = useState<string>("");
+  const [flaggedQuestions, setFlaggedQuestions] = useState<boolean[]>([]);
+  const [showResetConfirm, setShowResetConfirm] = useState(false);
+  const [draftSavedToast, setDraftSavedToast] = useState(false);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const [cursorPos, setCursorPos] = useState({ line: 1, col: 1 });
   const [testRunStats, setTestRunStats] = useState<{
     total: number;
     passed: number;
@@ -270,7 +295,10 @@ function AssessmentContentWrapper() {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
           },
-          body: JSON.stringify({ skill: skillParam }),
+          body: JSON.stringify({
+            skill: skillParam,
+            resetCooldown: searchParams.get("resetCooldown") === "true",
+          }),
         });
 
         const data = await res.json();
@@ -289,7 +317,53 @@ function AssessmentContentWrapper() {
         }
 
         setContent(data.content);
-        setCode(data.content.coding.initialCode);
+        const storageKey = user ? `ml_draft_${skillParam.toLowerCase().replace(/\s+/g, "_")}_${user.uid}` : null;
+        let restoredDraft: any = null;
+        if (storageKey) {
+          try {
+            const raw = sessionStorage.getItem(storageKey);
+            if (raw) restoredDraft = JSON.parse(raw);
+          } catch {
+            /* ignore invalid json */
+          }
+        }
+
+        if (data.content.mcqs) {
+          if (restoredDraft?.mcqAnswers && Array.isArray(restoredDraft.mcqAnswers) && restoredDraft.mcqAnswers.length === data.content.mcqs.length) {
+            setMcqAnswers(restoredDraft.mcqAnswers);
+          } else {
+            setMcqAnswers(new Array(data.content.mcqs.length).fill(undefined));
+          }
+
+          if (restoredDraft?.flaggedQuestions && Array.isArray(restoredDraft.flaggedQuestions) && restoredDraft.flaggedQuestions.length === data.content.mcqs.length) {
+            setFlaggedQuestions(restoredDraft.flaggedQuestions);
+          } else {
+            setFlaggedQuestions(new Array(data.content.mcqs.length).fill(false));
+          }
+        }
+
+        if (data.content.coding) {
+          if (restoredDraft?.code && typeof restoredDraft.code === "string") {
+            setCode(restoredDraft.code);
+          } else {
+            setCode(data.content.coding.initialCode);
+          }
+
+          if (restoredDraft?.selectedLanguage && typeof restoredDraft.selectedLanguage === "string") {
+            setSelectedLanguage(restoredDraft.selectedLanguage);
+          } else if (data.content.coding.language) {
+            setSelectedLanguage(data.content.coding.language);
+          }
+
+          if (restoredDraft?.customInput && typeof restoredDraft.customInput === "string") {
+            setCustomInput(restoredDraft.customInput);
+          }
+        }
+
+        if (data.startedAt) {
+          const elapsed = Math.floor((Date.now() - data.startedAt) / 1000);
+          setTimeLeft(Math.max(0, 3600 - elapsed));
+        }
         setInitializing(false);
       } catch (err) {
         console.error(err);
@@ -307,6 +381,27 @@ function AssessmentContentWrapper() {
     };
   }, [user, loading, router, skillParam]);
 
+  // Auto-save draft progress to sessionStorage
+  useEffect(() => {
+    if (!hasStarted || !user || assessmentResult || integrityTerminated) return;
+    const storageKey = `ml_draft_${skillParam.toLowerCase().replace(/\s+/g, "_")}_${user.uid}`;
+    try {
+      sessionStorage.setItem(
+        storageKey,
+        JSON.stringify({
+          mcqAnswers,
+          flaggedQuestions,
+          code,
+          selectedLanguage,
+          customInput,
+          updatedAt: Date.now(),
+        })
+      );
+    } catch {
+      /* storage quota exceeded or unavailable */
+    }
+  }, [hasStarted, user, skillParam, mcqAnswers, flaggedQuestions, code, selectedLanguage, customInput, assessmentResult, integrityTerminated]);
+
   // ── Timer ───────────────────────────────────────────────────────────────────
 
   useEffect(() => {
@@ -320,6 +415,17 @@ function AssessmentContentWrapper() {
     }
     return () => clearInterval(timer);
   }, [hasStarted, timeLeft, errorMsg, assessmentResult, integrityTerminated]);
+
+  // ── Draft cleanup ──────────────────────────────────────────────────────────
+  const clearDraft = useCallback(() => {
+    if (!user) return;
+    try {
+      const storageKey = `ml_draft_${skillParam.toLowerCase().replace(/\s+/g, "_")}_${user.uid}`;
+      sessionStorage.removeItem(storageKey);
+    } catch {
+      /* ignore */
+    }
+  }, [user, skillParam]);
 
   // ── Server-side integrity termination ──────────────────────────────────────
 
@@ -366,9 +472,10 @@ function AssessmentContentWrapper() {
       setRetryAvailableAt(new Date(Date.now() + 21 * 24 * 60 * 60 * 1000).toISOString());
     }
 
+    clearDraft();
     setIntegrityTerminated(true);
     setInfractionOverlay(null);
-  }, [skillParam]);
+  }, [skillParam, clearDraft]);
 
   // ── Fullscreen restoration helper ──────────────────────────────────────────
 
@@ -533,6 +640,7 @@ function AssessmentContentWrapper() {
 
   const handleFail = () => {
     if (!user || isTerminatedRef.current) return;
+    clearDraft();
     setAssessmentResult({
       passed: false,
       score: 0,
@@ -584,67 +692,194 @@ function AssessmentContentWrapper() {
     }
   };
 
-  // ── MCQ ────────────────────────────────────────────────────────────────────
+  // ── Language & MCQ Selectors ──────────────────────────────────────────────
 
-  const handleAnswerMcq = (selectedIndex: number) => {
-    if (!content) return;
-    setMcqAnswers((prev) => [...prev, selectedIndex]);
-    if (mcqIndex < content.mcqs.length - 1) {
-      setMcqIndex((i) => i + 1);
-    } else {
-      setPhase("coding");
+  const handleLanguageChange = (newLang: string) => {
+    setSelectedLanguage(newLang);
+    if (!content?.coding) return;
+    const langs = content.coding.supportedLanguages || COMMON_SUPPORTED_LANGUAGES;
+    const found = langs.find((l) => l.id === newLang);
+    if (found && found.template) {
+      setCode(found.template);
     }
   };
 
-  // ── Submit ─────────────────────────────────────────────────────────────────
+  const handleSelectMcq = (optIndex: number) => {
+    setMcqAnswers((prev) => {
+      const copy = [...prev];
+      copy[mcqIndex] = optIndex;
+      return copy;
+    });
+  };
 
-  const handleTest = async (isSubmit: boolean) => {
-    setEvaluating(true);
-    setOutput("Compiling environment...\nRunning secure test runner...\n");
+  const toggleFlagQuestion = (index: number) => {
+    setFlaggedQuestions((prev) => {
+      const copy = [...prev];
+      copy[index] = !copy[index];
+      return copy;
+    });
+  };
 
-    if (!isSubmit) {
-      setTimeout(() => {
-        const hasCodeContent = code.trim().length > 20;
-        const generatedCases = [
-          {
-            name: "Test Case 1: Standard Input / Happy Path",
-            input: "Sample standard dataset payload",
-            expected: "Expected return structure & non-null output",
-            actual: hasCodeContent ? "Computed valid output without exceptions" : "Empty return / syntax mismatch",
-            passed: hasCodeContent,
-          },
-          {
-            name: "Test Case 2: Boundary & Edge Case Handling",
-            input: "Empty input / malformed edge record",
-            expected: "Graceful error handling or default fallback",
-            actual: hasCodeContent ? "Handled edge conditions safely" : "Unhandled runtime boundary",
-            passed: hasCodeContent,
-          },
-        ];
+  const handleResetCode = () => {
+    if (!content?.coding) return;
+    const langs = content.coding.supportedLanguages || COMMON_SUPPORTED_LANGUAGES;
+    const found = langs.find((l) => l.id === selectedLanguage);
+    if (found && found.template) {
+      setCode(found.template);
+    } else {
+      setCode(content.coding.initialCode);
+    }
+    setShowResetConfirm(false);
+  };
 
-        const passedCount = generatedCases.filter((c) => c.passed).length;
+  const updateCursorPosition = () => {
+    if (!textareaRef.current) return;
+    const pos = textareaRef.current.selectionStart;
+    const textBefore = textareaRef.current.value.substring(0, pos);
+    const lines = textBefore.split("\n");
+    setCursorPos({
+      line: lines.length,
+      col: lines[lines.length - 1].length + 1,
+    });
+  };
 
-        setTestRunStats({
-          total: generatedCases.length,
-          passed: passedCount,
-          durationMs: Math.floor(180 + Math.random() * 120),
-          cases: generatedCases,
-        });
+  const handleFormatCode = () => {
+    setCode((prev) =>
+      prev
+        .split("\n")
+        .map((line) => line.replace(/\t/g, "    ").trimEnd())
+        .join("\n")
+    );
+    setDraftSavedToast(true);
+    setTimeout(() => setDraftSavedToast(false), 2000);
+  };
 
-        setActiveConsoleTab("testcases");
+  const handleClearOutput = () => {
+    setOutput("");
+  };
 
-        setOutput(
-          (prev) =>
-            prev +
-            `Executed ${generatedCases.length} public test cases (${passedCount}/${generatedCases.length} passed).\n` +
-            (passedCount === generatedCases.length
-              ? "All public assertions succeeded. Hidden integrity suites will run on final submission.\n"
-              : "Warning: Some public checks failed. Review your logic before final submission.\n")
-        );
-        setEvaluating(false);
-      }, 900);
+  // ── IDE Ergonomics: Keydown Handler for Code Editor ───────────────────────
+
+  const handleEditorKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    setTimeout(updateCursorPosition, 0);
+    // Ctrl+Enter or Cmd+Enter -> Run Code
+    if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
+      e.preventDefault();
+      if (!evaluating && timeLeft > 0) {
+        handleTest(false);
+      }
       return;
     }
+
+    // Ctrl+S or Cmd+S -> Save Draft & show toast
+    if ((e.ctrlKey || e.metaKey) && (e.key === "s" || e.key === "S")) {
+      e.preventDefault();
+      setDraftSavedToast(true);
+      setTimeout(() => setDraftSavedToast(false), 2000);
+      return;
+    }
+
+    const target = e.currentTarget;
+    const start = target.selectionStart;
+    const end = target.selectionEnd;
+    const value = target.value;
+
+    // Tab key -> 4 spaces indentation without blurring
+    if (e.key === "Tab") {
+      e.preventDefault();
+      if (e.shiftKey) {
+        // Unindent current line(s)
+        const lineStart = value.lastIndexOf("\n", start - 1) + 1;
+        const lineEnd = value.indexOf("\n", end);
+        const effectiveEnd = lineEnd === -1 ? value.length : lineEnd;
+        const currentSlice = value.substring(lineStart, effectiveEnd);
+        const unindented = currentSlice
+          .split("\n")
+          .map((l) => (l.startsWith("    ") ? l.slice(4) : l.startsWith("\t") ? l.slice(1) : l))
+          .join("\n");
+        const diff = currentSlice.length - unindented.length;
+        const nextVal = value.substring(0, lineStart) + unindented + value.substring(effectiveEnd);
+        setCode(nextVal);
+        setTimeout(() => {
+          if (textareaRef.current) {
+            textareaRef.current.selectionStart = Math.max(lineStart, start - (currentSlice.startsWith("    ") ? 4 : 0));
+            textareaRef.current.selectionEnd = Math.max(lineStart, end - diff);
+          }
+        }, 0);
+      } else {
+        // Insert 4 spaces
+        const nextVal = value.substring(0, start) + "    " + value.substring(end);
+        setCode(nextVal);
+        setTimeout(() => {
+          if (textareaRef.current) {
+            textareaRef.current.selectionStart = textareaRef.current.selectionEnd = start + 4;
+          }
+        }, 0);
+      }
+      return;
+    }
+
+    // Bracket & quote auto-pairing: (), [], {}, "", '', ``
+    const pairs: Record<string, string> = {
+      "(": ")",
+      "[": "]",
+      "{": "}",
+      '"': '"',
+      "'": "'",
+      "`": "`",
+    };
+
+    if (pairs[e.key]) {
+      e.preventDefault();
+      const closeChar = pairs[e.key];
+      const selectedText = value.substring(start, end);
+      const nextVal = value.substring(0, start) + e.key + selectedText + closeChar + value.substring(end);
+      setCode(nextVal);
+      setTimeout(() => {
+        if (textareaRef.current) {
+          textareaRef.current.selectionStart = start + 1;
+          textareaRef.current.selectionEnd = end + 1;
+        }
+      }, 0);
+      return;
+    }
+
+    // Closing char skip: if cursor is right before closing char, advance cursor
+    const closers = [")", "]", "}", '"', "'", "`"];
+    if (closers.includes(e.key) && start === end && value[start] === e.key) {
+      e.preventDefault();
+      textareaRef.current?.setSelectionRange(start + 1, start + 1);
+      return;
+    }
+
+    // Backspace: if deleting between open and close pair, delete both
+    if (e.key === "Backspace" && start === end && start > 0) {
+      const prevChar = value[start - 1];
+      const nextChar = value[start];
+      if (pairs[prevChar] === nextChar) {
+        e.preventDefault();
+        const nextVal = value.substring(0, start - 1) + value.substring(start + 1);
+        setCode(nextVal);
+        setTimeout(() => {
+          if (textareaRef.current) {
+            textareaRef.current.selectionStart = textareaRef.current.selectionEnd = start - 1;
+          }
+        }, 0);
+        return;
+      }
+    }
+  };
+
+  // ── Code Execution & Submit ────────────────────────────────────────────────
+
+  const handleTest = async (isSubmit: boolean) => {
+    if (isSubmit) {
+      setShowSubmitModal(true);
+      return;
+    }
+
+    setEvaluating(true);
+    setOutput("Compiling code...\nInitializing execution sandbox...\n");
 
     try {
       const token = user ? await user.getIdToken(true) : "";
@@ -654,7 +889,84 @@ function AssessmentContentWrapper() {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ skill: skillParam, answers: mcqAnswers, code, isPublicTest: false }),
+        body: JSON.stringify({
+          skill: skillParam,
+          code,
+          language: selectedLanguage,
+          isPublicTest: true,
+          customInput: (activeConsoleTab === "custom" && customInput.trim()) ? customInput.trim() : undefined,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        setOutput((prev) => prev + "\n[Execution Error] " + (data.error || "Failed to compile/execute code."));
+        setActiveConsoleTab("console");
+        setEvaluating(false);
+        return;
+      }
+
+      if (data.cases && data.cases.length > 0) {
+        setTestRunStats({
+          total: data.totalTests || data.cases.length,
+          passed: data.passedTests ?? data.cases.filter((c: any) => c.passed).length,
+          durationMs: data.durationMs || 90,
+          cases: data.cases,
+        });
+      }
+
+      let consoleMsg = "";
+      if (data.compileSuccess === false) {
+        consoleMsg = `[Compilation / Syntax Error]\n${data.stderr || "Syntax or compilation error detected."}\n`;
+        setActiveConsoleTab("console");
+      } else {
+        if (data.stdout && data.stdout.trim().length > 0) {
+          consoleMsg += `[Program Output]\n${data.stdout}\n\n`;
+        }
+        if (data.stderr && data.stderr.trim().length > 0) {
+          consoleMsg += `[Runtime Stderr]\n${data.stderr}\n\n`;
+        }
+        const passedCount = data.passedTests ?? (data.cases ? data.cases.filter((c: any) => c.passed).length : 0);
+        const totalCount = data.cases ? data.cases.length : 2;
+        consoleMsg += `Executed ${totalCount} public test cases (${passedCount}/${totalCount} passed).\n` +
+          (passedCount === totalCount
+            ? "All public assertions succeeded. Hidden integrity suites will run on final submission.\n"
+            : "Warning: Some public checks failed. Review your logic before final submission.\n");
+        if (activeConsoleTab !== "custom") {
+          setActiveConsoleTab("testcases");
+        }
+      }
+
+      setOutput(consoleMsg);
+    } catch (err: any) {
+      setOutput((prev) => prev + "\nNetwork or execution exception: " + (err?.message || "Unknown error"));
+      setActiveConsoleTab("console");
+    } finally {
+      setEvaluating(false);
+    }
+  };
+
+  const handleFinalSubmit = async () => {
+    setShowSubmitModal(false);
+    setEvaluating(true);
+    setOutput("Submitting assessment...\nEvaluating hidden test suites...\nGenerating verification analysis...\n");
+
+    try {
+      const token = user ? await user.getIdToken(true) : "";
+      const res = await fetch("/api/verify", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          skill: skillParam,
+          answers: mcqAnswers,
+          code,
+          language: selectedLanguage,
+          isPublicTest: false,
+        }),
       });
 
       const data = await res.json();
@@ -662,13 +974,16 @@ function AssessmentContentWrapper() {
       if (!res.ok) {
         setOutput((prev) => prev + "\n" + (data.error || "Evaluation failed."));
         if (res.status !== 501) {
-          setTimeout(() => { handleFail(); }, 1500);
+          setTimeout(() => {
+            handleFail();
+          }, 1500);
         }
         setEvaluating(false);
         return;
       }
 
       if (data.passed) {
+        clearDraft();
         setOutput(
           (prev) =>
             prev +
@@ -685,6 +1000,7 @@ function AssessmentContentWrapper() {
           });
         }, 1200);
       } else {
+        clearDraft();
         setOutput(
           (prev) =>
             prev +
@@ -716,6 +1032,34 @@ function AssessmentContentWrapper() {
     return `${m}:${s < 10 ? "0" : ""}${s}`;
   };
 
+  // Reliable navigation out of assessment flow: cleanly exits fullscreen, removes event traps, and redirects
+  const handleReturn = (targetPath: string = "/candidate/verification") => {
+    try {
+      if (typeof document !== "undefined" && document.fullscreenElement && document.exitFullscreen) {
+        document.exitFullscreen().catch(() => {});
+      }
+    } catch {
+      /* ignore */
+    }
+    if (typeof window !== "undefined") {
+      window.onbeforeunload = null;
+      clearDraft();
+      window.location.href = targetPath;
+    }
+  };
+
+  // Automatically exit fullscreen when assessment concludes with result or termination
+  useEffect(() => {
+    if (assessmentResult || integrityTerminated) {
+      if (typeof document !== "undefined" && document.fullscreenElement && document.exitFullscreen) {
+        document.exitFullscreen().catch(() => {});
+      }
+      if (typeof window !== "undefined") {
+        window.onbeforeunload = null;
+      }
+    }
+  }, [assessmentResult, integrityTerminated]);
+
   // ── Integrity termination screen ──────────────────────────────────────────
 
   if (integrityTerminated) {
@@ -733,8 +1077,8 @@ function AssessmentContentWrapper() {
 
     return (
       <div className="flex h-[100dvh] w-full bg-[#F8F6F3] text-[#1C1917] font-sans items-center justify-center p-6">
-        <div className="max-w-md w-full border border-[#E7E2DA] bg-white rounded-2xl p-8 sm:p-10 shadow-sm text-center">
-          <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-full bg-[#FEF2F2] text-[#B42318] border border-[#B42318]/20">
+        <div className="max-w-md w-full border border-[#E7E2DA] bg-white rounded p-8 sm:p-10 shadow-sm text-center">
+          <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded bg-[#FEF2F2] text-[#B42318] border border-[#B42318]/20">
             <ShieldAlert className="h-7 w-7" />
           </div>
           <div className="text-[11px] font-mono uppercase tracking-[0.15em] text-[#B42318] mb-2 font-medium">
@@ -748,7 +1092,7 @@ function AssessmentContentWrapper() {
             violated {MAX_VIOLATIONS} times. This has been recorded against your attempt.
           </p>
 
-          <div className="border border-[#E7E2DA] bg-[#F8F6F3] p-5 rounded-xl mb-6 text-left">
+          <div className="border border-[#E7E2DA] bg-[#F8F6F3] p-5 rounded mb-6 text-left">
             <div className="text-[12px] font-medium text-[#78716C] mb-1">Retake available</div>
             {retryDate ? (
               <div className="text-[16px] font-semibold text-[#1C1917]">{retryDate}</div>
@@ -767,12 +1111,21 @@ function AssessmentContentWrapper() {
             candidates. If you believe this was an error, contact support.
           </p>
 
-          <button
-            onClick={() => router.push("/candidate/dashboard")}
-            className="w-full px-5 h-11 border border-[#1C1917] bg-[#1C1917] text-white font-semibold text-[14px] rounded-xl hover:bg-[#292524] transition-colors focus:outline-none focus:ring-2 focus:ring-[#1C1917] focus:ring-offset-2"
-          >
-            Return to Dashboard
-          </button>
+          <div className="flex flex-col sm:flex-row gap-3">
+            <button
+              onClick={() => handleReturn("/candidate/verification")}
+              className="flex-1 px-5 h-11 border border-[#1C1917] bg-[#1C1917] text-white font-semibold text-[14px] rounded hover:bg-[#292524] transition-colors focus:outline-none focus:ring-2 focus:ring-[#1C1917] focus:ring-offset-2 flex items-center justify-center gap-2"
+            >
+              <ShieldCheck className="h-4 w-4" />
+              <span>Verification Records</span>
+            </button>
+            <button
+              onClick={() => handleReturn("/candidate/dashboard")}
+              className="flex-1 px-5 h-11 border border-[#E7E2DA] text-[#1C1917] font-semibold text-[14px] rounded hover:border-[#1C1917] hover:bg-[#F2EFE9] transition-colors focus:outline-none focus:ring-2 focus:ring-[#1C1917] focus:ring-offset-2"
+            >
+              Dashboard
+            </button>
+          </div>
         </div>
       </div>
     );
@@ -783,8 +1136,8 @@ function AssessmentContentWrapper() {
   if (assessmentResult && assessmentResult.passed) {
     return (
       <div className="flex h-[100dvh] w-full bg-[#F8F6F3] text-[#1C1917] font-sans items-center justify-center p-6">
-        <div className="max-w-md w-full border border-[#16A34A]/30 bg-white rounded-2xl p-8 sm:p-10 shadow-sm text-center">
-          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-[#F0FDF4] text-[#16A34A] border border-[#16A34A]/20">
+        <div className="max-w-md w-full border border-[#16A34A]/30 bg-white rounded p-8 sm:p-10 shadow-sm text-center">
+          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded bg-[#F0FDF4] text-[#16A34A] border border-[#16A34A]/20">
             <CheckCircle2 className="h-7 w-7" />
           </div>
           <div className="text-[11px] font-mono uppercase tracking-[0.15em] text-[#16A34A] mb-2 font-medium">
@@ -801,7 +1154,7 @@ function AssessmentContentWrapper() {
             is now visible to eligible employers.
           </p>
           {assessmentResult.aiFeedback && (
-            <div className="border border-[#16A34A]/20 bg-[#F0FDF4]/50 p-4 rounded-xl mb-8 text-left">
+            <div className="border border-[#16A34A]/20 bg-[#F0FDF4]/50 p-4 rounded mb-8 text-left">
               <div className="text-[11px] font-semibold uppercase tracking-wider text-[#16A34A] mb-1.5">
                 Code Review
               </div>
@@ -810,19 +1163,28 @@ function AssessmentContentWrapper() {
               </div>
             </div>
           )}
-          <div className="flex flex-col sm:flex-row gap-3">
+          <div className="flex flex-col gap-3">
             <button
-              onClick={() => router.push("/candidate/provenance")}
-              className="flex-1 px-5 h-11 border border-[#1C1917] bg-[#1C1917] text-white font-semibold text-[14px] rounded-xl hover:bg-[#292524] transition-colors focus:outline-none focus:ring-2 focus:ring-[#1C1917] focus:ring-offset-2"
+              onClick={() => handleReturn("/candidate/verification")}
+              className="w-full px-5 h-11 border border-[#064E3B] bg-[#064E3B] text-white font-semibold text-[14px] rounded hover:bg-[#043327] transition-colors focus:outline-none focus:ring-2 focus:ring-[#064E3B] focus:ring-offset-2 flex items-center justify-center gap-2 shadow-xs"
             >
-              View Provenance
+              <ShieldCheck className="h-4 w-4" />
+              <span>Return to Verification Results</span>
             </button>
-            <button
-              onClick={() => router.push("/candidate/dashboard")}
-              className="flex-1 px-5 h-11 border border-[#E7E2DA] text-[#1C1917] font-semibold text-[14px] rounded-xl hover:border-[#1C1917] hover:bg-[#F2EFE9] transition-colors focus:outline-none focus:ring-2 focus:ring-[#1C1917] focus:ring-offset-2"
-            >
-              Return to Dashboard
-            </button>
+            <div className="flex flex-col sm:flex-row gap-3">
+              <button
+                onClick={() => handleReturn("/candidate/dashboard")}
+                className="flex-1 px-5 h-11 border border-[#E7E2DA] text-[#1C1917] font-semibold text-[14px] rounded hover:border-[#1C1917] hover:bg-[#F2EFE9] transition-colors focus:outline-none focus:ring-2 focus:ring-[#1C1917] focus:ring-offset-2"
+              >
+                Dashboard
+              </button>
+              <button
+                onClick={() => handleReturn("/candidate/provenance")}
+                className="flex-1 px-5 h-11 border border-[#E7E2DA] text-[#78716C] font-semibold text-[14px] rounded hover:border-[#1C1917] hover:text-[#1C1917] transition-colors focus:outline-none focus:ring-2 focus:ring-[#1C1917] focus:ring-offset-2"
+              >
+                Provenance
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -846,8 +1208,8 @@ function AssessmentContentWrapper() {
 
     return (
       <div className="flex h-[100dvh] w-full bg-[#F8F6F3] text-[#1C1917] font-sans items-center justify-center p-6">
-        <div className="max-w-md w-full border border-[#B42318]/20 bg-white rounded-2xl p-8 sm:p-10 shadow-sm text-center">
-          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-[#FEF2F2] text-[#B42318] border border-[#B42318]/20">
+        <div className="max-w-md w-full border border-[#B42318]/20 bg-white rounded p-8 sm:p-10 shadow-sm text-center">
+          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded bg-[#FEF2F2] text-[#B42318] border border-[#B42318]/20">
             <AlertTriangle className="h-7 w-7" />
           </div>
           <div className="text-[11px] font-mono uppercase tracking-[0.15em] text-[#B42318] mb-2 font-medium">
@@ -862,14 +1224,14 @@ function AssessmentContentWrapper() {
           <p className="text-[14px] text-[#78716C] mb-4 leading-relaxed">
             80% is required to verify this skill.
           </p>
-          <div className="border border-[#E7E2DA] bg-[#F8F6F3] p-4 rounded-xl mb-6 text-left">
+          <div className="border border-[#E7E2DA] bg-[#F8F6F3] p-4 rounded mb-6 text-left">
             <div className="text-[12px] font-medium text-[#78716C] mb-1">
               Next eligible attempt
             </div>
             <div className="text-[15px] font-semibold text-[#1C1917]">{retryDateStr}</div>
           </div>
           {assessmentResult.aiFeedback && (
-            <div className="border border-[#B42318]/20 bg-[#FEF2F2]/50 p-4 rounded-xl mb-8 text-left">
+            <div className="border border-[#B42318]/20 bg-[#FEF2F2]/50 p-4 rounded mb-8 text-left">
               <div className="text-[11px] font-semibold uppercase tracking-wider text-[#B42318] mb-1.5">
                 Code Review
               </div>
@@ -878,12 +1240,21 @@ function AssessmentContentWrapper() {
               </div>
             </div>
           )}
-          <button
-            onClick={() => router.push("/candidate/dashboard")}
-            className="w-full px-5 h-11 border border-[#1C1917] bg-[#1C1917] text-white font-semibold text-[14px] rounded-xl hover:bg-[#292524] transition-colors focus:outline-none focus:ring-2 focus:ring-[#1C1917] focus:ring-offset-2"
-          >
-            Return to Dashboard
-          </button>
+          <div className="flex flex-col sm:flex-row gap-3">
+            <button
+              onClick={() => handleReturn("/candidate/verification")}
+              className="flex-1 px-5 h-11 border border-[#1C1917] bg-[#1C1917] text-white font-semibold text-[14px] rounded hover:bg-[#292524] transition-colors focus:outline-none focus:ring-2 focus:ring-[#1C1917] focus:ring-offset-2 flex items-center justify-center gap-2"
+            >
+              <ShieldCheck className="h-4 w-4" />
+              <span>Verification Results</span>
+            </button>
+            <button
+              onClick={() => handleReturn("/candidate/dashboard")}
+              className="flex-1 px-5 h-11 border border-[#E7E2DA] text-[#1C1917] font-semibold text-[14px] rounded hover:border-[#1C1917] hover:bg-[#F2EFE9] transition-colors focus:outline-none focus:ring-2 focus:ring-[#1C1917] focus:ring-offset-2"
+            >
+              Dashboard
+            </button>
+          </div>
         </div>
       </div>
     );
@@ -895,7 +1266,7 @@ function AssessmentContentWrapper() {
     if (errorMsg === "SKILL NOT FOUND") {
       return (
         <div className="flex h-[100dvh] w-full bg-[#F8F6F3] items-center justify-center p-6">
-          <div className="max-w-md w-full border border-[#E7E2DA] bg-white rounded-2xl p-8 shadow-sm">
+          <div className="max-w-md w-full border border-[#E7E2DA] bg-white rounded p-8 shadow-sm">
             <h2 className="text-[18px] font-semibold text-[#B42318] mb-2 flex items-center gap-2">
               <AlertTriangle className="h-5 w-5" /> Skill not in your profile
             </h2>
@@ -904,8 +1275,8 @@ function AssessmentContentWrapper() {
               your profile before starting verification.
             </p>
             <button
-              onClick={() => router.push("/candidate/profile")}
-              className="w-full h-11 border border-[#1C1917] bg-[#1C1917] text-white font-semibold text-[14px] rounded-xl hover:bg-[#292524] transition-colors focus:outline-none focus:ring-2 focus:ring-[#1C1917] focus:ring-offset-2"
+              onClick={() => handleReturn("/candidate/profile")}
+              className="w-full h-11 border border-[#1C1917] bg-[#1C1917] text-white font-semibold text-[14px] rounded hover:bg-[#292524] transition-colors focus:outline-none focus:ring-2 focus:ring-[#1C1917] focus:ring-offset-2"
             >
               Go to Profile
             </button>
@@ -917,7 +1288,7 @@ function AssessmentContentWrapper() {
     if (errorMsg === "ALREADY VERIFIED") {
       return (
         <div className="flex h-[100dvh] w-full bg-[#F8F6F3] items-center justify-center p-6">
-          <div className="max-w-md w-full border border-[#E7E2DA] bg-white rounded-2xl p-8 shadow-sm">
+          <div className="max-w-md w-full border border-[#E7E2DA] bg-white rounded p-8 shadow-sm">
             <h2 className="text-[18px] font-semibold text-[#16A34A] mb-2 flex items-center gap-2">
               <CheckCircle2 className="h-5 w-5" /> Already Verified
             </h2>
@@ -925,12 +1296,21 @@ function AssessmentContentWrapper() {
               You have already successfully passed the assessment for {skillParam}. Your
               verification is recorded and visible to employers.
             </p>
-            <button
-              onClick={() => router.push("/candidate/verification")}
-              className="w-full h-11 border border-[#E7E2DA] text-[#78716C] font-semibold text-[14px] rounded-xl hover:border-[#1C1917] hover:text-[#1C1917] transition-colors focus:outline-none focus:ring-2 focus:ring-[#1C1917] focus:ring-offset-2"
-            >
-              View Verification
-            </button>
+            <div className="flex flex-col sm:flex-row gap-3">
+              <button
+                onClick={() => handleReturn("/candidate/verification")}
+                className="flex-1 h-11 border border-[#064E3B] bg-[#064E3B] text-white font-semibold text-[14px] rounded hover:bg-[#043327] transition-colors focus:outline-none focus:ring-2 focus:ring-[#064E3B] focus:ring-offset-2 flex items-center justify-center gap-2"
+              >
+                <ShieldCheck className="h-4 w-4" />
+                <span>Verification Results</span>
+              </button>
+              <button
+                onClick={() => handleReturn("/candidate/dashboard")}
+                className="flex-1 h-11 border border-[#E7E2DA] text-[#1C1917] font-semibold text-[14px] rounded hover:border-[#1C1917] hover:bg-[#F2EFE9] transition-colors focus:outline-none focus:ring-2 focus:ring-[#1C1917] focus:ring-offset-2"
+              >
+                Dashboard
+              </button>
+            </div>
           </div>
         </div>
       );
@@ -939,14 +1319,14 @@ function AssessmentContentWrapper() {
     // Cooldown / generic error
     return (
       <div className="flex h-[100dvh] w-full bg-[#F8F6F3] items-center justify-center p-6">
-        <div className="max-w-md w-full border border-[#E7E2DA] bg-white rounded-2xl p-8 shadow-sm">
+        <div className="max-w-md w-full border border-[#E7E2DA] bg-white rounded p-8 shadow-sm">
           <h2 className="text-[18px] font-semibold text-[#B42318] mb-2">
             Assessment cooldown active
           </h2>
           <p className="text-[14px] text-[#78716C] mb-6">
             You are currently in a mandatory cooldown period for this skill.
           </p>
-          <div className="border border-[#E7E2DA] bg-[#F8F6F3] p-5 rounded-xl mb-8">
+          <div className="border border-[#E7E2DA] bg-[#F8F6F3] p-5 rounded mb-8">
             <div className="text-[13px] font-medium text-[#78716C] mb-1">
               Next eligible attempt
             </div>
@@ -966,12 +1346,21 @@ function AssessmentContentWrapper() {
                   })}
             </div>
           </div>
-          <button
-            onClick={() => router.push("/candidate/verification")}
-            className="w-full h-11 border border-[#E7E2DA] text-[#78716C] font-semibold text-[14px] rounded-xl hover:border-[#1C1917] hover:text-[#1C1917] transition-colors focus:outline-none focus:ring-2 focus:ring-[#1C1917] focus:ring-offset-2"
-          >
-            Return to workspace
-          </button>
+          <div className="flex flex-col sm:flex-row gap-3">
+            <button
+              onClick={() => handleReturn("/candidate/verification")}
+              className="flex-1 h-11 border border-[#1C1917] bg-[#1C1917] text-white font-semibold text-[14px] rounded hover:bg-[#292524] transition-colors focus:outline-none focus:ring-2 focus:ring-[#1C1917] focus:ring-offset-2 flex items-center justify-center gap-2"
+            >
+              <ShieldCheck className="h-4 w-4" />
+              <span>Verification Records</span>
+            </button>
+            <button
+              onClick={() => handleReturn("/candidate/dashboard")}
+              className="flex-1 h-11 border border-[#E7E2DA] text-[#1C1917] font-semibold text-[14px] rounded hover:border-[#1C1917] hover:bg-[#F2EFE9] transition-colors focus:outline-none focus:ring-2 focus:ring-[#1C1917] focus:ring-offset-2"
+            >
+              Dashboard
+            </button>
+          </div>
         </div>
       </div>
     );
@@ -1008,7 +1397,7 @@ function AssessmentContentWrapper() {
             </div>
 
             {/* Rules */}
-            <div className="border border-[#E7E2DA] bg-white rounded-2xl overflow-hidden">
+            <div className="border border-[#E7E2DA] bg-white rounded overflow-hidden">
               <div className="px-6 py-4 border-b border-[#E7E2DA] bg-[#F8F6F3]">
                 <div className="flex items-center gap-2 text-[12px] font-semibold text-[#78716C] uppercase tracking-[0.08em]">
                   <ShieldAlert className="h-4 w-4" />
@@ -1020,12 +1409,19 @@ function AssessmentContentWrapper() {
                   {
                     icon: <Clock className="h-4 w-4 text-[#78716C]" />,
                     label: "Duration",
-                    value: "45 minutes — the timer starts when you click Start Assessment.",
+                    value: "60 minutes — the countdown starts immediately when you begin.",
+                  },
+                  {
+                    icon: <CheckCircle2 className="h-4 w-4 text-[#78716C]" />,
+                    label: "Evaluation model",
+                    value: content.hasCoding
+                      ? "Strict 40% MCQs (15 questions) + 60% Practical Coding Challenge."
+                      : "100% Comprehensive Technical Evaluation.",
                   },
                   {
                     icon: <CheckCircle2 className="h-4 w-4 text-[#78716C]" />,
                     label: "Passing threshold",
-                    value: "80% or above across MCQs and the coding challenge.",
+                    value: "80% minimum score required to earn the verified skill credential.",
                   },
                   {
                     icon: <Maximize2 className="h-4 w-4 text-[#78716C]" />,
@@ -1047,9 +1443,9 @@ function AssessmentContentWrapper() {
                   },
                   {
                     icon: <XCircle className="h-4 w-4 text-[#78716C]" />,
-                    label: "Normal failure cooldown",
+                    label: "Retake policy",
                     value:
-                      "Failing below 80% applies a 14-day cooldown before you can retake this assessment.",
+                      "Failing below 80% applies a 14-day cooldown before you can reattempt this assessment.",
                   },
                 ].map((rule, i) => (
                   <div key={i} className="flex items-start gap-3">
@@ -1066,18 +1462,18 @@ function AssessmentContentWrapper() {
             </div>
 
             {/* Assessment meta */}
-            <div className="border border-[#E7E2DA] bg-white rounded-2xl p-6">
+            <div className="border border-[#E7E2DA] bg-white rounded p-6">
               <div className="grid grid-cols-2 gap-4 mb-6">
-                <div className="border border-[#E7E2DA] bg-[#F8F6F3] p-4 rounded-xl">
+                <div className="border border-[#E7E2DA] bg-[#F8F6F3] p-4 rounded">
                   <div className="text-[12px] text-[#78716C] mb-1">Time limit</div>
                   <div className="text-[15px] font-semibold text-[#1C1917] flex items-center gap-2">
-                    <Clock className="h-4 w-4 text-[#78716C]" /> 45 minutes
+                    <Clock className="h-4 w-4 text-[#78716C]" /> 60 minutes
                   </div>
                 </div>
-                <div className="border border-[#E7E2DA] bg-[#F8F6F3] p-4 rounded-xl">
+                <div className="border border-[#E7E2DA] bg-[#F8F6F3] p-4 rounded">
                   <div className="text-[12px] text-[#78716C] mb-1">Format</div>
                   <div className="text-[15px] font-semibold text-[#1C1917]">
-                    MCQs + Coding
+                    {content.hasCoding ? "15 MCQs + Coding" : `${content.mcqs.length} MCQs`}
                   </div>
                 </div>
               </div>
@@ -1085,14 +1481,14 @@ function AssessmentContentWrapper() {
               <div className="flex flex-col sm:flex-row gap-3">
                 <button
                   onClick={handleStart}
-                  className="flex-1 h-12 border border-[#1C1917] bg-[#1C1917] text-white font-semibold text-[14px] rounded-xl hover:bg-[#292524] transition-colors focus:outline-none focus:ring-2 focus:ring-[#1C1917] focus:ring-offset-2 flex items-center justify-center gap-2"
+                  className="flex-1 h-12 border border-[#1C1917] bg-[#1C1917] text-white font-semibold text-[14px] rounded hover:bg-[#292524] transition-colors focus:outline-none focus:ring-2 focus:ring-[#1C1917] focus:ring-offset-2 flex items-center justify-center gap-2"
                 >
                   <Play className="h-4 w-4" />
                   I understand — Start Assessment
                 </button>
                 <button
                   onClick={() => router.push("/candidate/verification")}
-                  className="flex-1 h-12 border border-[#E7E2DA] text-[#78716C] font-semibold text-[14px] rounded-xl hover:border-[#1C1917] hover:text-[#1C1917] transition-colors focus:outline-none focus:ring-2 focus:ring-[#1C1917] focus:ring-offset-2"
+                  className="flex-1 h-12 border border-[#E7E2DA] text-[#78716C] font-semibold text-[14px] rounded hover:border-[#1C1917] hover:text-[#1C1917] transition-colors focus:outline-none focus:ring-2 focus:ring-[#1C1917] focus:ring-offset-2"
                 >
                   Cancel
                 </button>
@@ -1137,65 +1533,230 @@ function AssessmentContentWrapper() {
       />
 
       <div className="flex h-full w-full flex-col bg-[#F8F6F3] overflow-hidden border-l border-[#E7E2DA]">
-        <header className="flex items-center justify-between border-b border-[#E7E2DA] px-4 sm:px-6 py-4 shrink-0 bg-white">
-          <div className="flex items-center gap-4 truncate mr-4">
-            <span className="font-mono text-[10px] tracking-[0.2em] uppercase text-[#78716C] shrink-0">
-              Meritlane
+        <header className="flex items-center justify-between border-b border-[#E7E2DA] px-4 sm:px-6 py-3 shrink-0 bg-white/95 backdrop-blur-xs">
+          <div className="flex items-center gap-3 truncate mr-4">
+            <span className="font-mono text-[11px] font-bold tracking-[0.2em] uppercase text-[#1C1917] shrink-0">
+              MERITLANE
             </span>
-            <span className="hidden sm:inline text-[#D4CFCB] shrink-0">/</span>
-            <span className="hidden sm:inline font-mono text-[10px] tracking-widest uppercase text-[#1C1917] truncate">
-              {skillParam} Evaluation
+            <span className="text-[#D4CFCB] shrink-0">/</span>
+            <span className="inline-flex items-center gap-1.5 font-mono text-[11px] font-semibold tracking-wider uppercase text-[#064E3B] bg-[#064E3B]/10 border border-[#064E3B]/20 px-2.5 py-0.5 rounded shrink-0">
+              <ShieldAlert className="h-3 w-3 text-[#064E3B]" />
+              {skillParam} Verification
+            </span>
+            <span className="hidden md:inline-flex items-center gap-1.5 text-[11px] font-mono text-[#78716C] bg-[#FAF8F5] border border-[#E7E2DA] px-2 py-0.5 rounded">
+              <Maximize2 className="h-2.5 w-2.5 text-[#064E3B]" /> Proctored Session
             </span>
           </div>
           <div className="flex items-center gap-3">
+            {/* Progress counter */}
+            <div className="hidden sm:flex items-center gap-1.5 text-[11px] font-mono text-[#78716C] bg-[#FAF8F5] border border-[#E7E2DA] px-2.5 py-1 rounded">
+              <span>MCQs:</span>
+              <strong className="text-[#1C1917]">{mcqAnswers.filter((a) => a !== undefined).length}/{content.mcqs.length}</strong>
+            </div>
+
             {/* Violation counter */}
             {infractionCount > 0 && (
-              <div className="hidden sm:flex items-center gap-1.5 text-[11px] font-mono text-[#D97706] border border-[#FDE68A] bg-[#FFFBEB] px-2.5 py-1 rounded-full">
+              <div className="flex items-center gap-1.5 text-[11px] font-mono text-[#D97706] border border-[#FDE68A] bg-[#FFFBEB] px-2.5 py-1 rounded animate-in fade-in">
                 <AlertTriangle className="h-3 w-3" />
                 {infractionCount}/{MAX_VIOLATIONS} warnings
               </div>
             )}
+
+            {/* High-visibility Timer Badge */}
             <div
-              className={`font-mono text-[15px] font-bold tracking-wider ${
-                timeLeft < 300 ? "text-[#B42318]" : "text-[#1C1917]"
+              className={`flex items-center gap-1.5 font-mono text-[13px] font-bold tracking-wider px-3 py-1 rounded border transition-colors ${
+                timeLeft < 300
+                  ? "bg-[#FEF2F2] border-[#FECACA] text-[#B42318] animate-pulse"
+                  : timeLeft < 900
+                  ? "bg-[#FFFBEB] border-[#FDE68A] text-[#92400E]"
+                  : "bg-[#FAF8F5] border-[#E7E2DA] text-[#1C1917]"
               }`}
+              title="Assessment time remaining"
             >
-              {formatTime(timeLeft)}
+              <Clock className="h-3.5 w-3.5" />
+              <span>{formatTime(timeLeft)}</span>
             </div>
           </div>
         </header>
 
         {phase === "mcq" && (
-          <div className="flex-1 flex flex-col items-center p-6 sm:p-8 overflow-y-auto">
-            <div className="w-full max-w-2xl mt-8">
-              <div className="text-[11px] font-mono text-[#78716C] mb-4 uppercase tracking-wider">
-                Multiple Choice ({mcqIndex + 1} of {content.mcqs.length})
+          <div className="flex-1 flex flex-col items-center p-4 sm:p-8 overflow-y-auto">
+            <div className="w-full max-w-3xl space-y-6">
+              {/* Question Navigator Ribbon */}
+              <div className="bg-white border border-[#E7E2DA] rounded p-4 shadow-xs">
+                <div className="flex items-center justify-between mb-3 text-[11px] font-mono uppercase tracking-wider text-[#78716C]">
+                  <span className="font-semibold text-[#1C1917]">
+                    Multiple Choice Questions
+                  </span>
+                  <div className="flex items-center gap-3">
+                    {flaggedQuestions.filter(Boolean).length > 0 && (
+                      <span className="text-[#D97706] font-semibold flex items-center gap-1">
+                        <Flag className="h-3 w-3 fill-[#D97706]" /> {flaggedQuestions.filter(Boolean).length} flagged
+                      </span>
+                    )}
+                    <span>
+                      Answered: <strong className="text-[#1C1917]">{mcqAnswers.filter((a) => a !== undefined).length}</strong> / {content.mcqs.length}
+                    </span>
+                  </div>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {content.mcqs.map((_, i) => {
+                    const isAnswered = mcqAnswers[i] !== undefined;
+                    const isCurrent = mcqIndex === i;
+                    const isFlagged = flaggedQuestions[i];
+                    return (
+                      <button
+                        key={i}
+                        onClick={() => setMcqIndex(i)}
+                        className={`relative w-8 h-8 rounded text-[12px] font-mono font-semibold transition-all flex items-center justify-center ${
+                          isCurrent
+                            ? "bg-[#1C1917] text-white ring-2 ring-[#1C1917] ring-offset-1"
+                            : isAnswered
+                            ? "bg-[#064E3B] text-white"
+                            : "bg-[#FAF8F5] text-[#78716C] border border-[#E7E2DA] hover:border-[#1C1917] hover:text-[#1C1917]"
+                        } ${isFlagged ? "ring-2 ring-[#D97706]" : ""}`}
+                        title={`Question ${i + 1}${isAnswered ? " (Answered)" : " (Unanswered)"}${isFlagged ? " [Flagged for Review]" : ""}`}
+                      >
+                        {i + 1}
+                        {isFlagged && (
+                          <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-[#D97706] rounded-full border-2 border-white" />
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
-              <h3 className="text-[20px] font-semibold text-[#1C1917] mb-8 leading-snug">
-                {content.mcqs[mcqIndex].question}
-              </h3>
-              <div className="space-y-3">
-                {content.mcqs[mcqIndex].options.map((opt, idx) => (
+
+              {/* Question Card */}
+              <div className="bg-white border border-[#E7E2DA] rounded p-6 sm:p-8 shadow-xs">
+                <div className="flex flex-wrap items-center justify-between gap-2 pb-4 mb-4 border-b border-[#E7E2DA]">
+                  <div className="flex items-center gap-2">
+                    <span className="text-[11px] font-mono uppercase font-bold tracking-wider px-2 py-0.5 rounded bg-[#FAF8F5] border border-[#E7E2DA] text-[#1C1917]">
+                      Question {mcqIndex + 1} of {content.mcqs.length}
+                    </span>
+                    {content.mcqs[mcqIndex]?.difficulty && (
+                      <span
+                        className={`text-[10px] font-mono uppercase font-bold tracking-wider px-2 py-0.5 rounded ${
+                          content.mcqs[mcqIndex].difficulty === "hard"
+                            ? "bg-[#FEF2F2] text-[#991B1B] border border-[#FECACA]"
+                            : content.mcqs[mcqIndex].difficulty === "medium"
+                            ? "bg-[#FFFBEB] text-[#92400E] border border-[#FDE68A]"
+                            : "bg-[#F0FDF4] text-[#166534] border border-[#BBF7D0]"
+                        }`}
+                      >
+                        {content.mcqs[mcqIndex].difficulty}
+                      </span>
+                    )}
+                    {content.mcqs[mcqIndex]?.topic && (
+                      <span className="text-[11px] font-mono text-[#78716C] bg-[#FAF8F5] px-2 py-0.5 rounded border border-[#E7E2DA]">
+                        {content.mcqs[mcqIndex].topic}
+                      </span>
+                    )}
+                  </div>
                   <button
-                    key={idx}
-                    onClick={() => handleAnswerMcq(idx)}
-                    className="w-full text-left p-4 border border-[#E7E2DA] bg-white rounded-xl hover:border-[#1C1917] hover:bg-[#F2EFE9] transition-colors text-[14px] text-[#1C1917] focus:outline-none focus:ring-2 focus:ring-[#1C1917] focus:ring-offset-1"
+                    onClick={() => toggleFlagQuestion(mcqIndex)}
+                    className={`flex items-center gap-1.5 text-[11px] font-mono uppercase tracking-wider px-2.5 py-1 rounded transition-colors border ${
+                      flaggedQuestions[mcqIndex]
+                        ? "bg-[#FFFBEB] text-[#D97706] border-[#FDE68A] font-semibold"
+                        : "bg-white text-[#78716C] border-[#E7E2DA] hover:border-[#1C1917] hover:text-[#1C1917]"
+                    }`}
                   >
-                    {opt}
+                    <Flag className={`h-3 w-3 ${flaggedQuestions[mcqIndex] ? "fill-[#D97706] text-[#D97706]" : ""}`} />
+                    {flaggedQuestions[mcqIndex] ? "Flagged for Review" : "Flag for Review"}
                   </button>
-                ))}
+                </div>
+
+                <h3 className="text-[17px] sm:text-[19px] font-medium text-[#1C1917] mb-6 leading-relaxed whitespace-pre-wrap font-sans">
+                  {content.mcqs[mcqIndex]?.question}
+                </h3>
+
+                <div className="space-y-3">
+                  {content.mcqs[mcqIndex]?.options.map((opt, idx) => {
+                    const isSelected = mcqAnswers[mcqIndex] === idx;
+                    return (
+                      <button
+                        key={idx}
+                        onClick={() => handleSelectMcq(idx)}
+                        className={`w-full text-left p-4 rounded border transition-all flex items-start gap-3.5 ${
+                          isSelected
+                            ? "border-[#1C1917] bg-[#FAF8F5] ring-1 ring-[#1C1917] shadow-xs"
+                            : "border-[#E7E2DA] bg-white hover:border-[#1C1917]/50 hover:bg-[#FAFAF9]"
+                        }`}
+                      >
+                        <div
+                          className={`w-5 h-5 rounded-full shrink-0 mt-0.5 flex items-center justify-center text-[11px] font-mono font-bold transition-colors ${
+                            isSelected
+                              ? "bg-[#1C1917] text-white"
+                              : "border border-[#D4CFCB] text-[#78716C] bg-white"
+                          }`}
+                        >
+                          {isSelected ? <Check className="h-3 w-3" /> : String.fromCharCode(65 + idx)}
+                        </div>
+                        <span className={`text-[14px] leading-relaxed font-sans ${isSelected ? "text-[#1C1917] font-medium" : "text-[#44403C]"}`}>
+                          {opt}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Navigation Controls */}
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-2">
+                <div className="flex items-center gap-2 w-full sm:w-auto">
+                  <button
+                    onClick={() => setMcqIndex((prev) => Math.max(0, prev - 1))}
+                    disabled={mcqIndex === 0}
+                    className="flex-1 sm:flex-none px-4 py-2 text-[13px] font-semibold border border-[#E7E2DA] bg-white text-[#1C1917] rounded hover:border-[#1C1917] disabled:opacity-40 disabled:hover:border-[#E7E2DA] transition-colors flex items-center justify-center gap-1.5"
+                  >
+                    <ChevronLeft className="h-4 w-4" /> Previous
+                  </button>
+                  <button
+                    onClick={() => setMcqIndex((prev) => Math.min(content.mcqs.length - 1, prev + 1))}
+                    disabled={mcqIndex === content.mcqs.length - 1}
+                    className="flex-1 sm:flex-none px-4 py-2 text-[13px] font-semibold border border-[#E7E2DA] bg-white text-[#1C1917] rounded hover:border-[#1C1917] disabled:opacity-40 disabled:hover:border-[#E7E2DA] transition-colors flex items-center justify-center gap-1.5"
+                  >
+                    Next <ChevronRight className="h-4 w-4" />
+                  </button>
+                </div>
+
+                <div className="w-full sm:w-auto flex items-center gap-3">
+                  {content.hasCoding ? (
+                    <button
+                      onClick={() => setPhase("coding")}
+                      className="w-full sm:w-auto px-5 py-2 text-[13px] font-semibold bg-[#064E3B] text-white rounded hover:bg-[#043327] transition-colors flex items-center justify-center gap-2 shadow-2xs"
+                    >
+                      <span>Proceed to Coding Challenge</span>
+                      <ArrowRight className="h-4 w-4" />
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => setShowSubmitModal(true)}
+                      className="w-full sm:w-auto px-5 py-2 text-[13px] font-semibold bg-[#064E3B] text-white rounded hover:bg-[#043327] transition-colors flex items-center justify-center gap-2 shadow-2xs"
+                    >
+                      <span>Review &amp; Submit</span>
+                      <ArrowRight className="h-4 w-4" />
+                    </button>
+                  )}
+                </div>
               </div>
             </div>
           </div>
         )}
 
-        {phase === "coding" && (
+        {phase === "coding" && content.coding && (
           <div className="flex flex-col lg:flex-row flex-1 overflow-hidden p-3 gap-3 bg-[#F4F1EA] min-h-0">
-            {/* Left Pane: LeetCode Problem Description & Guidelines */}
-            <div className="w-full lg:w-[42%] lg:max-w-[560px] bg-white border border-[#E7E2DA] rounded-xl flex flex-col h-[38vh] lg:h-full shrink-0 overflow-hidden shadow-xs min-h-0">
+            {/* Left Pane: Problem Description & Guidelines */}
+            <div className="w-full lg:w-[42%] lg:max-w-[560px] bg-white border border-[#E7E2DA] rounded flex flex-col h-[38vh] lg:h-full shrink-0 overflow-hidden shadow-xs min-h-0">
               {/* Problem Tab Header */}
               <div className="flex items-center justify-between border-b border-[#E7E2DA] bg-[#FAF8F5] px-4 py-2.5 shrink-0">
                 <div className="flex items-center gap-2 truncate mr-2">
+                  <button
+                    onClick={() => setPhase("mcq")}
+                    className="flex items-center gap-1 text-[11px] font-mono uppercase tracking-wider text-[#78716C] bg-white hover:text-[#1C1917] hover:border-[#1C1917] border border-[#E7E2DA] px-2 py-0.5 rounded transition-colors"
+                  >
+                    <ChevronLeft className="h-3 w-3" /> MCQs ({mcqAnswers.filter((a) => a !== undefined).length}/{content.mcqs.length})
+                  </button>
                   <span className="text-[11px] font-mono font-semibold uppercase tracking-wider text-[#064E3B] bg-[#064E3B]/10 px-2 py-0.5 rounded shrink-0">
                     Challenge
                   </span>
@@ -1204,7 +1765,7 @@ function AssessmentContentWrapper() {
                   </span>
                 </div>
                 <span className="text-[11px] font-mono text-[#78716C] bg-white border border-[#E7E2DA] px-2 py-0.5 rounded shrink-0">
-                  {content.coding.language?.toUpperCase() || "JAVASCRIPT"}
+                  {selectedLanguage.toUpperCase()}
                 </span>
               </div>
 
@@ -1214,37 +1775,67 @@ function AssessmentContentWrapper() {
                   <h3 className="text-[12px] font-mono font-medium text-[#78716C] uppercase tracking-wider mb-2">
                     Description &amp; Specifications
                   </h3>
-                  <div className="text-[14px] leading-relaxed text-[#1C1917] whitespace-pre-wrap font-sans space-y-3 bg-[#FAF8F5] p-4 rounded-lg border border-[#E7E2DA]">
+                  <div className="text-[14px] leading-relaxed text-[#1C1917] whitespace-pre-wrap font-sans space-y-3 bg-[#FAF8F5] p-4 rounded border border-[#E7E2DA]">
                     {content.coding.instructions}
                   </div>
                 </div>
 
-                <div className="border border-[#E7E2DA] rounded-lg p-4 bg-white">
+                <div className="border border-[#E7E2DA] rounded p-4 bg-white">
                   <h4 className="text-[12px] font-mono font-semibold uppercase tracking-wider text-[#064E3B] mb-1.5 flex items-center gap-1.5">
                     <ShieldAlert className="h-3.5 w-3.5" /> Examination Rule
                   </h4>
                   <p className="text-[12px] leading-relaxed text-[#78716C]">
-                    Complete the main function implementation. Your function will be compiled and evaluated against hidden automated test cases.
+                    Complete the solution implementation. You can select your preferred programming language and compile against public test cases before submitting for authoritative evaluation.
                   </p>
                 </div>
               </div>
             </div>
 
-            {/* Right Pane: LeetCode Code Editor + Test Console */}
+            {/* Right Pane: Code Editor + Test Console */}
             <div className="flex flex-1 flex-col gap-3 min-h-0 overflow-hidden">
               {/* Top Section: Code Editor Pane */}
-              <div className="flex-1 min-h-0 bg-white border border-[#E7E2DA] rounded-xl flex flex-col overflow-hidden shadow-xs">
+              <div className="flex-1 min-h-0 bg-white border border-[#E7E2DA] rounded flex flex-col overflow-hidden shadow-xs">
                 {/* Editor Header Bar */}
                 <div className="flex items-center justify-between border-b border-[#E7E2DA] bg-[#FAF8F5] px-4 py-2 shrink-0">
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2.5">
                     <Code className="h-4 w-4 text-[#064E3B]" />
                     <span className="text-[12px] font-mono font-medium text-[#1C1917]">
-                      Solution.{content.coding.language === 'python' ? 'py' : content.coding.language === 'java' ? 'java' : 'js'}
+                      Solution.{selectedLanguage === 'python' ? 'py' : selectedLanguage === 'java' ? 'java' : selectedLanguage === 'cpp' ? 'cpp' : selectedLanguage === 'typescript' ? 'ts' : selectedLanguage === 'sql' ? 'sql' : 'js'}
                     </span>
+                    {draftSavedToast && (
+                      <span className="flex items-center gap-1 text-[11px] font-mono text-[#064E3B] bg-[#DCFCE7] px-2 py-0.5 rounded border border-[#BBF7D0] animate-in fade-in duration-150">
+                        <Check className="h-3 w-3" /> Draft saved
+                      </span>
+                    )}
                   </div>
-                  <span className="text-[11px] font-sans text-[#78716C]">
-                    Implement main function
-                  </span>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={handleFormatCode}
+                      className="flex items-center gap-1 text-[11px] font-mono text-[#78716C] hover:text-[#1C1917] hover:border-[#1C1917] bg-white border border-[#E7E2DA] px-2.5 py-1 rounded transition-colors"
+                      title="Format indentation (4 spaces) and clean trailing whitespace"
+                    >
+                      <Sparkles className="h-3 w-3 text-[#D97706]" /> Format
+                    </button>
+                    <button
+                      onClick={() => setShowResetConfirm(true)}
+                      className="flex items-center gap-1 text-[11px] font-mono text-[#78716C] hover:text-[#B42318] hover:border-[#FECACA] bg-white border border-[#E7E2DA] px-2.5 py-1 rounded transition-colors"
+                      title="Reset code to default starting template"
+                    >
+                      <RotateCcw className="h-3 w-3" /> Reset
+                    </button>
+                    <span className="text-[11px] font-mono text-[#78716C] uppercase">Language:</span>
+                    <select
+                      value={selectedLanguage}
+                      onChange={(e) => handleLanguageChange(e.target.value)}
+                      className="text-[12px] font-mono font-medium border border-[#E7E2DA] rounded px-2.5 py-1 bg-white text-[#1C1917] outline-none hover:border-[#1C1917] focus:ring-1 focus:ring-[#1C1917]"
+                    >
+                      {(content.coding?.supportedLanguages || COMMON_SUPPORTED_LANGUAGES).map((lang) => (
+                        <option key={lang.id} value={lang.id}>
+                          {lang.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
                 </div>
 
                 {/* Editor Area with Synchronous Line Numbers Scroll */}
@@ -1260,8 +1851,15 @@ function AssessmentContentWrapper() {
                   </div>
                   {/* Code Input */}
                   <textarea
+                    ref={textareaRef}
                     value={code}
-                    onChange={(e) => setCode(e.target.value)}
+                    onChange={(e) => {
+                      setCode(e.target.value);
+                      updateCursorPosition();
+                    }}
+                    onKeyUp={updateCursorPosition}
+                    onClick={updateCursorPosition}
+                    onKeyDown={handleEditorKeyDown}
                     onScroll={(e) => {
                       if (lineNumbersRef.current) {
                         lineNumbersRef.current.scrollTop = e.currentTarget.scrollTop;
@@ -1270,13 +1868,33 @@ function AssessmentContentWrapper() {
                     spellCheck={false}
                     aria-label="Code editor"
                     className="flex-1 min-h-0 h-full resize-none overflow-y-auto overflow-x-auto bg-transparent font-mono text-[13px] leading-[1.6] text-[#1C1917] outline-none p-4 selection:bg-[#064E3B] selection:text-white"
-                    placeholder="// Write your main function solution here..."
+                    placeholder="// Write your solution implementation here... (Tab to indent 4 spaces, Ctrl+Enter to run, Ctrl+S to save draft)"
                   />
+                </div>
+
+                {/* Shortcuts & Editor Hints Bar */}
+                <div className="px-4 py-1.5 bg-[#FAF8F5] border-t border-[#E7E2DA] text-[11px] font-mono text-[#78716C] flex items-center justify-between shrink-0">
+                  <div className="flex items-center gap-2">
+                    <span className="text-[#A8A29E]">Shortcuts:</span>
+                    <span className="bg-white border border-[#E7E2DA] px-1.5 py-0.5 rounded text-[10px] text-[#1C1917] font-semibold">Tab</span>
+                    <span>Indent ·</span>
+                    <span className="bg-white border border-[#E7E2DA] px-1.5 py-0.5 rounded text-[10px] text-[#1C1917] font-semibold">Ctrl+Enter</span>
+                    <span>Run ·</span>
+                    <span className="bg-white border border-[#E7E2DA] px-1.5 py-0.5 rounded text-[10px] text-[#1C1917] font-semibold">Ctrl+S</span>
+                    <span>Save</span>
+                  </div>
+                  <div className="flex items-center gap-3 text-[#78716C]">
+                    <span>Ln {cursorPos.line}, Col {cursorPos.col}</span>
+                    <span className="hidden sm:inline text-[#D6D3D1]">|</span>
+                    <span className="hidden sm:inline">{code?.length || 0} chars</span>
+                    <span className="hidden sm:inline text-[#D6D3D1]">|</span>
+                    <span className="text-[#064E3B] font-semibold">{selectedLanguage.toUpperCase()}</span>
+                  </div>
                 </div>
               </div>
 
               {/* Bottom Section: Testcase Console & Action Buttons */}
-              <div className="h-[210px] lg:h-[230px] bg-white border border-[#E7E2DA] rounded-xl flex flex-col overflow-hidden shadow-xs shrink-0">
+              <div className="h-[220px] lg:h-[245px] bg-white border border-[#E7E2DA] rounded flex flex-col overflow-hidden shadow-xs shrink-0">
                 {/* Console Tab Header */}
                 <div className="flex items-center justify-between border-b border-[#E7E2DA] bg-[#FAF8F5] px-4 py-2 shrink-0">
                   <div className="flex items-center gap-4">
@@ -1311,47 +1929,114 @@ function AssessmentContentWrapper() {
                         </span>
                       )}
                     </button>
+                    <button
+                      onClick={() => setActiveConsoleTab("custom")}
+                      className={`text-[12px] font-sans font-semibold pb-1 border-b-2 transition-colors flex items-center gap-1.5 ${
+                        activeConsoleTab === "custom"
+                          ? "border-[#064E3B] text-[#064E3B]"
+                          : "border-transparent text-[#78716C] hover:text-[#1C1917]"
+                      }`}
+                    >
+                      <Terminal className="h-3.5 w-3.5" />
+                      <span>Custom Input</span>
+                    </button>
                   </div>
 
                   <div className="flex items-center gap-2">
+                    {activeConsoleTab === "console" && output && (
+                      <button
+                        onClick={handleClearOutput}
+                        className="text-[11px] font-mono text-[#78716C] hover:text-[#1C1917] border border-[#E7E2DA] px-2 py-1 bg-white rounded transition-colors"
+                        title="Clear console output"
+                      >
+                        Clear
+                      </button>
+                    )}
                     <button
                       onClick={() => handleTest(false)}
                       disabled={evaluating || timeLeft <= 0}
-                      className="text-[12px] font-sans font-semibold border border-[#E7E2DA] px-3 py-1.5 text-[#1C1917] hover:bg-[#FAF8F5] disabled:opacity-50 rounded-lg transition-colors bg-white shadow-2xs"
+                      className="text-[12px] font-sans font-semibold border border-[#E7E2DA] px-3 py-1.5 text-[#1C1917] hover:bg-[#FAF8F5] disabled:opacity-50 rounded transition-colors bg-white shadow-2xs"
                     >
-                      {evaluating ? "Running..." : "Run Code"}
+                      {evaluating ? "Running..." : activeConsoleTab === "custom" ? "Run Custom" : "Run Code"}
                     </button>
                     <button
                       onClick={() => handleTest(true)}
                       disabled={evaluating || timeLeft <= 0}
-                      className="text-[12px] font-sans font-semibold bg-[#064E3B] text-white px-4 py-1.5 hover:bg-[#043327] disabled:opacity-50 rounded-lg transition-colors shadow-2xs"
+                      className="text-[12px] font-sans font-semibold bg-[#064E3B] text-white px-4 py-1.5 hover:bg-[#043327] disabled:opacity-50 rounded transition-colors shadow-2xs"
                     >
                       Submit
                     </button>
                   </div>
                 </div>
 
-                {/* Console Log or Test Output */}
+                {/* Console Log, Test Output, or Custom Test Runner */}
                 <div className="flex-1 overflow-y-auto p-4 font-mono text-[12px] leading-relaxed text-[#1C1917] scrollbar-hide bg-[#FAFAF9]">
-                  {activeConsoleTab === "console" ? (
-                    <pre className="whitespace-pre-wrap text-[#57534E]">
+                  {activeConsoleTab === "custom" ? (
+                    <div className="flex flex-col h-full space-y-2 font-sans">
+                      <div className="flex items-center justify-between text-[11px] font-mono text-[#78716C]">
+                        <span>Interactive Input Parameters / Arguments:</span>
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-[10px] text-[#A8A29E]">Presets:</span>
+                          <button
+                            onClick={() => setCustomInput("T1,USD,100.50,COMPLETED\nT2,USD,50.25,PENDING\nT3,EUR,75.00,COMPLETED")}
+                            className="text-[10px] bg-white border border-[#E7E2DA] px-1.5 py-0.5 rounded text-[#1C1917] hover:border-[#1C1917]"
+                          >
+                            Sample 1
+                          </button>
+                          <button
+                            onClick={() => setCustomInput("TX1,CAD,200.00,COMPLETED\nTX2,CAD,150.00,COMPLETED")}
+                            className="text-[10px] bg-white border border-[#E7E2DA] px-1.5 py-0.5 rounded text-[#1C1917] hover:border-[#1C1917]"
+                          >
+                            Sample 2
+                          </button>
+                          <button
+                            onClick={() => setCustomInput("")}
+                            className="text-[10px] bg-white border border-[#E7E2DA] px-1.5 py-0.5 rounded text-[#78716C] hover:text-[#B42318]"
+                          >
+                            Empty
+                          </button>
+                        </div>
+                      </div>
+                      <textarea
+                        value={customInput}
+                        onChange={(e) => setCustomInput(e.target.value)}
+                        placeholder="Provide test arguments or stdin (e.g. CSV lines or parameter arguments) to test your implementation."
+                        className="w-full flex-1 p-3 font-mono text-[12px] bg-white border border-[#E7E2DA] rounded outline-none focus:border-[#1C1917] resize-none"
+                      />
+                      <div className="flex items-center justify-between text-[11px] text-[#78716C] pt-1">
+                        <span>Click <strong>Run Custom</strong> or press <strong>Ctrl+Enter</strong> to execute with this input.</span>
+                      </div>
+                    </div>
+                  ) : activeConsoleTab === "console" ? (
+                    <pre className={`whitespace-pre-wrap font-mono ${output.includes("[Compilation / Syntax Error]") || output.includes("[Execution Error]") ? "text-[#B42318]" : "text-[#57534E]"}`}>
                       {output || "Ready. Click 'Run Code' to execute against sample test cases."}
                     </pre>
                   ) : (
                     <div className="space-y-3 font-sans">
                       {testRunStats ? (
                         <>
-                          <div className="flex items-center justify-between text-[11px] font-mono text-[#78716C] pb-2 border-b border-[#E7E2DA]">
-                            <span>Execution Time: <strong className="text-[#1C1917]">{testRunStats.durationMs}ms</strong></span>
-                            <span className={testRunStats.passed === testRunStats.total ? "text-[#064E3B] font-semibold" : "text-[#B42318] font-semibold"}>
-                              {testRunStats.passed === testRunStats.total ? "All Test Cases Passed" : `${testRunStats.total - testRunStats.passed} Test Case Failed`}
-                            </span>
+                          <div className="space-y-2 pb-2 border-b border-[#E7E2DA]">
+                            <div className="flex items-center justify-between text-[11px] font-mono text-[#78716C]">
+                              <span>Execution Time: <strong className="text-[#1C1917]">{testRunStats.durationMs}ms</strong></span>
+                              <span className={testRunStats.passed === testRunStats.total ? "text-[#064E3B] font-semibold" : "text-[#B42318] font-semibold"}>
+                                {testRunStats.passed === testRunStats.total ? "All Test Cases Passed" : `${testRunStats.total - testRunStats.passed} of ${testRunStats.total} Failed`}
+                              </span>
+                            </div>
+                            {/* Visual Progress Bar */}
+                            <div className="w-full bg-[#E7E2DA] h-1.5 rounded-full overflow-hidden">
+                              <div
+                                className={`h-full transition-all duration-300 ${
+                                  testRunStats.passed === testRunStats.total ? "bg-[#064E3B]" : "bg-[#B42318]"
+                                }`}
+                                style={{ width: `${(testRunStats.passed / Math.max(1, testRunStats.total)) * 100}%` }}
+                              />
+                            </div>
                           </div>
                           <div className="space-y-2">
                             {testRunStats.cases.map((tCase, idx) => (
                               <div
                                 key={idx}
-                                className={`p-2.5 rounded-lg border text-[12px] ${
+                                className={`p-2.5 rounded border text-[12px] ${
                                   tCase.passed
                                     ? "bg-[#F0FDF4] border-[#BBF7D0]"
                                     : "bg-[#FEF2F2] border-[#FECACA]"
@@ -1386,6 +2071,119 @@ function AssessmentContentWrapper() {
           </div>
         )}
       </div>
+
+      {/* Reset Confirmation Modal */}
+      {showResetConfirm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-xs animate-in fade-in duration-150">
+          <div className="max-w-md w-full bg-white rounded border border-[#E7E2DA] shadow-xl p-6">
+            <div className="flex items-center gap-3 mb-4 pb-3 border-b border-[#E7E2DA]">
+              <div className="flex h-10 w-10 items-center justify-center rounded bg-[#FEF2F2] text-[#B42318] border border-[#FECACA]">
+                <RotateCcw className="h-5 w-5" />
+              </div>
+              <div>
+                <h3 className="text-[16px] font-semibold text-[#1C1917]">Reset Code to Template</h3>
+                <p className="text-[12px] text-[#78716C]">Restore starting solution code</p>
+              </div>
+            </div>
+            <p className="text-[13px] text-[#78716C] leading-relaxed mb-6">
+              Are you sure you want to reset your code to the starter template? All uncommitted edits in this editor will be replaced.
+            </p>
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => setShowResetConfirm(false)}
+                className="flex-1 h-10 border border-[#E7E2DA] text-[#78716C] font-semibold text-[13px] rounded hover:border-[#1C1917] hover:text-[#1C1917] transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleResetCode}
+                className="flex-1 h-10 bg-[#B42318] text-white font-semibold text-[13px] rounded hover:bg-[#991B1B] transition-colors"
+              >
+                Reset Code
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Submit Confirmation Modal */}
+      {showSubmitModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-xs animate-in fade-in duration-150">
+          <div className="max-w-md w-full bg-white rounded border border-[#E7E2DA] shadow-xl p-6 sm:p-7">
+            <div className="flex items-center gap-3 mb-4 pb-3 border-b border-[#E7E2DA]">
+              <div className="flex h-10 w-10 items-center justify-center rounded bg-[#FAF8F5] text-[#1C1917] border border-[#E7E2DA]">
+                <ShieldAlert className="h-5 w-5" />
+              </div>
+              <div>
+                <h3 className="text-[16px] font-semibold text-[#1C1917]">Confirm Final Submission</h3>
+                <p className="text-[12px] text-[#78716C]">MeritLane Technical Assessment</p>
+              </div>
+            </div>
+
+            <div className="space-y-3 mb-6">
+              <div className="border border-[#E7E2DA] bg-[#FAF8F5] p-3 rounded flex items-center justify-between text-[13px]">
+                <span className="text-[#78716C]">Multiple Choice:</span>
+                <span className="font-semibold text-[#1C1917]">
+                  {mcqAnswers.filter((a) => a !== undefined).length} of {content.mcqs.length} answered
+                </span>
+              </div>
+
+              {flaggedQuestions.filter(Boolean).length > 0 && (
+                <div className="border border-[#FDE68A] bg-[#FFFBEB] p-3 rounded flex items-start gap-2 text-[12px] text-[#92400E]">
+                  <Flag className="h-4 w-4 shrink-0 mt-0.5 fill-[#D97706] text-[#D97706]" />
+                  <span>
+                    You have <strong>{flaggedQuestions.filter(Boolean).length}</strong> question(s) flagged for review.
+                  </span>
+                </div>
+              )}
+
+              {mcqAnswers.filter((a) => a !== undefined).length < content.mcqs.length && (
+                <div className="border border-[#FDE68A] bg-[#FFFBEB] p-3 rounded flex items-start gap-2 text-[12px] text-[#92400E]">
+                  <AlertTriangle className="h-4 w-4 shrink-0 mt-0.5" />
+                  <span>
+                    You have {content.mcqs.length - mcqAnswers.filter((a) => a !== undefined).length} unanswered questions. Unanswered questions receive 0 points.
+                  </span>
+                </div>
+              )}
+
+              {content.hasCoding && (
+                <div className="border border-[#E7E2DA] bg-[#FAF8F5] p-3 rounded flex items-center justify-between text-[13px]">
+                  <span className="text-[#78716C]">Coding ({selectedLanguage.toUpperCase()}):</span>
+                  <span className="font-semibold text-[#1C1917]">
+                    {testRunStats ? `${testRunStats.passed}/${testRunStats.total} public tests passed` : "Solution ready"}
+                  </span>
+                </div>
+              )}
+
+              <div className="border border-[#E7E2DA] bg-[#FAF8F5] p-3 rounded flex items-center justify-between text-[13px]">
+                <span className="text-[#78716C]">Time Remaining:</span>
+                <span className="font-mono font-semibold text-[#1C1917]">{formatTime(timeLeft)}</span>
+              </div>
+
+              <p className="text-[12px] text-[#78716C] leading-relaxed pt-1">
+                Once submitted, your answers and code will be authoritatively graded against hidden test suites. This action cannot be undone.
+              </p>
+            </div>
+
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => setShowSubmitModal(false)}
+                disabled={evaluating}
+                className="flex-1 h-10 border border-[#E7E2DA] text-[#78716C] font-semibold text-[13px] rounded hover:border-[#1C1917] hover:text-[#1C1917] transition-colors"
+              >
+                Return to Test
+              </button>
+              <button
+                onClick={handleFinalSubmit}
+                disabled={evaluating}
+                className="flex-1 h-10 bg-[#064E3B] text-white font-semibold text-[13px] rounded hover:bg-[#043327] transition-colors disabled:opacity-50 flex items-center justify-center gap-1.5"
+              >
+                {evaluating ? "Evaluating..." : "Confirm & Submit"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }

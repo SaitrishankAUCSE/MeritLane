@@ -70,19 +70,11 @@ export async function POST(
       );
     }
 
-    // 5. ATOMIC DUPLICATE PROTECTION
+    // 5. ATOMIC DUPLICATE PROTECTION & TRANSACTIONAL WRITE
     const applicationId = `${jobId}_${candidateUid}`;
     const applicationRef = adminDb.collection("jobApplications").doc(applicationId);
-    const existingApp = await applicationRef.get();
+    const jobRef = adminDb.collection("jobs").doc(jobId);
 
-    if (existingApp.exists) {
-      return NextResponse.json(
-        { error: "You have already applied to this job." },
-        { status: 409 }
-      );
-    }
-
-    // 6. Assemble application record
     const now = Date.now();
     const applicationData = {
       id: applicationId,
@@ -101,14 +93,27 @@ export async function POST(
       updatedAt: now,
     };
 
-    // 7. Atomically save application and increment applicationCount on job
-    const batch = adminDb.batch();
-    batch.set(applicationRef, applicationData);
-    batch.update(adminDb.collection("jobs").doc(jobId), {
-      applicationCount: FieldValue.increment(1),
-      updatedAt: now,
-    });
-    await batch.commit();
+    try {
+      await adminDb.runTransaction(async (t) => {
+        const existingApp = await t.get(applicationRef);
+        if (existingApp.exists) {
+          throw new Error("ALREADY_APPLIED");
+        }
+        t.set(applicationRef, applicationData);
+        t.update(jobRef, {
+          applicationCount: FieldValue.increment(1),
+          updatedAt: now,
+        });
+      });
+    } catch (txError: any) {
+      if (txError.message === "ALREADY_APPLIED") {
+        return NextResponse.json(
+          { error: "You have already applied to this job." },
+          { status: 409 }
+        );
+      }
+      throw txError;
+    }
 
     return NextResponse.json(
       {

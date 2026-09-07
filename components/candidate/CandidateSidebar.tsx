@@ -161,7 +161,7 @@ export function CandidateSidebar() {
             onClick={() => router.push("/candidate/dashboard")}
             title={isCollapsed ? "Add evidence" : undefined}
             className={`
-              flex items-center h-9 w-full rounded-lg
+              flex items-center h-9 w-full rounded
               text-[13px] font-medium text-[#78716C] hover:text-[#1C1917] hover:bg-[#F2EFE9]
               transition-colors overflow-hidden
             `}
@@ -201,7 +201,7 @@ export function CandidateSidebar() {
                   exit={{ opacity: 0, y: 8, scale: 0.96 }}
                   transition={{ duration: 0.14, ease: "easeOut" }}
                   className="absolute bottom-full mb-2 left-0 w-52 bg-white border border-[#E7E2DA]
-                             rounded-xl shadow-lg overflow-hidden z-50 py-1"
+                             rounded shadow-lg overflow-hidden z-50 py-1"
                 >
                   <div className="px-4 py-3 border-b border-[#F2EFE9]">
                     <div className="text-[13px] font-semibold text-[#1C1917] truncate">{name}</div>
@@ -211,7 +211,7 @@ export function CandidateSidebar() {
                     <Link
                       href="/candidate/profile"
                       className="flex items-center gap-2.5 px-2.5 py-2 text-[13px] text-[#44403C]
-                                 hover:bg-[#F2EFE9] hover:text-[#1C1917] rounded-lg transition-colors"
+                                 hover:bg-[#F2EFE9] hover:text-[#1C1917] rounded transition-colors"
                     >
                       <Fingerprint className="h-3.5 w-3.5 text-[#A8A29E]" />
                       View Identity
@@ -219,7 +219,7 @@ export function CandidateSidebar() {
                     <Link
                       href="/candidate/settings"
                       className="flex items-center gap-2.5 px-2.5 py-2 text-[13px] text-[#44403C]
-                                 hover:bg-[#F2EFE9] hover:text-[#1C1917] rounded-lg transition-colors"
+                                 hover:bg-[#F2EFE9] hover:text-[#1C1917] rounded transition-colors"
                     >
                       <Settings className="h-3.5 w-3.5 text-[#A8A29E]" />
                       Settings
@@ -227,7 +227,7 @@ export function CandidateSidebar() {
                     <Link
                       href="/candidate/support"
                       className="flex items-center gap-2.5 px-2.5 py-2 text-[13px] text-[#44403C]
-                                 hover:bg-[#F2EFE9] hover:text-[#1C1917] rounded-lg transition-colors"
+                                 hover:bg-[#F2EFE9] hover:text-[#1C1917] rounded transition-colors"
                     >
                       <HelpCircle className="h-3.5 w-3.5 text-[#A8A29E]" />
                       Help & Support
@@ -240,7 +240,7 @@ export function CandidateSidebar() {
                         setShowLogoutModal(true);
                       }}
                       className="flex items-center gap-2.5 w-full text-left px-2.5 py-2
-                                 text-[13px] text-[#C0392B] hover:bg-red-50 rounded-lg transition-colors"
+                                 text-[13px] text-[#C0392B] hover:bg-red-50 rounded transition-colors"
                     >
                       <LogOut className="h-3.5 w-3.5" />
                       Sign Out
@@ -255,12 +255,12 @@ export function CandidateSidebar() {
               type="button"
               onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
               className={`
-                flex items-center gap-2.5 flex-1 min-w-0 p-1.5 rounded-lg text-left
+                flex items-center gap-2.5 flex-1 min-w-0 p-1.5 rounded text-left
                 transition-colors cursor-pointer overflow-hidden
                 ${isUserMenuOpen ? "bg-[#F2EFE9]" : "hover:bg-[#F2EFE9]"}
               `}
             >
-              <div className="h-7 w-7 rounded-full bg-[#1C1917] text-[#FAFAF9] flex items-center
+              <div className="h-7 w-7 rounded bg-[#1C1917] text-[#FAFAF9] flex items-center
                               justify-center text-[11px] font-semibold shrink-0 overflow-hidden border border-[#E7E2DA]">
                 {avatarUrl
                   ? <img src={avatarUrl} alt="Profile" className="h-full w-full object-cover" />
@@ -293,7 +293,7 @@ export function CandidateSidebar() {
             <button
               type="button"
               onClick={() => setIsCollapsed(!isCollapsed)}
-              className="p-1.5 text-[#A8A29E] hover:text-[#1C1917] hover:bg-[#F2EFE9] rounded-lg
+              className="p-1.5 text-[#A8A29E] hover:text-[#1C1917] hover:bg-[#F2EFE9] rounded
                          transition-colors shrink-0"
               aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
             >

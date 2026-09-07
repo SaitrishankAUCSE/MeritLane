@@ -254,7 +254,7 @@ export default function CandidateInboxPage() {
             <button
               onClick={() => fetchMessages(true)}
               disabled={refreshing}
-              className="h-10 w-10 border border-[#E7E2DA] bg-[#FAF8F5] hover:bg-white text-[#1C1917] rounded-full flex items-center justify-center transition-colors shadow-2xs"
+              className="h-10 w-10 border border-[#E7E2DA] bg-[#FAF8F5] hover:bg-white text-[#1C1917] rounded flex items-center justify-center transition-colors shadow-2xs"
               title="Refresh messages"
             >
               <RefreshCw className={`h-4 w-4 ${refreshing ? "animate-spin text-[#064E3B]" : "text-[#78716C]"}`} />
@@ -280,7 +280,7 @@ export default function CandidateInboxPage() {
                 placeholder="Search conversations or keywords…"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="w-full pl-9 pr-4 py-2 text-[13px] bg-white border border-[#E7E2DA] rounded-full text-[#1C1917] placeholder-[#A8A29E] focus:outline-none focus:ring-1 focus:ring-[#1C1917] transition-all"
+                className="w-full pl-9 pr-4 py-2 text-[13px] bg-white border border-[#E7E2DA] rounded text-[#1C1917] placeholder-[#A8A29E] focus:outline-none focus:ring-1 focus:ring-[#1C1917] transition-all"
               />
             </div>
 
@@ -288,7 +288,7 @@ export default function CandidateInboxPage() {
             <div className="flex items-center gap-2">
               <button
                 onClick={() => setFilterTab("all")}
-                className={`text-[11px] font-mono px-3 py-1 rounded-full border transition-colors ${
+                className={`text-[11px] font-mono px-3 py-1 rounded border transition-colors ${
                   filterTab === "all"
                     ? "bg-[#1C1917] text-white border-[#1C1917]"
                     : "bg-white text-[#78716C] border-[#E7E2DA] hover:text-[#1C1917]"
@@ -298,7 +298,7 @@ export default function CandidateInboxPage() {
               </button>
               <button
                 onClick={() => setFilterTab("unread")}
-                className={`text-[11px] font-mono px-3 py-1 rounded-full border transition-colors ${
+                className={`text-[11px] font-mono px-3 py-1 rounded border transition-colors ${
                   filterTab === "unread"
                     ? "bg-[#064E3B] text-white border-[#064E3B]"
                     : "bg-white text-[#78716C] border-[#E7E2DA] hover:text-[#1C1917]"
@@ -318,7 +318,7 @@ export default function CandidateInboxPage() {
               </div>
             ) : filteredThreads.length === 0 ? (
               <div className="flex flex-col items-center justify-center p-12 text-center">
-                <div className="h-12 w-12 rounded-2xl bg-[#FAF8F5] border border-[#E7E2DA] flex items-center justify-center mb-3">
+                <div className="h-12 w-12 rounded bg-[#FAF8F5] border border-[#E7E2DA] flex items-center justify-center mb-3">
                   <Inbox className="h-5 w-5 text-[#A8A29E]" />
                 </div>
                 <div className="text-[14px] font-semibold text-[#1C1917] mb-1">
@@ -350,7 +350,7 @@ export default function CandidateInboxPage() {
                     }`}
                   >
                     {/* Employer Avatar */}
-                    <div className="h-10 w-10 rounded-full bg-[#1C1917] text-white flex items-center justify-center text-[12px] font-mono font-bold shrink-0 shadow-2xs border border-[#E7E2DA]">
+                    <div className="h-10 w-10 rounded bg-[#1C1917] text-white flex items-center justify-center text-[12px] font-mono font-bold shrink-0 shadow-2xs border border-[#E7E2DA]">
                       {getInitials(thread.partnerName)}
                     </div>
 
@@ -407,13 +407,13 @@ export default function CandidateInboxPage() {
                   >
                     ← Back
                   </button>
-                  <div className="h-10 w-10 rounded-full bg-[#1C1917] text-white flex items-center justify-center text-[12px] font-mono font-bold shrink-0">
+                  <div className="h-10 w-10 rounded bg-[#1C1917] text-white flex items-center justify-center text-[12px] font-mono font-bold shrink-0">
                     {getInitials(activeThread.partnerName)}
                   </div>
                   <div>
                     <div className="flex items-center gap-2">
                       <h2 className="text-[16px] font-bold text-[#1C1917]">{activeThread.partnerName}</h2>
-                      <span className="text-[10px] font-mono font-semibold uppercase text-[#064E3B] bg-[#064E3B]/10 border border-[#064E3B]/20 px-2 py-0.5 rounded-full">
+                      <span className="text-[10px] font-mono font-semibold uppercase text-[#064E3B] bg-[#064E3B]/10 border border-[#064E3B]/20 px-2 py-0.5 rounded">
                         Verified Employer
                       </span>
                     </div>
@@ -426,7 +426,7 @@ export default function CandidateInboxPage() {
 
                 <div className="flex items-center gap-2">
                   <Link href="/candidate/jobs">
-                    <button className="hidden sm:flex items-center gap-1.5 px-3.5 py-1.5 border border-[#E7E2DA] bg-[#FAF8F5] hover:bg-white text-[11px] font-mono font-semibold text-[#1C1917] rounded-full transition-colors">
+                    <button className="hidden sm:flex items-center gap-1.5 px-3.5 py-1.5 border border-[#E7E2DA] bg-[#FAF8F5] hover:bg-white text-[11px] font-mono font-semibold text-[#1C1917] rounded transition-colors">
                       <span>EXPLORE JOBS</span>
                       <ExternalLink className="h-3 w-3" />
                     </button>
@@ -461,7 +461,7 @@ export default function CandidateInboxPage() {
                       </div>
 
                       <div
-                        className={`max-w-[720px] p-5 sm:p-6 rounded-2xl border text-[14px] leading-relaxed shadow-xs ${
+                        className={`max-w-[720px] p-5 sm:p-6 rounded border text-[14px] leading-relaxed shadow-xs ${
                           isSentByMe
                             ? "bg-[#064E3B] text-white border-[#064E3B] rounded-br-xs"
                             : "bg-white text-[#1C1917] border-[#E7E2DA] rounded-bl-xs"
@@ -484,7 +484,7 @@ export default function CandidateInboxPage() {
                       onChange={(e) => setReplyText(e.target.value)}
                       placeholder={`Write a direct reply to ${activeThread.partnerName}…`}
                       rows={3}
-                      className="w-full p-3.5 bg-[#FAF8F5] border border-[#E7E2DA] rounded-xl text-[13px] text-[#1C1917] placeholder-[#A8A29E] focus:outline-none focus:ring-1 focus:ring-[#1C1917] resize-none"
+                      className="w-full p-3.5 bg-[#FAF8F5] border border-[#E7E2DA] rounded text-[13px] text-[#1C1917] placeholder-[#A8A29E] focus:outline-none focus:ring-1 focus:ring-[#1C1917] resize-none"
                       onKeyDown={(e) => {
                         if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
                           handleSendReply(e);
@@ -501,7 +501,7 @@ export default function CandidateInboxPage() {
                     <button
                       type="submit"
                       disabled={sendingReply || !replyText.trim()}
-                      className="flex items-center gap-2 px-5 py-2.5 bg-[#064E3B] hover:bg-[#043327] disabled:opacity-50 disabled:cursor-not-allowed text-white text-[12px] font-mono font-semibold uppercase tracking-wider rounded-full transition-colors shadow-xs"
+                      className="flex items-center gap-2 px-5 py-2.5 bg-[#064E3B] hover:bg-[#043327] disabled:opacity-50 disabled:cursor-not-allowed text-white text-[12px] font-mono font-semibold uppercase tracking-wider rounded transition-colors shadow-xs"
                     >
                       {sendingReply ? (
                         <>
@@ -523,7 +523,7 @@ export default function CandidateInboxPage() {
             /* No conversation selected: Executive Full-Screen Communications Center */
             <div className="flex-1 flex flex-col items-center justify-center p-8 sm:p-12 overflow-y-auto">
               <div className="max-w-2xl w-full space-y-8 text-center">
-                <div className="inline-flex items-center justify-center h-16 w-16 rounded-2xl bg-white border border-[#E7E2DA] shadow-xs text-[#064E3B] mx-auto">
+                <div className="inline-flex items-center justify-center h-16 w-16 rounded bg-white border border-[#E7E2DA] shadow-xs text-[#064E3B] mx-auto">
                   <Mail className="h-8 w-8" />
                 </div>
 
@@ -541,7 +541,7 @@ export default function CandidateInboxPage() {
 
                 {/* 3 Step Telemetry Cards */}
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-left">
-                  <div className="bg-white border border-[#E7E2DA] p-5 rounded-xl shadow-2xs space-y-2">
+                  <div className="bg-white border border-[#E7E2DA] p-5 rounded shadow-2xs space-y-2">
                     <div className="text-[10px] font-mono text-[#064E3B] uppercase font-bold">1. Verified Skills</div>
                     <div className="text-[14px] font-bold text-[#1C1917]">Take Assessments</div>
                     <p className="text-[12px] text-[#78716C] leading-relaxed">
@@ -553,7 +553,7 @@ export default function CandidateInboxPage() {
                     </Link>
                   </div>
 
-                  <div className="bg-white border border-[#E7E2DA] p-5 rounded-xl shadow-2xs space-y-2">
+                  <div className="bg-white border border-[#E7E2DA] p-5 rounded shadow-2xs space-y-2">
                     <div className="text-[10px] font-mono text-[#064E3B] uppercase font-bold">2. Code Evidence</div>
                     <div className="text-[14px] font-bold text-[#1C1917]">Sync Git & Projects</div>
                     <p className="text-[12px] text-[#78716C] leading-relaxed">
@@ -565,7 +565,7 @@ export default function CandidateInboxPage() {
                     </Link>
                   </div>
 
-                  <div className="bg-white border border-[#E7E2DA] p-5 rounded-xl shadow-2xs space-y-2">
+                  <div className="bg-white border border-[#E7E2DA] p-5 rounded shadow-2xs space-y-2">
                     <div className="text-[10px] font-mono text-[#064E3B] uppercase font-bold">3. Applications</div>
                     <div className="text-[14px] font-bold text-[#1C1917]">Browse Openings</div>
                     <p className="text-[12px] text-[#78716C] leading-relaxed">

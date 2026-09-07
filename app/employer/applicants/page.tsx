@@ -141,7 +141,7 @@ export default function EmployerApplicantsPage() {
 
           <div className="flex items-center gap-3">
             <Link href="/employer/jobs/new">
-              <button className="px-5 py-2.5 bg-[#1C1917] hover:bg-[#064E3B] text-white text-[12px] font-mono font-semibold uppercase tracking-wider rounded-full transition-colors shadow-xs">
+              <button className="px-5 py-2.5 bg-[#1C1917] hover:bg-[#064E3B] text-white text-[12px] font-mono font-semibold uppercase tracking-wider rounded transition-colors shadow-xs">
                 + POST NEW OPPORTUNITY
               </button>
             </Link>
@@ -151,7 +151,7 @@ export default function EmployerApplicantsPage() {
 
       <div className="max-w-[1400px] mx-auto px-6 sm:px-10 py-8">
         {/* ── Filter Bar ── */}
-        <div className="bg-white border border-[#E7E2DA] p-4 sm:p-5 rounded-2xl mb-8 space-y-4 shadow-2xs">
+        <div className="bg-white border border-[#E7E2DA] p-4 sm:p-5 rounded mb-8 space-y-4 shadow-2xs">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
             {/* Search */}
             <div className="relative">
@@ -161,7 +161,7 @@ export default function EmployerApplicantsPage() {
                 placeholder="Search candidates, college, or skills…"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full bg-[#FAF8F5] border border-[#E7E2DA] rounded-xl pl-10 pr-4 py-2 text-[13px] text-[#1C1917] placeholder:text-[#A8A29E] outline-none focus:border-[#1C1917] transition-colors"
+                className="w-full bg-[#FAF8F5] border border-[#E7E2DA] rounded pl-10 pr-4 py-2 text-[13px] text-[#1C1917] placeholder:text-[#A8A29E] outline-none focus:border-[#1C1917] transition-colors"
               />
             </div>
 
@@ -170,7 +170,7 @@ export default function EmployerApplicantsPage() {
               <select
                 value={selectedJobId}
                 onChange={(e) => setSelectedJobId(e.target.value)}
-                className="w-full bg-[#FAF8F5] border border-[#E7E2DA] rounded-xl px-3.5 py-2 text-[13px] text-[#1C1917] outline-none focus:border-[#1C1917] transition-colors cursor-pointer"
+                className="w-full bg-[#FAF8F5] border border-[#E7E2DA] rounded px-3.5 py-2 text-[13px] text-[#1C1917] outline-none focus:border-[#1C1917] transition-colors cursor-pointer"
               >
                 <option value="all">All Opportunities ({applications.length})</option>
                 {jobs.map((job) => {
@@ -189,7 +189,7 @@ export default function EmployerApplicantsPage() {
               <select
                 value={selectedStage}
                 onChange={(e) => setSelectedStage(e.target.value as any)}
-                className="w-full bg-[#FAF8F5] border border-[#E7E2DA] rounded-xl px-3.5 py-2 text-[13px] text-[#1C1917] outline-none focus:border-[#1C1917] transition-colors cursor-pointer"
+                className="w-full bg-[#FAF8F5] border border-[#E7E2DA] rounded px-3.5 py-2 text-[13px] text-[#1C1917] outline-none focus:border-[#1C1917] transition-colors cursor-pointer"
               >
                 {PIPELINE_STAGES.map((s) => (
                   <option key={s.id} value={s.id}>
@@ -213,7 +213,7 @@ export default function EmployerApplicantsPage() {
                 <button
                   key={s.id}
                   onClick={() => setSelectedStage(s.id)}
-                  className={`text-[12px] font-mono px-3 py-1 rounded-full border transition-all shrink-0 ${
+                  className={`text-[12px] font-mono px-3 py-1 rounded border transition-all shrink-0 ${
                     isActive
                       ? "bg-[#1C1917] text-white border-[#1C1917] font-semibold shadow-xs"
                       : "bg-[#FAF8F5] text-[#78716C] border-[#E7E2DA] hover:border-[#1C1917] hover:text-[#1C1917]"
@@ -228,24 +228,24 @@ export default function EmployerApplicantsPage() {
 
         {/* ── Submissions Feed ── */}
         {loading ? (
-          <div className="border border-[#E7E2DA] bg-white p-16 text-center rounded-2xl shadow-xs">
+          <div className="border border-[#E7E2DA] bg-white p-16 text-center rounded shadow-xs">
             <div className="h-6 w-6 border-2 border-[#E7E2DA] border-t-[#1C1917] rounded-full animate-spin mx-auto mb-3" />
             <div className="text-[12px] font-mono text-[#78716C] uppercase tracking-wider">
               Retrieving applicant submissions…
             </div>
           </div>
         ) : error ? (
-          <div className="border border-[#FECACA] bg-[#FEF2F2] p-8 text-center rounded-2xl text-[#B42318]">
+          <div className="border border-[#FECACA] bg-[#FEF2F2] p-8 text-center rounded text-[#B42318]">
             <p className="font-medium text-[14px]">{error}</p>
             <button
               onClick={fetchApplicants}
-              className="mt-3 px-4 py-1.5 bg-[#B42318] text-white text-[12px] font-mono rounded-full uppercase"
+              className="mt-3 px-4 py-1.5 bg-[#B42318] text-white text-[12px] font-mono rounded uppercase"
             >
               Retry
             </button>
           </div>
         ) : filteredApplications.length === 0 ? (
-          <div className="border border-[#E7E2DA] border-dashed bg-white p-16 text-center rounded-2xl shadow-xs">
+          <div className="border border-[#E7E2DA] border-dashed bg-white p-16 text-center rounded shadow-xs">
             <Users className="h-10 w-10 text-[#78716C] mx-auto mb-3 opacity-60" />
             <h3 className="text-[18px] font-semibold text-[#1C1917] mb-1">
               No Submissions in this View
@@ -262,7 +262,7 @@ export default function EmployerApplicantsPage() {
                   setSelectedJobId("all");
                   setSelectedStage("all");
                 }}
-                className="px-4 py-2 border border-[#E7E2DA] bg-[#FAF8F5] hover:bg-[#F2EFE9] text-[12px] font-mono font-semibold rounded-full uppercase"
+                className="px-4 py-2 border border-[#E7E2DA] bg-[#FAF8F5] hover:bg-[#F2EFE9] text-[12px] font-mono font-semibold rounded uppercase"
               >
                 Clear Filters
               </button>
@@ -286,7 +286,7 @@ export default function EmployerApplicantsPage() {
               return (
                 <div
                   key={app.id}
-                  className="border border-[#E7E2DA] bg-white p-6 sm:p-7 rounded-2xl shadow-2xs hover:border-[#1C1917]/40 transition-all"
+                  className="border border-[#E7E2DA] bg-white p-6 sm:p-7 rounded shadow-2xs hover:border-[#1C1917]/40 transition-all"
                 >
                   <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-5">
                     {/* Candidate Info & Role */}
@@ -295,10 +295,10 @@ export default function EmployerApplicantsPage() {
                         <h2 className="text-[18px] sm:text-[20px] font-bold text-[#1C1917]">
                           {app.candidateName}
                         </h2>
-                        <span className="text-[11px] font-mono text-[#78716C] bg-[#FAF8F5] border border-[#E7E2DA] px-2.5 py-0.5 rounded-full">
+                        <span className="text-[11px] font-mono text-[#78716C] bg-[#FAF8F5] border border-[#E7E2DA] px-2.5 py-0.5 rounded">
                           {app.candidateKey || `#${app.candidateId.slice(0, 8).toUpperCase()}`}
                         </span>
-                        <span className="text-[11px] font-mono text-[#064E3B] bg-[#064E3B]/10 border border-[#064E3B]/20 px-2.5 py-0.5 rounded-full font-semibold flex items-center gap-1">
+                        <span className="text-[11px] font-mono text-[#064E3B] bg-[#064E3B]/10 border border-[#064E3B]/20 px-2.5 py-0.5 rounded font-semibold flex items-center gap-1">
                           <CheckCircle2 className="h-3 w-3" /> 100% Verified Profile
                         </span>
                       </div>
@@ -336,7 +336,7 @@ export default function EmployerApplicantsPage() {
                           return (
                             <span
                               key={skill}
-                              className={`text-[11px] font-mono px-2.5 py-0.5 rounded-full border ${
+                              className={`text-[11px] font-mono px-2.5 py-0.5 rounded border ${
                                 isVerified
                                   ? "bg-[#ECFDF5] text-[#064E3B] border-[#A7F3D0] font-semibold"
                                   : "bg-[#FAF8F5] text-[#78716C] border-[#E7E2DA]"
@@ -367,7 +367,7 @@ export default function EmployerApplicantsPage() {
                               e.target.value as ApplicationStage
                             )
                           }
-                          className="text-[12px] font-medium bg-[#FAF8F5] border border-[#E7E2DA] rounded-lg px-3 py-1.5 text-[#1C1917] outline-none cursor-pointer hover:border-[#1C1917] transition-colors disabled:opacity-50"
+                          className="text-[12px] font-medium bg-[#FAF8F5] border border-[#E7E2DA] rounded px-3 py-1.5 text-[#1C1917] outline-none cursor-pointer hover:border-[#1C1917] transition-colors disabled:opacity-50"
                         >
                           {PIPELINE_STAGES.filter((s) => s.id !== "all").map((s) => (
                             <option key={s.id} value={s.id}>
@@ -386,14 +386,14 @@ export default function EmployerApplicantsPage() {
                               name: app.candidateName,
                             })
                           }
-                          className="flex items-center gap-1.5 px-3.5 py-1.5 bg-white border border-[#E7E2DA] hover:border-[#1C1917] text-[12px] font-mono text-[#1C1917] rounded-full transition-colors shadow-2xs"
+                          className="flex items-center gap-1.5 px-3.5 py-1.5 bg-white border border-[#E7E2DA] hover:border-[#1C1917] text-[12px] font-mono text-[#1C1917] rounded transition-colors shadow-2xs"
                         >
                           <MessageSquare className="h-3.5 w-3.5 text-[#78716C]" />
                           Message
                         </button>
 
                         <Link href={`/employer/candidate/${app.candidateId}`}>
-                          <button className="flex items-center gap-1.5 px-4 py-1.5 bg-[#1C1917] hover:bg-[#064E3B] text-white text-[12px] font-mono font-semibold rounded-full transition-colors shadow-2xs">
+                          <button className="flex items-center gap-1.5 px-4 py-1.5 bg-[#1C1917] hover:bg-[#064E3B] text-white text-[12px] font-mono font-semibold rounded transition-colors shadow-2xs">
                             View Dossier <ArrowRight className="h-3.5 w-3.5" />
                           </button>
                         </Link>

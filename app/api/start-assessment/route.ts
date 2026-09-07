@@ -67,7 +67,10 @@ export async function POST(req: NextRequest) {
     const now = Date.now();
 
     // Check cooldown — integrity terminations use a 21-day window; normal failures use 14-day
-    if (userData.failedAssessments && userData.failedAssessments[skill]) {
+    const isDev = process.env.NODE_ENV === "development";
+    const bypassCooldown = isDev && (body.resetCooldown === true || req.nextUrl.searchParams.get("resetCooldown") === "true" || req.headers.get("x-dev-bypass-cooldown") === "true");
+
+    if (!bypassCooldown && userData.failedAssessments && userData.failedAssessments[skill]) {
       const failedTimestamp = userData.failedAssessments[skill];
       const failedMs = typeof failedTimestamp.toMillis === "function" ? failedTimestamp.toMillis() : failedTimestamp;
 
@@ -88,17 +91,21 @@ export async function POST(req: NextRequest) {
     // Check if an attempt is already active
     if (userData.assessmentStartedAt && userData.assessmentSkill === skill) {
       const startedMs = userData.assessmentStartedAt.toMillis();
-      const fortyFiveMinsMs = 45 * 60 * 1000;
+      const sixtyMinsMs = 60 * 60 * 1000;
       
-      if (now - startedMs < fortyFiveMinsMs) {
+      if (now - startedMs < sixtyMinsMs) {
         const activeSeed = userData.assessmentSeed || uid;
         const activeContent = getAssessmentContent(skill, activeSeed);
         const sanitizedActiveContent = {
           mcqs: activeContent.mcqs.map((mcq) => ({
             question: mcq.question,
-            options: mcq.options
+            options: mcq.options,
+            difficulty: mcq.difficulty,
+            topic: mcq.topic
           })),
-          coding: activeContent.coding
+          coding: activeContent.coding,
+          hasCoding: activeContent.hasCoding,
+          timeLimitMinutes: 60
         };
 
         return NextResponse.json({ 
@@ -118,13 +125,17 @@ export async function POST(req: NextRequest) {
     const sanitizedFreshContent = {
       mcqs: freshContent.mcqs.map((mcq) => ({
         question: mcq.question,
-        options: mcq.options
+        options: mcq.options,
+        difficulty: mcq.difficulty,
+        topic: mcq.topic
       })),
-      coding: freshContent.coding
+      coding: freshContent.coding,
+      hasCoding: freshContent.hasCoding,
+      timeLimitMinutes: 60
     };
 
-    // Assign a variant (A or B)
-    const newVariant = Math.random() > 0.5 ? "A" : "B";
+    // Assign a variant (A by default to align with standard problem templates)
+    const newVariant = "A";
 
     // Start a fresh session with dynamic seed
     await userRef.update({

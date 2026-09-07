@@ -23,7 +23,7 @@ export const MeritlaneLoader: React.FC<MeritlaneLoaderProps> = ({
       >
         <div className="relative flex items-center justify-center">
           {/* Spinning ring */}
-          <div className="h-16 w-16 rounded-full border-2 border-[#E7E2DA] border-t-[#1C1917] animate-spin" />
+          <div className="h-16 w-16 rounded border-2 border-[#E7E2DA] border-t-[#1C1917] animate-spin" />
           {/* Logo centered inside the ring */}
           <img
             src="/logo-m.png"
@@ -48,7 +48,7 @@ export const MeritlaneLoader: React.FC<MeritlaneLoaderProps> = ({
   // ── SECTION LEVEL (default) ────────────────────────────────────
   return (
     <div className={`flex items-center justify-center py-12 ${className}`}>
-      <div className="h-5 w-5 rounded-full border-2 border-[#E7E2DA] border-t-[#1C1917] animate-spin" />
+      <div className="h-5 w-5 rounded border-2 border-[#E7E2DA] border-t-[#1C1917] animate-spin" />
     </div>
   );
 };

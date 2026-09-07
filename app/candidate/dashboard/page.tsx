@@ -172,7 +172,7 @@ export default function CandidateDashboardPage() {
       />
 
       {/* Institutional Dossier Header */}
-      <div className="mb-8 border border-[#E7E2DA] bg-white rounded-2xl shadow-xs overflow-hidden">
+      <div className="mb-8 border border-[#E7E2DA] bg-white overflow-hidden">
         <div className="p-6 sm:p-8 flex flex-col lg:flex-row lg:items-center justify-between gap-6 border-b border-[#E7E2DA]">
           <div>
             <div className="flex items-center gap-2.5 flex-wrap mb-2.5">
@@ -206,7 +206,7 @@ export default function CandidateDashboardPage() {
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 shrink-0">
             <button
               onClick={handleCopyPublicLink}
-              className="flex items-center justify-center gap-2 px-4 h-10 border border-[#E7E2DA] bg-[#FAF8F5] hover:bg-white text-[#1C1917] rounded-full text-[13px] font-medium transition-colors shadow-2xs"
+              className="flex items-center justify-center gap-2 px-4 h-9 border border-[#E7E2DA] bg-[#FAF8F5] hover:bg-white text-[#1C1917] rounded text-[13px] font-medium transition-colors"
             >
               {copiedLink ? (
                 <>
@@ -224,7 +224,7 @@ export default function CandidateDashboardPage() {
             <button 
               type="button"
               onClick={() => setIsModalOpen(true)}
-              className="flex items-center justify-center gap-2 px-5 h-10 bg-[#064E3B] text-[#FFFFFF] hover:bg-[#022c22] rounded-full text-[13px] font-medium transition-colors shadow-xs"
+              className="flex items-center justify-center gap-2 px-5 h-9 bg-[#064E3B] text-[#FFFFFF] hover:bg-[#022c22] rounded text-[13px] font-medium transition-colors"
             >
               <span>+</span> Attach Code Evidence
             </button>
@@ -243,7 +243,7 @@ export default function CandidateDashboardPage() {
             <div className="text-[28px] font-serif text-[#1C1917] leading-tight mb-2">
               {healthIndex}%
             </div>
-            <div className="w-full bg-[#E7E2DA] h-1.5 rounded-full overflow-hidden mb-2">
+            <div className="w-full bg-[#E7E2DA] h-1.5 rounded overflow-hidden mb-2">
               <div
                 className="bg-[#064E3B] h-full transition-all duration-500"
                 style={{ width: `${healthIndex}%` }}
@@ -364,7 +364,7 @@ export default function CandidateDashboardPage() {
       {/* Tab 1: Competency Matrix */}
       {activeTab === "matrix" && (
         <div className="space-y-6">
-          <div className="bg-white border border-[#E7E2DA] rounded-2xl shadow-xs overflow-hidden">
+          <div className="bg-white border border-[#E7E2DA] rounded shadow-xs overflow-hidden">
             <div className="p-5 sm:p-6 border-b border-[#E7E2DA] flex items-center justify-between">
               <div>
                 <h2 className="text-[17px] font-serif text-[#1C1917] font-normal">
@@ -435,7 +435,7 @@ export default function CandidateDashboardPage() {
                           ) : (
                             <button
                               onClick={() => router.push(`/candidate/assessment?skill=${encodeURIComponent(skill)}`)}
-                              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-[#1C1917] hover:bg-[#292524] text-white text-[12px] font-medium rounded-lg transition-colors"
+                              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-[#1C1917] hover:bg-[#292524] text-white text-[12px] font-medium rounded transition-colors"
                             >
                               <Clock className="h-3 w-3" />
                               <span>Take 45m Exam</span>
@@ -476,7 +476,7 @@ export default function CandidateDashboardPage() {
 
             <button
               onClick={() => setIsModalOpen(true)}
-              className="px-4 py-2 bg-[#064E3B] text-white text-[13px] font-medium rounded-xl hover:bg-[#022c22] transition-colors"
+              className="px-4 py-2 bg-[#064E3B] text-white text-[13px] font-medium rounded hover:bg-[#022c22] transition-colors"
             >
               + Link Repository
             </button>
@@ -484,7 +484,7 @@ export default function CandidateDashboardPage() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {projects.length === 0 ? (
-              <div className="col-span-2 p-12 border border-dashed border-[#E7E2DA] rounded-2xl text-center bg-white">
+              <div className="col-span-2 p-12 border border-dashed border-[#E7E2DA] rounded text-center bg-white">
                 <h3 className="text-base font-serif text-[#1C1917] mb-2 font-normal">No artifacts attached</h3>
                 <p className="text-sm text-[#78716C] max-w-md mx-auto mb-6">
                   Attach code repositories or production links to establish evidentiary proof for employer review.
@@ -492,7 +492,7 @@ export default function CandidateDashboardPage() {
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(true)}
-                  className="px-5 py-2.5 bg-[#064E3B] text-white text-[13px] font-medium rounded-xl hover:bg-[#022c22] transition-colors"
+                  className="px-5 py-2.5 bg-[#064E3B] text-white text-[13px] font-medium rounded hover:bg-[#022c22] transition-colors"
                 >
                   + Link Code Repository
                 </button>
@@ -501,7 +501,7 @@ export default function CandidateDashboardPage() {
               projects.map((project, idx) => (
                 <div
                   key={project.id || idx}
-                  className="border border-[#E7E2DA] bg-white p-6 rounded-2xl transition-colors hover:border-[#1C1917] shadow-xs flex flex-col justify-between"
+                  className="border border-[#E7E2DA] bg-white p-6 rounded transition-colors hover:border-[#1C1917] shadow-xs flex flex-col justify-between"
                 >
                   <div>
                     <div className="flex items-start justify-between gap-4 mb-2">
@@ -580,7 +580,7 @@ export default function CandidateDashboardPage() {
       {/* Tab 3: Git Provenance */}
       {activeTab === "provenance" && (
         <div className="space-y-6">
-          <div className="bg-white border border-[#E7E2DA] rounded-2xl p-6 sm:p-8 shadow-xs">
+          <div className="bg-white border border-[#E7E2DA] rounded p-6 sm:p-8 shadow-xs">
             <h2 className="text-[18px] font-serif text-[#1C1917] font-normal mb-2">
               GitHub Technical Archive Audit
             </h2>
@@ -590,7 +590,7 @@ export default function CandidateDashboardPage() {
 
             {profile?.githubEvidence ? (
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-6">
-                <div className="p-4 bg-[#FAF8F5] rounded-xl border border-[#E7E2DA]">
+                <div className="p-4 bg-[#FAF8F5] rounded border border-[#E7E2DA]">
                   <div className="text-[11px] font-mono uppercase text-[#78716C] mb-1">
                     Audited Commits
                   </div>
@@ -599,7 +599,7 @@ export default function CandidateDashboardPage() {
                   </div>
                 </div>
 
-                <div className="p-4 bg-[#FAF8F5] rounded-xl border border-[#E7E2DA]">
+                <div className="p-4 bg-[#FAF8F5] rounded border border-[#E7E2DA]">
                   <div className="text-[11px] font-mono uppercase text-[#78716C] mb-1">
                     Public Repositories
                   </div>
@@ -608,7 +608,7 @@ export default function CandidateDashboardPage() {
                   </div>
                 </div>
 
-                <div className="p-4 bg-[#FAF8F5] rounded-xl border border-[#E7E2DA]">
+                <div className="p-4 bg-[#FAF8F5] rounded border border-[#E7E2DA]">
                   <div className="text-[11px] font-mono uppercase text-[#78716C] mb-1">
                     Top Language
                   </div>
@@ -618,7 +618,7 @@ export default function CandidateDashboardPage() {
                 </div>
               </div>
             ) : (
-              <div className="p-8 bg-[#FAF8F5] rounded-xl border border-[#E7E2DA] text-center">
+              <div className="p-8 bg-[#FAF8F5] rounded border border-[#E7E2DA] text-center">
                 <GitBranch className="h-8 w-8 text-[#78716C] mx-auto mb-2" />
                 <h3 className="text-[15px] font-medium text-[#1C1917] mb-1">No GitHub archive connected</h3>
                 <p className="text-[13px] text-[#78716C] mb-4">
@@ -626,7 +626,7 @@ export default function CandidateDashboardPage() {
                 </p>
                 <button
                   onClick={() => router.push("/candidate/profile")}
-                  className="px-4 py-2 bg-[#1C1917] text-white text-[12px] font-medium rounded-lg hover:bg-[#292524]"
+                  className="px-4 py-2 bg-[#1C1917] text-white text-[12px] font-medium rounded hover:bg-[#292524]"
                 >
                   Go to Identity
                 </button>
@@ -656,7 +656,7 @@ export default function CandidateDashboardPage() {
               role="dialog"
               aria-modal="true"
               aria-labelledby="modal-evidence-title"
-              className="relative z-10 bg-[#FFFFFF] rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden flex flex-col border border-[#E5E5E5]"
+              className="relative z-10 bg-[#FFFFFF] rounded shadow-2xl w-full max-w-lg overflow-hidden flex flex-col border border-[#E5E5E5]"
             >
               <div className="flex items-center justify-between px-6 py-5 border-b border-[#E5E5E5] bg-[#FAFAFA]">
                 <h2 id="modal-evidence-title" className="text-[18px] font-serif text-[#0D0D0D]">Add Supporting Evidence</h2>
@@ -671,7 +671,7 @@ export default function CandidateDashboardPage() {
 
               <form onSubmit={handleSaveEvidence} className="p-6 space-y-4">
                 {errorMsg && (
-                  <div className="p-3 bg-[#FEF2F2] border border-[#FECACA] text-[#991B1B] text-[13px] rounded-xl">
+                  <div className="p-3 bg-[#FEF2F2] border border-[#FECACA] text-[#991B1B] text-[13px] rounded">
                     {errorMsg}
                   </div>
                 )}
@@ -686,7 +686,7 @@ export default function CandidateDashboardPage() {
                     value={newProject.title}
                     onChange={(e) => setNewProject({ ...newProject, title: e.target.value })}
                     placeholder="e.g. Distributed In-Memory Cache"
-                    className="w-full h-11 px-3.5 bg-white border border-[#E7E2DA] rounded-xl text-[14px] text-[#1C1917] outline-none focus:border-[#1C1917]"
+                    className="w-full h-11 px-3.5 bg-white border border-[#E7E2DA] rounded text-[14px] text-[#1C1917] outline-none focus:border-[#1C1917]"
                   />
                 </div>
 
@@ -700,7 +700,7 @@ export default function CandidateDashboardPage() {
                     value={newProject.repoUrl}
                     onChange={(e) => setNewProject({ ...newProject, repoUrl: e.target.value })}
                     placeholder="https://github.com/username/project"
-                    className="w-full h-11 px-3.5 bg-white border border-[#E7E2DA] rounded-xl text-[14px] text-[#1C1917] outline-none focus:border-[#1C1917]"
+                    className="w-full h-11 px-3.5 bg-white border border-[#E7E2DA] rounded text-[14px] text-[#1C1917] outline-none focus:border-[#1C1917]"
                   />
                 </div>
 
@@ -713,7 +713,7 @@ export default function CandidateDashboardPage() {
                     value={newProject.liveUrl}
                     onChange={(e) => setNewProject({ ...newProject, liveUrl: e.target.value })}
                     placeholder="https://my-app.vercel.app"
-                    className="w-full h-11 px-3.5 bg-white border border-[#E7E2DA] rounded-xl text-[14px] text-[#1C1917] outline-none focus:border-[#1C1917]"
+                    className="w-full h-11 px-3.5 bg-white border border-[#E7E2DA] rounded text-[14px] text-[#1C1917] outline-none focus:border-[#1C1917]"
                   />
                 </div>
 
@@ -724,7 +724,7 @@ export default function CandidateDashboardPage() {
                   <select
                     value={newProject.supportsClaim}
                     onChange={(e) => setNewProject({ ...newProject, supportsClaim: e.target.value })}
-                    className="w-full h-11 px-3 bg-white border border-[#E7E2DA] rounded-xl text-[14px] text-[#1C1917] outline-none focus:border-[#1C1917]"
+                    className="w-full h-11 px-3 bg-white border border-[#E7E2DA] rounded text-[14px] text-[#1C1917] outline-none focus:border-[#1C1917]"
                   >
                     {skills.map((s) => (
                       <option key={s} value={s}>
@@ -744,7 +744,7 @@ export default function CandidateDashboardPage() {
                     value={newProject.description}
                     onChange={(e) => setNewProject({ ...newProject, description: e.target.value })}
                     placeholder="Briefly describe the architectural approach and technical complexity."
-                    className="w-full p-3 bg-white border border-[#E7E2DA] rounded-xl text-[13px] text-[#1C1917] outline-none focus:border-[#1C1917]"
+                    className="w-full p-3 bg-white border border-[#E7E2DA] rounded text-[13px] text-[#1C1917] outline-none focus:border-[#1C1917]"
                   />
                 </div>
 
@@ -752,14 +752,14 @@ export default function CandidateDashboardPage() {
                   <button
                     type="button"
                     onClick={() => setIsModalOpen(false)}
-                    className="px-4 py-2 border border-[#E7E2DA] text-[#78716C] hover:text-[#1C1917] rounded-xl text-[13px] font-medium"
+                    className="px-4 py-2 border border-[#E7E2DA] text-[#78716C] hover:text-[#1C1917] rounded text-[13px] font-medium"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
                     disabled={saving}
-                    className="px-5 py-2 bg-[#064E3B] text-white rounded-xl text-[13px] font-medium hover:bg-[#022c22] disabled:opacity-50"
+                    className="px-5 py-2 bg-[#064E3B] text-white rounded text-[13px] font-medium hover:bg-[#022c22] disabled:opacity-50"
                   >
                     {saving ? "Attaching..." : "Save Evidence"}
                   </button>

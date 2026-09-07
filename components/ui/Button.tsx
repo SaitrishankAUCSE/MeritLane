@@ -24,38 +24,36 @@ export function Button({
   ...props
 }: ButtonProps) {
   const baseStyles =
-    "inline-flex items-center justify-center font-sans font-medium transition-all select-none focus:outline-none focus-visible:ring-1 focus-visible:ring-[#0D0D0D] focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none whitespace-nowrap shrink-0";
+    "inline-flex items-center justify-center font-sans font-medium transition-all duration-150 select-none focus:outline-none focus-visible:ring-1 focus-visible:ring-[#1C1917] focus-visible:ring-offset-2 disabled:opacity-40 disabled:pointer-events-none whitespace-nowrap shrink-0";
 
-  const sizeStyles = {
-    xs: "text-[12px] px-3 h-7 gap-1.5 rounded-full",
-    sm: "text-[13px] px-4 h-8 gap-1.5 rounded-full",
-    md: "text-[14px] px-5 h-9 gap-2 rounded-full",
-    lg: "text-[14px] px-6 h-10 gap-2.5 rounded-full",
-    icon: "h-9 w-9 p-0 rounded-full",
+  const sizeStyles: Record<string, string> = {
+    xs:   "text-[12px] px-3 h-7 gap-1.5 rounded-none",
+    sm:   "text-[13px] px-4 h-8 gap-1.5 rounded-none",
+    md:   "text-[14px] px-5 h-9 gap-2 rounded-none",
+    lg:   "text-[15px] px-6 h-10 gap-2.5 rounded-none",
+    icon: "h-9 w-9 p-0 rounded-none",
   };
 
-  const variantStyles = {
+  const variantStyles: Record<string, string> = {
     primary:
-      "bg-[#064E3B] hover:bg-[#022c22] border border-[#064E3B]/80 shadow-[0_4px_14px_0_rgba(6,78,59,0.25),inset_0_-2px_6px_0_rgba(0,0,0,0.2),inset_0_2px_4px_0_rgba(255,255,255,0.15)] text-[#FFFFFF] active:scale-95",
+      "bg-[#064E3B] text-white border border-[#064E3B] hover:bg-[#043d2e] active:bg-[#032b20]",
     secondary:
-      "bg-white/70 backdrop-blur-md border border-white/60 shadow-[0_4px_14px_0_rgba(0,0,0,0.08),inset_0_-2px_6px_0_rgba(0,0,0,0.05),inset_0_2px_4px_0_rgba(255,255,255,1)] text-[#0D0D0D] hover:bg-white/80 active:scale-95",
+      "bg-white text-[#1C1917] border border-[#E7E2DA] hover:bg-[#F8F6F3] hover:border-[#1C1917] active:bg-[#EAE6DF]",
     outline:
-      "bg-white border border-[#E7E2DA] shadow-xs text-[#1C1917] hover:bg-[#F2EFE9] hover:border-[#C8C0B5] active:scale-95",
+      "bg-white text-[#1C1917] border border-[#E7E2DA] hover:bg-[#F8F6F3] hover:border-[#1C1917] active:bg-[#EAE6DF]",
     ghost:
-      "bg-transparent hover:bg-white/40 hover:backdrop-blur-sm border border-transparent hover:border-white/40 text-[#525252] hover:text-[#0D0D0D] hover:shadow-[0_2px_8px_0_rgba(0,0,0,0.05)] active:scale-95",
+      "bg-transparent text-[#525252] border border-transparent hover:bg-[#F2EFE9] hover:text-[#1C1917] active:bg-[#EAE6DF]",
     tertiary:
       "bg-transparent text-[#737373] border border-transparent underline-offset-4 hover:underline hover:text-[#525252] p-0 h-auto",
     danger:
-      "bg-[#B42318]/70 backdrop-blur-md border border-[#B42318]/50 shadow-[0_4px_14px_0_rgba(180,35,24,0.25),inset_0_-2px_6px_0_rgba(0,0,0,0.2),inset_0_2px_4px_0_rgba(255,255,255,0.2)] text-white hover:bg-[#B42318]/80 active:scale-95",
+      "bg-[#B42318] text-white border border-[#B42318] hover:bg-[#922015] active:bg-[#7a1b12]",
     success:
-      "bg-[#064E3B]/80 backdrop-blur-md border border-[#064E3B]/60 shadow-[0_4px_14px_0_rgba(6,78,59,0.25),inset_0_-2px_6px_0_rgba(0,0,0,0.2),inset_0_2px_4px_0_rgba(255,255,255,0.2)] text-white hover:bg-[#064E3B] active:scale-95",
+      "bg-[#064E3B] text-white border border-[#064E3B] hover:bg-[#043d2e] active:bg-[#032b20]",
   };
 
-  const appliedVariant = variant === "outline" ? "secondary" : variant;
-  
-  // If tertiary is used, override sizing to be inline
+  // Tertiary overrides sizing to be inline
   const finalSize = variant === "tertiary" ? "" : sizeStyles[size];
-  const combinedClassName = `${baseStyles} ${finalSize} ${variantStyles[appliedVariant]} ${className}`;
+  const combinedClassName = `${baseStyles} ${finalSize} ${variantStyles[variant] || variantStyles.primary} ${className}`;
 
   const content = (
     <>

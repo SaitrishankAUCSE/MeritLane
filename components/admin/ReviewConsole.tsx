@@ -184,7 +184,7 @@ export function ReviewConsole({
             <>
               {!actionType ? (
                 <>
-                  <div className="mb-4 bg-surface-low p-4 border border-border rounded-lg">
+                  <div className="mb-4 bg-surface-low p-4 border border-border rounded">
                     <p className="text-xs text-muted-foreground mb-3 font-sans">Run a quick automated pass over candidate artifacts to generate a baseline recommendation.</p>
                     <Button 
                       className="w-full justify-center bg-[#FAF8F5] hover:bg-white text-[#1C1917] border border-[#E7E2DA]" 

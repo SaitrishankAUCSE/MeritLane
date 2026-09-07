@@ -36,11 +36,11 @@ export function StatusMark({
       <span
         className={cn(
           "h-1.5 w-1.5 shrink-0",
-          status === "verified" && "rounded-full bg-success",
+          status === "verified" && "rounded bg-success",
           status === "pending" && "border border-warning bg-transparent",
           status === "changes_required" && "rotate-45 border border-warning bg-transparent",
-          status === "rejected" && "rounded-full bg-danger",
-          (status === "draft" || status === "declared") && "rounded-full bg-outline",
+          status === "rejected" && "rounded bg-danger",
+          (status === "draft" || status === "declared") && "rounded bg-outline",
           status === "assessed" && "h-px w-2.5 bg-foreground"
         )}
         aria-hidden
@@ -55,10 +55,10 @@ export function RailDot({ status }: { status: ProofStatus }) {
     <span
       className={cn(
         "absolute -left-[3.5px] top-2 z-10 h-2 w-2",
-        status === "verified" && "rounded-full bg-foreground verified-dot",
+        status === "verified" && "rounded bg-foreground verified-dot",
         status === "pending" && "border border-outline bg-background",
         status === "changes_required" && "rotate-45 border border-warning bg-background",
-        status === "rejected" && "rounded-full bg-danger",
+        status === "rejected" && "rounded bg-danger",
         (status === "draft" || status === "declared") && "hidden",
         status === "assessed" && "h-2 w-2 rotate-45 border border-outline bg-background"
       )}

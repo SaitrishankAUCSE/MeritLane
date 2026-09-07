@@ -34,8 +34,8 @@ export default function EmployerProfilePage() {
         </div>
 
         {/* Company Card Header Preview */}
-        <div className="bg-white border border-[#E5E5E5] rounded-2xl p-4 sm:p-8 shadow-sm flex items-start gap-4 sm:gap-5">
-          <div className="h-12 w-12 sm:h-16 sm:w-16 rounded-2xl bg-[#0D0D0D] text-white flex items-center justify-center font-serif text-[20px] sm:text-[26px] font-bold shrink-0">
+        <div className="bg-white border border-[#E5E5E5] rounded p-4 sm:p-8 shadow-sm flex items-start gap-4 sm:gap-5">
+          <div className="h-12 w-12 sm:h-16 sm:w-16 rounded bg-[#0D0D0D] text-white flex items-center justify-center font-serif text-[20px] sm:text-[26px] font-bold shrink-0">
             {companyName.charAt(0).toUpperCase()}
           </div>
           <div className="flex-1">
@@ -50,7 +50,7 @@ export default function EmployerProfilePage() {
         </div>
 
         {/* Edit Form */}
-        <form onSubmit={handleSave} className="bg-white border border-[#E5E5E5] rounded-2xl p-6 sm:p-8 shadow-sm space-y-5">
+        <form onSubmit={handleSave} className="bg-white border border-[#E5E5E5] rounded p-6 sm:p-8 shadow-sm space-y-5">
           <div className="grid gap-5 sm:grid-cols-2">
             <div>
               <label className="text-[12px] font-medium text-[#0D0D0D] block mb-1">
@@ -63,7 +63,7 @@ export default function EmployerProfilePage() {
                   required
                   value={companyName}
                   onChange={(e) => setCompanyName(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-[#E5E5E5] text-[14px] text-[#0D0D0D] focus:border-[#0D0D0D] focus:ring-1 focus:ring-[#0D0D0D] outline-none transition-all"
+                  className="w-full pl-10 pr-4 py-2.5 rounded border border-[#E5E5E5] text-[14px] text-[#0D0D0D] focus:border-[#0D0D0D] focus:ring-1 focus:ring-[#0D0D0D] outline-none transition-all"
                 />
               </div>
             </div>
@@ -79,7 +79,7 @@ export default function EmployerProfilePage() {
                   required
                   value={website}
                   onChange={(e) => setWebsite(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-[#E5E5E5] text-[14px] text-[#0D0D0D] focus:border-[#0D0D0D] focus:ring-1 focus:ring-[#0D0D0D] outline-none transition-all"
+                  className="w-full pl-10 pr-4 py-2.5 rounded border border-[#E5E5E5] text-[14px] text-[#0D0D0D] focus:border-[#0D0D0D] focus:ring-1 focus:ring-[#0D0D0D] outline-none transition-all"
                 />
               </div>
             </div>
@@ -97,7 +97,7 @@ export default function EmployerProfilePage() {
                   required
                   value={location}
                   onChange={(e) => setLocation(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-[#E5E5E5] text-[14px] text-[#0D0D0D] focus:border-[#0D0D0D] focus:ring-1 focus:ring-[#0D0D0D] outline-none transition-all"
+                  className="w-full pl-10 pr-4 py-2.5 rounded border border-[#E5E5E5] text-[14px] text-[#0D0D0D] focus:border-[#0D0D0D] focus:ring-1 focus:ring-[#0D0D0D] outline-none transition-all"
                 />
               </div>
             </div>
@@ -113,7 +113,7 @@ export default function EmployerProfilePage() {
                   required
                   value={techStack}
                   onChange={(e) => setTechStack(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-[#E5E5E5] text-[14px] text-[#0D0D0D] focus:border-[#0D0D0D] focus:ring-1 focus:ring-[#0D0D0D] outline-none transition-all"
+                  className="w-full pl-10 pr-4 py-2.5 rounded border border-[#E5E5E5] text-[14px] text-[#0D0D0D] focus:border-[#0D0D0D] focus:ring-1 focus:ring-[#0D0D0D] outline-none transition-all"
                 />
               </div>
             </div>
@@ -127,7 +127,7 @@ export default function EmployerProfilePage() {
               rows={3}
               value={about}
               onChange={(e) => setAbout(e.target.value)}
-              className="w-full px-4 py-2.5 rounded-xl border border-[#E5E5E5] text-[14px] text-[#0D0D0D] focus:border-[#0D0D0D] focus:ring-1 focus:ring-[#0D0D0D] outline-none transition-all resize-none"
+              className="w-full px-4 py-2.5 rounded border border-[#E5E5E5] text-[14px] text-[#0D0D0D] focus:border-[#0D0D0D] focus:ring-1 focus:ring-[#0D0D0D] outline-none transition-all resize-none"
             />
           </div>
 

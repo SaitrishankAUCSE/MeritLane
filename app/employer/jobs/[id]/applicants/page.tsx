@@ -138,7 +138,7 @@ export default function JobApplicantsPage() {
 
           <div className="flex items-center gap-3">
             <Link href={`/jobs/${id}`} target="_blank">
-              <button className="px-4 py-2 border border-[#E7E2DA] bg-white hover:bg-[#FAF8F5] text-[12px] font-mono font-semibold rounded-full transition-colors shadow-2xs">
+              <button className="px-4 py-2 border border-[#E7E2DA] bg-white hover:bg-[#FAF8F5] text-[12px] font-mono font-semibold rounded transition-colors shadow-2xs">
                 VIEW PUBLIC POSTING ↗
               </button>
             </Link>
@@ -150,7 +150,7 @@ export default function JobApplicantsPage() {
         {error ? (
           <div className="border border-[#B42318]/20 bg-[#FEF2F2] p-8 text-center rounded-2xl">
             <p className="text-[14px] text-[#B42318] mb-4">{error}</p>
-            <button onClick={loadApplicants} className="px-4 py-2 bg-[#1C1917] text-white text-[12px] font-mono rounded-full">
+            <button onClick={loadApplicants} className="px-4 py-2 bg-[#1C1917] text-white text-[12px] font-mono rounded">
               RETRY
             </button>
           </div>
@@ -188,7 +188,7 @@ export default function JobApplicantsPage() {
                         <span className="font-signature text-[32px] sm:text-[38px] text-[#1C1917] leading-none font-semibold">
                           {app.candidateName}
                         </span>
-                        <span className="text-[10px] font-mono font-semibold text-[#064E3B] bg-[#064E3B]/10 px-2 py-0.5 rounded-full border border-[#064E3B]/20">
+                        <span className="text-[10px] font-mono font-semibold text-[#064E3B] bg-[#064E3B]/10 px-2 py-0.5 rounded border border-[#064E3B]/20">
                           {app.candidateKey || "KEY: RECORDED"}
                         </span>
                         <span className="text-[11px] font-mono text-[#78716C]">
@@ -218,7 +218,7 @@ export default function JobApplicantsPage() {
                             return (
                               <span
                                 key={reqSkill}
-                                className={`text-[11px] font-mono px-2.5 py-0.5 rounded-full border flex items-center gap-1 ${
+                                className={`text-[11px] font-mono px-2.5 py-0.5 rounded border flex items-center gap-1 ${
                                   isVerified
                                     ? "bg-[#064E3B]/10 text-[#064E3B] border-[#064E3B]/30 font-semibold"
                                     : isDeclared
@@ -244,7 +244,7 @@ export default function JobApplicantsPage() {
                           value={app.status}
                           disabled={isBusy}
                           onChange={(e) => handleStageChange(app.candidateId, e.target.value as ApplicationStage)}
-                          className="h-10 px-3.5 bg-white border border-[#E7E2DA] rounded-full text-[12px] font-mono font-semibold text-[#1C1917] focus:outline-none shadow-2xs cursor-pointer"
+                          className="h-10 px-3.5 bg-white border border-[#E7E2DA] rounded text-[12px] font-mono font-semibold text-[#1C1917] focus:outline-none shadow-2xs cursor-pointer"
                         >
                           {PIPELINE_OPTIONS.map((opt) => (
                             <option key={opt.id} value={opt.id}>
@@ -256,7 +256,7 @@ export default function JobApplicantsPage() {
 
                       {/* Open Full Dossier */}
                       <Link href={`/employer/candidate/${app.candidateId}`} target="_blank">
-                        <button className="flex items-center justify-center gap-1.5 px-4 h-10 bg-[#1C1917] hover:bg-[#064E3B] text-white text-[11px] font-mono font-semibold uppercase tracking-wider rounded-full transition-colors shadow-xs">
+                        <button className="flex items-center justify-center gap-1.5 px-4 h-10 bg-[#1C1917] hover:bg-[#064E3B] text-white text-[11px] font-mono font-semibold uppercase tracking-wider rounded transition-colors shadow-xs">
                           <span>OPEN DOSSIER</span>
                           <ExternalLink className="h-3.5 w-3.5" />
                         </button>
@@ -270,7 +270,7 @@ export default function JobApplicantsPage() {
                             name: app.candidateName,
                           })
                         }
-                        className="flex items-center justify-center gap-1.5 px-4 h-10 border border-[#E7E2DA] bg-white hover:bg-[#FAF8F5] text-[#1C1917] text-[11px] font-mono font-semibold uppercase tracking-wider rounded-full transition-colors shadow-2xs"
+                        className="flex items-center justify-center gap-1.5 px-4 h-10 border border-[#E7E2DA] bg-white hover:bg-[#FAF8F5] text-[#1C1917] text-[11px] font-mono font-semibold uppercase tracking-wider rounded transition-colors shadow-2xs"
                       >
                         <MessageSquare className="h-3.5 w-3.5 text-[#78716C]" />
                         <span>MESSAGE</span>

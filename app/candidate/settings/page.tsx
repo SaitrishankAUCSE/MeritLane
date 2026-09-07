@@ -51,7 +51,7 @@ export default function SettingsPage() {
       />
 
       <div className="space-y-6">
-        <div className="border border-[#E5E5E5] bg-[#FFFFFF] rounded-xl overflow-hidden">
+        <div className="border border-[#E5E5E5] bg-[#FFFFFF] rounded overflow-hidden">
           <div className="border-b border-[#E5E5E5] px-6 py-5">
             <h2 className="text-base font-bold text-[#0D0D0D]">Profile &amp; Credentials</h2>
             <p className="mt-1 text-xs text-[#666666]">Your verified identity details on Meritlane.</p>
@@ -83,7 +83,7 @@ export default function SettingsPage() {
         </div>
 
         {/* Password & Security Block */}
-        <div className="border border-[#E5E5E5] bg-[#FFFFFF] rounded-xl overflow-hidden">
+        <div className="border border-[#E5E5E5] bg-[#FFFFFF] rounded overflow-hidden">
           <div className="border-b border-[#E5E5E5] px-6 py-5">
             <h2 className="text-base font-bold text-[#0D0D0D]">Password &amp; Security</h2>
             <p className="mt-1 text-xs text-[#666666]">Manage your security settings and authentication methods.</p>
@@ -113,7 +113,7 @@ export default function SettingsPage() {
 
 
         {/* Professional Session Management Block */}
-        <div className="border border-[#E5E5E5] bg-[#FFFFFF] rounded-xl overflow-hidden">
+        <div className="border border-[#E5E5E5] bg-[#FFFFFF] rounded overflow-hidden">
           <div className="border-b border-[#E5E5E5] px-6 py-5">
             <h2 className="text-base font-bold text-[#0D0D0D] flex items-center gap-2">
               Session Management

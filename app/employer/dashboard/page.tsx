@@ -256,7 +256,7 @@ export default function EmployerDashboardPage() {
         <div className="max-w-[1000px] mx-auto mb-8 sm:mb-10">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-3">
             <div className="flex items-center gap-2 flex-wrap">
-              <span className="text-[11px] font-mono font-bold uppercase tracking-[0.1em] text-[#064E3B] bg-[#064E3B]/10 px-2.5 py-1 rounded-full">
+              <span className="text-[11px] font-mono font-bold uppercase tracking-[0.1em] text-[#064E3B] bg-[#064E3B]/10 px-2.5 py-1 rounded">
                 Institutional Talent Registry
               </span>
               <span className="text-[12px] text-[#737373] font-mono">
@@ -264,7 +264,7 @@ export default function EmployerDashboardPage() {
               </span>
             </div>
             <Link href="/employer/jobs">
-              <button className="flex items-center gap-2 px-4 py-2 border border-[#E7E2DA] bg-white hover:bg-[#FAF8F5] text-[12px] font-mono font-semibold rounded-full text-[#1C1917] transition-colors shadow-2xs">
+              <button className="flex items-center gap-2 px-4 py-2 border border-[#E7E2DA] bg-white hover:bg-[#FAF8F5] text-[12px] font-mono font-semibold rounded text-[#1C1917] transition-colors shadow-2xs">
                 <Briefcase className="h-3.5 w-3.5 text-[#064E3B]" />
                 <span>MANAGE JOBS & APPLICANTS</span>
                 <ArrowRight className="h-3 w-3" />
@@ -280,7 +280,7 @@ export default function EmployerDashboardPage() {
 
           {/* Institutional Telemetry Strip */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-2">
-            <div className="bg-white border border-[#E5E5E5] p-4 rounded-xl shadow-xs">
+            <div className="bg-white border border-[#E5E5E5] p-4 rounded shadow-xs">
               <div className="text-[11px] font-mono uppercase tracking-wider text-[#737373] mb-1">
                 Verified Engineers
               </div>
@@ -290,7 +290,7 @@ export default function EmployerDashboardPage() {
               <div className="text-[11px] text-[#737373] mt-1">Evaluated practitioners in pool</div>
             </div>
 
-            <div className="bg-white border border-[#E5E5E5] p-4 rounded-xl shadow-xs">
+            <div className="bg-white border border-[#E5E5E5] p-4 rounded shadow-xs">
               <div className="text-[11px] font-mono uppercase tracking-wider text-[#064E3B] mb-1">
                 High Scorers (≥85%)
               </div>
@@ -300,7 +300,7 @@ export default function EmployerDashboardPage() {
               <div className="text-[11px] text-[#737373] mt-1">Distinction level evaluations</div>
             </div>
 
-            <div className="bg-white border border-[#E5E5E5] p-4 rounded-xl shadow-xs">
+            <div className="bg-white border border-[#E5E5E5] p-4 rounded shadow-xs">
               <div className="text-[11px] font-mono uppercase tracking-wider text-[#737373] mb-1">
                 Audited Projects
               </div>
@@ -314,7 +314,7 @@ export default function EmployerDashboardPage() {
 
         {/* Search & Filter Controls */}
         <div className="max-w-[1000px] mx-auto">
-          <div className="mb-8 bg-white border border-[#E5E5E5] p-4 sm:p-6 rounded-2xl shadow-[0_2px_10px_rgba(0,0,0,0.02)] space-y-4 sm:space-y-5">
+          <div className="mb-8 bg-white border border-[#E5E5E5] p-4 sm:p-6 rounded shadow-[0_2px_10px_rgba(0,0,0,0.02)] space-y-4 sm:space-y-5">
             {/* Search Bar */}
             <div className="relative">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-[#737373]" />
@@ -325,7 +325,7 @@ export default function EmployerDashboardPage() {
                 onKeyDown={(e) => {
                   if (e.key === "Enter") fetchCandidates();
                 }}
-                className="pl-12 pr-10 h-14 bg-[#FAFAFA] border-[#E5E5E5] text-[15px] focus-visible:ring-1 focus-visible:ring-[#0D0D0D] rounded-xl"
+                className="pl-12 pr-10 h-14 bg-[#FAFAFA] border-[#E5E5E5] text-[15px] focus-visible:ring-1 focus-visible:ring-[#0D0D0D] rounded"
               />
               {searchQuery && (
                 <button
@@ -344,7 +344,7 @@ export default function EmployerDashboardPage() {
               <div className="flex items-center gap-2 flex-wrap text-[12px] pt-1">
                 <span className="text-[#737373] font-mono text-[11px] uppercase tracking-wider">Active:</span>
                 {searchQuery.trim() && (
-                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#FAFAFA] border border-[#E5E5E5] text-[#0D0D0D] text-[12px] font-medium">
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded bg-[#FAFAFA] border border-[#E5E5E5] text-[#0D0D0D] text-[12px] font-medium">
                     Keyword: &ldquo;{searchQuery}&rdquo;
                     <button
                       type="button"
@@ -358,7 +358,7 @@ export default function EmployerDashboardPage() {
                 {selectedSkills.map((sk) => (
                   <span
                     key={sk}
-                    className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#0D0D0D] text-white text-[12px] font-medium shadow-xs"
+                    className="inline-flex items-center gap-1.5 px-3 py-1 rounded bg-[#0D0D0D] text-white text-[12px] font-medium shadow-xs"
                   >
                     {sk}
                     <button
@@ -396,7 +396,7 @@ export default function EmployerDashboardPage() {
                     type="button"
                     onClick={() => toggleSkillFilter(skill)}
                     className={
-                      "px-3.5 py-1.5 rounded-full text-[12px] font-medium transition-all duration-200 border " +
+                      "px-3.5 py-1.5 rounded text-[12px] font-medium transition-all duration-200 border " +
                       (isActive
                         ? "bg-[#0D0D0D] text-white border-[#0D0D0D] shadow-sm"
                         : "bg-[#FAFAFA] text-[#737373] border-[#E5E5E5] hover:bg-white hover:border-[#D2D2D2]")
@@ -451,7 +451,7 @@ export default function EmployerDashboardPage() {
               </div>
 
               {showAdvancedFilters && (
-                <div className="mt-4 p-4 rounded-xl bg-[#FAFAFA] border border-[#E5E5E5] grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-[12px]">
+                <div className="mt-4 p-4 rounded bg-[#FAFAFA] border border-[#E5E5E5] grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-[12px]">
                   {/* Verified Score Threshold */}
                   <div>
                     <label className="block font-semibold text-[#0D0D0D] mb-1.5">
@@ -460,7 +460,7 @@ export default function EmployerDashboardPage() {
                     <select
                       value={minScore}
                       onChange={(e) => setMinScore(Number(e.target.value))}
-                      className="w-full bg-white border border-[#E5E5E5] rounded-lg px-2.5 py-1.5 text-[#0D0D0D] outline-none"
+                      className="w-full bg-white border border-[#E5E5E5] rounded px-2.5 py-1.5 text-[#0D0D0D] outline-none"
                     >
                       <option value={0}>Any Score</option>
                       <option value={80}>Verified (≥ 80%)</option>
@@ -503,7 +503,7 @@ export default function EmployerDashboardPage() {
                     <select
                       value={minCommits}
                       onChange={(e) => setMinCommits(Number(e.target.value))}
-                      className="w-full bg-white border border-[#E5E5E5] rounded-lg px-2.5 py-1.5 text-[#0D0D0D] outline-none mb-2"
+                      className="w-full bg-white border border-[#E5E5E5] rounded px-2.5 py-1.5 text-[#0D0D0D] outline-none mb-2"
                     >
                       <option value={0}>Any Commit History</option>
                       <option value={25}>≥ 25 Total Commits</option>
@@ -532,7 +532,7 @@ export default function EmployerDashboardPage() {
                     <select
                       value={gradYearFilter}
                       onChange={(e) => setGradYearFilter(e.target.value)}
-                      className="w-full bg-white border border-[#E5E5E5] rounded-lg px-2.5 py-1.5 text-[#0D0D0D] outline-none"
+                      className="w-full bg-white border border-[#E5E5E5] rounded px-2.5 py-1.5 text-[#0D0D0D] outline-none"
                     >
                       <option value="all">All Cohorts</option>
                       <option value="2024">2024 Graduates</option>
@@ -577,7 +577,7 @@ export default function EmployerDashboardPage() {
               <p className="text-[13px] font-sans">Loading verified talent...</p>
             </div>
           ) : sortedCandidates.length === 0 ? (
-            <div className="border border-[#E5E5E5] border-dashed rounded-2xl bg-white p-16 text-center shadow-sm">
+            <div className="border border-[#E5E5E5] border-dashed rounded bg-white p-16 text-center shadow-sm">
               <h2 className="text-[20px] font-serif text-[#0D0D0D] mb-3">No verified candidates found</h2>
               <p className="text-[14px] text-[#737373] mb-6 max-w-md mx-auto">
                 No candidates match your current search query or skill filters. Try broadening your criteria or reset all filters.
@@ -609,12 +609,12 @@ export default function EmployerDashboardPage() {
                 return (
                   <div
                     key={c.uid}
-                    className="group border border-[#E5E5E5] rounded-2xl bg-white p-4 sm:p-6 md:p-8 hover:shadow-[0_8px_30px_rgba(0,0,0,0.04)] transition-all duration-300"
+                    className="group border border-[#E5E5E5] rounded bg-white p-4 sm:p-6 md:p-8 hover:shadow-[0_8px_30px_rgba(0,0,0,0.04)] transition-all duration-300"
                   >
                     <div className="flex flex-col md:flex-row md:items-start justify-between gap-5 sm:gap-6">
                       {/* Candidate Identity & Evidence */}
                       <div className="flex items-start gap-4 sm:gap-6">
-                        <div className="h-12 w-12 sm:h-16 sm:w-16 shrink-0 rounded-2xl bg-[#F3F3F1] border border-[#E5E5E5] flex items-center justify-center text-[#0D0D0D] font-serif text-[20px] sm:text-[26px]">
+                        <div className="h-12 w-12 sm:h-16 sm:w-16 shrink-0 rounded bg-[#F3F3F1] border border-[#E5E5E5] flex items-center justify-center text-[#0D0D0D] font-serif text-[20px] sm:text-[26px]">
                           {c.name ? c.name.charAt(0).toUpperCase() : "C"}
                         </div>
                         <div>
@@ -644,12 +644,12 @@ export default function EmployerDashboardPage() {
                                 return (
                                   <div
                                     key={idx}
-                                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-[#15803D]/20 bg-[#15803D]/5 text-[#15803D] text-[12px] font-medium"
+                                    className="flex items-center gap-1.5 px-3 py-1.5 rounded border border-[#15803D]/20 bg-[#15803D]/5 text-[#15803D] text-[12px] font-medium"
                                   >
                                     <CheckCircle2 className="h-3.5 w-3.5" />
                                     {skill}
                                     {skillObj?.score && (
-                                      <span className="text-[10px] font-mono bg-white px-1.5 py-0.2 rounded-full text-[#15803D] font-bold border border-[#15803D]/30">
+                                      <span className="text-[10px] font-mono bg-white px-1.5 py-0.2 rounded text-[#15803D] font-bold border border-[#15803D]/30">
                                         {skillObj.score}%
                                       </span>
                                     )}
@@ -756,12 +756,12 @@ export default function EmployerDashboardPage() {
 
                     {/* Expandable Candidate Evidence Synthesis */}
                     {activeAiCard === c.uid && (
-                      <div className="mt-6 pt-5 border-t border-[#E7E2DA] bg-[#FAF8F5] rounded-xl p-5 border border-[#E7E2DA]">
+                      <div className="mt-6 pt-5 border-t border-[#E7E2DA] bg-[#FAF8F5] rounded p-5 border border-[#E7E2DA]">
                         <div className="flex items-center justify-between mb-2">
                           <div className="flex items-center gap-2 text-[#1C1917] font-semibold text-[13px]">
                             <Sparkles className="h-4 w-4 text-[#064E3B]" /> Candidate Evidence Synthesis
                           </div>
-                          <span className="text-[10px] font-mono uppercase tracking-wider text-[#064E3B] bg-white px-2.5 py-0.5 rounded-full border border-[#064E3B]/20">
+                          <span className="text-[10px] font-mono uppercase tracking-wider text-[#064E3B] bg-white px-2.5 py-0.5 rounded border border-[#064E3B]/20">
                             Meritlane Verification Protocol
                           </span>
                         </div>

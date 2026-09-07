@@ -246,7 +246,7 @@ export default function EmployerShortlistPage() {
               <button
                 type="button"
                 onClick={() => setStageFilter("all")}
-                className={`p-3 rounded-xl border text-left transition-all ${
+                className={`p-3 rounded border text-left transition-all ${
                   stageFilter === "all"
                     ? "bg-[#0D0D0D] text-white border-[#0D0D0D] shadow-sm"
                     : "bg-white border-[#E5E5E5] text-[#0D0D0D] hover:border-[#D2D2D2]"
@@ -263,7 +263,7 @@ export default function EmployerShortlistPage() {
                     key={st.id}
                     type="button"
                     onClick={() => setStageFilter(isActive ? "all" : st.id)}
-                    className={`p-3 rounded-xl border text-left transition-all ${
+                    className={`p-3 rounded border text-left transition-all ${
                       isActive
                         ? "bg-[#0D0D0D] text-white border-[#0D0D0D] shadow-sm"
                         : "bg-white border-[#E5E5E5] text-[#0D0D0D] hover:border-[#D2D2D2]"
@@ -283,8 +283,8 @@ export default function EmployerShortlistPage() {
               <p className="text-[13px] font-sans">Loading shortlist...</p>
             </div>
           ) : candidates.length === 0 ? (
-            <div className="border border-[#E5E5E5] border-dashed rounded-2xl bg-white p-16 text-center shadow-sm">
-              <div className="h-12 w-12 rounded-2xl bg-[#F3F3F1] text-[#737373] flex items-center justify-center mx-auto mb-4">
+            <div className="border border-[#E5E5E5] border-dashed rounded bg-white p-16 text-center shadow-sm">
+              <div className="h-12 w-12 rounded bg-[#F3F3F1] text-[#737373] flex items-center justify-center mx-auto mb-4">
                 <BookMarked className="h-6 w-6" />
               </div>
               <h2 className="text-[20px] font-serif text-[#0D0D0D] mb-3">Your shortlist is empty</h2>
@@ -296,7 +296,7 @@ export default function EmployerShortlistPage() {
               </Link>
             </div>
           ) : filteredCandidates.length === 0 ? (
-            <div className="border border-[#E5E5E5] border-dashed rounded-2xl bg-white p-12 text-center">
+            <div className="border border-[#E5E5E5] border-dashed rounded bg-white p-12 text-center">
               <p className="text-[14px] text-[#737373] mb-4">No candidates currently in this pipeline stage.</p>
               <Button variant="outline" size="sm" onClick={() => setStageFilter("all")}>
                 View all candidates
@@ -314,11 +314,11 @@ export default function EmployerShortlistPage() {
                 return (
                   <div
                     key={c.uid}
-                    className="border border-[#E5E5E5] rounded-2xl bg-white p-4 sm:p-6 md:p-8 hover:shadow-[0_8px_30px_rgba(0,0,0,0.04)] transition-all duration-300"
+                    className="border border-[#E5E5E5] rounded bg-white p-4 sm:p-6 md:p-8 hover:shadow-[0_8px_30px_rgba(0,0,0,0.04)] transition-all duration-300"
                   >
                     <div className="flex flex-col md:flex-row md:items-start justify-between gap-5 sm:gap-6">
                       <div className="flex items-start gap-4 sm:gap-6">
-                        <div className="h-12 w-12 sm:h-16 sm:w-16 shrink-0 rounded-2xl bg-[#F3F3F1] border border-[#E5E5E5] flex items-center justify-center text-[#0D0D0D] font-serif text-[20px] sm:text-[26px]">
+                        <div className="h-12 w-12 sm:h-16 sm:w-16 shrink-0 rounded bg-[#F3F3F1] border border-[#E5E5E5] flex items-center justify-center text-[#0D0D0D] font-serif text-[20px] sm:text-[26px]">
                           {c.name ? c.name.charAt(0).toUpperCase() : "C"}
                         </div>
                         <div>
@@ -327,7 +327,7 @@ export default function EmployerShortlistPage() {
                               {c.name || "Anonymous Candidate"}
                             </h3>
                             <span
-                              className={`text-[11px] font-mono font-medium px-2.5 py-0.5 rounded-full border ${stageObj.color}`}
+                              className={`text-[11px] font-mono font-medium px-2.5 py-0.5 rounded border ${stageObj.color}`}
                             >
                               {stageObj.label}
                             </span>
@@ -346,7 +346,7 @@ export default function EmployerShortlistPage() {
                               {verifiedSkillsList.map((skill, idx) => (
                                 <div
                                   key={idx}
-                                  className="flex items-center gap-1.5 px-3 py-1 rounded-full border border-[#15803D]/20 bg-[#15803D]/5 text-[#15803D] text-[12px] font-medium"
+                                  className="flex items-center gap-1.5 px-3 py-1 rounded border border-[#15803D]/20 bg-[#15803D]/5 text-[#15803D] text-[12px] font-medium"
                                 >
                                   <CheckCircle2 className="h-3 w-3" />
                                   {skill}
@@ -365,7 +365,7 @@ export default function EmployerShortlistPage() {
                           <select
                             value={currentStage}
                             onChange={(e) => updateStage(c.uid, e.target.value)}
-                            className="text-[12px] font-medium bg-[#FAFAFA] border border-[#E5E5E5] rounded-lg px-3 py-1.5 text-[#0D0D0D] outline-none cursor-pointer hover:border-[#0D0D0D] transition-colors"
+                            className="text-[12px] font-medium bg-[#FAFAFA] border border-[#E5E5E5] rounded px-3 py-1.5 text-[#0D0D0D] outline-none cursor-pointer hover:border-[#0D0D0D] transition-colors"
                           >
                             {PIPELINE_STAGES.map((s) => (
                               <option key={s.id} value={s.id}>
@@ -418,12 +418,12 @@ export default function EmployerShortlistPage() {
 
                     {/* Expandable Evidence Synthesis */}
                     {activeAiCard === c.uid && (
-                      <div className="mt-6 pt-5 border-t border-[#E7E2DA] bg-[#FAF8F5] rounded-xl p-5 border border-[#E7E2DA]">
+                      <div className="mt-6 pt-5 border-t border-[#E7E2DA] bg-[#FAF8F5] rounded p-5 border border-[#E7E2DA]">
                         <div className="flex items-center justify-between mb-2">
                           <div className="flex items-center gap-2 text-[#1C1917] font-semibold text-[13px]">
                             <Sparkles className="h-4 w-4 text-[#064E3B]" /> Candidate Evidence Synthesis
                           </div>
-                          <span className="text-[10px] font-mono uppercase tracking-wider text-[#064E3B] bg-white px-2.5 py-0.5 rounded-full border border-[#064E3B]/20">
+                          <span className="text-[10px] font-mono uppercase tracking-wider text-[#064E3B] bg-white px-2.5 py-0.5 rounded border border-[#064E3B]/20">
                             Meritlane Verification Protocol
                           </span>
                         </div>

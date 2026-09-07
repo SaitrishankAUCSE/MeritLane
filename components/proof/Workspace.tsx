@@ -5,7 +5,7 @@ export function Workspace({ children, className }: { children: React.ReactNode; 
   return (
     <div className={cn("relative min-h-[calc(100vh-56px)] px-5 py-10 sm:px-8 lg:px-16", className)}>
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
-        <div className="absolute top-[-12%] right-[-8%] h-[42vw] w-[42vw] rounded-full bg-[radial-gradient(circle,rgba(168,162,255,0.07)_0%,transparent_70%)]" />
+        <div className="absolute top-[-12%] right-[-8%] h-[42vw] w-[42vw] rounded bg-[radial-gradient(circle,rgba(168,162,255,0.07)_0%,transparent_70%)]" />
       </div>
       <div className="relative mx-auto max-w-[1600px]">{children}</div>
     </div>

@@ -253,7 +253,7 @@ export function AuthForm({ mode: initialMode }: AuthFormProps) {
                 </div>
                 
                 {error && (
-                  <div className="p-3 bg-red-50 border border-red-100 text-red-600 text-sm rounded-lg text-center">
+                  <div className="p-3 bg-red-50 border border-red-100 text-red-600 text-sm rounded text-center">
                     {error}
                   </div>
                 )}
@@ -364,7 +364,7 @@ export function AuthForm({ mode: initialMode }: AuthFormProps) {
                         <label className={`flex-1 relative border rounded p-2 cursor-pointer transition-all ${selectedRole === 'candidate' ? 'border-[#1C1917] bg-[#FAF8F5]' : 'border-[#E7E2DA] hover:border-[#1C1917]'}`}>
                           <input type="radio" name="role" value="candidate" checked={selectedRole === 'candidate'} onChange={() => setSelectedRole('candidate')} className="sr-only" />
                           <div className="flex items-center gap-2">
-                            <div className={`w-3.5 h-3.5 rounded-full border flex items-center justify-center ${selectedRole === 'candidate' ? 'border-[#1C1917]' : 'border-[#D5CEBF]'}`}>
+                            <div className={`w-3.5 h-3.5 rounded border flex items-center justify-center ${selectedRole === 'candidate' ? 'border-[#1C1917]' : 'border-[#D5CEBF]'}`}>
                               {selectedRole === 'candidate' && <div className="w-1.5 h-1.5 rounded-full bg-[#1C1917]" />}
                             </div>
                             <span className="text-xs font-sans font-medium text-[#1C1917]">Candidate</span>
@@ -373,7 +373,7 @@ export function AuthForm({ mode: initialMode }: AuthFormProps) {
                         <label className={`flex-1 relative border rounded p-2 cursor-pointer transition-all ${selectedRole === 'employer' ? 'border-[#1C1917] bg-[#FAF8F5]' : 'border-[#E7E2DA] hover:border-[#1C1917]'}`}>
                           <input type="radio" name="role" value="employer" checked={selectedRole === 'employer'} onChange={() => setSelectedRole('employer')} className="sr-only" />
                           <div className="flex items-center gap-2">
-                            <div className={`w-3.5 h-3.5 rounded-full border flex items-center justify-center ${selectedRole === 'employer' ? 'border-[#1C1917]' : 'border-[#D5CEBF]'}`}>
+                            <div className={`w-3.5 h-3.5 rounded border flex items-center justify-center ${selectedRole === 'employer' ? 'border-[#1C1917]' : 'border-[#D5CEBF]'}`}>
                               {selectedRole === 'employer' && <div className="w-1.5 h-1.5 rounded-full bg-[#1C1917]" />}
                             </div>
                             <span className="text-xs font-sans font-medium text-[#1C1917]">Employer</span>

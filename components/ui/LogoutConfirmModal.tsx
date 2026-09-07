@@ -81,7 +81,7 @@ export function LogoutConfirmModal({ isOpen, onConfirm, onCancel }: LogoutConfir
               <button
                 type="button"
                 onClick={onCancel}
-                className="absolute top-5 right-5 p-1.5 rounded-full text-[#737373] hover:text-[#0D0D0D] hover:bg-[#F3F3F1] transition-colors"
+                className="absolute top-5 right-5 p-1.5 rounded text-[#737373] hover:text-[#0D0D0D] hover:bg-[#F3F3F1] transition-colors"
                 aria-label="Close modal"
               >
                 <X className="h-4 w-4" />
@@ -89,7 +89,7 @@ export function LogoutConfirmModal({ isOpen, onConfirm, onCancel }: LogoutConfir
             )}
 
             {/* Icon Banner */}
-            <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-red-50 text-red-600 border border-red-100 shadow-sm">
+            <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded bg-red-50 text-red-600 border border-red-100 shadow-sm">
               <LogOut className="h-6 w-6 text-red-600" />
             </div>
 
@@ -109,7 +109,7 @@ export function LogoutConfirmModal({ isOpen, onConfirm, onCancel }: LogoutConfir
                 type="button"
                 onClick={onCancel}
                 disabled={isLoggingOut}
-                className="w-full h-11 px-4 rounded-xl border border-[#E5E5E5] bg-white text-[#0D0D0D] font-sans font-semibold text-[14px] hover:bg-[#F5F5F5] active:scale-[0.98] transition-all disabled:opacity-50"
+                className="w-full h-11 px-4 rounded border border-[#E5E5E5] bg-white text-[#0D0D0D] font-sans font-semibold text-[14px] hover:bg-[#F5F5F5] active:scale-[0.98] transition-all disabled:opacity-50"
               >
                 Cancel
               </button>
@@ -118,7 +118,7 @@ export function LogoutConfirmModal({ isOpen, onConfirm, onCancel }: LogoutConfir
                 type="button"
                 onClick={handleConfirm}
                 disabled={isLoggingOut}
-                className="w-full h-11 px-4 rounded-xl bg-[#B42318] hover:bg-[#912018] text-white font-sans font-semibold text-[14px] shadow-sm active:scale-[0.98] transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+                className="w-full h-11 px-4 rounded bg-[#B42318] hover:bg-[#912018] text-white font-sans font-semibold text-[14px] shadow-sm active:scale-[0.98] transition-all flex items-center justify-center gap-2 disabled:opacity-50"
               >
                 {isLoggingOut ? (
                   <>

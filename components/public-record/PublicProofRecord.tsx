@@ -49,7 +49,7 @@ export function PublicProofRecord({ id, candidate, user, hideHeader = false }: P
           <div className="flex items-center gap-4">
             <button
               onClick={handleCopyLink}
-              className="flex items-center gap-1.5 text-[12px] font-medium text-[#78716C] hover:text-[#1C1917] px-3 py-1.5 rounded-lg border border-[#E7E2DA] hover:border-[#1C1917] transition-all"
+              className="flex items-center gap-1.5 text-[12px] font-medium text-[#78716C] hover:text-[#1C1917] px-3 py-1.5 rounded border border-[#E7E2DA] hover:border-[#1C1917] transition-all"
             >
               {copied ? <Check className="h-3.5 w-3.5 text-[#16A34A]" /> : <Copy className="h-3.5 w-3.5" />}
               {copied ? "Link copied" : "Copy public link"}
@@ -64,7 +64,7 @@ export function PublicProofRecord({ id, candidate, user, hideHeader = false }: P
       {/* Hero Section */}
       <section className="px-4 sm:px-8 lg:px-16 pt-12 sm:pt-16 pb-10 sm:pb-14 border-b border-[#E7E2DA] bg-white">
         <div className="flex flex-col md:flex-row gap-6 sm:gap-10 items-start max-w-[1200px] mx-auto">
-          <div className="h-[96px] w-[96px] sm:h-[120px] sm:w-[120px] shrink-0 rounded-2xl border border-[#E7E2DA] overflow-hidden bg-[#F8F6F3]">
+          <div className="h-[96px] w-[96px] sm:h-[120px] sm:w-[120px] shrink-0 rounded border border-[#E7E2DA] overflow-hidden bg-[#F8F6F3]">
             {avatarUrl ? <img src={avatarUrl} alt={name} className="h-full w-full object-cover grayscale opacity-90" /> : (
               <div className="h-full w-full flex items-center justify-center text-3xl font-serif text-[#78716C]">
                 {name.charAt(0)}
@@ -105,9 +105,9 @@ export function PublicProofRecord({ id, candidate, user, hideHeader = false }: P
           
           {/* Left: Assertion metadata & Education (4 cols) */}
           <aside className="lg:col-span-4 space-y-6">
-            <div className="p-5 bg-[#FAF8F5] border border-[#E7E2DA] rounded-lg">
-              <div className="inline-flex items-center gap-2 px-3 py-1 bg-[#064E3B]/10 backdrop-blur-md border border-[#064E3B]/20 text-[#064E3B] text-[11px] font-mono font-medium rounded-full mb-4 shadow-[0_2px_8px_rgba(6,78,59,0.08)]">
-                <span className="h-1.5 w-1.5 rounded-full bg-[#064E3B]" />
+            <div className="p-5 bg-[#FAF8F5] border border-[#E7E2DA] rounded">
+              <div className="inline-flex items-center gap-2 px-3 py-1 bg-[#064E3B]/10 backdrop-blur-md border border-[#064E3B]/20 text-[#064E3B] text-[11px] font-mono font-medium rounded mb-4 shadow-[0_2px_8px_rgba(6,78,59,0.08)]">
+                <span className="h-1.5 w-1.5 rounded bg-[#064E3B]" />
                 <span>ASSERTION METADATA</span>
               </div>
               
@@ -135,9 +135,9 @@ export function PublicProofRecord({ id, candidate, user, hideHeader = false }: P
             </div>
 
             {candidate.college && (
-              <div className="p-5 bg-[#FAF8F5] border border-[#E7E2DA] rounded-lg space-y-2">
-                <div className="inline-flex items-center gap-2 px-3 py-1 bg-[#064E3B]/10 backdrop-blur-md border border-[#064E3B]/20 text-[#064E3B] text-[11px] font-mono font-medium rounded-full mb-2 shadow-[0_2px_8px_rgba(6,78,59,0.08)]">
-                  <span className="h-1.5 w-1.5 rounded-full bg-[#064E3B]" />
+              <div className="p-5 bg-[#FAF8F5] border border-[#E7E2DA] rounded space-y-2">
+                <div className="inline-flex items-center gap-2 px-3 py-1 bg-[#064E3B]/10 backdrop-blur-md border border-[#064E3B]/20 text-[#064E3B] text-[11px] font-mono font-medium rounded mb-2 shadow-[0_2px_8px_rgba(6,78,59,0.08)]">
+                  <span className="h-1.5 w-1.5 rounded bg-[#064E3B]" />
                   <span>ACADEMIC RECORD</span>
                 </div>
                 <div className="text-[14px] font-serif text-[#1C1917] font-medium">{candidate.college}</div>
@@ -147,8 +147,8 @@ export function PublicProofRecord({ id, candidate, user, hideHeader = false }: P
             )}
 
             {candidate.githubEvidence && (
-              <div className="p-5 bg-[#FAF8F5] border border-[#E7E2DA] rounded-lg space-y-4">
-                <div className="inline-flex items-center gap-2 px-3 py-1 bg-[#064E3B]/10 backdrop-blur-md border border-[#064E3B]/20 text-[#064E3B] text-[11px] font-mono font-medium rounded-full shadow-[0_2px_8px_rgba(6,78,59,0.08)]">
+              <div className="p-5 bg-[#FAF8F5] border border-[#E7E2DA] rounded space-y-4">
+                <div className="inline-flex items-center gap-2 px-3 py-1 bg-[#064E3B]/10 backdrop-blur-md border border-[#064E3B]/20 text-[#064E3B] text-[11px] font-mono font-medium rounded shadow-[0_2px_8px_rgba(6,78,59,0.08)]">
                   <Shield className="h-3 w-3 text-[#064E3B]" />
                   <span>GITHUB AUDIT</span>
                 </div>
@@ -177,7 +177,7 @@ export function PublicProofRecord({ id, candidate, user, hideHeader = false }: P
           {/* Center: Audited Proof Ledger (8 cols) */}
           <article className="lg:col-span-8 space-y-8">
             <div className="flex items-center justify-between border-b border-[#E7E2DA] pb-4">
-              <div className="inline-flex items-center gap-2.5 px-3.5 py-1.5 bg-[#064E3B]/10 backdrop-blur-md border border-[#064E3B]/25 text-[#064E3B] text-[13px] font-serif font-medium rounded-full shadow-[0_2px_10px_rgba(6,78,59,0.1)]">
+              <div className="inline-flex items-center gap-2.5 px-3.5 py-1.5 bg-[#064E3B]/10 backdrop-blur-md border border-[#064E3B]/25 text-[#064E3B] text-[13px] font-serif font-medium rounded shadow-[0_2px_10px_rgba(6,78,59,0.1)]">
                 <span className="h-2 w-2 rounded-full bg-[#064E3B]" />
                 <span>Audited Evidence Register</span>
               </div>
@@ -193,7 +193,7 @@ export function PublicProofRecord({ id, candidate, user, hideHeader = false }: P
                 const score = candidate.verifiedSkills?.[skill]?.score;
 
                 return (
-                  <div key={index} className="p-5 bg-[#FAF8F5] border border-[#E7E2DA] rounded-lg">
+                  <div key={index} className="p-5 bg-[#FAF8F5] border border-[#E7E2DA] rounded">
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
                       <div className="flex items-center gap-2.5">
                         <span className="h-2 w-2 rounded-full bg-[#064E3B]" />
@@ -249,8 +249,8 @@ export function PublicProofRecord({ id, candidate, user, hideHeader = false }: P
             </div>
             
             {/* Standard of Technical Verification Box */}
-            <div className="p-5 bg-[#FAF8F5] border border-[#E7E2DA] rounded-lg">
-              <div className="inline-flex items-center gap-2 px-3 py-1 bg-[#064E3B]/10 backdrop-blur-md border border-[#064E3B]/20 text-[#064E3B] text-[11px] font-mono font-medium rounded-full mb-3 shadow-[0_2px_8px_rgba(6,78,59,0.08)]">
+            <div className="p-5 bg-[#FAF8F5] border border-[#E7E2DA] rounded">
+              <div className="inline-flex items-center gap-2 px-3 py-1 bg-[#064E3B]/10 backdrop-blur-md border border-[#064E3B]/20 text-[#064E3B] text-[11px] font-mono font-medium rounded mb-3 shadow-[0_2px_8px_rgba(6,78,59,0.08)]">
                 <Shield className="h-3 w-3 text-[#064E3B]" />
                 <span>STANDARD OF TECHNICAL VERIFICATION</span>
               </div>
