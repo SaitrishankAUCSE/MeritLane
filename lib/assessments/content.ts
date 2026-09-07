@@ -97,12 +97,15 @@ std::unordered_map<std::string, double> processTransactions(const std::string& c
     name: "SQL",
     monacoLang: "sql",
     template: `-- Write your query below
-SELECT user_id, SUM(amount) AS total_spent
+-- Problem: Top 3 Spenders in 2024
+-- Table: orders (id, user_id, amount, status, created_at)
+-- Filter: status = 'COMPLETED'
+-- Output: user_id, total_spent (ordered by total_spent DESC, LIMIT 3)
+
+SELECT
+    -- Fill in your SQL query here
 FROM orders
 WHERE status = 'COMPLETED'
-GROUP BY user_id
-ORDER BY total_spent DESC
-LIMIT 3;
 `
   }
 ];
@@ -1289,12 +1292,17 @@ public class Solution {
         language: "sql",
         instructions: "Write an SQL query to find the top 3 users who spent the most money in '2024'. Table: `orders (id, user_id, amount, status, created_at)`.\nRequirements: Only consider status = 'COMPLETED'. Order by total spent descending.",
         initialCode: `-- Write your SQL query here
-SELECT user_id, SUM(amount) AS total_spent
+-- Table schema: orders (id, user_id, amount, status, created_at)
+-- Requirements:
+-- 1. Filter for orders where status = 'COMPLETED'
+-- 2. Sum total amount spent per user in year 2024
+-- 3. Return user_id, total_spent
+-- 4. Order by total_spent descending and return the top 3 spenders
+
+SELECT
+    -- Write your query logic here
 FROM orders
 WHERE status = 'COMPLETED'
-GROUP BY user_id
-ORDER BY total_spent DESC
-LIMIT 3;
 `,
         supportedLanguages: COMMON_SUPPORTED_LANGUAGES
       }
