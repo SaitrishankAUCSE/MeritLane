@@ -41,10 +41,9 @@ export const COMMON_SUPPORTED_LANGUAGES: SupportedLanguage[] = [
     id: "python",
     name: "Python 3",
     monacoLang: "python",
-    template: `def process_transactions(csv_string):
-    # Parse CSV string, filter status == 'COMPLETED', sum total by user_id
-    totals = {}
-    return totals
+    template: `def process_transactions(csv_string: str) -> dict:
+    # Write your solution here
+    pass
 `
   },
   {
@@ -492,12 +491,18 @@ export default function Counter() {
         title: "Transaction Reconciliation",
         language: "python",
         instructions: "Write a function `process_transactions(csv_string)` that parses a CSV string.\nColumns: `tx_id, user_id, amount, status`\n\nRequirements:\n1. Filter for rows where status is 'COMPLETED'.\n2. Ignore empty or malformed rows.\n3. Return a dictionary of `{ user_id: total_amount }` with amounts summed as floats.",
-        initialCode: `def process_transactions(csv_string):
-    # Parse CSV, filter status == 'COMPLETED', sum by user_id
-    totals = {}
-    return totals
+        initialCode: `def process_transactions(csv_string: str) -> dict:
+    """
+    Process CSV transactions, filter COMPLETED records, and sum by user_id.
+    :param csv_string: raw multi-line CSV string
+    :return: dict of {user_id: total_amount}
+    """
+    # Write your solution here
+    pass
 `,
-        supportedLanguages: COMMON_SUPPORTED_LANGUAGES
+        supportedLanguages: [
+          { id: "python", name: "Python 3", monacoLang: "python" }
+        ]
       }
     ]
   },

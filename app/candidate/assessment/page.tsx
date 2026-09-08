@@ -360,11 +360,16 @@ function AssessmentContentWrapper() {
         const storageKey = user ? `ml_draft_${skillParam.toLowerCase().replace(/\s+/g, "_")}_${user.uid}` : null;
         let restoredDraft: any = null;
         if (storageKey) {
-          try {
-            const raw = sessionStorage.getItem(storageKey);
-            if (raw) restoredDraft = JSON.parse(raw);
-          } catch {
-            /* ignore invalid json */
+          // If starting a fresh assessment attempt, clear previous session drafts
+          if (data.message === "Assessment started") {
+            try { sessionStorage.removeItem(storageKey); } catch {}
+          } else {
+            try {
+              const raw = sessionStorage.getItem(storageKey);
+              if (raw) restoredDraft = JSON.parse(raw);
+            } catch {
+              /* ignore invalid json */
+            }
           }
         }
 
@@ -409,7 +414,9 @@ function AssessmentContentWrapper() {
           // Also set legacy `code` to easy task for initial editor display
           setCode(restoredDraft?.codeEasy || easyTask?.initialCode || "");
           
-          if (restoredDraft?.selectedLanguage) {
+          if (skillParam.toLowerCase().includes("python")) {
+            setSelectedLanguage("python");
+          } else if (restoredDraft?.selectedLanguage) {
             setSelectedLanguage(restoredDraft.selectedLanguage);
           } else if (easyTask?.supportedLanguages && easyTask.supportedLanguages.length > 0) {
             setSelectedLanguage(easyTask.supportedLanguages[0].id);
@@ -2097,7 +2104,7 @@ function AssessmentContentWrapper() {
                     <ShieldAlert className="h-3.5 w-3.5" /> Examination Rule
                   </h4>
                   <p className="text-[12px] leading-relaxed text-[#78716C]">
-                    Complete the solution implementation. You can select your preferred programming language and compile against public test cases before submitting for authoritative evaluation.
+                    Complete the solution implementation in the required language and compile against public test cases before submitting for authoritative evaluation.
                   </p>
                 </div>
               </div>
@@ -2201,22 +2208,54 @@ function AssessmentContentWrapper() {
                       <option value={15}>15px</option>
                     </select>
 
-                    {/* Language Selector */}
-                    <select
-                      value={selectedLanguage}
-                      onChange={(e) => handleLanguageChange(e.target.value)}
-                      className={`text-[11px] font-mono font-medium border rounded px-2 py-1 outline-none ${
-                        editorTheme === "dark"
-                          ? "bg-[#21262D] border-[#30363D] text-[#58A6FF]"
-                          : "bg-white border-[#E7E2DA] text-[#1C1917]"
-                      }`}
-                    >
-                      {(content.codingTasks?.[activeCodingTaskIdx]?.supportedLanguages || content.coding?.supportedLanguages || COMMON_SUPPORTED_LANGUAGES).map((lang) => (
-                        <option key={lang.id} value={lang.id}>
-                          {lang.name}
-                        </option>
-                      ))}
-                    </select>
+                    {/* Language Selector / Badge */}
+                    {(() => {
+                      const taskLangs = content.codingTasks?.[activeCodingTaskIdx]?.supportedLanguages || content.coding?.supportedLanguages;
+                      const isLanguageLocked =
+                        skillParam.toLowerCase().includes("python") ||
+                        (taskLangs && taskLangs.length <= 1);
+                      const availableLangs =
+                        taskLangs && taskLangs.length > 0
+                          ? taskLangs
+                          : (isLanguageLocked ? [{ id: "python", name: "Python 3" }] : COMMON_SUPPORTED_LANGUAGES);
+
+                      if (isLanguageLocked) {
+                        const currentName =
+                          availableLangs.find((l) => l.id === selectedLanguage)?.name ||
+                          (selectedLanguage === "python" ? "Python 3" : selectedLanguage);
+                        return (
+                          <div
+                            className={`text-[11px] font-mono font-semibold border rounded px-2.5 py-1 flex items-center gap-1.5 select-none ${
+                              editorTheme === "dark"
+                                ? "bg-[#21262D] border-[#30363D] text-[#58A6FF]"
+                                : "bg-[#F5F5F4] border-[#E7E2DA] text-[#1C1917]"
+                            }`}
+                            title={`Language locked to ${currentName} for this assessment`}
+                          >
+                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block" />
+                            <span>{currentName}</span>
+                          </div>
+                        );
+                      }
+
+                      return (
+                        <select
+                          value={selectedLanguage}
+                          onChange={(e) => handleLanguageChange(e.target.value)}
+                          className={`text-[11px] font-mono font-medium border rounded px-2 py-1 outline-none ${
+                            editorTheme === "dark"
+                              ? "bg-[#21262D] border-[#30363D] text-[#58A6FF]"
+                              : "bg-white border-[#E7E2DA] text-[#1C1917]"
+                          }`}
+                        >
+                          {availableLangs.map((lang) => (
+                            <option key={lang.id} value={lang.id}>
+                              {lang.name}
+                            </option>
+                          ))}
+                        </select>
+                      );
+                    })()}
                   </div>
                 </div>
 

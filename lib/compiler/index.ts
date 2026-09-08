@@ -276,7 +276,9 @@ print(json.dumps({
     let proc: any = null;
 
     try {
-      proc = spawn("python", ["-c", runner]);
+      proc = spawn("python", ["-"]);
+      proc.stdin.write(runner);
+      proc.stdin.end();
     } catch {
       return resolve(null);
     }
@@ -490,15 +492,51 @@ print("__RESULT_JSON__" + json.dumps({"stdout": user_stdout, "cases": cases}))
   // Pure AST fallback if all online/local runners are offline
   const hasDef = /def\s+[a-zA-Z0-9_]+\s*\(/.test(code);
   const hasReturn = /return\s+/.test(code);
-  const hasLogic = code.length > 50 && !code.includes("return {}");
-  const passed = hasDef && hasReturn && hasLogic;
+
+  // Strip comments and docstrings to inspect substantive logic
+  const strippedCode = code
+    .replace(/#.*$/gm, "")
+    .replace(/"""[\s\S]*?"""/g, "")
+    .replace(/'''[\s\S]*?'''/g, "")
+    .trim();
+
+  const isStarterOnly =
+    strippedCode.length < 30 ||
+    /^\s*def\s+[a-zA-Z0-9_]+\s*\([^)]*\)\s*(->\s*[^:]+)?:\s*pass\s*$/.test(strippedCode) ||
+    /^\s*def\s+[a-zA-Z0-9_]+\s*\([^)]*\)\s*(->\s*[^:]+)?:\s*return\s*({}|\[\]|None|0|""|'')?\s*$/.test(strippedCode);
+
+  let passed = false;
+
+  if (hasDef && !isStarterOnly) {
+    if (code.includes("process_transactions")) {
+      const hasLoop = /for\s+|while\s+/.test(strippedCode);
+      const hasSplit = /\.split\(|csv\.reader/.test(strippedCode);
+      const hasCompletedFilter = /COMPLETED/.test(strippedCode);
+      const hasFloatConvert = /float\(|int\(/.test(strippedCode);
+      const hasDictStore = /\[\s*.*?\s*\]\s*=|\.get\(/.test(strippedCode);
+      passed = hasDef && hasReturn && hasLoop && hasSplit && hasCompletedFilter && hasFloatConvert && hasDictStore;
+    } else if (code.includes("word_frequency")) {
+      const hasSplit = /\.split\(/.test(strippedCode);
+      const hasLower = /\.lower\(/.test(strippedCode);
+      const hasDictStore = /\[\s*.*?\s*\]\s*=|\.get\(/.test(strippedCode);
+      passed = hasDef && hasReturn && hasSplit && hasLower && hasDictStore;
+    } else if (code.includes("calculate_aov")) {
+      const hasLoop = /for\s+|while\s+/.test(strippedCode);
+      const hasSplit = /\.split\(/.test(strippedCode);
+      const hasSuccessFilter = /SUCCESS/.test(strippedCode);
+      passed = hasDef && hasReturn && hasLoop && hasSplit && hasSuccessFilter;
+    } else {
+      const hasControlFlow = /for\s+|while\s+|if\s+/.test(strippedCode);
+      passed = hasDef && hasReturn && hasControlFlow && strippedCode.length > 60;
+    }
+  }
 
   const count = isPublicTest ? 5 : 50;
   const mockCases: TestCaseResult[] = Array.from({ length: count }, (_, i) => ({
     name: `Test Case ${i + 1}: ${i < 5 ? "Public Assertion" : "Exhaustive Integrity Benchmark"}`,
     input: `csv_stream_record_${i + 1}`,
     expected: "Normalized aggregation result",
-    actual: passed ? "Validated against AST schema" : "Syntax or logical invariant failed",
+    actual: passed ? "Validated against AST schema" : "Incomplete solution or syntax invariant failed",
     passed,
   }));
 
@@ -1278,7 +1316,9 @@ print("__RESULT_JSON__" + json.dumps({"compileSuccess": True, "error": None, "st
   const localResult = await new Promise<ExecutionResult | null>((resolve) => {
     let proc: ReturnType<typeof spawn> | null = null;
     try {
-      proc = spawn("python", ["-c", runner]);
+      proc = spawn("python", ["-"]);
+      proc.stdin?.write(runner);
+      proc.stdin?.end();
     } catch {
       return resolve(null);
     }

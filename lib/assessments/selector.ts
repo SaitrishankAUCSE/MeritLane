@@ -145,13 +145,28 @@ export function sanitiseCodingQuestion(q: CodingQuestion): {
   supportedLanguages: Array<{ id: string; name: string }>;
   taskLabel: string;
 } {
+  const defaultLangs: Array<{ id: string; name: string }> = [];
+  if (q.starterCode?.python) defaultLangs.push({ id: "python", name: "Python 3" });
+  if (q.starterCode?.javascript) defaultLangs.push({ id: "javascript", name: "JavaScript" });
+  if (q.starterCode?.typescript) defaultLangs.push({ id: "typescript", name: "TypeScript" });
+  if (q.starterCode?.java) defaultLangs.push({ id: "java", name: "Java" });
+  if (q.starterCode?.cpp) defaultLangs.push({ id: "cpp", name: "C++" });
+  if (q.starterCode?.sql) defaultLangs.push({ id: "sql", name: "SQL" });
+
+  const resolvedSupportedLanguages =
+    q.supportedLanguages && q.supportedLanguages.length > 0
+      ? q.supportedLanguages
+      : defaultLangs.length > 0
+      ? defaultLangs
+      : [{ id: "python", name: "Python 3" }];
+
   return {
     id: q.id,
     difficulty: q.difficulty,
     title: q.title,
     instructions: q.instructions,
     initialCode: q.starterCode.python || q.starterCode.javascript || q.starterCode.java || q.starterCode.cpp || q.starterCode.typescript || q.starterCode.sql || "",
-    supportedLanguages: q.supportedLanguages || [{ id: "javascript", name: "JavaScript" }],
+    supportedLanguages: resolvedSupportedLanguages,
     taskLabel: q.difficulty === "easy" ? "Task 1 — Easy" : "Task 2 — Medium",
   };
 }

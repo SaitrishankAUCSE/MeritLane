@@ -154,11 +154,11 @@ Write a function **process_transactions(csv_string: str) -> dict** that:
     :param csv_string: raw multi-line CSV string
     :return: dict of {user_id: total_amount (float)}
     """
-    totals = {}
-    # Your implementation here
-    return totals
+    # Write your solution here
+    pass
 `,
     },
+    supportedLanguages: [{ id: "python", name: "Python 3" }],
     publicTests: [
       { name: "Test 1: Happy Path", inputArgs: ["tx1,alice,10.5,COMPLETED\ntx2,bob,5.0,COMPLETED\ntx3,alice,4.5,COMPLETED"], expected: { alice: 15.0, bob: 5.0 } },
       { name: "Test 2: Status Filtering", inputArgs: ["t1,u1,10,COMPLETED\nt2,u2,20,FAILED\nt3,u1,5,PENDING\nt4,u3,15,REFUNDED"], expected: { u1: 10.0 } },
@@ -213,11 +213,11 @@ Write a function **process_transactions(csv_string: str) -> dict** that:
     :param text: input text string
     :return: dict of {word: count}
     """
-    freq = {}
-    # Your implementation here
-    return freq
+    # Write your solution here
+    pass
 `,
     },
+    supportedLanguages: [{ id: "python", name: "Python 3" }],
     publicTests: [
       { name: "Test 1: Basic repetition", inputArgs: ["hello world hello"], expected: { hello: 2, world: 1 } },
       { name: "Test 2: Case insensitive", inputArgs: ["Hello HELLO hello"], expected: { hello: 3 } },
@@ -270,11 +270,11 @@ Write a function **process_transactions(csv_string: str) -> dict** that:
     :param nested: a list that may contain other lists
     :return: flat list of all non-list elements in order
     """
-    result = []
-    # Your implementation here
-    return result
+    # Write your solution here
+    pass
 `,
     },
+    supportedLanguages: [{ id: "python", name: "Python 3" }],
     publicTests: [
       { name: "Test 1: Two-level nesting", inputArgs: [[[1, 2], [3, 4]]], expected: [1, 2, 3, 4] },
       { name: "Test 2: Deep nesting", inputArgs: [[[1, [2, [3, [4]]]]]], expected: [1, 2, 3, 4] },
@@ -332,11 +332,11 @@ Write a function **process_transactions(csv_string: str) -> dict** that:
     :param buzz_div: Buzz divisor
     :return: list of strings
     """
-    result = []
-    # Your implementation here
-    return result
+    # Write your solution here
+    pass
 `,
     },
+    supportedLanguages: [{ id: "python", name: "Python 3" }],
     publicTests: [
       { name: "Test 1: Classic (3,5)", inputArgs: [15, 3, 5], expected: ["1","2","Fizz","4","Buzz","Fizz","7","8","Fizz","Buzz","11","Fizz","13","14","FizzBuzz"] },
       { name: "Test 2: fizz=2 buzz=3 n=4", inputArgs: [4, 2, 3], expected: ["1","Fizz","Buzz","Fizz"] },
@@ -384,10 +384,11 @@ Write a function **process_transactions(csv_string: str) -> dict** that:
     :param k: number of positions to rotate right
     :return: new rotated list (input unchanged)
     """
-    # Your implementation here
-    return []
+    # Write your solution here
+    pass
 `,
     },
+    supportedLanguages: [{ id: "python", name: "Python 3" }],
     publicTests: [
       { name: "Test 1: Standard k=2", inputArgs: [[1,2,3,4,5], 2], expected: [4,5,1,2,3] },
       { name: "Test 2: Full rotation (k=len)", inputArgs: [[1,2,3], 3], expected: [1,2,3] },
@@ -449,6 +450,7 @@ Write a function **calculate_aov(csv_string: str) -> dict** that:
     pass
 `,
     },
+    supportedLanguages: [{ id: "python", name: "Python 3" }],
     publicTests: [
       { name: "Test 1: Standard AOV", inputArgs: ["o1,alice,10.0,SUCCESS\no2,bob,20.0,SUCCESS\no3,alice,30.0,SUCCESS"], expected: { alice: 20.0, bob: 20.0 } },
       { name: "Test 2: Mixed statuses", inputArgs: ["o1,alice,10,SUCCESS\no2,bob,20,REFUNDED\no3,alice,5,FAILED"], expected: { alice: 10.0 } },
@@ -501,6 +503,7 @@ Write a function **calculate_aov(csv_string: str) -> dict** that:
     pass
 `,
     },
+    supportedLanguages: [{ id: "python", name: "Python 3" }],
     publicTests: [
       { name: "Test 1: Standard 5-point range", inputArgs: [[10.0, 20.0, 30.0, 40.0, 50.0]], expected: [0.0, 0.25, 0.5, 0.75, 1.0] },
       { name: "Test 2: Negative to positive", inputArgs: [[-10.0, 0.0, 10.0]], expected: [0.0, 0.5, 1.0] },
@@ -554,6 +557,7 @@ Write a function **calculate_aov(csv_string: str) -> dict** that:
     pass
 `,
     },
+    supportedLanguages: [{ id: "python", name: "Python 3" }],
     publicTests: [
       { name: "Test 1: Classic example", inputArgs: [[1,1,1,2,2,3], 2], expected: [1, 2] },
       { name: "Test 2: Single element k=1", inputArgs: [[4], 1], expected: [4] },
@@ -605,6 +609,7 @@ Write a function **calculate_aov(csv_string: str) -> dict** that:
     pass
 `,
     },
+    supportedLanguages: [{ id: "python", name: "Python 3" }],
     publicTests: [
       { name: "Test 1: Standard overlapping", inputArgs: [[[1,3],[2,6],[8,10],[15,18]]], expected: [[1,6],[8,10],[15,18]] },
       { name: "Test 2: Adjacent (touching) merges", inputArgs: [[[1,4],[4,5]]], expected: [[1,5]] },
@@ -660,6 +665,7 @@ Your solution should run in **O(n)** time.
     pass
 `,
     },
+    supportedLanguages: [{ id: "python", name: "Python 3" }],
     publicTests: [
       { name: "Test 1: Classic example", inputArgs: [[100, 4, 200, 1, 3, 2]], expected: 4 },
       { name: "Test 2: Long sequence 0-8", inputArgs: [[0,3,7,2,5,8,4,6,0,1]], expected: 9 },
