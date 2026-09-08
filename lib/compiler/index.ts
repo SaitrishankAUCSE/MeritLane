@@ -667,10 +667,7 @@ async function executeJsTs(
     exportsObj.process_transactions ||
     sandbox.processTransactions ||
     code.includes("processTransactions") ||
-    code.includes("process_transactions") ||
-    normalizedSkill.includes("python") ||
-    normalizedSkill.includes("typescript") ||
-    normalizedSkill.includes("javascript")
+    code.includes("process_transactions")
   );
 
   if (isTransactionTask && typeof targetFn === "function") {
@@ -1275,10 +1272,10 @@ if custom_b64:
         cases.insert(0, {"name": "Custom Input", "input": "", "expected": "(custom)", "actual": f"{type(cx).__name__}: {str(cx)}", "passed": False})
 
 sys.stdout = real_stdout
-print(json.dumps({"compileSuccess": True, "error": None, "stdout": captured.getvalue(), "cases": cases}))
+print("__RESULT_JSON__" + json.dumps({"compileSuccess": True, "error": None, "stdout": captured.getvalue(), "cases": cases}))
 `;
 
-  return new Promise((resolve) => {
+  const localResult = await new Promise<ExecutionResult | null>((resolve) => {
     let proc: ReturnType<typeof spawn> | null = null;
     try {
       proc = spawn("python", ["-c", runner]);
@@ -1303,7 +1300,11 @@ print(json.dumps({"compileSuccess": True, "error": None, "stdout": captured.getv
     proc.on("close", () => {
       clearTimeout(timer);
       try {
-        const parsed = JSON.parse(stdoutBuf.trim());
+        let jsonStr = stdoutBuf.trim();
+        if (jsonStr.includes("__RESULT_JSON__")) {
+          jsonStr = jsonStr.split("__RESULT_JSON__")[1].trim();
+        }
+        const parsed = JSON.parse(jsonStr);
         const passedCount = (parsed.cases || []).filter((c: { passed: boolean }) => c.passed).length;
         resolve({
           success: parsed.compileSuccess && passedCount > 0,
@@ -1320,6 +1321,50 @@ print(json.dumps({"compileSuccess": True, "error": None, "stdout": captured.getv
       }
     });
   });
+
+  if (localResult) return localResult;
+
+  // Fallback to Godbolt for Vercel/Node env without python installed
+  try {
+    const res = await fetch("https://godbolt.org/api/compiler/python311/compile", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Accept: "application/json" },
+      body: JSON.stringify({
+        source: runner,
+        options: {
+          userArguments: "",
+          executeParameters: { args: [], stdin: "" },
+          compilerOptions: { executorRequest: true },
+        },
+      }),
+    });
+    if (res.ok) {
+      const data = await res.json();
+      const stdoutBuf = (data.stdout || []).map((l: any) => l.text).join("\n");
+      const stderrBuf = (data.stderr || []).map((l: any) => l.text).join("\n");
+      
+      if (stdoutBuf.includes("__RESULT_JSON__")) {
+        const jsonStr = stdoutBuf.split("__RESULT_JSON__")[1].trim();
+        const parsed = JSON.parse(jsonStr);
+        const passedCount = (parsed.cases || []).filter((c: any) => c.passed).length;
+        return {
+          success: parsed.compileSuccess && passedCount > 0,
+          compileSuccess: parsed.compileSuccess,
+          stdout: parsed.stdout || "",
+          stderr: parsed.error || stderrBuf || "",
+          durationMs: Date.now() - startTime,
+          cases: parsed.cases || [],
+          passedTests: passedCount,
+          totalTests: (parsed.cases || []).length || (isPublicTest ? 5 : 50),
+        };
+      }
+    }
+  } catch {
+    // ignore
+  }
+
+  return null;
+
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

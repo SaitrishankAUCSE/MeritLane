@@ -2,13 +2,14 @@
 // Never import from client components.
 
 import type { CodingQuestion, MCQQuestion, SkillBank } from "./bank/types";
+import { adminDb } from "@/lib/firebase/admin";
 
 export interface SelectedAssignment {
-  easy: CodingQuestion;
-  medium: CodingQuestion;
+  easy?: CodingQuestion;
+  medium?: CodingQuestion;
   mcqs: MCQQuestion[];
-  easyId: string;
-  mediumId: string;
+  easyId?: string;
+  mediumId?: string;
   mcqIds: string[];
 }
 
@@ -56,31 +57,79 @@ export function selectAssignment(
   seen: SeenQuestions,
   skill: string
 ): SelectedAssignment {
-  const { items: [easy] } = pickFromPool(bank.easy, seen.coding, 1, `${skill}.easy`);
-  const { items: [medium] } = pickFromPool(bank.mediumHard, seen.coding, 1, `${skill}.medium`);
-  const { items: mcqs } = pickFromPool(bank.mcqs, seen.mcq, 8, `${skill}.mcqs`);
+  const isCodingCapable = (bank.easy && bank.easy.length > 0) && (bank.mediumHard && bank.mediumHard.length > 0);
+
+  let easy: CodingQuestion | undefined;
+  let medium: CodingQuestion | undefined;
+  let easyId: string | undefined;
+  let mediumId: string | undefined;
+
+  if (isCodingCapable) {
+    const easyPick = pickFromPool(bank.easy, seen.coding, 1, `${skill}.easy`);
+    const mediumPick = pickFromPool(bank.mediumHard, seen.coding, 1, `${skill}.medium`);
+    easy = easyPick.items[0];
+    medium = mediumPick.items[0];
+    easyId = easy?.id;
+    mediumId = medium?.id;
+  }
+
+  const targetMcqCount = isCodingCapable ? 15 : 30;
+  const { items: mcqs } = pickFromPool(bank.mcqs, seen.mcq, Math.min(targetMcqCount, bank.mcqs.length), `${skill}.mcqs`);
 
   return {
     easy,
     medium,
     mcqs,
-    easyId: easy.id,
-    mediumId: medium.id,
+    easyId,
+    mediumId,
     mcqIds: mcqs.map(q => q.id),
   };
 }
 
-/**
- * Get the bank for a given skill slug, or null if skill has no bank yet.
- */
 export async function getBankForSkill(skill: string): Promise<SkillBank | null> {
-  const slug = skill.toLowerCase().trim();
-  if (slug === "python" || slug.includes("python")) {
-    const { getPythonBank } = await import("./bank/python");
-    return getPythonBank();
+  if (!adminDb) return null;
+  const slug = skill.toLowerCase().replace(/[^a-z0-9]/g, "_");
+  const bankDoc = await adminDb.collection("questionBank").doc(slug).get();
+  
+  if (!bankDoc.exists) {
+    return null;
   }
-  // Future skills: javascript, sql, java, etc.
-  return null;
+
+  // Check if bank is stale (older than 24 hours) to force JIT regeneration
+  const data = bankDoc.data();
+  if (data?.lastUpdated) {
+    const updatedMs = data.lastUpdated.toMillis?.() || data.lastUpdated;
+    if (Date.now() - updatedMs > 24 * 60 * 60 * 1000) {
+      return null; // Return null to trigger JIT refresh
+    }
+  }
+
+  const mcqsSnap = await adminDb.collection("questionBank").doc(slug).collection("mcqs").where("status", "==", "live").get();
+  const codingSnap = await adminDb.collection("questionBank").doc(slug).collection("coding").where("status", "==", "live").get();
+
+  const mcqs: MCQQuestion[] = [];
+  mcqsSnap.forEach(doc => mcqs.push(doc.data() as MCQQuestion));
+
+  const easy: CodingQuestion[] = [];
+  const mediumHard: CodingQuestion[] = [];
+  
+  codingSnap.forEach(doc => {
+    const q = doc.data() as CodingQuestion;
+    if (q.difficulty === "easy") easy.push(q);
+    else mediumHard.push(q);
+  });
+
+  // If a skill is MCQ-only, it's valid as long as it has enough MCQs. 
+  // If it's a coding skill, it needs coding questions.
+  // The generator ensures empty coding array if it's MCQ only.
+  if (mcqs.length === 0) return null;
+
+  return {
+    skill,
+    easy,
+    mediumHard,
+    mcqs
+  };
 }
 
 /**
@@ -93,6 +142,7 @@ export function sanitiseCodingQuestion(q: CodingQuestion): {
   title: string;
   instructions: string;
   initialCode: string;
+  supportedLanguages: Array<{ id: string; name: string }>;
   taskLabel: string;
 } {
   return {
@@ -100,7 +150,8 @@ export function sanitiseCodingQuestion(q: CodingQuestion): {
     difficulty: q.difficulty,
     title: q.title,
     instructions: q.instructions,
-    initialCode: q.starterCode.python,
+    initialCode: q.starterCode.python || q.starterCode.javascript || q.starterCode.java || q.starterCode.cpp || q.starterCode.typescript || q.starterCode.sql || "",
+    supportedLanguages: q.supportedLanguages || [{ id: "javascript", name: "JavaScript" }],
     taskLabel: q.difficulty === "easy" ? "Task 1 — Easy" : "Task 2 — Medium",
   };
 }

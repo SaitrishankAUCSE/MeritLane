@@ -253,7 +253,7 @@ export default function CandidateVerificationPage() {
                         </div>
                         <div className="text-[11px] font-mono text-[#78716C] shrink-0">{dt}</div>
                         <div className="text-[10px] font-mono font-semibold text-[#064E3B] shrink-0">
-                          {v.score ? `${v.score}%` : "80%+"}
+                          {v.score ? `${v.score}%` : "Passed"}
                         </div>
                       </div>
                     );
@@ -298,7 +298,7 @@ export default function CandidateVerificationPage() {
                 "Skill declared in Identity record.",
                 "No active 14-day cooldown on the skill.",
                 "Stable connection required for fullscreen monitor.",
-                "Score ≥ 80% required for certification.",
+                "Component passing thresholds required for certification.",
               ].map((rule, i) => (
                 <div key={i} className="flex gap-3">
                   <div className="text-[9px] font-mono text-[#C8BFB0] pt-0.5 shrink-0">
@@ -320,7 +320,7 @@ export default function CandidateVerificationPage() {
                   <div className="pt-0.5"><StatusStamp status={s} /></div>
                   <span className="text-[11px] font-sans text-[#78716C] leading-relaxed">
                     {s === "VERIFIED"
-                      ? "Proctored examination passed ≥ 80%"
+                      ? "Proctored examination passed"
                       : s === "ELIGIBLE"
                       ? "Ready to sit the examination"
                       : "Failed — 14-day study period active"}

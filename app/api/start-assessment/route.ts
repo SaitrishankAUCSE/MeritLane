@@ -3,6 +3,7 @@ import { adminAuth, adminDb } from "@/lib/firebase/admin";
 import { FieldValue } from 'firebase-admin/firestore';
 import { getAssessmentContent } from "@/lib/assessments/content";
 import { getBankForSkill, selectAssignment, sanitiseCodingQuestion, sanitiseMcqs } from "@/lib/assessments/selector";
+import { generateAndPublishSkillBank } from "@/lib/assessments/generator";
 
 export async function POST(req: NextRequest) {
   try {
@@ -43,17 +44,25 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
+    const userData = userDoc.data() || {};
+
     const candidateRef = adminDb.collection("candidates").doc(uid);
-    const candidateDoc = await candidateRef.get();
+    let candidateDoc = await candidateRef.get();
     
     if (!candidateDoc.exists) {
-      return NextResponse.json({ error: "Candidate profile not found" }, { status: 404 });
+      await candidateRef.set({
+        name: userData.displayName || "Candidate",
+        email: userData.email || "",
+        skills: [skill],
+        verificationStatus: "draft",
+        createdAt: new Date().toISOString(),
+      }, { merge: true });
+      candidateDoc = await candidateRef.get();
     }
 
     const candidateData = candidateDoc.exists ? (candidateDoc.data() || {}) : {};
-    const userData = userDoc.data() || {};
     
-    // Validate skill belongs to candidate
+    // Automatically ensure the requested skill is in the candidate's skills list
     const normalizedSkill = skill.toLowerCase().trim();
     const candidateSkills: string[] = [
       ...(candidateData.skills || []),
@@ -61,35 +70,56 @@ export async function POST(req: NextRequest) {
     ];
     
     const hasSkill = candidateSkills.some((s: string) => s && s.toLowerCase().trim() === normalizedSkill);
-    if (!hasSkill && candidateSkills.length > 0) {
-      return NextResponse.json({ error: "Requested skill is not part of your profile" }, { status: 403 });
+    if (!hasSkill) {
+      await candidateRef.update({
+        skills: FieldValue.arrayUnion(skill)
+      }).catch(() => {});
     }
 
     const now = Date.now();
 
-    // Check cooldown (unchanged)
+    // 1. Global Proctoring Lockout Check (Overrides everything)
+    if (userData.proctoringLockoutUntil && userData.proctoringLockoutUntil > now) {
+      return NextResponse.json({
+        error: "Your access to assessments is suspended due to a severe proctoring violation. Please contact support if you believe this was an error.",
+        isProctoringLockout: true,
+        retryAvailableAt: new Date(userData.proctoringLockoutUntil).toISOString(),
+      }, { status: 403 });
+    }
+
+    // 2. Standard Cooldown Check
     const isDev = process.env.NODE_ENV === "development";
     const bypassCooldown = isDev && (body.resetCooldown === true || req.nextUrl.searchParams.get("resetCooldown") === "true" || req.headers.get("x-dev-bypass-cooldown") === "true");
 
     if (!bypassCooldown && userData.failedAssessments && userData.failedAssessments[skill]) {
       const failedTimestamp = userData.failedAssessments[skill];
       const failedMs = typeof failedTimestamp.toMillis === "function" ? failedTimestamp.toMillis() : failedTimestamp;
-      const isIntegrityTermination = !!(userData.integrityTerminations && userData.integrityTerminations[skill]);
-      const cooldownMs = isIntegrityTermination ? 21 * 24 * 60 * 60 * 1000 : 14 * 24 * 60 * 60 * 1000;
-      const cooldownLabel = isIntegrityTermination ? "21-day integrity cooldown" : "14-day cooldown";
+      const cooldownMs = 30 * 24 * 60 * 60 * 1000; // 30 days (1 month)
+      const cooldownLabel = "30-day cooldown";
 
       if (now - failedMs < cooldownMs) {
         return NextResponse.json({
           error: `You are currently in a ${cooldownLabel} period for this skill.`,
-          cooldownDays: isIntegrityTermination ? 21 : 14,
+          cooldownDays: 30,
           retryAvailableAt: new Date(failedMs + cooldownMs).toISOString(),
         }, { status: 429 });
       }
     }
 
-    // ─── Bank-aware path (Python and future skills) ─────────────────────────────
-    const bank = await getBankForSkill(skill);
-    const hasBankSupport = !!bank;
+    // ─── Bank-aware path (Firestore / Dynamic) ─────────────────────────────
+    let bank = await getBankForSkill(skill);
+    
+    // JIT Generation if bank is missing or stale
+    if (!bank) {
+      try {
+        await generateAndPublishSkillBank(skill);
+        bank = await getBankForSkill(skill);
+      } catch (err) {
+        console.warn("JIT Generation fallback to built-in content bank:", err);
+      }
+    }
+
+    const hasBankSupport = Boolean(bank);
 
     // Time limits per approved spec:
     // Coding-capable: 90 min | MCQ-only: 35 min
@@ -102,38 +132,32 @@ export async function POST(req: NextRequest) {
       const startedMs = userData.assessmentStartedAt.toMillis?.() || userData.assessmentStartedAt;
       if (now - startedMs < sessionWindowMs) {
         // Build resume content
-        let resumeContent: Record<string, unknown>;
+        let resumeContent: Record<string, unknown> = {};
 
         if (hasBankSupport && userData.assessmentEasyQuestionId && userData.assessmentMediumQuestionId) {
           // Bank-aware resume
-          const seenAll = [...(bank!.easy), ...(bank!.mediumHard)];
+          const seenAll = [...(bank!.easy || []), ...(bank!.mediumHard || [])];
           const easyQ = seenAll.find(q => q.id === userData.assessmentEasyQuestionId);
           const mediumQ = seenAll.find(q => q.id === userData.assessmentMediumQuestionId);
           const mcqIds: string[] = userData.assessmentMcqIds || [];
-          const mcqItems = bank!.mcqs.filter(m => mcqIds.includes(m.id));
+          const mcqItems = (bank!.mcqs || []).filter(m => mcqIds.includes(m.id));
 
           resumeContent = {
             codingTasks: easyQ && mediumQ ? [sanitiseCodingQuestion(easyQ), sanitiseCodingQuestion(mediumQ)] : [],
             coding: easyQ ? sanitiseCodingQuestion(easyQ) : undefined,
             mcqs: sanitiseMcqs(mcqItems),
-            hasCoding: true,
+            hasCoding: !!(easyQ && mediumQ),
             timeLimitMinutes,
-            assessmentType: "coding_capable",
+            assessmentType: easyQ && mediumQ ? "coding_capable" : "mcq_only",
           };
         } else {
-          // Legacy content resume
-          const activeSeed = userData.assessmentSeed || uid;
-          const activeContent = getAssessmentContent(skill, activeSeed);
+          const candidateSeed = userData.assessmentSeed || uid;
+          const builtinContent = getAssessmentContent(skill, candidateSeed, { sanitize: true });
           resumeContent = {
-            mcqs: activeContent.mcqs.map((mcq) => ({
-              question: mcq.question,
-              options: mcq.options,
-              difficulty: mcq.difficulty,
-              topic: mcq.topic
-            })),
-            coding: activeContent.coding,
-            hasCoding: activeContent.hasCoding,
-            timeLimitMinutes,
+            ...builtinContent,
+            codingTasks: builtinContent.coding ? [builtinContent.coding] : [],
+            assessmentType: builtinContent.hasCoding ? "coding_capable" : "mcq_only",
+            timeLimitMinutes: builtinContent.hasCoding ? 90 : 35,
           };
         }
 
@@ -148,7 +172,7 @@ export async function POST(req: NextRequest) {
     }
 
     // ─── Start fresh session ────────────────────────────────────────────────────
-    let freshContent: Record<string, unknown>;
+    let freshContent: Record<string, unknown> = {};
     const firestoreUpdates: Record<string, unknown> = {
       assessmentStartedAt: FieldValue.serverTimestamp(),
       assessmentVariant: "A",
@@ -167,46 +191,49 @@ export async function POST(req: NextRequest) {
       const assignment = selectAssignment(bank, seen, skill);
 
       // Store question IDs in user session
-      firestoreUpdates.assessmentEasyQuestionId = assignment.easyId;
-      firestoreUpdates.assessmentMediumQuestionId = assignment.mediumId;
       firestoreUpdates.assessmentMcqIds = assignment.mcqIds;
-      // Clear legacy seed
       firestoreUpdates.assessmentSeed = FieldValue.delete();
 
-      // Append seen questions to candidate doc (fire-and-forget, don't block response)
-      candidateRef.update({
-        [`seenQuestions.${normalizedSkill}.coding`]: FieldValue.arrayUnion(assignment.easyId, assignment.mediumId),
+      const candidateUpdates: Record<string, unknown> = {
         [`seenQuestions.${normalizedSkill}.mcq`]: FieldValue.arrayUnion(...assignment.mcqIds),
-      }).catch((e: Error) => console.error("[seenQuestions update failed]", e.message));
-
-      freshContent = {
-        codingTasks: [
-          sanitiseCodingQuestion(assignment.easy),
-          sanitiseCodingQuestion(assignment.medium),
-        ],
-        coding: sanitiseCodingQuestion(assignment.easy), // backward compat for page.tsx
-        mcqs: sanitiseMcqs(assignment.mcqs),
-        hasCoding: true,
-        timeLimitMinutes,
-        assessmentType: "coding_capable",
       };
-    } else {
-      // Legacy path: randomise with seed
-      const freshSeed = `${uid}_${Date.now()}_${Math.floor(Math.random() * 1000000)}`;
-      firestoreUpdates.assessmentSeed = freshSeed;
-      const legacyContent = getAssessmentContent(skill, freshSeed);
 
+      if (bank.easy?.length > 0 && bank.mediumHard?.length > 0 && assignment.easy && assignment.medium && assignment.easyId && assignment.mediumId) {
+        firestoreUpdates.assessmentEasyQuestionId = assignment.easyId;
+        firestoreUpdates.assessmentMediumQuestionId = assignment.mediumId;
+        candidateUpdates[`seenQuestions.${normalizedSkill}.coding`] = FieldValue.arrayUnion(assignment.easyId, assignment.mediumId);
+
+        freshContent = {
+          codingTasks: [
+            sanitiseCodingQuestion(assignment.easy),
+            sanitiseCodingQuestion(assignment.medium),
+          ],
+          coding: sanitiseCodingQuestion(assignment.easy), // backward compat for page.tsx
+          mcqs: sanitiseMcqs(assignment.mcqs),
+          hasCoding: true,
+          timeLimitMinutes,
+          assessmentType: "coding_capable",
+        };
+      } else {
+        // MCQ Only assignment
+        freshContent = {
+          mcqs: sanitiseMcqs(assignment.mcqs),
+          hasCoding: false,
+          timeLimitMinutes: 35,
+          assessmentType: "mcq_only",
+        };
+      }
+
+      candidateRef.update(candidateUpdates).catch((e: Error) => console.error("[seenQuestions update failed]", e.message));
+    } else {
+      const seed = Date.now();
+      firestoreUpdates.assessmentSeed = seed;
+      const builtinContent = getAssessmentContent(skill, seed, { sanitize: true });
       freshContent = {
-        mcqs: legacyContent.mcqs.map((mcq) => ({
-          question: mcq.question,
-          options: mcq.options,
-          difficulty: mcq.difficulty,
-          topic: mcq.topic
-        })),
-        coding: legacyContent.coding,
-        hasCoding: legacyContent.hasCoding,
-        timeLimitMinutes,
-        assessmentType: hasBankSupport ? "coding_capable" : "mcq_only",
+        ...builtinContent,
+        codingTasks: builtinContent.coding ? [builtinContent.coding] : [],
+        assessmentType: builtinContent.hasCoding ? "coding_capable" : "mcq_only",
+        timeLimitMinutes: builtinContent.hasCoding ? 90 : 35,
       };
     }
 

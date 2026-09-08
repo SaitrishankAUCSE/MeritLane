@@ -463,7 +463,7 @@ export default function EmployerDashboardPage() {
                       className="w-full bg-white border border-[#E5E5E5] rounded px-2.5 py-1.5 text-[#0D0D0D] outline-none"
                     >
                       <option value={0}>Any Score</option>
-                      <option value={80}>Verified (≥ 80%)</option>
+                      <option value={80}>Verified (Passed)</option>
                       <option value={90}>Top Tier (≥ 90%)</option>
                     </select>
                   </div>

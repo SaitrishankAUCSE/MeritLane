@@ -210,7 +210,9 @@ export async function POST(req: NextRequest) {
     const mcqPass = mcqPct >= 70;
 
     const easyPct = easyResult.totalTests > 0 ? Math.round((easyResult.passedTests / easyResult.totalTests) * 100) : 0;
-    const score = Math.round((easyPct * 0.30) + (mediumResult.pct * 0.40) + (mcqPct * 0.30));
+    const score = hasCodingSubmission 
+      ? Math.round((easyPct * 0.30) + (mediumResult.pct * 0.40) + (mcqPct * 0.30))
+      : Math.round(mcqPct);
 
     // Pass requires all three component thresholds to be met
     const passed = hasCodingSubmission

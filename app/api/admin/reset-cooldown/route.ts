@@ -46,8 +46,13 @@ export async function POST(req: NextRequest) {
     // Reset cooldown and active assessment timestamps
     await userRef.update({
       failedAssessments: FieldValue.delete(),
+      proctoringLockoutUntil: FieldValue.delete(),
+      proctoringTerminations: FieldValue.delete(),
+      integrityTerminations: FieldValue.delete(),
       assessmentStartedAt: FieldValue.delete(),
       assessmentVariant: FieldValue.delete(),
+      assessmentViolationCount: FieldValue.delete(),
+      assessmentLastViolationAt: FieldValue.delete(),
       cooldownResetBy: decodedToken.email || ADMIN_EMAIL,
       cooldownResetAt: FieldValue.serverTimestamp(),
     });

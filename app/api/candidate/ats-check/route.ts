@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { adminAuth, adminDb } from "@/lib/firebase/admin";
+import { extractPdfText, parseResumeEntities } from "@/lib/resume/parser";
 
 export interface RecommendedRole {
   role: string;
@@ -310,7 +311,7 @@ export async function POST(req: NextRequest) {
 
       const bytes = await file.arrayBuffer();
       const buffer = Buffer.from(bytes);
-      resumeText = await extractTextFromPdf(buffer);
+      resumeText = await extractPdfText(buffer);
 
       if (!resumeText || resumeText.trim().length < 30) {
         return NextResponse.json({
@@ -329,6 +330,8 @@ export async function POST(req: NextRequest) {
         { status: 400 }
       );
     }
+
+    const parsedEntities = parseResumeEntities(resumeText);
 
     const openRouterApiKey = process.env.OPENROUTER_API_KEY;
     if (openRouterApiKey) {
@@ -398,10 +401,15 @@ Ensure recommendedRoles has 3-4 top matches sorted by matchPercentage descending
               atsRating: parsed.rating,
               atsSummary: parsed.summary,
               atsRoles: parsed.recommendedRoles || [],
-              atsAnalyzedAt: Date.now()
+              atsAnalyzedAt: Date.now(),
+              parsedProfile: parsedEntities
             }, { merge: true });
 
-            return NextResponse.json({ result: parsed, extractedText: resumeText.slice(0, 500) }, { status: 200 });
+            return NextResponse.json({ 
+              result: parsed, 
+              parsed: parsedEntities,
+              extractedText: resumeText 
+            }, { status: 200 });
           }
         }
       } catch (aiErr) {
@@ -416,10 +424,15 @@ Ensure recommendedRoles has 3-4 top matches sorted by matchPercentage descending
       atsRating: result.rating,
       atsSummary: result.summary,
       atsRoles: result.recommendedRoles || [],
-      atsAnalyzedAt: Date.now()
+      atsAnalyzedAt: Date.now(),
+      parsedProfile: parsedEntities
     }, { merge: true });
 
-    return NextResponse.json({ result, extractedText: resumeText.slice(0, 500) }, { status: 200 });
+    return NextResponse.json({ 
+      result, 
+      parsed: parsedEntities,
+      extractedText: resumeText 
+    }, { status: 200 });
   } catch (error: any) {
     console.error("ATS check route error:", error);
     return NextResponse.json({ error: error.message || "Failed to parse resume and evaluate ATS." }, { status: 500 });

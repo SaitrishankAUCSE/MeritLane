@@ -66,8 +66,8 @@ export default function HowVerificationWorksPage() {
             },
             {
               step: "04",
-              title: "Achieve the 80% Threshold",
-              desc: "Scores are evaluated automatically against comprehensive test suites. Reaching 80% or higher is required to achieve verification.",
+              title: "Achieve the Component Thresholds",
+              desc: "Scores are evaluated automatically against comprehensive test suites. Reaching the required threshold for each component is required to achieve verification.",
             },
             {
               step: "05",
@@ -127,16 +127,16 @@ export default function HowVerificationWorksPage() {
                 <AlertCircle className="h-4 w-4 text-[#D97706]" /> Cooldown Periods
               </div>
               <p className="text-[13px] text-[#78716C] leading-relaxed">
-                Scores below 80% enforce a 14-day study cooldown before a retake. Assessments terminated for integrity infractions enforce a 21-day cooldown.
+                Failing to meet component thresholds enforces a 14-day study cooldown before a retake. Assessments terminated for integrity infractions enforce a 21-day cooldown.
               </p>
             </div>
 
             <div className="border border-[#E7E2DA] bg-[#F8F6F3] rounded p-6">
               <div className="flex items-center gap-2.5 text-[15px] font-semibold text-[#1C1917] mb-3">
-                <Award className="h-4 w-4 text-[#1C1917]" /> 80% Threshold Standard
+                <Award className="h-4 w-4 text-[#1C1917]" /> Component Threshold Standard
               </div>
               <p className="text-[13px] text-[#78716C] leading-relaxed">
-                Verification is not graded on a curve. A consistent 80% passing mark ensures employers that all verified candidates met the same objective technical standard.
+                Verification is not graded on a curve. A consistent passing standard for each component ensures employers that all verified candidates met the same objective technical standard.
               </p>
             </div>
           </div>
@@ -153,7 +153,7 @@ export default function HowVerificationWorksPage() {
             <ul className="space-y-3 text-[13px] text-[#78716C] leading-relaxed">
               <li className="flex items-start gap-2">
                 <span className="text-[#16A34A] mt-0.5">•</span>
-                The candidate passed an objective, timed evaluation with score ≥ 80%.
+                The candidate passed an objective, timed evaluation by meeting all component thresholds.
               </li>
               <li className="flex items-start gap-2">
                 <span className="text-[#16A34A] mt-0.5">•</span>

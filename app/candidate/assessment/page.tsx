@@ -217,7 +217,7 @@ function FullscreenUnsupportedOverlay({ onRetry }: { onRetry: () => void }) {
 
 // ─── Main Assessment Component ────────────────────────────────────────────────
 
-const MAX_VIOLATIONS = 3;
+const MAX_VIOLATIONS = 2; // 1st violation = warning, 2nd violation = termination
 
 function AssessmentContentWrapper() {
   const { user, userProfile, loading } = useAuth();
@@ -336,13 +336,22 @@ function AssessmentContentWrapper() {
         if (!isMounted) return;
 
         if (!res.ok) {
-          if (res.status === 403) setErrorMsg("SKILL NOT FOUND");
+          if (res.status === 403 && data.isProctoringLockout) {
+            setErrorMsg("PROCTORING LOCKOUT");
+            if (data.retryAvailableAt) setRetryAvailableAt(data.retryAvailableAt);
+          } else if (res.status === 403) setErrorMsg("SKILL NOT FOUND");
           else if (res.status === 429) {
             setErrorMsg("ASSESSMENT COOLDOWN ACTIVE");
-            setCooldownDays(data.cooldownDays || 14);
+            setCooldownDays(data.cooldownDays || 30);
             if (data.retryAvailableAt) setRetryAvailableAt(data.retryAvailableAt);
           } else if (res.status === 409) setErrorMsg("ALREADY VERIFIED");
           else setErrorMsg(data.error || "Failed to start assessment");
+          setInitializing(false);
+          return;
+        }
+
+        if (!data.content || !Array.isArray(data.content.mcqs) || data.content.mcqs.length === 0) {
+          setErrorMsg("Assessment content is being prepared. Please click Retry.");
           setInitializing(false);
           return;
         }
@@ -399,7 +408,14 @@ function AssessmentContentWrapper() {
           setCodeMedium(restoredDraft?.codeMedium || mediumTask?.initialCode || "");
           // Also set legacy `code` to easy task for initial editor display
           setCode(restoredDraft?.codeEasy || easyTask?.initialCode || "");
-          if (!restoredDraft?.selectedLanguage) setSelectedLanguage("python");
+          
+          if (restoredDraft?.selectedLanguage) {
+            setSelectedLanguage(restoredDraft.selectedLanguage);
+          } else if (easyTask?.supportedLanguages && easyTask.supportedLanguages.length > 0) {
+            setSelectedLanguage(easyTask.supportedLanguages[0].id);
+          } else {
+            setSelectedLanguage("python");
+          }
         }
 
         if (restoredDraft?.customInput && typeof restoredDraft.customInput === "string") {
@@ -497,31 +513,8 @@ function AssessmentContentWrapper() {
       posthog.default.capture("assessment_integrity_terminated", { skill: skillParam });
     }).catch(() => {});
 
-    // Persist to server — server calculates the 21-day cooldown
-    try {
-      const currentUser = auth.currentUser;
-      if (currentUser) {
-        const token = await currentUser.getIdToken(true);
-        const res = await fetch("/api/terminate-assessment", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({ skill: skillParam, violationCount: MAX_VIOLATIONS }),
-        });
-        const data = await res.json();
-        if (res.ok && data.retryAvailableAt) {
-          setRetryAvailableAt(data.retryAvailableAt);
-        } else {
-          // Fallback — show 21 days from now if server unreachable
-          setRetryAvailableAt(new Date(Date.now() + 21 * 24 * 60 * 60 * 1000).toISOString());
-        }
-      }
-    } catch {
-      // Network failure — show conservative estimate
-      setRetryAvailableAt(new Date(Date.now() + 21 * 24 * 60 * 60 * 1000).toISOString());
-    }
+    // Fallback display if server unreachable (90 days)
+    setRetryAvailableAt(new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString());
 
     clearDraft();
     setIntegrityTerminated(true);
@@ -555,91 +548,69 @@ function AssessmentContentWrapper() {
     const triggerInfraction = (type: string, reasonLabel: string) => {
       if (isTerminatedRef.current) return;
 
-      setInfractionCount((prev) => {
-        const count = prev + 1;
-
-        // Persist infraction to server in real time
-        if (auth.currentUser) {
-          auth.currentUser.getIdToken().then((token: string) => {
-            fetch("/api/candidate/record-infraction", {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${token}`
-              },
-              body: JSON.stringify({
-                skill: skillParam,
-                type,
-                count,
-                timestamp: Date.now()
-              })
-            }).catch(() => {});
-          }).catch(() => {});
-        }
-
-        // Analytics
-        import("posthog-js").then((posthog) => {
-          posthog.default.capture("assessment_fullscreen_violation", { count, type, reason: reasonLabel, skill: skillParam });
-        }).catch(() => {});
-
-        if (count >= MAX_VIOLATIONS) {
-          // Third violation — terminate immediately
-          handleIntegrityTerminate();
-          setInfractionOverlay({ count, reason: reasonLabel, requiresUserGesture: false });
-          return count;
-        }
-
-        // Show in-app overlay warning
-        const tryAutoRestore = type === "exited_fullscreen" || type === "hidden_tab";
-
-        setInfractionOverlay({ count, reason: reasonLabel, requiresUserGesture: !tryAutoRestore });
-
-        if (tryAutoRestore) {
-          setTimeout(async () => {
-            if (isTerminatedRef.current) return;
-            const restored = await requestFullscreenSafe();
-            if (restored) {
-              setTimeout(() => setInfractionOverlay(null), 600);
-            } else {
-              setInfractionOverlay((prev) =>
-                prev ? { ...prev, requiresUserGesture: true } : prev
-              );
+      // Persist infraction to server in real time
+      if (auth.currentUser) {
+        auth.currentUser.getIdToken().then((token: string) => {
+          fetch("/api/candidate/record-infraction", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`
             }
-          }, 3000);
-        }
+          }).then(res => res.json()).then(data => {
+            if (data.action === "terminate") {
+              handleIntegrityTerminate();
+            } else {
+              setInfractionCount((prev) => {
+                const count = prev + 1;
+                // Show in-app overlay warning
+                const tryAutoRestore = type === "exited_fullscreen" || type === "hidden_tab";
+                setInfractionOverlay({ count, reason: reasonLabel, requiresUserGesture: !tryAutoRestore });
 
-        return count;
-      });
-    };
-
-    const handleVisibilityChange = () => {
-      if (document.visibilityState === "hidden") {
-        triggerInfraction("hidden_tab", "Tab Switched or Window Minimized");
+                if (tryAutoRestore) {
+                  setTimeout(async () => {
+                    if (isTerminatedRef.current) return;
+                    const restored = await requestFullscreenSafe();
+                    if (!restored) {
+                      setInfractionOverlay({ count, reason: reasonLabel, requiresUserGesture: true });
+                    }
+                  }, 50);
+                }
+                return count;
+              });
+            }
+          }).catch(() => {});
+        }).catch(() => {});
       }
-    };
 
-    const handleWindowBlur = () => {
-      if (!isRestoringFullscreenRef.current && hasStarted && !isTerminatedRef.current) {
-        triggerInfraction("window_blur", "Switched Away / Focus Lost from Examination");
-      }
+      // Analytics
+      import("posthog-js").then((posthog) => {
+        posthog.default.capture("assessment_fullscreen_violation", { type, reason: reasonLabel, skill: skillParam });
+      }).catch(() => {});
     };
 
     const handlePopState = () => {
       window.history.pushState(null, "", window.location.href);
-      triggerInfraction("back_button", "Browser Navigation Attempted");
+      triggerInfraction("navigated_back", "You attempted to navigate away from the assessment.");
+    };
+
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        triggerInfraction("hidden_tab", "You switched tabs or minimized the browser window.");
+      }
     };
 
     const handleFullscreenChange = () => {
-      // Skip if MeritLane itself triggered the change (restoration or initial entry)
-      if (isRestoringFullscreenRef.current) return;
-      if (!document.fullscreenElement && hasStarted && !isTerminatedRef.current) {
-        triggerInfraction("exited_fullscreen", "Fullscreen Mode Exited");
+      if (!document.fullscreenElement && !isRestoringFullscreenRef.current) {
+        triggerInfraction("exited_fullscreen", "You exited fullscreen mode.");
       }
     };
 
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (isTerminatedRef.current || assessmentResult) return;
       e.preventDefault();
-      e.returnValue = "";
+      e.returnValue = "Are you sure you want to leave? Your assessment will be terminated.";
+      return e.returnValue;
     };
 
     // Strict Anti-Tamper: Prevent right-click context menu
@@ -660,15 +631,11 @@ function AssessmentContentWrapper() {
 
     // Strict Anti-Tamper: Prevent copying assessment questions
     const handleCopy = (e: ClipboardEvent) => {
-      // Allow copying within textarea only
-      if ((e.target as HTMLElement)?.tagName !== "TEXTAREA") {
-        e.preventDefault();
-      }
+      e.preventDefault();
     };
 
-    document.addEventListener("visibilitychange", handleVisibilityChange);
-    window.addEventListener("blur", handleWindowBlur);
     window.addEventListener("popstate", handlePopState);
+    document.addEventListener("visibilitychange", handleVisibilityChange);
     document.addEventListener("fullscreenchange", handleFullscreenChange);
     window.addEventListener("beforeunload", handleBeforeUnload);
     document.addEventListener("contextmenu", handleContextMenu);
@@ -677,7 +644,6 @@ function AssessmentContentWrapper() {
 
     return () => {
       document.removeEventListener("visibilitychange", handleVisibilityChange);
-      window.removeEventListener("blur", handleWindowBlur);
       window.removeEventListener("popstate", handlePopState);
       document.removeEventListener("fullscreenchange", handleFullscreenChange);
       window.removeEventListener("beforeunload", handleBeforeUnload);
@@ -772,12 +738,13 @@ function AssessmentContentWrapper() {
 
   const handleResetCode = () => {
     if (!content?.coding) return;
-    const langs = content.coding.supportedLanguages || COMMON_SUPPORTED_LANGUAGES;
+    const langs = content.codingTasks?.[activeCodingTaskIdx]?.supportedLanguages || content.coding?.supportedLanguages || COMMON_SUPPORTED_LANGUAGES;
     const found = langs.find((l) => l.id === selectedLanguage);
     if (found && found.template) {
       setCode(found.template);
     } else {
-      setCode(content.coding.initialCode);
+      const initialCode = content.codingTasks?.[activeCodingTaskIdx]?.initialCode || content.coding?.initialCode || "";
+      setCode(initialCode);
     }
     setShowResetConfirm(false);
   };
@@ -1089,7 +1056,7 @@ function AssessmentContentWrapper() {
             prev +
             "Evaluating 50 test suites & generating AI feedback...\nScore: " +
             data.score +
-            "% (Required: 80%)."
+            "% (Required Threshold Met)."
         );
         setTimeout(() => {
           setSubmittingModal(false);
@@ -1512,7 +1479,7 @@ function AssessmentContentWrapper() {
             {assessmentResult.score}%
           </div>
           <p className="text-[14px] text-[#78716C] mb-4 leading-relaxed">
-            80% is required to verify this skill. Review the component breakdown below.
+            Passing component thresholds is required to verify this skill. Review the component breakdown below.
           </p>
           {/* Proof Trace: Component Scores */}
           {assessmentResult.assessmentScores && (
@@ -1632,47 +1599,76 @@ function AssessmentContentWrapper() {
       );
     }
 
-    // Cooldown / generic error
+    if (errorMsg === "ASSESSMENT COOLDOWN ACTIVE") {
+      return (
+        <div className="flex h-[100dvh] w-full bg-[#F8F6F3] items-center justify-center p-6">
+          <div className="max-w-md w-full border border-[#E7E2DA] bg-white rounded p-8 shadow-sm">
+            <h2 className="text-[18px] font-semibold text-[#B42318] mb-2">
+              Assessment cooldown active
+            </h2>
+            <p className="text-[14px] text-[#78716C] mb-6">
+              You are currently in a mandatory cooldown period for this skill.
+            </p>
+            <div className="border border-[#E7E2DA] bg-[#F8F6F3] p-5 rounded mb-8">
+              <div className="text-[13px] font-medium text-[#78716C] mb-1">
+                Next eligible attempt
+              </div>
+              <div className="text-[15px] font-semibold text-[#1C1917]">
+                {retryAvailableAt
+                  ? new Date(retryAvailableAt).toLocaleDateString(undefined, {
+                      month: "long",
+                      day: "numeric",
+                      year: "numeric",
+                    })
+                  : new Date(
+                      Date.now() + (cooldownDays || 30) * 24 * 60 * 60 * 1000
+                    ).toLocaleDateString(undefined, {
+                      month: "long",
+                      day: "numeric",
+                      year: "numeric",
+                    })}
+              </div>
+            </div>
+            <div className="flex flex-col sm:flex-row gap-3">
+              <button
+                onClick={() => handleReturn("/candidate/verification")}
+                className="flex-1 h-11 border border-[#1C1917] bg-[#1C1917] text-white font-semibold text-[14px] rounded hover:bg-[#292524] transition-colors focus:outline-none focus:ring-2 focus:ring-[#1C1917] focus:ring-offset-2 flex items-center justify-center gap-2"
+              >
+                <ShieldCheck className="h-4 w-4" />
+                <span>Verification Records</span>
+              </button>
+              <button
+                onClick={() => handleReturn("/candidate/dashboard")}
+                className="flex-1 h-11 border border-[#E7E2DA] text-[#1C1917] font-semibold text-[14px] rounded hover:border-[#1C1917] hover:bg-[#F2EFE9] transition-colors focus:outline-none focus:ring-2 focus:ring-[#1C1917] focus:ring-offset-2"
+              >
+                Dashboard
+              </button>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    // Generic error fallback
     return (
       <div className="flex h-[100dvh] w-full bg-[#F8F6F3] items-center justify-center p-6">
         <div className="max-w-md w-full border border-[#E7E2DA] bg-white rounded p-8 shadow-sm">
-          <h2 className="text-[18px] font-semibold text-[#B42318] mb-2">
-            Assessment cooldown active
+          <h2 className="text-[18px] font-semibold text-[#1C1917] mb-2">
+            Unable to start assessment
           </h2>
           <p className="text-[14px] text-[#78716C] mb-6">
-            You are currently in a mandatory cooldown period for this skill.
+            {errorMsg || "An unexpected error occurred while preparing your assessment."}
           </p>
-          <div className="border border-[#E7E2DA] bg-[#F8F6F3] p-5 rounded mb-8">
-            <div className="text-[13px] font-medium text-[#78716C] mb-1">
-              Next eligible attempt
-            </div>
-            <div className="text-[15px] font-semibold text-[#1C1917]">
-              {retryAvailableAt
-                ? new Date(retryAvailableAt).toLocaleDateString(undefined, {
-                    month: "long",
-                    day: "numeric",
-                    year: "numeric",
-                  })
-                : new Date(
-                    Date.now() + (cooldownDays || 14) * 24 * 60 * 60 * 1000
-                  ).toLocaleDateString(undefined, {
-                    month: "long",
-                    day: "numeric",
-                    year: "numeric",
-                  })}
-            </div>
-          </div>
           <div className="flex flex-col sm:flex-row gap-3">
             <button
-              onClick={() => handleReturn("/candidate/verification")}
-              className="flex-1 h-11 border border-[#1C1917] bg-[#1C1917] text-white font-semibold text-[14px] rounded hover:bg-[#292524] transition-colors focus:outline-none focus:ring-2 focus:ring-[#1C1917] focus:ring-offset-2 flex items-center justify-center gap-2"
+              onClick={() => window.location.reload()}
+              className="flex-1 h-11 border border-[#1C1917] bg-[#1C1917] text-white font-semibold text-[14px] rounded hover:bg-[#292524] transition-colors"
             >
-              <ShieldCheck className="h-4 w-4" />
-              <span>Verification Records</span>
+              Retry
             </button>
             <button
               onClick={() => handleReturn("/candidate/dashboard")}
-              className="flex-1 h-11 border border-[#E7E2DA] text-[#1C1917] font-semibold text-[14px] rounded hover:border-[#1C1917] hover:bg-[#F2EFE9] transition-colors focus:outline-none focus:ring-2 focus:ring-[#1C1917] focus:ring-offset-2"
+              className="flex-1 h-11 border border-[#E7E2DA] text-[#1C1917] font-semibold text-[14px] rounded hover:border-[#1C1917] hover:bg-[#F2EFE9] transition-colors"
             >
               Dashboard
             </button>
@@ -1684,7 +1680,7 @@ function AssessmentContentWrapper() {
 
   // ── Loading ────────────────────────────────────────────────────────────────
 
-  if (initializing || loading || !content) {
+  if (initializing || loading || !content || !Array.isArray(content.mcqs)) {
     return (
       <div className="flex h-full w-full items-center justify-center">
         <MeritlaneLoader level="section" />
@@ -1737,7 +1733,7 @@ function AssessmentContentWrapper() {
                   {
                     icon: <CheckCircle2 className="h-4 w-4 text-[#78716C]" />,
                     label: "Passing threshold",
-                    value: "80% minimum score required to earn the verified skill credential.",
+                    value: "Component thresholds required to earn the verified skill credential.",
                   },
                   {
                     icon: <Maximize2 className="h-4 w-4 text-[#78716C]" />,
@@ -1761,7 +1757,7 @@ function AssessmentContentWrapper() {
                     icon: <XCircle className="h-4 w-4 text-[#78716C]" />,
                     label: "Retake policy",
                     value:
-                      "Failing below 80% applies a 14-day cooldown before you can reattempt this assessment.",
+                      "Failing to meet component thresholds applies a 14-day cooldown before you can reattempt this assessment.",
                   },
                 ].map((rule, i) => (
                   <div key={i} className="flex items-start gap-3">
@@ -1789,7 +1785,7 @@ function AssessmentContentWrapper() {
                 <div className="border border-[#E7E2DA] bg-[#F8F6F3] p-4 rounded">
                   <div className="text-[12px] text-[#78716C] mb-1">Format</div>
                   <div className="text-[15px] font-semibold text-[#1C1917]">
-                    {content.hasCoding ? "15 MCQs + Coding" : `${content.mcqs.length} MCQs`}
+                    {content.hasCoding ? "15 MCQs + Coding" : `${content.mcqs?.length || 0} MCQs`}
                   </div>
                 </div>
               </div>
@@ -1867,7 +1863,7 @@ function AssessmentContentWrapper() {
             {/* Progress counter */}
             <div className="hidden sm:flex items-center gap-1.5 text-[11px] font-mono text-[#78716C] bg-[#FAF8F5] border border-[#E7E2DA] px-2.5 py-1 rounded">
               <span>MCQs:</span>
-              <strong className="text-[#1C1917]">{mcqAnswers.filter((a) => a !== undefined).length}/{content.mcqs.length}</strong>
+              <strong className="text-[#1C1917]">{mcqAnswers.filter((a) => a !== undefined).length}/{content.mcqs?.length || 0}</strong>
             </div>
 
             {/* Violation counter */}
@@ -1911,12 +1907,12 @@ function AssessmentContentWrapper() {
                       </span>
                     )}
                     <span>
-                      Answered: <strong className="text-[#1C1917]">{mcqAnswers.filter((a) => a !== undefined).length}</strong> / {content.mcqs.length}
+                      Answered: <strong className="text-[#1C1917]">{mcqAnswers.filter((a) => a !== undefined).length}</strong> / {content.mcqs?.length || 0}
                     </span>
                   </div>
                 </div>
                 <div className="flex flex-wrap gap-2">
-                  {content.mcqs.map((_, i) => {
+                  {(content.mcqs || []).map((_, i) => {
                     const isAnswered = mcqAnswers[i] !== undefined;
                     const isCurrent = mcqIndex === i;
                     const isFlagged = flaggedQuestions[i];
@@ -1948,7 +1944,7 @@ function AssessmentContentWrapper() {
                 <div className="flex flex-wrap items-center justify-between gap-2 pb-4 mb-4 border-b border-[#E7E2DA]">
                   <div className="flex items-center gap-2">
                     <span className="text-[11px] font-mono uppercase font-bold tracking-wider px-2 py-0.5 rounded bg-[#FAF8F5] border border-[#E7E2DA] text-[#1C1917]">
-                      Question {mcqIndex + 1} of {content.mcqs.length}
+                      Question {mcqIndex + 1} of {content.mcqs?.length || 0}
                     </span>
                     {content.mcqs[mcqIndex]?.difficulty && (
                       <span
@@ -2215,7 +2211,7 @@ function AssessmentContentWrapper() {
                           : "bg-white border-[#E7E2DA] text-[#1C1917]"
                       }`}
                     >
-                      {(content.coding?.supportedLanguages || COMMON_SUPPORTED_LANGUAGES).map((lang) => (
+                      {(content.codingTasks?.[activeCodingTaskIdx]?.supportedLanguages || content.coding?.supportedLanguages || COMMON_SUPPORTED_LANGUAGES).map((lang) => (
                         <option key={lang.id} value={lang.id}>
                           {lang.name}
                         </option>

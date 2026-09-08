@@ -3,11 +3,10 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Search, CheckCircle, ArrowRight, Database, Shield, Code, ChevronRight } from "lucide-react";
+import { CheckCircle, ArrowRight, Database, Shield, Code, ChevronRight, Lock } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
-import { getPlatformStats, getVerifiedCandidates } from "@/lib/firebase/home";
-import { CandidateProfile } from "@/lib/firebase/candidate";
+import { getPlatformStats } from "@/lib/firebase/home";
 import { useAuth } from "@/lib/auth/AuthContext";
 import { motion } from "framer-motion";
 import { HandwritingText } from "@/components/ui/handwriting-text";
@@ -30,11 +29,7 @@ const staggerContainer = {
 export default function HomePage() {
   const { user, role, loading: authLoading, profileLoading } = useAuth();
   const router = useRouter();
-  const [searchQuery, setSearchQuery] = useState("");
   const [stats, setStats] = useState({ registeredCandidates: 0, activeEmployers: 0, verifiedProfiles: 0 });
-  const [candidates, setCandidates] = useState<(CandidateProfile & { id: string })[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [displayedCandidates, setDisplayedCandidates] = useState<(CandidateProfile & { id: string })[]>([]);
 
   useEffect(() => {
     if (!authLoading && !profileLoading && user) {
@@ -51,43 +46,18 @@ export default function HomePage() {
   }, [user, role, authLoading, profileLoading, router]);
 
   useEffect(() => {
-    async function loadData() {
+    async function loadStats() {
       try {
-        const [fetchedStats, fetchedCandidates] = await Promise.all([
-          getPlatformStats(),
-          getVerifiedCandidates()
-        ]);
+        const fetchedStats = await getPlatformStats();
         setStats(fetchedStats);
-        setCandidates(fetchedCandidates);
-        setDisplayedCandidates(fetchedCandidates);
       } catch (err) {
-        console.error("Failed to load home page data:", err);
-      } finally {
-        setLoading(false);
+        console.error("Failed to load platform stats:", err);
       }
     }
     if (!user) {
-      loadData();
+      loadStats();
     }
   }, [user]);
-
-  const handleSearch = () => {
-    if (!searchQuery.trim()) {
-      setDisplayedCandidates(candidates);
-      return;
-    }
-    const query = searchQuery.toLowerCase().trim();
-    const filtered = candidates.filter(c => {
-      const hasSkill = c.skills?.some(skill => skill.toLowerCase().includes(query));
-      const hasTitle = c.branch?.toLowerCase().includes(query) || c.college?.toLowerCase().includes(query);
-      return hasSkill || hasTitle;
-    });
-    setDisplayedCandidates(filtered);
-  };
-
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') handleSearch();
-  };
 
   if (authLoading || (user && profileLoading) || user) {
     return (
@@ -195,7 +165,7 @@ export default function HomePage() {
             </div>
             <div>
               <div className="text-[10px] font-mono text-[#78716C] uppercase tracking-wider mb-1">Examination Score</div>
-              <div className="font-mono text-[#064E3B] font-semibold">94% (Threshold: 80%)</div>
+              <div className="font-mono text-[#064E3B] font-semibold">PASS (Threshold Met)</div>
             </div>
             <div>
               <div className="text-[10px] font-mono text-[#78716C] uppercase tracking-wider mb-1">Git Repository Audit</div>
@@ -234,7 +204,7 @@ export default function HomePage() {
               {
                 num: "01",
                 title: "Supervised Technical Examination",
-                detail: "Every candidate undergoes timed 45-minute programming challenges in isolated runtime sandboxes. Code is graded directly against hidden unit tests and edge-case suites, requiring an 80% composite mark for verification."
+                detail: "Every candidate undergoes timed 45-minute programming challenges in isolated runtime sandboxes. Code is graded directly against hidden unit tests and edge-case suites, requiring all component thresholds to be met for verification."
               },
               {
                 num: "02",
@@ -270,7 +240,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* SEARCH & PUBLIC DIRECTORY */}
+      {/* VERIFIED REGISTER PREVIEW & EMPLOYER ACCESS */}
       <section className="py-24 sm:py-32 bg-white">
         <div className="mx-auto max-w-4xl px-6 lg:px-8">
           
@@ -279,101 +249,97 @@ export default function HomePage() {
             whileInView="visible"
             viewport={{ once: true }}
             variants={fadeUp}
-            className="mb-12"
+            className="mb-10 text-left"
           >
             <div className="text-[11px] font-mono uppercase tracking-[0.25em] text-[#78716C] mb-2">
-              Public Register
+              Attestation Directory Preview
             </div>
-            <h2 className="text-2xl sm:text-3xl font-serif text-[#1C1917] tracking-tight mb-8">
+            <h2 className="text-2xl sm:text-3xl font-serif text-[#1C1917] tracking-tight mb-4">
               Verified Engineering Records
             </h2>
-            
-            <div className="flex flex-col sm:flex-row border border-[#1C1917] bg-white">
-              <div className="flex-1 flex items-center px-4 py-3">
-                <Search className="h-4 w-4 text-[#78716C] mr-3 shrink-0" />
-                <input 
-                  type="text" 
-                  placeholder="Search by skill, discipline, or institution..." 
-                  className="w-full bg-transparent focus:outline-none text-[#1C1917] placeholder:text-[#A8A29E] text-sm font-sans"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  onKeyDown={handleKeyDown}
-                />
-              </div>
-              <button 
-                className="px-6 py-3 bg-[#1C1917] text-white hover:bg-[#292524] text-xs font-mono uppercase tracking-wider transition-colors shrink-0"
-                onClick={handleSearch}
-              >
-                Search Register
-              </button>
-            </div>
+            <p className="text-sm text-[#525252] leading-relaxed max-w-2xl font-sans">
+              Candidates who clear our proctored compiler evaluations and repository audits are entered into the Meritlane Register. Each record contains cryptographic proof of technical capability.
+            </p>
           </motion.div>
-          
-          <div className="flex justify-between items-center mb-6 border-b border-[#E7E2DA] pb-3">
-            <h3 className="text-[11px] font-mono tracking-wider text-[#78716C] uppercase">
-              {searchQuery ? `Matching Records [${displayedCandidates.length}]` : "Recently Verified Candidates"}
-            </h3>
-          </div>
-          
-          {loading ? (
-            <div className="py-16 text-[#78716C] font-mono text-xs flex items-center gap-3">
-              <div className="h-3.5 w-3.5 border border-[#1C1917] border-t-transparent animate-spin"></div>
-              Accessing public register records...
-            </div>
-          ) : displayedCandidates.length === 0 ? (
-            <div className="border border-[#E7E2DA] bg-[#FAF8F5] p-10 text-left">
-              <h3 className="text-sm font-serif text-[#1C1917]">No verified records found</h3>
-              <p className="mt-1 text-xs text-[#78716C] font-mono">No registered candidates match the current search query.</p>
-            </div>
-          ) : (
-            <motion.div 
-              initial="hidden"
-              whileInView="visible"
-              viewport={{ once: true }}
-              variants={staggerContainer}
-              className="divide-y divide-[#E7E2DA] border border-[#E7E2DA]"
-            >
-              {displayedCandidates.map((c) => (
-                <motion.div key={c.id} variants={fadeUp} className="p-5 sm:p-6 bg-white hover:bg-[#FAF8F5] transition-colors">
-                  <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4">
-                    <div className="flex gap-4">
-                      <div className="h-10 w-10 bg-[#FAF8F5] border border-[#E7E2DA] flex items-center justify-center font-serif text-base text-[#1C1917] shrink-0">
-                        {c.name ? c.name.charAt(0).toUpperCase() : "C"}
-                      </div>
-                      <div>
-                        <div className="flex items-center gap-2 mb-1">
-                          <h4 className="text-base font-serif font-medium text-[#1C1917]">{c.name || "Candidate Record"}</h4>
-                          <span className="text-[10px] font-mono text-[#064E3B] bg-[#064E3B]/10 px-1.5 py-0.5 border border-[#064E3B]/20">Verified</span>
-                        </div>
-                        <div className="text-xs font-mono text-[#78716C] mb-3">
-                          {c.branch || "Engineering"} {c.gradYear ? `· Class of ${c.gradYear}` : ""} {c.college ? `· ${c.college}` : ""}
-                        </div>
-                        
-                        <div className="flex flex-wrap gap-1.5">
-                          {c.skills?.slice(0, 5).map((skill, idx) => (
-                            <span key={idx} className="px-2 py-0.5 border border-[#E7E2DA] text-[#1C1917] text-[10px] font-mono">
-                              {skill}
-                            </span>
-                          ))}
-                          {c.skills?.length > 5 && (
-                            <span className="text-[10px] font-mono text-[#78716C] px-1.5 py-0.5">+{c.skills.length - 5}</span>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                    
-                    <div className="shrink-0 self-start sm:self-center">
-                      <Link href={`/p/${c.id || (c as any).uid}`}>
-                        <Button variant="outline" size="sm" className="rounded-none border-[#E7E2DA] hover:border-[#1C1917] text-xs">
-                          Inspect Dossier
-                        </Button>
-                      </Link>
-                    </div>
+
+          {/* Illustrative Dossier Record Cards */}
+          <div className="divide-y divide-[#E7E2DA] border border-[#E7E2DA] bg-white mb-8">
+            {[
+              {
+                ref: "ML-2026-B849",
+                discipline: "Distributed Systems & Backend",
+                meta: "Class of 2026 · Autonomous Code Audited",
+                status: "VERIFIED · PASS",
+                skills: ["Node.js", "Python", "Docker", "PostgreSQL", "System Architecture"]
+              },
+              {
+                ref: "ML-2026-C192",
+                discipline: "Frontend & Web Engineering",
+                meta: "Class of 2025 · Runtime Evaluated",
+                status: "VERIFIED · PASS",
+                skills: ["React", "TypeScript", "Next.js", "Browser API", "State Engines"]
+              },
+              {
+                ref: "ML-2026-A504",
+                discipline: "Cloud Infrastructure & SRE",
+                meta: "Class of 2026 · Scenario Evaluated",
+                status: "VERIFIED · PASS",
+                skills: ["AWS", "Kubernetes", "Linux", "CI/CD", "Security Protocols"]
+              }
+            ].map((dossier) => (
+              <div key={dossier.ref} className="p-5 sm:p-6 bg-white hover:bg-[#FAF8F5] transition-colors flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div>
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="font-mono text-sm font-semibold text-[#1C1917]">{dossier.ref}</span>
+                    <span className="text-[10px] font-mono text-[#064E3B] bg-[#064E3B]/10 px-1.5 py-0.5 border border-[#064E3B]/20 font-medium">
+                      {dossier.status}
+                    </span>
                   </div>
-                </motion.div>
-              ))}
-            </motion.div>
-          )}
+                  <div className="text-xs font-serif text-[#1C1917] mb-1 font-medium">{dossier.discipline}</div>
+                  <div className="text-[11px] font-mono text-[#78716C] mb-3">{dossier.meta}</div>
+                  <div className="flex flex-wrap gap-1.5">
+                    {dossier.skills.map((s, idx) => (
+                      <span key={idx} className="px-2 py-0.5 border border-[#E7E2DA] text-[#1C1917] text-[10px] font-mono">
+                        {s}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="shrink-0 self-start sm:self-center">
+                  <Link href="/employer/dashboard">
+                    <Button variant="outline" size="sm" className="rounded-none border-[#E7E2DA] hover:border-[#1C1917] text-xs font-mono">
+                      Inspect Record →
+                    </Button>
+                  </Link>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Privacy & Secure Access Callout */}
+          <div className="border border-[#E7E2DA] bg-[#FAF8F5] p-6 sm:p-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
+            <div className="flex items-start gap-4">
+              <div className="h-9 w-9 bg-white border border-[#E7E2DA] flex items-center justify-center shrink-0 mt-0.5">
+                <Lock className="h-4 w-4 text-[#78716C]" />
+              </div>
+              <div>
+                <h4 className="text-sm font-serif font-medium text-[#1C1917] mb-1">
+                  Candidate Privacy & Confidentiality Shield
+                </h4>
+                <p className="text-xs text-[#525252] leading-relaxed max-w-xl font-sans">
+                  To protect candidates currently in school or employment, personal identities and dossier inspection are restricted to authenticated, verified hiring teams.
+                </p>
+              </div>
+            </div>
+
+            <Link href="/employer/dashboard" className="shrink-0 w-full sm:w-auto">
+              <Button variant="primary" size="md" className="rounded-none px-6 w-full text-xs font-mono uppercase tracking-wider">
+                Access Talent Pool
+              </Button>
+            </Link>
+          </div>
+
         </div>
       </section>
 

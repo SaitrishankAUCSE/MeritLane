@@ -157,6 +157,7 @@ export function AuthForm({ mode: initialMode }: AuthFormProps) {
       const provider = new GoogleAuthProvider();
       await signInWithPopup(auth, provider);
       posthog.capture(mode === "login" ? "user_logged_in" : "user_signed_up", { method: 'google' });
+      setLoadingAction(false);
     } catch (err: any) {
       setError(err.message || "Failed to authenticate with Google.");
       setLoadingAction(false);
@@ -167,17 +168,64 @@ export function AuthForm({ mode: initialMode }: AuthFormProps) {
     setLoadingAction(true);
     setError(null);
     try {
-      if (!user) throw new Error("No authenticated user found.");
-      if (!db) throw new Error("Firestore not initialized");
+      const currentUser = auth.currentUser || user;
+      if (!currentUser) throw new Error("No authenticated user found. Please try logging in again.");
 
-      await setDoc(doc(db, "users", user.uid), {
-        email: user.email,
-        role: role,
-        createdAt: new Date().toISOString(),
-      });
+      // 1. Assign role via authenticated server endpoint (bypasses any client Firestore permission issues)
+      try {
+        const idToken = await currentUser.getIdToken(true);
+        const res = await fetch("/api/auth/set-role", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${idToken}`,
+          },
+          body: JSON.stringify({ role }),
+        });
+        if (!res.ok) {
+          const errData = await res.json().catch(() => ({}));
+          console.warn("Server set-role fallback warning:", errData);
+        }
+      } catch (serverErr) {
+        console.warn("Server set-role error:", serverErr);
+      }
+
+      // 2. Also write to client Firestore if available
+      if (db) {
+        try {
+          await setDoc(doc(db, "users", currentUser.uid), {
+            email: currentUser.email || "",
+            displayName: currentUser.displayName || "",
+            role: role,
+            authProvider: "google",
+            createdAt: new Date().toISOString(),
+            lastLoginAt: new Date().toISOString(),
+          }, { merge: true });
+
+          if (role === "candidate") {
+            await setDoc(doc(db, "candidates", currentUser.uid), {
+              name: currentUser.displayName || "",
+              email: currentUser.email || "",
+              verificationStatus: "draft",
+              createdAt: new Date().toISOString(),
+            }, { merge: true });
+          }
+        } catch (dbErr) {
+          console.warn("Client Firestore write warning:", dbErr);
+        }
+      }
+
       await refreshAuth();
+
+      // 3. Immediate, reliable redirection to destination workspace
+      if (role === "employer") {
+        window.location.href = "/employer/dashboard";
+      } else {
+        window.location.href = "/candidate/dashboard";
+      }
     } catch (err: any) {
-      setError(err.message || "Failed to save role.");
+      console.error("handleRoleSelection error:", err);
+      setError(err.message || "Failed to save role. Please try again.");
       setLoadingAction(false);
     }
   };
@@ -260,9 +308,10 @@ export function AuthForm({ mode: initialMode }: AuthFormProps) {
 
                 <div className="grid grid-cols-2 gap-4">
                   <button
+                    type="button"
                     onClick={() => handleRoleSelection("candidate")}
                     disabled={loadingAction}
-                    className="flex flex-col items-center justify-center p-6 border border-[#E7E2DA] rounded-md hover:border-[#1C1917] hover:bg-[#FAF8F5] transition-all group disabled:opacity-50"
+                    className="flex flex-col items-center justify-center p-6 border border-[#E7E2DA] rounded-md hover:border-[#1C1917] hover:bg-[#FAF8F5] transition-all group disabled:opacity-50 cursor-pointer text-left"
                   >
                     <div className="w-12 h-12 bg-[#FAF8F5] border border-[#E7E2DA] rounded-md flex items-center justify-center mb-4 group-hover:bg-[#1C1917] group-hover:text-white transition-colors">
                       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
@@ -272,9 +321,10 @@ export function AuthForm({ mode: initialMode }: AuthFormProps) {
                   </button>
 
                   <button
+                    type="button"
                     onClick={() => handleRoleSelection("employer")}
                     disabled={loadingAction}
-                    className="flex flex-col items-center justify-center p-6 border border-[#E7E2DA] rounded-md hover:border-[#1C1917] hover:bg-[#FAF8F5] transition-all group disabled:opacity-50"
+                    className="flex flex-col items-center justify-center p-6 border border-[#E7E2DA] rounded-md hover:border-[#1C1917] hover:bg-[#FAF8F5] transition-all group disabled:opacity-50 cursor-pointer text-left"
                   >
                     <div className="w-12 h-12 bg-[#FAF8F5] border border-[#E7E2DA] rounded-md flex items-center justify-center mb-4 group-hover:bg-[#1C1917] group-hover:text-white transition-colors">
                       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="20" height="14" x="2" y="7" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>

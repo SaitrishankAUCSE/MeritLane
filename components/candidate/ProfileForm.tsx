@@ -10,6 +10,8 @@ import { Autocomplete } from "@/components/ui/Autocomplete";
 import { COMMON_DEGREES, getBranchesForDegree, YEARS, fetchIndianColleges, COMMON_SKILLS } from "@/lib/constants";
 import { useToast } from "@/components/ui/Toast";
 import { useUnsavedChanges } from "@/components/ui/UnsavedChangesGuard";
+import { InstitutionalResumeScanner } from "@/components/candidate/InstitutionalResumeScanner";
+import { ParsedResumeProfile } from "@/lib/resume/parser";
 
 interface ProfileFormProps {
   initialData: CandidateProfile | null;
@@ -29,7 +31,9 @@ export function ProfileForm({ initialData, onSave, onCancel, isNew = false }: Pr
   const [resumeFile, setResumeFile] = useState<File | null>(null);
   const [resumeFileName, setResumeFileName] = useState<string>("");
   const [isDragging, setIsDragging] = useState(false);
-  const [scanStage, setScanStage] = useState<number>(0);
+  const [scannerOpen, setScannerOpen] = useState(false);
+  const [parsedProfile, setParsedProfile] = useState<ParsedResumeProfile | null>(null);
+  const pendingParseDataRef = useRef<any>(null);
 
   const initialValues = useMemo(() => ({
     name: initialData?.name || user?.displayName || "",
@@ -121,17 +125,11 @@ export function ProfileForm({ initialData, onSave, onCancel, isNew = false }: Pr
       return;
     }
 
+    setScannerOpen(true);
     setAnalyzingAts(true);
     setError(null);
-    setScanStage(1);
-
-    const stageTimers: NodeJS.Timeout[] = [];
-    stageTimers.push(setTimeout(() => setScanStage(2), 1100));
-    stageTimers.push(setTimeout(() => setScanStage(3), 2200));
-    stageTimers.push(setTimeout(() => setScanStage(4), 3500));
-    stageTimers.push(setTimeout(() => setScanStage(5), 4700));
-
-    const startTime = Date.now();
+    setParsedProfile(null);
+    pendingParseDataRef.current = null;
 
     try {
       const token = await user?.getIdToken(true);
@@ -166,28 +164,56 @@ export function ProfileForm({ initialData, onSave, onCancel, isNew = false }: Pr
         throw new Error(data.error || "Failed to analyze resume.");
       }
 
-      // Ensure the deep MNC screening sequence displays deliberately (minimum 5.4s)
-      const elapsed = Date.now() - startTime;
-      if (elapsed < 5400) {
-        await new Promise((resolve) => setTimeout(resolve, 5400 - elapsed));
+      pendingParseDataRef.current = data;
+      if (data.parsed) {
+        setParsedProfile(data.parsed);
       }
-
-      setAtsResult(data.result);
-      if (data.extractedText && !formData.resumeText) {
-        setFormData((prev) => ({ ...prev, resumeText: data.extractedText }));
-      }
-
-      addToast({
-        type: "success",
-        title: `ATS Screening Benchmark: ${data.result.score}/100 (${data.result.rating})`,
-      });
     } catch (err: any) {
-      setError(err.message || "Unable to complete enterprise ATS analysis.");
-    } finally {
-      stageTimers.forEach(clearTimeout);
+      setError(err.message || "Unable to complete institutional resume parsing.");
+      setScannerOpen(false);
       setAnalyzingAts(false);
-      setScanStage(0);
     }
+  };
+
+  const handleScannerComplete = () => {
+    setScannerOpen(false);
+    setAnalyzingAts(false);
+
+    const data = pendingParseDataRef.current;
+    if (!data) return;
+
+    const parsed: ParsedResumeProfile | undefined = data.parsed;
+    const result = data.result;
+    const extractedText = data.extractedText;
+
+    if (parsed) {
+      setFormData((prev) => {
+        // Merge skills without duplicates
+        const currentSkills = new Set(prev.skills);
+        (parsed.skills || []).forEach((s) => currentSkills.add(s));
+
+        return {
+          ...prev,
+          name: prev.name && prev.name !== "Candidate" ? prev.name : (parsed.name || prev.name),
+          college: parsed.college || prev.college,
+          degree: parsed.degree || prev.degree,
+          branch: parsed.branch || prev.branch,
+          gradYear: parsed.gradYear || prev.gradYear,
+          githubUrl: parsed.githubUrl || prev.githubUrl,
+          skills: Array.from(currentSkills),
+          resumeText: extractedText || prev.resumeText,
+        };
+      });
+    }
+
+    if (result) {
+      setAtsResult(result);
+    }
+
+    addToast({
+      type: "success",
+      title: `Resume parsed: ${parsed?.skills?.length || 0} skills & academic profile auto-populated.`,
+    });
   };
 
   const handleSkillsChange = (newSkills: string[]) => {
@@ -252,70 +278,13 @@ export function ProfileForm({ initialData, onSave, onCancel, isNew = false }: Pr
     <>
       <GuardModal />
 
-      {/* Claude-Grade Resume Scanning & Parsing Modal Overlay with Background Blur */}
-      <AnimatePresence>
-        {analyzingAts && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md"
-          >
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95, y: 15 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 15 }}
-              className="w-full max-w-lg bg-[#FAF8F5] border border-[#E7E2DA] shadow-2xl p-7 sm:p-8 text-center relative overflow-hidden"
-            >
-              {/* Animated emerald laser scan beam running across document */}
-              <motion.div
-                animate={{ y: [0, 240, 0] }}
-                transition={{ duration: 2.2, repeat: Infinity, ease: "easeInOut" }}
-                className="absolute inset-x-0 h-0.5 bg-gradient-to-r from-transparent via-[#064E3B] to-transparent shadow-[0_0_12px_#064E3B] pointer-events-none"
-              />
-
-              <div className="mx-auto mb-4 h-14 w-14 bg-white border border-[#E7E2DA] flex items-center justify-center relative shadow-xs">
-                <FileText className="h-7 w-7 text-[#064E3B]" />
-                <div className="absolute inset-0 border border-[#064E3B] animate-ping opacity-20" />
-              </div>
-
-              <div className="text-[10px] font-mono tracking-[0.2em] text-[#064E3B] uppercase mb-1 font-semibold">
-                Enterprise ATS Engine · Fortune 500 Screening Protocol
-              </div>
-              <h3 className="font-serif text-[22px] sm:text-[26px] text-[#1C1917] font-normal mb-2">
-                Auditing Technical Dossier
-              </h3>
-              <p className="text-[13px] text-[#78716C] font-sans mb-6 max-w-md mx-auto">
-                Executing multi-pass institutional parsing against enterprise ATS benchmark standards...
-              </p>
-
-              {/* Step progression ledger */}
-              <div className="bg-white border border-[#E7E2DA] p-4 sm:p-5 text-left space-y-3 font-mono text-[11px] shadow-xs">
-                <div className={`flex items-center gap-2.5 transition-colors ${scanStage >= 1 ? "text-[#064E3B] font-medium" : "text-[#A8A29E]"}`}>
-                  <span className="text-[12px]">{scanStage > 1 ? "✓" : "⟳"}</span>
-                  <span>Document Layout: Extracting PDF AST tokens, glyphs & sections...</span>
-                </div>
-                <div className={`flex items-center gap-2.5 transition-colors ${scanStage >= 2 ? "text-[#064E3B] font-medium" : "text-[#A8A29E]"}`}>
-                  <span className="text-[12px]">{scanStage > 2 ? "✓" : scanStage === 2 ? "⟳" : "○"}</span>
-                  <span>Career Trajectory: Verifying role chronology & technical ownership...</span>
-                </div>
-                <div className={`flex items-center gap-2.5 transition-colors ${scanStage >= 3 ? "text-[#064E3B] font-medium" : "text-[#A8A29E]"}`}>
-                  <span className="text-[12px]">{scanStage > 3 ? "✓" : scanStage === 3 ? "⟳" : "○"}</span>
-                  <span>Impact Analysis: Auditing quantifiable metrics, latency & KPI density...</span>
-                </div>
-                <div className={`flex items-center gap-2.5 transition-colors ${scanStage >= 4 ? "text-[#064E3B] font-medium" : "text-[#A8A29E]"}`}>
-                  <span className="text-[12px]">{scanStage > 4 ? "✓" : scanStage === 4 ? "⟳" : "○"}</span>
-                  <span>Stack Conformance: Benchmarking skills against Tier-1 enterprise codebases...</span>
-                </div>
-                <div className={`flex items-center gap-2.5 transition-colors ${scanStage >= 5 ? "text-[#064E3B] font-medium" : "text-[#A8A29E]"}`}>
-                  <span className="text-[12px]">{scanStage === 5 ? "⟳" : "○"}</span>
-                  <span>Synthesis: Indexing candidate role matches & enterprise score...</span>
-                </div>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {/* 10-Second Institutional Resume Decompiler & ATS Audit Terminal */}
+      <InstitutionalResumeScanner
+        isOpen={scannerOpen}
+        fileName={resumeFileName || "resume.pdf"}
+        parsedData={parsedProfile}
+        onComplete={handleScannerComplete}
+      />
 
       {/* Local in-form cancel confirmation when clicking Cancel with unsaved edits */}
       {showCancelConfirm && (

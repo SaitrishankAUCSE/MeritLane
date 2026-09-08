@@ -3,56 +3,93 @@ import { adminAuth, adminDb } from "@/lib/firebase/admin";
 import { FieldValue } from "firebase-admin/firestore";
 
 export async function POST(req: NextRequest) {
+  if (!adminAuth || !adminDb) {
+    return NextResponse.json({ error: "Server misconfiguration" }, { status: 500 });
+  }
+
+  const authHeader = req.headers.get("Authorization");
+  if (!authHeader?.startsWith("Bearer ")) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  const idToken = authHeader.split("Bearer ")[1];
+  let decodedToken;
   try {
-    if (!adminAuth || !adminDb) {
-      return NextResponse.json({ error: "Server misconfiguration" }, { status: 500 });
-    }
+    decodedToken = await adminAuth.verifyIdToken(idToken);
+  } catch {
+    return NextResponse.json({ error: "Invalid token" }, { status: 401 });
+  }
 
-    const authHeader = req.headers.get("Authorization");
-    if (!authHeader?.startsWith("Bearer ")) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+  const uid = decodedToken.uid;
+  const userRef = adminDb.collection("users").doc(uid);
+  const userDoc = await userRef.get();
 
-    const idToken = authHeader.split("Bearer ")[1];
-    let decodedToken;
-    try {
-      decodedToken = await adminAuth.verifyIdToken(idToken);
-    } catch {
-      return NextResponse.json({ error: "Invalid token" }, { status: 401 });
-    }
+  if (!userDoc.exists) {
+    return NextResponse.json({ error: "User not found" }, { status: 404 });
+  }
 
-    const uid = decodedToken.uid;
-    const body = await req.json();
-    const { skill, type, count, timestamp = Date.now() } = body;
+  const userData = userDoc.data() || {};
+  const skill = userData.assessmentSkill;
+  
+  if (!skill) {
+    // If no active assessment, tracking a violation doesn't make sense.
+    return NextResponse.json({ error: "No active assessment found" }, { status: 400 });
+  }
 
-    if (!skill || !type) {
-      return NextResponse.json({ error: "Missing required parameters" }, { status: 400 });
-    }
+  // Atomically increment the violation count for the current attempt
+  const violationCount = (userData.assessmentViolationCount || 0) + 1;
 
-    const userRef = adminDb.collection("users").doc(uid);
-    const candidateRef = adminDb.collection("candidates").doc(uid);
+  if (violationCount === 1) {
+    await userRef.update({
+      assessmentViolationCount: violationCount,
+      assessmentLastViolationAt: Date.now()
+    });
+    return NextResponse.json({ 
+      action: "warn", 
+      message: "Proctoring violation recorded. Next violation will terminate the assessment." 
+    }, { status: 200 });
+  }
 
-    const infractionRecord = {
-      skill,
-      type,
-      count,
-      timestamp,
-      recordedAt: Date.now()
+  if (violationCount >= 2) {
+    // Second violation -> Terminate the assessment and apply a 3-month lockout
+    const lockoutTimestamp = Date.now() + (90 * 24 * 60 * 60 * 1000); // 90 days
+
+    const sessionClearFields = {
+      assessmentStartedAt: FieldValue.delete(),
+      assessmentVariant: FieldValue.delete(),
+      assessmentSkill: FieldValue.delete(),
+      assessmentSeed: FieldValue.delete(),
+      assessmentEasyQuestionId: FieldValue.delete(),
+      assessmentMediumQuestionId: FieldValue.delete(),
+      assessmentMcqIds: FieldValue.delete(),
+      assessmentViolationCount: FieldValue.delete(),
+      assessmentLastViolationAt: FieldValue.delete()
     };
 
-    await Promise.all([
-      userRef.update({
-        assessmentInfractions: FieldValue.arrayUnion(infractionRecord),
-        lastInfractionAt: timestamp
-      }),
-      candidateRef.update({
-        assessmentInfractions: FieldValue.arrayUnion(infractionRecord)
-      }).catch(() => {})
-    ]);
+    const batch = adminDb.batch();
+    
+    // 1. Update User Record
+    batch.update(userRef, {
+      [`failedAssessments.${skill}`]: FieldValue.serverTimestamp(), // standard failure fallback
+      proctoringLockoutUntil: lockoutTimestamp, // 3-month global lockout
+      [`proctoringTerminations.${skill}`]: FieldValue.serverTimestamp(), // distinct termination flag
+      ...sessionClearFields
+    });
 
-    return NextResponse.json({ success: true, recorded: true });
-  } catch (error: any) {
-    console.error("Error recording integrity infraction:", error);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    // 2. Update Candidate Record
+    const candidateRef = adminDb.collection("candidates").doc(uid);
+    batch.set(candidateRef, {
+      verificationStatus: "unverified",
+      [`failedAssessments.${skill}`]: FieldValue.serverTimestamp()
+    }, { merge: true });
+
+    await batch.commit();
+
+    return NextResponse.json({ 
+      action: "terminate", 
+      message: "Assessment terminated due to repeated proctoring violations. A 3-month lockout has been applied." 
+    }, { status: 200 });
   }
+
+  return NextResponse.json({ success: true }, { status: 200 });
 }

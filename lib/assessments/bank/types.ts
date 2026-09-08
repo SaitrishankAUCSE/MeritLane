@@ -19,7 +19,12 @@ export interface CodingQuestion {
   starterCode: {
     python: string;
     javascript?: string;
+    java?: string;
+    cpp?: string;
+    typescript?: string;
+    sql?: string;
   };
+  supportedLanguages?: Array<{ id: string; name: string }>;
   /** Exactly 5 public test cases — shown after "Run Code" */
   publicTests: TestCase[];
   /** 45 hidden test cases — NEVER sent to the client */

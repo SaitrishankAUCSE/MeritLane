@@ -165,7 +165,7 @@ export default function CandidateDashboardPage() {
         steps={[
           { title: "Review Claims", description: "Audit declared skills against evidence requirements.", isCompleted: true },
           { title: "Link Artifacts", description: "Attach GitHub repositories or live deployed URLs.", isCompleted: projects.length > 0 },
-          { title: "Proctored Evaluation", description: "Complete timed assessments for 80%+ verified proof.", isCompleted: verifiedSkillsCount > 0 }
+          { title: "Proctored Evaluation", description: "Complete timed assessments for verified proof.", isCompleted: verifiedSkillsCount > 0 }
         ]}
         ctaLabel="Take Assessment"
         ctaHref="/candidate/verification"
@@ -250,7 +250,7 @@ export default function CandidateDashboardPage() {
               />
             </div>
             <div className="text-[11.5px] font-sans text-[#78716C]">
-              {healthIndex >= 80 ? "Record meets hiring threshold" : "Complete evaluations to reach 80%"}
+              {healthIndex >= 80 ? "Record meets hiring threshold" : "Complete evaluations to reach verified status"}
             </div>
           </div>
 
