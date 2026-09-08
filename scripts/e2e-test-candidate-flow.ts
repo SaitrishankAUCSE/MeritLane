@@ -171,16 +171,18 @@ async function runEndToEndVerification() {
     const parts = line.split(',').map(s => s.trim());
     if (parts.length >= 4) {
       const uid = parts[1];
-      const amt = parseFloat(parts[2]);
+      const amtStr = parts[2];
       const status = parts[3];
-      if (status && status.toUpperCase() === 'COMPLETED' && !isNaN(amt)) {
+      const amt = Number(amtStr);
+      if (status === 'COMPLETED' && !isNaN(amt)) {
         totals[uid] = (totals[uid] || 0) + amt;
       }
     } else if (parts.length === 3) {
       const uid = parts[0];
-      const amt = parseFloat(parts[1]);
+      const amtStr = parts[1];
       const status = parts[2];
-      if (status && status.toUpperCase() === 'COMPLETED' && !isNaN(amt)) {
+      const amt = Number(amtStr);
+      if (status === 'COMPLETED' && !isNaN(amt)) {
         totals[uid] = (totals[uid] || 0) + amt;
       }
     }
@@ -241,15 +243,17 @@ async function runEndToEndVerification() {
   const employerIdToken = employerTokenData.idToken;
 
   const discoverRes = await fetch("https://merit-lane.vercel.app/api/employer/discover", {
-    method: "GET",
+    method: "POST",
     headers: {
+      "Content-Type": "application/json",
       Authorization: `Bearer ${employerIdToken}`,
     },
+    body: JSON.stringify({}),
   });
 
   const discoverData = await discoverRes.json();
   console.log(`  Employer Discover HTTP Status: ${discoverRes.status}`);
-  const matchingCandidate = (discoverData.candidates || []).find((c: any) => c.id === uid);
+  const matchingCandidate = (discoverData.candidates || []).find((c: any) => c.uid === uid || c.id === uid);
 
   if (matchingCandidate) {
     console.log(`  PASS: Candidate found in Employer Portal!`);
