@@ -3,6 +3,7 @@
 import React, { useEffect, useState, useRef, Suspense, useCallback, useMemo } from "react";
 import { useAuth } from "@/lib/auth/AuthContext";
 import { useRouter, useSearchParams } from "next/navigation";
+import dynamic from "next/dynamic";
 import {
   Play,
   CheckCircle2,
@@ -11,6 +12,7 @@ import {
   ShieldAlert,
   Monitor,
   Maximize2,
+  Minimize2,
   XCircle,
   Code,
   ChevronLeft,
@@ -37,6 +39,15 @@ import { MeritlaneLoader } from "@/components/ui/MeritlaneLoader";
 import { AssessmentWatermark } from "@/components/candidate/AssessmentWatermark";
 
 import { COMMON_SUPPORTED_LANGUAGES, SupportedLanguage } from "@/lib/assessments/content";
+
+const MonacoEditor = dynamic(() => import("@monaco-editor/react"), {
+  ssr: false,
+  loading: () => (
+    <div className="flex-1 flex items-center justify-center bg-[#0D1117] text-[#8B949E] font-mono text-[13px]">
+      Loading Editor...
+    </div>
+  ),
+});
 
 export interface MCQ {
   question: string;
@@ -271,6 +282,7 @@ function AssessmentContentWrapper() {
   const [flaggedQuestions, setFlaggedQuestions] = useState<boolean[]>([]);
   const [showResetConfirm, setShowResetConfirm] = useState(false);
   const [draftSavedToast, setDraftSavedToast] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [cursorPos, setCursorPos] = useState({ line: 1, col: 1 });
   const [selectedCaseIdx, setSelectedCaseIdx] = useState<number>(0);
@@ -303,6 +315,14 @@ function AssessmentContentWrapper() {
   const terminatingRef = useRef(false);
   // Ref for synchronized line numbers scrolling
   const lineNumbersRef = useRef<HTMLDivElement>(null);
+
+  // ── Browser Integrity Listeners ───────────────────────────────────────────
+
+  useEffect(() => {
+    const onFsChange = () => setIsFullscreen(Boolean(document.fullscreenElement));
+    document.addEventListener("fullscreenchange", onFsChange);
+    return () => document.removeEventListener("fullscreenchange", onFsChange);
+  }, []);
 
   // ── Init assessment ─────────────────────────────────────────────────────────
 
@@ -743,16 +763,47 @@ function AssessmentContentWrapper() {
     });
   };
 
-  const handleResetCode = () => {
-    if (!content?.coding) return;
-    const langs = content.codingTasks?.[activeCodingTaskIdx]?.supportedLanguages || content.coding?.supportedLanguages || COMMON_SUPPORTED_LANGUAGES;
-    const found = langs.find((l) => l.id === selectedLanguage);
-    if (found && found.template) {
-      setCode(found.template);
+  const handleCodeChange = (newVal: string) => {
+    setCode(newVal);
+    if (activeCodingTaskIdx === 0) {
+      setCodeEasy(newVal);
     } else {
-      const initialCode = content.codingTasks?.[activeCodingTaskIdx]?.initialCode || content.coding?.initialCode || "";
-      setCode(initialCode);
+      setCodeMedium(newVal);
     }
+  };
+
+  const handleSwitchCodingTask = (targetIdx: 0 | 1) => {
+    if (targetIdx === activeCodingTaskIdx) return;
+    if (activeCodingTaskIdx === 0) {
+      setCodeEasy(code);
+    } else {
+      setCodeMedium(code);
+    }
+    const targetCode = targetIdx === 0
+      ? (codeEasy || content?.codingTasks?.[0]?.initialCode || "")
+      : (codeMedium || content?.codingTasks?.[1]?.initialCode || "");
+    setCode(targetCode);
+    setActiveCodingTaskIdx(targetIdx);
+  };
+
+  const toggleFullscreen = async () => {
+    try {
+      if (document.fullscreenElement) {
+        await document.exitFullscreen().catch(() => {});
+        setIsFullscreen(false);
+      } else {
+        const ok = await requestFullscreenSafe();
+        setIsFullscreen(ok);
+      }
+    } catch (e) {
+      console.warn("Fullscreen toggle failed:", e);
+    }
+  };
+
+  const handleResetCode = () => {
+    if (!content?.coding && (!content?.codingTasks || content.codingTasks.length === 0)) return;
+    const initialCode = content?.codingTasks?.[activeCodingTaskIdx]?.initialCode || content?.coding?.initialCode || "";
+    handleCodeChange(initialCode);
     setShowResetConfirm(false);
   };
 
@@ -908,9 +959,8 @@ function AssessmentContentWrapper() {
     try {
       const token = user ? await user.getIdToken(true) : "";
       const isDualTask = !!(content?.codingTasks && content.codingTasks.length >= 2);
-      const activeCode = isDualTask
-        ? (activeCodingTaskIdx === 0 ? codeEasy : codeMedium)
-        : code;
+      // Ensure the currently active code in editor is sent
+      const activeCode = code;
       const activeQuestion = isDualTask
         ? content!.codingTasks![activeCodingTaskIdx]
         : content?.coding;
@@ -1010,11 +1060,11 @@ function AssessmentContentWrapper() {
         body: JSON.stringify({
           skill: skillParam,
           answers: mcqAnswers,
-          // Dual-task: send easy + medium separately
-          easyCode: isDualTask ? codeEasy : undefined,
-          mediumCode: isDualTask ? codeMedium : undefined,
+          // Dual-task: send easy + medium separately, ensuring current editor code is used for active task
+          easyCode: isDualTask ? (activeCodingTaskIdx === 0 ? code : (codeEasy || code)) : undefined,
+          mediumCode: isDualTask ? (activeCodingTaskIdx === 1 ? code : (codeMedium || code)) : undefined,
           // Legacy fallback
-          code: isDualTask ? undefined : code,
+          code: code,
           language: selectedLanguage,
           isPublicTest: false,
         }),
@@ -1851,8 +1901,8 @@ function AssessmentContentWrapper() {
         skill={skillParam}
       />
 
-      <div className="flex h-full w-full flex-col bg-[#F8F6F3] overflow-hidden border-l border-[#E7E2DA]">
-        <header className="flex items-center justify-between border-b border-[#E7E2DA] px-4 sm:px-6 py-3 shrink-0 bg-white/95 backdrop-blur-xs">
+      <div className="fixed inset-0 z-40 flex h-screen w-screen flex-col bg-[#F8F6F3] overflow-hidden">
+        <header className="flex items-center justify-between border-b border-[#E7E2DA] px-4 sm:px-6 py-2.5 shrink-0 bg-white/95 backdrop-blur-xs">
           <div className="flex items-center gap-3 truncate mr-4">
             <span className="font-mono text-[11px] font-bold tracking-[0.2em] uppercase text-[#1C1917] shrink-0">
               MERITLANE
@@ -1862,9 +1912,18 @@ function AssessmentContentWrapper() {
               <ShieldAlert className="h-3 w-3 text-[#064E3B]" />
               {skillParam} Verification
             </span>
-            <span className="hidden md:inline-flex items-center gap-1.5 text-[11px] font-mono text-[#78716C] bg-[#FAF8F5] border border-[#E7E2DA] px-2 py-0.5 rounded">
-              <Maximize2 className="h-2.5 w-2.5 text-[#064E3B]" /> Proctored Session
-            </span>
+            <button
+              onClick={toggleFullscreen}
+              className={`inline-flex items-center gap-1.5 text-[11px] font-mono font-medium px-2.5 py-0.5 rounded border transition-colors cursor-pointer ${
+                isFullscreen
+                  ? "bg-[#064E3B] text-white border-[#064E3B]"
+                  : "bg-[#FAF8F5] text-[#78716C] hover:text-[#1C1917] border-[#E7E2DA]"
+              }`}
+              title={isFullscreen ? "Exit Fullscreen" : "Enter Fullscreen Mode"}
+            >
+              {isFullscreen ? <Minimize2 className="h-3 w-3" /> : <Maximize2 className="h-3 w-3 text-[#064E3B]" />}
+              <span className="hidden md:inline">{isFullscreen ? "Exit Fullscreen" : "Fullscreen"}</span>
+            </button>
           </div>
           <div className="flex items-center gap-3">
             {/* Progress counter */}
@@ -2063,12 +2122,12 @@ function AssessmentContentWrapper() {
           </div>
         )}
 
-        {phase === "coding" && content.coding && (
+        {phase === "coding" && (content.coding || (content.codingTasks && content.codingTasks.length > 0)) && (
           <div className="flex flex-col lg:flex-row flex-1 overflow-hidden p-3 gap-3 bg-[#F4F1EA] min-h-0">
             {/* Left Pane: Problem Description & Guidelines */}
             <div className="w-full lg:w-[42%] lg:max-w-[560px] bg-white border border-[#E7E2DA] rounded flex flex-col h-[38vh] lg:h-full shrink-0 overflow-hidden shadow-xs min-h-0">
               {/* Problem Tab Header */}
-              <div className="flex items-center justify-between border-b border-[#E7E2DA] bg-[#FAF8F5] px-4 py-2.5 shrink-0">
+              <div className="flex items-center justify-between border-b border-[#E7E2DA] bg-[#FAF8F5] px-4 py-2 shrink-0">
                 <div className="flex items-center gap-2 truncate mr-2">
                   <button
                     onClick={() => setPhase("mcq")}
@@ -2076,11 +2135,36 @@ function AssessmentContentWrapper() {
                   >
                     <ChevronLeft className="h-3 w-3" /> MCQs ({mcqAnswers.filter((a) => a !== undefined).length}/{content.mcqs.length})
                   </button>
-                  <span className="text-[11px] font-mono font-semibold uppercase tracking-wider text-[#064E3B] bg-[#064E3B]/10 px-2 py-0.5 rounded shrink-0">
-                    Challenge
-                  </span>
+                  {content.codingTasks && content.codingTasks.length >= 2 ? (
+                    <div className="flex items-center gap-1 bg-[#EFECE6] p-0.5 rounded border border-[#E7E2DA]">
+                      <button
+                        onClick={() => handleSwitchCodingTask(0)}
+                        className={`px-2.5 py-0.5 text-[11px] font-mono font-semibold rounded transition-colors cursor-pointer ${
+                          activeCodingTaskIdx === 0
+                            ? "bg-white text-[#1C1917] shadow-xs"
+                            : "text-[#78716C] hover:text-[#1C1917]"
+                        }`}
+                      >
+                        Task 1 (Easy)
+                      </button>
+                      <button
+                        onClick={() => handleSwitchCodingTask(1)}
+                        className={`px-2.5 py-0.5 text-[11px] font-mono font-semibold rounded transition-colors cursor-pointer ${
+                          activeCodingTaskIdx === 1
+                            ? "bg-white text-[#1C1917] shadow-xs"
+                            : "text-[#78716C] hover:text-[#1C1917]"
+                        }`}
+                      >
+                        Task 2 (Medium)
+                      </button>
+                    </div>
+                  ) : (
+                    <span className="text-[11px] font-mono font-semibold uppercase tracking-wider text-[#064E3B] bg-[#064E3B]/10 px-2 py-0.5 rounded shrink-0">
+                      Challenge
+                    </span>
+                  )}
                   <span className="text-[13px] font-sans font-semibold text-[#1C1917] truncate">
-                    {content.coding.title}
+                    {(content.codingTasks?.[activeCodingTaskIdx] || content.coding)?.title}
                   </span>
                 </div>
                 <span className="text-[11px] font-mono text-[#78716C] bg-white border border-[#E7E2DA] px-2 py-0.5 rounded shrink-0">
@@ -2095,7 +2179,7 @@ function AssessmentContentWrapper() {
                     Description &amp; Specifications
                   </h3>
                   <div className="text-[14px] leading-relaxed text-[#1C1917] whitespace-pre-wrap font-sans space-y-3 bg-[#FAF8F5] p-4 rounded border border-[#E7E2DA]">
-                    {content.coding.instructions}
+                    {(content.codingTasks?.[activeCodingTaskIdx] || content.coding)?.instructions}
                   </div>
                 </div>
 
@@ -2259,48 +2343,46 @@ function AssessmentContentWrapper() {
                   </div>
                 </div>
 
-                {/* Editor Area with Synchronous Line Numbers Scroll */}
-                <div className={`flex-1 min-h-0 relative flex overflow-hidden ${
-                  editorTheme === "dark" ? "bg-[#0D1117]" : "bg-[#FAFAF9]"
-                }`}>
-                  {/* Line Numbers Column */}
-                  <div
-                    ref={lineNumbersRef}
-                    className={`w-12 py-4 select-none text-right pr-3 font-mono text-[12px] leading-[1.6] overflow-hidden shrink-0 pointer-events-none border-r ${
-                      editorTheme === "dark"
-                        ? "bg-[#161B22] border-[#30363D] text-[#484F58]"
-                        : "bg-[#F5F5F4] border-[#E7E2DA] text-[#A8A29E]"
-                    }`}
-                  >
-                    {(code || "").split("\n").map((_, i) => (
-                      <div key={i}>{i + 1}</div>
-                    ))}
-                  </div>
-                  {/* Code Input */}
-                  <textarea
-                    ref={textareaRef}
+                {/* Monaco Editor (LeetCode 100% Experience) */}
+                <div className="flex-1 min-h-0 relative w-full h-full overflow-hidden bg-[#0D1117]">
+                  <MonacoEditor
+                    height="100%"
+                    language={
+                      selectedLanguage === "python" ? "python" :
+                      selectedLanguage === "javascript" ? "javascript" :
+                      selectedLanguage === "typescript" ? "typescript" :
+                      selectedLanguage === "java" ? "java" :
+                      selectedLanguage === "cpp" ? "cpp" :
+                      selectedLanguage === "sql" ? "sql" : "python"
+                    }
+                    theme={editorTheme === "dark" ? "vs-dark" : "light"}
                     value={code}
-                    onChange={(e) => {
-                      setCode(e.target.value);
-                      updateCursorPosition();
+                    onChange={(val) => handleCodeChange(val || "")}
+                    options={{
+                      fontSize: editorFontSize,
+                      fontFamily: "'Fira Code', 'Cascadia Code', Consolas, Monaco, monospace",
+                      fontLigatures: true,
+                      minimap: { enabled: false },
+                      scrollBeyondLastLine: false,
+                      lineNumbers: "on",
+                      lineNumbersMinChars: 3,
+                      glyphMargin: false,
+                      folding: true,
+                      lineDecorationsWidth: 10,
+                      roundedSelection: true,
+                      automaticLayout: true,
+                      tabSize: 4,
+                      insertSpaces: true,
+                      autoIndent: "full",
+                      formatOnPaste: true,
+                      formatOnType: true,
+                      wordWrap: "on",
+                      cursorBlinking: "smooth",
+                      cursorSmoothCaretAnimation: "on",
+                      suggestOnTriggerCharacters: true,
+                      acceptSuggestionOnEnter: "on",
+                      padding: { top: 12, bottom: 12 },
                     }}
-                    onKeyUp={updateCursorPosition}
-                    onClick={updateCursorPosition}
-                    onKeyDown={handleEditorKeyDown}
-                    onScroll={(e) => {
-                      if (lineNumbersRef.current) {
-                        lineNumbersRef.current.scrollTop = e.currentTarget.scrollTop;
-                      }
-                    }}
-                    spellCheck={false}
-                    aria-label="Code editor"
-                    style={{ fontSize: `${editorFontSize}px` }}
-                    className={`flex-1 min-h-0 h-full resize-none overflow-y-auto overflow-x-auto bg-transparent font-mono leading-[1.6] outline-none p-4 ${
-                      editorTheme === "dark"
-                        ? "text-[#E6EDF3] selection:bg-[#264F78] placeholder-[#484F58]"
-                        : "text-[#1C1917] selection:bg-[#064E3B] selection:text-white placeholder-[#A8A29E]"
-                    }`}
-                    placeholder="// Write your solution implementation here... (Tab to indent 4 spaces, Ctrl+Enter to run 5 tests, Ctrl+S to save draft)"
                   />
                 </div>
 
