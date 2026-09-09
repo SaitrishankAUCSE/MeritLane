@@ -1077,13 +1077,17 @@ function AssessmentContentWrapper() {
 
       if (!res.ok) {
         setSubmittingModal(false);
+        setEvaluating(false);
+        if (res.status === 503 || data.retryable) {
+          setOutput((prev) => prev + "\n[Infrastructure Notice] " + (data.error || "Evaluation sandbox temporarily unreachable. Your attempt was NOT consumed. Please click Submit again."));
+          return;
+        }
         setOutput((prev) => prev + "\n" + (data.error || "Evaluation failed."));
         if (res.status !== 501) {
           setTimeout(() => {
             handleFail();
           }, 1500);
         }
-        setEvaluating(false);
         return;
       }
 

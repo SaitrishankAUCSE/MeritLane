@@ -103,6 +103,13 @@ export async function POST(req: NextRequest) {
         questionId: questionId || easyQId || undefined,
       });
 
+      if (execResult.isInfrastructureError) {
+        return NextResponse.json({
+          error: "Compiler sandbox is temporarily unreachable due to network latency. Please click Run again.",
+          retryable: true,
+        }, { status: 503 });
+      }
+
       return NextResponse.json({
         success: execResult.success,
         isPublicTest: true,
@@ -134,13 +141,21 @@ export async function POST(req: NextRequest) {
         variant,
         questionId: easyQId,
       });
+
+      if (easyExec.isInfrastructureError) {
+        return NextResponse.json({
+          error: "Assessment compiler sandbox is temporarily unreachable due to network latency. Your session and attempt have NOT been consumed. Please click Submit again.",
+          retryable: true,
+        }, { status: 503 });
+      }
+
       easyResult = {
         passedTests: easyExec.passedTests,
         totalTests: easyExec.totalTests || 50,
         passed: easyExec.passedTests === (easyExec.totalTests || 50),
       };
 
-      let mediumExec = { passedTests: 0, totalTests: 50 };
+      let mediumExec: { passedTests: number; totalTests: number; isInfrastructureError?: boolean } = { passedTests: 0, totalTests: 50 };
       if (mediumCode) {
         const res = await executeCode({
           skill,
@@ -150,6 +165,14 @@ export async function POST(req: NextRequest) {
           variant,
           questionId: mediumQId,
         });
+
+        if (res.isInfrastructureError) {
+          return NextResponse.json({
+            error: "Assessment compiler sandbox is temporarily unreachable due to network latency. Your session and attempt have NOT been consumed. Please click Submit again.",
+            retryable: true,
+          }, { status: 503 });
+        }
+
         mediumExec = { passedTests: res.passedTests, totalTests: res.totalTests || 50 };
       }
       mediumResult = {
@@ -160,6 +183,14 @@ export async function POST(req: NextRequest) {
     } else if (hasCodingSubmission) {
       // Legacy single-task execution
       const execResult = await executeCode({ skill, code: code || easyCode, language, isPublicTest: false, variant, customInput });
+
+      if (execResult.isInfrastructureError) {
+        return NextResponse.json({
+          error: "Assessment compiler sandbox is temporarily unreachable due to network latency. Your session and attempt have NOT been consumed. Please click Submit again.",
+          retryable: true,
+        }, { status: 503 });
+      }
+
       const pct = execResult.totalTests > 0 ? (execResult.passedTests / execResult.totalTests) * 100 : 0;
       easyResult = { passedTests: execResult.passedTests, totalTests: execResult.totalTests || 50, passed: pct >= 100 };
       mediumResult = { passedTests: execResult.passedTests, totalTests: execResult.totalTests || 50, pct: Math.round(pct) };

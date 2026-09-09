@@ -20,6 +20,7 @@ export interface ExecutionResult {
   cases: TestCaseResult[];
   passedTests: number;
   totalTests: number;
+  isInfrastructureError?: boolean;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -448,12 +449,28 @@ print("__RESULT_JSON__" + json.dumps({"stdout": user_stdout, "cases": cases}))
           compilerOptions: { executorRequest: true },
         },
       }),
+      signal: AbortSignal.timeout(9000),
     });
 
     if (res.ok) {
       const data = await res.json();
       const stdout = (data.stdout || []).map((l: any) => l.text).join("\n");
       const stderr = (data.stderr || []).map((l: any) => l.text).join("\n");
+
+      // Handle Godbolt backend container timeout (candidate code ran infinite loop)
+      if (data.timedOut) {
+        return {
+          success: false,
+          compileSuccess: true,
+          stdout: stdout,
+          stderr: "Time Limit Exceeded (5000ms). Execution timed out inside container boundary (infinite loop or high complexity).",
+          durationMs: Date.now() - startTime,
+          cases: [],
+          passedTests: 0,
+          totalTests: isPublicTest ? 5 : 50,
+          isInfrastructureError: false,
+        };
+      }
 
       if (stdout.includes("CRITICAL_COMPILE_ERROR:")) {
         const err = stdout.split("CRITICAL_COMPILE_ERROR:")[1];
@@ -484,9 +501,33 @@ print("__RESULT_JSON__" + json.dumps({"stdout": user_stdout, "cases": cases}))
           totalTests: (parsed.cases || []).length || (isPublicTest ? 5 : 50),
         };
       }
+    } else {
+      // Remote compiler returned non-200 (infrastructure failure)
+      return {
+        success: false,
+        compileSuccess: false,
+        stdout: "",
+        stderr: `Compiler service temporarily unavailable (status ${res.status}).`,
+        durationMs: Date.now() - startTime,
+        cases: [],
+        passedTests: 0,
+        totalTests: isPublicTest ? 5 : 50,
+        isInfrastructureError: true,
+      };
     }
   } catch (err) {
     console.error("Godbolt execution failed:", err);
+    return {
+      success: false,
+      compileSuccess: false,
+      stdout: "",
+      stderr: "Compiler sandbox connection error. Infrastructure temporarily unreachable.",
+      durationMs: Date.now() - startTime,
+      cases: [],
+      passedTests: 0,
+      totalTests: isPublicTest ? 5 : 50,
+      isInfrastructureError: true,
+    };
   }
 
   // Pure AST fallback if all online/local runners are offline
@@ -1402,11 +1443,26 @@ print("__RESULT_JSON__" + json.dumps({"compileSuccess": True, "error": None, "st
           compilerOptions: { executorRequest: true },
         },
       }),
+      signal: AbortSignal.timeout(9000),
     });
     if (res.ok) {
       const data = await res.json();
       const stdoutBuf = (data.stdout || []).map((l: any) => l.text).join("\n");
       const stderrBuf = (data.stderr || []).map((l: any) => l.text).join("\n");
+
+      if (data.timedOut) {
+        return {
+          success: false,
+          compileSuccess: true,
+          stdout: stdoutBuf,
+          stderr: "Time Limit Exceeded (5000ms). Execution timed out inside container boundary.",
+          durationMs: Date.now() - startTime,
+          cases: [],
+          passedTests: 0,
+          totalTests: isPublicTest ? 5 : 50,
+          isInfrastructureError: false,
+        };
+      }
       
       if (stdoutBuf.includes("__RESULT_JSON__")) {
         const jsonStr = stdoutBuf.split("__RESULT_JSON__")[1].trim();
@@ -1423,9 +1479,31 @@ print("__RESULT_JSON__" + json.dumps({"compileSuccess": True, "error": None, "st
           totalTests: (parsed.cases || []).length || (isPublicTest ? 5 : 50),
         };
       }
+    } else {
+      return {
+        success: false,
+        compileSuccess: false,
+        stdout: "",
+        stderr: `Compiler service temporarily unavailable (status ${res.status}).`,
+        durationMs: Date.now() - startTime,
+        cases: [],
+        passedTests: 0,
+        totalTests: isPublicTest ? 5 : 50,
+        isInfrastructureError: true,
+      };
     }
   } catch {
-    // ignore
+    return {
+      success: false,
+      compileSuccess: false,
+      stdout: "",
+      stderr: "Compiler sandbox connection error. Infrastructure temporarily unreachable.",
+      durationMs: Date.now() - startTime,
+      cases: [],
+      passedTests: 0,
+      totalTests: isPublicTest ? 5 : 50,
+      isInfrastructureError: true,
+    };
   }
 
   return null;
