@@ -1,28 +1,28 @@
 @import "tailwindcss";
 
 :root {
-  /* Warm neutrals — ink on cream, not pure black on pure white */
-  --color-void: #F8F6F3;
-  --color-background: #F8F6F3;
-  --color-surface: #FFFFFF;
-  --color-surface-dim: #F2EFE9;
-  --color-surface-bright: #FFFFFF;
-  --color-surface-container-lowest: #FFFFFF;
-  --color-surface-container-low: #F2EFE9;
-  --color-surface-container: #FFFFFF;
-  --color-surface-container-high: #EAE6DF;
-  --color-surface-container-highest: #E0DBD3;
-  --color-foreground: #1C1917;
-  --color-muted: #F2EFE9;
+  /* Document of Authority Palette */
+  --color-void: #F7F3E9;
+  --color-background: #F7F3E9;
+  --color-surface: #F2EFE5;
+  --color-surface-dim: #EBE5D8;
+  --color-surface-bright: #F7F3E9;
+  --color-surface-container-lowest: #F7F3E9;
+  --color-surface-container-low: #F2EFE5;
+  --color-surface-container: #EBE5D8;
+  --color-surface-container-high: #E2DBCB;
+  --color-surface-container-highest: #D9D0BD;
+  --color-foreground: #1C1917; /* Charcoal */
+  --color-muted: #EBE5D8;
   --color-muted-foreground: #78716C;
-  --color-border: #E7E2DA;
-  --color-outline: #C8C0B5;
-  --color-primary: #064E3B;
-  --color-primary-foreground: #FAFAF9;
-  --color-accent: #064E3B;
-  --color-success: #064E3B;
+  --color-border: #D8D2C5;
+  --color-outline: #C3BAA8;
+  --color-primary: #1F3D2B; /* Hunter Green */
+  --color-primary-foreground: #F7F3E9; /* Ivory */
+  --color-accent: #7A3B2E; /* Oxblood */
+  --color-success: #1F3D2B;
   --color-warning: #B45309;
-  --color-danger: #C0392B;
+  --color-danger: #7A3B2E;
   --color-info: #4A6FA5;
 }
 
@@ -52,7 +52,7 @@
 
   /* Single unified modern font style across the entire website */
   --font-sans: var(--font-sans), "DM Sans", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  --font-serif: var(--font-sans), "DM Sans", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-serif: var(--font-serif), "Lora", "Playfair Display", Georgia, serif;
   --font-signature: var(--font-signature), "Caveat", cursive;
   --font-mono: var(--font-mono), "JetBrains Mono", ui-monospace, monospace;
 }
@@ -72,30 +72,30 @@ body {
   line-height: 1.6;
   letter-spacing: -0.01em;
   min-height: 100vh;
+  /* Subtle noise texture for engraved document feel */
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.03'/%3E%3C/svg%3E");
 }
 
-/* Headings — professional, high-impact block letter styling */
+/* Headings — Document of Authority */
 h1, h2, h3, h4, h5, h6 {
-  font-family: var(--font-sans);
-  letter-spacing: -0.02em;
+  font-family: var(--font-serif);
+  letter-spacing: -0.01em;
   line-height: 1.25;
-  font-weight: 700;
+  font-weight: 500;
   color: var(--color-foreground);
 }
 
 /* Dedicated block letter headings */
 .heading-block, .block-heading {
-  font-family: var(--font-sans);
-  font-weight: 700;
+  font-family: var(--font-serif);
+  font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.05em;
   color: var(--color-foreground);
 }
 
-/* Override any font-serif utility to strictly use the clean sans font */
 .font-serif {
-  font-family: var(--font-sans) !important;
-  letter-spacing: -0.02em;
+  font-family: var(--font-serif) !important;
 }
 
 /* Distinct cursive signature moniker — applied ONLY to candidate name */
@@ -107,23 +107,23 @@ h1, h2, h3, h4, h5, h6 {
 
 /* Public theme */
 .theme-public {
-  --color-void: #F8F6F3;
-  --color-background: #F8F6F3;
-  --color-surface: #FFFFFF;
-  --color-surface-low: #F2EFE9;
-  --color-surface-mid: #EAE6DF;
-  --color-surface-high: #E0DBD3;
+  --color-void: #F7F3E9;
+  --color-background: #F7F3E9;
+  --color-surface: #F2EFE5;
+  --color-surface-low: #EBE5D8;
+  --color-surface-mid: #E2DBCB;
+  --color-surface-high: #D9D0BD;
   --color-foreground: #1C1917;
-  --color-muted: #F2EFE9;
+  --color-muted: #EBE5D8;
   --color-muted-foreground: #78716C;
-  --color-border: #E7E2DA;
-  --color-outline: #C8C0B5;
-  --color-primary: #064E3B;
-  --color-primary-foreground: #FAFAF9;
-  --color-accent: #064E3B;
-  --color-success: #064E3B;
+  --color-border: #D8D2C5;
+  --color-outline: #C3BAA8;
+  --color-primary: #1F3D2B; /* Hunter Green */
+  --color-primary-foreground: #F7F3E9;
+  --color-accent: #7A3B2E; /* Oxblood */
+  --color-success: #1F3D2B;
   --color-warning: #B45309;
-  --color-danger: #C0392B;
+  --color-danger: #7A3B2E;
 
   background: var(--color-background);
   color: var(--color-foreground);

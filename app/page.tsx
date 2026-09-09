@@ -61,8 +61,8 @@ export default function HomePage() {
 
   if (authLoading || (user && profileLoading) || user) {
     return (
-      <div className="flex min-h-screen w-full items-center justify-center bg-[#FAFAFA]">
-        <div className="h-6 w-6 border-2 border-[#D2D2D2] border-t-[#0D0D0D] rounded-full animate-spin" />
+      <div className="flex min-h-screen w-full items-center justify-center bg-[var(--color-background)]">
+        <div className="h-6 w-6 border-2 border-[var(--color-outline)] border-t-[var(--color-foreground)] rounded-full animate-spin" />
       </div>
     );
   }
@@ -95,13 +95,13 @@ export default function HomePage() {
           className="w-full flex justify-center items-center mb-4 sm:mb-6 min-h-[2.2em] sm:min-h-[2.6em]"
         >
           <HandwritingText
-            words={["Meritlane.", "Proof of skill.", "Audited code.", "Verified talent.", "Not pedigree."]}
+            words={["Meritlane.", "Audited code.", "Verified talent.", "Cryptographic proof."]}
             height="2.2em"
             duration={1.5}
             delay={0.1}
             interval={3200}
             strokeWidth={2.0}
-            className="text-[#064E3B] font-normal"
+            className="text-[var(--color-primary)] font-normal"
           />
         </motion.div>
 
@@ -110,10 +110,9 @@ export default function HomePage() {
           initial="hidden"
           animate="visible"
           variants={fadeUp}
-          className="text-[44px] sm:text-[58px] md:text-[70px] lg:text-[78px] font-serif text-[#1C1917] tracking-tight leading-[1.08] max-w-4xl mx-auto mb-6 font-normal"
+          className="text-[44px] sm:text-[58px] md:text-[70px] lg:text-[78px] font-serif text-[var(--color-foreground)] tracking-tight leading-[1.08] max-w-4xl mx-auto mb-6 font-normal"
         >
-          Proof of skill.<br/>
-          <span className="text-[#78716C] italic">Not pedigree.</span>
+          Independent Technical Evaluation.
         </motion.h1>
 
         {/* Subtitle */}
@@ -137,7 +136,7 @@ export default function HomePage() {
             Access Verified Register
           </Button>
           <Button href="/signup" variant="outline" size="lg" className="rounded-none px-8">
-            Candidate Examination
+            Begin Verification
           </Button>
         </motion.div>
 
@@ -146,26 +145,26 @@ export default function HomePage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
-          className="w-full max-w-3xl mx-auto text-left border border-[#E7E2DA] bg-white p-6 sm:p-8"
+          className="w-full max-w-3xl mx-auto text-left border border-[var(--color-border)] bg-[var(--color-surface)] p-6 sm:p-8"
         >
-          <div className="flex flex-col sm:flex-row sm:items-baseline justify-between border-b border-[#E7E2DA] pb-4 mb-6">
+          <div className="flex flex-col sm:flex-row sm:items-baseline justify-between border-b border-[var(--color-border)] pb-4 mb-6">
             <div>
-              <div className="text-[10px] font-mono uppercase tracking-[0.2em] text-[#78716C]">Attestation Record Extract</div>
-              <div className="text-[18px] font-serif text-[#1C1917] mt-0.5">ML-2026-B849 · Verified Software Engineer</div>
+              <div className="text-[10px] font-mono uppercase tracking-[0.2em] text-[var(--color-muted-foreground)]">Attestation Record Extract</div>
+              <div className="text-[18px] font-serif text-[var(--color-foreground)] mt-0.5">ML-2026-B849 · Verified Software Engineer</div>
             </div>
-            <div className="text-[11px] font-mono text-[#064E3B] font-medium mt-2 sm:mt-0">
+            <div className="text-[11px] font-mono text-[var(--color-primary)] font-medium mt-2 sm:mt-0">
               AUDITED &amp; ATTESTED
             </div>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 text-sm font-sans mb-6">
             <div>
-              <div className="text-[10px] font-mono text-[#78716C] uppercase tracking-wider mb-1">Evaluated Discipline</div>
-              <div className="font-medium text-[#1C1917]">Full-Stack &amp; Systems</div>
+              <div className="text-[10px] font-mono text-[var(--color-muted-foreground)] uppercase tracking-wider mb-1">Evaluated Discipline</div>
+              <div className="font-medium text-[var(--color-foreground)]">Full-Stack &amp; Systems</div>
             </div>
             <div>
-              <div className="text-[10px] font-mono text-[#78716C] uppercase tracking-wider mb-1">Examination Score</div>
-              <div className="font-mono text-[#064E3B] font-semibold">PASS (Threshold Met)</div>
+              <div className="text-[10px] font-mono text-[var(--color-muted-foreground)] uppercase tracking-wider mb-1">Examination Score</div>
+              <div className="font-mono text-[var(--color-primary)] font-semibold">PASS (Threshold Met)</div>
             </div>
             <div>
               <div className="text-[10px] font-mono text-[#78716C] uppercase tracking-wider mb-1">Git Repository Audit</div>
@@ -173,15 +172,15 @@ export default function HomePage() {
             </div>
           </div>
 
-          <div className="border-t border-[#E7E2DA] pt-4 flex flex-wrap items-center justify-between text-xs text-[#78716C] font-mono gap-2">
+          <div className="border-t border-[var(--color-border)] pt-4 flex flex-wrap items-center justify-between text-xs text-[var(--color-muted-foreground)] font-mono gap-2">
             <span>Verified under Standard 2026.4</span>
             <span>Cryptographic Dossier Available for Inspection</span>
           </div>
         </motion.div>
       </section>
 
-      {/* REGISTRY STANDARDS SECTION (Replacing SaaS Comparison Matrix) */}
-      <section id="standards" className="py-20 sm:py-28 bg-[#FAF8F5] border-y border-[#E7E2DA]">
+      {/* REGISTRY STANDARDS SECTION */}
+      <section id="standards" className="py-20 sm:py-28 bg-[var(--color-background)] border-y border-[var(--color-border)]">
         <div className="mx-auto max-w-4xl px-6 lg:px-8">
           <motion.div 
             initial="hidden"
@@ -190,16 +189,16 @@ export default function HomePage() {
             variants={fadeUp}
             className="text-left mb-14"
           >
-            <div className="text-[11px] font-mono uppercase tracking-[0.25em] text-[#78716C] mb-3">
+            <div className="text-[11px] font-mono uppercase tracking-[0.25em] text-[var(--color-muted-foreground)] mb-3">
               Institutional Evaluation Canon
             </div>
-            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-serif text-[#1C1917] tracking-tight leading-snug">
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-serif text-[var(--color-foreground)] tracking-tight leading-snug">
               Objective examination criteria for the modern engineering workforce.
             </h2>
           </motion.div>
 
           {/* Linear Canonical Protocols */}
-          <div className="divide-y divide-[#E7E2DA] border-y border-[#E7E2DA] bg-white">
+          <div className="divide-y divide-[var(--color-border)] border-y border-[var(--color-border)] bg-[var(--color-surface)]">
             {[
               {
                 num: "01",
@@ -241,7 +240,7 @@ export default function HomePage() {
       </section>
 
       {/* VERIFIED REGISTER PREVIEW & EMPLOYER ACCESS */}
-      <section className="py-24 sm:py-32 bg-white">
+      <section className="py-24 sm:py-32 bg-[var(--color-background)]">
         <div className="mx-auto max-w-4xl px-6 lg:px-8">
           
           <motion.div 
@@ -251,10 +250,10 @@ export default function HomePage() {
             variants={fadeUp}
             className="mb-10 text-left"
           >
-            <div className="text-[11px] font-mono uppercase tracking-[0.25em] text-[#78716C] mb-2">
+            <div className="text-[11px] font-mono uppercase tracking-[0.25em] text-[var(--color-muted-foreground)] mb-2">
               Attestation Directory Preview
             </div>
-            <h2 className="text-2xl sm:text-3xl font-serif text-[#1C1917] tracking-tight mb-4">
+            <h2 className="text-2xl sm:text-3xl font-serif text-[var(--color-foreground)] tracking-tight mb-4">
               Verified Engineering Records
             </h2>
             <p className="text-sm text-[#525252] leading-relaxed max-w-2xl font-sans">
@@ -263,7 +262,7 @@ export default function HomePage() {
           </motion.div>
 
           {/* Illustrative Dossier Record Cards */}
-          <div className="divide-y divide-[#E7E2DA] border border-[#E7E2DA] bg-white mb-8">
+          <div className="divide-y divide-[var(--color-border)] border border-[var(--color-border)] bg-[var(--color-surface)] mb-8">
             {[
               {
                 ref: "ML-2026-B849",
@@ -287,19 +286,19 @@ export default function HomePage() {
                 skills: ["AWS", "Kubernetes", "Linux", "CI/CD", "Security Protocols"]
               }
             ].map((dossier) => (
-              <div key={dossier.ref} className="p-5 sm:p-6 bg-white hover:bg-[#FAF8F5] transition-colors flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div key={dossier.ref} className="p-5 sm:p-6 bg-[var(--color-surface)] hover:bg-[var(--color-surface-dim)] transition-colors flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
                   <div className="flex items-center gap-2 mb-1">
-                    <span className="font-mono text-sm font-semibold text-[#1C1917]">{dossier.ref}</span>
-                    <span className="text-[10px] font-mono text-[#064E3B] bg-[#064E3B]/10 px-1.5 py-0.5 border border-[#064E3B]/20 font-medium">
+                    <span className="font-mono text-sm font-semibold text-[var(--color-foreground)]">{dossier.ref}</span>
+                    <span className="text-[10px] font-mono text-[var(--color-primary)] bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] px-1.5 py-0.5 border border-[color-mix(in_srgb,var(--color-primary)_20%,transparent)] font-medium">
                       {dossier.status}
                     </span>
                   </div>
-                  <div className="text-xs font-serif text-[#1C1917] mb-1 font-medium">{dossier.discipline}</div>
-                  <div className="text-[11px] font-mono text-[#78716C] mb-3">{dossier.meta}</div>
+                  <div className="text-xs font-serif text-[var(--color-foreground)] mb-1 font-medium">{dossier.discipline}</div>
+                  <div className="text-[11px] font-mono text-[var(--color-muted-foreground)] mb-3">{dossier.meta}</div>
                   <div className="flex flex-wrap gap-1.5">
                     {dossier.skills.map((s, idx) => (
-                      <span key={idx} className="px-2 py-0.5 border border-[#E7E2DA] text-[#1C1917] text-[10px] font-mono">
+                      <span key={idx} className="px-2 py-0.5 border border-[var(--color-border)] text-[var(--color-foreground)] text-[10px] font-mono">
                         {s}
                       </span>
                     ))}
@@ -318,13 +317,10 @@ export default function HomePage() {
           </div>
 
           {/* Privacy & Secure Access Callout */}
-          <div className="border border-[#E7E2DA] bg-[#FAF8F5] p-6 sm:p-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
+          <div className="border border-[var(--color-border)] bg-[var(--color-surface-dim)] p-6 sm:p-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
             <div className="flex items-start gap-4">
-              <div className="h-9 w-9 bg-white border border-[#E7E2DA] flex items-center justify-center shrink-0 mt-0.5">
-                <Lock className="h-4 w-4 text-[#78716C]" />
-              </div>
               <div>
-                <h4 className="text-sm font-serif font-medium text-[#1C1917] mb-1">
+                <h4 className="text-sm font-serif font-medium text-[var(--color-foreground)] mb-1">
                   Candidate Privacy & Confidentiality Shield
                 </h4>
                 <p className="text-xs text-[#525252] leading-relaxed max-w-xl font-sans">
@@ -343,10 +339,10 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* INSTITUTIONAL COLOPHON & NOTICE (Replacing Dual SaaS CTA) */}
-      <section className="border-t border-[#E7E2DA] bg-[#FAF8F5] py-20">
+      {/* INSTITUTIONAL COLOPHON & NOTICE */}
+      <section className="border-t border-[var(--color-border)] bg-[var(--color-surface-low)] py-20">
         <div className="mx-auto max-w-3xl px-6 lg:px-8 text-center">
-          <div className="text-[11px] font-mono uppercase tracking-[0.25em] text-[#78716C] mb-3">
+          <div className="text-[11px] font-mono uppercase tracking-[0.25em] text-[var(--color-muted-foreground)] mb-3">
             Institutional Attestation
           </div>
           <h2 className="text-2xl sm:text-3xl font-serif text-[#1C1917] tracking-tight mb-4">
@@ -358,15 +354,15 @@ export default function HomePage() {
           <div className="flex flex-wrap justify-center gap-4">
             <Link
               href="/employer/dashboard"
-              className="px-6 py-2.5 bg-[#1C1917] text-white text-xs font-mono uppercase tracking-wider hover:bg-[#292524] transition-colors"
+              className="px-6 py-2.5 bg-[var(--color-foreground)] text-[var(--color-background)] border border-[var(--color-foreground)] text-xs font-mono uppercase tracking-wider hover:bg-[#292524] transition-colors"
             >
               Open Employer Portal
             </Link>
             <Link
               href="/signup"
-              className="px-6 py-2.5 border border-[#1C1917] bg-white text-[#1C1917] text-xs font-mono uppercase tracking-wider hover:bg-[#F8F6F3] transition-colors"
+              className="px-6 py-2.5 border border-[var(--color-foreground)] bg-[var(--color-surface)] text-[var(--color-foreground)] text-xs font-mono uppercase tracking-wider hover:bg-[var(--color-surface-dim)] transition-colors"
             >
-              Register for Evaluation
+              Begin Verification
             </Link>
           </div>
         </div>

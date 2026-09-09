@@ -36,19 +36,19 @@ export function Button({
 
   const variantStyles: Record<string, string> = {
     primary:
-      "bg-[#064E3B] text-white border border-[#064E3B] hover:bg-[#043d2e] active:bg-[#032b20]",
+      "bg-[var(--color-primary)] text-[var(--color-primary-foreground)] border border-[var(--color-primary)] hover:bg-[#162D1E] active:bg-[#0D1B12]",
     secondary:
-      "bg-white text-[#1C1917] border border-[#E7E2DA] hover:bg-[#F8F6F3] hover:border-[#1C1917] active:bg-[#EAE6DF]",
+      "bg-[var(--color-surface)] text-[var(--color-foreground)] border border-[var(--color-border)] hover:bg-[var(--color-surface-dim)] hover:border-[var(--color-foreground)] active:bg-[var(--color-surface-container)]",
     outline:
-      "bg-white text-[#1C1917] border border-[#E7E2DA] hover:bg-[#F8F6F3] hover:border-[#1C1917] active:bg-[#EAE6DF]",
+      "bg-[var(--color-surface)] text-[var(--color-foreground)] border border-[var(--color-border)] hover:bg-[var(--color-surface-dim)] hover:border-[var(--color-foreground)] active:bg-[var(--color-surface-container)]",
     ghost:
-      "bg-transparent text-[#525252] border border-transparent hover:bg-[#F2EFE9] hover:text-[#1C1917] active:bg-[#EAE6DF]",
+      "bg-transparent text-[var(--color-muted-foreground)] border border-transparent hover:bg-[var(--color-surface-dim)] hover:text-[var(--color-foreground)] active:bg-[var(--color-surface-container)]",
     tertiary:
-      "bg-transparent text-[#737373] border border-transparent underline-offset-4 hover:underline hover:text-[#525252] p-0 h-auto",
+      "bg-transparent text-[var(--color-muted-foreground)] border border-transparent underline-offset-4 hover:underline hover:text-[var(--color-foreground)] p-0 h-auto",
     danger:
-      "bg-[#B42318] text-white border border-[#B42318] hover:bg-[#922015] active:bg-[#7a1b12]",
+      "bg-[var(--color-danger)] text-white border border-[var(--color-danger)] hover:bg-[#5E2D23] active:bg-[#4A241C]",
     success:
-      "bg-[#064E3B] text-white border border-[#064E3B] hover:bg-[#043d2e] active:bg-[#032b20]",
+      "bg-[var(--color-success)] text-white border border-[var(--color-success)] hover:bg-[#162D1E] active:bg-[#0D1B12]",
   };
 
   // Tertiary overrides sizing to be inline

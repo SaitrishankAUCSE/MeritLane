@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { DM_Sans, JetBrains_Mono, Caveat } from "next/font/google";
+import { DM_Sans, JetBrains_Mono, Caveat, Lora } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
 import { SiteFooter } from "@/components/chrome/SiteFooter";
@@ -22,6 +22,14 @@ const caveatSignature = Caveat({
   subsets: ["latin"],
   weight: ["500", "600", "700"],
   variable: "--font-signature",
+  display: "swap",
+});
+
+// Serif font for authoritative headings
+const loraSerif = Lora({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-serif",
   display: "swap",
 });
 
@@ -63,7 +71,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${dmSans.variable} ${caveatSignature.variable} ${jetbrainsMono.variable} h-full antialiased`}>
+    <html lang="en" className={`${dmSans.variable} ${caveatSignature.variable} ${jetbrainsMono.variable} ${loraSerif.variable} h-full antialiased`}>
       <body className="flex min-h-full flex-col bg-background font-sans text-foreground">
         <script
           type="application/ld+json"
