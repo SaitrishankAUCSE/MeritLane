@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useAuth } from "@/lib/auth/AuthContext";
-import { fetchCandidateProfile, CandidateProfile } from "@/lib/firebase/candidate";
+import { fetchCandidateProfile, saveCandidateProfile, CandidateProfile } from "@/lib/firebase/candidate";
 import { useRouter } from "next/navigation";
 import {
   ShieldCheck,
@@ -12,9 +12,15 @@ import {
   ExternalLink,
   BookOpen,
   FileText,
+  UploadCloud,
+  CheckCircle2,
+  AlertCircle,
+  Sparkles,
 } from "lucide-react";
 import { ProfileForm } from "@/components/candidate/ProfileForm";
 import { MeritlaneLoader } from "@/components/ui/MeritlaneLoader";
+import { InstitutionalResumeScanner } from "@/components/candidate/InstitutionalResumeScanner";
+import { ParsedResumeProfile } from "@/lib/resume/parser";
 import { GithubAuthProvider, linkWithPopup } from "firebase/auth";
 import { auth } from "@/lib/firebase/config";
 
@@ -26,6 +32,14 @@ export default function CandidateProfilePage() {
   const [isInitializing, setIsInitializing] = useState(true);
   const [isSyncingGithub, setIsSyncingGithub] = useState(false);
   const [syncError, setSyncError] = useState<string | null>(null);
+
+  // Resume Upload State at Top of Profile
+  const [uploadingResume, setUploadingResume] = useState(false);
+  const [scannerOpen, setScannerOpen] = useState(false);
+  const [parsedData, setParsedData] = useState<ParsedResumeProfile | null>(null);
+  const [resumeFileName, setResumeFileName] = useState<string>("");
+  const resumeInputRef = useRef<HTMLInputElement>(null);
+  const pendingDataRef = useRef<any>(null);
 
   useEffect(() => {
     if (!loading && user) {
@@ -47,6 +61,80 @@ export default function CandidateProfilePage() {
   const handleSave = (updatedProfile: CandidateProfile) => {
     setProfile(updatedProfile);
     setIsEditing(false);
+  };
+
+  const handleResumeUpload = async (file: File) => {
+    if (!file.name.toLowerCase().endsWith(".pdf") && file.type !== "application/pdf") {
+      alert("Please upload a PDF document (.pdf)");
+      return;
+    }
+    if (file.size > 12 * 1024 * 1024) {
+      alert("File size exceeds 12MB limit.");
+      return;
+    }
+
+    setResumeFileName(file.name);
+    setScannerOpen(true);
+    setUploadingResume(true);
+    setParsedData(null);
+    pendingDataRef.current = null;
+
+    try {
+      const token = await user?.getIdToken(true);
+      const data = new FormData();
+      data.append("file", file);
+      data.append("skills", JSON.stringify(profile?.skills || []));
+      const res = await fetch("/api/candidate/ats-check", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+        body: data,
+      });
+      const resData = await res.json();
+      if (!res.ok) throw new Error(resData.error || "Failed to parse resume.");
+      pendingDataRef.current = resData;
+      if (resData.parsed) {
+        setParsedData(resData.parsed);
+      }
+    } catch (err: any) {
+      console.error("Resume parse error:", err);
+      setScannerOpen(false);
+      setUploadingResume(false);
+      alert(err.message || "Failed to process resume.");
+    }
+  };
+
+  const handleScannerComplete = async () => {
+    setScannerOpen(false);
+    setUploadingResume(false);
+    const data = pendingDataRef.current;
+    if (!data?.parsed || !user) return;
+    const parsed: ParsedResumeProfile = data.parsed;
+
+    // Merge with existing profile skills
+    const existingSkills = new Set(profile?.skills || []);
+    (parsed.skills || []).forEach((s: string) => existingSkills.add(s));
+
+    const updated: CandidateProfile = {
+      ...profile,
+      name: profile?.name && profile.name !== "Candidate" ? profile.name : (parsed.name || profile?.name || "Candidate"),
+      college: parsed.college || profile?.college || "",
+      degree: parsed.degree || profile?.degree || "",
+      branch: parsed.branch || profile?.branch || "",
+      gradYear: parsed.gradYear || profile?.gradYear || "",
+      githubUrl: parsed.githubUrl || profile?.githubUrl || "",
+      skills: Array.from(existingSkills),
+      resumeText: data.extractedText || profile?.resumeText || "",
+      atsScore: data.result?.score ?? profile?.atsScore,
+      atsRating: data.result?.rating ?? profile?.atsRating,
+      atsSummary: data.result?.summary ?? profile?.atsSummary,
+    };
+
+    try {
+      await saveCandidateProfile(user.uid, updated);
+      setProfile(updated);
+    } catch (saveErr) {
+      console.error("Error saving parsed profile:", saveErr);
+    }
   };
 
   const handleGithubSync = async () => {
@@ -167,10 +255,73 @@ export default function CandidateProfilePage() {
         </div>
       </div>
 
+      {/* Institutional Resume Scanner Modal */}
+      <InstitutionalResumeScanner
+        isOpen={scannerOpen}
+        fileName={resumeFileName}
+        parsedData={parsedData}
+        onComplete={handleScannerComplete}
+      />
+
       <div className="max-w-[1400px] mx-auto px-6 sm:px-10 py-8 grid grid-cols-1 lg:grid-cols-3 gap-8">
 
         {/* ── LEFT: Main Claims Column ── */}
         <div className="lg:col-span-2 space-y-6">
+
+          {/* ── Top-of-Profile Resume Upload Card ── */}
+          <div className="border border-[#E7E2DA] bg-white rounded p-6 shadow-2xs">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-[#E7E2DA]">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded bg-[#FAF8F5] border border-[#E7E2DA] flex items-center justify-center text-[#1C1917] shrink-0">
+                  <FileText className="h-5 w-5" />
+                </div>
+                <div>
+                  <div className="text-[10px] font-mono tracking-[0.16em] uppercase text-[#78716C]">
+                    Institutional Registry Ingestion
+                  </div>
+                  <h2 className="font-serif text-[18px] text-[#1C1917] font-semibold">
+                    Auto-Populate Profile from Resume
+                  </h2>
+                </div>
+              </div>
+              <span className="text-[11px] font-mono text-[#78716C] bg-[#FAF8F5] border border-[#E7E2DA] px-2.5 py-1 rounded w-fit">
+                PDF format · Max 12MB
+              </span>
+            </div>
+
+            <p className="text-[13px] font-sans text-[#78716C] mt-3 mb-4 leading-relaxed">
+              Upload your official resume to automatically populate your education, experience, and technical capabilities into your identity record. All fields remain fully editable, and every extracted skill can be verified through our proctored assessments.
+            </p>
+
+            <div
+              onDragOver={(e) => e.preventDefault()}
+              onDrop={(e) => {
+                e.preventDefault();
+                const file = e.dataTransfer.files?.[0];
+                if (file) handleResumeUpload(file);
+              }}
+              onClick={() => resumeInputRef.current?.click()}
+              className="border-2 border-dashed border-[#E7E2DA] hover:border-[#064E3B] bg-[#FAF8F5] hover:bg-[#F5F1EB] rounded-lg p-6 text-center transition-colors cursor-pointer"
+            >
+              <input
+                type="file"
+                ref={resumeInputRef}
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) handleResumeUpload(file);
+                }}
+                accept=".pdf,application/pdf"
+                className="hidden"
+              />
+              <UploadCloud className="h-7 w-7 text-[#78716C] mx-auto mb-2" />
+              <div className="text-[13px] font-medium text-[#1C1917]">
+                Click to browse or drop your resume PDF here
+              </div>
+              <div className="text-[11px] font-mono text-[#A8A29E] mt-1">
+                Auto-extracts name, college, degree, graduation year, and technical skills
+              </div>
+            </div>
+          </div>
 
           {/* Skills Ledger Table */}
           <div className="border border-[#E7E2DA] bg-white">
@@ -183,11 +334,25 @@ export default function CandidateProfilePage() {
               </div>
             </div>
 
+            {/* Assessment requirement notice */}
+            <div className="p-3.5 bg-[#FAF8F5] border-b border-[#E7E2DA] flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-[11px] font-mono text-[#78716C]">
+              <span className="flex items-center gap-1.5">
+                <AlertCircle className="h-3.5 w-3.5 text-[#064E3B] shrink-0" />
+                Every skill present on your resume must be verified by writing an assessment before it is certified.
+              </span>
+              <button
+                onClick={() => setIsEditing(true)}
+                className="text-[#064E3B] font-semibold underline hover:text-[#1C1917] shrink-0 text-left"
+              >
+                Edit Skills
+              </button>
+            </div>
+
             {skills.length === 0 ? (
               <div className="p-10 text-center">
                 <div className="text-[15px] font-serif text-[#1C1917] mb-2">No capabilities declared</div>
                 <p className="text-[12px] font-sans text-[#78716C] mb-5">
-                  Add technical skills to your identity record to begin the verification process.
+                  Upload your resume above or add technical skills to begin the verification process.
                 </p>
                 <button
                   onClick={() => setIsEditing(true)}
@@ -199,7 +364,7 @@ export default function CandidateProfilePage() {
             ) : (
               <>
                 {/* Table head */}
-                <div className="hidden sm:grid sm:grid-cols-[2rem_1fr_8rem_8rem_7rem] border-b border-[#E7E2DA] bg-[#FAF8F5] px-5 py-2.5">
+                <div className="hidden sm:grid sm:grid-cols-[2rem_1fr_8rem_8rem_9rem] border-b border-[#E7E2DA] bg-[#FAF8F5] px-5 py-2.5">
                   {["#", "Skill / Technology", "Status", "Score", "Action"].map((h) => (
                     <div key={h} className={`text-[9px] font-mono text-[#78716C] uppercase tracking-[0.18em] ${h === "Action" ? "text-right" : ""}`}>
                       {h}
@@ -213,7 +378,7 @@ export default function CandidateProfilePage() {
                   return (
                     <div
                       key={skill}
-                      className={`sm:grid sm:grid-cols-[2rem_1fr_8rem_8rem_7rem] flex flex-col gap-1 sm:gap-0 items-start sm:items-center px-5 py-4 border-b border-[#E7E2DA] last:border-b-0 transition-colors ${
+                      className={`sm:grid sm:grid-cols-[2rem_1fr_8rem_8rem_9rem] flex flex-col gap-1 sm:gap-0 items-start sm:items-center px-5 py-4 border-b border-[#E7E2DA] last:border-b-0 transition-colors ${
                         isVerified ? "bg-[#064E3B]/[0.02]" : "bg-white hover:bg-[#FAF8F5]"
                       }`}
                     >
@@ -234,7 +399,7 @@ export default function CandidateProfilePage() {
                             ? "text-[#064E3B] bg-[#064E3B]/[0.08] border-[#064E3B]/30"
                             : "text-[#78716C] bg-[#F5F1EB] border-[#C8BFB0]"
                         }`}>
-                          {isVerified ? "VERIFIED" : "DECLARED"}
+                          {isVerified ? "VERIFIED" : "UNVERIFIED"}
                         </span>
                       </div>
                       <div className="text-[13px] font-mono text-[#1C1917]">
@@ -242,13 +407,14 @@ export default function CandidateProfilePage() {
                       </div>
                       <div className="sm:flex sm:justify-end">
                         {isVerified ? (
-                          <span className="text-[10px] font-mono text-[#064E3B]">✓ Passed</span>
+                          <span className="text-[10px] font-mono text-[#064E3B] font-semibold">✓ Passed</span>
                         ) : (
                           <button
-                            onClick={() => router.push(`/candidate/verification`)}
-                            className="text-[10px] font-mono font-semibold text-[#1C1917] border border-[#E7E2DA] px-3 py-1 hover:bg-[#F5F1EB] transition-colors rounded"
+                            onClick={() => router.push(`/candidate/assessment?skill=${encodeURIComponent(skill)}`)}
+                            className="text-[10px] font-mono font-semibold text-white bg-[#1C1917] hover:bg-[#064E3B] px-3 py-1.5 transition-colors rounded shadow-2xs"
+                            title={`Take assessment to verify ${skill}`}
                           >
-                            ASSESS →
+                            TAKE ASSESSMENT →
                           </button>
                         )}
                       </div>

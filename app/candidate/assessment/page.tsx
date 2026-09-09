@@ -2251,14 +2251,14 @@ function AssessmentContentWrapper() {
                     </button>
                     <button
                       onClick={() => setShowResetConfirm(true)}
-                      className={`flex items-center gap-1 text-[11px] font-mono px-2 py-1 rounded border transition-colors ${
+                      className={`flex items-center gap-1 text-[11px] font-mono px-2.5 py-1 rounded border transition-colors ${
                         editorTheme === "dark"
                           ? "bg-[#21262D] border-[#30363D] text-[#F85149] hover:bg-[#B42318]/20"
                           : "bg-white border-[#E7E2DA] text-[#78716C] hover:text-[#B42318] hover:border-[#FECACA]"
                       }`}
                       title="Reset code to starter template"
                     >
-                      <RotateCcw className="h-3 w-3" /> Reset
+                      <RotateCcw className="h-3 w-3" /> Reset to starter code
                     </button>
 
                     {/* Editor Theme Switcher */}
@@ -2374,13 +2374,38 @@ function AssessmentContentWrapper() {
                       tabSize: 4,
                       insertSpaces: true,
                       autoIndent: "full",
+                      matchBrackets: "always",
                       formatOnPaste: true,
                       formatOnType: true,
                       wordWrap: "on",
                       cursorBlinking: "smooth",
                       cursorSmoothCaretAnimation: "on",
-                      suggestOnTriggerCharacters: true,
-                      acceptSuggestionOnEnter: "on",
+                      quickSuggestions: false,
+                      suggestOnTriggerCharacters: false,
+                      snippetSuggestions: "none",
+                      wordBasedSuggestions: "off",
+                      parameterHints: { enabled: false },
+                      suggest: {
+                        showKeywords: false,
+                        showSnippets: false,
+                        showWords: false,
+                        showFunctions: false,
+                        showVariables: false,
+                        showClasses: false,
+                        showModules: false,
+                        showProperties: false,
+                        showInterfaces: false,
+                        showReference: false,
+                        showConstants: false,
+                        showConstructors: false,
+                        showFields: false,
+                        showEvents: false,
+                        showOperators: false,
+                        showUnits: false,
+                        showValues: false,
+                        showStructs: false,
+                        showTypeParameters: false,
+                      },
                       padding: { top: 12, bottom: 12 },
                     }}
                   />

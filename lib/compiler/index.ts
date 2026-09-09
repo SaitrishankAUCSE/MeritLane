@@ -141,7 +141,7 @@ else:
         ("Test Case 1: Happy Path Completed Transactions", "tx1,u1,10.5,COMPLETED\\ntx2,u2,5.0,COMPLETED\\ntx3,u1,4.5,COMPLETED", {"u1": 15.0, "u2": 5.0}),
         ("Test Case 2: Status Filtering (COMPLETED only)", "t1,u1,10,COMPLETED\\nt2,u2,20,FAILED\\nt3,u1,5,PENDING\\nt4,u3,15,REFUNDED", {"u1": 10.0}),
         ("Test Case 3: Empty Dataset Handling", "", {}),
-        ("Test Case 4: Malformed Record Recovery", "t1,u1,10,COMPLETED\\nBADROW\\nt2,u2,5,COMPLETED\\nt3,u1,bad_amount,COMPLETED\\n,,,\n", {"u1": 10.0, "u2": 5.0}),
+        ("Test Case 4: Malformed Record Recovery", "t1,u1,10,COMPLETED\\nBADROW\\nt2,u2,5,COMPLETED\\nt3,u1,bad_amount,COMPLETED\\n,,,\\n", {"u1": 10.0, "u2": 5.0}),
         ("Test Case 5: Negative Balances / Floats", "t1,u1,-5.5,COMPLETED\\nt2,u1,10.25,COMPLETED\\nt3,u2,0.001,COMPLETED", {"u1": 4.75, "u2": 0.001})
     ]
 
@@ -394,7 +394,7 @@ tests = [
     ("Test Case 1: Happy Path Completed Transactions", "tx1,u1,10.5,COMPLETED\\ntx2,u2,5.0,COMPLETED\\ntx3,u1,4.5,COMPLETED", {"u1": 15.0, "u2": 5.0}),
     ("Test Case 2: Status Filtering (COMPLETED only)", "t1,u1,10,COMPLETED\\nt2,u2,20,FAILED\\nt3,u1,5,PENDING\\nt4,u3,15,REFUNDED", {"u1": 10.0}),
     ("Test Case 3: Empty Dataset Handling", "", {}),
-    ("Test Case 4: Malformed Record Recovery", "t1,u1,10,COMPLETED\\nBADROW\\nt2,u2,5,COMPLETED\\nt3,u1,bad_amount,COMPLETED\\n,,,\n", {"u1": 10.0, "u2": 5.0}),
+    ("Test Case 4: Malformed Record Recovery", "t1,u1,10,COMPLETED\\nBADROW\\nt2,u2,5,COMPLETED\\nt3,u1,bad_amount,COMPLETED\\n,,,\\n", {"u1": 10.0, "u2": 5.0}),
     ("Test Case 5: Negative Balances / Floats", "t1,u1,-5.5,COMPLETED\\nt2,u1,10.25,COMPLETED\\nt3,u2,0.001,COMPLETED", {"u1": 4.75, "u2": 0.001})
 ]
 
