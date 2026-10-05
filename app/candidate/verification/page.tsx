@@ -8,6 +8,7 @@ import { ArrowRight, Clock, ShieldCheck, BookOpen, ExternalLink } from "lucide-r
 import { db } from "@/lib/firebase/config";
 import { doc, getDoc } from "firebase/firestore";
 import Link from "next/link";
+import CooldownTimer from "@/components/candidate/cooldown-timer";
 
 function StatusStamp({ status }: { status: "VERIFIED" | "ELIGIBLE" | "COOLDOWN" }) {
   const map = {
@@ -16,7 +17,7 @@ function StatusStamp({ status }: { status: "VERIFIED" | "ELIGIBLE" | "COOLDOWN" 
     COOLDOWN: "text-[#92400E] bg-[#FEF3C7] border border-[#D97706]/30",
   };
   return (
-    <span className={`inline-block text-[9px] font-mono font-semibold tracking-[0.18em] px-2 py-[3px] uppercase ${map[status]}`}>
+    <span className={`inline-block text-[9px] font-medium font-semibold tracking-[0.18em] px-2 py-[3px] uppercase ${map[status]}`}>
       {status}
     </span>
   );
@@ -73,69 +74,82 @@ export default function CandidateVerificationPage() {
 
   const skills = profile?.skills || [];
   const verifiedCount = Object.values(profile?.verifiedSkills || {}).filter(
-    (v) => v.status === "verified"
+    (v) => v.status === "verified" && (v.score === undefined || v.score >= 75)
   ).length;
+  const requiredForEmployerPortal = Math.max(1, Math.ceil(skills.length / 2));
+  const isEmployerPortalUnlocked = skills.length > 0 && verifiedCount >= requiredForEmployerPortal;
 
   return (
     <div className="w-full min-h-full bg-[#FAF8F5] pb-24">
 
-      {/* ── Registry Header Strip ── */}
-      <div className="border-b border-[#E7E2DA] bg-white px-6 sm:px-10 py-5">
-        <div className="max-w-[1400px] mx-auto flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      {/* ── Header Strip ── */}
+      <div className="border-b border-[#E7E2DA] bg-white px-4 sm:px-6 lg:px-8 py-5">
+        <div className="w-full flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <div className="text-[10px] font-mono tracking-[0.2em] text-[#78716C] uppercase mb-1">
-              Technical Assessment Registry · Meritlane Examination System
+            <div className="text-[10px] font-medium tracking-[0.2em] text-[#78716C] uppercase mb-1">
+              Skill Verification · Meritlane
             </div>
             <h1 className="text-[26px] sm:text-[32px] text-[#1C1917] font-semibold tracking-tight leading-tight">
-              Skill Examination Records
+              Skill Tests &amp; Badges
             </h1>
           </div>
           <div className="flex items-center gap-6 shrink-0">
             <div className="text-right">
-              <div className="text-[10px] font-mono text-[#78716C] uppercase tracking-wider mb-0.5">Verified</div>
+              <div className="text-[10px] font-medium text-[#78716C] uppercase tracking-wider mb-0.5">Verified (≥75%)</div>
               <div className="text-[24px] font-semibold text-[#064E3B]">{verifiedCount}</div>
             </div>
             <div className="w-px h-10 bg-[#E7E2DA]" />
             <div className="text-right">
-              <div className="text-[10px] font-mono text-[#78716C] uppercase tracking-wider mb-0.5">Claimed</div>
+              <div className="text-[10px] font-medium text-[#78716C] uppercase tracking-wider mb-0.5">Total Skills</div>
               <div className="text-[24px] font-semibold text-[#1C1917]">{skills.length}</div>
+            </div>
+            <div className="w-px h-10 bg-[#E7E2DA]" />
+            <div className="text-right">
+              <div className="text-[10px] font-medium text-[#78716C] uppercase tracking-wider mb-0.5">Employer Discovery</div>
+              <div className={`text-[12px] font-mono font-bold mt-1.5 px-2.5 py-0.5 rounded ${
+                isEmployerPortalUnlocked
+                  ? "bg-[#DCFCE7] text-[#166534] border border-[#86EFAC]"
+                  : "bg-[#FEF3C7] text-[#92400E] border border-[#FDE68A]"
+              }`}>
+                {isEmployerPortalUnlocked ? "✓ UNLOCKED" : `${verifiedCount}/${requiredForEmployerPortal} (50%)`}
+              </div>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="max-w-[1400px] mx-auto px-6 sm:px-10 py-8 grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="w-full px-4 sm:px-6 lg:px-8 py-8 grid grid-cols-1 lg:grid-cols-3 gap-8">
 
         {/* ── LEFT: Exam Index Table ── */}
         <div className="lg:col-span-2 space-y-6">
 
           <div className="flex items-center justify-between">
             <div>
-              <div className="text-[9px] font-mono tracking-[0.18em] text-[#78716C] uppercase mb-0.5">Section A</div>
-              <h2 className="text-[12px] font-mono font-semibold text-[#1C1917] uppercase tracking-[0.08em]">
-                Declared Capabilities — Assessment Index
+              <div className="text-[9px] font-medium tracking-[0.18em] text-[#78716C] uppercase mb-0.5">Your Skills</div>
+              <h2 className="text-[12px] font-medium font-semibold text-[#1C1917] uppercase tracking-[0.08em]">
+                Available Skill Tests
               </h2>
             </div>
             <div className="text-[10px] font-mono text-[#78716C]">
-              {skills.length} {skills.length === 1 ? "record" : "records"}
+              {skills.length} {skills.length === 1 ? "skill" : "skills"}
             </div>
           </div>
 
           {isFetching ? (
             <div className="border border-[#E7E2DA] bg-white p-12 text-center">
               <div className="h-5 w-5 border-2 border-[#E7E2DA] border-t-[#1C1917] rounded-full animate-spin mx-auto mb-3" />
-              <p className="text-[12px] font-mono text-[#78716C]">Retrieving examination records…</p>
+              <p className="text-[12px] font-mono text-[#78716C]">Loading your skill tests…</p>
             </div>
           ) : skills.length === 0 ? (
             <div className="border border-dashed border-[#C8BFB0] bg-white p-14 text-center">
               <BookOpen className="h-8 w-8 text-[#C8BFB0] mx-auto mb-4" />
-              <div className="text-[16px] font-serif text-[#1C1917] mb-2">No capabilities declared</div>
+              <div className="text-[16px] font-serif text-[#1C1917] mb-2">No skills added yet</div>
               <p className="text-[13px] text-[#78716C] font-sans mb-6 max-w-sm mx-auto leading-relaxed">
-                Declare skills in your Identity record to become eligible for proctored examinations.
+                Add skills in your profile to take tests and earn verified badges for recruiters to see.
               </p>
               <Link href="/candidate/profile">
                 <button className="text-[11px] font-mono font-semibold px-5 py-2.5 bg-[#1C1917] hover:bg-[#064E3B] text-white transition-colors tracking-[0.06em] rounded">
-                  OPEN IDENTITY RECORD
+                  GO TO PROFILE
                 </button>
               </Link>
             </div>
@@ -143,8 +157,8 @@ export default function CandidateVerificationPage() {
             <div className="border border-[#E7E2DA] bg-white overflow-hidden">
               {/* Table head */}
               <div className="hidden sm:grid sm:grid-cols-[2rem_1fr_7rem_5rem_7rem_8rem] border-b border-[#E7E2DA] bg-[#F5F1EB] px-4 py-2.5">
-                {["#", "Skill / Technology", "Status", "Score", "Exam Date", "Action"].map((h) => (
-                  <div key={h} className={`text-[9px] font-mono text-[#78716C] uppercase tracking-[0.18em] ${h === "Action" ? "text-right" : ""}`}>
+                {["#", "Skill", "Status", "Score", "Test Date", "Action"].map((h) => (
+                  <div key={h} className={`text-[9px] font-medium text-[#78716C] uppercase tracking-[0.18em] ${h === "Action" ? "text-right" : ""}`}>
                     {h}
                   </div>
                 ))}
@@ -154,6 +168,7 @@ export default function CandidateVerificationPage() {
                 const verifiedObj = profile?.verifiedSkills?.[skill];
                 const isVerified = verifiedObj?.status === "verified";
                 const inCooldown = !isVerified && !!cooldowns[skill];
+                const cooldownTs = cooldowns[skill] || 0;
                 const score = verifiedObj?.score;
                 const verifiedAt = verifiedObj?.verifiedAt
                   ? new Date(verifiedObj.verifiedAt).toLocaleDateString("en-GB", {
@@ -181,12 +196,23 @@ export default function CandidateVerificationPage() {
                       <div className="text-[14px] font-serif text-[#1C1917]">{skill}</div>
                       {isVerified && (
                         <div className="text-[10px] font-mono text-[#064E3B] mt-0.5 flex items-center gap-1">
-                          <ShieldCheck className="h-2.5 w-2.5" />Active on public record
+                          <ShieldCheck className="h-2.5 w-2.5" />Active on public profile
                         </div>
                       )}
                       {inCooldown && (
-                        <div className="text-[10px] font-mono text-[#92400E] mt-0.5 flex items-center gap-1">
-                          <Clock className="h-2.5 w-2.5" />Retry in ~{daysLeft}d
+                        <div className="mt-0.5">
+                          <CooldownTimer
+                            timestamp={cooldownTs}
+                            durationDays={14}
+                            variant="detail"
+                            onExpire={() => {
+                              setCooldowns((prev) => {
+                                const next = { ...prev };
+                                delete next[skill];
+                                return next;
+                              });
+                            }}
+                          />
                         </div>
                       )}
                     </div>
@@ -211,11 +237,24 @@ export default function CandidateVerificationPage() {
                           </Link>
                         )
                       ) : inCooldown ? (
-                        <span className="text-[10px] font-mono text-[#78716C]">Locked</span>
+                        <span className="inline-flex items-center gap-1 text-[10px] font-mono font-semibold bg-[#FEF3C7] border border-[#FDE68A] text-[#92400E] px-2.5 py-1 rounded cursor-not-allowed select-none tabular-nums">
+                          <CooldownTimer
+                            timestamp={cooldownTs}
+                            durationDays={14}
+                            variant="badge"
+                            onExpire={() => {
+                              setCooldowns((prev) => {
+                                const next = { ...prev };
+                                delete next[skill];
+                                return next;
+                              });
+                            }}
+                          />
+                        </span>
                       ) : (
                         <Link href={`/candidate/assessment?skill=${encodeURIComponent(skill)}`}>
                           <button className="flex items-center gap-1 text-[10px] font-mono font-semibold bg-[#1C1917] hover:bg-[#064E3B] text-white px-3.5 py-1 transition-colors rounded">
-                            EXAMINE <ArrowRight className="h-2.5 w-2.5" />
+                            TAKE TEST <ArrowRight className="h-2.5 w-2.5" />
                           </button>
                         </Link>
                       )}
@@ -226,12 +265,12 @@ export default function CandidateVerificationPage() {
             </div>
           )}
 
-          {/* Audit Trail */}
+          {/* Test History */}
           {verifiedCount > 0 && (
             <div className="border border-[#E7E2DA] bg-white">
               <div className="border-b border-[#E7E2DA] bg-[#F5F1EB] px-5 py-3">
-                <div className="text-[9px] font-mono tracking-[0.18em] text-[#78716C] uppercase">
-                  Section B — Examination Audit Trail
+                <div className="text-[9px] font-medium tracking-[0.18em] text-[#78716C] uppercase">
+                  Test History &amp; Verified Badges
                 </div>
               </div>
               <div className="p-5 space-y-0 divide-y divide-[#F0EDE8]">
@@ -249,7 +288,7 @@ export default function CandidateVerificationPage() {
                         <div className="h-1.5 w-1.5 rounded bg-[#064E3B] shrink-0" />
                         <div className="flex-1 text-[12px] font-sans text-[#1C1917]">
                           <span className="font-medium">{s}</span>
-                          <span className="text-[#78716C]"> — proctored examination passed</span>
+                          <span className="text-[#78716C]"> — test passed</span>
                         </div>
                         <div className="text-[11px] font-mono text-[#78716C] shrink-0">{dt}</div>
                         <div className="text-[10px] font-mono font-semibold text-[#064E3B] shrink-0">
@@ -263,23 +302,24 @@ export default function CandidateVerificationPage() {
           )}
         </div>
 
-        {/* ── RIGHT: Protocol Panel ── */}
+        {/* ── RIGHT: Test Rules & Info ── */}
         <div className="space-y-5">
 
           <div className="border border-[#E7E2DA] bg-white">
             <div className="border-b border-[#E7E2DA] bg-[#F5F1EB] px-5 py-3">
-              <div className="text-[9px] font-mono tracking-[0.18em] text-[#78716C] uppercase">
-                Examination Protocol
+              <div className="text-[9px] font-medium tracking-[0.18em] text-[#78716C] uppercase">
+                Test Details
               </div>
             </div>
             <div className="divide-y divide-[#F0EDE8]">
               {[
-                { label: "Passing Threshold", value: "80 / 100" },
-                { label: "Duration", value: "45 Minutes" },
-                { label: "Environment", value: "Monitored Fullscreen" },
-                { label: "Cooldown on Failure", value: "14 Calendar Days" },
-                { label: "Record Visibility", value: "Public Registry" },
-                { label: "Retakes", value: "After Cooldown" },
+                { label: "Passing Score", value: "75% (All Components)" },
+                { label: "Employer Portal", value: "Pass 50% of Skills" },
+                { label: "Time Limit", value: "45 Minutes" },
+                { label: "Mode", value: "Fullscreen Window" },
+                { label: "Retry Wait Time", value: "14 Days" },
+                { label: "Badge Visibility", value: "Public Profile" },
+                { label: "Retakes", value: "Allowed After Wait Time" },
               ].map(({ label, value }) => (
                 <div key={label} className="flex items-center justify-between px-5 py-3">
                   <span className="text-[11px] font-mono text-[#78716C]">{label}</span>
@@ -290,15 +330,16 @@ export default function CandidateVerificationPage() {
           </div>
 
           <div className="border border-[#E7E2DA] bg-white p-5">
-            <div className="text-[9px] font-mono tracking-[0.18em] text-[#78716C] uppercase mb-3">
-              Eligibility Criteria
+            <div className="text-[9px] font-medium tracking-[0.18em] text-[#78716C] uppercase mb-3">
+              Requirements
             </div>
             <div className="space-y-3">
               {[
-                "Skill declared in Identity record.",
-                "No active 14-day cooldown on the skill.",
-                "Stable connection required for fullscreen monitor.",
-                "Component passing thresholds required for certification.",
+                "Skill is added to your Profile.",
+                "No active 14-day wait period on this skill.",
+                "Stable internet connection for the timed session.",
+                "Score 75% or higher on each assessment to earn the verified badge.",
+                "Verify at least 50% of your listed skills to unlock visibility in the Employer Portal.",
               ].map((rule, i) => (
                 <div key={i} className="flex gap-3">
                   <div className="text-[9px] font-mono text-[#C8BFB0] pt-0.5 shrink-0">
@@ -311,8 +352,8 @@ export default function CandidateVerificationPage() {
           </div>
 
           <div className="border border-[#E7E2DA] bg-white p-5">
-            <div className="text-[9px] font-mono tracking-[0.18em] text-[#78716C] uppercase mb-3">
-              Status Legend
+            <div className="text-[9px] font-medium tracking-[0.18em] text-[#78716C] uppercase mb-3">
+              Status Explanations
             </div>
             <div className="space-y-3">
               {(["VERIFIED", "ELIGIBLE", "COOLDOWN"] as const).map((s) => (
@@ -320,10 +361,10 @@ export default function CandidateVerificationPage() {
                   <div className="pt-0.5"><StatusStamp status={s} /></div>
                   <span className="text-[11px] font-sans text-[#78716C] leading-relaxed">
                     {s === "VERIFIED"
-                      ? "Proctored examination passed"
+                      ? "Skill test passed and badge active"
                       : s === "ELIGIBLE"
-                      ? "Ready to sit the examination"
-                      : "Failed — 14-day study period active"}
+                      ? "Ready to take the test"
+                      : "Did not pass — retry available after 14 days"}
                   </span>
                 </div>
               ))}
@@ -331,18 +372,17 @@ export default function CandidateVerificationPage() {
           </div>
 
           <div className="border border-[#E7E2DA] bg-white p-5">
-            <div className="text-[9px] font-mono tracking-[0.18em] text-[#78716C] uppercase mb-3">
-              Examination Standards
+            <div className="text-[9px] font-medium tracking-[0.18em] text-[#78716C] uppercase mb-3">
+              Why Verification Matters
             </div>
             <p className="text-[12px] font-sans text-[#525252] leading-relaxed mb-4">
-              All examinations are administered under a standardised proctoring protocol.
-              Scores are timestamped and immutably recorded against your candidate ID.
+              Tests verify your practical coding abilities. Once you pass, verified badges appear on your public profile for tech recruiters to see.
             </p>
             <Link
               href="/how-verification-works"
               className="flex items-center gap-1.5 text-[11px] font-mono font-semibold text-[#1C1917] hover:text-[#064E3B] transition-colors"
             >
-              READ FULL METHODOLOGY <ArrowRight className="h-2.5 w-2.5" />
+              LEARN HOW VERIFICATION WORKS <ArrowRight className="h-2.5 w-2.5" />
             </Link>
           </div>
         </div>

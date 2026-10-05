@@ -227,7 +227,7 @@ export default function CandidateInboxPage() {
       <div className="border-b border-[#E7E2DA] bg-white px-6 sm:px-10 py-5 shrink-0">
         <div className="max-w-[1400px] mx-auto flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <div className="text-[10px] font-mono tracking-[0.2em] text-[#78716C] uppercase mb-1">
+            <div className="text-[10px] font-medium tracking-[0.2em] text-[#78716C] uppercase mb-1">
               Verified Communications · Meritlane Direct Messaging
             </div>
             <h1 className="text-[26px] sm:text-[32px] text-[#1C1917] font-semibold tracking-tight leading-tight">
@@ -240,12 +240,12 @@ export default function CandidateInboxPage() {
 
           <div className="flex items-center gap-6 shrink-0">
             <div className="text-right">
-              <div className="text-[10px] font-mono text-[#78716C] uppercase tracking-wider mb-0.5">Conversations</div>
+              <div className="text-[10px] font-medium text-[#78716C] uppercase tracking-wider mb-0.5">Conversations</div>
               <div className="text-[24px] font-semibold text-[#1C1917]">{threads.length}</div>
             </div>
             <div className="w-px h-10 bg-[#E7E2DA]" />
             <div className="text-right">
-              <div className="text-[10px] font-mono text-[#78716C] uppercase tracking-wider mb-0.5">Unread</div>
+              <div className="text-[10px] font-medium text-[#78716C] uppercase tracking-wider mb-0.5">Unread</div>
               <div className={`text-[24px] font-semibold ${unreadCount > 0 ? "text-[#064E3B]" : "text-[#78716C]"}`}>
                 {unreadCount}
               </div>
@@ -314,7 +314,7 @@ export default function CandidateInboxPage() {
             {fetching ? (
               <div className="flex flex-col items-center justify-center p-16 gap-3 text-[#78716C]">
                 <div className="h-5 w-5 border-2 border-[#E7E2DA] border-t-[#1C1917] rounded-full animate-spin" />
-                <p className="text-[12px] font-mono uppercase tracking-wider">Syncing communications…</p>
+                <p className="text-[12px] font-sans font-semibold uppercase tracking-wide">Syncing communications…</p>
               </div>
             ) : filteredThreads.length === 0 ? (
               <div className="flex flex-col items-center justify-center p-12 text-center">
@@ -371,7 +371,7 @@ export default function CandidateInboxPage() {
                         </span>
                       </div>
 
-                      <div className="text-[11px] font-mono uppercase tracking-wider text-[#064E3B] mb-1">
+                      <div className="text-[11px] font-sans font-semibold uppercase tracking-wide text-[#064E3B] mb-1">
                         Interview Invitation
                       </div>
 
@@ -413,7 +413,7 @@ export default function CandidateInboxPage() {
                   <div>
                     <div className="flex items-center gap-2">
                       <h2 className="text-[16px] font-bold text-[#1C1917]">{activeThread.partnerName}</h2>
-                      <span className="text-[10px] font-mono font-semibold uppercase text-[#064E3B] bg-[#064E3B]/10 border border-[#064E3B]/20 px-2 py-0.5 rounded">
+                      <span className="text-[10px] font-medium font-semibold uppercase text-[#064E3B] bg-[#064E3B]/10 border border-[#064E3B]/20 px-2 py-0.5 rounded">
                         Verified Employer
                       </span>
                     </div>
@@ -435,7 +435,7 @@ export default function CandidateInboxPage() {
               </div>
 
               {/* Subject Strip */}
-              <div className="px-6 py-2.5 bg-[#FAF8F5] border-b border-[#E7E2DA] flex items-center justify-between text-[11px] font-mono text-[#78716C] uppercase tracking-wider shrink-0">
+              <div className="px-6 py-2.5 bg-[#FAF8F5] border-b border-[#E7E2DA] flex items-center justify-between text-[11px] font-medium text-[#78716C] uppercase tracking-wider shrink-0">
                 <div className="flex items-center gap-2">
                   <MailOpen className="h-3.5 w-3.5 text-[#064E3B]" />
                   <span>Topic: Technical Role Consideration & Candidate Evaluation</span>
@@ -501,7 +501,7 @@ export default function CandidateInboxPage() {
                     <button
                       type="submit"
                       disabled={sendingReply || !replyText.trim()}
-                      className="flex items-center gap-2 px-5 py-2.5 bg-[#064E3B] hover:bg-[#043327] disabled:opacity-50 disabled:cursor-not-allowed text-white text-[12px] font-mono font-semibold uppercase tracking-wider rounded transition-colors shadow-xs"
+                      className="flex items-center gap-2 px-5 py-2.5 bg-[#064E3B] hover:bg-[#043327] disabled:opacity-50 disabled:cursor-not-allowed text-white text-[12px] font-sans font-semibold uppercase tracking-wide rounded transition-colors shadow-xs"
                     >
                       {sendingReply ? (
                         <>
@@ -528,7 +528,7 @@ export default function CandidateInboxPage() {
                 </div>
 
                 <div className="space-y-2">
-                  <div className="text-[11px] font-mono uppercase tracking-[0.18em] text-[#064E3B]">
+                  <div className="text-[11px] font-medium uppercase tracking-[0.18em] text-[#064E3B]">
                     Institutional Messaging Engine
                   </div>
                   <h2 className="text-[24px] sm:text-[28px] font-bold text-[#1C1917] tracking-tight">
@@ -542,7 +542,7 @@ export default function CandidateInboxPage() {
                 {/* 3 Step Telemetry Cards */}
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-left">
                   <div className="bg-white border border-[#E7E2DA] p-5 rounded shadow-2xs space-y-2">
-                    <div className="text-[10px] font-mono text-[#064E3B] uppercase font-bold">1. Verified Skills</div>
+                    <div className="text-[10px] font-medium text-[#064E3B] uppercase font-bold">1. Verified Skills</div>
                     <div className="text-[14px] font-bold text-[#1C1917]">Take Assessments</div>
                     <p className="text-[12px] text-[#78716C] leading-relaxed">
                       Pass timed 15-minute proctored evaluations to earn verified skill badges.
@@ -554,7 +554,7 @@ export default function CandidateInboxPage() {
                   </div>
 
                   <div className="bg-white border border-[#E7E2DA] p-5 rounded shadow-2xs space-y-2">
-                    <div className="text-[10px] font-mono text-[#064E3B] uppercase font-bold">2. Code Evidence</div>
+                    <div className="text-[10px] font-medium text-[#064E3B] uppercase font-bold">2. Code Evidence</div>
                     <div className="text-[14px] font-bold text-[#1C1917]">Sync Git & Projects</div>
                     <p className="text-[12px] text-[#78716C] leading-relaxed">
                       Connect repositories to showcase real commit histories and production deployments.
@@ -566,7 +566,7 @@ export default function CandidateInboxPage() {
                   </div>
 
                   <div className="bg-white border border-[#E7E2DA] p-5 rounded shadow-2xs space-y-2">
-                    <div className="text-[10px] font-mono text-[#064E3B] uppercase font-bold">3. Applications</div>
+                    <div className="text-[10px] font-medium text-[#064E3B] uppercase font-bold">3. Applications</div>
                     <div className="text-[14px] font-bold text-[#1C1917]">Browse Openings</div>
                     <p className="text-[12px] text-[#78716C] leading-relaxed">
                       Dispatch your 100% completed dossier directly to open engineering roles.

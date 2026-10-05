@@ -288,10 +288,23 @@ export async function POST(req: NextRequest) {
 
     const contentType = req.headers.get("content-type") || "";
 
+    let uploadedFileName = "";
+    let formCandidateName = "";
+    let formCollege = "";
+    let formDegree = "";
+    let formBranch = "";
+    let formGradYear = "";
+
     if (contentType.includes("multipart/form-data")) {
       const formData = await req.formData();
       const file = formData.get("file") as File | null;
       const skillsField = formData.get("skills");
+      formCandidateName = (formData.get("candidateName") as string) || "";
+      formCollege = (formData.get("college") as string) || "";
+      formDegree = (formData.get("degree") as string) || "";
+      formBranch = (formData.get("branch") as string) || "";
+      formGradYear = (formData.get("gradYear") as string) || "";
+
       if (typeof skillsField === "string") {
         try {
           skills = JSON.parse(skillsField);
@@ -304,8 +317,9 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ error: "No resume PDF file uploaded." }, { status: 400 });
       }
 
-      const fileName = file.name.toLowerCase();
-      if (!fileName.endsWith(".pdf") && file.type !== "application/pdf") {
+      uploadedFileName = file.name;
+      const fileNameLower = file.name.toLowerCase();
+      if (!fileNameLower.endsWith(".pdf") && file.type !== "application/pdf") {
         return NextResponse.json({ error: "Only PDF resume files (.pdf) are supported." }, { status: 400 });
       }
 
@@ -322,6 +336,11 @@ export async function POST(req: NextRequest) {
       const body = await req.json();
       resumeText = body.resumeText || "";
       skills = body.skills || [];
+      formCandidateName = body.candidateName || "";
+      formCollege = body.college || "";
+      formDegree = body.degree || "";
+      formBranch = body.branch || "";
+      formGradYear = body.gradYear || "";
     }
 
     if (!resumeText || typeof resumeText !== "string" || resumeText.trim().length < 30) {
@@ -331,7 +350,24 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const parsedEntities = parseResumeEntities(resumeText);
+    let existingProfile: any = null;
+    try {
+      const candidateSnap = await adminDb.collection("candidates").doc(uid).get();
+      if (candidateSnap.exists) {
+        existingProfile = candidateSnap.data();
+      }
+    } catch (dbErr) {
+      console.warn("Could not fetch existing candidate profile for parser hints:", dbErr);
+    }
+
+    const parsedEntities = parseResumeEntities(resumeText, {
+      fileName: uploadedFileName,
+      existingName: formCandidateName || existingProfile?.name,
+      existingCollege: formCollege || existingProfile?.college,
+      existingDegree: formDegree || existingProfile?.degree,
+      existingBranch: formBranch || existingProfile?.branch,
+      existingGradYear: formGradYear || existingProfile?.gradYear,
+    });
 
     const openRouterApiKey = process.env.OPENROUTER_API_KEY;
     if (openRouterApiKey) {

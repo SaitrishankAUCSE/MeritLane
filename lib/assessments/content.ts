@@ -114,6 +114,27 @@ WHERE status = 'COMPLETED'
   }
 ];
 
+export const SQL_SUPPORTED_LANGUAGES: SupportedLanguage[] = [
+  {
+    id: "sql",
+    name: "SQL",
+    monacoLang: "sql",
+    template: `-- Write your SQL query here
+-- Table schema: orders (id, user_id, amount, status, created_at)
+-- Requirements:
+-- 1. Filter for orders where status = 'COMPLETED'
+-- 2. Sum total amount spent per user in year 2024
+-- 3. Return user_id, total_spent
+-- 4. Order by total_spent descending and return the top 3 spenders
+
+SELECT
+    -- Write your query logic here
+FROM orders
+WHERE status = 'COMPLETED'
+`
+  }
+];
+
 export const QUESTION_BANKS: Record<string, { mcqPool: MCQ[]; codingPool: CodingChallenge[] }> = {
   // 1. REACT
   react: {
@@ -501,7 +522,7 @@ export default function Counter() {
     pass
 `,
         supportedLanguages: [
-          { id: "python", name: "Python 3", monacoLang: "python" }
+          { id: "python", name: "Python 3", monacoLang: "python", template: "" }
         ]
       }
     ]
@@ -897,7 +918,19 @@ export default function Counter() {
   };
 }
 `,
-        supportedLanguages: COMMON_SUPPORTED_LANGUAGES
+        supportedLanguages: [
+          {
+            id: "javascript",
+            name: "JavaScript (ES6)",
+            monacoLang: "javascript",
+            template: `export function debounce(fn, delayMs) {
+  // Implement debouncing
+  return function(...args) {
+  };
+}
+`
+          }
+        ]
       }
     ]
   },
@@ -1314,7 +1347,7 @@ SELECT
 FROM orders
 WHERE status = 'COMPLETED'
 `,
-        supportedLanguages: COMMON_SUPPORTED_LANGUAGES
+        supportedLanguages: SQL_SUPPORTED_LANGUAGES
       }
     ]
   },

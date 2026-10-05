@@ -21,22 +21,15 @@ export default async function PublicProfilePage({ params }: Props) {
     notFound();
   }
 
-  if (!candidateDoc.exists) {
+  if (!candidateDoc?.exists && !userDoc?.exists) {
     notFound();
   }
 
-  const rawCandidate = candidateDoc.data()!;
+  const rawCandidate = candidateDoc?.exists ? candidateDoc.data()! : {};
+  const rawUser = userDoc?.exists ? userDoc.data()! : {};
 
-  const verifiedSkills = rawCandidate.verifiedSkills || {};
+  const verifiedSkills = rawCandidate.verifiedSkills || rawUser.verifiedSkills || {};
   const hasVerifiedSkills = Object.values(verifiedSkills).some((s: any) => s?.status === "verified");
-  const isCandidateVerified = rawCandidate.verificationStatus === "verified" || hasVerifiedSkills;
-
-  // Must have at least one verified skill or verified status to be publicly accessible
-  if (!isCandidateVerified) {
-    notFound();
-  }
-
-  const rawUser = userDoc.exists ? userDoc.data()! : {};
 
   // Deep clone to strip Firestore Timestamps and extract ONLY safe public fields
   // CRITICAL SECURITY FIX: Do not pass the entire document to a Client Component
@@ -55,23 +48,29 @@ export default async function PublicProfilePage({ params }: Props) {
   }
 
   const candidate = {
-    name: rawCandidate.name || "",
-    skills: rawCandidate.skills || [],
-    projects: rawCandidate.projects || [],
-    college: rawCandidate.college || "",
-    degree: rawCandidate.degree || "",
-    branch: rawCandidate.branch || "",
-    gradYear: rawCandidate.gradYear || "",
-    verificationStatus: rawCandidate.verificationStatus || (hasVerifiedSkills ? "verified" : "draft"),
+    name: rawCandidate.name || rawUser.displayName || "Candidate",
+    skills: rawCandidate.skills || rawUser.skills || [],
+    projects: rawCandidate.projects || rawUser.projects || [],
+    college: rawCandidate.college || rawUser.college || "",
+    degree: rawCandidate.degree || rawUser.degree || "",
+    branch: rawCandidate.branch || rawUser.branch || "",
+    gradYear: rawCandidate.gradYear || rawUser.gradYear || "",
+    verificationStatus: rawCandidate.verificationStatus || (hasVerifiedSkills ? "verified" : "unverified"),
     verifiedSkills: sanitizedVerifiedSkills,
-    verifiedAt: parseTimestamp(rawCandidate.verifiedAt) || null,
-    updatedAt: parseTimestamp(rawCandidate.updatedAt) || null,
+    githubEvidence: rawCandidate.githubEvidence || rawUser.githubEvidence || null,
+    githubUsername: rawCandidate.githubUsername || rawUser.githubUsername || "",
+    githubUrl: rawCandidate.githubUrl || rawUser.githubUrl || (rawCandidate.githubUsername ? `https://github.com/${rawCandidate.githubUsername}` : ""),
+    linkedinUrl: rawCandidate.linkedinUrl || rawUser.linkedinUrl || "",
+    resumeUrl: rawCandidate.resumeUrl || rawUser.resumeUrl || "",
+    bio: rawCandidate.bio || rawUser.bio || "",
+    headline: rawCandidate.headline || rawUser.headline || "",
+    verifiedAt: parseTimestamp(rawCandidate.verifiedAt || rawUser.verifiedAt) || null,
+    updatedAt: parseTimestamp(rawCandidate.updatedAt || rawUser.updatedAt) || null,
   };
   
   const user = {
-    photoURL: rawUser.photoURL || "",
+    photoURL: rawUser.photoURL || rawCandidate.avatarUrl || "",
   };
 
   return <PublicProofRecord id={id} candidate={candidate} user={user} />;
 }
-

@@ -36,8 +36,11 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "No active assessment found" }, { status: 400 });
   }
 
+  const body = await req.json().catch(() => ({}));
+  const isForceTerminate = Boolean(body?.forceTerminate);
+
   // Atomically increment the violation count for the current attempt
-  const violationCount = (userData.assessmentViolationCount || 0) + 1;
+  const violationCount = isForceTerminate ? 99 : (userData.assessmentViolationCount || 0) + 1;
 
   if (violationCount === 1) {
     await userRef.update({

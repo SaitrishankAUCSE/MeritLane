@@ -108,7 +108,7 @@ export default function EmployerJobsPage() {
       <div className="border-b border-[#E7E2DA] bg-white px-6 sm:px-10 py-6">
         <div className="max-w-[1400px] mx-auto flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <div className="text-[10px] font-mono tracking-[0.2em] text-[#78716C] uppercase mb-1">
+            <div className="text-[10px] font-medium tracking-[0.2em] text-[#78716C] uppercase mb-1">
               Employer Hiring Operations · Meritlane Registry
             </div>
             <h1 className="text-[26px] sm:text-[32px] font-bold uppercase tracking-[0.06em] text-[#1C1917] leading-tight">
@@ -123,7 +123,7 @@ export default function EmployerJobsPage() {
               </button>
             </Link>
             <Link href="/employer/jobs/new">
-              <button className="flex items-center gap-2 px-5 py-2 bg-[#064E3B] hover:bg-[#043327] text-white text-[12px] font-mono font-semibold uppercase tracking-wider rounded transition-colors shadow-xs">
+              <button className="flex items-center gap-2 px-5 py-2 bg-[#064E3B] hover:bg-[#043327] text-white text-[12px] font-sans font-semibold uppercase tracking-wide rounded transition-colors shadow-xs">
                 <Plus className="h-4 w-4" />
                 POST A NEW JOB
               </button>
@@ -161,7 +161,7 @@ export default function EmployerJobsPage() {
         {loading ? (
           <div className="border border-[#E7E2DA] bg-white p-16 text-center rounded">
             <div className="h-6 w-6 border-2 border-[#E7E2DA] border-t-[#1C1917] rounded-full animate-spin mx-auto mb-3" />
-            <div className="text-[12px] font-mono text-[#78716C] uppercase tracking-wider">
+            <div className="text-[12px] font-medium text-[#78716C] uppercase tracking-wider">
               Loading your posted roles…
             </div>
           </div>
@@ -185,7 +185,7 @@ export default function EmployerJobsPage() {
               Establish your first engineering job posting to start receiving verified candidate dossiers directly into your hiring pipeline.
             </p>
             <Link href="/employer/jobs/new">
-              <button className="px-6 py-2.5 bg-[#064E3B] hover:bg-[#043327] text-white text-[12px] font-mono font-semibold uppercase tracking-wider rounded transition-colors shadow-xs">
+              <button className="px-6 py-2.5 bg-[#064E3B] hover:bg-[#043327] text-white text-[12px] font-sans font-semibold uppercase tracking-wide rounded transition-colors shadow-xs">
                 + POST YOUR FIRST JOB
               </button>
             </Link>
@@ -193,7 +193,7 @@ export default function EmployerJobsPage() {
         ) : (
           <div className="border border-[#E7E2DA] bg-white rounded shadow-xs overflow-hidden">
             <div className="border-b border-[#E7E2DA] bg-[#FAF8F5] px-6 py-3.5 flex items-center justify-between">
-              <div className="text-[11px] font-mono tracking-[0.14em] text-[#78716C] uppercase font-semibold">
+              <div className="text-[11px] font-medium tracking-[0.14em] text-[#78716C] uppercase font-semibold">
                 POSTED ROLES DIRECTORY ({jobs.length})
               </div>
               <div className="text-[11px] font-mono text-[#78716C]">
@@ -208,10 +208,10 @@ export default function EmployerJobsPage() {
                   <div key={job.id} className="p-6 flex flex-col lg:flex-row lg:items-center justify-between gap-6 hover:bg-[#FAF8F5]/50 transition-colors">
                     <div className="space-y-2 flex-1">
                       <div className="flex items-center gap-2.5 flex-wrap">
-                        <span className={`text-[10px] font-mono font-semibold uppercase tracking-[0.14em] px-2.5 py-0.5 rounded border ${getStatusBadge(job.status)}`}>
+                        <span className={`text-[10px] font-medium font-semibold uppercase tracking-[0.14em] px-2.5 py-0.5 rounded border ${getStatusBadge(job.status)}`}>
                           {job.status.toUpperCase()}
                         </span>
-                        <span className="text-[11px] font-mono text-[#78716C] uppercase">
+                        <span className="text-[11px] font-medium text-[#78716C] uppercase">
                           {job.workMode} · {job.employmentType}
                         </span>
                         <span className="text-[11px] font-mono text-[#78716C]">
@@ -265,7 +265,7 @@ export default function EmployerJobsPage() {
                         <button
                           onClick={() => handleStatusChange(job.id, "published")}
                           disabled={busy}
-                          className="px-4 py-2 bg-[#064E3B] text-white text-[12px] font-mono font-semibold uppercase tracking-wider rounded hover:bg-[#043327] transition-colors disabled:opacity-50"
+                          className="px-4 py-2 bg-[#064E3B] text-white text-[12px] font-sans font-semibold uppercase tracking-wide rounded hover:bg-[#043327] transition-colors disabled:opacity-50"
                         >
                           PUBLISH NOW
                         </button>
@@ -275,7 +275,7 @@ export default function EmployerJobsPage() {
                         <button
                           onClick={() => handleStatusChange(job.id, "paused")}
                           disabled={busy}
-                          className="px-3.5 py-2 border border-[#D97706]/30 text-[#92400E] bg-[#FFFBEB] text-[11px] font-mono font-semibold uppercase tracking-wider rounded hover:bg-[#FEF3C7] transition-colors disabled:opacity-50"
+                          className="px-3.5 py-2 border border-[#D97706]/30 text-[#92400E] bg-[#FFFBEB] text-[11px] font-sans font-semibold uppercase tracking-wide rounded hover:bg-[#FEF3C7] transition-colors disabled:opacity-50"
                         >
                           PAUSE
                         </button>
@@ -285,7 +285,7 @@ export default function EmployerJobsPage() {
                         <button
                           onClick={() => handleStatusChange(job.id, "published")}
                           disabled={busy}
-                          className="px-3.5 py-2 bg-[#064E3B] text-white text-[11px] font-mono font-semibold uppercase tracking-wider rounded hover:bg-[#043327] transition-colors disabled:opacity-50"
+                          className="px-3.5 py-2 bg-[#064E3B] text-white text-[11px] font-sans font-semibold uppercase tracking-wide rounded hover:bg-[#043327] transition-colors disabled:opacity-50"
                         >
                           RESUME
                         </button>
@@ -299,7 +299,7 @@ export default function EmployerJobsPage() {
                             }
                           }}
                           disabled={busy}
-                          className="px-3.5 py-2 border border-[#B42318]/30 text-[#B42318] bg-[#FEF2F2] text-[11px] font-mono font-semibold uppercase tracking-wider rounded hover:bg-[#FEE2E2] transition-colors disabled:opacity-50"
+                          className="px-3.5 py-2 border border-[#B42318]/30 text-[#B42318] bg-[#FEF2F2] text-[11px] font-sans font-semibold uppercase tracking-wide rounded hover:bg-[#FEE2E2] transition-colors disabled:opacity-50"
                         >
                           CLOSE
                         </button>

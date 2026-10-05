@@ -40,7 +40,7 @@ export default function ProofCanvasPage() {
           </div>
 
           <div className="p-6 bg-white border border-[#E7E2DA] rounded">
-            <h2 className="text-[11px] font-mono font-medium uppercase tracking-wider text-[#78716C] mb-4">Evaluated Competencies</h2>
+            <h2 className="text-[11px] font-sans font-medium uppercase tracking-wide text-[#78716C] mb-4">Evaluated Competencies</h2>
             <div className="space-y-3">
               <div className="flex items-center justify-between py-2 border-b border-[#E7E2DA]/60">
                 <span className="text-[13px] font-medium text-[#1C1917]">Distributed Systems</span>
@@ -58,7 +58,7 @@ export default function ProofCanvasPage() {
           </div>
 
           <div className="p-6 bg-white border border-[#E7E2DA] rounded">
-            <h2 className="text-[11px] font-mono font-medium uppercase tracking-wider text-[#78716C] mb-4">Technical Repositories</h2>
+            <h2 className="text-[11px] font-sans font-medium uppercase tracking-wide text-[#78716C] mb-4">Technical Repositories</h2>
             <div className="space-y-2">
               <a href="https://github.com" target="_blank" rel="noreferrer" className="flex items-center text-[13px] text-[#064E3B] hover:underline gap-2">
                 <Code className="h-4 w-4 shrink-0" />

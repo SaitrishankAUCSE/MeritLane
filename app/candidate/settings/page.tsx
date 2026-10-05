@@ -29,7 +29,7 @@ export default function SettingsPage() {
   }
 
   return (
-    <div className="mx-auto max-w-3xl px-4 py-10 sm:px-6 lg:px-8 space-y-8 h-full overflow-y-auto scrollbar-hide">
+    <div className="w-full px-4 sm:px-6 lg:px-8 py-8 space-y-8 h-full overflow-y-auto scrollbar-hide">
       <div className="border-b border-[#E5E5E5] pb-5">
         <h1 className="font-serif text-2xl font-bold tracking-tight text-[#0D0D0D] sm:text-3xl">
           Account Settings

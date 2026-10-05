@@ -5,31 +5,11 @@ import { CheckCircle2, Shield, ArrowRight, Clock, Award, Users, AlertCircle } fr
 export default function HowVerificationWorksPage() {
   return (
     <div className="min-h-screen bg-[#F8F6F3] text-[#1C1917] font-sans">
-      {/* Navigation */}
-      <header className="flex h-[64px] sm:h-[72px] items-center justify-between px-4 sm:px-8 lg:px-16 border-b border-[#E7E2DA] bg-white">
-        <Link href="/" className="font-serif text-[22px] sm:text-[26px] font-medium tracking-tight text-[#1C1917]">
-          Meritlane
-        </Link>
-        <div className="flex items-center gap-3 sm:gap-4">
-          <Link
-            href="/login"
-            className="text-[13px] sm:text-[14px] font-medium text-[#78716C] hover:text-[#1C1917] transition-colors"
-          >
-            Sign in
-          </Link>
-          <Link
-            href="/signup"
-            className="px-3 sm:px-4 py-1.5 sm:py-2 bg-[#1C1917] text-white text-[12px] sm:text-[13px] font-semibold rounded hover:bg-[#292524] transition-colors"
-          >
-            Get Verified
-          </Link>
-        </div>
-      </header>
 
       {/* Hero */}
       <section className="px-4 sm:px-8 lg:px-16 pt-12 sm:pt-20 pb-12 sm:pb-16 border-b border-[#E7E2DA] bg-white text-center">
         <div className="max-w-3xl mx-auto">
-          <div className="inline-flex items-center gap-2 text-[11px] font-mono uppercase tracking-[0.15em] text-[#78716C] mb-4 border border-[#E7E2DA] px-3 py-1 rounded bg-[#F8F6F3]">
+          <div className="inline-flex items-center gap-2 text-[11px] font-medium uppercase tracking-[0.15em] text-[#78716C] mb-4 border border-[#E7E2DA] px-3 py-1 rounded bg-[#F8F6F3]">
             <Shield className="h-3 w-3 text-[#16A34A]" /> Verification Methodology
           </div>
           <h1 className="font-serif text-[42px] sm:text-[54px] text-[#1C1917] tracking-tight leading-[1.1] mb-6">

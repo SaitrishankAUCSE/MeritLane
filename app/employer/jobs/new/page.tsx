@@ -106,7 +106,7 @@ export default function NewJobPostingPage() {
             <ArrowLeft className="h-3.5 w-3.5" />
             BACK TO POSTED ROLES
           </Link>
-          <span className="text-[11px] font-mono uppercase tracking-wider text-[#78716C]">
+          <span className="text-[11px] font-sans font-semibold uppercase tracking-wide text-[#78716C]">
             New Job Specification
           </span>
         </div>
@@ -115,7 +115,7 @@ export default function NewJobPostingPage() {
       <div className="max-w-[1000px] mx-auto px-6 sm:px-10 py-8">
         <div className="border border-[#E7E2DA] bg-white p-7 sm:p-10 rounded shadow-xs space-y-8">
           <div>
-            <div className="text-[10px] font-mono tracking-[0.2em] text-[#78716C] uppercase mb-1">
+            <div className="text-[10px] font-medium tracking-[0.2em] text-[#78716C] uppercase mb-1">
               Job Intake Formulation
             </div>
             <h1 className="text-[24px] sm:text-[30px] font-bold uppercase tracking-[0.06em] text-[#1C1917]">
@@ -137,7 +137,7 @@ export default function NewJobPostingPage() {
             {/* Title & Department */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
               <div>
-                <label className="block text-[12px] font-mono font-semibold uppercase tracking-wider text-[#1C1917] mb-2">
+                <label className="block text-[12px] font-sans font-semibold uppercase tracking-wide text-[#1C1917] mb-2">
                   Job Title <span className="text-[#B42318]">*</span>
                 </label>
                 <input
@@ -150,7 +150,7 @@ export default function NewJobPostingPage() {
               </div>
 
               <div>
-                <label className="block text-[12px] font-mono font-semibold uppercase tracking-wider text-[#1C1917] mb-2">
+                <label className="block text-[12px] font-sans font-semibold uppercase tracking-wide text-[#1C1917] mb-2">
                   Department / Squad
                 </label>
                 <input
@@ -166,7 +166,7 @@ export default function NewJobPostingPage() {
             {/* Work Mode, Employment Type, Location */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
               <div>
-                <label className="block text-[12px] font-mono font-semibold uppercase tracking-wider text-[#1C1917] mb-2">
+                <label className="block text-[12px] font-sans font-semibold uppercase tracking-wide text-[#1C1917] mb-2">
                   Work Mode <span className="text-[#B42318]">*</span>
                 </label>
                 <select
@@ -181,7 +181,7 @@ export default function NewJobPostingPage() {
               </div>
 
               <div>
-                <label className="block text-[12px] font-mono font-semibold uppercase tracking-wider text-[#1C1917] mb-2">
+                <label className="block text-[12px] font-sans font-semibold uppercase tracking-wide text-[#1C1917] mb-2">
                   Role Type <span className="text-[#B42318]">*</span>
                 </label>
                 <select
@@ -197,7 +197,7 @@ export default function NewJobPostingPage() {
               </div>
 
               <div>
-                <label className="block text-[12px] font-mono font-semibold uppercase tracking-wider text-[#1C1917] mb-2">
+                <label className="block text-[12px] font-sans font-semibold uppercase tracking-wide text-[#1C1917] mb-2">
                   Location <span className="text-[#B42318]">*</span>
                 </label>
                 <input
@@ -212,7 +212,7 @@ export default function NewJobPostingPage() {
 
             {/* Compensation Range */}
             <div>
-              <label className="block text-[12px] font-mono font-semibold uppercase tracking-wider text-[#1C1917] mb-2">
+              <label className="block text-[12px] font-sans font-semibold uppercase tracking-wide text-[#1C1917] mb-2">
                 Annual Compensation / Range (Optional)
               </label>
               <input
@@ -226,7 +226,7 @@ export default function NewJobPostingPage() {
 
             {/* Required Skills Picker */}
             <div className="space-y-3">
-              <label className="block text-[12px] font-mono font-semibold uppercase tracking-wider text-[#1C1917]">
+              <label className="block text-[12px] font-sans font-semibold uppercase tracking-wide text-[#1C1917]">
                 Required Technical Capabilities <span className="text-[#B42318]">*</span>
               </label>
 
@@ -281,7 +281,7 @@ export default function NewJobPostingPage() {
 
               {/* Suggested Skills */}
               <div className="flex items-center gap-1.5 flex-wrap pt-1">
-                <span className="text-[10px] font-mono uppercase text-[#78716C] mr-1">Suggestions:</span>
+                <span className="text-[10px] font-medium uppercase text-[#78716C] mr-1">Suggestions:</span>
                 {COMMON_SKILLS.slice(0, 10).map((s) => (
                   <button
                     key={s}
@@ -297,7 +297,7 @@ export default function NewJobPostingPage() {
 
             {/* Description */}
             <div>
-              <label className="block text-[12px] font-mono font-semibold uppercase tracking-wider text-[#1C1917] mb-2">
+              <label className="block text-[12px] font-sans font-semibold uppercase tracking-wide text-[#1C1917] mb-2">
                 Full Role Specification & Responsibilities <span className="text-[#B42318]">*</span>
               </label>
               <textarea
@@ -316,7 +316,7 @@ export default function NewJobPostingPage() {
               type="button"
               disabled={saving}
               onClick={() => handleSubmit("draft")}
-              className="w-full sm:w-auto px-6 h-11 border border-[#E7E2DA] bg-white hover:bg-[#FAF8F5] text-[12px] font-mono font-semibold uppercase tracking-wider rounded transition-colors disabled:opacity-50 shadow-2xs"
+              className="w-full sm:w-auto px-6 h-11 border border-[#E7E2DA] bg-white hover:bg-[#FAF8F5] text-[12px] font-sans font-semibold uppercase tracking-wide rounded transition-colors disabled:opacity-50 shadow-2xs"
             >
               SAVE AS DRAFT
             </button>
@@ -325,7 +325,7 @@ export default function NewJobPostingPage() {
               type="button"
               disabled={saving}
               onClick={() => handleSubmit("published")}
-              className="w-full sm:w-auto px-7 h-11 bg-[#064E3B] hover:bg-[#043327] text-white text-[12px] font-mono font-semibold uppercase tracking-wider rounded transition-colors shadow-xs disabled:opacity-50 flex items-center justify-center gap-2"
+              className="w-full sm:w-auto px-7 h-11 bg-[#064E3B] hover:bg-[#043327] text-white text-[12px] font-sans font-semibold uppercase tracking-wide rounded transition-colors shadow-xs disabled:opacity-50 flex items-center justify-center gap-2"
             >
               {saving ? (
                 <>

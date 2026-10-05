@@ -33,10 +33,10 @@ export function MobileNav({ role }: { role: "candidate" | "employer" | "admin" }
   };
 
   const candidateItems: NavItem[] = [
-    { name: "Identity", href: "/candidate/profile", icon: Fingerprint },
-    { name: "Evidence", href: "/candidate/dashboard", icon: LayoutDashboard },
-    { name: "Provenance", href: "/candidate/provenance", icon: Network },
-    { name: "Verification", href: "/candidate/verification", icon: ShieldCheck },
+    { name: "Profile", href: "/candidate/profile", icon: Fingerprint },
+    { name: "Projects", href: "/candidate/dashboard", icon: LayoutDashboard },
+    { name: "Public Record", href: "/candidate/provenance", icon: Network },
+    { name: "Skill Tests", href: "/candidate/verification", icon: ShieldCheck },
     { name: "Jobs", href: "/candidate/jobs", icon: Briefcase },
     { name: "Applications", href: "/candidate/applications", icon: FileText },
     { name: "Inbox", href: "/candidate/inbox", icon: Inbox },

@@ -7,7 +7,7 @@ import Link from "next/link";
 
 interface GuideStep {
   title: string;
-  description: string;
+  description?: string;
   isCompleted?: boolean;
 }
 

@@ -10,6 +10,7 @@ import { getPlatformStats } from "@/lib/firebase/home";
 import { useAuth } from "@/lib/auth/AuthContext";
 import { motion } from "framer-motion";
 import { HandwritingText } from "@/components/ui/handwriting-text";
+import { MeritlaneLoader } from "@/components/ui/MeritlaneLoader";
 
 const fadeUp: any = {
   hidden: { opacity: 0, y: 30 },
@@ -59,12 +60,8 @@ export default function HomePage() {
     }
   }, [user]);
 
-  if (authLoading || (user && profileLoading) || user) {
-    return (
-      <div className="flex min-h-screen w-full items-center justify-center bg-[var(--color-background)]">
-        <div className="h-6 w-6 border-2 border-[var(--color-outline)] border-t-[var(--color-foreground)] rounded-full animate-spin" />
-      </div>
-    );
+  if ((user && profileLoading) || user) {
+    return <MeritlaneLoader level="page" />;
   }
 
   return (
@@ -81,8 +78,8 @@ export default function HomePage() {
           className="mb-8 flex items-center justify-center gap-3"
         >
           <span className="h-px w-12 bg-[#1C1917]/20" />
-          <span className="text-[11px] font-mono font-medium tracking-[0.25em] uppercase text-[#78716C]">
-            The Meritlane Register
+          <span className="text-[11px] font-medium font-medium tracking-[0.25em] uppercase text-[#78716C]">
+            Meritlane
           </span>
           <span className="h-px w-12 bg-[#1C1917]/20" />
         </motion.div>
@@ -95,7 +92,7 @@ export default function HomePage() {
           className="w-full flex justify-center items-center mb-4 sm:mb-6 min-h-[2.2em] sm:min-h-[2.6em]"
         >
           <HandwritingText
-            words={["Meritlane.", "Audited code.", "Verified talent.", "Cryptographic proof."]}
+            words={["Meritlane.", "Real code.", "Verified skills.", "Proof of work."]}
             height="2.2em"
             duration={1.5}
             delay={0.1}
@@ -112,7 +109,7 @@ export default function HomePage() {
           variants={fadeUp}
           className="text-[44px] sm:text-[58px] md:text-[70px] lg:text-[78px] font-serif text-[var(--color-foreground)] tracking-tight leading-[1.08] max-w-4xl mx-auto mb-6 font-normal"
         >
-          Independent Technical Evaluation.
+          Hire Developers Based on Real Skills.
         </motion.h1>
 
         {/* Subtitle */}
@@ -122,10 +119,10 @@ export default function HomePage() {
           variants={fadeUp}
           className="text-[16px] sm:text-[18px] text-[#525252] max-w-2xl mx-auto leading-[1.7] mb-10 font-sans"
         >
-          Meritlane is an independent technical examination registry. We evaluate source code, administer proctored technical evaluations, and establish verifiable public proof of engineering competency—so hiring is grounded in demonstrable evidence.
+          Meritlane helps students and developers prove what they can build. Take practical coding tests, connect your projects, and share a verified profile with hiring teams.
         </motion.p>
 
-        {/* Action Buttons: Crisp Rectangular Format */}
+        {/* Action Buttons */}
         <motion.div 
           initial="hidden"
           animate="visible"
@@ -133,14 +130,14 @@ export default function HomePage() {
           className="flex flex-wrap items-center justify-center gap-4 mb-16"
         >
           <Button href="/employer/dashboard" variant="primary" size="lg" className="rounded-none px-8">
-            Access Verified Register
+            Browse Candidates
           </Button>
           <Button href="/signup" variant="outline" size="lg" className="rounded-none px-8">
-            Begin Verification
+            Get Verified
           </Button>
         </motion.div>
 
-        {/* Authentic Archival Register Extract */}
+        {/* Sample Profile Card */}
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -149,37 +146,37 @@ export default function HomePage() {
         >
           <div className="flex flex-col sm:flex-row sm:items-baseline justify-between border-b border-[var(--color-border)] pb-4 mb-6">
             <div>
-              <div className="text-[10px] font-mono uppercase tracking-[0.2em] text-[var(--color-muted-foreground)]">Attestation Record Extract</div>
+              <div className="text-[10px] font-medium uppercase tracking-[0.2em] text-[var(--color-muted-foreground)]">Sample Verified Profile</div>
               <div className="text-[18px] font-serif text-[var(--color-foreground)] mt-0.5">ML-2026-B849 · Verified Software Engineer</div>
             </div>
             <div className="text-[11px] font-mono text-[var(--color-primary)] font-medium mt-2 sm:mt-0">
-              AUDITED &amp; ATTESTED
+              VERIFIED DEVELOPER
             </div>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 text-sm font-sans mb-6">
             <div>
-              <div className="text-[10px] font-mono text-[var(--color-muted-foreground)] uppercase tracking-wider mb-1">Evaluated Discipline</div>
+              <div className="text-[10px] font-medium text-[var(--color-muted-foreground)] uppercase tracking-wider mb-1">Focus Area</div>
               <div className="font-medium text-[var(--color-foreground)]">Full-Stack &amp; Systems</div>
             </div>
             <div>
-              <div className="text-[10px] font-mono text-[var(--color-muted-foreground)] uppercase tracking-wider mb-1">Examination Score</div>
-              <div className="font-mono text-[var(--color-primary)] font-semibold">PASS (Threshold Met)</div>
+              <div className="text-[10px] font-medium text-[var(--color-muted-foreground)] uppercase tracking-wider mb-1">Skill Test Score</div>
+              <div className="font-mono text-[var(--color-primary)] font-semibold">Passed (88%)</div>
             </div>
             <div>
-              <div className="text-[10px] font-mono text-[#78716C] uppercase tracking-wider mb-1">Git Repository Audit</div>
-              <div className="font-medium text-[#1C1917]">Verified 14 Repositories</div>
+              <div className="text-[10px] font-medium text-[#78716C] uppercase tracking-wider mb-1">GitHub Activity</div>
+              <div className="font-medium text-[#1C1917]">Active Code History</div>
             </div>
           </div>
 
           <div className="border-t border-[var(--color-border)] pt-4 flex flex-wrap items-center justify-between text-xs text-[var(--color-muted-foreground)] font-mono gap-2">
-            <span>Verified under Standard 2026.4</span>
-            <span>Cryptographic Dossier Available for Inspection</span>
+            <span>Verified on Meritlane</span>
+            <span>Public proof and projects ready to view</span>
           </div>
         </motion.div>
       </section>
 
-      {/* REGISTRY STANDARDS SECTION */}
+      {/* HOW IT WORKS SECTION */}
       <section id="standards" className="py-20 sm:py-28 bg-[var(--color-background)] border-y border-[var(--color-border)]">
         <div className="mx-auto max-w-4xl px-6 lg:px-8">
           <motion.div 
@@ -189,36 +186,36 @@ export default function HomePage() {
             variants={fadeUp}
             className="text-left mb-14"
           >
-            <div className="text-[11px] font-mono uppercase tracking-[0.25em] text-[var(--color-muted-foreground)] mb-3">
-              Institutional Evaluation Canon
+            <div className="text-[11px] font-medium uppercase tracking-[0.25em] text-[var(--color-muted-foreground)] mb-3">
+              How It Works
             </div>
             <h2 className="text-2xl sm:text-3xl lg:text-4xl font-serif text-[var(--color-foreground)] tracking-tight leading-snug">
-              Objective examination criteria for the modern engineering workforce.
+              Clear proof of technical skills for the modern tech workforce.
             </h2>
           </motion.div>
 
-          {/* Linear Canonical Protocols */}
+          {/* Protocols */}
           <div className="divide-y divide-[var(--color-border)] border-y border-[var(--color-border)] bg-[var(--color-surface)]">
             {[
               {
                 num: "01",
-                title: "Supervised Technical Examination",
-                detail: "Every candidate undergoes timed 45-minute programming challenges in isolated runtime sandboxes. Code is graded directly against hidden unit tests and edge-case suites, requiring all component thresholds to be met for verification."
+                title: "Practical Coding Tests",
+                detail: "Candidates take timed 45-minute programming challenges in an online code editor. Code is tested against automated unit tests and test suites."
               },
               {
                 num: "02",
-                title: "Repository & Commit Provenance",
-                detail: "Candidate claims are substantiated against public and authenticated Git histories. Commit chronology, architectural complexity, and individual contributions are audited to confirm practical implementation ability."
+                title: "GitHub & Project Proof",
+                detail: "Connect your GitHub account and showcase real projects. Recruiters can view your code, commit history, and live applications directly."
               },
               {
                 num: "03",
-                title: "Monitored Session Integrity",
-                detail: "Assessments enforce strict runtime containment with window blur detection, fullscreen validation, and anti-copy mechanisms. Infractions trigger automatic disqualifications and mandatory cooldown periods."
+                title: "Fair, Timed Environment",
+                detail: "Tests run in a fullscreen monitored browser window with copy-paste protections to ensure fair and honest results for everyone."
               },
               {
                 num: "04",
-                title: "Immutable Public Dossiers",
-                detail: "Successful evaluations generate a permanent, public dossier record. Hiring teams inspect complete code submissions, test benchmarks, and verified skills directly—eliminating resume keyword ambiguity."
+                title: "Shareable Verified Profile",
+                detail: "Passing a test earns a verified badge on your public profile link. Add it to your resume or LinkedIn to stand out to employers."
               }
             ].map((protocol) => (
               <div key={protocol.num} className="p-6 sm:p-8 flex flex-col sm:flex-row gap-4 sm:gap-8 items-start">
@@ -239,7 +236,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* VERIFIED REGISTER PREVIEW & EMPLOYER ACCESS */}
+      {/* VERIFIED TALENT PREVIEW & EMPLOYER ACCESS */}
       <section className="py-24 sm:py-32 bg-[var(--color-background)]">
         <div className="mx-auto max-w-4xl px-6 lg:px-8">
           
@@ -250,40 +247,40 @@ export default function HomePage() {
             variants={fadeUp}
             className="mb-10 text-left"
           >
-            <div className="text-[11px] font-mono uppercase tracking-[0.25em] text-[var(--color-muted-foreground)] mb-2">
-              Attestation Directory Preview
+            <div className="text-[11px] font-medium uppercase tracking-[0.25em] text-[var(--color-muted-foreground)] mb-2">
+              Verified Talent
             </div>
             <h2 className="text-2xl sm:text-3xl font-serif text-[var(--color-foreground)] tracking-tight mb-4">
-              Verified Engineering Records
+              Explore Verified Profiles
             </h2>
             <p className="text-sm text-[#525252] leading-relaxed max-w-2xl font-sans">
-              Candidates who clear our proctored compiler evaluations and repository audits are entered into the Meritlane Register. Each record contains cryptographic proof of technical capability.
+              Developers who pass coding challenges and attach real projects earn verified badges. View sample profiles below:
             </p>
           </motion.div>
 
-          {/* Illustrative Dossier Record Cards */}
+          {/* Cards */}
           <div className="divide-y divide-[var(--color-border)] border border-[var(--color-border)] bg-[var(--color-surface)] mb-8">
             {[
               {
                 ref: "ML-2026-B849",
                 discipline: "Distributed Systems & Backend",
-                meta: "Class of 2026 · Autonomous Code Audited",
+                meta: "Class of 2026 · Code Tested",
                 status: "VERIFIED · PASS",
                 skills: ["Node.js", "Python", "Docker", "PostgreSQL", "System Architecture"]
               },
               {
                 ref: "ML-2026-C192",
                 discipline: "Frontend & Web Engineering",
-                meta: "Class of 2025 · Runtime Evaluated",
+                meta: "Class of 2025 · Code Tested",
                 status: "VERIFIED · PASS",
-                skills: ["React", "TypeScript", "Next.js", "Browser API", "State Engines"]
+                skills: ["React", "TypeScript", "Next.js", "Browser API", "State Management"]
               },
               {
                 ref: "ML-2026-A504",
-                discipline: "Cloud Infrastructure & SRE",
-                meta: "Class of 2026 · Scenario Evaluated",
+                discipline: "Cloud Infrastructure & DevOps",
+                meta: "Class of 2026 · Code Tested",
                 status: "VERIFIED · PASS",
-                skills: ["AWS", "Kubernetes", "Linux", "CI/CD", "Security Protocols"]
+                skills: ["AWS", "Kubernetes", "Linux", "CI/CD", "Docker"]
               }
             ].map((dossier) => (
               <div key={dossier.ref} className="p-5 sm:p-6 bg-[var(--color-surface)] hover:bg-[var(--color-surface-dim)] transition-colors flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -308,7 +305,7 @@ export default function HomePage() {
                 <div className="shrink-0 self-start sm:self-center">
                   <Link href="/employer/dashboard">
                     <Button variant="outline" size="sm" className="rounded-none border-[#E7E2DA] hover:border-[#1C1917] text-xs font-mono">
-                      Inspect Record →
+                      View Profile →
                     </Button>
                   </Link>
                 </div>
@@ -321,17 +318,17 @@ export default function HomePage() {
             <div className="flex items-start gap-4">
               <div>
                 <h4 className="text-sm font-serif font-medium text-[var(--color-foreground)] mb-1">
-                  Candidate Privacy & Confidentiality Shield
+                  Candidate Privacy First
                 </h4>
                 <p className="text-xs text-[#525252] leading-relaxed max-w-xl font-sans">
-                  To protect candidates currently in school or employment, personal identities and dossier inspection are restricted to authenticated, verified hiring teams.
+                  We protect student and developer privacy. Full profiles and direct messaging are only accessible by verified hiring teams.
                 </p>
               </div>
             </div>
 
             <Link href="/employer/dashboard" className="shrink-0 w-full sm:w-auto">
-              <Button variant="primary" size="md" className="rounded-none px-6 w-full text-xs font-mono uppercase tracking-wider">
-                Access Talent Pool
+              <Button variant="primary" size="md" className="rounded-none px-6 w-full text-xs font-sans font-semibold uppercase tracking-wide">
+                Browse Talent
               </Button>
             </Link>
           </div>
@@ -339,30 +336,30 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* INSTITUTIONAL COLOPHON & NOTICE */}
+      {/* FOOTER CALL TO ACTION */}
       <section className="border-t border-[var(--color-border)] bg-[var(--color-surface-low)] py-20">
         <div className="mx-auto max-w-3xl px-6 lg:px-8 text-center">
-          <div className="text-[11px] font-mono uppercase tracking-[0.25em] text-[var(--color-muted-foreground)] mb-3">
-            Institutional Attestation
+          <div className="text-[11px] font-medium uppercase tracking-[0.25em] text-[var(--color-muted-foreground)] mb-3">
+            Get Started
           </div>
           <h2 className="text-2xl sm:text-3xl font-serif text-[#1C1917] tracking-tight mb-4">
-            The National Register of Evaluated Engineering Talent
+            A Fair, Skill-First Way to Get Hired
           </h2>
           <p className="text-sm text-[#525252] leading-relaxed max-w-xl mx-auto mb-8 font-sans">
-            Meritlane maintains an independent standard of competence for software engineers in India. Records are permanently cataloged and verifiable by authorized hiring organizations without commercial intermediaries.
+            Meritlane gives every software engineer an equal opportunity to stand out through verified coding tests and real-world projects.
           </p>
           <div className="flex flex-wrap justify-center gap-4">
             <Link
               href="/employer/dashboard"
-              className="px-6 py-2.5 bg-[var(--color-foreground)] text-[var(--color-background)] border border-[var(--color-foreground)] text-xs font-mono uppercase tracking-wider hover:bg-[#292524] transition-colors"
+              className="px-6 py-2.5 bg-[var(--color-foreground)] text-[var(--color-background)] border border-[var(--color-foreground)] text-xs font-sans font-semibold uppercase tracking-wide hover:bg-[#292524] transition-colors"
             >
-              Open Employer Portal
+              For Employers
             </Link>
             <Link
               href="/signup"
-              className="px-6 py-2.5 border border-[var(--color-foreground)] bg-[var(--color-surface)] text-[var(--color-foreground)] text-xs font-mono uppercase tracking-wider hover:bg-[var(--color-surface-dim)] transition-colors"
+              className="px-6 py-2.5 border border-[var(--color-foreground)] bg-[var(--color-surface)] text-[var(--color-foreground)] text-xs font-sans font-semibold uppercase tracking-wide hover:bg-[var(--color-surface-dim)] transition-colors"
             >
-              Begin Verification
+              For Candidates
             </Link>
           </div>
         </div>

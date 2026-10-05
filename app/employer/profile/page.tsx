@@ -41,7 +41,7 @@ export default function EmployerProfilePage() {
           <div className="flex-1">
             <div className="flex items-center gap-3 flex-wrap">
               <h2 className="font-serif text-[24px] font-bold text-[#0D0D0D]">{companyName}</h2>
-              <span className="text-[11px] font-mono font-bold uppercase tracking-wider text-[#15803D] bg-[#15803D]/10 px-2.5 py-0.5 rounded-sm">
+              <span className="text-[11px] font-medium font-bold uppercase tracking-wider text-[#15803D] bg-[#15803D]/10 px-2.5 py-0.5 rounded-sm">
                 Verified Hiring Partner
               </span>
             </div>

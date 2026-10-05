@@ -8,11 +8,11 @@ import {
   ArrowRight,
   BookMarked,
   MessageSquare,
-  Sparkles,
   Users,
   ExternalLink,
   ChevronDown,
   Layers,
+  ShieldCheck,
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -43,11 +43,6 @@ export default function EmployerShortlistPage() {
 
   // Active messaging target
   const [messagingTarget, setMessagingTarget] = useState<{ id: string; name: string } | null>(null);
-
-  // AI Briefs cache
-  const [aiSummaries, setAiSummaries] = useState<Record<string, string>>({});
-  const [loadingAi, setLoadingAi] = useState<Record<string, boolean>>({});
-  const [activeAiCard, setActiveAiCard] = useState<string | null>(null);
 
   // Filter by stage
   const [stageFilter, setStageFilter] = useState<string>("all");
@@ -138,38 +133,6 @@ export default function EmployerShortlistPage() {
     }
   };
 
-  const toggleAiSummary = async (candidateId: string) => {
-    if (activeAiCard === candidateId) {
-      setActiveAiCard(null);
-      return;
-    }
-    setActiveAiCard(candidateId);
-    if (aiSummaries[candidateId]) return;
-
-    setLoadingAi((prev) => ({ ...prev, [candidateId]: true }));
-    try {
-      const token = await user?.getIdToken(true);
-      const res = await fetch("/api/employer/ai-summary", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ candidateId }),
-      });
-      if (res.ok) {
-        const data = await res.json();
-        setAiSummaries((prev) => ({ ...prev, [candidateId]: data.summary || "Summary generated." }));
-      } else {
-        setAiSummaries((prev) => ({ ...prev, [candidateId]: "Unable to generate summary." }));
-      }
-    } catch {
-      setAiSummaries((prev) => ({ ...prev, [candidateId]: "Failed to contact AI service." }));
-    } finally {
-      setLoadingAi((prev) => ({ ...prev, [candidateId]: false }));
-    }
-  };
-
   if (loading && !user) return <MeritlaneLoader level="page" text="Authenticating" />;
   if (errorMsg) {
     return (
@@ -252,7 +215,7 @@ export default function EmployerShortlistPage() {
                     : "bg-white border-[#E5E5E5] text-[#0D0D0D] hover:border-[#D2D2D2]"
                 }`}
               >
-                <div className="text-[11px] font-mono uppercase tracking-wider opacity-70">Total Saved</div>
+                <div className="text-[11px] font-sans font-semibold uppercase tracking-wide opacity-70">Total Saved</div>
                 <div className="text-[20px] font-bold font-serif">{candidates.length}</div>
               </button>
               {PIPELINE_STAGES.slice(0, 4).map((st) => {
@@ -269,7 +232,7 @@ export default function EmployerShortlistPage() {
                         : "bg-white border-[#E5E5E5] text-[#0D0D0D] hover:border-[#D2D2D2]"
                     }`}
                   >
-                    <div className="text-[11px] font-mono uppercase tracking-wider opacity-70">{st.label}</div>
+                    <div className="text-[11px] font-sans font-semibold uppercase tracking-wide opacity-70">{st.label}</div>
                     <div className="text-[20px] font-bold font-serif">{count}</div>
                   </button>
                 );
@@ -308,6 +271,12 @@ export default function EmployerShortlistPage() {
                 const verifiedSkillsList = Object.keys(c.verifiedSkills || {}).filter(
                   (k) => c.verifiedSkills[k].status === "verified"
                 );
+                const totalSkills = c.totalSkillsCount || c.skills?.length || (verifiedSkillsList.length > 0 ? verifiedSkillsList.length * 2 : 1);
+                const verifiedCount = c.qualifiedSkillsCount ?? verifiedSkillsList.length;
+                const verificationPct = typeof c.skillVerificationPct === "number"
+                  ? c.skillVerificationPct
+                  : (totalSkills > 0 ? Math.round((verifiedCount / totalSkills) * 100) : 50);
+
                 const currentStage = pipeline[c.uid] || "shortlisted";
                 const stageObj = PIPELINE_STAGES.find((s) => s.id === currentStage) || PIPELINE_STAGES[0];
 
@@ -322,7 +291,7 @@ export default function EmployerShortlistPage() {
                           {c.name ? c.name.charAt(0).toUpperCase() : "C"}
                         </div>
                         <div>
-                          <div className="flex items-center gap-3 flex-wrap">
+                          <div className="flex items-center gap-2.5 flex-wrap">
                             <h3 className="font-serif text-[24px] text-[#0D0D0D] leading-tight">
                               {c.name || "Anonymous Candidate"}
                             </h3>
@@ -331,6 +300,13 @@ export default function EmployerShortlistPage() {
                             >
                               {stageObj.label}
                             </span>
+                            <div className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-sm bg-[#ECFDF5] border border-[#A7F3D0] text-[#065F46] text-[11px] font-semibold">
+                              <ShieldCheck className="h-3.5 w-3.5 text-[#059669]" />
+                              <span>{verificationPct}% Skills Verified</span>
+                              <span className="text-[#047857] font-normal text-[10px]">
+                                ({verifiedCount}/{totalSkills})
+                              </span>
+                            </div>
                           </div>
 
                           {(c.college || c.branch) && (
@@ -380,16 +356,6 @@ export default function EmployerShortlistPage() {
                           <Button
                             variant="outline"
                             size="sm"
-                            onClick={() => toggleAiSummary(c.uid)}
-                            className="gap-1.5 text-[12px] border-[#E7E2DA] bg-[#FAF8F5] text-[#1C1917] hover:bg-[#F5F1EB]"
-                          >
-                            <Sparkles className="h-3.5 w-3.5 text-[#064E3B]" />
-                            {activeAiCard === c.uid ? "Hide Synthesis" : "Evidence Synthesis"}
-                          </Button>
-
-                          <Button
-                            variant="outline"
-                            size="sm"
                             onClick={() => setMessagingTarget({ id: c.uid, name: c.name || "Candidate" })}
                             className="gap-1.5 text-[12px] border-[#E5E5E5] text-[#0D0D0D] hover:bg-white"
                           >
@@ -415,33 +381,7 @@ export default function EmployerShortlistPage() {
                         </div>
                       </div>
                     </div>
-
-                    {/* Expandable Evidence Synthesis */}
-                    {activeAiCard === c.uid && (
-                      <div className="mt-6 pt-5 border-t border-[#E7E2DA] bg-[#FAF8F5] rounded p-5 border border-[#E7E2DA]">
-                        <div className="flex items-center justify-between mb-2">
-                          <div className="flex items-center gap-2 text-[#1C1917] font-semibold text-[13px]">
-                            <Sparkles className="h-4 w-4 text-[#064E3B]" /> Candidate Evidence Synthesis
-                          </div>
-                          <span className="text-[10px] font-mono uppercase tracking-wider text-[#064E3B] bg-white px-2.5 py-0.5 rounded border border-[#064E3B]/20">
-                            Meritlane Verification Protocol
-                          </span>
-                        </div>
-                        {loadingAi[c.uid] ? (
-                          <div className="py-4 flex items-center gap-3 text-[#78716C]">
-                            <div className="h-4 w-4 border-2 border-[#E7E2DA] border-t-[#064E3B] rounded-full animate-spin" />
-                            <span className="text-[13px] text-[#78716C] font-mono uppercase tracking-wider">
-                              Evaluating verified project signals and code claims…
-                            </span>
-                          </div>
-                        ) : (
-                          <p className="text-[13px] text-[#333333] leading-relaxed font-sans">
-                            {aiSummaries[c.uid] || "Summary unavailable."}
-                          </p>
-                        )}
-                      </div>
-                    )}
-                  </div>
+                    </div>
                 );
               })}
             </div>

@@ -35,7 +35,11 @@ export interface CandidateProfile {
   branch: string;
   gradYear: string;
   githubUrl: string;
+  avatarUrl?: string;
+  avatarBadge?: "auto" | "job_ready" | "in_verification" | "none";
   resumeUrl: string;
+  resumeFileName?: string;
+  resumeUploadedAt?: number;
   resumeText?: string;
   atsScore?: number;
   atsRating?: "Needs Work" | "Good" | "Strong" | "Excellent";
@@ -43,6 +47,12 @@ export interface CandidateProfile {
   atsAnalyzedAt?: number;
   skills: string[];
   candidateKey?: string;          // Unique registry key e.g. ML-3F8A2C1D
+  targetRoles?: string[];         // e.g. ["Full-Stack Engineer", "Backend Developer"]
+  preferredLocations?: string[];  // e.g. ["Remote", "Bangalore", "Hyderabad"]
+  workPreference?: "Remote" | "Hybrid" | "On-site" | "Flexible";
+  availability?: string;          // e.g. "Immediate", "15 Days", "1 Month"
+  expectedSalary?: string;        // e.g. "₹8-12 LPA", "$90,000/yr"
+  bio?: string;                   // Brief professional summary
   verifiedSkills?: Record<string, SkillVerification>;
   projects: ProjectEntry[];
   githubEvidence?: GithubEvidence;

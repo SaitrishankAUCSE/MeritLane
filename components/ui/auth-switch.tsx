@@ -274,7 +274,7 @@ export function AuthSwitch({ defaultMode = "login" }: AuthSwitchProps) {
   };
 
   // Prevent UI flash while evaluating an existing valid session
-  if (authLoading || (user && profileLoading) || (user && userRole)) {
+  if ((user && profileLoading) || (user && userRole)) {
     return <MeritlaneLoader level="page" text="Authenticating" />;
   }
 

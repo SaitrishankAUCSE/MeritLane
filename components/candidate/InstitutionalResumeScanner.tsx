@@ -1,251 +1,286 @@
 "use client";
 
-import React, { useEffect, useState, useMemo } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { FileText, CheckCircle2, ShieldCheck, GraduationCap, Code2, ArrowRight } from "lucide-react";
+import React, { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
+import {
+  FileText,
+  CheckCircle2,
+  GraduationCap,
+  Code2,
+  ArrowRight,
+  AlertTriangle,
+  X,
+  User,
+} from "lucide-react";
 import { ParsedResumeProfile } from "@/lib/resume/parser";
 
 interface InstitutionalResumeScannerProps {
   isOpen: boolean;
   fileName?: string;
   parsedData: ParsedResumeProfile | null;
+  currentProfileName?: string;
+  currentProfileCollege?: string;
+  isAnalyzing?: boolean;
+  error?: string | null;
   onComplete: () => void;
+  onClose?: () => void;
 }
-
-const PARSE_STAGES = [
-  {
-    id: 1,
-    title: "DOCUMENT STRUCTURE",
-    description: "Ingesting document layout and canonical ATS structure",
-    startMs: 0,
-    endMs: 700,
-  },
-  {
-    id: 2,
-    title: "ACADEMIC CREDENTIALS",
-    description: "Extracting institution, degree, branch, and graduation cohort",
-    startMs: 700,
-    endMs: 1400,
-  },
-  {
-    id: 3,
-    title: "SKILL EXTRACTION",
-    description: "Matching technical capabilities and programming frameworks",
-    startMs: 1400,
-    endMs: 2200,
-  },
-  {
-    id: 4,
-    title: "PROFILE SYNCHRONIZATION",
-    description: "Synthesizing candidate profile schema and capability ledger",
-    startMs: 2200,
-    endMs: 3000,
-  },
-];
 
 export function InstitutionalResumeScanner({
   isOpen,
   fileName = "resume.pdf",
   parsedData,
+  currentProfileName,
+  currentProfileCollege,
+  isAnalyzing = false,
+  error = null,
   onComplete,
+  onClose,
 }: InstitutionalResumeScannerProps) {
-  const [elapsedMs, setElapsedMs] = useState(0);
+  const [mounted, setMounted] = useState(false);
+  const [progress, setProgress] = useState(15);
+  const [completed, setCompleted] = useState(false);
 
   useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // Simple progress animation while waiting for API
+  useEffect(() => {
     if (!isOpen) {
-      setElapsedMs(0);
+      setProgress(15);
+      setCompleted(false);
       return;
     }
 
-    const interval = 40; // update smoothly over 3000ms total
-    const timer = setInterval(() => {
-      setElapsedMs((prev) => {
-        const next = prev + interval;
-        if (next >= 3000) {
-          clearInterval(timer);
-          setTimeout(() => {
-            onComplete();
-          }, 350);
-          return 3000;
+    const interval = setInterval(() => {
+      setProgress((prev) => {
+        if (parsedData) {
+          if (prev < 100) return Math.min(100, prev + 15);
+          return 100;
         }
-        return next;
+        if (prev < 88) {
+          return prev + Math.floor(Math.random() * 5 + 3);
+        }
+        return prev;
       });
-    }, interval);
+    }, 150);
 
-    return () => clearInterval(timer);
-  }, [isOpen, onComplete]);
+    return () => clearInterval(interval);
+  }, [isOpen, parsedData]);
 
-  const progressPercent = Math.min(100, Math.floor((elapsedMs / 3000) * 100));
+  // Mark completed when progress hits 100 and parsedData is received
+  useEffect(() => {
+    if (parsedData && progress >= 100) {
+      setCompleted(true);
+    }
+  }, [parsedData, progress]);
 
-  const currentStage = useMemo(() => {
-    return (
-      PARSE_STAGES.find((s) => elapsedMs >= s.startMs && elapsedMs < s.endMs) ||
-      PARSE_STAGES[PARSE_STAGES.length - 1]
-    );
-  }, [elapsedMs]);
+  // Lock background scroll when open
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "unset";
+    }
+    return () => {
+      document.body.style.overflow = "unset";
+    };
+  }, [isOpen]);
 
-  const showAcademic = elapsedMs >= 900;
-  const showSkills = elapsedMs >= 1600;
+  if (!isOpen || !mounted) return null;
 
-  if (!isOpen) return null;
+  const skillsList = parsedData?.skills || [];
 
-  return (
-    <AnimatePresence>
-      <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 sm:p-6 bg-[#1C1917]/50 backdrop-blur-xs overflow-y-auto">
-        <motion.div
-          initial={{ opacity: 0, scale: 0.98, y: 8 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
-          exit={{ opacity: 0, scale: 0.98, y: 8 }}
-          className="w-full max-w-2xl bg-[#FAF8F5] border border-[#E7E2DA] shadow-2xl rounded-lg overflow-hidden text-[#1C1917] relative"
-        >
-          {/* Header */}
-          <div className="bg-white border-b border-[#E7E2DA] px-6 py-5">
-            <div className="flex items-center justify-between gap-4">
-              <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded bg-[#FAF8F5] border border-[#E7E2DA] flex items-center justify-center text-[#1C1917]">
-                  <FileText className="h-5 w-5" />
-                </div>
-                <div>
-                  <div className="text-[10px] font-mono tracking-[0.16em] uppercase text-[#78716C]">
-                    MeritLane Registry · Credential Extraction
-                  </div>
-                  <h2 className="font-serif text-[18px] sm:text-[20px] font-semibold text-[#1C1917] leading-tight">
-                    Document Examination
-                  </h2>
-                </div>
-              </div>
-
-              <div className="text-right">
-                <span className="text-[11px] font-mono text-[#78716C] bg-[#FAF8F5] border border-[#E7E2DA] px-2.5 py-1 rounded">
-                  {fileName}
-                </span>
-              </div>
+  const modalContent = (
+    <div className="fixed inset-0 z-[99999] flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-200">
+      <div
+        className="w-full max-w-lg bg-white border border-[#E7E2DA] shadow-2xl rounded-lg overflow-hidden text-[#1C1917] relative animate-in zoom-in-95 duration-200 flex flex-col max-h-[90vh]"
+        role="dialog"
+        aria-modal="true"
+      >
+        {/* Header */}
+        <div className="bg-[#FAF8F5] border-b border-[#E7E2DA] px-5 py-3.5 flex items-center justify-between">
+          <div className="flex items-center gap-2.5 min-w-0">
+            <div className="w-8 h-8 rounded bg-white border border-[#E7E2DA] flex items-center justify-center text-[#1C1917] shrink-0">
+              <FileText className="h-4 w-4 text-[#064E3B]" />
             </div>
-
-            {/* Progress Bar */}
-            <div className="mt-4 w-full bg-[#E7E2DA] h-1.5 rounded-full overflow-hidden">
-              <motion.div
-                className="h-full bg-[#064E3B]"
-                style={{ width: `${progressPercent}%` }}
-                transition={{ ease: "easeOut" }}
-              />
+            <div className="min-w-0">
+              <h2 className="text-[15px] font-semibold text-[#1C1917] leading-tight">
+                {error
+                  ? "Couldn't read resume"
+                  : completed
+                  ? "Resume Read Successfully"
+                  : "Checking Resume"}
+              </h2>
+              <p className="text-[11px] font-mono text-[#78716C] truncate mt-0.5">
+                {fileName}
+              </p>
             </div>
           </div>
 
-          {/* Stage Progression */}
-          <div className="p-6 space-y-5">
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-              {PARSE_STAGES.map((stage) => {
-                const isPast = elapsedMs >= stage.endMs;
-                const isCurrent = elapsedMs >= stage.startMs && elapsedMs < stage.endMs;
-                return (
-                  <div
-                    key={stage.id}
-                    className={`p-3 rounded border text-left transition-colors ${
-                      isCurrent
-                        ? "bg-white border-[#064E3B] shadow-xs"
-                        : isPast
-                        ? "bg-[#FAF8F5] border-[#E7E2DA] text-[#78716C]"
-                        : "bg-white/50 border-[#E7E2DA]/60 text-[#A8A29E]"
-                    }`}
-                  >
-                    <div className="flex items-center gap-1.5 text-[10px] font-mono font-semibold uppercase mb-1">
-                      {isPast ? (
-                        <CheckCircle2 className="h-3 w-3 text-[#064E3B]" />
-                      ) : (
-                        <span className={`w-1.5 h-1.5 rounded-full ${isCurrent ? "bg-[#064E3B] animate-pulse" : "bg-[#D6D3D1]"}`} />
-                      )}
-                      <span>Stage {stage.id}</span>
-                    </div>
-                    <div className="text-[11px] font-sans font-medium line-clamp-1">
-                      {stage.title}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-
-            {/* Extracted Information Preview Card */}
-            <div className="bg-white border border-[#E7E2DA] rounded p-5 space-y-4">
-              <div className="flex items-center justify-between border-b border-[#E7E2DA] pb-3">
-                <div className="flex items-center gap-2 text-[11px] font-mono text-[#78716C] uppercase tracking-wider">
-                  <ShieldCheck className="h-3.5 w-3.5 text-[#064E3B]" />
-                  <span>Extracted Profile Records</span>
-                </div>
-                <span className="text-[11px] font-mono text-[#064E3B] font-semibold">
-                  {progressPercent}% Complete
-                </span>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <span className="text-[10px] font-mono text-[#78716C] uppercase block mb-1">
-                    Candidate Identity
-                  </span>
-                  <div className="text-[14px] font-serif font-semibold text-[#1C1917]">
-                    {parsedData?.name || "Candidate"}
-                  </div>
-                </div>
-
-                <div>
-                  <span className="text-[10px] font-mono text-[#78716C] uppercase block mb-1">
-                    Academic Institution
-                  </span>
-                  <div className="text-[13px] font-sans text-[#1C1917] flex items-center gap-1.5">
-                    <GraduationCap className="h-3.5 w-3.5 text-[#78716C] shrink-0" />
-                    <span className="truncate">
-                      {showAcademic ? (parsedData?.college || "Recognized Technical University") : "Verifying records..."}
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Skills Extracted */}
-              <div>
-                <span className="text-[10px] font-mono text-[#78716C] uppercase block mb-2 flex items-center justify-between">
-                  <span>Declared Technical Skills (To Be Verified)</span>
-                  {showSkills && parsedData?.skills && (
-                    <span className="text-[#064E3B] font-medium font-sans">
-                      {parsedData.skills.length} competencies isolated
-                    </span>
-                  )}
-                </span>
-                <div className="flex flex-wrap gap-1.5 max-h-[100px] overflow-y-auto">
-                  {showSkills && parsedData?.skills && parsedData.skills.length > 0 ? (
-                    parsedData.skills.map((skill) => (
-                      <span
-                        key={skill}
-                        className="inline-flex items-center gap-1 text-[11px] font-mono px-2 py-0.5 rounded bg-[#FAF8F5] border border-[#E7E2DA] text-[#1C1917]"
-                      >
-                        <Code2 className="h-2.5 w-2.5 text-[#78716C]" />
-                        {skill}
-                      </span>
-                    ))
-                  ) : (
-                    <span className="text-[12px] font-sans text-[#78716C] italic">
-                      Scanning technical competency taxonomy...
-                    </span>
-                  )}
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Footer Action */}
-          <div className="bg-white border-t border-[#E7E2DA] px-6 py-3.5 flex items-center justify-between">
-            <div className="text-[11px] font-mono text-[#78716C]">
-              Status: <span className="text-[#064E3B] font-medium">{currentStage.title}</span>
-            </div>
+          {onClose && (
             <button
-              onClick={onComplete}
-              className="inline-flex items-center gap-1.5 text-[11px] font-mono font-semibold px-4 py-2 bg-[#1C1917] hover:bg-[#064E3B] text-white rounded transition-colors"
+              onClick={onClose}
+              className="text-[#78716C] hover:text-[#1C1917] p-1.5 rounded hover:bg-white transition-colors"
+              title="Close"
             >
-              <span>Apply & Review Profile</span>
-              <ArrowRight className="h-3.5 w-3.5" />
+              <X className="h-4 w-4" />
             </button>
-          </div>
-        </motion.div>
+          )}
+        </div>
+
+        {/* Content Body */}
+        <div className="p-6 overflow-y-auto">
+          {error ? (
+            <div className="bg-red-50 border border-red-200 text-[#C0392B] p-4 rounded text-[13px] flex items-start gap-3">
+              <AlertTriangle className="h-5 w-5 shrink-0 mt-0.5" />
+              <div>
+                <div className="font-semibold mb-1">Couldn't read this resume</div>
+                <div className="text-[12px] text-red-700">{error}</div>
+              </div>
+            </div>
+          ) : !completed ? (
+            /* Very Simple Loading & Parsing Animation */
+            <div className="py-6 flex flex-col items-center justify-center text-center">
+              <div className="relative mb-5">
+                <div className="w-14 h-14 rounded-full border-[3px] border-[#E7E2DA] border-t-[#064E3B] animate-spin" />
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <FileText className="w-5 h-5 text-[#064E3B]" />
+                </div>
+              </div>
+
+              <h3 className="text-[16px] font-semibold text-[#1C1917] mb-1">
+                Reading Your Resume
+              </h3>
+              <p className="text-[13px] text-[#78716C] max-w-xs mb-5">
+                {progress < 40
+                  ? "Reading document..."
+                  : progress < 75
+                  ? "Finding your skills and education..."
+                  : "Almost done..."}
+              </p>
+
+              {/* Progress bar */}
+              <div className="w-full max-w-xs bg-[#FAF8F5] border border-[#E7E2DA] h-2 rounded-full overflow-hidden">
+                <div
+                  className="bg-[#064E3B] h-full transition-all duration-200 rounded-full"
+                  style={{ width: `${progress}%` }}
+                />
+              </div>
+              <span className="text-[11px] font-mono text-[#78716C] mt-2">
+                {progress}%
+              </span>
+            </div>
+          ) : (
+            /* Simple Extracted Data Review */
+            <div className="space-y-4">
+              <div className="flex items-center gap-2 text-[#064E3B] bg-[#064E3B]/10 border border-[#064E3B]/20 p-2.5 rounded text-[12px] font-medium">
+                <CheckCircle2 className="h-4 w-4 shrink-0" />
+                <span>Found your details. Ready to update your profile?</span>
+              </div>
+
+              <div className="border border-[#E7E2DA] rounded p-4 space-y-3 bg-[#FAF8F5]">
+                {/* Candidate Name */}
+                <div>
+                  <span className="text-[10px] font-mono text-[#78716C] uppercase block mb-0.5">
+                    Full Name
+                  </span>
+                  <div className="text-[14px] font-semibold text-[#1C1917] flex items-center gap-1.5">
+                    <User className="h-3.5 w-3.5 text-[#78716C]" />
+                    <span>
+                      {parsedData?.name && parsedData.name !== "Candidate"
+                        ? parsedData.name
+                        : currentProfileName || "Candidate"}
+                    </span>
+                    {!parsedData?.name && currentProfileName && (
+                      <span className="text-[10px] font-mono text-[#78716C] bg-white border border-[#E7E2DA] px-1.5 py-0.2 rounded">
+                        From your profile
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                {/* College / Degree */}
+                {(() => {
+                  const academicItems = [
+                    parsedData?.degree,
+                    parsedData?.branch,
+                    parsedData?.college || currentProfileCollege,
+                    parsedData?.gradYear ? `Class of ${parsedData.gradYear}` : null,
+                  ].filter(Boolean);
+                  const academicText = academicItems.join(" · ");
+                  if (!academicText) return null;
+                  return (
+                    <div>
+                      <span className="text-[10px] font-mono text-[#78716C] uppercase block mb-0.5">
+                        Education
+                      </span>
+                      <div className="text-[13px] text-[#1C1917] flex items-center gap-1.5">
+                        <GraduationCap className="h-3.5 w-3.5 text-[#78716C] shrink-0" />
+                        <span className="truncate">{academicText}</span>
+                      </div>
+                    </div>
+                  );
+                })()}
+
+                {/* Skills Identified */}
+                <div>
+                  <div className="flex items-center justify-between mb-1.5">
+                    <span className="text-[10px] font-mono text-[#78716C] uppercase">
+                      Skills Found ({skillsList.length})
+                    </span>
+                  </div>
+                  <div className="flex flex-wrap gap-1.5 max-h-36 overflow-y-auto p-1.5 bg-white border border-[#E7E2DA] rounded">
+                    {skillsList.length > 0 ? (
+                      skillsList.map((skill) => (
+                        <span
+                          key={skill}
+                          className="inline-flex items-center gap-1 text-[11px] font-mono px-2 py-0.5 rounded bg-[#FAF8F5] border border-[#E7E2DA] text-[#1C1917]"
+                        >
+                          <Code2 className="h-2.5 w-2.5 text-[#064E3B]" />
+                          {skill}
+                        </span>
+                      ))
+                    ) : (
+                      <span className="text-[12px] text-[#78716C] italic p-1">
+                        No skills found in resume text.
+                      </span>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Footer */}
+        <div className="bg-[#FAF8F5] border-t border-[#E7E2DA] px-5 py-3.5 flex items-center justify-end gap-3">
+          {onClose && (
+            <button
+              onClick={onClose}
+              className="text-[12px] font-medium text-[#78716C] hover:text-[#1C1917] px-3 py-1.5 rounded transition-colors"
+            >
+              Cancel
+            </button>
+          )}
+
+          <button
+            onClick={onComplete}
+            disabled={!parsedData && !error}
+            className={`inline-flex items-center gap-1.5 text-[12px] font-semibold px-4 py-2 rounded transition-colors cursor-pointer ${
+              completed
+                ? "bg-[#064E3B] hover:bg-[#043327] text-white"
+                : "bg-[#1C1917] hover:bg-[#2C2927] text-white disabled:opacity-40 disabled:cursor-not-allowed"
+            }`}
+          >
+            <span>{error ? "Close" : "Save to Profile"}</span>
+            <ArrowRight className="h-3.5 w-3.5" />
+          </button>
+        </div>
       </div>
-    </AnimatePresence>
+    </div>
   );
+
+  return createPortal(modalContent, document.body);
 }

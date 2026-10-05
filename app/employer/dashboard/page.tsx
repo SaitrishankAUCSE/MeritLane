@@ -10,23 +10,25 @@ import {
   BookmarkCheck,
   ArrowRight,
   Filter,
-  Sparkles,
   MessageSquare,
   ArrowUpDown,
   Code2,
   Layers,
   GraduationCap,
   Briefcase,
+  ShieldCheck,
+  X,
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { COMMON_SKILLS } from "@/lib/constants";
+import { motion, AnimatePresence } from "framer-motion";
 import { MeritlaneLoader } from "@/components/ui/MeritlaneLoader";
 import { ContextGuide } from "@/components/ui/ContextGuide";
-import { Input } from "@/components/ui/Input";
 import { ErrorState } from "@/components/ui/ErrorState";
 import { Button } from "@/components/ui/Button";
 import { MessageModal } from "@/components/employer/MessageModal";
+import { CandidateAvatar } from "@/components/ui/CandidateAvatar";
 
 export default function EmployerDashboardPage() {
   const { user, loading } = useAuth();
@@ -51,11 +53,6 @@ export default function EmployerDashboardPage() {
 
   // Messaging state
   const [messagingTarget, setMessagingTarget] = useState<{ id: string; name: string } | null>(null);
-
-  // AI Briefs cache & active card
-  const [aiSummaries, setAiSummaries] = useState<Record<string, string>>({});
-  const [loadingAi, setLoadingAi] = useState<Record<string, boolean>>({});
-  const [activeAiCard, setActiveAiCard] = useState<string | null>(null);
 
   const fetchCandidates = useCallback(async () => {
     if (!user) return;
@@ -172,38 +169,6 @@ export default function EmployerDashboardPage() {
     );
   };
 
-  const toggleAiSummary = async (candidateId: string) => {
-    if (activeAiCard === candidateId) {
-      setActiveAiCard(null);
-      return;
-    }
-    setActiveAiCard(candidateId);
-    if (aiSummaries[candidateId]) return;
-
-    setLoadingAi((prev) => ({ ...prev, [candidateId]: true }));
-    try {
-      const token = await user?.getIdToken(true);
-      const res = await fetch("/api/employer/ai-summary", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ candidateId }),
-      });
-      if (res.ok) {
-        const data = await res.json();
-        setAiSummaries((prev) => ({ ...prev, [candidateId]: data.summary || "Summary generated." }));
-      } else {
-        setAiSummaries((prev) => ({ ...prev, [candidateId]: "Unable to generate summary." }));
-      }
-    } catch {
-      setAiSummaries((prev) => ({ ...prev, [candidateId]: "Failed to contact AI service." }));
-    } finally {
-      setLoadingAi((prev) => ({ ...prev, [candidateId]: false }));
-    }
-  };
-
   // Sorting
   const sortedCandidates = [...candidates].sort((a, b) => {
     if (sortBy === "skills") {
@@ -243,11 +208,10 @@ export default function EmployerDashboardPage() {
           <ContextGuide
             storageKey="employer_dashboard"
             title="Discovery Engine"
-            description="Unlike traditional job boards, MeritLane only shows candidates who have passed rigorous technical assessments. If a candidate appears here, their skills are objectively verified."
             steps={[
-              { title: "Filter & Search", description: "Filter by verified technical domains or search for specific traits.", isCompleted: true },
-              { title: "Review Evidence", description: "Click a candidate to view their complete dossier and proof.", isCompleted: false },
-              { title: "Shortlist & Message", description: "Save interesting candidates and reach out directly.", isCompleted: Object.values(shortlisted).some((v) => v) },
+              { title: "Filter & Search", isCompleted: true },
+              { title: "Review Evidence", isCompleted: false },
+              { title: "Shortlist & Message", isCompleted: Object.values(shortlisted).some((v) => v) },
             ]}
           />
         </div>
@@ -256,7 +220,7 @@ export default function EmployerDashboardPage() {
         <div className="max-w-[1000px] mx-auto mb-8 sm:mb-10">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-3">
             <div className="flex items-center gap-2 flex-wrap">
-              <span className="text-[11px] font-mono font-bold uppercase tracking-[0.1em] text-[#064E3B] bg-[#064E3B]/10 px-2.5 py-1 rounded">
+              <span className="text-[11px] font-medium font-bold uppercase tracking-[0.1em] text-[#064E3B] bg-[#064E3B]/10 px-2.5 py-1 rounded">
                 Institutional Talent Registry
               </span>
               <span className="text-[12px] text-[#737373] font-mono">
@@ -271,17 +235,14 @@ export default function EmployerDashboardPage() {
               </button>
             </Link>
           </div>
-          <h1 className="text-[26px] sm:text-[34px] lg:text-[38px] font-bold uppercase tracking-[0.06em] text-[#0D0D0D] leading-tight mb-2">
+          <h1 className="text-[26px] sm:text-[34px] lg:text-[38px] font-bold uppercase tracking-[0.06em] text-[#0D0D0D] leading-tight mb-6">
             FIND PEOPLE WHOSE SKILLS ARE PROVEN.
           </h1>
-          <p className="text-[14px] sm:text-[16px] text-[#737373] font-sans mb-6">
-            Inspect technical candidates backed by timed assessments, audited Git evidence, and verified project artifacts.
-          </p>
 
           {/* Institutional Telemetry Strip */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-2">
             <div className="bg-white border border-[#E5E5E5] p-4 rounded shadow-xs">
-              <div className="text-[11px] font-mono uppercase tracking-wider text-[#737373] mb-1">
+              <div className="text-[11px] font-sans font-semibold uppercase tracking-wide text-[#737373] mb-1">
                 Verified Engineers
               </div>
               <div className="text-[26px] font-serif text-[#0D0D0D] font-normal leading-none">
@@ -291,7 +252,7 @@ export default function EmployerDashboardPage() {
             </div>
 
             <div className="bg-white border border-[#E5E5E5] p-4 rounded shadow-xs">
-              <div className="text-[11px] font-mono uppercase tracking-wider text-[#064E3B] mb-1">
+              <div className="text-[11px] font-sans font-semibold uppercase tracking-wide text-[#064E3B] mb-1">
                 High Scorers (≥85%)
               </div>
               <div className="text-[26px] font-serif text-[#064E3B] font-normal leading-none">
@@ -301,7 +262,7 @@ export default function EmployerDashboardPage() {
             </div>
 
             <div className="bg-white border border-[#E5E5E5] p-4 rounded shadow-xs">
-              <div className="text-[11px] font-mono uppercase tracking-wider text-[#737373] mb-1">
+              <div className="text-[11px] font-sans font-semibold uppercase tracking-wide text-[#737373] mb-1">
                 Audited Projects
               </div>
               <div className="text-[26px] font-serif text-[#0D0D0D] font-normal leading-none">
@@ -316,25 +277,26 @@ export default function EmployerDashboardPage() {
         <div className="max-w-[1000px] mx-auto">
           <div className="mb-8 bg-white border border-[#E5E5E5] p-4 sm:p-6 rounded shadow-[0_2px_10px_rgba(0,0,0,0.02)] space-y-4 sm:space-y-5">
             {/* Search Bar */}
-            <div className="relative">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-[#737373]" />
-              <Input
-                placeholder="Search candidates by name, college, technology, or repository keywords..."
+            <div className="relative flex items-center">
+              <Search className="absolute left-4 h-4 w-4 text-[#78716C] pointer-events-none" />
+              <input
+                type="text"
+                placeholder="Search candidates by name, skills, target role, or Telemetry Record ID (e.g. #I8XEESRN)..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 onKeyDown={(e) => {
                   if (e.key === "Enter") fetchCandidates();
                 }}
-                className="pl-12 pr-10 h-14 bg-[#FAFAFA] border-[#E5E5E5] text-[15px] focus-visible:ring-1 focus-visible:ring-[#0D0D0D] rounded"
+                className="w-full h-12 pl-11 pr-10 bg-[#FAF8F5] border border-[#E7E2DA] focus:border-[#064E3B] focus:bg-white text-[14px] font-sans text-[#1C1917] placeholder:text-[#A8A29E] rounded transition-all outline-none"
               />
               {searchQuery && (
                 <button
                   type="button"
                   onClick={() => setSearchQuery("")}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-[#737373] hover:text-[#0D0D0D] text-sm font-bold p-1"
+                  className="absolute right-3.5 text-[#78716C] hover:text-[#1C1917] p-1 rounded transition-colors"
                   title="Clear search"
                 >
-                  ✕
+                  <X className="h-4 w-4" />
                 </button>
               )}
             </div>
@@ -342,31 +304,31 @@ export default function EmployerDashboardPage() {
             {/* Active Filter Indicators */}
             {(selectedSkills.length > 0 || searchQuery.trim()) && (
               <div className="flex items-center gap-2 flex-wrap text-[12px] pt-1">
-                <span className="text-[#737373] font-mono text-[11px] uppercase tracking-wider">Active:</span>
+                <span className="text-[#78716C] font-mono text-[10px] uppercase tracking-wider font-semibold">Active:</span>
                 {searchQuery.trim() && (
-                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded bg-[#FAFAFA] border border-[#E5E5E5] text-[#0D0D0D] text-[12px] font-medium">
+                  <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded bg-[#FAF8F5] border border-[#E7E2DA] text-[#1C1917] text-[12px] font-mono">
                     Keyword: &ldquo;{searchQuery}&rdquo;
                     <button
                       type="button"
                       onClick={() => setSearchQuery("")}
-                      className="hover:text-[#B42318] text-[#737373] ml-1 font-bold"
+                      className="hover:text-[#B42318] text-[#78716C] ml-1"
                     >
-                      ×
+                      <X className="h-3 w-3" />
                     </button>
                   </span>
                 )}
                 {selectedSkills.map((sk) => (
                   <span
                     key={sk}
-                    className="inline-flex items-center gap-1.5 px-3 py-1 rounded bg-[#0D0D0D] text-white text-[12px] font-medium shadow-xs"
+                    className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded bg-[#1C1917] text-white text-[12px] font-mono shadow-2xs"
                   >
                     {sk}
                     <button
                       type="button"
                       onClick={() => toggleSkillFilter(sk)}
-                      className="hover:text-red-300 ml-1 font-bold"
+                      className="hover:text-red-300 ml-1"
                     >
-                      ×
+                      <X className="h-3 w-3" />
                     </button>
                   </span>
                 ))}
@@ -376,7 +338,7 @@ export default function EmployerDashboardPage() {
                     setSearchQuery("");
                     setSelectedSkills([]);
                   }}
-                  className="text-[12px] font-mono text-[#B42318] hover:underline ml-1"
+                  className="text-[11px] font-sans text-[#78716C] hover:text-[#B42318] hover:underline transition-colors ml-1 font-medium"
                 >
                   Clear all
                 </button>
@@ -385,7 +347,7 @@ export default function EmployerDashboardPage() {
 
             {/* Skill Filter Chips */}
             <div className="flex items-center gap-2.5 flex-wrap pt-1">
-              <div className="flex items-center gap-1.5 text-[12px] font-mono text-[#737373] uppercase tracking-wider mr-1">
+              <div className="flex items-center gap-1.5 text-[12px] font-medium text-[#737373] uppercase tracking-wider mr-1">
                 <Filter className="h-3.5 w-3.5" /> Filter by Skill:
               </div>
               {COMMON_SKILLS.slice(0, 14).map((skill) => {
@@ -572,9 +534,11 @@ export default function EmployerDashboardPage() {
 
           {/* Results List */}
           {fetching ? (
-            <div className="flex flex-col items-center justify-center py-20 text-[#737373]">
-              <div className="h-6 w-6 border-2 border-[#D2D2D2] border-t-[#0D0D0D] rounded-full animate-spin mb-4" />
-              <p className="text-[13px] font-sans">Loading verified talent...</p>
+            <div className="py-20 flex flex-col items-center justify-center space-y-3 bg-white border border-[#E7E2DA] rounded shadow-2xs">
+              <div className="h-7 w-7 border-2 border-[#E7E2DA] border-t-[#064E3B] rounded-full animate-spin" />
+              <div className="text-[12px] font-mono text-[#78716C] uppercase tracking-[0.16em]">
+                Querying verified practitioner ledger…
+              </div>
             </div>
           ) : sortedCandidates.length === 0 ? (
             <div className="border border-[#E5E5E5] border-dashed rounded bg-white p-16 text-center shadow-sm">
@@ -599,33 +563,76 @@ export default function EmployerDashboardPage() {
               </Button>
             </div>
           ) : (
-            <div className="space-y-6">
-              {sortedCandidates.map((c) => {
-                const isShortlisted = shortlisted[c.uid] || false;
-                const verifiedSkillsList = Object.keys(c.verifiedSkills || {}).filter(
-                  (k) => c.verifiedSkills[k].status === "verified"
-                );
+            <motion.div layout className="space-y-6">
+              <AnimatePresence>
+                {sortedCandidates.map((c) => {
+                  const isShortlisted = shortlisted[c.uid] || false;
+                  const verifiedSkillsList = Object.keys(c.verifiedSkills || {}).filter(
+                    (k) => c.verifiedSkills[k].status === "verified"
+                  );
+                  const totalSkills = c.totalSkillsCount || c.skills?.length || (verifiedSkillsList.length > 0 ? verifiedSkillsList.length * 2 : 1);
+                  const verifiedCount = c.qualifiedSkillsCount ?? verifiedSkillsList.length;
+                  const verificationPct = typeof c.skillVerificationPct === "number" 
+                    ? c.skillVerificationPct 
+                    : (totalSkills > 0 ? Math.round((verifiedCount / totalSkills) * 100) : 50);
 
-                return (
-                  <div
-                    key={c.uid}
-                    className="group border border-[#E5E5E5] rounded bg-white p-4 sm:p-6 md:p-8 hover:shadow-[0_8px_30px_rgba(0,0,0,0.04)] transition-all duration-300"
-                  >
+                  return (
+                    <motion.div
+                      layout
+                      initial={{ opacity: 0, scale: 0.98, y: 10 }}
+                      animate={{ opacity: 1, scale: 1, y: 0 }}
+                      exit={{ opacity: 0, scale: 0.95, y: -10 }}
+                      transition={{ duration: 0.3, ease: "easeOut" }}
+                      key={c.uid}
+                      className="group border border-[#E5E5E5] rounded bg-white p-4 sm:p-6 md:p-8 hover:shadow-[0_8px_30px_rgba(0,0,0,0.04)] transition-all duration-300"
+                    >
                     <div className="flex flex-col md:flex-row md:items-start justify-between gap-5 sm:gap-6">
                       {/* Candidate Identity & Evidence */}
                       <div className="flex items-start gap-4 sm:gap-6">
-                        <div className="h-12 w-12 sm:h-16 sm:w-16 shrink-0 rounded bg-[#F3F3F1] border border-[#E5E5E5] flex items-center justify-center text-[#0D0D0D] font-serif text-[20px] sm:text-[26px]">
-                          {c.name ? c.name.charAt(0).toUpperCase() : "C"}
-                        </div>
+                        <CandidateAvatar
+                          avatarUrl={c.avatarUrl}
+                          name={c.name}
+                          size="lg"
+                          isEligibleForJob={totalSkills > 0 && verifiedCount === totalSkills}
+                          badgePreference="auto"
+                          showBadge={true}
+                        />
                         <div>
-                          <div className="flex items-center gap-3 flex-wrap">
+                          <div className="flex items-center gap-2.5 flex-wrap">
                             <h3 className="font-serif text-[26px] text-[#0D0D0D] leading-tight">
                               {c.name || "Anonymous Candidate"}
                             </h3>
-                            <span className="text-[11px] font-mono font-bold uppercase tracking-[0.1em] text-[#15803D] bg-[#15803D]/10 px-2 py-0.5 rounded-sm">
+                            <span className="text-[11px] font-mono font-semibold text-[#064E3B] bg-[#064E3B]/10 px-2.5 py-0.5 rounded border border-[#064E3B]/20">
+                              {c.telemetryRecordId || `#${c.uid.slice(0, 8).toUpperCase()}`}
+                            </span>
+                            <span className="text-[11px] font-medium font-bold uppercase tracking-[0.1em] text-[#15803D] bg-[#15803D]/10 px-2 py-0.5 rounded-sm">
                               Verified Practitioner
                             </span>
+                            <div className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-sm bg-[#ECFDF5] border border-[#A7F3D0] text-[#065F46] text-[11px] font-semibold">
+                              <ShieldCheck className="h-3.5 w-3.5 text-[#059669]" />
+                              <span>{verificationPct}% Skills Verified</span>
+                              <span className="text-[#047857] font-normal text-[10px]">
+                                ({verifiedCount}/{totalSkills} passed ≥75%)
+                              </span>
+                            </div>
                           </div>
+
+                          {/* Target Roles & Location preview if available */}
+                          {((c.targetRoles && c.targetRoles.length > 0) || c.workPreference) && (
+                            <div className="flex items-center gap-2 flex-wrap mt-1 text-[11px] font-mono text-[#064E3B]">
+                              {c.targetRoles?.slice(0, 2).map((role: string) => (
+                                <span key={role} className="bg-[#FAF8F5] border border-[#E7E2DA] px-2 py-0.5 rounded text-[#1C1917]">
+                                  {role}
+                                </span>
+                              ))}
+                              {c.workPreference && (
+                                <span className="text-[#78716C]">· {c.workPreference}</span>
+                              )}
+                              {c.availability && (
+                                <span className="text-[#059669]">· {c.availability}</span>
+                              )}
+                            </div>
+                          )}
 
                           {(c.college || c.branch) && (
                             <p className="text-[14px] text-[#737373] mt-1 mb-4 flex items-center gap-1.5">
@@ -698,25 +705,27 @@ export default function EmployerDashboardPage() {
                       {/* Stats & Actions */}
                       <div className="flex flex-col items-start md:items-end gap-3 shrink-0">
                         <div className="text-left md:text-right mb-1">
-                          <div className="text-[13px] text-[#737373] font-medium">
-                            {verifiedSkillsList.length} verified skill{verifiedSkillsList.length === 1 ? "" : "s"}
+                          <div className="flex items-center md:justify-end gap-1.5">
+                            <span className="text-[11px] font-bold text-[#065F46] bg-[#ECFDF5] border border-[#A7F3D0] px-2 py-0.5 rounded">
+                              {verificationPct}% Verified
+                            </span>
+                            <span className="text-[13px] text-[#0D0D0D] font-medium">
+                              {verifiedCount}/{totalSkills} skills (≥75%)
+                            </span>
                           </div>
-                          <div className="text-[13px] text-[#737373]">
+                          <div className="w-32 bg-[#E5E5E5] h-1.5 rounded-full overflow-hidden mt-1.5 md:ml-auto">
+                            <div
+                              className="bg-[#059669] h-full rounded-full transition-all duration-500"
+                              style={{ width: `${Math.min(100, Math.max(5, verificationPct))}%` }}
+                            />
+                          </div>
+                          <div className="text-[12px] text-[#737373] mt-1">
                             {c.projects?.length || 0} evidence project{c.projects?.length === 1 ? "" : "s"}
                           </div>
                         </div>
 
                         {/* Action buttons */}
                         <div className="flex flex-wrap items-center gap-2 pt-1">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => toggleAiSummary(c.uid)}
-                            className="gap-1.5 text-[12px] border-[#E7E2DA] bg-[#FAF8F5] text-[#1C1917] hover:bg-[#F5F1EB]"
-                          >
-                            <Sparkles className="h-3.5 w-3.5 text-[#064E3B]" />
-                            {activeAiCard === c.uid ? "Hide Synthesis" : "Evidence Synthesis"}
-                          </Button>
 
                           <Button
                             variant="outline"
@@ -753,36 +762,11 @@ export default function EmployerDashboardPage() {
                         </div>
                       </div>
                     </div>
-
-                    {/* Expandable Candidate Evidence Synthesis */}
-                    {activeAiCard === c.uid && (
-                      <div className="mt-6 pt-5 border-t border-[#E7E2DA] bg-[#FAF8F5] rounded p-5 border border-[#E7E2DA]">
-                        <div className="flex items-center justify-between mb-2">
-                          <div className="flex items-center gap-2 text-[#1C1917] font-semibold text-[13px]">
-                            <Sparkles className="h-4 w-4 text-[#064E3B]" /> Candidate Evidence Synthesis
-                          </div>
-                          <span className="text-[10px] font-mono uppercase tracking-wider text-[#064E3B] bg-white px-2.5 py-0.5 rounded border border-[#064E3B]/20">
-                            Meritlane Verification Protocol
-                          </span>
-                        </div>
-                        {loadingAi[c.uid] ? (
-                          <div className="py-4 flex items-center gap-3 text-[#78716C]">
-                            <div className="h-4 w-4 border-2 border-[#E7E2DA] border-t-[#064E3B] rounded-full animate-spin" />
-                            <span className="text-[13px] text-[#78716C] font-mono uppercase tracking-wider">
-                              Synthesizing verified engineering evidence and code claims…
-                            </span>
-                          </div>
-                        ) : (
-                          <p className="text-[13px] text-[#333333] leading-relaxed font-sans">
-                            {aiSummaries[c.uid] || "Summary unavailable."}
-                          </p>
-                        )}
-                      </div>
-                    )}
-                  </div>
+                  </motion.div>
                 );
               })}
-            </div>
+              </AnimatePresence>
+            </motion.div>
           )}
         </div>
       </div>

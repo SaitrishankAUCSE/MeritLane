@@ -60,8 +60,8 @@ export default function EmployerInboxPage() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [selected, setSelected] = useState<Message | null>(null);
-  const [thread, setThread] = useState<Message[]>([]);
+  const [selectedPartnerId, setSelectedPartnerId] = useState<string | null>(null);
+  const [readIds, setReadIds] = useState<Set<string>>(new Set());
   const [reply, setReply] = useState("");
   const [sending, setSending] = useState(false);
   const [sendError, setSendError] = useState("");
@@ -99,45 +99,81 @@ export default function EmployerInboxPage() {
     }
   }, [user, role]);
 
-  const handleSelectMessage = async (msg: Message) => {
-    setSelected(msg);
+  const threadsMap = new Map<string, { partnerId: string; partnerName: string; messages: Message[]; lastMessage: Message }>();
+
+  messages.forEach((msg) => {
+    const isSentByMe = msg.senderUid === user?.uid;
+    const partnerId = isSentByMe ? msg.recipientUid : msg.senderUid;
+    let partnerName = isSentByMe ? "Candidate" : msg.senderName;
+
+    if (!threadsMap.has(partnerId)) {
+      threadsMap.set(partnerId, {
+        partnerId,
+        partnerName,
+        messages: [],
+        lastMessage: msg,
+      });
+    } else {
+      if (!isSentByMe) {
+        threadsMap.get(partnerId)!.partnerName = msg.senderName;
+      }
+    }
+    const thread = threadsMap.get(partnerId)!;
+    thread.messages.push(msg);
+    if (msg.timestamp > thread.lastMessage.timestamp) {
+      thread.lastMessage = msg;
+    }
+  });
+
+  const threads = Array.from(threadsMap.values());
+  threads.sort((a, b) => b.lastMessage.timestamp - a.lastMessage.timestamp);
+
+  const filteredThreads = threads.filter((t) =>
+    t.partnerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    t.messages.some((m) => m.content.toLowerCase().includes(searchTerm.toLowerCase()))
+  );
+
+  const activeThread = selectedPartnerId ? threadsMap.get(selectedPartnerId) : null;
+  const activeConversationMessages = activeThread ? [...activeThread.messages].sort((a, b) => a.timestamp - b.timestamp) : [];
+
+  const unreadCount = messages.filter(
+    (m) => m.recipientUid === user?.uid && !readIds.has(m.id) && !m.read
+  ).length;
+
+  const handleSelectThread = async (partnerId: string) => {
+    setSelectedPartnerId(partnerId);
     setSendError("");
     setReply("");
 
-    // Build thread: parent + current + replies
-    const threadMessages = [msg];
-    // Find replies to this message
-    const replies = messages.filter(
-      (m) => m.parentMessageId === msg.id && m.id !== msg.id
-    );
-    threadMessages.push(...replies);
-    setThread(threadMessages.sort((a, b) => a.timestamp - b.timestamp));
-
-    // Mark as read
-    if (!msg.read && user) {
+    const thread = threadsMap.get(partnerId);
+    if (thread) {
+      thread.messages.forEach((m) => {
+        if (m.recipientUid === user?.uid && !m.read) {
+          setReadIds((prev) => new Set(prev).add(m.id));
+        }
+      });
       try {
-        const token = await user.getIdToken(true);
-        await fetch("/api/messages", {
-          method: "PATCH",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({ messageId: msg.id, read: true }),
-        });
-        setMessages((prev) =>
-          prev.map((m) => (m.id === msg.id ? { ...m, read: true } : m))
-        );
-      } catch {
-        // Non-critical
-      }
+        const token = await user?.getIdToken(true);
+        if (token) {
+          const unreadMsgs = thread.messages.filter(m => m.recipientUid === user?.uid && !m.read);
+          for (let u of unreadMsgs) {
+            fetch("/api/messages", {
+              method: "PATCH",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
+              },
+              body: JSON.stringify({ messageId: u.id, read: true }),
+            });
+          }
+        }
+      } catch (err) {}
     }
-
     setTimeout(() => bottomRef.current?.scrollIntoView({ behavior: "smooth" }), 100);
   };
 
   const handleSendReply = async () => {
-    if (!reply.trim() || !selected || !user) return;
+    if (!reply.trim() || !selectedPartnerId || !user) return;
     setSending(true);
     setSendError("");
     try {
@@ -149,9 +185,8 @@ export default function EmployerInboxPage() {
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
-          recipientUid: selected.senderUid,
+          recipientId: selectedPartnerId,
           content: reply.trim(),
-          parentMessageId: selected.id,
         }),
       });
       if (!res.ok) {
@@ -160,6 +195,7 @@ export default function EmployerInboxPage() {
       }
       setReply("");
       await fetchMessages();
+      setTimeout(() => bottomRef.current?.scrollIntoView({ behavior: "smooth" }), 100);
     } catch (err: any) {
       setSendError(err.message || "Failed to send reply.");
     } finally {
@@ -167,22 +203,12 @@ export default function EmployerInboxPage() {
     }
   };
 
-  const filteredMessages = messages.filter(
-    (m) =>
-      !m.parentMessageId &&
-      (m.senderName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        m.content.toLowerCase().includes(searchTerm.toLowerCase()))
-  );
-
-  const unreadCount = messages.filter((m) => !m.read && !m.parentMessageId).length;
-
   return (
     <div className="w-full min-h-screen bg-[#FAF8F5] text-[#1C1917]">
-      {/* Header */}
       <div className="border-b border-[#E7E2DA] bg-white px-6 sm:px-10 py-6">
         <div className="max-w-[1400px] mx-auto flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <div className="text-[10px] font-mono tracking-[0.2em] text-[#78716C] uppercase mb-1">
+            <div className="text-[10px] font-medium tracking-[0.2em] text-[#78716C] uppercase mb-1">
               Employer Communication Centre · Meritlane
             </div>
             <h1 className="text-[26px] sm:text-[32px] font-bold uppercase tracking-[0.06em] text-[#1C1917] leading-tight flex items-center gap-3">
@@ -208,7 +234,7 @@ export default function EmployerInboxPage() {
         {loading ? (
           <div className="border border-[#E7E2DA] bg-white p-16 text-center rounded">
             <div className="h-6 w-6 border-2 border-[#E7E2DA] border-t-[#1C1917] rounded-full animate-spin mx-auto mb-3" />
-            <div className="text-[12px] font-mono text-[#78716C] uppercase tracking-wider">
+            <div className="text-[12px] font-medium text-[#78716C] uppercase tracking-wider">
               Loading messages…
             </div>
           </div>
@@ -224,15 +250,13 @@ export default function EmployerInboxPage() {
           </div>
         ) : (
           <div className="flex gap-6 h-[calc(100vh-220px)] min-h-[500px]">
-            {/* Message List */}
             <div className="w-full max-w-[360px] shrink-0 flex flex-col border border-[#E7E2DA] bg-white rounded overflow-hidden shadow-xs">
-              {/* Search */}
               <div className="border-b border-[#E7E2DA] p-3">
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-[#A8A29E]" />
                   <input
                     type="text"
-                    placeholder="Search messages..."
+                    placeholder="Search conversations..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     className="w-full pl-9 pr-3 py-2 text-[13px] font-sans border border-[#E7E2DA] rounded bg-[#FAF8F5] focus:outline-none focus:border-[#1C1917] placeholder:text-[#A8A29E]"
@@ -241,59 +265,61 @@ export default function EmployerInboxPage() {
               </div>
 
               <div className="flex-1 overflow-y-auto divide-y divide-[#F5F1EB]">
-                {filteredMessages.length === 0 ? (
+                {filteredThreads.length === 0 ? (
                   <div className="p-10 text-center">
                     <Inbox className="h-10 w-10 text-[#C8BFB0] mx-auto mb-3" />
-                    <div className="text-[13px] text-[#78716C] font-sans">No messages yet</div>
+                    <div className="text-[13px] text-[#78716C] font-sans">No conversations yet</div>
                     <div className="text-[11px] text-[#A8A29E] mt-1">
-                      Messages from candidates will appear here
+                      Messages with candidates will appear here
                     </div>
                   </div>
                 ) : (
-                  filteredMessages.map((msg) => (
-                    <button
-                      key={msg.id}
-                      onClick={() => handleSelectMessage(msg)}
-                      className={`w-full text-left p-4 hover:bg-[#FAF8F5] transition-colors ${
-                        selected?.id === msg.id ? "bg-[#F5F1EB]" : ""
-                      }`}
-                    >
-                      <div className="flex items-start gap-3">
-                        <div className="h-9 w-9 shrink-0 rounded bg-[#1C1917] flex items-center justify-center text-white text-[11px] font-mono font-semibold">
-                          {getInitials(msg.senderName)}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center justify-between gap-2">
-                            <span className={`text-[13px] font-semibold truncate ${!msg.read ? "text-[#1C1917]" : "text-[#78716C]"}`}>
-                              {msg.senderName}
-                            </span>
-                            <span className="text-[10px] font-mono text-[#A8A29E] shrink-0">
-                              {formatTimestamp(msg.timestamp)}
-                            </span>
+                  filteredThreads.map((thread) => {
+                    const hasUnread = thread.messages.some(m => m.recipientUid === user?.uid && !m.read && !readIds.has(m.id));
+                    return (
+                      <button
+                        key={thread.partnerId}
+                        onClick={() => handleSelectThread(thread.partnerId)}
+                        className={`w-full text-left p-4 hover:bg-[#FAF8F5] transition-colors ${
+                          selectedPartnerId === thread.partnerId ? "bg-[#F5F1EB]" : ""
+                        }`}
+                      >
+                        <div className="flex items-start gap-3">
+                          <div className="h-9 w-9 shrink-0 rounded bg-[#1C1917] flex items-center justify-center text-white text-[11px] font-mono font-semibold">
+                            {getInitials(thread.partnerName)}
                           </div>
-                          <div className="flex items-center gap-1.5 mt-0.5">
-                            {!msg.read && (
-                              <div className="h-1.5 w-1.5 rounded-full bg-[#064E3B] shrink-0" />
-                            )}
-                            <p className={`text-[12px] truncate ${!msg.read ? "text-[#1C1917]" : "text-[#A8A29E]"}`}>
-                              {msg.content}
-                            </p>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center justify-between gap-2">
+                              <span className={`text-[13px] font-semibold truncate ${hasUnread ? "text-[#1C1917]" : "text-[#78716C]"}`}>
+                                {thread.partnerName}
+                              </span>
+                              <span className="text-[10px] font-mono text-[#A8A29E] shrink-0">
+                                {formatTimestamp(thread.lastMessage.timestamp)}
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-1.5 mt-0.5">
+                              {hasUnread && (
+                                <div className="h-1.5 w-1.5 rounded-full bg-[#064E3B] shrink-0" />
+                              )}
+                              <p className={`text-[12px] truncate ${hasUnread ? "text-[#1C1917]" : "text-[#A8A29E]"}`}>
+                                {thread.lastMessage.content}
+                              </p>
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    </button>
-                  ))
+                      </button>
+                    )
+                  })
                 )}
               </div>
             </div>
 
-            {/* Message Detail */}
             <div className="flex-1 border border-[#E7E2DA] bg-white rounded overflow-hidden shadow-xs flex flex-col">
-              {!selected ? (
+              {!activeThread ? (
                 <div className="flex-1 flex flex-col items-center justify-center text-center p-10">
                   <MessageSquare className="h-12 w-12 text-[#C8BFB0] mb-4" />
                   <div className="text-[16px] font-semibold text-[#1C1917] mb-1">
-                    Select a message
+                    Select a conversation
                   </div>
                   <p className="text-[13px] text-[#78716C] max-w-xs">
                     Choose a conversation from the left to view its contents and reply.
@@ -301,27 +327,25 @@ export default function EmployerInboxPage() {
                 </div>
               ) : (
                 <>
-                  {/* Thread Header */}
                   <div className="border-b border-[#E7E2DA] px-6 py-4 flex items-center justify-between bg-[#FAF8F5]">
                     <div className="flex items-center gap-3">
                       <div className="h-9 w-9 rounded bg-[#1C1917] flex items-center justify-center text-white text-[11px] font-mono font-semibold">
-                        {getInitials(selected.senderName)}
+                        {getInitials(activeThread.partnerName)}
                       </div>
                       <div>
-                        <div className="text-[14px] font-semibold text-[#1C1917]">{selected.senderName}</div>
+                        <div className="text-[14px] font-semibold text-[#1C1917]">{activeThread.partnerName}</div>
                         <div className="text-[11px] font-mono text-[#78716C]">
-                          {formatTimestamp(selected.timestamp)}
+                          {formatTimestamp(activeThread.lastMessage.timestamp)}
                         </div>
                       </div>
                     </div>
-                    <span className="text-[10px] font-mono font-semibold px-2 py-0.5 rounded border border-[#E7E2DA] text-[#78716C] uppercase tracking-wider">
+                    <span className="text-[10px] font-medium font-semibold px-2 py-0.5 rounded border border-[#E7E2DA] text-[#78716C] uppercase tracking-wider">
                       CANDIDATE
                     </span>
                   </div>
 
-                  {/* Thread Messages */}
                   <div className="flex-1 overflow-y-auto p-6 space-y-5">
-                    {thread.map((m) => {
+                    {activeConversationMessages.map((m) => {
                       const isFromMe = m.senderUid === user?.uid;
                       return (
                         <div
@@ -351,7 +375,6 @@ export default function EmployerInboxPage() {
                     <div ref={bottomRef} />
                   </div>
 
-                  {/* Reply Box */}
                   <div className="border-t border-[#E7E2DA] p-4 bg-[#FAF8F5]">
                     {sendError && (
                       <p className="text-[12px] text-[#B42318] mb-2">{sendError}</p>
@@ -365,7 +388,7 @@ export default function EmployerInboxPage() {
                             handleSendReply();
                           }
                         }}
-                        placeholder="Type your reply… (Ctrl+Enter to send)"
+                        placeholder="Type your reply... (Ctrl+Enter to send)"
                         rows={3}
                         className="flex-1 px-3 py-2.5 text-[13px] font-sans border border-[#E7E2DA] rounded bg-white focus:outline-none focus:border-[#1C1917] resize-none placeholder:text-[#A8A29E]"
                       />

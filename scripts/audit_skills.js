@@ -45,12 +45,25 @@ async function main() {
 
   snapshot.forEach(doc => {
     const data = doc.data();
+    const candidateName = data.name || 'Unnamed';
+    
+    // Exclude test accounts
+    const lowerName = candidateName.toLowerCase();
+    if (
+      lowerName.includes('verified engineer') ||
+      lowerName.includes('test engineer') ||
+      lowerName.includes('profile setup') ||
+      lowerName.includes('bannu')
+    ) {
+      return;
+    }
+
     const candidateSkills = data.skills || [];
     const verified = data.verifiedSkills || {};
 
     candidateList.push({
       id: doc.id,
-      name: data.name || 'Unnamed',
+      name: candidateName,
       skills: candidateSkills,
       verifiedSkills: Object.keys(verified)
     });

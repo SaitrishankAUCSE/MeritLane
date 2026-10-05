@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { ArrowLeft, Bookmark, BookmarkCheck, MessageSquare, Sparkles, ChevronDown, CheckCircle2 } from "lucide-react";
+import { ArrowLeft, Bookmark, BookmarkCheck, MessageSquare, ChevronDown, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { useAuth } from "@/lib/auth/AuthContext";
 import { useRouter } from "next/navigation";
@@ -25,9 +25,6 @@ export function EmployerDossierActions({ candidateId, candidateName = "Candidate
   const [pipelineStage, setPipelineStage] = useState<string>("shortlisted");
   const [loading, setLoading] = useState(true);
   const [isMessageModalOpen, setIsMessageModalOpen] = useState(false);
-  const [aiSummary, setAiSummary] = useState<string | null>(null);
-  const [loadingAi, setLoadingAi] = useState(false);
-  const [showAiCard, setShowAiCard] = useState(false);
   
   const { user } = useAuth();
   const router = useRouter();
@@ -103,36 +100,6 @@ export function EmployerDossierActions({ candidateId, candidateName = "Candidate
     }
   };
 
-  const generateAiSummary = async () => {
-    if (aiSummary) {
-      setShowAiCard(!showAiCard);
-      return;
-    }
-    setLoadingAi(true);
-    setShowAiCard(true);
-    try {
-      const token = await user?.getIdToken(true);
-      const res = await fetch("/api/employer/ai-summary", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ candidateId })
-      });
-      if (res.ok) {
-        const data = await res.json();
-        setAiSummary(data.summary || "Summary unavailable.");
-      } else {
-        setAiSummary("Unable to generate summary at this time.");
-      }
-    } catch {
-      setAiSummary("System error while contacting AI evaluation service.");
-    } finally {
-      setLoadingAi(false);
-    }
-  };
-
   return (
     <>
       <div className="fixed top-16 lg:top-0 left-0 lg:left-[240px] right-0 h-16 bg-[#FAF8F5]/95 backdrop-blur-md border-b border-[#E7E2DA] z-[40] flex items-center justify-between px-6 lg:px-12 transition-all duration-300">
@@ -145,16 +112,6 @@ export function EmployerDossierActions({ candidateId, candidateName = "Candidate
         </button>
 
         <div className="flex items-center gap-3">
-          {/* Evidence Synthesis Button */}
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={generateAiSummary}
-            className="gap-1.5 text-[12px] border-[#E7E2DA] bg-[#FAF8F5] text-[#1C1917] hover:bg-[#F5F1EB]"
-          >
-            <Sparkles className="h-3.5 w-3.5 text-[#064E3B]" />
-            {showAiCard ? "Hide Synthesis" : "Evidence Synthesis"}
-          </Button>
 
           {/* Direct Message Button */}
           <Button
@@ -201,44 +158,6 @@ export function EmployerDossierActions({ candidateId, candidateName = "Candidate
           )}
         </div>
       </div>
-
-      {/* Floating Collapsible Evidence Summary Card */}
-      {showAiCard && (
-        <div className="fixed top-36 right-6 lg:right-12 max-w-md w-full z-30 animate-in fade-in slide-in-from-top-3 duration-200">
-          <div className="bg-white border border-[#E7E2DA] rounded shadow-xl p-5 relative overflow-hidden">
-            <div className="flex items-center justify-between pb-3 border-b border-[#F5F1EB] mb-3">
-              <div className="flex items-center gap-2">
-                <Sparkles className="h-4 w-4 text-[#064E3B]" />
-                <h4 className="text-[13px] font-semibold text-[#1C1917]">Candidate Evidence Synthesis</h4>
-              </div>
-              <button
-                type="button"
-                onClick={() => setShowAiCard(false)}
-                className="text-[11px] text-[#78716C] hover:text-[#1C1917]"
-              >
-                Close
-              </button>
-            </div>
-            
-            {loadingAi ? (
-              <div className="py-6 flex flex-col items-center justify-center space-y-2 text-[#78716C]">
-                <div className="h-5 w-5 border-2 border-[#E7E2DA] border-t-[#064E3B] rounded-full animate-spin" />
-                <p className="text-[12px] text-[#78716C] font-mono uppercase tracking-wider">Synthesizing verified code evidence…</p>
-              </div>
-            ) : (
-              <div className="space-y-3">
-                <p className="text-[13px] text-[#333333] leading-relaxed font-sans">
-                  {aiSummary}
-                </p>
-                <div className="flex items-center gap-1.5 text-[10px] text-[#064E3B] font-mono font-medium pt-2 border-t border-[#F5F1EB]">
-                  <CheckCircle2 className="h-3 w-3" /> Grounded in verified assessment scores & evidence nodes
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
-
       {/* Direct Messaging Modal */}
       <MessageModal
         isOpen={isMessageModalOpen}

@@ -16,20 +16,23 @@ function cleanJsonString(raw: string): string {
 }
 
 /**
- * Classifies the skill into "programming" (needs coding tasks) or "knowledge" (MCQ only).
+ * Classifies the skill into "programming" (needs coding tasks), "config" (needs structural tasks), or "knowledge" (MCQ only).
  * Also returns the target programming language(s) if applicable.
  */
-export async function classifySkill(skill: string, apiKey: string): Promise<{ type: "programming" | "knowledge"; languages: string[] }> {
+export async function classifySkill(skill: string, apiKey: string): Promise<{ type: "programming" | "knowledge" | "config"; languages: string[] }> {
   const prompt = `You are a technical assessment architect. Analyze the technical skill: "${skill}".
-Classify this skill into one of two categories:
+Classify this skill into one of three categories:
 1. "programming": This is a programming language or an application framework (e.g., Python, React, Next.js, Java, C++, Node.js). It requires algorithmic coding tasks to evaluate.
-2. "knowledge": This is an infrastructure tool, cloud platform, database, devops practice, or security domain (e.g., AWS, Docker, PostgreSQL, Cybersecurity, Kubernetes). It does NOT require algorithmic coding tasks; deep theoretical and scenario-based knowledge is sufficient.
+2. "config": This is an infrastructure-as-code tool or declarative configuration (e.g., Docker, Kubernetes, Terraform, CI/CD YAML). It requires candidates to write configuration files (like Dockerfiles or YAML) which will be structurally validated.
+3. "knowledge": This is a theoretical, operational, or cloud platform domain (e.g., AWS, Cybersecurity, Agile) where candidates do NOT write any code or configuration; deep theoretical and scenario-based knowledge is sufficient.
 
-If it is "programming", you must also provide the canonical compiler language ID(s) it maps to. Valid compiler IDs are EXACTLY: ["javascript", "python", "java", "cpp", "typescript", "sql"]. (e.g., for Next.js, return ["javascript", "typescript"]).
+If it is "programming" or "config", you must also provide the canonical compiler language ID(s) it maps to. 
+Valid compiler IDs for programming are EXACTLY: ["javascript", "python", "java", "cpp", "typescript", "sql"].
+Valid compiler IDs for config are EXACTLY: ["dockerfile", "yaml", "hcl"].
 
 Respond ONLY with valid JSON matching exactly:
 {
-  "type": "programming" | "knowledge",
+  "type": "programming" | "knowledge" | "config",
   "languages": string[] // empty if type is knowledge
 }
 `;
@@ -48,7 +51,7 @@ Respond ONLY with valid JSON matching exactly:
   const text = data.candidates?.[0]?.content?.parts?.[0]?.text || "";
   const parsed = JSON.parse(cleanJsonString(text));
   return {
-    type: parsed.type === "programming" ? "programming" : "knowledge",
+    type: (parsed.type === "programming" || parsed.type === "config") ? parsed.type : "knowledge",
     languages: Array.isArray(parsed.languages) ? parsed.languages : []
   };
 }
@@ -90,6 +93,32 @@ Respond ONLY with valid JSON matching exactly:
     supportedLanguages: Array<{ id: string; name: string }>;
     publicTests: Array<{ name: string; inputArgs: any[]; expected: any }>;
     hiddenTests: Array<{ name: string; inputArgs: any[]; expected: any }>;
+  }>;
+}`;
+  } else if (classification.type === "config") {
+    prompt = `You are a strict DevOps architect building a technical assessment for the infrastructure-as-code skill: "${skill}".
+Generate a strictly typed JSON response containing precisely 15 Multiple Choice Questions (MCQs) and 2 structural configuration tasks (one easy, one medium-hard).
+
+REQUIREMENTS FOR CONFIG TASKS:
+- The candidate will write raw configuration text (e.g. Dockerfile, Kubernetes YAML, Terraform HCL).
+- You must provide exactly 5 public tests and 45 hidden tests. For config tasks, "inputArgs" should be empty arrays []. "expected" should be a string describing the structural invariant (e.g. "Exposes port 80", "Uses ubuntu:latest as base"). 
+- Our Tier 2.5 static validator will parse the candidate's config and evaluate if they met the structural requirements.
+
+REQUIREMENTS FOR MCQs:
+- 15 deep, non-trivial questions focusing on infrastructure edge cases and scenarios.
+
+Respond ONLY with valid JSON matching exactly:
+{
+  "mcqs": Array<{ question: string; options: string[]; answerIndex: number; explanation: string; difficulty: "easy" | "medium" | "hard"; topic: string; }>;
+  "coding": Array<{
+    difficulty: "easy" | "medium_hard";
+    title: string;
+    instructions: string;
+    functionName: string; 
+    starterCode: { dockerfile?: string; yaml?: string; hcl?: string; };
+    supportedLanguages: Array<{ id: string; name: string }>;
+    publicTests: Array<{ name: string; inputArgs: any[]; expected: string }>;
+    hiddenTests: Array<{ name: string; inputArgs: any[]; expected: string }>;
   }>;
 }`;
   } else {

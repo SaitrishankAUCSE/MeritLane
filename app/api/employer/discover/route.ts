@@ -112,30 +112,48 @@ export async function POST(req: NextRequest) {
     const sanitizedCandidates = [];
 
     for (const { id: uid, data } of candidateDocs) {
-      // Filter: gradYear
-      if (gradYearFilter && gradYearFilter !== "all" && data.gradYear !== gradYearFilter) {
-        continue;
-      }
-
-      // Filter: requireLiveProject
+      const recordId = uid.slice(0, 8).toUpperCase();
+      const telemetryId = "#" + recordId;
+      const candidateKey = data.candidateKey || ("ML-" + recordId);
       const projects = data.projects || [];
-      if (requireLiveProject && !projects.some((p: any) => p.liveUrl && p.liveUrl.trim().length > 0)) {
-        continue;
-      }
-
-      // Filter: requireGithub / minCommits
       const githubUrl = data.githubUrl || "";
       const githubEvidence = data.githubEvidence;
-      if (requireGithub && !githubUrl && !githubEvidence) {
-        continue;
-      }
-      if (minCommits > 0 && (!githubEvidence || (githubEvidence.totalCommits || 0) < minCommits)) {
-        continue;
-      }
-
-      const matchReasons: string[] = [];
       const candidateSkills = data.skills || [];
+      const totalSkillsCount = candidateSkills.length;
+      const verifiedSkillsObj = data.verifiedSkills || {};
 
+      // Normalize query tokens for Telemetry / Record ID matching
+      const cleanQuery = searchQuery.trim().toLowerCase();
+      const rawQuery = cleanQuery.replace(/^#/, "").replace(/^ml-?/, "").trim();
+
+      const recordIdLower = recordId.toLowerCase();
+      const candidateKeyLower = candidateKey.toLowerCase();
+      const rawKeyLower = candidateKeyLower.replace(/^ml-?/, "");
+      const uidLower = uid.toLowerCase();
+      const nameLower = (data.name || "").toLowerCase();
+
+      // Check if this candidate directly matches an explicit ID or unique query
+      const isDirectIdMatch =
+        cleanQuery.length >= 3 &&
+        (
+          recordIdLower === rawQuery ||
+          recordIdLower === cleanQuery ||
+          telemetryId.toLowerCase() === cleanQuery ||
+          candidateKeyLower === cleanQuery ||
+          rawKeyLower === rawQuery ||
+          rawKeyLower === cleanQuery ||
+          uidLower.startsWith(rawQuery) ||
+          uidLower.startsWith(cleanQuery) ||
+          (cleanQuery.startsWith("ml-") && candidateKeyLower.includes(cleanQuery)) ||
+          (cleanQuery.startsWith("ml-") && ("ml-" + recordIdLower).includes(cleanQuery))
+        );
+
+      const isDirectNameMatch =
+        cleanQuery.length >= 3 && nameLower.includes(cleanQuery);
+
+      const isDirectTargetMatch = isDirectIdMatch || isDirectNameMatch;
+
+      // Retrieve assessment scores
       let assessmentScores: Record<string, number> = {};
       try {
         const uDoc = await adminDb!.collection("users").doc(uid).get();
@@ -149,16 +167,94 @@ export async function POST(req: NextRequest) {
         // Continue
       }
 
-      // Filter: minScore
-      if (minScore > 0) {
-        const verifiedSkillScores = Object.values(data.verifiedSkills || {})
-          .map((s) => s.score)
-          .filter((score): score is number => typeof score === "number");
-        const allScores = [...verifiedSkillScores, ...Object.values(assessmentScores)];
-        const maxScore = allScores.length > 0 ? Math.max(...allScores) : 0;
-        if (maxScore < minScore) {
+      // Count skills verified with score >= 75%
+      const qualifiedSkillsCount = Object.entries(verifiedSkillsObj).filter(([skillName, s]) => {
+        const score = typeof s?.score === "number" ? s.score : assessmentScores[skillName];
+        return s?.status === "verified" && (score === undefined || score >= 75);
+      }).length;
+
+      // ── Apply Discovery Exclusion Filters ONLY if this is NOT a targeted ID/name lookup ──
+      if (!isDirectTargetMatch) {
+        // Filter: gradYear
+        if (gradYearFilter && gradYearFilter !== "all" && data.gradYear !== gradYearFilter) {
           continue;
         }
+
+        // Filter: requireLiveProject
+        if (requireLiveProject && !projects.some((p: any) => p.liveUrl && p.liveUrl.trim().length > 0)) {
+          continue;
+        }
+
+        // Filter: requireGithub / minCommits
+        if (requireGithub && !githubUrl && !githubEvidence) {
+          continue;
+        }
+        if (minCommits > 0 && (!githubEvidence || (githubEvidence.totalCommits || 0) < minCommits)) {
+          continue;
+        }
+
+        // ── Platform Rule: 50% Skills Milestone with 75%+ Score ──
+        if (totalSkillsCount === 0) {
+          continue;
+        }
+
+        const requiredVerifiedCount = Math.max(1, Math.ceil(totalSkillsCount / 2));
+        if (qualifiedSkillsCount < requiredVerifiedCount) {
+          continue;
+        }
+
+        // Filter: minScore
+        if (minScore > 0) {
+          const verifiedSkillScores = Object.values(data.verifiedSkills || {})
+            .map((s) => s.score)
+            .filter((score): score is number => typeof score === "number");
+          const allScores = [...verifiedSkillScores, ...Object.values(assessmentScores)];
+          const maxScore = allScores.length > 0 ? Math.max(...allScores) : 0;
+          if (maxScore < minScore) {
+            continue;
+          }
+        }
+
+        // General search query token check
+        if (searchQuery) {
+          const searchableTokens = [
+            data.name || "",
+            data.college || "",
+            data.degree || "",
+            data.branch || "",
+            recordId,
+            telemetryId,
+            candidateKey,
+            ...(data.skills || []),
+            ...(data.targetRoles || []),
+            ...(data.preferredLocations || []),
+            data.workPreference || "",
+            data.availability || "",
+            data.bio || "",
+            ...Object.keys(data.verifiedSkills || {}),
+            ...projects.map((p: any) => p.title || ""),
+            ...projects.map((p: any) => p.description || ""),
+            ...projects.flatMap((p: any) => p.skillsUsed || []),
+            data.githubEvidence?.githubUsername || "",
+            data.githubUrl || "",
+          ]
+            .join(" ")
+            .toLowerCase();
+
+          const queryWords = searchQuery.replace(/^#/, "").split(/\s+/).filter(Boolean);
+          const matchesQuery = queryWords.every((word) => searchableTokens.includes(word));
+          if (!matchesQuery) {
+            continue;
+          }
+        }
+      }
+
+      const matchReasons: string[] = [];
+
+      if (isDirectIdMatch) {
+        matchReasons.push("Direct Telemetry Record ID Match (" + candidateKey + " · " + telemetryId + ")");
+      } else if (isDirectNameMatch) {
+        matchReasons.push("Candidate Name Match (" + data.name + ")");
       }
 
       let matchedRequiredSkillCount = 0;
@@ -191,7 +287,7 @@ export async function POST(req: NextRequest) {
 
         if (
           !matched &&
-          projects.some((p) => {
+          projects.some((p: any) => {
             const regex = new RegExp("(^|\\W)" + escapeRegExp(canonicalReq) + "($|\\W)", "i");
             return (
               (p.title && regex.test(p.title)) ||
@@ -215,7 +311,7 @@ export async function POST(req: NextRequest) {
         matchReasons.push("Technical assessment (" + testNames.join(", ") + ") completed");
       }
 
-      const relevantProjectsCount = projects.filter((p) =>
+      const relevantProjectsCount = projects.filter((p: any) =>
         requiredSkills.some((s) => {
           const canonicalReq = canonicalizeSkill(s);
           if (canonicalReq.length === 0) return false;
@@ -232,40 +328,19 @@ export async function POST(req: NextRequest) {
         matchReasons.push(relevantProjectsCount + " relevant project signal(s)");
       }
 
-      if (searchQuery) {
-        const searchableTokens = [
-          data.name || "",
-          data.college || "",
-          data.degree || "",
-          data.branch || "",
-          ...(data.skills || []),
-          ...Object.keys(data.verifiedSkills || {}),
-          ...projects.map((p: any) => p.title || ""),
-          ...projects.map((p: any) => p.description || ""),
-          ...projects.flatMap((p: any) => p.skillsUsed || []),
-          data.githubEvidence?.githubUsername || "",
-          data.githubUrl || "",
-        ]
-          .join(" ")
-          .toLowerCase();
+      // Check matchMode ("all" requires every required skill to be matched) - only for generic searches
+      if (!isDirectTargetMatch && requiredSkills.length > 0) {
+        const isIncluded =
+          matchMode === "all"
+            ? matchedRequiredSkillCount === requiredSkills.length
+            : matchedRequiredSkillCount > 0;
 
-        const queryWords = searchQuery.split(/\s+/).filter(Boolean);
-        const matchesQuery = queryWords.every((word) => searchableTokens.includes(word));
-        if (!matchesQuery) {
+        if (!isIncluded) {
           continue;
         }
       }
 
-      // Check matchMode ("all" requires every required skill to be matched)
-      const isIncluded =
-        requiredSkills.length === 0 ||
-        (matchMode === "all"
-          ? matchedRequiredSkillCount === requiredSkills.length
-          : matchedRequiredSkillCount > 0);
-
-      if (!isIncluded) {
-        continue;
-      }
+      const skillVerificationPct = totalSkillsCount > 0 ? Math.round((qualifiedSkillsCount / totalSkillsCount) * 100) : 0;
 
       sanitizedCandidates.push({
         uid,
@@ -273,6 +348,15 @@ export async function POST(req: NextRequest) {
         college: data.college,
         branch: data.branch,
         gradYear: data.gradYear,
+        telemetryRecordId: telemetryId,
+        candidateKey,
+        avatarUrl: data.avatarUrl || "",
+        avatarBadge: data.avatarBadge || "auto",
+        targetRoles: data.targetRoles || [],
+        preferredLocations: data.preferredLocations || [],
+        workPreference: data.workPreference || "",
+        availability: data.availability || "",
+        bio: data.bio || "",
         skills: candidateSkills,
         matchedSkills: Array.from(new Set(matchedSkills)),
         matchedRequiredSkillCount,
@@ -286,6 +370,9 @@ export async function POST(req: NextRequest) {
         verificationStatus: data.verificationStatus,
         assessmentScores,
         verifiedSkills: data.verifiedSkills || {},
+        qualifiedSkillsCount,
+        totalSkillsCount,
+        skillVerificationPct,
         matchReasons: Array.from(new Set(matchReasons)),
       });
     }

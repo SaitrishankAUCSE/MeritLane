@@ -42,7 +42,7 @@ export default function EmployerSettingsPage() {
               <span className="font-medium text-[#737373] flex items-center gap-2">
                 <ShieldCheck className="h-4 w-4 text-[#15803D]" /> Access Role
               </span>
-              <span className="font-semibold uppercase tracking-wider text-[11px] font-mono text-[#15803D] bg-[#15803D]/10 px-2.5 py-0.5 rounded-sm">
+              <span className="font-semibold uppercase tracking-wider text-[11px] font-medium text-[#15803D] bg-[#15803D]/10 px-2.5 py-0.5 rounded-sm">
                 Verified Employer
               </span>
             </div>
@@ -61,18 +61,18 @@ export default function EmployerSettingsPage() {
         <div className="bg-white border border-[#E7E2DA] rounded overflow-hidden shadow-xs">
           <div className="px-6 py-5 border-b border-[#E7E2DA] bg-[#FAF8F5]">
             <h2 className="text-[15px] font-bold text-[#1C1917] flex items-center gap-2">
-              <Sparkles className="h-4 w-4 text-[#064E3B]" /> Technical Evaluation Engine
+              <ShieldCheck className="h-4 w-4 text-[#064E3B]" /> Technical Evaluation Engine
             </h2>
           </div>
           <div className="p-6 space-y-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-[14px] font-medium text-[#1C1917]">Evidence & Provenance Synthesis</p>
+                <p className="text-[14px] font-medium text-[#1C1917]">Code & Provenance Verification</p>
                 <p className="text-[12px] text-[#78716C] font-sans">
                   Automated architectural code audits, timed test suite proctoring, and GitHub commit graph verification.
                 </p>
               </div>
-              <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-[#064E3B] bg-[#064E3B]/10 border border-[#064E3B]/20 px-2.5 py-1 rounded">
+              <span className="text-[10px] font-medium font-bold uppercase tracking-wider text-[#064E3B] bg-[#064E3B]/10 border border-[#064E3B]/20 px-2.5 py-1 rounded">
                 Active Protocol
               </span>
             </div>

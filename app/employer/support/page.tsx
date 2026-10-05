@@ -61,7 +61,7 @@ export default function EmployerSupportPage() {
 
         {/* Verification Standards Summary */}
         <div className="bg-gradient-to-br from-white to-[#F9F9F8] border border-[#E5E5E5] rounded p-6 sm:p-8 shadow-sm">
-          <div className="flex items-center gap-2.5 text-[#15803D] font-mono text-[12px] font-bold uppercase tracking-wider mb-2">
+          <div className="flex items-center gap-2.5 text-[#15803D] font-medium text-[12px] font-bold uppercase tracking-wider mb-2">
             <ShieldCheck className="h-4 w-4" /> The MeritLane Standard
           </div>
           <h2 className="font-serif text-[24px] text-[#0D0D0D] mb-3">

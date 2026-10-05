@@ -230,7 +230,7 @@ export function AuthForm({ mode: initialMode }: AuthFormProps) {
     }
   };
 
-  if (!isSigningUp && !signupSuccess && (authLoading || profileLoading || (user && userRole))) {
+  if (!isSigningUp && !signupSuccess && (profileLoading || (user && userRole))) {
     return (
       <div className="min-h-screen bg-[#FAF8F5] flex items-center justify-center">
         <div className="h-6 w-6 border-2 border-[#E7E2DA] border-t-[#1C1917] rounded-full animate-spin" />

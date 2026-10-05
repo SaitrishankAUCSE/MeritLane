@@ -58,13 +58,13 @@ export function CandidateSidebar() {
   }, [pathname]);
 
   const navItems = [
-    { name: "Identity",     href: "/candidate/profile",      icon: Fingerprint },
-    { name: "Evidence",     href: "/candidate/dashboard",    icon: LayoutDashboard },
-    { name: "Provenance",   href: "/candidate/provenance",   icon: Network },
-    { name: "Verification", href: "/candidate/verification", icon: ShieldCheck },
-    { name: "Jobs",         href: "/candidate/jobs",         icon: Briefcase },
-    { name: "Applications", href: "/candidate/applications", icon: FileText },
-    { name: "Inbox",        href: "/candidate/inbox",        icon: Inbox },
+    { name: "Profile",       href: "/candidate/profile",      icon: Fingerprint },
+    { name: "Projects",      href: "/candidate/dashboard",    icon: LayoutDashboard },
+    { name: "Public Record", href: "/candidate/provenance",   icon: Network },
+    { name: "Skill Tests",   href: "/candidate/verification", icon: ShieldCheck },
+    { name: "Jobs",          href: "/candidate/jobs",         icon: Briefcase },
+    { name: "Applications",  href: "/candidate/applications", icon: FileText },
+    { name: "Inbox",         href: "/candidate/inbox",        icon: Inbox },
   ];
 
   return (
@@ -178,7 +178,7 @@ export function CandidateSidebar() {
                   transition={{ duration: 0.22, ease: [0.4, 0, 0.2, 1] }}
                   className="whitespace-nowrap pr-3 tracking-[-0.01em]"
                 >
-                  Add evidence
+                  Add project
                 </motion.span>
               )}
             </AnimatePresence>
@@ -214,7 +214,7 @@ export function CandidateSidebar() {
                                  hover:bg-[#F2EFE9] hover:text-[#1C1917] rounded transition-colors"
                     >
                       <Fingerprint className="h-3.5 w-3.5 text-[#A8A29E]" />
-                      View Identity
+                      View Profile
                     </Link>
                     <Link
                       href="/candidate/settings"

@@ -138,7 +138,7 @@ export default function EditJobPostingPage() {
       <div className="min-h-screen bg-[#FAF8F5] flex items-center justify-center p-8">
         <div className="text-center">
           <div className="h-6 w-6 border-2 border-[#E7E2DA] border-t-[#1C1917] rounded-full animate-spin mx-auto mb-3" />
-          <div className="text-[12px] font-mono text-[#78716C] uppercase tracking-wider">
+          <div className="text-[12px] font-medium text-[#78716C] uppercase tracking-wider">
             Loading job #{id}…
           </div>
         </div>
@@ -158,7 +158,7 @@ export default function EditJobPostingPage() {
             <ArrowLeft className="h-3.5 w-3.5" />
             BACK TO POSTED ROLES
           </Link>
-          <span className="text-[11px] font-mono uppercase tracking-wider text-[#78716C]">
+          <span className="text-[11px] font-sans font-semibold uppercase tracking-wide text-[#78716C]">
             Edit Job #{id.slice(0, 8)}
           </span>
         </div>
@@ -168,7 +168,7 @@ export default function EditJobPostingPage() {
         <div className="border border-[#E7E2DA] bg-white p-7 sm:p-10 rounded-2xl shadow-xs space-y-8">
           <div className="flex items-center justify-between flex-wrap gap-3">
             <div>
-              <div className="text-[10px] font-mono tracking-[0.2em] text-[#78716C] uppercase mb-1">
+              <div className="text-[10px] font-medium tracking-[0.2em] text-[#78716C] uppercase mb-1">
                 Edit Opportunity
               </div>
               <h1 className="text-[24px] sm:text-[30px] font-bold uppercase tracking-[0.06em] text-[#1C1917]">
@@ -178,7 +178,7 @@ export default function EditJobPostingPage() {
 
             {/* Current Status Selector */}
             <div className="flex items-center gap-2">
-              <span className="text-[11px] font-mono uppercase text-[#78716C]">Status:</span>
+              <span className="text-[11px] font-medium uppercase text-[#78716C]">Status:</span>
               <select
                 value={status}
                 onChange={(e) => setStatus(e.target.value as JobStatus)}
@@ -202,7 +202,7 @@ export default function EditJobPostingPage() {
           <div className="space-y-6">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
               <div>
-                <label className="block text-[12px] font-mono font-semibold uppercase tracking-wider text-[#1C1917] mb-2">
+                <label className="block text-[12px] font-sans font-semibold uppercase tracking-wide text-[#1C1917] mb-2">
                   Job Title
                 </label>
                 <input
@@ -214,7 +214,7 @@ export default function EditJobPostingPage() {
               </div>
 
               <div>
-                <label className="block text-[12px] font-mono font-semibold uppercase tracking-wider text-[#1C1917] mb-2">
+                <label className="block text-[12px] font-sans font-semibold uppercase tracking-wide text-[#1C1917] mb-2">
                   Department / Squad
                 </label>
                 <input
@@ -228,7 +228,7 @@ export default function EditJobPostingPage() {
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
               <div>
-                <label className="block text-[12px] font-mono font-semibold uppercase tracking-wider text-[#1C1917] mb-2">
+                <label className="block text-[12px] font-sans font-semibold uppercase tracking-wide text-[#1C1917] mb-2">
                   Work Mode
                 </label>
                 <select
@@ -243,7 +243,7 @@ export default function EditJobPostingPage() {
               </div>
 
               <div>
-                <label className="block text-[12px] font-mono font-semibold uppercase tracking-wider text-[#1C1917] mb-2">
+                <label className="block text-[12px] font-sans font-semibold uppercase tracking-wide text-[#1C1917] mb-2">
                   Role Type
                 </label>
                 <select
@@ -259,7 +259,7 @@ export default function EditJobPostingPage() {
               </div>
 
               <div>
-                <label className="block text-[12px] font-mono font-semibold uppercase tracking-wider text-[#1C1917] mb-2">
+                <label className="block text-[12px] font-sans font-semibold uppercase tracking-wide text-[#1C1917] mb-2">
                   Location
                 </label>
                 <input
@@ -272,7 +272,7 @@ export default function EditJobPostingPage() {
             </div>
 
             <div>
-              <label className="block text-[12px] font-mono font-semibold uppercase tracking-wider text-[#1C1917] mb-2">
+              <label className="block text-[12px] font-sans font-semibold uppercase tracking-wide text-[#1C1917] mb-2">
                 Annual Compensation Range
               </label>
               <input
@@ -285,7 +285,7 @@ export default function EditJobPostingPage() {
 
             {/* Skills */}
             <div className="space-y-3">
-              <label className="block text-[12px] font-mono font-semibold uppercase tracking-wider text-[#1C1917]">
+              <label className="block text-[12px] font-sans font-semibold uppercase tracking-wide text-[#1C1917]">
                 Required Technical Capabilities
               </label>
               <div className="flex items-center gap-2 flex-wrap min-h-[40px] p-2 bg-[#FAF8F5] border border-[#E7E2DA] rounded-xl">
@@ -332,7 +332,7 @@ export default function EditJobPostingPage() {
 
             {/* Description */}
             <div>
-              <label className="block text-[12px] font-mono font-semibold uppercase tracking-wider text-[#1C1917] mb-2">
+              <label className="block text-[12px] font-sans font-semibold uppercase tracking-wide text-[#1C1917] mb-2">
                 Full Role Specification
               </label>
               <textarea
@@ -349,7 +349,7 @@ export default function EditJobPostingPage() {
               type="button"
               disabled={saving}
               onClick={() => handleSave()}
-              className="px-7 h-11 bg-[#064E3B] hover:bg-[#043327] text-white text-[12px] font-mono font-semibold uppercase tracking-wider rounded transition-colors shadow-xs disabled:opacity-50 flex items-center justify-center gap-2"
+              className="px-7 h-11 bg-[#064E3B] hover:bg-[#043327] text-white text-[12px] font-sans font-semibold uppercase tracking-wide rounded transition-colors shadow-xs disabled:opacity-50 flex items-center justify-center gap-2"
             >
               {saving ? "SAVING CHANGES…" : "SAVE UPDATES"}
             </button>

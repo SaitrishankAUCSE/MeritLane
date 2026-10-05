@@ -15,21 +15,12 @@ export const MeritlaneLoader: React.FC<MeritlaneLoaderProps> = ({
   className = "",
 }) => {
   // ── PAGE LEVEL ─────────────────────────────────────────────────
-  // Logo centered, single spinning ring around it. Nothing else.
   if (level === "page") {
     return (
-      <div
-        className={`fixed inset-0 z-50 flex items-center justify-center bg-[#F8F6F3] ${className}`}
-      >
-        <div className="relative flex items-center justify-center">
-          {/* Spinning ring */}
-          <div className="h-16 w-16 rounded border-2 border-[#E7E2DA] border-t-[#1C1917] animate-spin" />
-          {/* Logo centered inside the ring */}
-          <img
-            src="/logo-m.png"
-            alt="Meritlane"
-            className="absolute h-7 w-7 object-contain"
-          />
+      <div className={`fixed inset-0 z-50 flex items-start justify-center pointer-events-none ${className}`}>
+        {/* Animated Top Progress Bar */}
+        <div className="w-full h-1 bg-[var(--color-surface-dim)] relative overflow-hidden">
+          <div className="absolute top-0 left-0 h-full w-1/3 bg-[var(--color-primary)] animate-[slideRight_1.5s_ease-in-out_infinite]" />
         </div>
       </div>
     );
@@ -47,8 +38,10 @@ export const MeritlaneLoader: React.FC<MeritlaneLoaderProps> = ({
 
   // ── SECTION LEVEL (default) ────────────────────────────────────
   return (
-    <div className={`flex items-center justify-center py-12 ${className}`}>
-      <div className="h-5 w-5 rounded border-2 border-[#E7E2DA] border-t-[#1C1917] animate-spin" />
+    <div className={`flex flex-col items-center justify-center py-12 w-full ${className}`}>
+      <div className="w-48 h-1 bg-[var(--color-surface-dim)] relative overflow-hidden rounded-full">
+        <div className="absolute top-0 left-0 h-full w-1/2 bg-[var(--color-outline)] animate-[slideRight_1.5s_ease-in-out_infinite]" />
+      </div>
     </div>
   );
 };

@@ -47,19 +47,31 @@ export async function GET(req: NextRequest) {
         }
       } catch (err) {}
 
+      const candidateSkills = data.skills || [];
+      const totalSkillsCount = candidateSkills.length;
+      const verifiedSkillsObj = data.verifiedSkills || {};
+      const qualifiedSkillsCount = Object.entries(verifiedSkillsObj).filter(([skillName, s]: [string, any]) => {
+        const score = typeof s?.score === "number" ? s.score : assessmentScores[skillName];
+        return s?.status === "verified" && (score === undefined || score >= 75);
+      }).length;
+      const skillVerificationPct = totalSkillsCount > 0 ? Math.round((qualifiedSkillsCount / totalSkillsCount) * 100) : 0;
+
       sanitizedCandidates.push({
         uid,
         name: data.name,
         college: data.college,
         branch: data.branch,
         gradYear: data.gradYear,
-        skills: data.skills || [],
+        skills: candidateSkills,
         projects: data.projects || [],
         githubUrl: data.githubUrl,
         resumeUrl: data.resumeUrl,
         verificationStatus: data.verificationStatus,
         assessmentScores,
         verifiedSkills: data.verifiedSkills || {},
+        qualifiedSkillsCount,
+        totalSkillsCount,
+        skillVerificationPct,
       });
     }
 

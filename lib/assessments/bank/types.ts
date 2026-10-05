@@ -17,12 +17,15 @@ export interface CodingQuestion {
   /** Python function name the runner will locate in the candidate's code */
   functionName: string;
   starterCode: {
-    python: string;
+    python?: string;
     javascript?: string;
     java?: string;
     cpp?: string;
     typescript?: string;
     sql?: string;
+    dockerfile?: string;
+    yaml?: string;
+    hcl?: string;
   };
   supportedLanguages?: Array<{ id: string; name: string }>;
   /** Exactly 5 public test cases — shown after "Run Code" */

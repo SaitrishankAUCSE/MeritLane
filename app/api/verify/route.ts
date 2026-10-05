@@ -230,34 +230,45 @@ export async function POST(req: NextRequest) {
     const mcqPct = totalMcqs > 0 ? (mcqCorrectCount / totalMcqs) * 100 : 0;
     const mcqScore = Math.round(mcqPct);
 
-    // ── Step 3: Apply approved scoring rules ─────────────────────────────────
-    // Approved thresholds:
-    //   - EASY task: must be fully correct (100% of 50 hidden tests)
-    //   - MEDIUM-HARD task: ≥ 60% correct
-    //   - MCQ: ≥ 70% correct
-    // Overall score = 30% easy + 40% medium + 30% MCQ
-    const easyFullyCorrect = easyResult.totalTests > 0 && easyResult.passedTests === easyResult.totalTests;
-    const mediumPass = mediumResult.pct >= 60;
-    const mcqPass = mcqPct >= 70;
+    // ── Step 3: Apply proportional test-case scoring rules ───────────────────
+    // Proportional test-case scoring:
+    //   - If candidate passes 50% of test cases, award half score for that coding question.
+    //   - EASY task: proportional to passed test cases (35% weight in dual-task mode)
+    //   - MEDIUM task: proportional to passed test cases (35% weight in dual-task mode)
+    //   - MCQ section: proportional to correct answers (30% weight)
+    //   - Single coding task: 70% coding + 30% MCQ
+    //   - Passing threshold for every skill: overall score >= 75%
+    const easyPct = easyResult.totalTests > 0 ? (easyResult.passedTests / easyResult.totalTests) * 100 : 0;
+    const mediumPct = mediumResult.totalTests > 0 ? (mediumResult.passedTests / mediumResult.totalTests) * 100 : 0;
 
-    const easyPct = easyResult.totalTests > 0 ? Math.round((easyResult.passedTests / easyResult.totalTests) * 100) : 0;
-    const score = hasCodingSubmission 
-      ? Math.round((easyPct * 0.30) + (mediumResult.pct * 0.40) + (mcqPct * 0.30))
-      : Math.round(mcqPct);
+    const isDualTask = hasCodingSubmission && (mediumCode || (isBankAssessment && mediumQId));
+    
+    let score = 0;
+    if (hasCodingSubmission) {
+      if (isDualTask) {
+        score = Math.round((easyPct * 0.35) + (mediumPct * 0.35) + (mcqPct * 0.30));
+      } else {
+        score = Math.round((easyPct * 0.70) + (mcqPct * 0.30));
+      }
+    } else {
+      score = Math.round(mcqPct);
+    }
 
-    // Pass requires all three component thresholds to be met
-    const passed = hasCodingSubmission
-      ? easyFullyCorrect && mediumPass && mcqPass
-      : mcqPass; // MCQ-only assessment
+    // Unified passing threshold: overall score >= 75%
+    const passed = score >= 75;
 
     // Component score trace for Proof Trace display
     const assessmentScores = {
-      easy: easyPct,
-      easyPassed: easyFullyCorrect,
-      medium: mediumResult.pct,
-      mediumPassed: mediumPass,
+      easy: Math.round(easyPct),
+      easyPassedTests: easyResult.passedTests,
+      easyTotalTests: easyResult.totalTests,
+      easyPassed: easyPct >= 75,
+      medium: Math.round(mediumPct),
+      mediumPassedTests: mediumResult.passedTests,
+      mediumTotalTests: mediumResult.totalTests,
+      mediumPassed: mediumPct >= 75,
       mcq: mcqScore,
-      mcqPassed: mcqPass,
+      mcqPassed: mcqPct >= 75,
       overall: score,
     };
 
@@ -307,6 +318,30 @@ export async function POST(req: NextRequest) {
 
     if (passed) {
       const nowMs = Date.now();
+      const updatedVerifiedSkills = {
+        ...(candidateData.verifiedSkills || {}),
+        [skill]: {
+          status: "verified",
+          score,
+          assessmentScores,
+          verifiedAt: nowMs,
+          aiFeedback,
+        },
+      };
+
+      // ── 50% Assessments Milestone Rule for Employer Portal ──
+      // Candidate must pass at least 50% (Math.ceil(totalSkills / 2)) of listed resume skills
+      // with a score of >= 75% to appear in the Employer Portal.
+      const candidateSkills: string[] = candidateData.skills || userData.skills || [skill];
+      const totalSkillsCount = candidateSkills.length;
+      const requiredVerifiedCount = Math.max(1, Math.ceil(totalSkillsCount / 2));
+      const passedSkillsWith75 = Object.values(updatedVerifiedSkills).filter(
+        (s: any) => s?.status === "verified" && (s?.score ?? 0) >= 75
+      ).length;
+
+      const isEligibleForEmployerPortal = passedSkillsWith75 >= requiredVerifiedCount;
+      const newVerificationStatus = isEligibleForEmployerPortal ? "verified" : "partially_verified";
+
       await Promise.all([
         userRef.update({
           [`assessmentScores.${skill}`]: assessmentScores,
@@ -317,6 +352,7 @@ export async function POST(req: NextRequest) {
             verifiedAt: nowMs,
             aiFeedback,
           },
+          verificationStatus: newVerificationStatus,
           assessmentDate: FieldValue.serverTimestamp(),
           ...sessionClearFields,
           [`failedAssessments.${skill}`]: FieldValue.delete(),
@@ -324,7 +360,7 @@ export async function POST(req: NextRequest) {
           [`integrityTerminations.${skill}`]: FieldValue.delete(),
         }),
         candidateRef.update({
-          verificationStatus: "verified",
+          verificationStatus: newVerificationStatus,
           [`verifiedSkills.${skill}`]: {
             status: "verified",
             score,
@@ -343,6 +379,11 @@ export async function POST(req: NextRequest) {
         skill,
         assessmentScores,
         aiFeedback,
+        employerPortalUnlocked: isEligibleForEmployerPortal,
+        qualifiedSkillsCount: passedSkillsWith75,
+        requiredForEmployerPortal: requiredVerifiedCount,
+        totalSkillsCount,
+        skillVerificationPercentage: totalSkillsCount > 0 ? Math.round((passedSkillsWith75 / totalSkillsCount) * 100) : 0,
       });
     } else {
       // Failed — apply 14-day cooldown

@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useRef } from "react";
-import { Save, Sparkles, FileText, CheckCircle2, UploadCloud, Trash2, ShieldCheck, RefreshCw, AlertCircle } from "lucide-react";
+import { Save, Sparkles, FileText, CheckCircle2, UploadCloud, Trash2, ShieldCheck, RefreshCw, AlertCircle, Briefcase, MapPin, Clock, DollarSign } from "lucide-react";
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
 import { TagInput } from "@/components/ui/TagInput";
@@ -11,6 +11,33 @@ import { useToast } from "@/components/ui/Toast";
 import { useUnsavedChanges } from "@/components/ui/UnsavedChangesGuard";
 import { InstitutionalResumeScanner } from "@/components/candidate/InstitutionalResumeScanner";
 import { ParsedResumeProfile } from "@/lib/resume/parser";
+
+const TARGET_ROLE_SUGGESTIONS = [
+  "Full-Stack Developer",
+  "Backend Engineer",
+  "Frontend Engineer",
+  "Software Engineer",
+  "DevOps Engineer",
+  "Cloud Architect",
+  "Mobile Developer",
+  "Data Engineer",
+  "AI / Machine Learning Engineer",
+  "Systems Engineer",
+];
+
+const PREFERRED_LOCATION_SUGGESTIONS = [
+  "Remote",
+  "Bangalore, India",
+  "Hyderabad, India",
+  "Pune, India",
+  "Mumbai, India",
+  "Delhi NCR, India",
+  "Chennai, India",
+  "San Francisco, USA",
+  "New York, USA",
+  "London, UK",
+  "Singapore",
+];
 
 interface ProfileFormProps {
   initialData: CandidateProfile | null;
@@ -44,6 +71,12 @@ export function ProfileForm({ initialData, onSave, onCancel, isNew = false }: Pr
     resumeUrl: initialData?.resumeUrl || "",
     resumeText: initialData?.resumeText || "",
     skills: initialData?.skills || [],
+    targetRoles: initialData?.targetRoles || [],
+    preferredLocations: initialData?.preferredLocations || [],
+    workPreference: initialData?.workPreference || "Remote",
+    availability: initialData?.availability || "Immediate (Ready to Join)",
+    expectedSalary: initialData?.expectedSalary || "",
+    bio: initialData?.bio || "",
   }), [initialData, user]);
 
   const [formData, setFormData] = useState(initialValues);
@@ -79,7 +112,13 @@ export function ProfileForm({ initialData, onSave, onCancel, isNew = false }: Pr
       formData.githubUrl !== initialValues.githubUrl ||
       formData.resumeUrl !== initialValues.resumeUrl ||
       formData.resumeText !== initialValues.resumeText ||
-      JSON.stringify(formData.skills) !== JSON.stringify(initialValues.skills)
+      formData.workPreference !== initialValues.workPreference ||
+      formData.availability !== initialValues.availability ||
+      formData.expectedSalary !== initialValues.expectedSalary ||
+      formData.bio !== initialValues.bio ||
+      JSON.stringify(formData.skills) !== JSON.stringify(initialValues.skills) ||
+      JSON.stringify(formData.targetRoles) !== JSON.stringify(initialValues.targetRoles) ||
+      JSON.stringify(formData.preferredLocations) !== JSON.stringify(initialValues.preferredLocations)
     );
   }, [formData, initialValues]);
 
@@ -188,7 +227,7 @@ export function ProfileForm({ initialData, onSave, onCancel, isNew = false }: Pr
 
         return {
           ...prev,
-          name: (!prev.name || prev.name === "Candidate" || isNew) ? (parsed.name || prev.name) : (prev.name || parsed.name),
+          name: (!prev.name || prev.name === "Candidate" || isNew) ? (parsed.name || prev.name || "") : (prev.name || parsed.name || ""),
           college: parsed.college || prev.college,
           degree: parsed.degree || prev.degree,
           branch: parsed.branch || prev.branch,
@@ -248,6 +287,8 @@ export function ProfileForm({ initialData, onSave, onCancel, isNew = false }: Pr
     try {
       const updatedProfile: Partial<CandidateProfile> = {
         ...formData,
+        resumeFileName: resumeFileName || initialData?.resumeFileName,
+        resumeUploadedAt: resumeFile ? Date.now() : (initialData?.resumeUploadedAt || Date.now()),
         updatedAt: Date.now(),
       };
       
@@ -261,7 +302,7 @@ export function ProfileForm({ initialData, onSave, onCancel, isNew = false }: Pr
       
       addToast({
         type: "success",
-        title: "Candidate record saved successfully.",
+        title: "Profile saved successfully.",
       });
 
       onSave({
@@ -279,12 +320,18 @@ export function ProfileForm({ initialData, onSave, onCancel, isNew = false }: Pr
     <>
       <GuardModal />
 
-      {/* Institutional Resume Scanner & Decompiler Terminal */}
+      {/* Resume Scanner Terminal */}
       <InstitutionalResumeScanner
         isOpen={scannerOpen}
         fileName={resumeFileName || "resume.pdf"}
         parsedData={parsedProfile}
+        isAnalyzing={analyzingAts}
+        error={error}
         onComplete={handleScannerComplete}
+        onClose={() => {
+          setScannerOpen(false);
+          setAnalyzingAts(false);
+        }}
       />
 
       {/* Local in-form cancel confirmation */}
@@ -299,13 +346,13 @@ export function ProfileForm({ initialData, onSave, onCancel, isNew = false }: Pr
               Unsaved Changes
             </h2>
             <p className="text-[14px] text-[var(--color-muted-foreground)] leading-relaxed mb-6 font-sans">
-              You have modifications that have not been committed to your candidate record. Do you wish to discard them?
+              You have unsaved changes. Do you want to discard them?
             </p>
             <div className="flex flex-col gap-2.5">
               <button
                 type="button"
                 onClick={() => setShowCancelConfirm(false)}
-                className="w-full h-11 bg-[var(--color-primary)] text-white text-[13px] font-mono uppercase tracking-wider font-semibold hover:bg-[var(--color-primary-hover)] transition-colors"
+                className="w-full h-11 bg-[var(--color-primary)] text-white text-[13px] font-sans font-semibold uppercase tracking-wide font-semibold hover:bg-[var(--color-primary-hover)] transition-colors"
               >
                 Continue Editing
               </button>
@@ -315,7 +362,7 @@ export function ProfileForm({ initialData, onSave, onCancel, isNew = false }: Pr
                   setShowCancelConfirm(false);
                   if (onCancel) onCancel();
                 }}
-                className="w-full h-11 border border-[var(--color-border)] text-[var(--color-muted-foreground)] text-[13px] font-mono uppercase tracking-wider font-semibold hover:border-[#7A3B2E] hover:text-[#7A3B2E] transition-colors"
+                className="w-full h-11 border border-[var(--color-border)] text-[var(--color-muted-foreground)] text-[13px] font-sans font-semibold uppercase tracking-wide font-semibold hover:border-[#7A3B2E] hover:text-[#7A3B2E] transition-colors"
               >
                 Discard &amp; Exit
               </button>
@@ -327,14 +374,14 @@ export function ProfileForm({ initialData, onSave, onCancel, isNew = false }: Pr
       <form onSubmit={handleSubmit} className="border border-[var(--color-border)] bg-[var(--color-surface-low)] p-6 sm:p-10 space-y-8 shadow-xs">
         {/* Page Header */}
         <div className="border-b border-[var(--color-border)] pb-5">
-          <div className="text-[10px] font-mono tracking-[0.2em] text-[#7A3B2E] uppercase font-semibold mb-1">
-            Institutional Attestation Protocol
+          <div className="text-[10px] font-medium tracking-[0.2em] text-[#7A3B2E] uppercase font-semibold mb-1">
+            Profile Setup
           </div>
           <h2 className="font-serif text-[24px] sm:text-[30px] font-semibold text-[var(--color-foreground)] leading-tight">
-            {isNew ? "Establish Candidate Identity Record" : "Edit Candidate Identity Record"}
+            {isNew ? "Create Your Profile" : "Edit Your Profile"}
           </h2>
           <p className="text-[14px] text-[var(--color-muted-foreground)] font-sans mt-1">
-            This information forms the verified basis of your technical record. Upload your official resume to automatically populate your credentials and claimed capabilities.
+            Upload your resume to automatically fill in your education, skills, and details. You can review and edit everything before saving.
           </p>
         </div>
 
@@ -345,7 +392,7 @@ export function ProfileForm({ initialData, onSave, onCancel, isNew = false }: Pr
           </div>
         )}
 
-        {/* ── TOP SECTION: MANDATORY RESUME UPLOAD FOR AUTO-FILL ── */}
+        {/* ── TOP SECTION: RESUME UPLOAD FOR AUTO-FILL ── */}
         <div className="border border-[var(--color-border)] bg-[var(--color-background)] p-6 shadow-xs">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-[var(--color-border)]">
             <div className="flex items-center gap-3">
@@ -354,15 +401,15 @@ export function ProfileForm({ initialData, onSave, onCancel, isNew = false }: Pr
               </div>
               <div>
                 <div className="flex items-center gap-2">
-                  <span className="text-[10px] font-mono tracking-[0.18em] uppercase text-[var(--color-muted-foreground)]">
-                    Step 01 · Ingestion Engine
+                  <span className="text-[10px] font-medium tracking-[0.18em] uppercase text-[var(--color-muted-foreground)]">
+                    Step 1 · Resume
                   </span>
-                  <span className="text-[9px] font-mono font-semibold tracking-wider uppercase px-2 py-0.5 bg-[#7A3B2E]/15 text-[#7A3B2E] border border-[#7A3B2E]/30">
-                    Mandatory
+                  <span className="text-[9px] font-medium font-semibold tracking-wider uppercase px-2 py-0.5 bg-[#7A3B2E]/15 text-[#7A3B2E] border border-[#7A3B2E]/30">
+                    Required
                   </span>
                 </div>
                 <h3 className="font-serif text-[18px] text-[var(--color-foreground)] font-semibold mt-0.5">
-                  Official Technical Resume Upload
+                  Upload Your Resume
                 </h3>
               </div>
             </div>
@@ -372,7 +419,7 @@ export function ProfileForm({ initialData, onSave, onCancel, isNew = false }: Pr
           </div>
 
           <p className="text-[13px] text-[var(--color-muted-foreground)] mt-3 mb-4 leading-relaxed font-sans">
-            Your resume is parsed to automatically fill your name, college, degree, graduation year, and technical skills into the record below. All fields remain fully editable for verification.
+            We automatically read your resume to fill in your name, college, degree, graduation year, and skills below. You can change any field anytime.
           </p>
 
           <input
@@ -400,14 +447,14 @@ export function ProfileForm({ initialData, onSave, onCancel, isNew = false }: Pr
                 <UploadCloud className="h-6 w-6 text-[var(--color-primary)]" />
               </div>
               <div className="font-serif text-[16px] text-[var(--color-foreground)] font-semibold mb-1">
-                Click to browse or drop your official resume PDF here
+                Click to upload or drag and drop your resume PDF here
               </div>
               <p className="text-[12px] text-[var(--color-muted-foreground)] font-mono max-w-md mx-auto">
-                Auto-extracts name, university, degree, cohort, and capabilities directly into the fields below
+                Automatically finds your name, university, degree, year, and skills
               </p>
-              <div className="mt-3.5 inline-flex items-center gap-1.5 text-[10px] font-mono uppercase tracking-wider text-[var(--color-primary)] bg-[var(--color-primary)]/10 px-3 py-1 border border-[var(--color-primary)]/25">
+              <div className="mt-3.5 inline-flex items-center gap-1.5 text-[10px] font-sans font-semibold uppercase tracking-wide text-[var(--color-primary)] bg-[var(--color-primary)]/10 px-3 py-1 border border-[var(--color-primary)]/25">
                 <Sparkles className="h-3 w-3" />
-                <span>Immediate Auto-Parse &amp; Auto-Fill Active</span>
+                <span>Auto-fill from resume is ready</span>
               </div>
             </div>
           ) : (
@@ -423,13 +470,13 @@ export function ProfileForm({ initialData, onSave, onCancel, isNew = false }: Pr
                       <span className="text-[14px] font-mono font-semibold text-[var(--color-foreground)] truncate max-w-xs sm:max-w-md">
                         {resumeFileName || "Uploaded Resume.pdf"}
                       </span>
-                      <span className="text-[9px] font-mono uppercase tracking-wider bg-[var(--color-primary)]/15 text-[var(--color-primary)] border border-[var(--color-primary)]/30 px-2 py-0.5 shrink-0">
-                        Parsed &amp; Ingested
+                      <span className="text-[9px] font-sans font-semibold uppercase tracking-wide bg-[var(--color-primary)]/15 text-[var(--color-primary)] border border-[var(--color-primary)]/30 px-2 py-0.5 shrink-0">
+                        Uploaded
                       </span>
                     </div>
                     <div className="text-[11px] font-mono text-[var(--color-muted-foreground)] mt-0.5">
                       {resumeFile ? `${(resumeFile.size / 1024).toFixed(1)} KB · ` : ""}
-                      {formData.skills.length} skills &amp; academic credentials auto-populated below
+                      {formData.skills.length} skills &amp; details filled below
                     </div>
                   </div>
                 </div>
@@ -442,7 +489,7 @@ export function ProfileForm({ initialData, onSave, onCancel, isNew = false }: Pr
                     className="text-[11px] font-mono font-semibold text-[var(--color-foreground)] hover:text-[var(--color-primary)] px-3 py-1.5 border border-[var(--color-border)] bg-[var(--color-background)] hover:bg-[var(--color-surface-mid)] transition-colors flex items-center gap-1.5"
                   >
                     <RefreshCw className={`h-3 w-3 ${analyzingAts ? "animate-spin" : ""}`} />
-                    {analyzingAts ? "Re-parsing..." : "Replace Resume"}
+                    {analyzingAts ? "Reading..." : "Replace Resume"}
                   </button>
                   <button
                     type="button"
@@ -458,7 +505,7 @@ export function ProfileForm({ initialData, onSave, onCancel, isNew = false }: Pr
 
               {/* Informative Banner */}
               <div className="bg-[var(--color-surface-mid)]/40 border-l-2 border-[var(--color-primary)] p-3 text-[12px] font-mono text-[var(--color-foreground)] flex items-center justify-between">
-                <span>✓ Extracted credentials have been automatically populated below. Review and adjust any details before saving.</span>
+                <span>✓ Details have been filled in below. Please check and adjust anything if needed before saving.</span>
               </div>
 
               {/* ATS Results Snapshot (if available) */}
@@ -469,10 +516,10 @@ export function ProfileForm({ initialData, onSave, onCancel, isNew = false }: Pr
                       {atsResult.score}<span className="text-[12px] text-[var(--color-muted-foreground)] font-normal">/100</span>
                     </div>
                     <div>
-                      <div className="text-[9px] font-mono uppercase tracking-[0.16em] text-[var(--color-muted-foreground)]">
-                        ATS Architecture Rating
+                      <div className="text-[9px] font-medium uppercase tracking-[0.16em] text-[var(--color-muted-foreground)]">
+                        Resume Score
                       </div>
-                      <span className="text-[10px] font-mono font-semibold tracking-wider uppercase text-[var(--color-primary)] bg-[var(--color-primary)]/10 px-2 py-0.5 border border-[var(--color-primary)]/20">
+                      <span className="text-[10px] font-medium font-semibold tracking-wider uppercase text-[var(--color-primary)] bg-[var(--color-primary)]/10 px-2 py-0.5 border border-[var(--color-primary)]/20">
                         {atsResult.rating}
                       </span>
                     </div>
@@ -489,14 +536,14 @@ export function ProfileForm({ initialData, onSave, onCancel, isNew = false }: Pr
         {/* ── STEP 2: REVIEW & COMPLETE EXTRACTED PROFILE DETAILS ── */}
         <div className="pt-2 border-t border-[var(--color-border)]">
           <div className="mb-6">
-            <span className="text-[10px] font-mono tracking-[0.18em] uppercase text-[var(--color-muted-foreground)] font-semibold">
-              Step 02 · Credential Attestation
+            <span className="text-[10px] font-medium tracking-[0.18em] uppercase text-[var(--color-muted-foreground)] font-semibold">
+              Step 2 · Your Details
             </span>
             <h3 className="font-serif text-[18px] sm:text-[20px] text-[var(--color-foreground)] font-semibold mt-0.5">
-              Review &amp; Verify Extracted Information
+              Review Your Information
             </h3>
             <p className="text-[13px] text-[var(--color-muted-foreground)] font-sans">
-              Confirm your candidate details below. All fields can be adjusted manually if needed.
+              Check your profile details below. You can change any information anytime.
             </p>
           </div>
 
@@ -529,7 +576,7 @@ export function ProfileForm({ initialData, onSave, onCancel, isNew = false }: Pr
                 placeholder="Type to search your university or college..."
                 fetchOptions={fetchIndianColleges}
                 allowManualEntry={true}
-                manualEntryLabel="Custom Institution"
+                manualEntryLabel="Custom College"
                 manualEntryPlaceholder="Enter your university or college name"
               />
               <Autocomplete
@@ -549,7 +596,7 @@ export function ProfileForm({ initialData, onSave, onCancel, isNew = false }: Pr
             {/* Branch & Notice */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <Autocomplete
-                label="Branch / Specialization"
+                label="Branch / Major"
                 value={formData.branch}
                 onChange={(val) => setFormData((prev) => ({ ...prev, branch: val }))}
                 placeholder={formData.degree ? "Select branch for your degree" : "e.g. Computer Science and Engineering"}
@@ -559,11 +606,11 @@ export function ProfileForm({ initialData, onSave, onCancel, isNew = false }: Pr
                 manualEntryPlaceholder="e.g. Computer Science"
               />
               <div className="flex flex-col justify-center bg-[var(--color-background)] border border-[var(--color-border)] p-4">
-                <span className="text-[10px] font-mono uppercase tracking-wider text-[var(--color-muted-foreground)] mb-1">
-                  Public Attestation Note
+                <span className="text-[10px] font-sans font-semibold uppercase tracking-wide text-[var(--color-muted-foreground)] mb-1">
+                  Public Profile Note
                 </span>
                 <p className="text-[12px] text-[var(--color-foreground)] leading-relaxed font-sans">
-                  Your university, degree, and specialization will appear on your public verification badge and employer dossier.
+                  Your university, degree, and branch will appear on your public profile for recruiters to see.
                 </p>
               </div>
             </div>
@@ -572,34 +619,137 @@ export function ProfileForm({ initialData, onSave, onCancel, isNew = false }: Pr
             <div className="pt-3 border-t border-[var(--color-border)]">
               <div className="flex items-center justify-between mb-1">
                 <h4 className="font-serif text-[16px] text-[var(--color-foreground)] font-semibold">
-                  Extracted Technical Capabilities
+                  Technical Skills
                 </h4>
                 <span className="text-[10px] font-mono text-[var(--color-muted-foreground)]">
-                  {formData.skills.length} skills registered
+                  {formData.skills.length} skills added
                 </span>
               </div>
               <p className="text-[12px] text-[var(--color-muted-foreground)] mb-4 font-sans">
-                These capabilities were extracted from your resume. Each skill can be verified through our proctored assessment suite.
+                These skills were found from your resume. You can take short tests to earn verified badges on them.
               </p>
               <div className="mb-6">
                 <TagInput
-                  label="Skills & Domains"
+                  label="Skills"
                   tags={formData.skills}
                   onChange={handleSkillsChange}
                   placeholder="React, Python, Systems Design..."
-                  helperText="The first skill listed will be your Primary Domain. Separate with commas or press Enter."
+                  helperText="The first skill listed will be your primary focus. Separate with commas or press Enter."
                   options={COMMON_SKILLS}
                 />
+              </div>
+            </div>
+
+            {/* Targeted Roles & Career Preferences */}
+            <div className="pt-3 border-t border-[var(--color-border)]">
+              <div className="flex items-center gap-2 mb-1">
+                <Briefcase className="h-4 w-4 text-[var(--color-primary)]" />
+                <h4 className="font-serif text-[16px] text-[var(--color-foreground)] font-semibold">
+                  Targeted Roles &amp; Career Preferences
+                </h4>
+              </div>
+              <p className="text-[12px] text-[var(--color-muted-foreground)] mb-4 font-sans">
+                Tell prospective employers the exact engineering roles, locations, and working models you are targeting.
+              </p>
+
+              <div className="space-y-5">
+                {/* Targeted Roles */}
+                <div>
+                  <TagInput
+                    label="Targeted Job Roles"
+                    tags={formData.targetRoles}
+                    onChange={(tags) => setFormData((prev) => ({ ...prev, targetRoles: tags }))}
+                    placeholder="e.g. Full-Stack Developer, Backend Engineer, DevOps..."
+                    helperText="Specify the roles you are best suited for. Separate with commas or press Enter."
+                    options={TARGET_ROLE_SUGGESTIONS}
+                  />
+                </div>
+
+                {/* Preferred Locations */}
+                <div>
+                  <TagInput
+                    label="Preferred Work Locations"
+                    tags={formData.preferredLocations}
+                    onChange={(tags) => setFormData((prev) => ({ ...prev, preferredLocations: tags }))}
+                    placeholder="e.g. Remote, Bangalore, Hyderabad, Pune..."
+                    helperText="Where are you willing or eager to work? (Includes Remote)"
+                    options={PREFERRED_LOCATION_SUGGESTIONS}
+                  />
+                </div>
+
+                {/* Work Preference, Availability, and Expected Compensation */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+                  <div>
+                    <label className="block text-[11px] font-sans font-semibold uppercase tracking-wider text-[var(--color-muted-foreground)] mb-1.5">
+                      Work Preference
+                    </label>
+                    <select
+                      name="workPreference"
+                      value={formData.workPreference}
+                      onChange={(e) => setFormData((prev) => ({ ...prev, workPreference: e.target.value as any }))}
+                      className="w-full h-10 px-3 border border-[var(--color-border)] bg-[var(--color-background)] text-[13px] text-[var(--color-foreground)] rounded focus:outline-none focus:ring-1 focus:ring-[var(--color-foreground)]"
+                    >
+                      <option value="Remote">Remote Only</option>
+                      <option value="Hybrid">Hybrid (Flexible)</option>
+                      <option value="On-site">On-site (Office)</option>
+                      <option value="Flexible">Flexible / Open to All</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-[11px] font-sans font-semibold uppercase tracking-wider text-[var(--color-muted-foreground)] mb-1.5">
+                      Notice / Availability
+                    </label>
+                    <select
+                      name="availability"
+                      value={formData.availability}
+                      onChange={(e) => setFormData((prev) => ({ ...prev, availability: e.target.value }))}
+                      className="w-full h-10 px-3 border border-[var(--color-border)] bg-[var(--color-background)] text-[13px] text-[var(--color-foreground)] rounded focus:outline-none focus:ring-1 focus:ring-[var(--color-foreground)]"
+                    >
+                      <option value="Immediate (Ready to Join)">Immediate (Ready to Join)</option>
+                      <option value="15 Days Notice">15 Days Notice</option>
+                      <option value="30 Days (1 Month)">30 Days (1 Month)</option>
+                      <option value="60 Days (2 Months)">60 Days (2 Months)</option>
+                      <option value="Summer Internship">Summer Internship</option>
+                      <option value="Graduating Senior (Class of 2026)">Graduating Senior (Class of 2026)</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <Input
+                      label="Expected Compensation (Optional)"
+                      name="expectedSalary"
+                      value={formData.expectedSalary}
+                      onChange={handleChange}
+                      placeholder="e.g. ₹8 - 12 LPA or $90k/yr"
+                    />
+                  </div>
+                </div>
+
+                {/* Professional Bio */}
+                <div>
+                  <label className="block text-[11px] font-sans font-semibold uppercase tracking-wider text-[var(--color-muted-foreground)] mb-1.5">
+                    Professional Headline / Engineering Focus
+                  </label>
+                  <textarea
+                    name="bio"
+                    value={formData.bio}
+                    onChange={handleChange}
+                    rows={2}
+                    placeholder="Brief 1-2 sentence engineering focus e.g. Full-Stack TypeScript & Go engineer passionate about scalable backend systems and high-performance web applications."
+                    className="w-full px-3 py-2 border border-[var(--color-border)] bg-[var(--color-background)] text-[13px] text-[var(--color-foreground)] rounded focus:outline-none focus:ring-1 focus:ring-[var(--color-foreground)] leading-relaxed"
+                  />
+                </div>
               </div>
             </div>
 
             {/* External Links */}
             <div className="pt-3 border-t border-[var(--color-border)]">
               <h4 className="font-serif text-[16px] text-[var(--color-foreground)] font-semibold mb-1">
-                External Evidence Repositories
+                Links &amp; Portfolio
               </h4>
               <p className="text-[12px] text-[var(--color-muted-foreground)] mb-4 font-sans">
-                Provide external links to substantiate your software provenance.
+                Add links to your GitHub or personal portfolio website.
               </p>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <Input
@@ -611,7 +761,7 @@ export function ProfileForm({ initialData, onSave, onCancel, isNew = false }: Pr
                   type="url"
                 />
                 <Input
-                  label="Portfolio / External Website URL"
+                  label="Portfolio / Personal Website URL"
                   name="resumeUrl"
                   value={formData.resumeUrl}
                   onChange={handleChange}
@@ -629,12 +779,12 @@ export function ProfileForm({ initialData, onSave, onCancel, isNew = false }: Pr
             {!hasResume ? (
               <span className="text-[#7A3B2E] flex items-center gap-1.5 font-semibold">
                 <AlertCircle className="h-3.5 w-3.5" />
-                Resume upload is required in Step 01 to proceed.
+                Please upload your resume in Step 1 to continue.
               </span>
             ) : (
               <span className="text-[var(--color-primary)] flex items-center gap-1.5">
                 <ShieldCheck className="h-3.5 w-3.5" />
-                Resume ingested · Ready to establish identity record.
+                Resume uploaded · Ready to save profile.
               </span>
             )}
           </div>
@@ -653,7 +803,7 @@ export function ProfileForm({ initialData, onSave, onCancel, isNew = false }: Pr
               leftIcon={<Save className="h-4 w-4" />}
               className="w-full sm:w-auto justify-center"
             >
-              {isNew ? "Create Candidate Record" : "Save Changes"}
+              {isNew ? "Create Profile" : "Save Changes"}
             </Button>
           </div>
         </div>

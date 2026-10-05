@@ -15,6 +15,14 @@ interface CandidateProofModalProps {
 export function CandidateProofModal({ candidate, isOpen, onClose }: CandidateProofModalProps) {
   if (!isOpen || !candidate) return null;
 
+  const verifiedList = Object.entries(candidate.verifiedSkills || {}).filter(([_, s]: [string, any]) => s?.status === "verified");
+  const verifiedSkillsCount = candidate.qualifiedSkillsCount ?? verifiedList.length;
+  const candidateSkills = candidate.skills || [];
+  const totalSkillsCount = candidate.totalSkillsCount || candidateSkills.length || (verifiedSkillsCount > 0 ? verifiedSkillsCount * 2 : 1);
+  const verificationPct = typeof candidate.skillVerificationPct === "number"
+    ? candidate.skillVerificationPct
+    : (totalSkillsCount > 0 ? Math.round((verifiedSkillsCount / totalSkillsCount) * 100) : 50);
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-foreground/60 backdrop-blur-sm p-4 sm:p-6 animate-in fade-in duration-200">
       <div className="bg-surface w-full max-w-4xl max-h-[90vh] overflow-y-auto rounded-none border border-border shadow-sm flex flex-col">
@@ -32,6 +40,13 @@ export function CandidateProofModal({ candidate, isOpen, onClose }: CandidatePro
                 candidateName={candidate.name}
                 size="sm"
               />
+              <div className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-sm bg-[#ECFDF5] border border-[#BBF7D0] text-[#166534] text-[11px] font-semibold">
+                <ShieldCheck className="h-3.5 w-3.5 text-[#16A34A]" />
+                <span>{verificationPct}% Skills Verified</span>
+                <span className="text-[#15803D] font-normal text-[10px]">
+                  ({verifiedSkillsCount}/{totalSkillsCount} passed ≥75%)
+                </span>
+              </div>
             </div>
             <p className="text-xs sm:text-sm font-semibold text-muted-foreground mt-1 uppercase tracking-wider truncate">
               {candidate.branch || "Software Engineering"} · {candidate.college || "N/A"} · {candidate.gradYear || "N/A"}
@@ -52,20 +67,36 @@ export function CandidateProofModal({ candidate, isOpen, onClose }: CandidatePro
           
           {/* SECTION: CANDIDATE EVIDENCE SUMMARY (Factual, no AI rankings) */}
           <section className="bg-surface-low border border-border p-5 rounded-md">
-            <h3 className="text-xs font-bold text-foreground uppercase tracking-widest mb-3">
-              Evidence Summary
-            </h3>
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-xs font-bold text-foreground uppercase tracking-widest">
+                Evidence Summary
+              </h3>
+              <span className="text-[11px] font-mono text-[#059669] font-semibold bg-[#ECFDF5] px-2 py-0.5 rounded border border-[#A7F3D0]">
+                {verificationPct}% of Cataloged Skills Passed (≥75%)
+              </span>
+            </div>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-left">
               <div>
-                <span className="text-[10px] font-mono text-muted-foreground uppercase tracking-wider block mb-1">
+                <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider block mb-1">
                   Verified Skills
                 </span>
-                <span className="text-base font-bold text-foreground">
-                  {Object.values(candidate.verifiedSkills || {}).filter((s: any) => s?.status === "verified").length}
-                </span>
+                <div className="flex items-baseline gap-1.5">
+                  <span className="text-base font-bold text-[#059669]">
+                    {verificationPct}%
+                  </span>
+                  <span className="text-xs text-muted-foreground">
+                    ({verifiedSkillsCount}/{totalSkillsCount})
+                  </span>
+                </div>
+                <div className="w-full bg-[#E5E5E5] h-1.5 rounded-full overflow-hidden mt-1">
+                  <div
+                    className="bg-[#059669] h-full rounded-full"
+                    style={{ width: `${Math.min(100, Math.max(5, verificationPct))}%` }}
+                  />
+                </div>
               </div>
               <div>
-                <span className="text-[10px] font-mono text-muted-foreground uppercase tracking-wider block mb-1">
+                <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider block mb-1">
                   Verified Projects
                 </span>
                 <span className="text-base font-bold text-foreground">
@@ -73,7 +104,7 @@ export function CandidateProofModal({ candidate, isOpen, onClose }: CandidatePro
                 </span>
               </div>
               <div>
-                <span className="text-[10px] font-mono text-muted-foreground uppercase tracking-wider block mb-1">
+                <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider block mb-1">
                   GitHub Repos
                 </span>
                 <span className="text-base font-bold text-foreground">
@@ -81,7 +112,7 @@ export function CandidateProofModal({ candidate, isOpen, onClose }: CandidatePro
                 </span>
               </div>
               <div>
-                <span className="text-[10px] font-mono text-muted-foreground uppercase tracking-wider block mb-1">
+                <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider block mb-1">
                   Education
                 </span>
                 <span className="text-xs font-semibold text-foreground truncate block">

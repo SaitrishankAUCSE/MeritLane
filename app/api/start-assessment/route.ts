@@ -78,18 +78,25 @@ export async function POST(req: NextRequest) {
 
     const now = Date.now();
 
-    // 1. Global Proctoring Lockout Check (Overrides everything)
-    if (userData.proctoringLockoutUntil && userData.proctoringLockoutUntil > now) {
+    // 1. Dev Bypass / Cooldown Reset
+    const isDev = process.env.NODE_ENV === "development";
+    const bypassCooldown = isDev && (body.resetCooldown === true || req.nextUrl.searchParams.get("resetCooldown") === "true" || req.headers.get("x-dev-bypass-cooldown") === "true");
+
+    if (bypassCooldown && userData.proctoringLockoutUntil) {
+      await userRef.update({
+        proctoringLockoutUntil: FieldValue.delete(),
+        assessmentInfractionCount: FieldValue.delete(),
+      }).catch(() => {});
+    }
+
+    // 2. Global Proctoring Lockout Check (Overrides everything)
+    if (!bypassCooldown && userData.proctoringLockoutUntil && userData.proctoringLockoutUntil > now) {
       return NextResponse.json({
         error: "Your access to assessments is suspended due to a severe proctoring violation. Please contact support if you believe this was an error.",
         isProctoringLockout: true,
         retryAvailableAt: new Date(userData.proctoringLockoutUntil).toISOString(),
       }, { status: 403 });
     }
-
-    // 2. Standard Cooldown Check
-    const isDev = process.env.NODE_ENV === "development";
-    const bypassCooldown = isDev && (body.resetCooldown === true || req.nextUrl.searchParams.get("resetCooldown") === "true" || req.headers.get("x-dev-bypass-cooldown") === "true");
 
     if (!bypassCooldown && userData.failedAssessments && userData.failedAssessments[skill]) {
       const failedTimestamp = userData.failedAssessments[skill];

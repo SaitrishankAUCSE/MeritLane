@@ -103,7 +103,7 @@ export default function JobApplicantsPage() {
       <div className="min-h-screen bg-[#FAF8F5] flex items-center justify-center p-8">
         <div className="text-center">
           <div className="h-6 w-6 border-2 border-[#E7E2DA] border-t-[#1C1917] rounded-full animate-spin mx-auto mb-3" />
-          <div className="text-[12px] font-mono text-[#78716C] uppercase tracking-wider">
+          <div className="text-[12px] font-medium text-[#78716C] uppercase tracking-wider">
             Loading applicant dossiers…
           </div>
         </div>
@@ -166,7 +166,7 @@ export default function JobApplicantsPage() {
           </div>
         ) : (
           <div className="border border-[#E7E2DA] bg-white rounded-2xl shadow-xs overflow-hidden">
-            <div className="border-b border-[#E7E2DA] bg-[#FAF8F5] px-6 py-3.5 flex items-center justify-between text-[11px] font-mono text-[#78716C] uppercase font-semibold">
+            <div className="border-b border-[#E7E2DA] bg-[#FAF8F5] px-6 py-3.5 flex items-center justify-between text-[11px] font-medium text-[#78716C] uppercase font-semibold">
               <div>APPLICANT DOSSIER INDEX ({applicants.length})</div>
               <div>VERIFIED MATCHING MATRIX</div>
             </div>
@@ -183,9 +183,9 @@ export default function JobApplicantsPage() {
                     className="p-6 sm:p-7 flex flex-col lg:flex-row lg:items-center justify-between gap-6 hover:bg-[#FAF8F5]/40 transition-colors"
                   >
                     <div className="space-y-3 flex-1">
-                      {/* Name with subtle cursive flair */}
+                      {/* Candidate Name */}
                       <div className="flex items-center gap-3 flex-wrap">
-                        <span className="font-signature text-[32px] sm:text-[38px] text-[#1C1917] leading-none font-semibold">
+                        <span className="font-serif text-[22px] sm:text-[24px] text-[#1C1917] leading-tight font-bold">
                           {app.candidateName}
                         </span>
                         <span className="text-[10px] font-mono font-semibold text-[#064E3B] bg-[#064E3B]/10 px-2 py-0.5 rounded border border-[#064E3B]/20">
@@ -208,7 +208,7 @@ export default function JobApplicantsPage() {
 
                       {/* Required vs Verified Skill Match Matrix */}
                       <div className="pt-1">
-                        <div className="text-[10px] font-mono uppercase text-[#78716C] tracking-wider mb-1.5">
+                        <div className="text-[10px] font-medium uppercase text-[#78716C] tracking-wider mb-1.5">
                           Capabilities vs Role Requirements:
                         </div>
                         <div className="flex items-center gap-2 flex-wrap">
@@ -256,7 +256,7 @@ export default function JobApplicantsPage() {
 
                       {/* Open Full Dossier */}
                       <Link href={`/employer/candidate/${app.candidateId}`} target="_blank">
-                        <button className="flex items-center justify-center gap-1.5 px-4 h-10 bg-[#1C1917] hover:bg-[#064E3B] text-white text-[11px] font-mono font-semibold uppercase tracking-wider rounded transition-colors shadow-xs">
+                        <button className="flex items-center justify-center gap-1.5 px-4 h-10 bg-[#1C1917] hover:bg-[#064E3B] text-white text-[11px] font-sans font-semibold uppercase tracking-wide rounded transition-colors shadow-xs">
                           <span>OPEN DOSSIER</span>
                           <ExternalLink className="h-3.5 w-3.5" />
                         </button>
@@ -270,7 +270,7 @@ export default function JobApplicantsPage() {
                             name: app.candidateName,
                           })
                         }
-                        className="flex items-center justify-center gap-1.5 px-4 h-10 border border-[#E7E2DA] bg-white hover:bg-[#FAF8F5] text-[#1C1917] text-[11px] font-mono font-semibold uppercase tracking-wider rounded transition-colors shadow-2xs"
+                        className="flex items-center justify-center gap-1.5 px-4 h-10 border border-[#E7E2DA] bg-white hover:bg-[#FAF8F5] text-[#1C1917] text-[11px] font-sans font-semibold uppercase tracking-wide rounded transition-colors shadow-2xs"
                       >
                         <MessageSquare className="h-3.5 w-3.5 text-[#78716C]" />
                         <span>MESSAGE</span>

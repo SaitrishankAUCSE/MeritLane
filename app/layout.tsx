@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { DM_Sans, JetBrains_Mono, Caveat, Lora } from "next/font/google";
+import { DM_Sans, JetBrains_Mono, Lora } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
 import { SiteFooter } from "@/components/chrome/SiteFooter";
@@ -8,20 +8,13 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { Analytics } from "@vercel/analytics/react";
 import { GlobalAuthModal } from "@/components/ui/AuthModal";
 import { PostHogProvider } from "@/providers/PostHogProvider";
+import NextTopLoader from "nextjs-toploader";
 
 // Primary UI font — DM Sans: humanist, warm, reads naturally at every weight
 const dmSans = DM_Sans({
   subsets: ["latin"],
   weight: ["300", "400", "500", "600", "700"],
   variable: "--font-sans",
-  display: "swap",
-});
-
-// Dedicated cursive signature font for candidate name display
-const caveatSignature = Caveat({
-  subsets: ["latin"],
-  weight: ["500", "600", "700"],
-  variable: "--font-signature",
   display: "swap",
 });
 
@@ -71,7 +64,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${dmSans.variable} ${caveatSignature.variable} ${jetbrainsMono.variable} ${loraSerif.variable} h-full antialiased`}>
+    <html lang="en" className={`${dmSans.variable} ${jetbrainsMono.variable} ${loraSerif.variable} h-full antialiased`}>
       <body className="flex min-h-full flex-col bg-background font-sans text-foreground">
         <script
           type="application/ld+json"
@@ -90,6 +83,7 @@ export default function RootLayout({
           <AuthProvider>
             <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
               <Navbar />
+              <NextTopLoader color="#1C1917" height={3} showSpinner={false} />
               <main className="flex-1 flex flex-col">
                 {children}
               </main>

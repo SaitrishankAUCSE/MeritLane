@@ -125,6 +125,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const handleSignOut = useCallback(async () => {
     try {
+      document.cookie = "ml_session=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
       await signOut(auth);
       window.location.href = "/";
     } catch (error) {
@@ -141,6 +142,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         setLoading(false);
         
         if (currentUser) {
+          document.cookie = "ml_session=1; path=/; max-age=2592000";
           const isSuperadmin = currentUser.email?.toLowerCase() === ADMIN_EMAIL;
           if (isSuperadmin) {
             setIsAdmin(true);
@@ -167,6 +169,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
           await loadProfile(currentUser.uid);
         } else {
+          document.cookie = "ml_session=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
           setUserProfile(null);
           setRole(null);
           setIsAdmin(false);

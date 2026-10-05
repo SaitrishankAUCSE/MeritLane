@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from "react";
 import { useAuth } from "@/lib/auth/AuthContext";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { fetchCandidateProfile, CandidateProfile, ProjectEntry } from "@/lib/firebase/candidate";
 import {
   FileCheck,
@@ -29,9 +30,10 @@ import {
 } from "lucide-react";
 import { MeritlaneLoader } from "@/components/ui/MeritlaneLoader";
 import { db } from "@/lib/firebase/config";
-import { doc, updateDoc } from "firebase/firestore";
+import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { motion, AnimatePresence } from "framer-motion";
 import { ContextGuide } from "@/components/ui/ContextGuide";
+import CooldownTimer from "@/components/candidate/cooldown-timer";
 
 export default function CandidateDashboardPage() {
   const { user, loading } = useAuth();
@@ -42,6 +44,7 @@ export default function CandidateDashboardPage() {
   const [saving, setSaving] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
   const [copiedLink, setCopiedLink] = useState(false);
+  const [cooldowns, setCooldowns] = useState<Record<string, { timestamp: number; daysLeft: number; score?: number }>>({});
 
   const [newProject, setNewProject] = useState<Partial<ProjectEntry>>({
     title: "",
@@ -54,12 +57,67 @@ export default function CandidateDashboardPage() {
 
   useEffect(() => {
     if (!loading && user) {
-      fetchCandidateProfile(user.uid)
-        .then((p) => {
+      Promise.all([
+        fetchCandidateProfile(user.uid),
+        getDoc(doc(db, "users", user.uid)).then((d) => (d.exists() ? d.data() : null)).catch(() => null),
+        getDoc(doc(db, "candidates", user.uid)).then((d) => (d.exists() ? d.data() : null)).catch(() => null),
+      ])
+        .then(([p, uData, cData]) => {
           setProfile(p);
           if (p?.skills && p.skills.length > 0) {
-            setNewProject(prev => ({ ...prev, supportsClaim: p.skills[0] }));
+            setNewProject((prev) => ({ ...prev, supportsClaim: p.skills[0] }));
           }
+
+          const allSkills = p?.skills || [];
+          const cd: Record<string, { timestamp: number; daysLeft: number; score?: number }> = {};
+          const now = Date.now();
+          const fourteenDays = 14 * 24 * 60 * 60 * 1000;
+
+          allSkills.forEach((skill) => {
+            let ts: number | null = null;
+            let score: number | undefined = undefined;
+
+            // Check users or candidates collections in firestore
+            const fa = uData?.failedAssessments?.[skill] || cData?.failedAssessments?.[skill];
+            if (fa) {
+              ts =
+                typeof fa?.toMillis === "function"
+                  ? fa.toMillis()
+                  : typeof fa === "number"
+                  ? fa
+                  : fa?.seconds
+                  ? fa.seconds * 1000
+                  : null;
+            }
+            if (uData?.failedAssessmentsScore?.[skill] !== undefined) {
+              score = uData.failedAssessmentsScore[skill];
+            } else if (cData?.failedAssessmentsScore?.[skill] !== undefined) {
+              score = cData.failedAssessmentsScore[skill];
+            }
+
+            // Check localStorage fallback for immediate responsiveness
+            if (typeof window !== "undefined") {
+              const stored = localStorage.getItem(`meritlane_cooldown_${user.uid}_${skill}`);
+              if (stored) {
+                const storedTs = parseInt(stored, 10);
+                if (!ts || storedTs > ts) ts = storedTs;
+              }
+              const storedScore = localStorage.getItem(`meritlane_last_score_${user.uid}_${skill}`);
+              if (storedScore !== null && score === undefined) {
+                score = parseInt(storedScore, 10);
+              }
+            }
+
+            if (ts) {
+              const elapsed = now - ts;
+              if (elapsed < fourteenDays) {
+                const daysLeft = Math.max(1, Math.ceil((ts + fourteenDays - now) / 86400000));
+                cd[skill] = { timestamp: ts, daysLeft, score };
+              }
+            }
+          });
+
+          setCooldowns(cd);
         })
         .catch((err) => console.error(err));
     }
@@ -79,8 +137,10 @@ export default function CandidateDashboardPage() {
   const skills = profile?.skills || [];
   const projects = profile?.projects || [];
   const verifiedSkillsCount = Object.values(profile?.verifiedSkills || {}).filter(
-    (v: any) => v.status === "verified"
+    (v: any) => v.status === "verified" && (v.score === undefined || v.score >= 75)
   ).length;
+  const requiredForEmployerPortal = Math.max(1, Math.ceil(skills.length / 2));
+  const isEmployerPortalUnlocked = skills.length > 0 && verifiedSkillsCount >= requiredForEmployerPortal;
 
   // Calculate evidence health index (0 to 100)
   const skillFactor = skills.length > 0 ? (verifiedSkillsCount / skills.length) * 50 : 0;
@@ -109,14 +169,18 @@ export default function CandidateDashboardPage() {
     setErrorMsg("");
 
     try {
+      const finalSkills = (newProject.skillsUsed && newProject.skillsUsed.length > 0)
+        ? newProject.skillsUsed
+        : (newProject.supportsClaim ? [newProject.supportsClaim] : (skills[0] ? [skills[0]] : []));
+
       const projectToAdd: ProjectEntry = {
         id: Date.now().toString(),
         title: newProject.title || "",
         repoUrl: newProject.repoUrl || "",
         liveUrl: newProject.liveUrl || "",
         description: newProject.description || "",
-        supportsClaim: newProject.supportsClaim || "",
-        skillsUsed: newProject.skillsUsed || []
+        supportsClaim: finalSkills[0] || newProject.supportsClaim || "",
+        skillsUsed: finalSkills
       };
 
       const updatedProjects = [...projects, projectToAdd];
@@ -155,19 +219,18 @@ export default function CandidateDashboardPage() {
   }
 
   return (
-    <div className="w-full px-4 sm:px-8 md:px-12 lg:px-16 py-8 sm:py-10 mx-auto max-w-[1500px] h-full overflow-y-auto scrollbar-hide relative bg-[var(--color-background)] text-[var(--color-foreground)] font-sans">
+    <div className="w-full px-4 sm:px-6 lg:px-8 py-6 sm:py-8 h-full overflow-y-auto scrollbar-hide relative bg-[var(--color-background)] text-[var(--color-foreground)] font-sans">
       
       {/* Context Guide */}
       <ContextGuide 
         storageKey="candidate_dashboard"
-        title="Evidence Workspace"
-        description="MeritLane operates on audited evidence. Your declared skills must be substantiated with proctored assessment records and verified code artifacts."
+        title="Your Projects & Proof"
         steps={[
-          { title: "Review Claims", description: "Audit declared skills against evidence requirements.", isCompleted: true },
-          { title: "Link Artifacts", description: "Attach GitHub repositories or live deployed URLs.", isCompleted: projects.length > 0 },
-          { title: "Proctored Evaluation", description: "Complete timed assessments for verified proof.", isCompleted: verifiedSkillsCount > 0 }
+          { title: "Add Skills", isCompleted: true },
+          { title: "Add Projects", isCompleted: projects.length > 0 },
+          { title: "Pass Skill Tests", isCompleted: verifiedSkillsCount > 0 }
         ]}
-        ctaLabel="Take Assessment"
+        ctaLabel="Take Skill Test"
         ctaHref="/candidate/verification"
       />
 
@@ -176,19 +239,19 @@ export default function CandidateDashboardPage() {
         <div className="p-6 sm:p-8 flex flex-col lg:flex-row lg:items-center justify-between gap-6 border-b border-[var(--color-border)]">
           <div>
             <div className="flex items-center gap-2.5 flex-wrap mb-2.5">
-              <span className="text-[11px] font-mono uppercase tracking-[0.15em] font-semibold text-[var(--color-primary)] bg-[var(--color-primary)]/10 px-2.5 py-0.5 rounded border border-[var(--color-primary)]/20">
-                AUDITED CANDIDATE RECORD
+              <span className="text-[11px] font-medium uppercase tracking-[0.15em] font-semibold text-[var(--color-primary)] bg-[var(--color-primary)]/10 px-2.5 py-0.5 rounded border border-[var(--color-primary)]/20">
+                CANDIDATE RECORD
               </span>
               <span className="text-[12px] font-mono text-[var(--color-muted-foreground)]">
                 ID: #{user?.uid.slice(0, 8).toUpperCase()}
               </span>
               <span className="text-[12px] text-[var(--color-muted-foreground)] font-mono">
-                · STATUS: {verifiedSkillsCount > 0 ? "EVALUATED & ACTIVE" : "PENDING AUDIT"}
+                · EMPLOYER DISCOVERY: {isEmployerPortalUnlocked ? "ACTIVE & UNLOCKED" : `${verifiedSkillsCount}/${requiredForEmployerPortal} (50% NEEDED)`}
               </span>
             </div>
 
             <h1 className="font-serif text-[38px] sm:text-[46px] text-[var(--color-foreground)] leading-none py-1 font-semibold">
-              {profile?.name || "Candidate Engineering Record"}
+              {profile?.name || "Candidate Profile"}
             </h1>
 
             {(profile?.college || profile?.branch) && (
@@ -204,30 +267,34 @@ export default function CandidateDashboardPage() {
 
           {/* Quick Actions & Public Dossier Copy */}
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 shrink-0">
-            <button
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
               onClick={handleCopyPublicLink}
               className="flex items-center justify-center gap-2 px-4 h-9 border border-[var(--color-border)] bg-[var(--color-background)] hover:bg-[var(--color-surface)] text-[var(--color-foreground)] rounded text-[13px] font-medium transition-colors"
             >
               {copiedLink ? (
                 <>
-                  <Check className="h-4 w-4 text-[#16A34A]" />
-                  <span className="text-[#16A34A] font-medium">Public URL Copied</span>
+                  <Check className="h-4 w-4 text-[var(--color-primary)]" />
+                  <span>Public Link Copied</span>
                 </>
               ) : (
                 <>
                   <Copy className="h-4 w-4 text-[var(--color-muted-foreground)]" />
-                  <span>Copy Public Dossier Link</span>
+                  <span>Copy Public Profile Link</span>
                 </>
               )}
-            </button>
+            </motion.button>
 
-            <button 
+            <motion.button 
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
               type="button"
               onClick={() => setIsModalOpen(true)}
               className="flex items-center justify-center gap-2 px-5 h-9 bg-[var(--color-primary)] text-[var(--color-primary-foreground)] hover:bg-[color-mix(in_srgb,var(--color-primary)_90%,black)] rounded text-[13px] font-medium transition-colors"
             >
-              <span>+</span> Attach Code Evidence
-            </button>
+              <span>+</span> Add Project
+            </motion.button>
           </div>
         </div>
 
@@ -236,42 +303,46 @@ export default function CandidateDashboardPage() {
           
           {/* 1. Evidence Health */}
           <div className="p-5 sm:p-6">
-            <div className="flex items-center justify-between text-[11px] font-mono uppercase tracking-[0.15em] text-[var(--color-muted-foreground)] mb-1.5">
-              <span>Evidence Completeness</span>
+            <div className="flex items-center justify-between text-[11px] font-medium uppercase tracking-[0.15em] text-[var(--color-muted-foreground)] mb-1.5">
+              <span>Profile Strength</span>
               <Activity className="h-3.5 w-3.5 text-[var(--color-primary)]" />
             </div>
             <div className="text-[28px] font-serif text-[var(--color-foreground)] leading-tight mb-2">
               {healthIndex}%
             </div>
             <div className="w-full bg-[#E7E2DA] h-1.5 rounded overflow-hidden mb-2">
-              <div
-                className="bg-[var(--color-primary)] h-full transition-all duration-500"
-                style={{ width: `${healthIndex}%` }}
+              <motion.div
+                initial={{ width: 0 }}
+                animate={{ width: `${healthIndex}%` }}
+                transition={{ duration: 1.2, ease: "easeOut" }}
+                className="bg-[var(--color-primary)] h-full"
               />
             </div>
             <div className="text-[11.5px] font-sans text-[var(--color-muted-foreground)]">
-              {healthIndex >= 80 ? "Record meets hiring threshold" : "Complete evaluations to reach verified status"}
+              {healthIndex >= 80 ? "Your profile is in great shape!" : "Pass skill tests to reach verified status"}
             </div>
           </div>
 
           {/* 2. Verified Assessments */}
           <div className="p-5 sm:p-6">
-            <div className="flex items-center justify-between text-[11px] font-mono uppercase tracking-[0.15em] text-[var(--color-primary)] mb-1.5">
-              <span>Verified Competencies</span>
+            <div className="flex items-center justify-between text-[11px] font-medium uppercase tracking-[0.15em] text-[var(--color-primary)] mb-1.5">
+              <span>Verified Skills</span>
               <ShieldCheck className="h-3.5 w-3.5 text-[var(--color-primary)]" />
             </div>
             <div className="text-[28px] font-serif text-[var(--color-primary)] leading-tight mb-2">
               {verifiedSkillsCount} / {skills.length || 0}
             </div>
             <div className="text-[11.5px] font-sans text-[var(--color-muted-foreground)]">
-              {verifiedSkillsCount > 0 ? "Proctored timed evaluations" : "No evaluations recorded"}
+              {isEmployerPortalUnlocked
+                ? "✓ 50% Milestone Met (Visible to Employers)"
+                : `${verifiedSkillsCount}/${requiredForEmployerPortal} with ≥75% (Reach 50% to unlock)`}
             </div>
           </div>
 
           {/* 3. Git Provenance */}
           <div className="p-5 sm:p-6">
-            <div className="flex items-center justify-between text-[11px] font-mono uppercase tracking-[0.15em] text-[var(--color-muted-foreground)] mb-1.5">
-              <span>Git Archive Footprint</span>
+            <div className="flex items-center justify-between text-[11px] font-medium uppercase tracking-[0.15em] text-[var(--color-muted-foreground)] mb-1.5">
+              <span>GitHub Commits</span>
               <GitBranch className="h-3.5 w-3.5 text-[var(--color-foreground)]" />
             </div>
             <div className="text-[28px] font-serif text-[var(--color-foreground)] leading-tight mb-2">
@@ -279,22 +350,22 @@ export default function CandidateDashboardPage() {
             </div>
             <div className="text-[11.5px] font-sans text-[var(--color-muted-foreground)]">
               {profile?.githubEvidence
-                ? `Commits across ${profile.githubEvidence.repoCount} repositories`
-                : "Archive link pending"}
+                ? `Across ${profile.githubEvidence.repoCount} repositories`
+                : "GitHub not connected"}
             </div>
           </div>
 
           {/* 4. ATS Keyword Match */}
           <div className="p-5 sm:p-6">
-            <div className="flex items-center justify-between text-[11px] font-mono uppercase tracking-[0.15em] text-[var(--color-muted-foreground)] mb-1.5">
-              <span>ATS Resume Standing</span>
+            <div className="flex items-center justify-between text-[11px] font-medium uppercase tracking-[0.15em] text-[var(--color-muted-foreground)] mb-1.5">
+              <span>Resume Score</span>
               <FileText className="h-3.5 w-3.5 text-[var(--color-muted-foreground)]" />
             </div>
             <div className="text-[28px] font-serif text-[var(--color-foreground)] leading-tight mb-2">
-              {typeof profile?.atsScore === "number" ? `${profile.atsScore}/100` : "Unindexed"}
+              {typeof profile?.atsScore === "number" ? `${profile.atsScore}/100` : "Not scored"}
             </div>
             <div className="text-[11.5px] font-sans text-[var(--color-muted-foreground)]">
-              {profile?.atsRating ? `${profile.atsRating} keyword density` : "Check resume in Identity"}
+              {profile?.atsRating ? `${profile.atsRating} match rating` : "Upload resume in Profile"}
             </div>
           </div>
 
@@ -311,7 +382,7 @@ export default function CandidateDashboardPage() {
               : "text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)]"
           }`}
         >
-          <span>Skill Competency Matrix</span>
+          <span>Skills</span>
           <span className="ml-2 px-1.5 py-0.5 rounded text-[11px] font-mono bg-[#E7E2DA]/60">
             {skills.length}
           </span>
@@ -331,7 +402,7 @@ export default function CandidateDashboardPage() {
               : "text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)]"
           }`}
         >
-          <span>Linked Technical Artifacts</span>
+          <span>Projects</span>
           <span className="ml-2 px-1.5 py-0.5 rounded text-[11px] font-mono bg-[#E7E2DA]/60">
             {projects.length}
           </span>
@@ -351,7 +422,7 @@ export default function CandidateDashboardPage() {
               : "text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)]"
           }`}
         >
-          <span>Git Provenance &amp; Activity</span>
+          <span>GitHub Activity</span>
           {activeTab === "provenance" && (
             <motion.div
               layoutId="activeTabUnderline"
@@ -368,52 +439,80 @@ export default function CandidateDashboardPage() {
             <div className="p-5 sm:p-6 border-b border-[var(--color-border)] flex items-center justify-between">
               <div>
                 <h2 className="text-[17px] font-serif text-[var(--color-foreground)] font-normal">
-                  Audited Skill Matrix &amp; Evaluation Records
+                  Skills &amp; Test Results
                 </h2>
-                <p className="text-[13px] text-[var(--color-muted-foreground)] mt-0.5">
-                  Every technical claim requires a proctored 45-minute timed coding assessment and code repository proof.
-                </p>
               </div>
             </div>
 
             <div className="overflow-x-auto">
               <table className="w-full text-left text-[13px] border-collapse">
                 <thead>
-                  <tr className="bg-[var(--color-background)] border-b border-[var(--color-border)] text-[11px] font-mono uppercase tracking-[0.12em] text-[var(--color-muted-foreground)]">
-                    <th className="py-3 px-6 font-semibold">Technical Skill</th>
-                    <th className="py-3 px-6 font-semibold">Audit Status</th>
-                    <th className="py-3 px-6 font-semibold">Assessment Score</th>
-                    <th className="py-3 px-6 font-semibold">Linked Artifacts</th>
-                    <th className="py-3 px-6 font-semibold text-right">Evaluation Action</th>
+                  <tr className="bg-[var(--color-background)] border-b border-[var(--color-border)] text-[11px] font-medium uppercase tracking-[0.12em] text-[var(--color-muted-foreground)]">
+                    <th className="py-3 px-6 font-semibold">Skill</th>
+                    <th className="py-3 px-6 font-semibold">Status</th>
+                    <th className="py-3 px-6 font-semibold">Score</th>
+                    <th className="py-3 px-6 font-semibold">Projects</th>
+                    <th className="py-3 px-6 font-semibold text-right">Action</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-[#E7E2DA]">
                   {skills.map((skill, idx) => {
                     const skillVer = profile?.verifiedSkills?.[skill];
                     const isVerified = skillVer?.status === "verified";
-                    const itemsCount = projects.filter(p => p.supportsClaim === skill).length;
+                    const cdInfo = cooldowns[skill];
+                    const inCooldown = !isVerified && !!cdInfo;
+                    const itemsCount = projects.filter(p => p.supportsClaim === skill || p.skillsUsed?.includes(skill)).length;
 
                     return (
                       <tr key={idx} className="hover:bg-[var(--color-background)]/60 transition-colors">
                         <td className="py-4 px-6 font-medium text-[var(--color-foreground)] text-[14px]">
-                          {skill}
+                          <div>{skill}</div>
+                          {inCooldown && (
+                            <div className="mt-1">
+                              <CooldownTimer
+                                timestamp={cdInfo.timestamp}
+                                durationDays={14}
+                                variant="detail"
+                                onExpire={() => {
+                                  setCooldowns((prev) => {
+                                    const next = { ...prev };
+                                    delete next[skill];
+                                    return next;
+                                  });
+                                }}
+                              />
+                            </div>
+                          )}
                         </td>
                         <td className="py-4 px-6">
                           <span
-                            className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded text-[11px] font-mono font-semibold border ${
+                            className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded text-[11px] font-mono font-semibold border transition-all duration-300 ${
                               isVerified
-                                ? "bg-[#DCFCE7] text-[#166534] border-[#BBF7D0]"
+                                ? "bg-[#DCFCE7] text-[#166534] border-[#BBF7D0] shadow-[0_0_8px_rgba(22,101,52,0.15)] animate-pulse"
+                                : inCooldown
+                                ? "bg-[#FEF3C7] text-[#92400E] border-[#FDE68A]"
                                 : itemsCount > 0
                                 ? "bg-[#EFF6FF] text-[#1E40AF] border-[#BFDBFE]"
                                 : "bg-[#F8F6F3] text-[var(--color-muted-foreground)] border-[var(--color-border)]"
                             }`}
                           >
-                            {isVerified ? "✓ VERIFIED" : itemsCount > 0 ? "EVIDENCE LINKED" : "UNVERIFIED"}
+                            {isVerified
+                              ? "✓ VERIFIED"
+                              : inCooldown
+                              ? "COOLDOWN"
+                              : itemsCount > 0
+                              ? "PROJECT LINKED"
+                              : "NOT TESTED"}
                           </span>
                         </td>
                         <td className="py-4 px-6 font-mono text-[13px]">
                           {isVerified && skillVer?.score ? (
                             <span className="font-bold text-[#166534]">{skillVer.score}%</span>
+                          ) : inCooldown ? (
+                            <div>
+                              <span className="font-semibold text-[#B42318]">{cdInfo.score !== undefined ? `${cdInfo.score}%` : "0%"}</span>
+                              <span className="text-[10px] text-[#78716C] block">Failed</span>
+                            </div>
                           ) : (
                             <span className="text-[var(--color-muted-foreground)]">—</span>
                           )}
@@ -421,26 +520,45 @@ export default function CandidateDashboardPage() {
                         <td className="py-4 px-6 text-[var(--color-muted-foreground)]">
                           {itemsCount > 0 ? (
                             <span className="font-mono text-[var(--color-foreground)] font-medium">
-                              {itemsCount} repository{itemsCount > 1 ? "s" : ""}
+                              {itemsCount} project{itemsCount > 1 ? "s" : ""}
                             </span>
                           ) : (
-                            <span>No code attached</span>
+                            <span>No project added</span>
                           )}
                         </td>
                         <td className="py-4 px-6 text-right">
                           {isVerified ? (
                             <span className="text-[12px] font-mono text-[#166534] font-medium">
-                              Validated Standard
+                              Verified
                             </span>
+                          ) : inCooldown ? (
+                            <div
+                              className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#FEF3C7] border border-[#FDE68A] text-[#92400E] text-[12px] font-mono font-semibold rounded cursor-not-allowed select-none tabular-nums"
+                              title="Locked in study cooldown"
+                            >
+                              <CooldownTimer
+                                timestamp={cdInfo.timestamp}
+                                durationDays={14}
+                                variant="badge"
+                                onExpire={() => {
+                                  setCooldowns((prev) => {
+                                    const next = { ...prev };
+                                    delete next[skill];
+                                    return next;
+                                  });
+                                }}
+                              />
+                            </div>
                           ) : (
-                            <button
-                              onClick={() => router.push(`/candidate/assessment?skill=${encodeURIComponent(skill)}`)}
+                            <Link
+                              href={`/candidate/assessment?skill=${encodeURIComponent(skill)}`}
+                              prefetch={true}
                               className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-[var(--color-foreground)] hover:bg-[#292524] text-[var(--color-primary-foreground)] text-[12px] font-medium rounded transition-colors"
                             >
                               <Clock className="h-3 w-3" />
-                              <span>Take 45m Exam</span>
+                              <span>Take Test</span>
                               <ArrowRight className="h-3 w-3" />
-                            </button>
+                            </Link>
                           )}
                         </td>
                       </tr>
@@ -450,7 +568,7 @@ export default function CandidateDashboardPage() {
                   {skills.length === 0 && (
                     <tr>
                       <td colSpan={5} className="py-12 text-center text-[var(--color-muted-foreground)]">
-                        No technical skills declared. Add your skills in Identity to establish your audit ledger.
+                        No skills added yet. Add your skills in Profile to take tests and get verified badges.
                       </td>
                     </tr>
                   )}
@@ -461,40 +579,37 @@ export default function CandidateDashboardPage() {
         </div>
       )}
 
-      {/* Tab 2: Linked Technical Artifacts */}
+      {/* Tab 2: Projects */}
       {activeTab === "artifacts" && (
         <div className="space-y-6">
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-[18px] font-serif text-[var(--color-foreground)] font-normal">
-                Linked Technical Artifacts ({projects.length})
+                Projects ({projects.length})
               </h2>
-              <p className="text-[13px] text-[var(--color-muted-foreground)]">
-                Substantiated repositories and deployed applications inspected by prospective hiring teams.
-              </p>
             </div>
 
             <button
               onClick={() => setIsModalOpen(true)}
               className="px-4 py-2 bg-[var(--color-primary)] text-[var(--color-primary-foreground)] text-[13px] font-medium rounded hover:bg-[color-mix(in_srgb,var(--color-primary)_90%,black)] transition-colors"
             >
-              + Link Repository
+              + Add Project
             </button>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {projects.length === 0 ? (
               <div className="col-span-2 p-12 border border-dashed border-[var(--color-border)] rounded text-center bg-[var(--color-surface)]">
-                <h3 className="text-base font-serif text-[var(--color-foreground)] mb-2 font-normal">No artifacts attached</h3>
+                <h3 className="text-base font-serif text-[var(--color-foreground)] mb-2 font-normal">No projects added yet</h3>
                 <p className="text-sm text-[var(--color-muted-foreground)] max-w-md mx-auto mb-6">
-                  Attach code repositories or production links to establish evidentiary proof for employer review.
+                  Add code repositories or live websites to show recruiters what you can build.
                 </p>
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(true)}
                   className="px-5 py-2.5 bg-[var(--color-primary)] text-[var(--color-primary-foreground)] text-[13px] font-medium rounded hover:bg-[color-mix(in_srgb,var(--color-primary)_90%,black)] transition-colors"
                 >
-                  + Link Code Repository
+                  + Add Project
                 </button>
               </div>
             ) : (
@@ -515,7 +630,7 @@ export default function CandidateDashboardPage() {
                           rel="noopener noreferrer"
                           className="text-[11px] font-mono text-[var(--color-primary)] bg-[var(--color-primary)]/10 px-2.5 py-1 rounded border border-[var(--color-primary)]/20 hover:underline flex items-center gap-1 shrink-0"
                         >
-                          <ExternalLink className="h-3 w-3" /> Live System ↗
+                          <ExternalLink className="h-3 w-3" /> Live Demo ↗
                         </a>
                       )}
                     </div>
@@ -546,9 +661,9 @@ export default function CandidateDashboardPage() {
 
                   <div className="border-t border-[var(--color-border)] pt-3 mt-4 flex items-center justify-between text-[12px]">
                     <div className="flex items-center gap-2">
-                      <span className="text-[var(--color-muted-foreground)]">Proves:</span>
+                      <span className="text-[var(--color-muted-foreground)]">Skill:</span>
                       <span className="font-mono text-[var(--color-foreground)] bg-[var(--color-background)] px-2 py-0.5 rounded border border-[var(--color-border)] text-[11px]">
-                        {project.supportsClaim || "General Capability"}
+                        {project.supportsClaim || "General Skill"}
                       </span>
                     </div>
 
@@ -559,7 +674,7 @@ export default function CandidateDashboardPage() {
                         rel="noopener noreferrer"
                         className="text-[var(--color-foreground)] underline hover:text-[var(--color-primary)] text-[12px]"
                       >
-                        Inspect Code ↗
+                        View Code ↗
                       </a>
                       <span className="text-[#E7E2DA]">|</span>
                       <button
@@ -577,22 +692,19 @@ export default function CandidateDashboardPage() {
         </div>
       )}
 
-      {/* Tab 3: Git Provenance */}
+      {/* Tab 3: Git Activity */}
       {activeTab === "provenance" && (
         <div className="space-y-6">
           <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded p-6 sm:p-8 shadow-xs">
-            <h2 className="text-[18px] font-serif text-[var(--color-foreground)] font-normal mb-2">
-              GitHub Technical Archive Audit
+            <h2 className="text-[18px] font-serif text-[var(--color-foreground)] font-normal mb-6">
+              GitHub Activity &amp; Stats
             </h2>
-            <p className="text-[13px] text-[var(--color-muted-foreground)] mb-6">
-              Verified signals collected directly from your authenticated GitHub account.
-            </p>
 
             {profile?.githubEvidence ? (
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-6">
                 <div className="p-4 bg-[var(--color-background)] rounded border border-[var(--color-border)]">
-                  <div className="text-[11px] font-mono uppercase text-[var(--color-muted-foreground)] mb-1">
-                    Audited Commits
+                  <div className="text-[11px] font-medium uppercase text-[var(--color-muted-foreground)] mb-1">
+                    Total Commits
                   </div>
                   <div className="text-[26px] font-serif text-[var(--color-foreground)]">
                     {profile.githubEvidence.totalCommits}
@@ -600,8 +712,8 @@ export default function CandidateDashboardPage() {
                 </div>
 
                 <div className="p-4 bg-[var(--color-background)] rounded border border-[var(--color-border)]">
-                  <div className="text-[11px] font-mono uppercase text-[var(--color-muted-foreground)] mb-1">
-                    Public Repositories
+                  <div className="text-[11px] font-medium uppercase text-[var(--color-muted-foreground)] mb-1">
+                    Repositories
                   </div>
                   <div className="text-[26px] font-serif text-[var(--color-foreground)]">
                     {profile.githubEvidence.repoCount}
@@ -609,7 +721,7 @@ export default function CandidateDashboardPage() {
                 </div>
 
                 <div className="p-4 bg-[var(--color-background)] rounded border border-[var(--color-border)]">
-                  <div className="text-[11px] font-mono uppercase text-[var(--color-muted-foreground)] mb-1">
+                  <div className="text-[11px] font-medium uppercase text-[var(--color-muted-foreground)] mb-1">
                     Top Language
                   </div>
                   <div className="text-[26px] font-serif text-[var(--color-foreground)]">
@@ -620,15 +732,15 @@ export default function CandidateDashboardPage() {
             ) : (
               <div className="p-8 bg-[var(--color-background)] rounded border border-[var(--color-border)] text-center">
                 <GitBranch className="h-8 w-8 text-[var(--color-muted-foreground)] mx-auto mb-2" />
-                <h3 className="text-[15px] font-medium text-[var(--color-foreground)] mb-1">No GitHub archive connected</h3>
+                <h3 className="text-[15px] font-medium text-[var(--color-foreground)] mb-1">No GitHub profile connected</h3>
                 <p className="text-[13px] text-[var(--color-muted-foreground)] mb-4">
-                  Connect your GitHub account in the Identity tab to automatically sync commit metrics and code repositories.
+                  Add your GitHub link in your Profile to automatically display your repositories and commit counts.
                 </p>
                 <button
                   onClick={() => router.push("/candidate/profile")}
                   className="px-4 py-2 bg-[var(--color-foreground)] text-[var(--color-primary-foreground)] text-[12px] font-medium rounded hover:bg-[#292524]"
                 >
-                  Go to Identity
+                  Go to Profile
                 </button>
               </div>
             )}
@@ -636,7 +748,7 @@ export default function CandidateDashboardPage() {
         </div>
       )}
 
-      {/* Add Evidence Modal */}
+      {/* Add Project Modal */}
       <AnimatePresence>
         {isModalOpen && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
@@ -659,7 +771,7 @@ export default function CandidateDashboardPage() {
               className="relative z-10 bg-[var(--color-surface)] rounded shadow-2xl w-full max-w-lg overflow-hidden flex flex-col border border-[var(--color-border)]"
             >
               <div className="flex items-center justify-between px-6 py-5 border-b border-[var(--color-border)] bg-[var(--color-background)]">
-                <h2 id="modal-evidence-title" className="text-[18px] font-serif text-[var(--color-foreground)]">Add Supporting Evidence</h2>
+                <h2 id="modal-evidence-title" className="text-[18px] font-serif text-[var(--color-foreground)]">Add Project</h2>
                 <button 
                   type="button"
                   onClick={() => setIsModalOpen(false)}
@@ -678,7 +790,7 @@ export default function CandidateDashboardPage() {
 
                 <div>
                   <label className="block text-[12px] font-semibold text-[var(--color-foreground)] mb-1">
-                    Project / Artifact Title *
+                    Project Title *
                   </label>
                   <input
                     type="text"
@@ -706,7 +818,7 @@ export default function CandidateDashboardPage() {
 
                 <div>
                   <label className="block text-[12px] font-semibold text-[var(--color-foreground)] mb-1">
-                    Live Production URL (Optional)
+                    Live Demo / Website (Optional)
                   </label>
                   <input
                     type="url"
@@ -719,31 +831,66 @@ export default function CandidateDashboardPage() {
 
                 <div>
                   <label className="block text-[12px] font-semibold text-[var(--color-foreground)] mb-1">
-                    Claim Substantiated
+                    Skills Used in This Project
                   </label>
-                  <select
-                    value={newProject.supportsClaim}
-                    onChange={(e) => setNewProject({ ...newProject, supportsClaim: e.target.value })}
-                    className="w-full h-11 px-3 bg-[var(--color-surface)] border border-[var(--color-border)] rounded text-[14px] text-[var(--color-foreground)] outline-none focus:border-[var(--color-foreground)]"
-                  >
-                    {skills.map((s) => (
-                      <option key={s} value={s}>
-                        {s}
-                      </option>
-                    ))}
-                    <option value="General Capability">General Capability</option>
-                  </select>
+                  <p className="text-[11.5px] text-[var(--color-muted-foreground)] mb-2">
+                    Click to select all skills and technologies used in this project:
+                  </p>
+                  <div className="flex flex-wrap gap-1.5 p-2.5 bg-[var(--color-surface)] border border-[var(--color-border)] rounded max-h-40 overflow-y-auto">
+                    {skills.map((s) => {
+                      const isSelected = (newProject.skillsUsed || []).includes(s) || (newProject.supportsClaim === s && (!newProject.skillsUsed || newProject.skillsUsed.length === 0));
+                      return (
+                        <button
+                          key={s}
+                          type="button"
+                          onClick={() => {
+                            const current = newProject.skillsUsed && newProject.skillsUsed.length > 0
+                              ? newProject.skillsUsed
+                              : (newProject.supportsClaim ? [newProject.supportsClaim] : []);
+                            const updated = isSelected
+                              ? current.filter(x => x !== s)
+                              : [...current, s];
+                            setNewProject({
+                              ...newProject,
+                              skillsUsed: updated,
+                              supportsClaim: updated[0] || ""
+                            });
+                          }}
+                          className={`px-2.5 py-1 rounded text-[11px] font-mono font-medium transition-all flex items-center gap-1 cursor-pointer border ${
+                            isSelected
+                              ? "bg-[#064E3B] text-white border-[#064E3B]"
+                              : "bg-[var(--color-background)] text-[var(--color-foreground)] border-[var(--color-border)] hover:border-[var(--color-foreground)]"
+                          }`}
+                        >
+                          {isSelected && <Check className="h-3 w-3" />}
+                          <span>{s}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                  {skills.length === 0 && (
+                    <input
+                      type="text"
+                      placeholder="e.g. JavaScript, React, Python"
+                      value={(newProject.skillsUsed || []).join(", ")}
+                      onChange={(e) => {
+                        const parsed = e.target.value.split(",").map(x => x.trim()).filter(Boolean);
+                        setNewProject({ ...newProject, skillsUsed: parsed, supportsClaim: parsed[0] || "" });
+                      }}
+                      className="w-full h-11 px-3.5 bg-[var(--color-surface)] border border-[var(--color-border)] rounded text-[14px] text-[var(--color-foreground)] outline-none focus:border-[var(--color-foreground)] mt-2"
+                    />
+                  )}
                 </div>
 
                 <div>
                   <label className="block text-[12px] font-semibold text-[var(--color-foreground)] mb-1">
-                    Description &amp; Engineering Details
+                    Project Description
                   </label>
                   <textarea
                     rows={3}
                     value={newProject.description}
                     onChange={(e) => setNewProject({ ...newProject, description: e.target.value })}
-                    placeholder="Briefly describe the architectural approach and technical complexity."
+                    placeholder="Briefly describe what this project does and what tech you used."
                     className="w-full p-3 bg-[var(--color-surface)] border border-[var(--color-border)] rounded text-[13px] text-[var(--color-foreground)] outline-none focus:border-[var(--color-foreground)]"
                   />
                 </div>
@@ -761,12 +908,29 @@ export default function CandidateDashboardPage() {
                     disabled={saving}
                     className="px-5 py-2 bg-[var(--color-primary)] text-[var(--color-primary-foreground)] rounded text-[13px] font-medium hover:bg-[color-mix(in_srgb,var(--color-primary)_90%,black)] disabled:opacity-50"
                   >
-                    {saving ? "Attaching..." : "Save Evidence"}
+                    {saving ? "Saving..." : "Save Project"}
                   </button>
                 </div>
               </form>
             </motion.div>
           </div>
+        )}
+      </AnimatePresence>
+
+      {/* Notification Toast */}
+      <AnimatePresence>
+        {copiedLink && (
+          <motion.div
+            initial={{ opacity: 0, y: 50, scale: 0.9 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 20, scale: 0.9 }}
+            className="fixed bottom-6 right-6 bg-[#1C1917] text-white border border-[#333] shadow-2xl rounded p-4 z-50 min-w-[280px] flex items-center gap-3"
+          >
+            <Check className="h-5 w-5 text-[#22c55e] shrink-0" />
+            <span className="text-[13px] font-sans font-medium">
+              Profile link copied to clipboard!
+            </span>
+          </motion.div>
         )}
       </AnimatePresence>
     </div>

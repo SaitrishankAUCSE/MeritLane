@@ -111,12 +111,13 @@ export default function EmployerApplicantsPage() {
     if (selectedJobId !== "all" && app.jobId !== selectedJobId) return false;
     if (selectedStage !== "all" && app.status !== selectedStage) return false;
     if (searchQuery.trim()) {
-      const q = searchQuery.toLowerCase();
+      const q = searchQuery.toLowerCase().replace(/^#/, "");
       const matchName = (app.candidateName || "").toLowerCase().includes(q);
       const matchCollege = (app.candidateCollege || "").toLowerCase().includes(q);
       const matchRole = (app.jobTitle || "").toLowerCase().includes(q);
       const matchSkills = (app.candidateSkills || []).some((s: string) => s.toLowerCase().includes(q));
-      if (!matchName && !matchCollege && !matchRole && !matchSkills) return false;
+      const matchId = (app.candidateUid || "").toLowerCase().includes(q) || (app.candidateId || "").toLowerCase().includes(q);
+      if (!matchName && !matchCollege && !matchRole && !matchSkills && !matchId) return false;
     }
     return true;
   });
@@ -127,7 +128,7 @@ export default function EmployerApplicantsPage() {
       <div className="border-b border-[#E7E2DA] bg-white px-6 sm:px-10 py-6">
         <div className="max-w-[1400px] mx-auto flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <div className="text-[10px] font-mono tracking-[0.2em] text-[#78716C] uppercase mb-1">
+            <div className="text-[10px] font-medium tracking-[0.2em] text-[#78716C] uppercase mb-1">
               Employer Hiring Ingress · Meritlane Technical Registry
             </div>
             <h1 className="text-[26px] sm:text-[32px] font-bold uppercase tracking-[0.06em] text-[#1C1917] leading-tight flex items-center gap-3">
@@ -141,7 +142,7 @@ export default function EmployerApplicantsPage() {
 
           <div className="flex items-center gap-3">
             <Link href="/employer/jobs/new">
-              <button className="px-5 py-2.5 bg-[#1C1917] hover:bg-[#064E3B] text-white text-[12px] font-mono font-semibold uppercase tracking-wider rounded transition-colors shadow-xs">
+              <button className="px-5 py-2.5 bg-[#1C1917] hover:bg-[#064E3B] text-white text-[12px] font-sans font-semibold uppercase tracking-wide rounded transition-colors shadow-xs">
                 + POST NEW OPPORTUNITY
               </button>
             </Link>
@@ -158,7 +159,7 @@ export default function EmployerApplicantsPage() {
               <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-[#78716C]" />
               <input
                 type="text"
-                placeholder="Search candidates, college, or skills…"
+                placeholder="Search candidates, skills, or Telemetry Record ID (e.g. #I8XEESRN)..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full bg-[#FAF8F5] border border-[#E7E2DA] rounded pl-10 pr-4 py-2 text-[13px] text-[#1C1917] placeholder:text-[#A8A29E] outline-none focus:border-[#1C1917] transition-colors"
@@ -230,7 +231,7 @@ export default function EmployerApplicantsPage() {
         {loading ? (
           <div className="border border-[#E7E2DA] bg-white p-16 text-center rounded shadow-xs">
             <div className="h-6 w-6 border-2 border-[#E7E2DA] border-t-[#1C1917] rounded-full animate-spin mx-auto mb-3" />
-            <div className="text-[12px] font-mono text-[#78716C] uppercase tracking-wider">
+            <div className="text-[12px] font-medium text-[#78716C] uppercase tracking-wider">
               Retrieving applicant submissions…
             </div>
           </div>
@@ -239,7 +240,7 @@ export default function EmployerApplicantsPage() {
             <p className="font-medium text-[14px]">{error}</p>
             <button
               onClick={fetchApplicants}
-              className="mt-3 px-4 py-1.5 bg-[#B42318] text-white text-[12px] font-mono rounded uppercase"
+              className="mt-3 px-4 py-1.5 bg-[#B42318] text-white text-[12px] font-medium rounded uppercase"
             >
               Retry
             </button>
@@ -262,7 +263,7 @@ export default function EmployerApplicantsPage() {
                   setSelectedJobId("all");
                   setSelectedStage("all");
                 }}
-                className="px-4 py-2 border border-[#E7E2DA] bg-[#FAF8F5] hover:bg-[#F2EFE9] text-[12px] font-mono font-semibold rounded uppercase"
+                className="px-4 py-2 border border-[#E7E2DA] bg-[#FAF8F5] hover:bg-[#F2EFE9] text-[12px] font-medium font-semibold rounded uppercase"
               >
                 Clear Filters
               </button>
@@ -353,7 +354,7 @@ export default function EmployerApplicantsPage() {
                     <div className="flex flex-col sm:flex-row lg:flex-col items-start lg:items-end gap-3 shrink-0 pt-3 lg:pt-0 border-t lg:border-t-0 border-[#F5F1EB]">
                       {/* Pipeline Stage Selector */}
                       <div className="flex items-center gap-2">
-                        <span className="text-[11px] font-mono uppercase text-[#78716C]">
+                        <span className="text-[11px] font-medium uppercase text-[#78716C]">
                           Stage:
                         </span>
                         <select

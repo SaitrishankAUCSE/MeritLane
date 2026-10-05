@@ -40,7 +40,7 @@ export default async function EmployerCandidateDossierPage({ params }: Props) {
           <div className="pt-2">
             <a
               href="/employer/dashboard"
-              className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#1C1917] text-white text-[12px] font-mono font-semibold rounded uppercase tracking-wider hover:bg-[#064E3B] transition-colors"
+              className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#1C1917] text-white text-[12px] font-medium font-semibold rounded uppercase tracking-wider hover:bg-[#064E3B] transition-colors"
             >
               Back to Talent Discovery
             </a>
@@ -83,6 +83,8 @@ export default async function EmployerCandidateDossierPage({ params }: Props) {
     githubUrl: rawCandidate.githubUrl || null,
     verificationStatus: rawCandidate.verificationStatus || (hasVerifiedSkills ? "verified" : "draft"),
     verifiedSkills: sanitizedVerifiedSkills,
+    avatarUrl: rawCandidate.avatarUrl || rawUser.photoURL || "",
+    avatarBadge: rawCandidate.avatarBadge || "auto",
     verifiedAt: parseTimestamp(rawCandidate.verifiedAt) || null,
     updatedAt: parseTimestamp(rawCandidate.updatedAt) || null,
   };

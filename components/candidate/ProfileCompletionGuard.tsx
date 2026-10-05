@@ -60,7 +60,7 @@ export function ProfileCompletionGuard({ children }: ProfileCompletionGuardProps
       {/* Main page content with smooth blur transition */}
       <motion.div
         animate={{
-          filter: shouldBlur ? "blur(8px)" : "blur(0px)",
+          filter: shouldBlur ? "blur(8px)" : "none",
           opacity: shouldBlur ? 0.45 : 1,
           pointerEvents: shouldBlur ? "none" : "auto",
         }}
@@ -91,23 +91,23 @@ export function ProfileCompletionGuard({ children }: ProfileCompletionGuardProps
                 <UserCheck className="h-7 w-7" />
               </div>
 
-              <div className="text-[11px] font-mono uppercase tracking-[0.15em] text-[#78716C] mb-2">
-                Profile Setup Required
+              <div className="text-[11px] font-medium uppercase tracking-[0.15em] text-[#78716C] mb-2">
+                Quick Setup
               </div>
 
               <h2 className="text-[22px] font-semibold text-[#1C1917] tracking-tight mb-2">
-                Complete Your Profile First
+                Please Complete Your Profile
               </h2>
 
               <p className="text-[14px] text-[#78716C] leading-relaxed mb-6">
-                To unlock MeritLane&apos;s verified assessments, evidence submissions, and employer visibility, please fill and save your initial candidate profile.
+                Fill in your basic details and skills first to unlock skill tests, job applications, and get discovered by employers.
               </p>
 
               <button
                 onClick={() => router.push("/candidate/profile")}
                 className="w-full h-11 bg-[#1C1917] hover:bg-[#292524] text-white text-[13px] font-semibold rounded transition-all duration-150 flex items-center justify-center gap-2 shadow-sm focus:outline-none focus:ring-2 focus:ring-[#1C1917] focus:ring-offset-2"
               >
-                <span>Go to Profile Setup</span>
+                <span>Go to Profile</span>
                 <ArrowRight className="h-4 w-4" />
               </button>
             </motion.div>

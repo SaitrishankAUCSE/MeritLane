@@ -17,7 +17,7 @@ export function Footerdemo() {
           </div>
 
           <div>
-            <h3 className="mb-4 text-[11px] font-mono uppercase tracking-[0.18em] text-muted-foreground">Register</h3>
+            <h3 className="mb-4 text-[11px] font-medium uppercase tracking-[0.18em] text-muted-foreground">Register</h3>
             <nav className="space-y-2.5">
               <Link href="/signup" className="block text-[13px] text-foreground hover:text-muted-foreground transition-colors">For Engineers</Link>
               <Link href="/employer/dashboard" className="block text-[13px] text-foreground hover:text-muted-foreground transition-colors">For Employers</Link>
@@ -27,7 +27,7 @@ export function Footerdemo() {
           </div>
 
           <div>
-            <h3 className="mb-4 text-[11px] font-mono uppercase tracking-[0.18em] text-muted-foreground">Institution</h3>
+            <h3 className="mb-4 text-[11px] font-medium uppercase tracking-[0.18em] text-muted-foreground">Institution</h3>
             <nav className="space-y-2.5">
               <Link href="/" className="block text-[13px] text-foreground hover:text-muted-foreground transition-colors">About Us</Link>
               <a href="mailto:hello@meritlane.app" className="block text-[13px] text-foreground hover:text-muted-foreground transition-colors">Contact Support</a>
@@ -37,7 +37,7 @@ export function Footerdemo() {
           </div>
 
           <div>
-            <h3 className="mb-4 text-[11px] font-mono uppercase tracking-[0.18em] text-muted-foreground">Contact</h3>
+            <h3 className="mb-4 text-[11px] font-medium uppercase tracking-[0.18em] text-muted-foreground">Contact</h3>
             <div className="space-y-2.5">
               <a href="mailto:hello@meritlane.app" className="block text-[13px] text-foreground hover:text-muted-foreground transition-colors">hello@meritlane.app</a>
               <a href="https://twitter.com/meritlane" target="_blank" rel="noopener noreferrer" className="block text-[13px] text-foreground hover:text-muted-foreground transition-colors">Twitter / X</a>

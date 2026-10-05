@@ -63,6 +63,7 @@ export const TECHNICAL_SKILLS_DICTIONARY = [
 
 // Institutions Database
 const INSTITUTION_PATTERNS = [
+  "Andhra University College of Engineering", "Andhra University", "AUCE",
   "Indian Institute of Technology", "IIT",
   "National Institute of Technology", "NIT",
   "Birla Institute of Technology and Science", "BITS",
@@ -83,9 +84,11 @@ const INSTITUTION_PATTERNS = [
   "BMS College of Engineering", "BMSCE",
   "PES University",
   "Visvesvaraya National Institute of Technology",
-  "Jawaharlal Nehru Technological University", "JNTU",
+  "Jawaharlal Nehru Technological University", "JNTU", "JNTUK", "JNTUH", "JNTUA",
   "Osmania University",
   "University of Hyderabad",
+  "GITAM University", "GITAM",
+  "Gayatri Vidya Parishad College of Engineering", "GVP",
   "Delhi University", "University of Delhi",
   "Mumbai University", "University of Mumbai",
   "Stanford University", "Massachusetts Institute of Technology", "UC Berkeley", "Carnegie Mellon University"
@@ -195,10 +198,40 @@ export async function extractPdfText(buffer: Buffer): Promise<string> {
   return "";
 }
 
+const SKILL_CANONICAL_MAP: Record<string, string> = {
+  "react.js": "React",
+  "vue.js": "Vue",
+  "angular.js": "Angular",
+  "node": "Node.js",
+  "express.js": "Express",
+  "tailwind": "TailwindCSS",
+  "rest": "REST APIs",
+  "rest api": "REST APIs",
+  "rest apis": "REST APIs",
+};
+
+function toTitleCase(str: string): string {
+  return str
+    .toLowerCase()
+    .split(/\s+/)
+    .map(w => w.charAt(0).toUpperCase() + w.slice(1))
+    .join(" ");
+}
+
 /**
  * Deterministically parses structured candidate resume entities from raw text.
  */
-export function parseResumeEntities(resumeText: string): ParsedResumeProfile {
+export function parseResumeEntities(
+  resumeText: string,
+  hints?: {
+    fileName?: string;
+    existingName?: string;
+    existingCollege?: string;
+    existingDegree?: string;
+    existingBranch?: string;
+    existingGradYear?: string;
+  }
+): ParsedResumeProfile {
   const lines = resumeText.split(/[\r\n]+/).map(l => l.trim()).filter(Boolean);
   const profile: ParsedResumeProfile = {
     skills: []
@@ -230,36 +263,73 @@ export function parseResumeEntities(resumeText: string): ParsedResumeProfile {
   }
 
   // 4. Candidate Name Extraction
-  // Look at the first 5 non-empty lines for a line with 2-4 capitalized words that is not an email, phone, or title
-  for (let i = 0; i < Math.min(6, lines.length); i++) {
-    const line = lines[i];
+  const NON_NAME_WORDS = /curriculum|resume|profile|cv|bio|phone|address|education|experience|projects|skills|summary|developer|engineer|architect|intern|contact|university|college|portfolio|page|email/i;
+
+  for (let i = 0; i < Math.min(10, lines.length); i++) {
+    const rawLine = lines[i];
+    // Split line on common delimiters (e.g. "Sai Trishank | Full Stack Developer" or "Sai Trishank - saitrishank@...")
+    const segments = rawLine.split(/[|•·—\t,]/).map(s => s.trim()).filter(Boolean);
+    const candidateSegment = segments[0] || rawLine;
+
+    // Remove leading/trailing non-alpha chars
+    const cleaned = candidateSegment.replace(/^[^a-zA-Z]+|[^a-zA-Z.]+$/g, "").trim();
+    const words = cleaned.split(/\s+/);
+
     if (
-      !line.includes("@") &&
-      !line.includes("http") &&
-      !line.includes(".com") &&
-      !/curriculum|resume|profile|cv|bio|phone|address|education/i.test(line) &&
-      /^[A-Z][a-zA-Z'.]+(?:\s+[A-Z][a-zA-Z'.]+){1,3}$/.test(line)
+      words.length >= 2 &&
+      words.length <= 4 &&
+      !NON_NAME_WORDS.test(cleaned) &&
+      !cleaned.includes("@") &&
+      !cleaned.includes(".com") &&
+      !/\d/.test(cleaned)
     ) {
-      profile.name = line.trim();
-      break;
+      const isAllUpper = cleaned === cleaned.toUpperCase();
+      const isTitleCase = words.every(w => /^[A-Z]/.test(w));
+      if (isAllUpper || isTitleCase) {
+        profile.name = toTitleCase(cleaned);
+        break;
+      }
     }
   }
 
-  // Fallback for name if first line is just letters
-  if (!profile.name && lines.length > 0) {
-    const firstClean = lines[0].replace(/[^a-zA-Z\s]/g, "").trim();
-    const words = firstClean.split(/\s+/);
-    if (words.length >= 2 && words.length <= 4 && !/resume|cv/i.test(firstClean)) {
-      profile.name = firstClean;
+  // Fallback 4b: Check filename or email hint for name matching in resume text
+  if (!profile.name) {
+    const searchTerms: string[] = [];
+    if (hints?.fileName) {
+      const namePart = hints.fileName.replace(/\.pdf$/i, "").replace(/[-_](?:resume|cv|main|final|latest|v\d+)/gi, "");
+      const terms = namePart.split(/[-_]+/).filter(w => w.length > 2 && !/resume|cv|pdf/i.test(w));
+      searchTerms.push(...terms);
     }
+    if (profile.email) {
+      const emailUser = profile.email.split("@")[0].replace(/[0-9_.-]+/g, " ");
+      const terms = emailUser.split(/\s+/).filter(w => w.length > 2);
+      searchTerms.push(...terms);
+    }
+
+    for (const term of searchTerms) {
+      const nameRegex = new RegExp(`\\b([A-Z][a-z]+(?:\\s+[A-Z][a-z]+){1,3})\\b`, "g");
+      let match;
+      while ((match = nameRegex.exec(resumeText.slice(0, 1500))) !== null) {
+        if (match[1].toLowerCase().includes(term.toLowerCase()) && !NON_NAME_WORDS.test(match[1])) {
+          profile.name = toTitleCase(match[1].trim());
+          break;
+        }
+      }
+      if (profile.name) break;
+    }
+  }
+
+  // Fallback 4c: Use existing profile name if available and valid
+  if (!profile.name && hints?.existingName && hints.existingName !== "Candidate") {
+    profile.name = hints.existingName;
   }
 
   // 5. College / Institution Extraction
   for (const pattern of INSTITUTION_PATTERNS) {
-    const regex = new RegExp(`\\b${pattern.replace(/[-/\\^$*+?.()|[\]{}]/g, "\\$&")}(?:\\s+[A-Za-z,]+)*\\b`, "i");
+    const regex = new RegExp(`\\b${pattern.replace(/[-/\\^$*+?.()|[\]{}]/g, "\\$&")}(?:[\\s,]+[A-Za-z]+)*\\b`, "i");
     const match = resumeText.match(regex);
     if (match) {
-      profile.college = match[0].trim();
+      profile.college = match[0].replace(/[-,.\s]+$/, "").trim();
       break;
     }
   }
@@ -268,47 +338,80 @@ export function parseResumeEntities(resumeText: string): ParsedResumeProfile {
     // Regex matching any "X University", "Institute of Technology", "College of Engineering"
     const genericInstMatch = resumeText.match(/([A-Z][A-Za-z\s]+(?:University|Institute\s+of\s+Technology|College\s+of\s+Engineering|Institute\s+of\s+Science))/);
     if (genericInstMatch) {
-      profile.college = genericInstMatch[0].trim();
+      profile.college = genericInstMatch[0].replace(/[-,.\s]+$/, "").trim();
     }
+  }
+
+  if (!profile.college && hints?.existingCollege) {
+    profile.college = hints.existingCollege;
   }
 
   // 6. Degree Extraction
   for (const deg of DEGREE_PATTERNS) {
     if (deg.match.test(resumeText)) {
-      profile.degree = deg.value;
+      profile.degree = deg.value.replace(/[-,.\s]+$/, "").trim();
       break;
     }
+  }
+  if (!profile.degree && hints?.existingDegree) {
+    profile.degree = hints.existingDegree;
   }
 
   // 7. Branch Extraction
   for (const br of BRANCH_PATTERNS) {
     if (br.match.test(resumeText)) {
-      profile.branch = br.value;
+      profile.branch = br.value.replace(/[-,.\s]+$/, "").trim();
       break;
     }
   }
+  if (!profile.branch && hints?.existingBranch) {
+    profile.branch = hints.existingBranch;
+  }
 
   // 8. Graduation Year Extraction
-  // Look for years between 2020 and 2030 near education keywords or anywhere in text
   const yearMatches = resumeText.match(/\b(202[0-9]|2030)\b/g);
   if (yearMatches && yearMatches.length > 0) {
-    // Pick the most recent/latest plausible year (e.g., graduation year)
     const sortedYears = yearMatches.map(Number).sort((a, b) => b - a);
     profile.gradYear = sortedYears[0].toString();
   }
+  if (!profile.gradYear && hints?.existingGradYear) {
+    profile.gradYear = hints.existingGradYear;
+  }
 
-  // 9. Technical Skills Extraction against 200+ taxonomy
+  // 9. Technical Skills Extraction against 200+ taxonomy with deduplication
   const detectedSkills = new Set<string>();
   for (const skill of TECHNICAL_SKILLS_DICTIONARY) {
+    // Special protection for single-letter skills to avoid false positives (e.g. "R&D", "C.")
+    if (skill === "R") {
+      const rRegex = /\b(?:R\s*(?:language|programming|stats|studio)|(?:\bPython\s*,\s*R\b)|(?:\bR\s*,\s*Python\b))\b/i;
+      if (rRegex.test(resumeText)) {
+        detectedSkills.add("R");
+      }
+      continue;
+    }
+    if (skill === "C") {
+      const cRegex = /(?:\bC\s*(?:programming|language)\b|\bC\s*[,/]\s*C\+\+|\bC\+\+\s*[,/]\s*C\b|Languages:[\s\S]*?\bC\b)/i;
+      if (cRegex.test(resumeText)) {
+        detectedSkills.add("C");
+      }
+      continue;
+    }
+
     const escaped = skill.replace(/[-/\\^$*+?.()|[\]{}]/g, "\\$&");
     const regex = new RegExp(`(?:^|[^a-zA-Z0-9+#])${escaped}(?:$|[^a-zA-Z0-9+#])`, "i");
     if (regex.test(resumeText)) {
-      // Normalize skill name to canonical casing
-      detectedSkills.add(skill);
+      const canonical = SKILL_CANONICAL_MAP[skill.toLowerCase()] || skill;
+      detectedSkills.add(canonical);
     }
   }
+
+  // Consolidate duplicates (e.g. if React is present, ensure React.js isn't separate)
+  if (detectedSkills.has("React")) detectedSkills.delete("React.js");
+  if (detectedSkills.has("Vue")) detectedSkills.delete("Vue.js");
+  if (detectedSkills.has("TailwindCSS")) detectedSkills.delete("Tailwind");
 
   profile.skills = Array.from(detectedSkills);
 
   return profile;
 }
+
