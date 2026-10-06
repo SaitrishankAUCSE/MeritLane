@@ -163,16 +163,16 @@ export default function HomePage() {
       </section>
 
       {/* 2. THE PROBLEM */}
-      <section className="py-24 bg-[#F5F5F4] border-y border-[var(--color-border)]">
+      <section className="py-24 bg-[#0A0A0A] text-white border-y border-[#333]">
         <div className="mx-auto max-w-6xl px-6 lg:px-12">
           <motion.div 
             initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-100px" }} variants={fadeUp}
             className="mb-16 text-center max-w-3xl mx-auto"
           >
-            <div className="text-[11px] font-medium uppercase tracking-[0.25em] text-[var(--color-muted-foreground)] mb-4">
+            <div className="text-[11px] font-medium uppercase tracking-[0.25em] text-[#A8A29E] mb-4">
               The Status Quo
             </div>
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-serif text-[var(--color-foreground)] tracking-tight leading-snug">
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-serif text-white tracking-tight leading-snug">
               Resumes don't compile.
             </h2>
           </motion.div>
@@ -196,13 +196,13 @@ export default function HomePage() {
                 key={i}
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
-                whileHover={{ y: -6, boxShadow: "0 10px 40px -10px rgba(0,0,0,0.08)" }}
+                whileHover={{ y: -6, boxShadow: "0 10px 40px -10px rgba(0,0,0,0.5)" }}
                 viewport={{ once: true, margin: "-50px" }}
                 transition={{ duration: 0.3, delay: i * 0.1 }}
-                className="p-8 bg-white border border-[var(--color-border)] shadow-sm transition-colors hover:border-[#1C1917]/20 cursor-default"
+                className="p-8 bg-[#1C1917] border border-[#333] shadow-sm transition-colors hover:border-[#525252] cursor-default"
               >
-                <h3 className="text-lg font-serif font-medium text-[#1C1917] mb-3">{problem.title}</h3>
-                <p className="text-sm text-[#525252] leading-relaxed">{problem.description}</p>
+                <h3 className="text-lg font-serif font-medium text-white mb-3">{problem.title}</h3>
+                <p className="text-sm text-[#A8A29E] leading-relaxed">{problem.description}</p>
               </motion.div>
             ))}
           </div>
@@ -335,7 +335,7 @@ export default function HomePage() {
       </section>
 
       {/* 5. HOW IT WORKS */}
-      <section className="py-24 bg-[var(--color-foreground)] text-white border-t border-[#333]">
+      <section className="py-24 bg-[#0A0A0A] text-white border-y border-[#333]">
         <div className="mx-auto max-w-6xl px-6 lg:px-12">
           <motion.div 
             initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-100px" }} variants={fadeUp}
@@ -505,17 +505,17 @@ export default function HomePage() {
       </section>
 
       {/* 8. CALL TO ACTION */}
-      <section className="py-24 sm:py-32 bg-[#F8F6F3] text-center border-t border-[var(--color-border)]">
+      <section className="py-24 sm:py-32 bg-[#0A0A0A] text-center border-t border-[#333]">
         <div className="mx-auto max-w-3xl px-6">
           <motion.h2 
             initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.4 }}
-            className="text-3xl sm:text-4xl md:text-5xl font-serif tracking-tight mb-6 leading-tight text-[var(--color-foreground)]"
+            className="text-3xl sm:text-4xl md:text-5xl font-serif tracking-tight mb-6 leading-tight text-white"
           >
             Transition from filtering resumes to hiring engineers.
           </motion.h2>
           <motion.p 
             initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.4, delay: 0.1 }}
-            className="text-lg text-[#525252] mb-10 max-w-xl mx-auto"
+            className="text-lg text-[#A8A29E] mb-10 max-w-xl mx-auto"
           >
             Whether you are building a team or looking for your next role, Meritlane provides the ground truth for engineering talent.
           </motion.p>
@@ -524,12 +524,12 @@ export default function HomePage() {
             className="flex flex-col sm:flex-row items-center justify-center gap-4"
           >
             <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-              <Button href="/employer/dashboard" variant="primary" size="lg" className="rounded-none px-8 w-full sm:w-auto">
+              <Button href="/employer/dashboard" variant="primary" size="lg" className="rounded-none px-8 w-full sm:w-auto bg-white text-black hover:bg-[#E5E5E5]">
                 Start Hiring
               </Button>
             </motion.div>
             <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-              <Button href="/signup" variant="outline" size="lg" className="rounded-none px-8 w-full sm:w-auto">
+              <Button href="/signup" variant="outline" size="lg" className="rounded-none px-8 w-full sm:w-auto border-white text-white hover:bg-white hover:text-black">
                 Apply as Developer
               </Button>
             </motion.div>
