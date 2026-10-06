@@ -155,9 +155,9 @@ export default function HomePage() {
           <div className="text-left">
             <div className="flex items-center gap-2 text-[14px] font-semibold text-[#1C1917]">
               <ShieldCheck className="w-4 h-4 text-green-600" />
-              Trusted by 10,000+ Verified Engineers
+              Built for the Next Generation of Engineers
             </div>
-            <div className="text-[13px] text-[#78716C] mt-1">Replacing resumes with cryptographically verified code.</div>
+            <div className="text-[13px] text-[#78716C] mt-1">Evaluating talent based on cryptographically verified code.</div>
           </div>
         </motion.div>
       </section>
@@ -172,7 +172,7 @@ export default function HomePage() {
             <div className="text-[11px] font-medium uppercase tracking-[0.25em] text-[#A8A29E] mb-4">
               The Status Quo
             </div>
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-serif text-white tracking-tight leading-snug">
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-serif !text-white tracking-tight leading-snug">
               Resumes don't compile.
             </h2>
           </motion.div>
@@ -201,8 +201,8 @@ export default function HomePage() {
                 transition={{ duration: 0.3, delay: i * 0.1 }}
                 className="p-8 bg-[#1C1917] border border-[#333] shadow-sm transition-colors hover:border-[#525252] cursor-default"
               >
-                <h3 className="text-lg font-serif font-medium text-white mb-3">{problem.title}</h3>
-                <p className="text-sm text-[#A8A29E] leading-relaxed">{problem.description}</p>
+                <h3 className="text-lg font-serif font-medium !text-white mb-3">{problem.title}</h3>
+                <p className="text-sm !text-[#A8A29E] leading-relaxed">{problem.description}</p>
               </motion.div>
             ))}
           </div>
@@ -216,7 +216,7 @@ export default function HomePage() {
             <div className="inline-flex items-center justify-center p-4 bg-[#1C1917] rounded-full mb-8">
               <Globe className="w-8 h-8 text-white" />
             </div>
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-serif text-[var(--color-foreground)] tracking-tight leading-snug max-w-4xl mx-auto mb-6">
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-serif text-[#1C1917] tracking-tight leading-snug max-w-4xl mx-auto mb-6">
               The Unified Ground Truth for Technical Talent.
             </h2>
             <p className="text-[16px] sm:text-[18px] text-[#525252] max-w-3xl mx-auto leading-[1.8] font-sans">
@@ -304,7 +304,7 @@ export default function HomePage() {
                   <div className="flex justify-between border-b border-[var(--color-border)] pb-4 mb-6">
                     <div>
                       <div className="text-[10px] font-medium uppercase tracking-[0.2em] text-[#78716C]">Evidence Profile</div>
-                      <div className="text-[18px] font-serif text-[#1C1917] mt-1">ML-2026-B849</div>
+                      <div className="text-[18px] font-serif text-[#1C1917] mt-1">Preview Mode</div>
                     </div>
                     <div className="text-[11px] font-mono text-green-600 font-bold flex items-center gap-1.5">
                       <Shield className="w-3.5 h-3.5" /> VERIFIED
@@ -312,12 +312,12 @@ export default function HomePage() {
                   </div>
                   <div className="grid grid-cols-2 gap-4 text-sm font-sans mb-4">
                     <div>
-                      <div className="text-[10px] font-medium text-[#78716C] uppercase mb-1">Code</div>
-                      <div className="font-mono text-[#1C1917] font-semibold">1,204 Commits</div>
+                      <div className="text-[10px] font-medium text-[#78716C] uppercase mb-1">Git Telemetry</div>
+                      <div className="font-mono text-[#1C1917] font-semibold">Authenticated</div>
                     </div>
                     <div>
-                      <div className="text-[10px] font-medium text-[#78716C] uppercase mb-1">ATS Score</div>
-                      <div className="font-mono text-[#1C1917] font-semibold">94/100</div>
+                      <div className="text-[10px] font-medium text-[#78716C] uppercase mb-1">Status</div>
+                      <div className="font-mono text-[#1C1917] font-semibold">Pre-vetted</div>
                     </div>
                   </div>
                   <div className="border-t border-[#E5E5E5] pt-4">
@@ -436,22 +436,26 @@ export default function HomePage() {
               </div>
 
               <motion.div 
-                whileHover={{ y: -4, boxShadow: "0 10px 40px -15px rgba(0,0,0,0.1)" }}
-                className="flex flex-col sm:flex-row items-center gap-6 mt-12 bg-white border border-[#E5E5E5] p-6 rounded-xl shadow-sm transition-all duration-300"
+                whileHover={{ y: -6, boxShadow: "0 25px 50px -12px rgba(0,0,0,0.15)" }}
+                className="flex flex-col sm:flex-row items-center gap-8 mt-12 bg-white border border-[#E5E5E5] p-8 rounded-2xl shadow-lg transition-all duration-300 relative overflow-hidden"
               >
-                <div className="w-20 h-20 bg-gradient-to-tr from-[#1C1917] to-[#525252] rounded-full flex items-center justify-center shrink-0 border-4 border-white shadow-sm overflow-hidden relative">
-                  <div className="absolute inset-0 bg-black/20 mix-blend-overlay"></div>
-                  <div className="text-white font-serif text-2xl z-10">SB</div>
+                <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-amber-100 to-transparent rounded-full opacity-40 -z-10 translate-x-1/3 -translate-y-1/3 blur-xl"></div>
+                <div className="w-24 h-24 sm:w-32 sm:h-32 bg-gradient-to-tr from-[#1C1917] to-[#44403C] rounded-full flex items-center justify-center shrink-0 border-4 border-white shadow-xl overflow-hidden relative group">
+                  <div className="absolute inset-0 bg-black/20 mix-blend-overlay group-hover:opacity-0 transition-opacity duration-300"></div>
+                  <div className="text-white font-serif text-3xl sm:text-4xl z-10 drop-shadow-md">SB</div>
                 </div>
-                <div>
-                  <h4 className="text-[18px] font-semibold text-[#1C1917]">Saitrishank B</h4>
-                  <div className="text-[13px] text-[#78716C] mb-3">Founder & Lead Engineer, MeritLane</div>
-                  <div className="flex gap-3 justify-center sm:justify-start">
-                    <a href="https://Code.com/SaitrishankAUCSE" target="_blank" rel="noreferrer" className="text-[#525252] hover:text-[#1C1917] transition-colors p-2 bg-[#FAFAFA] rounded-full border border-[#E5E5E5]">
-                      <Code className="w-4 h-4" />
+                <div className="flex-1 text-center sm:text-left">
+                  <div className="inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-amber-600 bg-amber-50 px-2.5 py-1 rounded-full mb-3 border border-amber-200">
+                    <Sparkles className="w-3 h-3" /> Founder Profile
+                  </div>
+                  <h4 className="text-[24px] font-serif font-bold text-[#1C1917] leading-tight">Saitrishank B</h4>
+                  <div className="text-[15px] font-medium text-[#78716C] mb-4">Founder & Lead Engineer, MeritLane</div>
+                  <div className="flex gap-4 justify-center sm:justify-start">
+                    <a href="https://github.com/SaitrishankAUCSE" target="_blank" rel="noreferrer" className="flex items-center gap-2 text-[13px] font-semibold text-[#1C1917] hover:text-[#2563EB] transition-colors p-2.5 px-4 bg-[#FAFAFA] rounded border border-[#E5E5E5] hover:border-[#2563EB]/30 hover:bg-blue-50">
+                      <Code className="w-4 h-4" /> GitHub
                     </a>
-                    <a href="mailto:saitrishankb9@gmail.com" className="text-[#525252] hover:text-[#1C1917] transition-colors p-2 bg-[#FAFAFA] rounded-full border border-[#E5E5E5]">
-                      <User className="w-4 h-4" />
+                    <a href="mailto:saitrishankb9@gmail.com" className="flex items-center gap-2 text-[13px] font-semibold text-[#1C1917] hover:text-amber-600 transition-colors p-2.5 px-4 bg-[#FAFAFA] rounded border border-[#E5E5E5] hover:border-amber-600/30 hover:bg-amber-50">
+                      <Mail className="w-4 h-4" /> Email
                     </a>
                   </div>
                 </div>
@@ -509,13 +513,13 @@ export default function HomePage() {
         <div className="mx-auto max-w-3xl px-6">
           <motion.h2 
             initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.4 }}
-            className="text-3xl sm:text-4xl md:text-5xl font-serif tracking-tight mb-6 leading-tight text-white"
+            className="text-3xl sm:text-4xl md:text-5xl font-serif tracking-tight mb-6 leading-tight !text-white"
           >
             Transition from filtering resumes to hiring engineers.
           </motion.h2>
           <motion.p 
             initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.4, delay: 0.1 }}
-            className="text-lg text-[#A8A29E] mb-10 max-w-xl mx-auto"
+            className="text-lg !text-[#A8A29E] mb-10 max-w-xl mx-auto"
           >
             Whether you are building a team or looking for your next role, Meritlane provides the ground truth for engineering talent.
           </motion.p>
@@ -524,12 +528,12 @@ export default function HomePage() {
             className="flex flex-col sm:flex-row items-center justify-center gap-4"
           >
             <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-              <Button href="/employer/dashboard" variant="primary" size="lg" className="rounded-none px-8 w-full sm:w-auto bg-white text-black hover:bg-[#E5E5E5]">
+              <Button href="/employer/dashboard" variant="primary" size="lg" className="rounded-none px-8 w-full sm:w-auto !bg-white !text-black hover:!bg-[#E5E5E5] !border-white">
                 Start Hiring
               </Button>
             </motion.div>
             <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-              <Button href="/signup" variant="outline" size="lg" className="rounded-none px-8 w-full sm:w-auto border-white text-white hover:bg-white hover:text-black">
+              <Button href="/signup" variant="outline" size="lg" className="rounded-none px-8 w-full sm:w-auto !border-white !text-white !bg-transparent hover:!bg-white hover:!text-black">
                 Apply as Developer
               </Button>
             </motion.div>
