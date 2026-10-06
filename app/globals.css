@@ -82,7 +82,12 @@ h1, h2, h3, h4, h5, h6 {
   letter-spacing: -0.01em;
   line-height: 1.25;
   font-weight: 500;
-  color: var(--color-foreground);
+  color: inherit;
+}
+[class*="bg-[#0A0A0A]"] :is(h1, h2, h3, h4),
+[class*="bg-[#1C1917]"] :is(h1, h2, h3, h4),
+.text-white :is(h1, h2, h3, h4) {
+  color: #FFFFFF !important;
 }
 
 /* Dedicated block letter headings */

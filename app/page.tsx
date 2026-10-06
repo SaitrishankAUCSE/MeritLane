@@ -4,16 +4,16 @@ import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { 
   CheckCircle, ArrowRight, Database, Shield, Code, ChevronRight, Lock, 
-  BrainCircuit, Globe, GitBranch, Terminal, ShieldCheck, ChevronDown, User, Server, Cpu, Search, Activity, Briefcase
+  BrainCircuit, Globe, GitBranch, Terminal, ShieldCheck, ChevronDown, User, Server, Cpu, Search, Activity, Briefcase, Sparkles, Mail
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
 import { useAuth } from "@/lib/auth/AuthContext";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, type Variants } from "framer-motion";
 import { HandwritingText } from "@/components/ui/handwriting-text";
 import { MeritlaneLoader } from "@/components/ui/MeritlaneLoader";
 
-const fadeUp = {
+const fadeUp: Variants = {
   hidden: { opacity: 0, y: 30 },
   visible: { opacity: 1, y: 0, transition: { duration: 0.3, ease: "easeOut" } }
 };
@@ -41,7 +41,7 @@ const faqs = [
   },
   {
     question: "What makes MeritLane different from traditional hiring?",
-    answer: "Instead of relying on self-reported resumes and keywords, MeritLane forces candidates to prove their ability via real code execution, verified Code history, and live projects."
+    answer: "Instead of relying on self-reported resumes and keywords, MeritLane forces candidates to prove their ability via real code execution, verified GitHub history, and live projects."
   }
 ];
 
@@ -169,10 +169,10 @@ export default function HomePage() {
             initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-100px" }} variants={fadeUp}
             className="mb-16 text-center max-w-3xl mx-auto"
           >
-            <div className="text-[11px] font-medium uppercase tracking-[0.25em] text-[#A8A29E] mb-4">
+            <div className="text-[11px] font-medium uppercase tracking-[0.25em] mb-4" style={{ color: "#D6D3D1" }}>
               The Status Quo
             </div>
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-serif !text-white tracking-tight leading-snug">
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-serif tracking-tight leading-snug" style={{ color: "#FFFFFF" }}>
               Resumes don't compile.
             </h2>
           </motion.div>
@@ -201,8 +201,8 @@ export default function HomePage() {
                 transition={{ duration: 0.3, delay: i * 0.1 }}
                 className="p-8 bg-[#1C1917] border border-[#333] shadow-sm transition-colors hover:border-[#525252] cursor-default"
               >
-                <h3 className="text-lg font-serif font-medium !text-white mb-3">{problem.title}</h3>
-                <p className="text-sm !text-[#A8A29E] leading-relaxed">{problem.description}</p>
+                <h3 className="text-lg font-serif font-medium mb-3" style={{ color: "#FFFFFF" }}>{problem.title}</h3>
+                <p className="text-sm leading-relaxed" style={{ color: "#D1D5DB" }}>{problem.description}</p>
               </motion.div>
             ))}
           </div>
@@ -279,7 +279,7 @@ export default function HomePage() {
               </div>
               <h3 className="text-3xl font-serif text-[#1C1917] mb-6 leading-tight">Don't trust resumes. Trust data.</h3>
               <p className="text-[15px] text-[#525252] leading-[1.8] mb-6">
-                A test score isn't enough. MeritLane aggregates real-world evidence. We securely connect to Code to index commit history, parse ATS semantic data, and showcase live deployed projects.
+                A test score isn't enough. MeritLane aggregates real-world evidence. We securely connect to GitHub to index commit history, parse ATS semantic data, and showcase live deployed projects.
               </p>
               <div className="grid grid-cols-2 gap-4">
                 <div className="p-4 bg-white border border-[#E5E5E5] rounded hover:border-[#2563EB]/40 transition-colors duration-300">
@@ -341,10 +341,10 @@ export default function HomePage() {
             initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-100px" }} variants={fadeUp}
             className="mb-16 text-center"
           >
-            <div className="text-[11px] font-medium uppercase tracking-[0.25em] text-[#A8A29E] mb-4">
+            <div className="text-[11px] font-medium uppercase tracking-[0.25em] mb-4" style={{ color: "#D6D3D1" }}>
               Two Sides, One Platform
             </div>
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-serif tracking-tight leading-snug text-white">
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-serif tracking-tight leading-snug" style={{ color: "#FFFFFF" }}>
               How Meritlane Operates.
             </h2>
           </motion.div>
@@ -357,23 +357,23 @@ export default function HomePage() {
               <motion.div 
                 whileHover={{ scale: 1.1, rotate: [0, -10, 10, -10, 0] }} 
                 transition={{ duration: 0.4 }} 
-                className="inline-flex items-center justify-center p-3 bg-[#1C1917] border border-[#333] mb-6 rounded-none cursor-pointer"
+                className="inline-flex items-center justify-center p-3 bg-[#1C1917] border border-[#444] mb-6 rounded-none cursor-pointer"
               >
                 <Code className="w-6 h-6 text-white" />
               </motion.div>
-              <h3 className="text-2xl font-serif text-white mb-6">For Candidates</h3>
+              <h3 className="text-2xl font-serif mb-6" style={{ color: "#FFFFFF" }}>For Candidates</h3>
               <div className="space-y-8">
                 <motion.div whileHover={{ x: 5 }} transition={{ duration: 0.2 }}>
-                  <h4 className="text-sm font-medium text-[#D6D3D1] mb-2 uppercase tracking-wide">1. Take the Assessment</h4>
-                  <p className="text-[15px] text-[#A8A29E] leading-relaxed">Select your primary domain and complete our timed, proctored coding challenge.</p>
+                  <h4 className="text-sm font-medium mb-2 uppercase tracking-wide" style={{ color: "#F3F4F6" }}>1. Take the Assessment</h4>
+                  <p className="text-[15px] leading-relaxed" style={{ color: "#D1D5DB" }}>Select your primary domain and complete our timed, proctored coding challenge.</p>
                 </motion.div>
                 <motion.div whileHover={{ x: 5 }} transition={{ duration: 0.2 }}>
-                  <h4 className="text-sm font-medium text-[#D6D3D1] mb-2 uppercase tracking-wide">2. Build Your Profile</h4>
-                  <p className="text-[15px] text-[#A8A29E] leading-relaxed">Connect your Code, detail education, and showcase real-world deployed projects.</p>
+                  <h4 className="text-sm font-medium mb-2 uppercase tracking-wide" style={{ color: "#F3F4F6" }}>2. Build Your Profile</h4>
+                  <p className="text-[15px] leading-relaxed" style={{ color: "#D1D5DB" }}>Connect your GitHub, detail education, and showcase real-world deployed projects.</p>
                 </motion.div>
                 <motion.div whileHover={{ x: 5 }} transition={{ duration: 0.2 }}>
-                  <h4 className="text-sm font-medium text-[#D6D3D1] mb-2 uppercase tracking-wide">3. Get Discovered</h4>
-                  <p className="text-[15px] text-[#A8A29E] leading-relaxed">Once verified, your profile enters the talent pool. Employers search and reach out directly.</p>
+                  <h4 className="text-sm font-medium mb-2 uppercase tracking-wide" style={{ color: "#F3F4F6" }}>3. Get Discovered</h4>
+                  <p className="text-[15px] leading-relaxed" style={{ color: "#D1D5DB" }}>Once verified, your profile enters the talent pool. Employers search and reach out directly.</p>
                 </motion.div>
               </div>
             </motion.div>
@@ -383,23 +383,23 @@ export default function HomePage() {
               <motion.div 
                 whileHover={{ scale: 1.1, rotate: [0, -10, 10, -10, 0] }} 
                 transition={{ duration: 0.4 }} 
-                className="inline-flex items-center justify-center p-3 bg-[#1C1917] border border-[#333] mb-6 rounded-none cursor-pointer"
+                className="inline-flex items-center justify-center p-3 bg-[#1C1917] border border-[#444] mb-6 rounded-none cursor-pointer"
               >
                 <Database className="w-6 h-6 text-white" />
               </motion.div>
-              <h3 className="text-2xl font-serif text-white mb-6">For Employers</h3>
+              <h3 className="text-2xl font-serif mb-6" style={{ color: "#FFFFFF" }}>For Employers</h3>
               <div className="space-y-8">
                 <motion.div whileHover={{ x: 5 }} transition={{ duration: 0.2 }}>
-                  <h4 className="text-sm font-medium text-[#D6D3D1] mb-2 uppercase tracking-wide">1. Search with Certainty</h4>
-                  <p className="text-[15px] text-[#A8A29E] leading-relaxed">Filter candidates not by keywords, but by actual verified skills. High signal, low noise.</p>
+                  <h4 className="text-sm font-medium mb-2 uppercase tracking-wide" style={{ color: "#F3F4F6" }}>1. Search with Certainty</h4>
+                  <p className="text-[15px] leading-relaxed" style={{ color: "#D1D5DB" }}>Filter candidates not by keywords, but by actual verified skills. High signal, low noise.</p>
                 </motion.div>
                 <motion.div whileHover={{ x: 5 }} transition={{ duration: 0.2 }}>
-                  <h4 className="text-sm font-medium text-[#D6D3D1] mb-2 uppercase tracking-wide">2. Review the Evidence</h4>
-                  <p className="text-[15px] text-[#A8A29E] leading-relaxed">Examine assessment scores, Code telemetry, and live code implementations.</p>
+                  <h4 className="text-sm font-medium mb-2 uppercase tracking-wide" style={{ color: "#F3F4F6" }}>2. Review the Evidence</h4>
+                  <p className="text-[15px] leading-relaxed" style={{ color: "#D1D5DB" }}>Examine assessment scores, GitHub telemetry, and live code implementations.</p>
                 </motion.div>
                 <motion.div whileHover={{ x: 5 }} transition={{ duration: 0.2 }}>
-                  <h4 className="text-sm font-medium text-[#D6D3D1] mb-2 uppercase tracking-wide">3. Connect Directly</h4>
-                  <p className="text-[15px] text-[#A8A29E] leading-relaxed">Message candidates directly. Skip the technical screen and go straight to system design.</p>
+                  <h4 className="text-sm font-medium mb-2 uppercase tracking-wide" style={{ color: "#F3F4F6" }}>3. Connect Directly</h4>
+                  <p className="text-[15px] leading-relaxed" style={{ color: "#D1D5DB" }}>Message candidates directly. Skip the technical screen and go straight to system design.</p>
                 </motion.div>
               </div>
             </motion.div>
@@ -556,13 +556,15 @@ export default function HomePage() {
         <div className="mx-auto max-w-3xl px-6">
           <motion.h2 
             initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.4 }}
-            className="text-3xl sm:text-4xl md:text-5xl font-serif tracking-tight mb-6 leading-tight !text-white"
+            className="text-3xl sm:text-4xl md:text-5xl font-serif tracking-tight mb-6 leading-tight"
+            style={{ color: "#FFFFFF" }}
           >
             Transition from filtering resumes to hiring engineers.
           </motion.h2>
           <motion.p 
             initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.4, delay: 0.1 }}
-            className="text-lg !text-[#A8A29E] mb-10 max-w-xl mx-auto"
+            className="text-lg mb-10 max-w-xl mx-auto"
+            style={{ color: "#D1D5DB" }}
           >
             Whether you are building a team or looking for your next role, Meritlane provides the ground truth for engineering talent.
           </motion.p>
@@ -610,7 +612,7 @@ export default function HomePage() {
             <h4 className="text-[11px] font-semibold tracking-wider uppercase text-[#1C1917] mb-4">Company</h4>
             <ul className="space-y-3 text-[13px] text-[#78716C]">
               <li><a href="#" className="hover:text-[#1C1917] transition-colors">About Us</a></li>
-              <li><a href="https://Code.com/SaitrishankAUCSE" target="_blank" rel="noreferrer" className="hover:text-[#1C1917] transition-colors">Our Creator</a></li>
+              <li><a href="https://github.com/SaitrishankAUCSE" target="_blank" rel="noreferrer" className="hover:text-[#1C1917] transition-colors">Our Creator</a></li>
               <li><a href="#" className="hover:text-[#1C1917] transition-colors">Privacy Policy</a></li>
               <li><a href="#" className="hover:text-[#1C1917] transition-colors">Terms of Service</a></li>
             </ul>
@@ -619,7 +621,7 @@ export default function HomePage() {
           <div>
             <h4 className="text-[11px] font-semibold tracking-wider uppercase text-[#1C1917] mb-4">Connect</h4>
             <div className="flex gap-4">
-              <a href="https://Code.com/SaitrishankAUCSE" target="_blank" rel="noreferrer" className="w-8 h-8 rounded-full bg-[#FAFAFA] border border-[#E5E5E5] flex items-center justify-center text-[#525252] hover:text-[#1C1917] hover:border-[#1C1917] transition-colors">
+              <a href="https://github.com/SaitrishankAUCSE" target="_blank" rel="noreferrer" className="w-8 h-8 rounded-full bg-[#FAFAFA] border border-[#E5E5E5] flex items-center justify-center text-[#525252] hover:text-[#1C1917] hover:border-[#1C1917] transition-colors" title="GitHub">
                 <Code className="w-4 h-4" />
               </a>
               <a href="mailto:saitrishankb9@gmail.com" className="w-8 h-8 rounded-full bg-[#FAFAFA] border border-[#E5E5E5] flex items-center justify-center text-[#525252] hover:text-[#1C1917] hover:border-[#1C1917] transition-colors">
