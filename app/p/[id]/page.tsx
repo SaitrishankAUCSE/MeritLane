@@ -14,8 +14,11 @@ export default async function PublicProfilePage({ params }: Props) {
   let userDoc;
 
   try {
-    candidateDoc = await adminDb!.collection("candidates").doc(id).get();
-    userDoc = await adminDb!.collection("users").doc(id).get();
+    // Fetch both docs in parallel for faster server-side rendering
+    [candidateDoc, userDoc] = await Promise.all([
+      adminDb!.collection("candidates").doc(id).get(),
+      adminDb!.collection("users").doc(id).get(),
+    ]);
   } catch (err) {
     console.error("Error fetching public profile:", err);
     notFound();
@@ -61,7 +64,19 @@ export default async function PublicProfilePage({ params }: Props) {
     githubUsername: rawCandidate.githubUsername || rawUser.githubUsername || "",
     githubUrl: rawCandidate.githubUrl || rawUser.githubUrl || (rawCandidate.githubUsername ? `https://github.com/${rawCandidate.githubUsername}` : ""),
     linkedinUrl: rawCandidate.linkedinUrl || rawUser.linkedinUrl || "",
+    portfolioUrl: rawCandidate.portfolioUrl || rawUser.portfolioUrl || "",
     resumeUrl: rawCandidate.resumeUrl || rawUser.resumeUrl || "",
+    resumeFileName: rawCandidate.resumeFileName || rawUser.resumeFileName || "",
+    resumeText: rawCandidate.resumeText || rawUser.resumeText || "",
+    resumePdfDataUrl: rawCandidate.resumePdfDataUrl || rawUser.resumePdfDataUrl || "",
+    candidateKey: rawCandidate.candidateKey || rawUser.candidateKey || "",
+    avatarUrl: rawCandidate.avatarUrl || rawUser.photoURL || "",
+    atsScore: rawCandidate.atsScore || rawUser.atsScore || null,
+    atsRating: rawCandidate.atsRating || rawUser.atsRating || "",
+    targetRoles: rawCandidate.targetRoles || rawUser.targetRoles || [],
+    preferredLocations: rawCandidate.preferredLocations || rawUser.preferredLocations || [],
+    workPreference: rawCandidate.workPreference || rawUser.workPreference || "",
+    availability: rawCandidate.availability || rawUser.availability || "",
     bio: rawCandidate.bio || rawUser.bio || "",
     headline: rawCandidate.headline || rawUser.headline || "",
     verifiedAt: parseTimestamp(rawCandidate.verifiedAt || rawUser.verifiedAt) || null,

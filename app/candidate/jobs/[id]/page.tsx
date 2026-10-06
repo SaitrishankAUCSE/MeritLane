@@ -128,7 +128,7 @@ export default function CandidateJobDetailPage() {
         <div className="text-center">
           <div className="h-6 w-6 border-2 border-[#E7E2DA] border-t-[#1C1917] rounded-full animate-spin mx-auto mb-3" />
           <div className="text-[12px] font-medium text-[#78716C] uppercase tracking-wider">
-            Loading opportunity file #{id.slice(0, 8)}…
+            Loading role specifications…
           </div>
         </div>
       </div>
@@ -173,7 +173,7 @@ export default function CandidateJobDetailPage() {
           </Link>
 
           <span className="text-[11px] font-medium text-[#78716C] uppercase tracking-wider">
-            RECORD #{job.id.slice(0, 8).toUpperCase()}
+            Verified Role
           </span>
         </div>
       </div>

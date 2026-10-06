@@ -12,6 +12,7 @@ import {
   ExternalLink,
   BookOpen,
   FileText,
+  Globe,
   UploadCloud,
   CheckCircle2,
   AlertCircle,
@@ -21,6 +22,7 @@ import {
   ArrowRight,
   Briefcase,
   MapPin,
+  Download,
   X,
 } from "lucide-react";
 import Link from "next/link";
@@ -31,7 +33,6 @@ import { ParsedResumeProfile } from "@/lib/resume/parser";
 import { auth, db } from "@/lib/firebase/config";
 import { doc, getDoc } from "firebase/firestore";
 import CooldownTimer from "@/components/candidate/cooldown-timer";
-import { ProfilePhotoUploader } from "@/components/candidate/ProfilePhotoUploader";
 import { CandidateAvatar, AvatarBadgeType } from "@/components/ui/CandidateAvatar";
 
 export default function CandidateProfilePage() {
@@ -64,6 +65,22 @@ export default function CandidateProfilePage() {
       ])
         .then(([p, uData, cData]) => {
           setProfile(p);
+          if (p && typeof window !== "undefined") {
+            try {
+              localStorage.setItem("meritlane_current_candidate", JSON.stringify({
+                name: p.name || uData?.name || user?.displayName || "Candidate",
+                avatarUrl: p.avatarUrl || uData?.avatarUrl || user?.photoURL || "",
+              }));
+              window.dispatchEvent(
+                new CustomEvent("meritlane-profile-updated", {
+                  detail: {
+                    name: p.name || uData?.name || user?.displayName || "Candidate",
+                    avatarUrl: p.avatarUrl || uData?.avatarUrl || user?.photoURL || "",
+                  },
+                })
+              );
+            } catch {}
+          }
           if (p?.resumeFileName) setResumeFileName(p.resumeFileName);
           if (!p || !p.name || !p.skills || p.skills.length === 0) setIsEditing(true);
 
@@ -214,6 +231,7 @@ export default function CandidateProfilePage() {
       resumeUrl: profile?.resumeUrl || "",
       resumeFileName: resumeFileName || profile?.resumeFileName || "Candidate_Resume.pdf",
       resumeUploadedAt: Date.now(),
+      resumePdfDataUrl: data.resumePdfDataUrl || profile?.resumePdfDataUrl || "",
       skills: Array.from(existingSkills),
       resumeText: data.extractedText || profile?.resumeText || "",
       atsScore: data.result?.score ?? profile?.atsScore,
@@ -351,7 +369,7 @@ export default function CandidateProfilePage() {
                   Candidate Profile · Meritlane
                 </span>
                 <span className="inline-flex items-center gap-1 text-[11px] font-mono font-semibold text-[#064E3B] bg-[#064E3B]/10 px-2.5 py-0.5 rounded border border-[#064E3B]/20">
-                  ID: {candidateKey}
+                  Candidate ID: {candidateKey}
                 </span>
               </div>
               <h1 className="font-serif text-[32px] sm:text-[38px] text-[#1C1917] font-bold tracking-tight leading-tight py-0.5">
@@ -430,6 +448,19 @@ export default function CandidateProfilePage() {
                 </div>
 
                 <div className="flex items-center gap-2 shrink-0">
+                  {(profile?.resumePdfDataUrl || (profile?.resumeUrl && profile.resumeUrl.toLowerCase().includes(".pdf"))) && (
+                    <a
+                      href={profile.resumePdfDataUrl || profile.resumeUrl}
+                      download={profile?.resumeFileName || `${name.replace(/\s+/g, "_")}_Resume.pdf`}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="inline-flex items-center gap-1.5 px-3 py-2 bg-white hover:bg-[#FAF8F5] text-[#1C1917] border border-[#E7E2DA] text-[12px] font-mono font-semibold rounded transition-colors shadow-2xs cursor-pointer"
+                      title="Download Current Resume"
+                    >
+                      <Download className="h-3.5 w-3.5 text-[#064E3B]" />
+                      <span>Download</span>
+                    </a>
+                  )}
                   <button
                     onClick={() => resumeInputRef.current?.click()}
                     disabled={uploadingResume}
@@ -842,33 +873,22 @@ export default function CandidateProfilePage() {
 
         {/* ── RIGHT: Record Status Panel ── */}
         <div className="space-y-5">
-
-          {/* Profile Photo & LinkedIn Badge Manager */}
-          <ProfilePhotoUploader
-            currentAvatarUrl={profile?.avatarUrl || user?.photoURL}
-            name={name}
-            isEligibleForJob={isEligibleForJob}
-            verifiedCount={verifiedCount}
-            totalSkillsCount={skills.length}
-            currentBadgePreference={profile?.avatarBadge || "auto"}
-            onAvatarUpdated={(newUrl, badgePref) => {
-              setProfile((prev) =>
-                prev ? { ...prev, avatarUrl: newUrl || undefined, avatarBadge: badgePref } : null
-              );
-            }}
-          />
-
           {/* Record Status */}
           <div className="border border-[#E7E2DA] bg-white">
-            <div className="border-b border-[#E7E2DA] bg-[#F5F1EB] px-5 py-3">
+            <div className="border-b border-[#E7E2DA] bg-[#F5F1EB] px-5 py-3 flex items-center justify-between">
               <div className="text-[9px] font-medium tracking-[0.18em] text-[#78716C] uppercase">
                 Profile Overview
               </div>
+              {isEligibleForJob && (
+                <span className="text-[9px] font-mono text-[#064E3B] font-semibold uppercase tracking-wider bg-[#064E3B]/10 px-2 py-0.5 rounded border border-[#064E3B]/20">
+                  Career Badge Active
+                </span>
+              )}
             </div>
             <div className="divide-y divide-[#F0EDE8]">
               {[
                 {
-                  label: "Profile ID",
+                  label: "Candidate ID",
                   value: candidateKey,
                   accent: true,
                 },
@@ -901,6 +921,18 @@ export default function CandidateProfilePage() {
                 </div>
               ))}
             </div>
+
+            {skills.length > 0 && (
+              <div className="p-4 bg-[#FAF8F5] border-t border-[#E7E2DA] space-y-1">
+                <div className="flex items-center justify-between text-[11px] font-mono">
+                  <span className="text-[#78716C] uppercase">Skills Verification</span>
+                  <span className="font-semibold text-[#064E3B]">{verifiedCount} / {skills.length} Verified</span>
+                </div>
+                <p className="text-[11px] text-[#78716C] leading-relaxed font-sans">
+                  Career badge is awarded automatically once all skills assessments are verified (≥75% score).
+                </p>
+              </div>
+            )}
           </div>
 
           {/* External Links */}
@@ -919,16 +951,30 @@ export default function CandidateProfilePage() {
                 GitHub Profile
                 <ExternalLink className="h-2.5 w-2.5 ml-auto text-[#C8BFB0]" />
               </a>
-              <a
-                href={profile?.resumeUrl || "#"}
-                target="_blank"
-                rel="noreferrer"
-                className={`flex items-center gap-3 text-[12px] font-mono text-[#1C1917] hover:text-[#064E3B] transition-colors ${!profile?.resumeUrl ? "opacity-40 pointer-events-none" : ""}`}
-              >
-                <FileText className="h-3.5 w-3.5 shrink-0 text-[#78716C]" />
-                External Resume
-                <ExternalLink className="h-2.5 w-2.5 ml-auto text-[#C8BFB0]" />
-              </a>
+              {(profile?.portfolioUrl || (profile?.resumeUrl && (profile.resumeUrl.includes("portfolio") || profile.resumeUrl.includes("vercel.app")))) && (
+                <a
+                  href={profile?.portfolioUrl || profile?.resumeUrl || "#"}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="flex items-center gap-3 text-[12px] font-mono text-[#1C1917] hover:text-[#064E3B] transition-colors"
+                >
+                  <Globe className="h-3.5 w-3.5 shrink-0 text-[#78716C]" />
+                  Portfolio Website
+                  <ExternalLink className="h-2.5 w-2.5 ml-auto text-[#C8BFB0]" />
+                </a>
+              )}
+              {profile?.resumeUrl && (!profile.resumeUrl.includes("portfolio") && !profile.resumeUrl.includes("vercel.app")) && (
+                <a
+                  href={profile.resumeUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="flex items-center gap-3 text-[12px] font-mono text-[#1C1917] hover:text-[#064E3B] transition-colors"
+                >
+                  <FileText className="h-3.5 w-3.5 shrink-0 text-[#78716C]" />
+                  Resume Document
+                  <ExternalLink className="h-2.5 w-2.5 ml-auto text-[#C8BFB0]" />
+                </a>
+              )}
             </div>
           </div>
 

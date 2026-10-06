@@ -30,6 +30,9 @@ import {
   Briefcase,
   Lock,
   Printer,
+  Download,
+  X,
+  Eye,
 } from "lucide-react";
 
 function GithubIcon({ className = "h-4 w-4" }: { className?: string }) {
@@ -48,6 +51,7 @@ interface PublicProofRecordProps {
   id: string;
   candidate: {
     name?: string;
+    candidateKey?: string;
     skills?: string[];
     projects?: Array<{
       title: string;
@@ -80,7 +84,13 @@ interface PublicProofRecordProps {
     githubUsername?: string;
     githubUrl?: string;
     linkedinUrl?: string;
+    portfolioUrl?: string;
     resumeUrl?: string;
+    resumeFileName?: string;
+    resumeText?: string;
+    resumePdfDataUrl?: string;
+    atsScore?: number;
+    atsRating?: string;
     bio?: string;
     headline?: string;
     avatarUrl?: string;
@@ -105,14 +115,52 @@ export function PublicProofRecord({
   hideHeader = false,
 }: PublicProofRecordProps) {
   const [copied, setCopied] = useState(false);
+  const [isResumeModalOpen, setIsResumeModalOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [activeFilter, setActiveFilter] = useState<"all" | "verified" | "languages" | "frameworks" | "data">("all");
 
   const name = candidate.name || "Engineering Candidate";
   const skills = candidate.skills || [];
   const projects = candidate.projects || [];
-  const recordId = id.substring(0, 8).toUpperCase();
+  const candidateKey = candidate.candidateKey || (id ? `ML-${id.substring(0, 8).toUpperCase()}` : "");
   const avatarUrl = candidate.avatarUrl || user?.photoURL || "";
+
+  const isResumeActuallyPortfolio = Boolean(
+    candidate.resumeUrl &&
+    (candidate.resumeUrl.includes("portfolio") ||
+     candidate.resumeUrl.includes("vercel.app") ||
+     candidate.resumeUrl.includes("github.io") ||
+     (!candidate.resumeUrl.toLowerCase().includes(".pdf") && !candidate.resumeUrl.includes("drive.google.com")))
+  );
+  const resolvedPortfolioUrl = candidate.portfolioUrl || (isResumeActuallyPortfolio ? candidate.resumeUrl : undefined);
+  const resolvedResumeUrl = isResumeActuallyPortfolio ? (candidate.portfolioUrl ? candidate.resumeUrl : undefined) : candidate.resumeUrl;
+
+  const handleDownloadResume = () => {
+    const filename = candidate.resumeFileName || `${name.replace(/\s+/g, "_")}_Resume.pdf`;
+
+    if (candidate.resumePdfDataUrl) {
+      const a = document.createElement("a");
+      a.href = candidate.resumePdfDataUrl;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      return;
+    }
+
+    if (resolvedResumeUrl) {
+      const a = document.createElement("a");
+      a.href = resolvedResumeUrl;
+      a.download = filename;
+      a.target = "_blank";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      return;
+    }
+
+    window.print();
+  };
 
   const verifiedSkillsMap = candidate.verifiedSkills || {};
   const verifiedSkillsList = Object.entries(verifiedSkillsMap).filter(
@@ -207,6 +255,15 @@ export function PublicProofRecord({
 
           <div className="flex items-center gap-3">
             <button
+              onClick={() => setIsResumeModalOpen(true)}
+              className="flex items-center gap-1.5 text-[12px] font-semibold text-white bg-[#064E3B] hover:bg-[#043327] px-3.5 py-1.5 rounded-lg transition-all shadow-xs cursor-pointer"
+              title="See Candidate Resume"
+            >
+              <FileText className="h-3.5 w-3.5" />
+              <span>See Resume</span>
+            </button>
+
+            <button
               onClick={handleCopyLink}
               className="flex items-center gap-1.5 text-[12px] font-medium text-[#1C1917] hover:text-[#064E3B] px-3.5 py-1.5 rounded-lg border border-[#E7E2DA] bg-[#FAF8F5] hover:bg-white transition-all shadow-xs cursor-pointer"
               title="Copy public portfolio link"
@@ -224,10 +281,12 @@ export function PublicProofRecord({
               )}
             </button>
 
-            <div className="hidden sm:inline-flex items-center gap-1.5 text-[11px] font-mono text-[#064E3B] font-semibold px-2.5 py-1 rounded bg-[#064E3B]/10 border border-[#064E3B]/20">
-              <ShieldCheck className="h-3.5 w-3.5 text-[#064E3B]" />
-              <span>RECORD #{recordId}</span>
-            </div>
+            {candidateKey && (
+              <div className="hidden sm:inline-flex items-center gap-1.5 text-[11px] font-mono text-[#064E3B] font-semibold px-2.5 py-1 rounded bg-[#064E3B]/10 border border-[#064E3B]/20">
+                <ShieldCheck className="h-3.5 w-3.5 text-[#064E3B]" />
+                <span>ID: {candidateKey}</span>
+              </div>
+            )}
           </div>
         </header>
       )}
@@ -258,9 +317,11 @@ export function PublicProofRecord({
                 >
                   {isCandidateVerified ? `✓ Verified Practitioner (${verifiedPercentage}% Verified)` : "Engineering Candidate"}
                 </span>
-                <span className="text-[12px] font-mono text-[#78716C]">
-                  ID: #{recordId}
-                </span>
+                {candidateKey && (
+                  <span className="text-[12px] font-mono text-[#78716C]">
+                    ID: {candidateKey}
+                  </span>
+                )}
                 <span className="text-[#C8BFB0]">·</span>
                 <span className="text-[12px] text-[#78716C]">
                   Evaluated {formattedDate}
@@ -321,18 +382,39 @@ export function PublicProofRecord({
               </a>
             )}
 
-            {candidate.resumeUrl && (
+            {resolvedPortfolioUrl && (
               <a
-                href={candidate.resumeUrl}
+                href={resolvedPortfolioUrl}
                 target="_blank"
                 rel="noreferrer"
                 className="flex items-center gap-1.5 text-[12px] font-medium bg-white text-[#1C1917] hover:bg-[#FAF8F5] border border-[#E7E2DA] px-3.5 py-2 rounded-lg transition-colors shadow-xs"
               >
-                <FileText className="h-3.5 w-3.5 text-[#064E3B]" />
-                <span>Resume PDF</span>
+                <Globe className="h-3.5 w-3.5 text-[#064E3B]" />
+                <span>Portfolio</span>
                 <ExternalLink className="h-3 w-3 text-[#78716C]" />
               </a>
             )}
+
+            {/* ── SEE RESUME BUTTON ── */}
+            <button
+              type="button"
+              onClick={() => setIsResumeModalOpen(true)}
+              className="flex items-center gap-2 text-[12px] font-semibold bg-[#064E3B] text-white hover:bg-[#043327] px-4 py-2 rounded-lg transition-colors shadow-xs cursor-pointer"
+            >
+              <FileText className="h-4 w-4" />
+              <span>See Resume</span>
+            </button>
+
+            {/* ── DOWNLOAD RESUME BUTTON ── */}
+            <button
+              type="button"
+              onClick={handleDownloadResume}
+              className="flex items-center gap-1.5 text-[12px] font-medium bg-white text-[#1C1917] hover:bg-[#FAF8F5] border border-[#E7E2DA] px-3.5 py-2 rounded-lg transition-colors shadow-xs cursor-pointer"
+              title="Download Resume Document"
+            >
+              <Download className="h-3.5 w-3.5 text-[#064E3B]" />
+              <span>Download Resume</span>
+            </button>
           </div>
 
         </div>
@@ -427,8 +509,8 @@ export function PublicProofRecord({
 
               <div className="space-y-3 text-[13px]">
                 <div className="flex items-center justify-between border-b border-[#E7E2DA]/60 pb-2">
-                  <span className="text-[#78716C]">Telemetry Record ID</span>
-                  <span className="font-mono font-semibold text-[#1C1917]">#{recordId}</span>
+                  <span className="text-[#78716C]">Candidate ID</span>
+                  <span className="font-mono font-semibold text-[#1C1917]">{candidateKey}</span>
                 </div>
                 <div className="flex items-center justify-between border-b border-[#E7E2DA]/60 pb-2">
                   <span className="text-[#78716C]">Platform Authenticity</span>
@@ -442,8 +524,8 @@ export function PublicProofRecord({
                   <span className="font-mono text-[#1C1917]">75%+ Passing Standard</span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-[#78716C]">Sandbox Environment</span>
-                  <span className="font-mono text-[#1C1917]">Isolated Node / Go 1.22</span>
+                  <span className="text-[#78716C]">Evaluation Status</span>
+                  <span className="font-medium text-[#1C1917]">{isCandidateVerified ? "Verified Practitioner" : "In Progress"}</span>
                 </div>
               </div>
             </div>
@@ -481,7 +563,7 @@ export function PublicProofRecord({
                   <div className="flex items-center gap-2">
                     <GithubIcon className="h-4 w-4 text-[#1C1917]" />
                     <h3 className="text-[14px] font-bold text-[#1C1917] uppercase tracking-tight">
-                      Codebase Telemetry
+                      GitHub Activity
                     </h3>
                   </div>
                   <span className="text-[10px] font-mono text-[#78716C] bg-[#FAF8F5] px-2 py-0.5 rounded border border-[#E7E2DA]">
@@ -696,9 +778,9 @@ export function PublicProofRecord({
                   <span className="text-[#1C1917]">50 Tests per Task</span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span>Cryptographic Ledger</span>
-                  <span className="text-[10px] text-[#78716C] truncate max-w-[140px]">
-                    SHA256-{recordId}-OK
+                  <span>Verification Status</span>
+                  <span className="text-[11px] font-medium text-[#064E3B]">
+                    Meritlane Verified
                   </span>
                 </div>
               </div>
@@ -1026,14 +1108,14 @@ export function PublicProofRecord({
                     Meritlane Institutional Verification Authority
                   </div>
                   <div className="text-[11.5px] text-[#78716C]">
-                    Cryptographically recorded telemetry for hiring teams and engineering organizations worldwide.
+                    Verified technical skills and project assessments for engineering hiring teams.
                   </div>
                 </div>
               </div>
 
               <div className="shrink-0 text-center sm:text-right">
                 <span className="text-[10px] font-mono uppercase px-3 py-1 rounded-full bg-white border border-[#E7E2DA] text-[#78716C]">
-                  PORTFOLIO HASH: {recordId}-ML
+                  CANDIDATE ID: {candidateKey}
                 </span>
               </div>
             </div>
@@ -1042,6 +1124,252 @@ export function PublicProofRecord({
 
         </div>
       </main>
+
+      {/* ── Resume Viewer & Download Modal ── */}
+      {isResumeModalOpen && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-xs p-3 sm:p-6"
+        >
+          <div className="bg-white border border-[#E7E2DA] rounded-xl shadow-2xl w-full max-w-4xl max-h-[92vh] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+            
+            {/* Modal Header */}
+            <div className="flex items-center justify-between px-5 py-4 border-b border-[#E7E2DA] bg-[#FAF8F5]">
+              <div className="flex items-center gap-3 min-w-0">
+                <div className="h-9 w-9 rounded-lg bg-[#064E3B]/10 text-[#064E3B] flex items-center justify-center shrink-0 border border-[#064E3B]/20">
+                  <FileText className="h-5 w-5" />
+                </div>
+                <div className="min-w-0">
+                  <div className="flex items-center gap-2">
+                    <h3 className="text-[15px] font-semibold text-[#1C1917] truncate">
+                      {candidate.resumeFileName || `${name.replace(/\s+/g, "_")}_Resume.pdf`}
+                    </h3>
+                    <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-[#DCFCE7] text-[#166534] border border-[#86EFAC] shrink-0 font-semibold">
+                      Verified Resume
+                    </span>
+                  </div>
+                  <p className="text-[11.5px] text-[#78716C] truncate mt-0.5">
+                    Candidate: {name} · ID: {candidateKey}
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2 shrink-0">
+                <button
+                  type="button"
+                  onClick={handleDownloadResume}
+                  className="flex items-center gap-1.5 px-3 py-1.5 bg-[#064E3B] hover:bg-[#043327] text-white text-[12px] font-semibold rounded-lg transition-colors shadow-2xs cursor-pointer"
+                  title="Download Resume PDF"
+                >
+                  <Download className="h-3.5 w-3.5" />
+                  <span className="hidden sm:inline">Download</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => window.print()}
+                  className="flex items-center gap-1.5 px-2.5 py-1.5 bg-white hover:bg-[#FAF8F5] text-[#1C1917] border border-[#E7E2DA] text-[12px] font-medium rounded-lg transition-colors shadow-2xs cursor-pointer"
+                  title="Print Resume"
+                >
+                  <Printer className="h-3.5 w-3.5 text-[#78716C]" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setIsResumeModalOpen(false)}
+                  className="p-1.5 text-[#78716C] hover:text-[#1C1917] hover:bg-[#E7E2DA]/50 rounded-lg transition-colors cursor-pointer"
+                  aria-label="Close"
+                >
+                  <X className="h-5 w-5" />
+                </button>
+              </div>
+            </div>
+
+            {/* Modal Body: PDF Preview or Structured Verified Resume */}
+            <div className="flex-1 overflow-y-auto p-4 sm:p-6 bg-[#FAF8F5]/50">
+              {candidate.resumePdfDataUrl || (resolvedResumeUrl && resolvedResumeUrl.toLowerCase().includes(".pdf")) ? (
+                <div className="w-full h-[68vh] rounded-lg overflow-hidden border border-[#E7E2DA] bg-[#525659] shadow-inner">
+                  <iframe
+                    src={candidate.resumePdfDataUrl || resolvedResumeUrl}
+                    title={`${name} Resume Preview`}
+                    className="w-full h-full border-0"
+                  />
+                </div>
+              ) : (
+                /* High-fidelity Institutional Resume Document */
+                <div className="bg-white border border-[#E7E2DA] rounded-lg p-6 sm:p-10 shadow-xs max-w-3xl mx-auto space-y-6 text-[#1C1917]">
+                  {/* Resume Header */}
+                  <div className="border-b border-[#E7E2DA] pb-6">
+                    <div className="flex items-start justify-between gap-4">
+                      <div>
+                        <h1 className="font-serif text-[28px] sm:text-[34px] font-bold text-[#1C1917] leading-tight">
+                          {name}
+                        </h1>
+                        <p className="text-[14px] text-[#064E3B] font-medium mt-1">
+                          {candidate.branch || "Software Engineering"} · Class of {candidate.gradYear || "2026"}
+                        </p>
+                        <p className="text-[13px] text-[#78716C] mt-0.5">
+                          {candidate.college}
+                        </p>
+                      </div>
+                      <div className="text-right shrink-0">
+                        <span className="inline-block text-[11px] font-mono px-2.5 py-1 rounded bg-[#FAF8F5] border border-[#E7E2DA] text-[#78716C]">
+                          ID: {candidateKey}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Contact & Links */}
+                    <div className="flex flex-wrap items-center gap-3 mt-4 text-[12px] text-[#57534E]">
+                      {candidate.githubUrl && (
+                        <a href={candidate.githubUrl} target="_blank" rel="noreferrer" className="flex items-center gap-1 hover:text-[#064E3B] underline underline-offset-2">
+                          <GithubIcon className="h-3.5 w-3.5" />
+                          <span>GitHub</span>
+                        </a>
+                      )}
+                      {candidate.linkedinUrl && (
+                        <a href={candidate.linkedinUrl} target="_blank" rel="noreferrer" className="flex items-center gap-1 hover:text-[#064E3B] underline underline-offset-2">
+                          <Globe className="h-3.5 w-3.5 text-[#0A66C2]" />
+                          <span>LinkedIn</span>
+                        </a>
+                      )}
+                      {resolvedPortfolioUrl && (
+                        <a href={resolvedPortfolioUrl} target="_blank" rel="noreferrer" className="flex items-center gap-1 hover:text-[#064E3B] underline underline-offset-2">
+                          <Globe className="h-3.5 w-3.5 text-[#064E3B]" />
+                          <span>Portfolio</span>
+                        </a>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Summary */}
+                  {candidate.bio && (
+                    <div>
+                      <h4 className="text-[11px] font-mono uppercase tracking-[0.16em] text-[#78716C] font-semibold mb-2">
+                        Professional Summary
+                      </h4>
+                      <p className="text-[13.5px] leading-relaxed text-[#44403C]">
+                        {candidate.bio}
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Verified Skills */}
+                  <div>
+                    <h4 className="text-[11px] font-mono uppercase tracking-[0.16em] text-[#78716C] font-semibold mb-3">
+                      Verified Technical Skills
+                    </h4>
+                    <div className="flex flex-wrap gap-2">
+                      {skills.map((skill) => {
+                        const isVer = verifiedSkillsMap[skill]?.status === "verified";
+                        const score = verifiedSkillsMap[skill]?.score;
+                        return (
+                          <span
+                            key={skill}
+                            className={`inline-flex items-center gap-1.5 px-3 py-1 rounded text-[12px] font-mono border ${
+                              isVer
+                                ? "bg-[#DCFCE7] text-[#166534] border-[#86EFAC] font-semibold"
+                                : "bg-[#FAF8F5] text-[#57534E] border-[#E7E2DA]"
+                            }`}
+                          >
+                            {isVer && <CheckCircle2 className="h-3 w-3 text-[#166534]" />}
+                            <span>{skill}</span>
+                            {score !== undefined && <span className="opacity-70 text-[10px]">({score}%)</span>}
+                          </span>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* Featured Projects */}
+                  {projects.length > 0 && (
+                    <div>
+                      <h4 className="text-[11px] font-mono uppercase tracking-[0.16em] text-[#78716C] font-semibold mb-3">
+                        Engineering Projects
+                      </h4>
+                      <div className="space-y-4">
+                        {projects.map((proj, idx) => (
+                          <div key={idx} className="p-4 rounded-lg border border-[#E7E2DA] bg-[#FAF8F5]/60">
+                            <div className="flex items-start justify-between gap-3">
+                              <h5 className="font-semibold text-[14px] text-[#1C1917]">
+                                {proj.title}
+                              </h5>
+                              <div className="flex items-center gap-2 shrink-0">
+                                {proj.repoUrl && (
+                                  <a href={proj.repoUrl} target="_blank" rel="noreferrer" className="text-[11px] font-mono text-[#064E3B] hover:underline flex items-center gap-1">
+                                    <FolderGit2 className="h-3 w-3" />
+                                    <span>Code</span>
+                                  </a>
+                                )}
+                                {proj.liveUrl && (
+                                  <a href={proj.liveUrl} target="_blank" rel="noreferrer" className="text-[11px] font-mono text-[#064E3B] hover:underline flex items-center gap-1">
+                                    <ExternalLink className="h-3 w-3" />
+                                    <span>Live</span>
+                                  </a>
+                                )}
+                              </div>
+                            </div>
+                            {proj.description && (
+                              <p className="text-[12.5px] text-[#57534E] mt-1.5 leading-relaxed">
+                                {proj.description}
+                              </p>
+                            )}
+                            {proj.skillsUsed && proj.skillsUsed.length > 0 && (
+                              <div className="flex flex-wrap gap-1.5 mt-2">
+                                {proj.skillsUsed.map((sk) => (
+                                  <span key={sk} className="text-[10.5px] font-mono px-2 py-0.5 rounded bg-white border border-[#E7E2DA] text-[#78716C]">
+                                    {sk}
+                                  </span>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Extracted Resume Text if available and relevant */}
+                  {candidate.resumeText && candidate.resumeText.length > 100 && (
+                    <div className="pt-4 border-t border-[#E7E2DA]">
+                      <h4 className="text-[11px] font-mono uppercase tracking-[0.16em] text-[#78716C] font-semibold mb-2">
+                        Resume Transcript &amp; Raw Evidence
+                      </h4>
+                      <div className="p-4 rounded bg-[#FAF8F5] border border-[#E7E2DA] text-[12px] font-mono text-[#57534E] whitespace-pre-wrap max-h-64 overflow-y-auto leading-relaxed">
+                        {candidate.resumeText}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+
+            {/* Modal Footer */}
+            <div className="px-5 py-3 border-t border-[#E7E2DA] bg-white flex items-center justify-between">
+              <span className="text-[11.5px] text-[#78716C] font-mono">
+                Verified Candidate Record · Meritlane Registry
+              </span>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setIsResumeModalOpen(false)}
+                  className="px-4 py-2 border border-[#E7E2DA] bg-white hover:bg-[#FAF8F5] text-[#1C1917] text-[12px] font-medium rounded-lg transition-colors cursor-pointer"
+                >
+                  Close
+                </button>
+                <button
+                  type="button"
+                  onClick={handleDownloadResume}
+                  className="flex items-center gap-1.5 px-4 py-2 bg-[#064E3B] hover:bg-[#043327] text-white text-[12px] font-semibold rounded-lg transition-colors shadow-2xs cursor-pointer"
+                >
+                  <Download className="h-3.5 w-3.5" />
+                  <span>Download Resume</span>
+                </button>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      )}
 
     </div>
   );

@@ -34,6 +34,7 @@ import {
   ExternalLink,
   X,
   Lock,
+  Loader2,
 } from "lucide-react";
 import { logFunnelEvent } from "@/lib/analytics/logEvent";
 import { auth } from "@/lib/firebase/config";
@@ -274,11 +275,41 @@ function getSkillLockedLanguage(skill: string): { id: string; name: string; mona
 }
 
 function AssessmentContentWrapper() {
-  const { user, userProfile, loading } = useAuth();
+  const { user, userProfile, loading, isAdmin } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
 
   const skillParam = searchParams.get("skill") || "Software Engineering";
+  
+  const formatSkillName = (s: string) => {
+    if (!s) return "";
+    const aliases: Record<string, string> = {
+      "c": "C",
+      "c++": "C++",
+      "cpp": "C++",
+      "c#": "C#",
+      "csharp": "C#",
+      "js": "JavaScript",
+      "javascript": "JavaScript",
+      "ts": "TypeScript",
+      "typescript": "TypeScript",
+      "py": "Python",
+      "python": "Python",
+      "java": "Java",
+      "golang": "Go",
+      "go": "Go",
+      "r": "R",
+      "sql": "SQL",
+      "react": "React",
+      "react.js": "React",
+      "reactjs": "React",
+    };
+    const lower = s.toLowerCase();
+    if (aliases[lower]) return aliases[lower];
+    return s.charAt(0).toUpperCase() + s.slice(1);
+  };
+  const displaySkill = formatSkillName(skillParam);
+
   const lockedLang = getSkillLockedLanguage(skillParam);
   const isSqlSkill = /sql|mysql|postgres|sqlite|database/i.test(skillParam);
   const isLanguageLocked = Boolean(lockedLang || isSqlSkill);
@@ -287,6 +318,7 @@ function AssessmentContentWrapper() {
   const [errorMsg, setErrorMsg] = useState("");
   const [cooldownDays, setCooldownDays] = useState<number | null>(null);
   const [retryAvailableAt, setRetryAvailableAt] = useState<string | null>(null);
+  const [resettingLockout, setResettingLockout] = useState(false);
   const [hasStarted, setHasStarted] = useState(false);
   const [infractionCount, setInfractionCount] = useState(0);
   const [integrityTerminated, setIntegrityTerminated] = useState(false);
@@ -665,8 +697,8 @@ function AssessmentContentWrapper() {
       score: 0,
       status: "terminated",
       skill: skillParam,
-      retryAvailableAt: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString(),
-      aiFeedback: "The assessment was terminated due to an unauthorized navigation exit or window departure. Your submitted answers and code buffer have been preserved in the examination archive.",
+      retryAvailableAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+      aiFeedback: "The assessment was terminated due to an integrity violation (unauthorized navigation, tab switching, or screenshot).\n\nIf this was a mistake or system glitch, you can submit a query to support@meritlane.com to resolve this and attempt again.\n\nIf you were attempting to use unauthorized tools, please be aware this violates our academic integrity policy. Do not do that! You will be able to re-attempt this skill assessment in 30 days.",
       assessmentScores: {
         easy: 0,
         easyPassed: false,
@@ -796,14 +828,31 @@ function AssessmentContentWrapper() {
       e.preventDefault();
     };
 
-    // Strict Anti-Tamper: Block devtools shortcuts & view source
+    // Strict Anti-Tamper: Block devtools shortcuts & view source & screenshots
     const handleKeyDown = (e: KeyboardEvent) => {
+      // Mac screenshots
+      if (e.metaKey && e.shiftKey && (e.key === "3" || e.key === "4" || e.key === "5")) {
+        triggerInfraction("screenshot", "You attempted to capture a screenshot.");
+        e.preventDefault();
+      }
+      // Windows Snipping Tool (Win + Shift + S)
+      if (e.metaKey && e.shiftKey && (e.key === "s" || e.key === "S")) {
+        triggerInfraction("screenshot", "You attempted to capture a screenshot.");
+        e.preventDefault();
+      }
+
       if (
         e.key === "F12" ||
         (e.ctrlKey && e.shiftKey && (e.key === "I" || e.key === "J" || e.key === "C")) ||
         (e.ctrlKey && (e.key === "u" || e.key === "U"))
       ) {
         e.preventDefault();
+      }
+    };
+
+    const handleKeyUp = (e: KeyboardEvent) => {
+      if (e.key === "PrintScreen") {
+        triggerInfraction("screenshot", "You attempted to capture a screenshot.");
       }
     };
 
@@ -818,6 +867,7 @@ function AssessmentContentWrapper() {
     window.addEventListener("beforeunload", handleBeforeUnload);
     document.addEventListener("contextmenu", handleContextMenu);
     window.addEventListener("keydown", handleKeyDown);
+    window.addEventListener("keyup", handleKeyUp);
     document.addEventListener("copy", handleCopy);
 
     return () => {
@@ -827,6 +877,7 @@ function AssessmentContentWrapper() {
       window.removeEventListener("beforeunload", handleBeforeUnload);
       document.removeEventListener("contextmenu", handleContextMenu);
       window.removeEventListener("keydown", handleKeyDown);
+      window.removeEventListener("keyup", handleKeyUp);
       document.removeEventListener("copy", handleCopy);
     };
   }, [hasStarted, assessmentResult, integrityTerminated, requestFullscreenSafe, handleIntegrityTerminate, skillParam]);
@@ -933,14 +984,18 @@ function AssessmentContentWrapper() {
       return copy;
     });
   };
+  const codeUpdateTimeout = useRef<any>(null);
 
   const handleCodeChange = (newVal: string) => {
-    setCode(newVal);
-    if (activeCodingTaskIdx === 0) {
-      setCodeEasy(newVal);
-    } else {
-      setCodeMedium(newVal);
-    }
+    if (codeUpdateTimeout.current) clearTimeout(codeUpdateTimeout.current);
+    codeUpdateTimeout.current = setTimeout(() => {
+      setCode(newVal);
+      if (activeCodingTaskIdx === 0) {
+        setCodeEasy(newVal);
+      } else {
+        setCodeMedium(newVal);
+      }
+    }, 400); // 400ms debounce
   };
 
   const handleSwitchCodingTask = (targetIdx: 0 | 1) => {
@@ -1119,13 +1174,12 @@ function AssessmentContentWrapper() {
   // ── Code Execution & Submit ────────────────────────────────────────────────
 
   const handleTest = async (isSubmit: boolean) => {
-    if (isSubmit) {
-      setShowSubmitModal(true);
-      return;
-    }
-
     setEvaluating(true);
-    setOutput("Compiling code...\nInitializing execution sandbox...\n");
+    if (isSubmit) {
+      setOutput("Running 50 evaluation test suites before final submission...\n");
+    } else {
+      setOutput("Compiling code...\nInitializing execution sandbox...\n");
+    }
 
     try {
       const token = user ? await user.getIdToken(true) : "";
@@ -1146,7 +1200,8 @@ function AssessmentContentWrapper() {
           skill: skillParam,
           code: activeCode,
           language: selectedLanguage,
-          isPublicTest: true,
+          isPublicTest: !isSubmit,
+          dryRun: isSubmit,
           questionId: activeQuestion?.id,
           customInput: (activeConsoleTab === "custom" && customInput.trim()) ? customInput.trim() : undefined,
         }),
@@ -1184,11 +1239,23 @@ function AssessmentContentWrapper() {
           consoleMsg += `[Runtime Stderr]\n${data.stderr}\n\n`;
         }
         const passedCount = data.passedTests ?? (data.cases ? data.cases.filter((c: any) => c.passed).length : 0);
-        const totalCount = data.cases ? data.cases.length : 5;
-        consoleMsg += `Executed ${totalCount} public test cases (${passedCount}/${totalCount} passed).\n` +
-          (passedCount === totalCount
-            ? "✓ All 5 public test assertions succeeded. Ready for final evaluation.\n"
-            : "⚠ Some public assertions failed. Check input/output diffs in Test Cases tab.\n");
+        const totalCount = data.cases ? data.cases.length : (isSubmit ? 50 : 5);
+        
+        if (isSubmit) {
+          consoleMsg += `Executed ${totalCount} evaluation test cases (${passedCount}/${totalCount} passed).\n`;
+          if (passedCount === totalCount) {
+             consoleMsg += "✓ All 50 test assertions succeeded! Ready for final submission.\n";
+             setTimeout(() => setShowSubmitModal(true), 1500);
+          } else {
+             consoleMsg += "⚠ Some test assertions failed. Please fix your code to pass all 50 cases before submitting the exam.\n";
+          }
+        } else {
+          consoleMsg += `Executed ${totalCount} public test cases (${passedCount}/${totalCount} passed).\n` +
+            (passedCount === totalCount
+              ? "✓ All 5 public test assertions succeeded. Ready for 50-case evaluation.\n"
+              : "⚠ Some public assertions failed. Check input/output diffs in Test Cases tab.\n");
+        }
+        
         if (activeConsoleTab !== "custom") {
           setActiveConsoleTab("testcases");
         }
@@ -1388,7 +1455,7 @@ function AssessmentContentWrapper() {
   }, [assessmentResult, integrityTerminated]);
 
   // ── Public Test Cases (5 Test Cases for Run Code) ─────────────────────────
-  const defaultPublicTestCases = useMemo(() => {
+  const defaultPublicTestCases = useMemo<any[]>(() => {
     const skillLower = (skillParam || "").toLowerCase();
     const langLower = (selectedLanguage || "").toLowerCase();
 
@@ -1597,7 +1664,7 @@ function AssessmentContentWrapper() {
               </div>
               <div>
                 <h2 className="text-[17px] font-bold text-[#1C1917]">
-                  Full Assessment Report: {skillParam}
+                  Full Assessment Report: {displaySkill}
                 </h2>
                 <p className="text-[12px] text-[#78716C]">
                   Comprehensive audit record of all responses, code implementations, and session diagnostics.
@@ -1839,7 +1906,7 @@ function AssessmentContentWrapper() {
           {/* Modal Footer */}
           <div className="px-6 py-3.5 border-t border-[#E7E2DA] bg-[#F8F6F3] flex items-center justify-between">
             <span className="text-[12px] text-[#78716C]">
-              Session ID: <span className="font-mono">ML-{skillParam.toUpperCase().slice(0, 4)}-{user?.uid.slice(0, 6)}</span>
+              Assessment Type: <span className="font-mono">ML-EVAL-{skillParam.toUpperCase().slice(0, 4)}</span>
             </span>
             <button
               onClick={() => setShowFullReportModal(false)}
@@ -1869,7 +1936,7 @@ function AssessmentContentWrapper() {
             <span>/</span>
             <span>Technical Verification</span>
             <span>/</span>
-            <span className="text-[#1C1917] font-medium">{skillParam}</span>
+            <span className="text-[#1C1917] font-medium">{displaySkill}</span>
           </div>
           <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-[#FEF2F2] border border-[#FCA5A5] text-[#B42318] text-[11px] font-mono font-semibold rounded">
             <XCircle className="h-3.5 w-3.5" />
@@ -1895,7 +1962,7 @@ function AssessmentContentWrapper() {
                   </span>
                 </div>
                 <h1 className="text-[24px] sm:text-[30px] font-bold text-[#1C1917] tracking-tight">
-                  {skillParam} Assessment Terminated
+                  {displaySkill} Assessment Terminated
                 </h1>
                 <p className="text-[14px] text-[#78716C] mt-1 max-w-2xl leading-relaxed">
                   This examination was concluded due to navigation exit or security requirements. Your answers, code buffers, and attempt diagnostics are preserved in your official record.
@@ -2055,7 +2122,7 @@ function AssessmentContentWrapper() {
               <span>/</span>
               <span>Technical Verification</span>
               <span>/</span>
-              <span className="text-[#1C1917] font-medium">{skillParam}</span>
+              <span className="text-[#1C1917] font-medium">{displaySkill}</span>
             </div>
             <div className="flex items-center gap-3">
               <span className="text-[12px] font-mono text-[#78716C] bg-white px-2.5 py-1 rounded border border-[#E7E2DA]">
@@ -2090,7 +2157,7 @@ function AssessmentContentWrapper() {
                   </span>
                 </div>
                 <h1 className="text-[26px] sm:text-[32px] font-bold text-[#1C1917] tracking-tight">
-                  {skillParam} Technical Assessment
+                  {displaySkill} Technical Assessment
                 </h1>
                 <p className="text-[14px] text-[#78716C] mt-1 max-w-2xl leading-relaxed">
                   {isPassed
@@ -2339,7 +2406,7 @@ function AssessmentContentWrapper() {
                   </div>
                   <div>
                     <h2 className="text-[17px] font-bold text-[#1C1917]">
-                      Full Assessment Report: {skillParam}
+                      Full Assessment Report: {displaySkill}
                     </h2>
                     <p className="text-[12px] text-[#78716C]">
                       Comprehensive audit record of all responses, code implementations, and test results.
@@ -2648,7 +2715,7 @@ function AssessmentContentWrapper() {
               {/* Modal Footer */}
               <div className="px-6 py-3.5 border-t border-[#E7E2DA] bg-[#F8F6F3] flex items-center justify-between">
                 <span className="text-[12px] text-[#78716C]">
-                  Session ID: <span className="font-mono">ML-{skillParam.toUpperCase().slice(0, 4)}-{user?.uid.slice(0, 6)}</span>
+                  Assessment Type: <span className="font-mono">ML-EVAL-{skillParam.toUpperCase().slice(0, 4)}</span>
                 </span>
                 <button
                   onClick={() => setShowFullReportModal(false)}
@@ -2677,7 +2744,7 @@ function AssessmentContentWrapper() {
               <AlertTriangle className="h-5 w-5" /> Skill not in your profile
             </h2>
             <p className="text-[14px] text-[#78716C] mb-8">
-              The skill &quot;{skillParam}&quot; is not part of your Technical Identity. Add it to
+              The skill &quot;{displaySkill}&quot; is not part of your Technical Identity. Add it to
               your profile before starting verification.
             </p>
             <button
@@ -2699,7 +2766,7 @@ function AssessmentContentWrapper() {
               <CheckCircle2 className="h-5 w-5" /> Already Verified
             </h2>
             <p className="text-[14px] text-[#78716C] mb-8">
-              You have already successfully passed the assessment for {skillParam}. Your
+              You have already successfully passed the assessment for {displaySkill}. Your
               verification is recorded and visible to employers.
             </p>
             <div className="flex flex-col sm:flex-row gap-3">
@@ -2787,6 +2854,100 @@ function AssessmentContentWrapper() {
       );
     }
 
+    if (errorMsg === "PROCTORING LOCKOUT") {
+      const isSuperadmin = isAdmin || 
+        user?.email?.toLowerCase() === "saitrishankb9@gmail.com" || 
+        user?.email?.toLowerCase() === "saitrishankb1311@gmail.com";
+
+      return (
+        <div className="flex h-[100dvh] w-full bg-[#F8F6F3] items-center justify-center p-6">
+          <div className="max-w-md w-full border border-[#E7E2DA] bg-white rounded p-8 shadow-sm">
+            <h2 className="text-[18px] font-semibold text-[#B42318] mb-2 flex items-center gap-2">
+              <AlertTriangle className="h-5 w-5 text-[#B42318]" />
+              Proctoring Lockout Active
+            </h2>
+            <p className="text-[14px] text-[#78716C] mb-6 leading-relaxed">
+              Assessment access is temporarily suspended due to repeated proctoring departures or fullscreen exits. To preserve institutional integrity, a cooldown period is enforced.
+            </p>
+            <div className="border border-[#E7E2DA] bg-[#F8F6F3] p-5 rounded mb-8">
+              <div className="text-[13px] font-medium text-[#78716C] mb-3 flex items-center justify-between">
+                <span>Time Remaining Until Unlock</span>
+                <span className="text-[10px] font-mono text-[#92400E] bg-[#FEF3C7] border border-[#FDE68A] px-2 py-0.5 rounded font-semibold">
+                  LOCKOUT
+                </span>
+              </div>
+              <CooldownTimer
+                timestamp={
+                  retryAvailableAt
+                    ? new Date(retryAvailableAt).getTime() - 90 * 24 * 60 * 60 * 1000
+                    : Date.now()
+                }
+                durationDays={90}
+                variant="boxes"
+              />
+              <div className="mt-3 text-right text-[11px] font-mono text-[#78716C]">
+                Eligible on:{" "}
+                <strong className="text-[#1C1917]">
+                  {retryAvailableAt
+                    ? new Date(retryAvailableAt).toLocaleDateString(undefined, {
+                        month: "long",
+                        day: "numeric",
+                        year: "numeric",
+                      })
+                    : new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toLocaleDateString(undefined, {
+                        month: "long",
+                        day: "numeric",
+                        year: "numeric",
+                      })}
+                </strong>
+              </div>
+            </div>
+            <div className="flex flex-col sm:flex-row gap-3">
+              {isSuperadmin ? (
+                <button
+                  disabled={resettingLockout}
+                  onClick={async () => {
+                    if (!user) return;
+                    setResettingLockout(true);
+                    try {
+                      const token = await user.getIdToken();
+                      await fetch("/api/start-assessment", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+                        body: JSON.stringify({ skill: skillParam, resetCooldown: true, resetLockout: true })
+                      });
+                      window.location.reload();
+                    } catch (e) {
+                      console.error(e);
+                    } finally {
+                      setResettingLockout(false);
+                    }
+                  }}
+                  className="flex-1 h-11 border border-[#1C1917] bg-[#1C1917] text-white font-semibold text-[14px] rounded hover:bg-[#292524] transition-colors disabled:opacity-50"
+                >
+                  {resettingLockout ? "Resetting..." : "Reset Lockout (Admin)"}
+                </button>
+              ) : (
+                <button
+                  onClick={() => handleReturn("/candidate/verification")}
+                  className="flex-1 h-11 border border-[#1C1917] bg-[#1C1917] text-white font-semibold text-[14px] rounded hover:bg-[#292524] transition-colors flex items-center justify-center gap-2"
+                >
+                  <ShieldCheck className="h-4 w-4" />
+                  <span>Verification</span>
+                </button>
+              )}
+              <button
+                onClick={() => handleReturn("/candidate/dashboard")}
+                className="flex-1 h-11 border border-[#E7E2DA] text-[#1C1917] font-semibold text-[14px] rounded hover:border-[#1C1917] hover:bg-[#F2EFE9] transition-colors"
+              >
+                Dashboard
+              </button>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
     // Generic error fallback
     return (
       <div className="flex h-[100dvh] w-full bg-[#F8F6F3] items-center justify-center p-6">
@@ -2841,7 +3002,7 @@ function AssessmentContentWrapper() {
               <div>
                 <div className="inline-flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-[#064E3B] bg-[#064E3B]/10 border border-[#064E3B]/20 px-3 py-1 rounded mb-3">
                   <ShieldCheck className="h-3.5 w-3.5 text-[#064E3B]" />
-                  {skillParam.toUpperCase()} · Technical Assessment & Verification
+                  {displaySkill.toUpperCase()} · Technical Assessment & Verification
                 </div>
                 <h1 className="text-[32px] sm:text-[38px] font-semibold text-[#1C1917] leading-tight">
                   Before you begin
@@ -3142,7 +3303,7 @@ function AssessmentContentWrapper() {
             <span className="text-[#D4CFCB] shrink-0">/</span>
             <span className="inline-flex items-center gap-1.5 font-medium text-[11px] font-semibold tracking-wider uppercase text-[#064E3B] bg-[#064E3B]/10 border border-[#064E3B]/20 px-2.5 py-0.5 rounded shrink-0">
               <ShieldAlert className="h-3 w-3 text-[#064E3B]" />
-              {skillParam} Verification
+              {displaySkill} Verification
             </span>
             <button
               onClick={toggleFullscreen}
@@ -3605,6 +3766,7 @@ function AssessmentContentWrapper() {
                 <div className="flex-1 min-h-0 relative w-full h-full overflow-hidden bg-[#0D1117]">
                   <MonacoEditor
                     height="100%"
+                    path={`task-${activeCodingTaskIdx}-lang-${selectedLanguage}`}
                     language={
                       selectedLanguage === "go" ? "go" :
                       selectedLanguage === "python" ? "python" :
@@ -3617,7 +3779,7 @@ function AssessmentContentWrapper() {
                       selectedLanguage === "rust" ? "rust" : "plaintext"
                     }
                     theme={editorTheme === "dark" ? "vs-dark" : "light"}
-                    value={code}
+                    defaultValue={code}
                     onChange={(val) => handleCodeChange(val || "")}
                     options={{
                       fontSize: editorFontSize,
@@ -3929,11 +4091,19 @@ function AssessmentContentWrapper() {
                             </span>
                             {displayCases[selectedCaseIdx].passed !== null && (
                               <span className={`px-2 py-0.5 rounded text-[10px] font-medium uppercase font-bold ${
-                                displayCases[selectedCaseIdx].passed
+                                displayCases[selectedCaseIdx].status === "TLE"
+                                  ? "bg-[#F59E0B]/20 text-[#FBBF24] border border-[#F59E0B]/40"
+                                  : displayCases[selectedCaseIdx].status === "RE"
+                                  ? "bg-[#EF4444]/20 text-[#F87171] border border-[#EF4444]/40"
+                                  : displayCases[selectedCaseIdx].passed
                                   ? "bg-[#10B981]/20 text-[#34D399] border border-[#10B981]/40"
                                   : "bg-[#EF4444]/20 text-[#F87171] border border-[#EF4444]/40"
                               }`}>
-                                {displayCases[selectedCaseIdx].passed ? "Passed ✓" : "Failed ✗"}
+                                {displayCases[selectedCaseIdx].status === "TLE" ? "Time Limit Exceeded ⏱"
+                                  : displayCases[selectedCaseIdx].status === "RE" ? "Runtime Error ⚠"
+                                  : displayCases[selectedCaseIdx].status === "WA" ? "Wrong Answer ✗"
+                                  : displayCases[selectedCaseIdx].passed ? "Accepted ✓"
+                                  : "Failed ✗"}
                               </span>
                             )}
                           </div>
@@ -3991,8 +4161,11 @@ function AssessmentContentWrapper() {
                           {/* Actual Output (if executed) */}
                           {displayCases[selectedCaseIdx].actual !== undefined && displayCases[selectedCaseIdx].actual !== "" && (
                             <div>
-                              <div className="text-[10px] uppercase tracking-wider text-[#8B949E] mb-1">
-                                Your Output:
+                              <div className="text-[10px] uppercase tracking-wider text-[#8B949E] mb-1 flex items-center justify-between">
+                                <span>Your Output:</span>
+                                {displayCases[selectedCaseIdx].runtimeMs !== undefined && (
+                                  <span className="text-[10px] text-[#8B949E] font-sans">Runtime: {displayCases[selectedCaseIdx].runtimeMs} ms</span>
+                                )}
                               </div>
                               <div className={`p-2.5 rounded font-mono text-[12px] whitespace-pre-wrap overflow-x-auto max-h-16 ${
                                 displayCases[selectedCaseIdx].passed
@@ -4004,6 +4177,22 @@ function AssessmentContentWrapper() {
                                     : "bg-[#FEF2F2] text-[#991B1B] border border-[#FECACA]"
                               }`}>
                                 {displayCases[selectedCaseIdx].actual}
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Stdout / Console Logs (if any) */}
+                          {displayCases[selectedCaseIdx].consoleLogs && (
+                            <div>
+                              <div className="text-[10px] uppercase tracking-wider text-[#8B949E] mb-1 mt-2">
+                                Stdout:
+                              </div>
+                              <div className={`p-2.5 rounded font-mono text-[12px] whitespace-pre-wrap overflow-x-auto max-h-16 ${
+                                editorTheme === "dark"
+                                  ? "bg-[#161B22] text-[#E6EDF3] border border-[#30363D]"
+                                  : "bg-[#F3F4F6] text-[#1C1917] border border-[#E7E2DA]"
+                              }`}>
+                                {displayCases[selectedCaseIdx].consoleLogs}
                               </div>
                             </div>
                           )}
@@ -4131,20 +4320,20 @@ function AssessmentContentWrapper() {
         </div>
       )}
 
-      {/* High-Tech 50-Test-Case Submission & Grading Progress Modal */}
+      {/* Institutional 50-Test-Case Submission & Grading Progress Modal */}
       {submittingModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-md p-4 animate-in fade-in duration-200">
-          <div className="max-w-lg w-full bg-[#0D1117] text-white rounded-xl border border-[#30363D] shadow-2xl p-6 sm:p-8 space-y-6">
-            <div className="flex items-center gap-3.5 border-b border-[#21262D] pb-4">
-              <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-[#58A6FF]/10 text-[#58A6FF] border border-[#58A6FF]/20">
-                <Cpu className="h-6 w-6 animate-pulse" />
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-xs p-4 animate-in fade-in duration-200">
+          <div className="max-w-lg w-full bg-white text-[#1C1917] rounded-2xl border border-[#E7E2DA] shadow-2xl p-6 sm:p-8 space-y-6">
+            <div className="flex items-center gap-3.5 border-b border-[#E7E2DA] pb-4">
+              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-[#064E3B]/10 text-[#064E3B] border border-[#064E3B]/20 shrink-0">
+                <Cpu className="h-5 w-5" />
               </div>
               <div>
-                <h3 className="text-[16px] font-semibold tracking-wide text-white">
-                  Grading Submission (50 Test Cases)
+                <h3 className="text-[17px] font-bold text-[#1C1917] tracking-tight">
+                  Authoritative Evaluation &amp; Grading
                 </h3>
-                <p className="text-[12px] text-[#8B949E] font-mono">
-                  MeritLane Sandbox Compiler · Authoritative Grading Engine
+                <p className="text-[12px] text-[#78716C] font-mono">
+                  MeritLane Sandbox Compiler · 50-Case Test Suite
                 </p>
               </div>
             </div>
@@ -4152,58 +4341,124 @@ function AssessmentContentWrapper() {
             {/* Progress Bar & Numerical Counter */}
             <div className="space-y-2">
               <div className="flex items-center justify-between text-[12px] font-mono">
-                <span className="text-[#8B949E]">
-                  Test Suites Completed:
+                <span className="text-[#78716C]">
+                  Test Suites Executed:
                 </span>
-                <span className="text-[#58A6FF] font-bold">
+                <span className="text-[#064E3B] font-bold">
                   {Math.min(50, Math.floor((submissionProgress / 100) * 50))} / 50 Cases ({submissionProgress}%)
                 </span>
               </div>
-              <div className="w-full bg-[#21262D] h-2.5 rounded-full overflow-hidden p-0.5 border border-[#30363D]">
+              <div className="w-full bg-[#FAF8F5] h-2.5 rounded-full overflow-hidden p-0.5 border border-[#E7E2DA]">
                 <div
-                  className="h-full bg-gradient-to-r from-[#10B981] via-[#58A6FF] to-[#38BDF8] rounded-full transition-all duration-300 shadow-[0_0_12px_rgba(56,189,248,0.5)]"
+                  className="h-full bg-[#064E3B] rounded-full transition-all duration-300 ease-out"
                   style={{ width: `${Math.max(4, submissionProgress)}%` }}
                 />
               </div>
             </div>
 
             {/* Dynamic Stage Checklist */}
-            <div className="space-y-2 font-mono text-[11px] bg-[#161B22] p-3.5 rounded-lg border border-[#21262D]">
+            <div className="space-y-2.5 font-mono text-[11.5px] bg-[#FAF8F5] p-4 rounded-xl border border-[#E7E2DA]">
               <div className="flex items-center justify-between">
-                <span className={submissionProgress >= 20 ? "text-[#34D399]" : "text-[#8B949E]"}>
-                  {submissionProgress >= 20 ? "✓" : "○"} Suites 1–10: Baseline Functionality & Types
+                <span className={`flex items-center gap-2 ${submissionProgress >= 20 ? "text-[#1C1917] font-medium" : "text-[#78716C]"}`}>
+                  {submissionProgress >= 20 ? (
+                    <CheckCircle2 className="h-3.5 w-3.5 text-[#064E3B] shrink-0" />
+                  ) : (
+                    <Loader2 className="h-3.5 w-3.5 text-[#064E3B] animate-spin shrink-0" />
+                  )}
+                  <span>Suites 1–10: Baseline Functionality &amp; Types</span>
                 </span>
-                {submissionProgress < 20 && <span className="h-2 w-2 rounded-full bg-[#58A6FF] animate-ping" />}
+                {submissionProgress >= 20 ? (
+                  <span className="text-[10px] uppercase font-bold text-[#064E3B]">Passed</span>
+                ) : (
+                  <span className="text-[10px] uppercase font-bold text-[#78716C]">Running</span>
+                )}
               </div>
+
               <div className="flex items-center justify-between">
-                <span className={submissionProgress >= 50 ? "text-[#34D399]" : submissionProgress >= 20 ? "text-[#E6EDF3]" : "text-[#8B949E]"}>
-                  {submissionProgress >= 50 ? "✓" : "○"} Suites 11–25: Boundary & Corner Edge Cases
+                <span className={`flex items-center gap-2 ${submissionProgress >= 50 ? "text-[#1C1917] font-medium" : submissionProgress >= 20 ? "text-[#064E3B] font-semibold" : "text-[#A8A29E]"}`}>
+                  {submissionProgress >= 50 ? (
+                    <CheckCircle2 className="h-3.5 w-3.5 text-[#064E3B] shrink-0" />
+                  ) : submissionProgress >= 20 ? (
+                    <Loader2 className="h-3.5 w-3.5 text-[#064E3B] animate-spin shrink-0" />
+                  ) : (
+                    <span className="h-3.5 w-3.5 rounded-full border border-[#D6D3D1] shrink-0" />
+                  )}
+                  <span>Suites 11–25: Boundary &amp; Corner Cases</span>
                 </span>
-                {submissionProgress >= 20 && submissionProgress < 50 && <span className="h-2 w-2 rounded-full bg-[#58A6FF] animate-ping" />}
+                {submissionProgress >= 50 ? (
+                  <span className="text-[10px] uppercase font-bold text-[#064E3B]">Passed</span>
+                ) : submissionProgress >= 20 ? (
+                  <span className="text-[10px] uppercase font-bold text-[#064E3B]">Running</span>
+                ) : (
+                  <span className="text-[10px] uppercase text-[#A8A29E]">Queued</span>
+                )}
               </div>
+
               <div className="flex items-center justify-between">
-                <span className={submissionProgress >= 80 ? "text-[#34D399]" : submissionProgress >= 50 ? "text-[#E6EDF3]" : "text-[#8B949E]"}>
-                  {submissionProgress >= 80 ? "✓" : "○"} Suites 26–40: Computational Complexity & Scale
+                <span className={`flex items-center gap-2 ${submissionProgress >= 80 ? "text-[#1C1917] font-medium" : submissionProgress >= 50 ? "text-[#064E3B] font-semibold" : "text-[#A8A29E]"}`}>
+                  {submissionProgress >= 80 ? (
+                    <CheckCircle2 className="h-3.5 w-3.5 text-[#064E3B] shrink-0" />
+                  ) : submissionProgress >= 50 ? (
+                    <Loader2 className="h-3.5 w-3.5 text-[#064E3B] animate-spin shrink-0" />
+                  ) : (
+                    <span className="h-3.5 w-3.5 rounded-full border border-[#D6D3D1] shrink-0" />
+                  )}
+                  <span>Suites 26–40: Computational Scale</span>
                 </span>
-                {submissionProgress >= 50 && submissionProgress < 80 && <span className="h-2 w-2 rounded-full bg-[#58A6FF] animate-ping" />}
+                {submissionProgress >= 80 ? (
+                  <span className="text-[10px] uppercase font-bold text-[#064E3B]">Passed</span>
+                ) : submissionProgress >= 50 ? (
+                  <span className="text-[10px] uppercase font-bold text-[#064E3B]">Running</span>
+                ) : (
+                  <span className="text-[10px] uppercase text-[#A8A29E]">Queued</span>
+                )}
               </div>
+
               <div className="flex items-center justify-between">
-                <span className={submissionProgress >= 95 ? "text-[#34D399]" : submissionProgress >= 80 ? "text-[#E6EDF3]" : "text-[#8B949E]"}>
-                  {submissionProgress >= 95 ? "✓" : "○"} Suites 41–50: Memory & Concurrency Benchmarks
+                <span className={`flex items-center gap-2 ${submissionProgress >= 95 ? "text-[#1C1917] font-medium" : submissionProgress >= 80 ? "text-[#064E3B] font-semibold" : "text-[#A8A29E]"}`}>
+                  {submissionProgress >= 95 ? (
+                    <CheckCircle2 className="h-3.5 w-3.5 text-[#064E3B] shrink-0" />
+                  ) : submissionProgress >= 80 ? (
+                    <Loader2 className="h-3.5 w-3.5 text-[#064E3B] animate-spin shrink-0" />
+                  ) : (
+                    <span className="h-3.5 w-3.5 rounded-full border border-[#D6D3D1] shrink-0" />
+                  )}
+                  <span>Suites 41–50: Memory &amp; Concurrency</span>
                 </span>
-                {submissionProgress >= 80 && submissionProgress < 95 && <span className="h-2 w-2 rounded-full bg-[#58A6FF] animate-ping" />}
+                {submissionProgress >= 95 ? (
+                  <span className="text-[10px] uppercase font-bold text-[#064E3B]">Passed</span>
+                ) : submissionProgress >= 80 ? (
+                  <span className="text-[10px] uppercase font-bold text-[#064E3B]">Running</span>
+                ) : (
+                  <span className="text-[10px] uppercase text-[#A8A29E]">Queued</span>
+                )}
               </div>
+
               <div className="flex items-center justify-between">
-                <span className={submissionProgress >= 100 ? "text-[#34D399]" : submissionProgress >= 95 ? "text-[#E6EDF3]" : "text-[#8B949E]"}>
-                  {submissionProgress >= 100 ? "✓" : "○"} AI Feedback & Assessment Ledger Sync
+                <span className={`flex items-center gap-2 ${submissionProgress >= 100 ? "text-[#1C1917] font-medium" : submissionProgress >= 95 ? "text-[#064E3B] font-semibold" : "text-[#A8A29E]"}`}>
+                  {submissionProgress >= 100 ? (
+                    <CheckCircle2 className="h-3.5 w-3.5 text-[#064E3B] shrink-0" />
+                  ) : submissionProgress >= 95 ? (
+                    <Loader2 className="h-3.5 w-3.5 text-[#064E3B] animate-spin shrink-0" />
+                  ) : (
+                    <span className="h-3.5 w-3.5 rounded-full border border-[#D6D3D1] shrink-0" />
+                  )}
+                  <span>Ledger Sync &amp; Assessment Scorecard</span>
                 </span>
-                {submissionProgress >= 95 && <span className="h-2 w-2 rounded-full bg-[#10B981] animate-ping" />}
+                {submissionProgress >= 100 ? (
+                  <span className="text-[10px] uppercase font-bold text-[#064E3B]">Synced</span>
+                ) : submissionProgress >= 95 ? (
+                  <span className="text-[10px] uppercase font-bold text-[#064E3B]">Syncing</span>
+                ) : (
+                  <span className="text-[10px] uppercase text-[#A8A29E]">Pending</span>
+                )}
               </div>
             </div>
 
-            <p className="text-[11px] text-[#8B949E] text-center font-sans">
-              Please do not refresh or navigate away while the sandbox executes your solution.
-            </p>
+            <div className="flex items-center justify-center gap-2 text-[12px] text-[#78716C] font-sans">
+              <Lock className="h-3.5 w-3.5 text-[#064E3B]" />
+              <span>Please keep this window open while the sandbox grades your solution.</span>
+            </div>
           </div>
         </div>
       )}

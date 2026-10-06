@@ -14,7 +14,15 @@ import {
   MessageSquare,
   Clock,
   ChevronRight,
+  Paperclip,
+  Image as ImageIcon,
 } from "lucide-react";
+import {
+  MessageAttachment,
+  AttachmentPreviewTray,
+  MessageAttachmentsList,
+  processFileForAttachment,
+} from "@/components/ui/MessageAttachments";
 
 interface Message {
   id: string;
@@ -23,6 +31,7 @@ interface Message {
   senderRole?: string;
   recipientUid: string;
   content: string;
+  attachments?: MessageAttachment[];
   parentMessageId?: string | null;
   timestamp: number;
   read: boolean;
@@ -63,10 +72,48 @@ export default function EmployerInboxPage() {
   const [selectedPartnerId, setSelectedPartnerId] = useState<string | null>(null);
   const [readIds, setReadIds] = useState<Set<string>>(new Set());
   const [reply, setReply] = useState("");
+  const [replyAttachments, setReplyAttachments] = useState<MessageAttachment[]>([]);
+  const [uploadingAttachment, setUploadingAttachment] = useState(false);
+  const [attachmentError, setAttachmentError] = useState("");
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const imageInputRef = useRef<HTMLInputElement>(null);
   const [sending, setSending] = useState(false);
   const [sendError, setSendError] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
   const bottomRef = useRef<HTMLDivElement>(null);
+
+  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+    setAttachmentError("");
+    setUploadingAttachment(true);
+
+    try {
+      const remainingSlots = 5 - replyAttachments.length;
+      if (remainingSlots <= 0) {
+        throw new Error("You can attach up to 5 files per message.");
+      }
+
+      const filesToProcess = Array.from(files).slice(0, remainingSlots);
+      const newAttachments: MessageAttachment[] = [];
+
+      for (const file of filesToProcess) {
+        const att = await processFileForAttachment(file);
+        newAttachments.push(att);
+      }
+
+      setReplyAttachments((prev) => [...prev, ...newAttachments]);
+    } catch (err: any) {
+      setAttachmentError(err.message || "Failed to process attached file.");
+    } finally {
+      setUploadingAttachment(false);
+      if (e.target) e.target.value = "";
+    }
+  };
+
+  const handleRemoveAttachment = (id: string) => {
+    setReplyAttachments((prev) => prev.filter((a) => a.id !== id));
+  };
 
   useEffect(() => {
     if (!authLoading && (!user || role !== "employer")) {
@@ -173,9 +220,10 @@ export default function EmployerInboxPage() {
   };
 
   const handleSendReply = async () => {
-    if (!reply.trim() || !selectedPartnerId || !user) return;
+    if ((!reply.trim() && replyAttachments.length === 0) || !selectedPartnerId || !user) return;
     setSending(true);
     setSendError("");
+    setAttachmentError("");
     try {
       const token = await user.getIdToken(true);
       const res = await fetch("/api/messages", {
@@ -187,6 +235,7 @@ export default function EmployerInboxPage() {
         body: JSON.stringify({
           recipientId: selectedPartnerId,
           content: reply.trim(),
+          attachments: replyAttachments,
         }),
       });
       if (!res.ok) {
@@ -194,6 +243,7 @@ export default function EmployerInboxPage() {
         throw new Error(data.error || "Failed to send reply.");
       }
       setReply("");
+      setReplyAttachments([]);
       await fetchMessages();
       setTimeout(() => bottomRef.current?.scrollIntoView({ behavior: "smooth" }), 100);
     } catch (err: any) {
@@ -363,7 +413,8 @@ export default function EmployerInboxPage() {
                                 ? "bg-[#064E3B] text-white border-[#064E3B]/30"
                                 : "bg-[#F5F1EB] text-[#1C1917] border-[#E7E2DA]"
                             }`}>
-                              {m.content}
+                              {m.content && <div>{m.content}</div>}
+                              <MessageAttachmentsList attachments={m.attachments} isSentByMe={isFromMe} />
                             </div>
                             <span className="text-[10px] font-mono text-[#A8A29E]">
                               {formatTimestamp(m.timestamp)}
@@ -379,31 +430,99 @@ export default function EmployerInboxPage() {
                     {sendError && (
                       <p className="text-[12px] text-[#B42318] mb-2">{sendError}</p>
                     )}
-                    <div className="flex gap-3">
-                      <textarea
-                        value={reply}
-                        onChange={(e) => setReply(e.target.value)}
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) {
-                            handleSendReply();
-                          }
-                        }}
-                        placeholder="Type your reply... (Ctrl+Enter to send)"
-                        rows={3}
-                        className="flex-1 px-3 py-2.5 text-[13px] font-sans border border-[#E7E2DA] rounded bg-white focus:outline-none focus:border-[#1C1917] resize-none placeholder:text-[#A8A29E]"
-                      />
-                      <button
-                        onClick={handleSendReply}
-                        disabled={sending || !reply.trim()}
-                        className="px-4 py-2 bg-[#064E3B] hover:bg-[#043327] text-white text-[12px] font-mono font-semibold rounded transition-colors disabled:opacity-50 flex items-center gap-2 self-end"
-                      >
-                        {sending ? (
-                          <div className="h-3.5 w-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                        ) : (
-                          <Send className="h-3.5 w-3.5" />
+                    {attachmentError && (
+                      <p className="text-[12px] text-[#B42318] mb-2">{attachmentError}</p>
+                    )}
+
+                    <div className="flex flex-col gap-2">
+                      <div className="border border-[#E7E2DA] rounded bg-white focus-within:border-[#1C1917] transition-all">
+                        <textarea
+                          value={reply}
+                          onChange={(e) => setReply(e.target.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) {
+                              handleSendReply();
+                            }
+                          }}
+                          placeholder="Type your reply... (Ctrl+Enter to send)"
+                          rows={3}
+                          className="w-full px-3 py-2.5 text-[13px] font-sans bg-transparent focus:outline-none resize-none placeholder:text-[#A8A29E]"
+                        />
+
+                        {replyAttachments.length > 0 && (
+                          <div className="px-3 pb-2.5">
+                            <AttachmentPreviewTray
+                              attachments={replyAttachments}
+                              onRemove={handleRemoveAttachment}
+                            />
+                          </div>
                         )}
-                        SEND
-                      </button>
+                      </div>
+
+                      <div className="flex items-center justify-between gap-3 flex-wrap">
+                        {/* Hidden file inputs & attach buttons */}
+                        <div className="flex items-center gap-1.5">
+                          <input
+                            ref={fileInputRef}
+                            type="file"
+                            multiple
+                            className="hidden"
+                            onChange={handleFileSelect}
+                          />
+                          <input
+                            ref={imageInputRef}
+                            type="file"
+                            accept="image/*"
+                            multiple
+                            className="hidden"
+                            onChange={handleFileSelect}
+                          />
+
+                          <button
+                            type="button"
+                            onClick={() => fileInputRef.current?.click()}
+                            disabled={uploadingAttachment || replyAttachments.length >= 5}
+                            className="flex items-center gap-1.5 px-3 py-1.5 bg-white hover:bg-[#FAF8F5] border border-[#E7E2DA] rounded text-[12px] font-mono text-[#1C1917] hover:border-[#1C1917] transition-colors disabled:opacity-50"
+                            title="Attach files (PDF, job descriptions, contracts, etc.)"
+                          >
+                            <Paperclip className="h-3.5 w-3.5 text-[#78716C]" />
+                            <span>Attach File</span>
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={() => imageInputRef.current?.click()}
+                            disabled={uploadingAttachment || replyAttachments.length >= 5}
+                            className="flex items-center gap-1.5 px-3 py-1.5 bg-white hover:bg-[#FAF8F5] border border-[#E7E2DA] rounded text-[12px] font-mono text-[#1C1917] hover:border-[#1C1917] transition-colors disabled:opacity-50"
+                            title="Attach images (diagrams, photos, screenshots)"
+                          >
+                            <ImageIcon className="h-3.5 w-3.5 text-[#78716C]" />
+                            <span>Attach Image</span>
+                          </button>
+
+                          {uploadingAttachment && (
+                            <div className="flex items-center gap-1.5 text-[11px] font-mono text-[#78716C]">
+                              <div className="h-3 w-3 border-2 border-[#1C1917] border-t-transparent rounded-full animate-spin" />
+                              <span>Processing…</span>
+                            </div>
+                          )}
+                        </div>
+
+                        <div className="flex items-center gap-3 ml-auto">
+                          <button
+                            onClick={handleSendReply}
+                            disabled={sending || uploadingAttachment || (!reply.trim() && replyAttachments.length === 0)}
+                            className="px-4 py-2 bg-[#064E3B] hover:bg-[#043327] text-white text-[12px] font-mono font-semibold rounded transition-colors disabled:opacity-50 flex items-center gap-2"
+                          >
+                            {sending ? (
+                              <div className="h-3.5 w-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                            ) : (
+                              <Send className="h-3.5 w-3.5" />
+                            )}
+                            SEND
+                          </button>
+                        </div>
+                      </div>
                     </div>
                     <p className="text-[10px] font-mono text-[#A8A29E] mt-2">
                       Ctrl+Enter to send · Replies are private between you and the candidate

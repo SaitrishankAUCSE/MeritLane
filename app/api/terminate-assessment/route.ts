@@ -68,26 +68,22 @@ export async function POST(req: NextRequest) {
           typeof existingFailed.toMillis === "function"
             ? existingFailed.toMillis()
             : existingFailed;
-        // 21-day integrity cooldown
-        const retryAvailableAt = new Date(failedMs + 21 * 24 * 60 * 60 * 1000).toISOString();
-        return NextResponse.json({ success: true, retryAvailableAt, alreadyTerminated: true });
+        // 30-day cooldown for this specific language only
+        const retryAvailableAt = new Date(failedMs + 30 * 24 * 60 * 60 * 1000).toISOString();
+        return NextResponse.json({ success: true, retryAvailableAt, alreadyTerminated: true, cooldownDays: 30 });
       }
       return NextResponse.json({ error: "No active assessment session found" }, { status: 409 });
     }
 
     // Write the integrity termination record
     // Uses the same `failedAssessments[skill]` field the cooldown checker already reads.
-    // The 21-day duration is enforced by the START-ASSESSMENT cooldown check which
-    // reads the timestamp — we store a separate integrityTerminations map so we can
-    // display accurate UI without changing the cooldown logic in start-assessment.
     const serverNow = FieldValue.serverTimestamp();
 
     await userRef.update({
-      // Standard cooldown field — this triggers the 14-day block in start-assessment.
-      // We override this with integrityTerminations below for 21-day display.
+      // Standard cooldown field — this triggers the 30-day block in start-assessment for this skill only
       [`failedAssessments.${skill}`]: serverNow,
 
-      // Integrity-specific record (separate map, no schema change to existing fields)
+      // Integrity-specific record
       [`integrityTerminations.${skill}`]: serverNow,
 
       // Clear the active session
@@ -105,14 +101,15 @@ export async function POST(req: NextRequest) {
         ? terminatedTimestamp.toMillis()
         : Date.now();
 
-    // Integrity termination = 21-day cooldown
-    const INTEGRITY_COOLDOWN_MS = 21 * 24 * 60 * 60 * 1000;
-    const retryAvailableAt = new Date(terminatedMs + INTEGRITY_COOLDOWN_MS).toISOString();
+    // Specific said cooldown = 30 days for this specific language only
+    const SPECIFIC_COOLDOWN_MS = 30 * 24 * 60 * 60 * 1000;
+    const retryAvailableAt = new Date(terminatedMs + SPECIFIC_COOLDOWN_MS).toISOString();
 
     return NextResponse.json({
       success: true,
       retryAvailableAt,
       skill,
+      cooldownDays: 30,
       reason: "integrity_termination",
     });
   } catch (error: any) {

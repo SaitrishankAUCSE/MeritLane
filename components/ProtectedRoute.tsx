@@ -22,7 +22,7 @@ export default function ProtectedRoute({ children, allowedRoles }: ProtectedRout
   const router = useRouter();
   const pathname = usePathname();
   
-  // Fast initial authorization if user already loaded in AuthContext
+  // Optimistic authorization: if we already have user + profile, authorize immediately
   const [isAuthorized, setIsAuthorized] = useState(() => {
     if (!user || !userProfile) return false;
     const normalizedRole = (userProfile.role || "").trim().toLowerCase() as Role;
@@ -116,17 +116,25 @@ export default function ProtectedRoute({ children, allowedRoles }: ProtectedRout
     enforceAuth();
   }, [user, userProfile, isAdmin, loading, profileLoading, router, pathname, allowedRoles, authPrompted, openAuthModal]);
 
-  // Only show full page loader on cold initial boot when no user state exists yet
-  if ((loading || profileLoading) && !user) {
+  // Show loader only during the genuine cold-boot auth check
+  // Once user is known (even if profileLoading), render children to avoid layout shift
+  if (loading && !user) {
     return <MeritlaneLoader level="page" text="Authenticating" />;
   }
 
+  // User is definitely not logged in
   if (!user && !loading) {
-    return <MeritlaneLoader level="page" text="Authenticating" />;
+    return <MeritlaneLoader level="page" text="Redirecting" />;
   }
 
+  // Still waiting for profile AND not yet authorized — show loader briefly
+  if (profileLoading && !isAuthorized) {
+    return <MeritlaneLoader level="page" text="Loading" />;
+  }
+
+  // Not authorized after profile loaded — a redirect is happening
   if (!isAuthorized && !loading && !profileLoading) {
-    return <MeritlaneLoader level="page" text="Authenticating" />;
+    return <MeritlaneLoader level="page" text="Redirecting" />;
   }
 
   return <>{children}</>;

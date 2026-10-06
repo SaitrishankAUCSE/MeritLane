@@ -38,9 +38,12 @@ export interface CandidateProfile {
   avatarUrl?: string;
   avatarBadge?: "auto" | "job_ready" | "in_verification" | "none";
   resumeUrl: string;
+  portfolioUrl?: string;
+  linkedinUrl?: string;
   resumeFileName?: string;
   resumeUploadedAt?: number;
   resumeText?: string;
+  resumePdfDataUrl?: string;
   atsScore?: number;
   atsRating?: "Needs Work" | "Good" | "Strong" | "Excellent";
   atsSummary?: string;
@@ -64,12 +67,29 @@ export interface CandidateProfile {
   updatedAt: number;
 }
 
+// Module-level in-memory cache to avoid redundant Firestore reads within the same session.
+// TTL: 60 seconds — short enough to reflect profile edits, long enough to prevent spam reads.
+const profileCache = new Map<string, { data: CandidateProfile; ts: number }>();
+const PROFILE_CACHE_TTL_MS = 60_000;
+
+export const invalidateCandidateProfileCache = (uid: string) => {
+  profileCache.delete(uid);
+};
+
 export const fetchCandidateProfile = async (uid: string): Promise<CandidateProfile | null> => {
+  // Return cached value if still fresh
+  const cached = profileCache.get(uid);
+  if (cached && Date.now() - cached.ts < PROFILE_CACHE_TTL_MS) {
+    return cached.data;
+  }
+
   const docRef = doc(db, "candidates", uid);
   const docSnap = await getDoc(docRef);
 
   if (docSnap.exists()) {
-    return docSnap.data() as CandidateProfile;
+    const data = docSnap.data() as CandidateProfile;
+    profileCache.set(uid, { data, ts: Date.now() });
+    return data;
   }
 
   // Fallback for legacy profiles saved in the users collection
@@ -79,7 +99,9 @@ export const fetchCandidateProfile = async (uid: string): Promise<CandidateProfi
     const userData = userSnap.data();
     // If it has profile fields like college or branch, treat it as a profile
     if (userData.college || userData.skills) {
-      return userData as CandidateProfile;
+      const data = userData as CandidateProfile;
+      profileCache.set(uid, { data, ts: Date.now() });
+      return data;
     }
   }
 
@@ -106,4 +128,6 @@ export const saveCandidateProfile = async (uid: string, profile: Partial<Candida
   }
 
   await setDoc(docRef, { ...profile, candidateKey, updatedAt: Date.now() }, { merge: true });
+  // Invalidate cache so the next read fetches fresh data
+  invalidateCandidateProfileCache(uid);
 };

@@ -24,7 +24,7 @@ export function Button({
   ...props
 }: ButtonProps) {
   const baseStyles =
-    "inline-flex items-center justify-center font-sans font-medium transition-all duration-150 select-none focus:outline-none focus-visible:ring-1 focus-visible:ring-[#1C1917] focus-visible:ring-offset-2 disabled:opacity-40 disabled:pointer-events-none whitespace-nowrap shrink-0";
+    "inline-flex items-center justify-center font-sans font-medium transition-all duration-75 select-none focus:outline-none focus-visible:ring-1 focus-visible:ring-[#1C1917] focus-visible:ring-offset-2 disabled:opacity-40 disabled:pointer-events-none whitespace-nowrap shrink-0";
 
   const sizeStyles: Record<string, string> = {
     xs:   "text-[12px] px-3 h-7 gap-1.5 rounded-none",

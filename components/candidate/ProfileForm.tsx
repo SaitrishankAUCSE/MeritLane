@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useRef } from "react";
-import { Save, Sparkles, FileText, CheckCircle2, UploadCloud, Trash2, ShieldCheck, RefreshCw, AlertCircle, Briefcase, MapPin, Clock, DollarSign } from "lucide-react";
+import { Save, Sparkles, FileText, CheckCircle2, UploadCloud, Trash2, ShieldCheck, RefreshCw, AlertCircle, Briefcase, MapPin, Clock, DollarSign, Camera } from "lucide-react";
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
 import { TagInput } from "@/components/ui/TagInput";
@@ -11,6 +11,7 @@ import { useToast } from "@/components/ui/Toast";
 import { useUnsavedChanges } from "@/components/ui/UnsavedChangesGuard";
 import { InstitutionalResumeScanner } from "@/components/candidate/InstitutionalResumeScanner";
 import { ParsedResumeProfile } from "@/lib/resume/parser";
+import { CandidateAvatar } from "@/components/ui/CandidateAvatar";
 
 const TARGET_ROLE_SUGGESTIONS = [
   "Full-Stack Developer",
@@ -53,6 +54,11 @@ export function ProfileForm({ initialData, onSave, onCancel, isNew = false }: Pr
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Avatar Upload State (Instagram-style)
+  const avatarInputRef = useRef<HTMLInputElement>(null);
+  const [isProcessingAvatar, setIsProcessingAvatar] = useState(false);
+  const [showPhotoActionSheet, setShowPhotoActionSheet] = useState(false);
+
   // PDF File Upload & Scan State
   const [resumeFile, setResumeFile] = useState<File | null>(null);
   const [resumeFileName, setResumeFileName] = useState<string>(initialData?.resumeUrl ? "Existing Resume Document" : "");
@@ -63,12 +69,15 @@ export function ProfileForm({ initialData, onSave, onCancel, isNew = false }: Pr
 
   const initialValues = useMemo(() => ({
     name: initialData?.name || user?.displayName || "",
+    avatarUrl: initialData?.avatarUrl || user?.photoURL || "",
     college: initialData?.college || "",
     degree: initialData?.degree || "",
     branch: initialData?.branch || "",
     gradYear: initialData?.gradYear || "",
     githubUrl: initialData?.githubUrl || "",
-    resumeUrl: initialData?.resumeUrl || "",
+    linkedinUrl: initialData?.linkedinUrl || "",
+    portfolioUrl: initialData?.portfolioUrl || (initialData?.resumeUrl && (initialData.resumeUrl.includes("portfolio") || initialData.resumeUrl.includes("vercel.app") || !initialData.resumeUrl.toLowerCase().includes(".pdf")) ? initialData.resumeUrl : "") || "",
+    resumeUrl: (initialData?.resumeUrl && !initialData.resumeUrl.includes("portfolio") && !initialData.resumeUrl.includes("vercel.app")) ? initialData.resumeUrl : "",
     resumeText: initialData?.resumeText || "",
     skills: initialData?.skills || [],
     targetRoles: initialData?.targetRoles || [],
@@ -110,6 +119,8 @@ export function ProfileForm({ initialData, onSave, onCancel, isNew = false }: Pr
       formData.branch !== initialValues.branch ||
       formData.gradYear !== initialValues.gradYear ||
       formData.githubUrl !== initialValues.githubUrl ||
+      formData.linkedinUrl !== initialValues.linkedinUrl ||
+      formData.portfolioUrl !== initialValues.portfolioUrl ||
       formData.resumeUrl !== initialValues.resumeUrl ||
       formData.resumeText !== initialValues.resumeText ||
       formData.workPreference !== initialValues.workPreference ||
@@ -249,6 +260,100 @@ export function ProfileForm({ initialData, onSave, onCancel, isNew = false }: Pr
     });
   };
 
+  // Instagram-style client image compressor (square center crop 256x256 WebP/JPEG <40KB)
+  const processImageFile = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement("canvas");
+          const size = 256;
+          canvas.width = size;
+          canvas.height = size;
+          const ctx = canvas.getContext("2d");
+          if (!ctx) {
+            reject(new Error("Unable to create canvas context"));
+            return;
+          }
+
+          const minDim = Math.min(img.width, img.height);
+          const startX = (img.width - minDim) / 2;
+          const startY = (img.height - minDim) / 2;
+
+          ctx.drawImage(img, startX, startY, minDim, minDim, 0, 0, size, size);
+
+          try {
+            const dataUrl = canvas.toDataURL("image/webp", 0.85);
+            resolve(dataUrl);
+          } catch {
+            const dataUrl = canvas.toDataURL("image/jpeg", 0.85);
+            resolve(dataUrl);
+          }
+        };
+        img.onerror = () => reject(new Error("Failed to load image"));
+        img.src = e.target?.result as string;
+      };
+      reader.onerror = () => reject(new Error("Failed to read file"));
+      reader.readAsDataURL(file);
+    });
+  };
+
+  const handleAvatarFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+      addToast({
+        type: "error",
+        title: "Invalid file type",
+        description: "Please choose an image file (PNG, JPG, JPEG, or WebP).",
+      });
+      return;
+    }
+
+    if (file.size > 10 * 1024 * 1024) {
+      addToast({
+        type: "error",
+        title: "File too large",
+        description: "Profile image must be under 10MB.",
+      });
+      return;
+    }
+
+    setIsProcessingAvatar(true);
+    try {
+      const compressedDataUrl = await processImageFile(file);
+      setFormData((prev) => ({ ...prev, avatarUrl: compressedDataUrl }));
+      setShowPhotoActionSheet(false);
+      addToast({
+        type: "success",
+        title: "Profile photo updated",
+        description: "Your new profile picture is ready.",
+      });
+    } catch (err: any) {
+      console.error("Avatar upload failed:", err);
+      addToast({
+        type: "error",
+        title: "Processing error",
+        description: err.message || "Failed to process image.",
+      });
+    } finally {
+      setIsProcessingAvatar(false);
+      if (avatarInputRef.current) avatarInputRef.current.value = "";
+    }
+  };
+
+  const handleRemoveAvatar = () => {
+    setFormData((prev) => ({ ...prev, avatarUrl: "" }));
+    setShowPhotoActionSheet(false);
+    addToast({
+      type: "info",
+      title: "Photo removed",
+      description: "Avatar reset to initials monogram.",
+    });
+  };
+
   const handleSkillsChange = (newSkills: string[]) => {
     setFormData((prev) => ({ ...prev, skills: newSkills }));
   };
@@ -287,6 +392,7 @@ export function ProfileForm({ initialData, onSave, onCancel, isNew = false }: Pr
     try {
       const updatedProfile: Partial<CandidateProfile> = {
         ...formData,
+        avatarUrl: formData.avatarUrl || undefined,
         resumeFileName: resumeFileName || initialData?.resumeFileName,
         resumeUploadedAt: resumeFile ? Date.now() : (initialData?.resumeUploadedAt || Date.now()),
         updatedAt: Date.now(),
@@ -299,6 +405,35 @@ export function ProfileForm({ initialData, onSave, onCancel, isNew = false }: Pr
       }
 
       await saveCandidateProfile(user.uid, updatedProfile);
+
+      // Sync users doc in Firestore and auth photoURL
+      if (user) {
+        try {
+          const { doc, updateDoc } = await import("firebase/firestore");
+          const { db } = await import("@/lib/firebase/config");
+          await updateDoc(doc(db, "users", user.uid), {
+            avatarUrl: formData.avatarUrl || "",
+            photoURL: formData.avatarUrl || "",
+          });
+        } catch {}
+      }
+
+      if (typeof window !== "undefined") {
+        try {
+          localStorage.setItem("meritlane_current_candidate", JSON.stringify({
+            name: formData.name,
+            avatarUrl: formData.avatarUrl || "",
+          }));
+          window.dispatchEvent(
+            new CustomEvent("meritlane-profile-updated", {
+              detail: {
+                name: formData.name,
+                avatarUrl: formData.avatarUrl || "",
+              },
+            })
+          );
+        } catch {}
+      }
       
       addToast({
         type: "success",
@@ -548,6 +683,115 @@ export function ProfileForm({ initialData, onSave, onCancel, isNew = false }: Pr
           </div>
 
           <div className="space-y-6">
+            {/* ── Instagram-Style Profile Photo Section ── */}
+            <div className="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6 p-4 sm:p-5 bg-white border border-[#E7E2DA] rounded-xl shadow-2xs">
+              <div
+                className="relative group cursor-pointer shrink-0 self-start sm:self-center"
+                onClick={() => {
+                  if (formData.avatarUrl) {
+                    setShowPhotoActionSheet(true);
+                  } else {
+                    avatarInputRef.current?.click();
+                  }
+                }}
+                title={formData.avatarUrl ? "Click to change or remove photo" : "Click to upload photo"}
+              >
+                <CandidateAvatar
+                  avatarUrl={formData.avatarUrl || user?.photoURL}
+                  name={formData.name || "Candidate"}
+                  size="xl"
+                  showBadge={false}
+                />
+                <div className="absolute inset-0 rounded-full bg-black/45 flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-opacity">
+                  <Camera className="h-5 w-5" />
+                </div>
+              </div>
+
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 mb-0.5">
+                  <span className="text-[15px] sm:text-[16px] font-bold text-[#1C1917] truncate">
+                    {formData.name || "Candidate Portrait"}
+                  </span>
+                </div>
+                <p className="text-[12px] text-[#78716C] mb-3 font-sans">
+                  Profile photo visible to employers and on your public technical record.
+                </p>
+
+                <div className="flex items-center gap-2.5 flex-wrap">
+                  <button
+                    type="button"
+                    onClick={() => avatarInputRef.current?.click()}
+                    disabled={isProcessingAvatar}
+                    className="text-[11px] font-mono font-semibold px-3.5 py-1.5 bg-[#1C1917] hover:bg-[#064E3B] text-white rounded transition-colors shadow-2xs flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+                  >
+                    <UploadCloud className="h-3.5 w-3.5" />
+                    <span>{formData.avatarUrl ? "Update Photo" : "Upload Photo"}</span>
+                  </button>
+
+                  {formData.avatarUrl && (
+                    <button
+                      type="button"
+                      onClick={handleRemoveAvatar}
+                      disabled={isProcessingAvatar}
+                      className="text-[11px] font-mono font-semibold px-3 py-1.5 border border-[#E7E2DA] hover:border-[#B42318] hover:bg-[#FEF2F2] text-[#B42318] rounded transition-colors flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                      <span>Remove</span>
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              <input
+                ref={avatarInputRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={handleAvatarFileSelect}
+              />
+            </div>
+
+            {/* Instagram-style Photo Action Sheet Modal */}
+            {showPhotoActionSheet && (
+              <div
+                className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-xs p-4"
+                onClick={() => setShowPhotoActionSheet(false)}
+              >
+                <div
+                  className="w-full max-w-xs bg-white rounded-2xl border border-[#E7E2DA] shadow-2xl overflow-hidden text-center divide-y divide-[#F5F1EB] animate-in zoom-in-95 duration-150"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <div className="py-4 px-6 bg-[#FAF8F5]">
+                    <h3 className="text-[15px] font-bold text-[#1C1917]">Change Profile Photo</h3>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowPhotoActionSheet(false);
+                      avatarInputRef.current?.click();
+                    }}
+                    className="w-full py-3.5 text-[13px] font-semibold text-[#064E3B] hover:bg-[#FAF8F5] transition-colors cursor-pointer"
+                  >
+                    Upload New Photo
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleRemoveAvatar}
+                    className="w-full py-3.5 text-[13px] font-semibold text-[#B42318] hover:bg-[#FEF2F2] transition-colors cursor-pointer"
+                  >
+                    Remove Current Photo
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setShowPhotoActionSheet(false)}
+                    className="w-full py-3 text-[13px] font-medium text-[#78716C] hover:bg-[#FAF8F5] transition-colors cursor-pointer"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            )}
+
             {/* Name & Cohort */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <Input
@@ -749,7 +993,7 @@ export function ProfileForm({ initialData, onSave, onCancel, isNew = false }: Pr
                 Links &amp; Portfolio
               </h4>
               <p className="text-[12px] text-[var(--color-muted-foreground)] mb-4 font-sans">
-                Add links to your GitHub or personal portfolio website.
+                Add links to your code repository, professional network, and personal portfolio.
               </p>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <Input
@@ -761,11 +1005,27 @@ export function ProfileForm({ initialData, onSave, onCancel, isNew = false }: Pr
                   type="url"
                 />
                 <Input
+                  label="LinkedIn URL"
+                  name="linkedinUrl"
+                  value={formData.linkedinUrl}
+                  onChange={handleChange}
+                  placeholder="https://linkedin.com/in/username"
+                  type="url"
+                />
+                <Input
                   label="Portfolio / Personal Website URL"
+                  name="portfolioUrl"
+                  value={formData.portfolioUrl}
+                  onChange={handleChange}
+                  placeholder="https://yourportfolio.com"
+                  type="url"
+                />
+                <Input
+                  label="Resume Document / PDF Link"
                   name="resumeUrl"
                   value={formData.resumeUrl}
                   onChange={handleChange}
-                  placeholder="https://yourwebsite.com"
+                  placeholder="https://drive.google.com/... or direct PDF link"
                   type="url"
                 />
               </div>

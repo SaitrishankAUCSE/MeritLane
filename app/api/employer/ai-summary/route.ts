@@ -28,7 +28,12 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Missing candidateId" }, { status: 400 });
     }
 
-    const candidateDoc = await adminDb.collection("candidates").doc(candidateId).get();
+    // Fetch candidate profile and user docs in parallel
+    const [candidateDoc, candidateUserDoc] = await Promise.all([
+      adminDb.collection("candidates").doc(candidateId).get(),
+      adminDb.collection("users").doc(candidateId).get(),
+    ]);
+
     if (!candidateDoc.exists) {
       return NextResponse.json({ error: "Candidate not found" }, { status: 404 });
     }
@@ -36,16 +41,11 @@ export async function POST(req: NextRequest) {
     const candidateData = candidateDoc.data() as CandidateProfile;
     
     let assessmentScores: Record<string, number> = {};
-    try {
-      const candidateUserDoc = await adminDb.collection("users").doc(candidateId).get();
-      if (candidateUserDoc.exists) {
-        const uData = candidateUserDoc.data() as UserProfile;
-        if (uData.assessmentScores) {
-          assessmentScores = uData.assessmentScores;
-        }
+    if (candidateUserDoc.exists) {
+      const uData = candidateUserDoc.data() as UserProfile;
+      if (uData.assessmentScores) {
+        assessmentScores = uData.assessmentScores;
       }
-    } catch {
-      // Non-fatal if assessmentScores cannot be fetched
     }
 
     const openRouterApiKey = process.env.OPENROUTER_API_KEY;

@@ -65,8 +65,18 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // Fetch all candidates
-    const candidatesSnapshot = await adminDb!.collection("candidates").get();
+    // Parallel fetch candidates and candidate users to minimize latency
+    const [candidatesSnapshot, usersCandidateSnapshot] = await Promise.all([
+      adminDb!.collection("candidates").get(),
+      adminDb!.collection("users").where("role", "==", "candidate").get(),
+    ]);
+
+    // Build a lookup map from the already-fetched snapshot → eliminates N+1 per-candidate reads
+    const usersBatchMap = new Map<string, Record<string, any>>();
+    usersCandidateSnapshot.docs.forEach((uDoc) => {
+      usersBatchMap.set(uDoc.id, uDoc.data());
+    });
+
     const candidateDocs: { id: string; data: CandidateProfile }[] = [];
 
     if (!candidatesSnapshot.empty) {
@@ -74,12 +84,6 @@ export async function POST(req: NextRequest) {
         candidateDocs.push({ id: d.id, data: d.data() as CandidateProfile });
       });
     }
-
-    // Fallback: also merge users collection with role candidate if not already in candidates list
-    const usersCandidateSnapshot = await adminDb!
-      .collection("users")
-      .where("role", "==", "candidate")
-      .get();
 
     if (!usersCandidateSnapshot.empty) {
       usersCandidateSnapshot.docs.forEach((uDoc) => {
@@ -153,18 +157,11 @@ export async function POST(req: NextRequest) {
 
       const isDirectTargetMatch = isDirectIdMatch || isDirectNameMatch;
 
-      // Retrieve assessment scores
+      // Retrieve assessment scores from the pre-fetched map (zero extra Firestore reads)
       let assessmentScores: Record<string, number> = {};
-      try {
-        const uDoc = await adminDb!.collection("users").doc(uid).get();
-        if (uDoc.exists) {
-          const uData = uDoc.data() as UserProfile;
-          if (uData.assessmentScores && Object.keys(uData.assessmentScores).length > 0) {
-            assessmentScores = uData.assessmentScores;
-          }
-        }
-      } catch {
-        // Continue
+      const prefetchedUser = usersBatchMap.get(uid);
+      if (prefetchedUser?.assessmentScores && Object.keys(prefetchedUser.assessmentScores).length > 0) {
+        assessmentScores = prefetchedUser.assessmentScores;
       }
 
       // Count skills verified with score >= 75%
@@ -252,7 +249,7 @@ export async function POST(req: NextRequest) {
       const matchReasons: string[] = [];
 
       if (isDirectIdMatch) {
-        matchReasons.push("Direct Telemetry Record ID Match (" + candidateKey + " · " + telemetryId + ")");
+        matchReasons.push("Candidate ID Match (" + candidateKey + ")");
       } else if (isDirectNameMatch) {
         matchReasons.push("Candidate Name Match (" + data.name + ")");
       }
@@ -348,7 +345,6 @@ export async function POST(req: NextRequest) {
         college: data.college,
         branch: data.branch,
         gradYear: data.gradYear,
-        telemetryRecordId: telemetryId,
         candidateKey,
         avatarUrl: data.avatarUrl || "",
         avatarBadge: data.avatarBadge || "auto",

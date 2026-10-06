@@ -4,6 +4,9 @@ import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth/AuthContext";
+import { db } from "@/lib/firebase/config";
+import { doc, getDoc, onSnapshot } from "firebase/firestore";
+import { fetchCandidateProfile } from "@/lib/firebase/candidate";
 import {
   Fingerprint,
   LayoutDashboard,
@@ -29,17 +32,103 @@ export function CandidateSidebar() {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [showLogoutModal, setShowLogoutModal] = useState(false);
+  const [profileData, setProfileData] = useState<{
+    name?: string;
+    avatarUrl?: string;
+  } | null>(() => {
+    if (typeof window !== "undefined") {
+      try {
+        const stored = localStorage.getItem("meritlane_current_candidate");
+        if (stored) return JSON.parse(stored);
+      } catch {}
+    }
+    return null;
+  });
   const menuRef = useRef<HTMLDivElement>(null);
 
-  const name = user?.displayName || "Candidate";
+  useEffect(() => {
+    if (!user?.uid) return;
+
+    const applyProfile = (data: { name?: string; avatarUrl?: string }) => {
+      setProfileData((prev) => {
+        const updated = {
+          name: data.name || prev?.name || user.displayName || "Candidate",
+          avatarUrl: data.avatarUrl || prev?.avatarUrl || user.photoURL || "",
+        };
+        try {
+          localStorage.setItem("meritlane_current_candidate", JSON.stringify(updated));
+        } catch {}
+        return updated;
+      });
+    };
+
+    // 1. Fetch candidate profile via centralized helper
+    fetchCandidateProfile(user.uid)
+      .then((p) => {
+        if (p) {
+          applyProfile({ name: p.name, avatarUrl: p.avatarUrl });
+        }
+      })
+      .catch(console.warn);
+
+    // 2. Fetch users collection fallback
+    getDoc(doc(db, "users", user.uid))
+      .then((snap) => {
+        if (snap.exists()) {
+          const d = snap.data();
+          applyProfile({ name: d.name, avatarUrl: d.avatarUrl || d.photoURL });
+        }
+      })
+      .catch(console.warn);
+
+    // 3. Real-time snapshot on candidates collection
+    const unsubCandidate = onSnapshot(
+      doc(db, "candidates", user.uid),
+      (snap) => {
+        if (snap.exists()) {
+          const d = snap.data();
+          applyProfile({ name: d.name, avatarUrl: d.avatarUrl });
+        }
+      },
+      (err) => console.warn(err)
+    );
+
+    // 4. Real-time snapshot on users collection
+    const unsubUser = onSnapshot(
+      doc(db, "users", user.uid),
+      (snap) => {
+        if (snap.exists()) {
+          const d = snap.data();
+          applyProfile({ name: d.name, avatarUrl: d.avatarUrl || d.photoURL });
+        }
+      },
+      (err) => console.warn(err)
+    );
+
+    // 5. Global window event listener
+    const onProfileUpdate = (e: any) => {
+      if (e.detail) {
+        applyProfile(e.detail);
+      }
+    };
+    window.addEventListener("meritlane-profile-updated", onProfileUpdate);
+
+    return () => {
+      unsubCandidate();
+      unsubUser();
+      window.removeEventListener("meritlane-profile-updated", onProfileUpdate);
+    };
+  }, [user?.uid, user?.displayName, user?.photoURL]);
+
+  const name = profileData?.name || user?.displayName || "Candidate";
   const email = user?.email || "";
-  const avatarUrl = user?.photoURL || "";
-  const initials = name
-    .split(" ")
+  const avatarUrl = profileData?.avatarUrl || user?.photoURL || "";
+  const initials = (name.trim() || "Candidate")
+    .split(/\s+/)
     .map((n) => n[0])
     .join("")
     .toUpperCase()
-    .slice(0, 2);
+    .slice(0, 2) || "C";
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -203,9 +292,18 @@ export function CandidateSidebar() {
                   className="absolute bottom-full mb-2 left-0 w-52 bg-white border border-[#E7E2DA]
                              rounded shadow-lg overflow-hidden z-50 py-1"
                 >
-                  <div className="px-4 py-3 border-b border-[#F2EFE9]">
-                    <div className="text-[13px] font-semibold text-[#1C1917] truncate">{name}</div>
-                    <div className="text-[11px] text-[#A8A29E] truncate mt-0.5">{email}</div>
+                  <div className="px-4 py-3 border-b border-[#F2EFE9] flex items-center gap-3">
+                    <div className="h-8 w-8 rounded-full bg-[#1C1917] text-[#FAFAF9] flex items-center justify-center text-[11px] font-semibold shrink-0 overflow-hidden border border-[#E7E2DA]">
+                      {avatarUrl ? (
+                        <img src={avatarUrl} alt={name} className="h-full w-full object-cover" />
+                      ) : (
+                        initials
+                      )}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <div className="text-[13px] font-semibold text-[#1C1917] truncate">{name}</div>
+                      <div className="text-[11px] text-[#A8A29E] truncate mt-0.5">{email}</div>
+                    </div>
                   </div>
                   <div className="px-2 py-1.5 space-y-0.5">
                     <Link
@@ -260,10 +358,10 @@ export function CandidateSidebar() {
                 ${isUserMenuOpen ? "bg-[#F2EFE9]" : "hover:bg-[#F2EFE9]"}
               `}
             >
-              <div className="h-7 w-7 rounded bg-[#1C1917] text-[#FAFAF9] flex items-center
+              <div className="h-7 w-7 rounded-full bg-[#1C1917] text-[#FAFAF9] flex items-center
                               justify-center text-[11px] font-semibold shrink-0 overflow-hidden border border-[#E7E2DA]">
                 {avatarUrl
-                  ? <img src={avatarUrl} alt="Profile" className="h-full w-full object-cover" />
+                  ? <img src={avatarUrl} alt={name} className="h-full w-full object-cover" />
                   : initials
                 }
               </div>

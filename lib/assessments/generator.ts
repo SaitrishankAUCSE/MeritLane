@@ -68,18 +68,20 @@ export async function generateAndPublishSkillBank(skill: string): Promise<void> 
 
   let prompt = "";
   if (classification.type === "programming") {
-    prompt = `You are a strict, senior software engineer building a technical assessment for the skill: "${skill}".
-Generate a strictly typed JSON response containing precisely 15 Multiple Choice Questions (MCQs) and 2 algorithmic Coding Questions (one easy, one medium-hard).
+    prompt = `You are an elite, strict senior software engineer architecting a rigorous technical assessment for the skill: "${skill}".
+Generate a strictly typed JSON response containing precisely 25 Multiple Choice Questions (MCQs) and 2 algorithmic Coding Questions (one easy, one medium-hard).
 
 REQUIREMENTS FOR CODING TASKS:
 - The code must be plain ${skill} algorithmic logic, absolutely NO UI rendering, NO web frameworks, NO external libraries.
 - The candidate must use one of these languages: ${JSON.stringify(classification.languages)}. Include these exactly in the "supportedLanguages" array as {id, name}.
-- You must provide exactly 5 public test cases and 45 hidden test cases for each task.
+- You must provide exactly 5 public test cases and 45 hidden test cases for each task. Test cases must cover edge cases, large inputs, and boundary conditions to ensure O(N) or O(N log N) optimality where appropriate.
 - "inputArgs" must be an array of arguments that will be passed into the function via the spread operator.
 - "expected" must be the exact return value.
 
 REQUIREMENTS FOR MCQs:
-- 15 deep, non-trivial questions (no boilerplate trivia).
+- Exactly 25 questions: questions 1-8 must be "easy", questions 9-17 must be "medium", and questions 18-25 must be "hard".
+- Deep, non-trivial questions (no boilerplate trivia). Focus on internal language mechanics, memory management, concurrency, and advanced paradigms.
+- Distractor options must be highly plausible common misconceptions.
 
 Respond ONLY with valid JSON matching exactly:
 {
@@ -96,8 +98,8 @@ Respond ONLY with valid JSON matching exactly:
   }>;
 }`;
   } else if (classification.type === "config") {
-    prompt = `You are a strict DevOps architect building a technical assessment for the infrastructure-as-code skill: "${skill}".
-Generate a strictly typed JSON response containing precisely 15 Multiple Choice Questions (MCQs) and 2 structural configuration tasks (one easy, one medium-hard).
+    prompt = `You are a strict, elite DevOps architect building a rigorous technical assessment for the infrastructure-as-code skill: "${skill}".
+Generate a strictly typed JSON response containing precisely 25 Multiple Choice Questions (MCQs) and 2 structural configuration tasks (one easy, one medium-hard).
 
 REQUIREMENTS FOR CONFIG TASKS:
 - The candidate will write raw configuration text (e.g. Dockerfile, Kubernetes YAML, Terraform HCL).
@@ -105,7 +107,8 @@ REQUIREMENTS FOR CONFIG TASKS:
 - Our Tier 2.5 static validator will parse the candidate's config and evaluate if they met the structural requirements.
 
 REQUIREMENTS FOR MCQs:
-- 15 deep, non-trivial questions focusing on infrastructure edge cases and scenarios.
+- Exactly 25 questions: questions 1-8 must be "easy", questions 9-17 must be "medium", and questions 18-25 must be "hard".
+- Deep, non-trivial questions focusing on infrastructure edge cases, security, compliance, and large-scale architectural scenarios.
 
 Respond ONLY with valid JSON matching exactly:
 {
@@ -122,13 +125,13 @@ Respond ONLY with valid JSON matching exactly:
   }>;
 }`;
   } else {
-    prompt = `You are a strict, senior DevOps/Cloud/Security engineer building a technical assessment for the skill: "${skill}".
+    prompt = `You are a strict, elite Cloud/Security architect building a rigorous technical assessment for the skill: "${skill}".
 This skill falls into the infrastructure/knowledge domain, so no coding tasks are required.
-Generate a strictly typed JSON response containing precisely 30 advanced, scenario-based Multiple Choice Questions (MCQs) designed to test deep conceptual understanding rather than simple trivia.
+Generate a strictly typed JSON response containing precisely 25 advanced, scenario-based Multiple Choice Questions (MCQs) designed to test deep conceptual understanding, architectural trade-offs, and critical thinking rather than simple trivia.
 
 REQUIREMENTS FOR MCQs:
-- 30 deep, non-trivial questions. Use real-world troubleshooting scenarios where possible.
-- Options must be an array of exactly 4 strings.
+- Exactly 25 questions: questions 1-8 must be "easy", questions 9-17 must be "medium", and questions 18-25 must be "hard".
+- Options must be an array of exactly 4 strings. All distractors must be plausible industry anti-patterns.
 - answerIndex is the 0-based index of the correct option.
 - difficulty must be one of: "easy", "medium", "hard".
 
@@ -139,7 +142,7 @@ Respond ONLY with valid JSON matching exactly:
 }`;
   }
 
-  const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`, {
+  const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro:generateContent?key=${apiKey}`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({

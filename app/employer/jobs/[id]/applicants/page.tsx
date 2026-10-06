@@ -189,7 +189,7 @@ export default function JobApplicantsPage() {
                           {app.candidateName}
                         </span>
                         <span className="text-[10px] font-mono font-semibold text-[#064E3B] bg-[#064E3B]/10 px-2 py-0.5 rounded border border-[#064E3B]/20">
-                          {app.candidateKey || "KEY: RECORDED"}
+                          {app.candidateKey || (app.candidateId ? `ML-${app.candidateId.slice(0, 8).toUpperCase()}` : "CANDIDATE")}
                         </span>
                         <span className="text-[11px] font-mono text-[#78716C]">
                           Applied {new Date(app.appliedAt).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" })}

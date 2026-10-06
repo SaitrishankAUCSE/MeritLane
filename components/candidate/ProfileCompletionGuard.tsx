@@ -56,7 +56,7 @@ export function ProfileCompletionGuard({ children }: ProfileCompletionGuardProps
   const shouldBlur = !checking && isProfileComplete === false && !isProfilePage;
 
   return (
-    <div className="relative min-h-full w-full flex flex-col">
+    <div className="relative h-full min-h-0 w-full flex flex-col">
       {/* Main page content with smooth blur transition */}
       <motion.div
         animate={{
@@ -65,7 +65,7 @@ export function ProfileCompletionGuard({ children }: ProfileCompletionGuardProps
           pointerEvents: shouldBlur ? "none" : "auto",
         }}
         transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-        className="min-h-full w-full flex-1 flex flex-col"
+        className="h-full min-h-0 w-full flex-1 flex flex-col"
       >
         {children}
       </motion.div>

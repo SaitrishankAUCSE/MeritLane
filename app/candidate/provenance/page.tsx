@@ -41,7 +41,7 @@ export default function ProvenancePage() {
   ).length;
   const isDiscoverable = verifiedCount > 0;
   const publicUrl = user ? `${typeof window !== "undefined" ? window.location.origin : "https://merit-lane.vercel.app"}/p/${user.uid}` : "";
-  const shortId = user?.uid?.substring(0, 8).toUpperCase() || "—";
+  const candidateKey = candidate?.candidateKey || (user?.uid ? `ML-${user.uid.substring(0, 8).toUpperCase()}` : "—");
   const auditDate = new Date().toLocaleDateString("en-GB", { day: "2-digit", month: "long", year: "numeric" });
 
   const handleCopy = () => {
@@ -69,7 +69,7 @@ export default function ProvenancePage() {
               </h1>
               <div className="mt-2 flex items-center gap-3 flex-wrap">
                 <span className="text-[11px] font-mono text-[#78716C]">
-                  Profile ID: <span className="text-[#1C1917] font-semibold">#{shortId}</span>
+                  Candidate ID: <span className="text-[#1C1917] font-semibold">{candidateKey}</span>
                 </span>
                 <div className="w-px h-3 bg-[#E7E2DA]" />
                 <span className="text-[11px] font-mono text-[#78716C]">
@@ -203,7 +203,7 @@ export default function ProvenancePage() {
                 Public Profile Preview
               </div>
               <div className="text-[9px] font-mono text-[#78716C]">
-                ID: {user?.uid?.substring(0, 12).toLowerCase()}…
+                Candidate ID: {candidateKey}
               </div>
             </div>
             {/* Embedded proof record */}

@@ -38,7 +38,13 @@ export async function POST(req: NextRequest) {
 
     const uid = decodedToken.uid;
     const userRef = adminDb.collection("users").doc(uid);
-    const userDoc = await userRef.get();
+    const candidateRef = adminDb.collection("candidates").doc(uid);
+
+    // Fetch user and candidate docs in parallel
+    let [userDoc, candidateDoc] = await Promise.all([
+      userRef.get(),
+      candidateRef.get(),
+    ]);
 
     if (!userDoc.exists) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
@@ -46,9 +52,6 @@ export async function POST(req: NextRequest) {
 
     const userData = userDoc.data() || {};
 
-    const candidateRef = adminDb.collection("candidates").doc(uid);
-    let candidateDoc = await candidateRef.get();
-    
     if (!candidateDoc.exists) {
       await candidateRef.set({
         name: userData.displayName || "Candidate",
@@ -78,36 +81,69 @@ export async function POST(req: NextRequest) {
 
     const now = Date.now();
 
-    // 1. Dev Bypass / Cooldown Reset
+    // 1. Dev & Admin Bypass / Cooldown Reset
     const isDev = process.env.NODE_ENV === "development";
-    const bypassCooldown = isDev && (body.resetCooldown === true || req.nextUrl.searchParams.get("resetCooldown") === "true" || req.headers.get("x-dev-bypass-cooldown") === "true");
+    const ADMIN_EMAILS = ["saitrishankb9@gmail.com", "saitrishankb1311@gmail.com"];
+    const isAdmin = decodedToken.admin === true || ADMIN_EMAILS.includes(decodedToken.email?.toLowerCase() || "");
+    const bypassCooldown = (isDev || isAdmin) && (
+      body.resetCooldown === true ||
+      body.resetLockout === true ||
+      req.nextUrl.searchParams.get("resetCooldown") === "true" ||
+      req.headers.get("x-dev-bypass-cooldown") === "true"
+    );
 
-    if (bypassCooldown && userData.proctoringLockoutUntil) {
+    if (bypassCooldown) {
       await userRef.update({
         proctoringLockoutUntil: FieldValue.delete(),
+        [`skillLockoutUntil.${skill}`]: FieldValue.delete(),
+        [`skillLockoutUntil.${normalizedSkill}`]: FieldValue.delete(),
         assessmentInfractionCount: FieldValue.delete(),
+        assessmentViolationCount: FieldValue.delete(),
+        assessmentLastViolationAt: FieldValue.delete(),
+        [`failedAssessments.${skill}`]: FieldValue.delete(),
+        [`failedAssessments.${normalizedSkill}`]: FieldValue.delete(),
       }).catch(() => {});
     }
 
-    // 2. Global Proctoring Lockout Check (Overrides everything)
-    if (!bypassCooldown && userData.proctoringLockoutUntil && userData.proctoringLockoutUntil > now) {
+    // 2. Specific Language / Skill Ban Check (Applies ONLY to that specific language, NOT all languages)
+    const skillLockout = userData.skillLockoutUntil?.[skill] || userData.skillLockoutUntil?.[normalizedSkill];
+    if (!isAdmin && !bypassCooldown && skillLockout && skillLockout > now) {
       return NextResponse.json({
-        error: "Your access to assessments is suspended due to a severe proctoring violation. Please contact support if you believe this was an error.",
+        error: `Your access to the ${skill} assessment is temporarily suspended due to a proctoring violation. You may continue verifying other languages.`,
         isProctoringLockout: true,
-        retryAvailableAt: new Date(userData.proctoringLockoutUntil).toISOString(),
+        retryAvailableAt: new Date(skillLockout).toISOString(),
       }, { status: 403 });
     }
 
-    if (!bypassCooldown && userData.failedAssessments && userData.failedAssessments[skill]) {
-      const failedTimestamp = userData.failedAssessments[skill];
-      const failedMs = typeof failedTimestamp.toMillis === "function" ? failedTimestamp.toMillis() : failedTimestamp;
-      const cooldownMs = 30 * 24 * 60 * 60 * 1000; // 30 days (1 month)
-      const cooldownLabel = "30-day cooldown";
+    // Check for integrity termination (30-day cooldown)
+    const integrityTimestamp = userData.integrityTerminations?.[skill] || userData.integrityTerminations?.[normalizedSkill];
+    if (!isAdmin && !bypassCooldown && integrityTimestamp) {
+      const integrityMs = typeof integrityTimestamp.toMillis === "function" ? integrityTimestamp.toMillis() : integrityTimestamp;
+      const cooldownDays = 30; // 30 days for termination
+      const cooldownMs = cooldownDays * 24 * 60 * 60 * 1000;
 
+      if (now - integrityMs < cooldownMs) {
+        return NextResponse.json({
+          error: `Your access to the ${skill} assessment is temporarily suspended due to a prior integrity violation or early termination. You may re-attempt this skill after the 30-day cooldown period.`,
+          cooldownDays,
+          retryAvailableAt: new Date(integrityMs + cooldownMs).toISOString(),
+        }, { status: 429 });
+      }
+    }
+
+    // Check for normal failure (14-day cooldown)
+    const failedTimestamp = userData.failedAssessments?.[skill] || userData.failedAssessments?.[normalizedSkill];
+    if (!isAdmin && !bypassCooldown && failedTimestamp) {
+      const failedMs = typeof failedTimestamp.toMillis === "function" ? failedTimestamp.toMillis() : failedTimestamp;
+      const cooldownDays = 14; // 14 days for normal fail
+      const cooldownMs = cooldownDays * 24 * 60 * 60 * 1000;
+
+      // Note: If they had an integrity termination, the 30-day block above catches it first.
+      // This catches normal failures.
       if (now - failedMs < cooldownMs) {
         return NextResponse.json({
-          error: `You are currently in a ${cooldownLabel} period for this skill.`,
-          cooldownDays: 30,
+          error: `You are currently in a ${cooldownDays}-day cooldown period for ${skill}. You may take assessments for other skills.`,
+          cooldownDays,
           retryAvailableAt: new Date(failedMs + cooldownMs).toISOString(),
         }, { status: 429 });
       }
@@ -160,6 +196,9 @@ export async function POST(req: NextRequest) {
         } else {
           const candidateSeed = userData.assessmentSeed || uid;
           const builtinContent = getAssessmentContent(skill, candidateSeed, { sanitize: true });
+          if (!builtinContent) {
+            return NextResponse.json({ error: `Assessment content for ${skill} is not available.` }, { status: 404 });
+          }
           resumeContent = {
             ...builtinContent,
             codingTasks: builtinContent.coding ? [builtinContent.coding] : [],
@@ -205,20 +244,22 @@ export async function POST(req: NextRequest) {
         [`seenQuestions.${normalizedSkill}.mcq`]: FieldValue.arrayUnion(...assignment.mcqIds),
       };
 
-      if (bank.easy?.length > 0 && bank.mediumHard?.length > 0 && assignment.easy && assignment.medium && assignment.easyId && assignment.mediumId) {
+      if (assignment.easy && assignment.easyId) {
+        const mediumQ = assignment.medium || assignment.easy;
+        const mediumId = assignment.mediumId || assignment.easyId;
         firestoreUpdates.assessmentEasyQuestionId = assignment.easyId;
-        firestoreUpdates.assessmentMediumQuestionId = assignment.mediumId;
-        candidateUpdates[`seenQuestions.${normalizedSkill}.coding`] = FieldValue.arrayUnion(assignment.easyId, assignment.mediumId);
+        firestoreUpdates.assessmentMediumQuestionId = mediumId;
+        candidateUpdates[`seenQuestions.${normalizedSkill}.coding`] = FieldValue.arrayUnion(assignment.easyId, mediumId);
 
         freshContent = {
           codingTasks: [
             sanitiseCodingQuestion(assignment.easy),
-            sanitiseCodingQuestion(assignment.medium),
+            sanitiseCodingQuestion(mediumQ),
           ],
           coding: sanitiseCodingQuestion(assignment.easy), // backward compat for page.tsx
           mcqs: sanitiseMcqs(assignment.mcqs),
           hasCoding: true,
-          timeLimitMinutes,
+          timeLimitMinutes: 90,
           assessmentType: "coding_capable",
         };
       } else {
@@ -236,6 +277,9 @@ export async function POST(req: NextRequest) {
       const seed = Date.now();
       firestoreUpdates.assessmentSeed = seed;
       const builtinContent = getAssessmentContent(skill, seed, { sanitize: true });
+      if (!builtinContent) {
+        return NextResponse.json({ error: `Assessment content for ${skill} is not available.` }, { status: 404 });
+      }
       freshContent = {
         ...builtinContent,
         codingTasks: builtinContent.coding ? [builtinContent.coding] : [],
@@ -245,8 +289,8 @@ export async function POST(req: NextRequest) {
     }
 
     await userRef.update(firestoreUpdates);
-    const updatedDoc = await userRef.get();
-    const startedAt = updatedDoc.data()?.assessmentStartedAt?.toMillis?.() || Date.now();
+    // Use local timestamp — saves an extra Firestore read after update
+    const startedAt = Date.now();
 
     return NextResponse.json({ 
       message: "Assessment started",

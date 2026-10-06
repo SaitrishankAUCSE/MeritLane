@@ -5,6 +5,8 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { Search, Bookmark, Briefcase, Users, Settings, HelpCircle, LogOut, Activity, ChevronUp, Inbox } from "lucide-react";
 import { useAuth } from "@/lib/auth/AuthContext";
+import { db } from "@/lib/firebase/config";
+import { doc, onSnapshot } from "firebase/firestore";
 import { motion, AnimatePresence } from "framer-motion";
 import { LogoutConfirmModal } from "@/components/ui/LogoutConfirmModal";
 
@@ -14,17 +16,36 @@ export function EmployerSidebar() {
 
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [showLogoutModal, setShowLogoutModal] = useState(false);
+  const [profileData, setProfileData] = useState<{ name?: string; avatarUrl?: string } | null>(null);
   const menuRef = useRef<HTMLDivElement>(null);
 
-  const name = user?.displayName || "Employer";
+  useEffect(() => {
+    if (!user?.uid) return;
+    const unsub = onSnapshot(
+      doc(db, "employers", user.uid),
+      (snap) => {
+        if (snap.exists()) {
+          const d = snap.data();
+          setProfileData({
+            name: d.companyName || d.name,
+            avatarUrl: d.logoUrl || d.avatarUrl,
+          });
+        }
+      },
+      (err) => console.warn("EmployerSidebar profile listener warning:", err)
+    );
+    return () => unsub();
+  }, [user?.uid]);
+
+  const name = profileData?.name || user?.displayName || "Employer";
   const email = user?.email || "";
-  const avatarUrl = user?.photoURL || "";
-  const initials = name
-    .split(" ")
+  const avatarUrl = profileData?.avatarUrl || user?.photoURL || "";
+  const initials = (name.trim() || "Employer")
+    .split(/\s+/)
     .map((n) => n[0])
     .join("")
     .toUpperCase()
-    .slice(0, 2);
+    .slice(0, 2) || "E";
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -170,7 +191,7 @@ export function EmployerSidebar() {
                 ${isUserMenuOpen ? "bg-[#F2EFE9]" : "hover:bg-[#F2EFE9]"}
               `}
             >
-              <div className="h-7 w-7 rounded bg-[#1C1917] text-[#FAFAF9] flex items-center
+              <div className="h-7 w-7 rounded-full bg-[#1C1917] text-[#FAFAF9] flex items-center
                               justify-center text-[11px] font-semibold shrink-0 overflow-hidden border border-[#E7E2DA]">
                 {avatarUrl
                   ? <img src={avatarUrl} alt="Profile" className="h-full w-full object-cover" />

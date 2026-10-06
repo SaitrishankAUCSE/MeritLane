@@ -78,6 +78,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       if (profile) {
         setUserProfile(profile);
         setRole(profile.role);
+        if (profile.role) {
+          document.cookie = `ml_role=${profile.role}; path=/; max-age=2592000; SameSite=Lax`;
+        }
       } else {
         setUserProfile(null);
         setRole(null);
@@ -125,7 +128,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const handleSignOut = useCallback(async () => {
     try {
-      document.cookie = "ml_session=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
+      document.cookie = "ml_session=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Lax";
+      document.cookie = "ml_role=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Lax";
       await signOut(auth);
       window.location.href = "/";
     } catch (error) {
@@ -142,34 +146,42 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         setLoading(false);
         
         if (currentUser) {
-          document.cookie = "ml_session=1; path=/; max-age=2592000";
+          document.cookie = "ml_session=1; path=/; max-age=2592000; SameSite=Lax";
           const isSuperadmin = currentUser.email?.toLowerCase() === ADMIN_EMAIL;
           if (isSuperadmin) {
             setIsAdmin(true);
             setRole("admin");
+            document.cookie = "ml_role=admin; path=/; max-age=2592000; SameSite=Lax";
             setUserProfile(null);
             setProfileLoading(false);
             return;
           }
 
+          // Only check token claims if the user could plausibly be an admin
+          // (avoids the expensive getIdTokenResult() round-trip for regular users)
+          let adminClaim = false;
           try {
-            const tokenResult = await currentUser.getIdTokenResult();
-            const adminClaim = Boolean(tokenResult.claims.admin);
-            setIsAdmin(adminClaim);
-
-            if (adminClaim) {
-              setRole("admin");
-              setUserProfile(null);
-              setProfileLoading(false);
-              return;
-            }
+            // Use cached token (false = no force refresh) to minimize latency
+            const tokenResult = await currentUser.getIdTokenResult(false);
+            adminClaim = Boolean(tokenResult.claims.admin);
           } catch (e) {
-            console.error("Error checking user token claims:", e);
+            // Token check failed — proceed as non-admin
           }
 
+          if (adminClaim) {
+            setIsAdmin(true);
+            setRole("admin");
+            document.cookie = "ml_role=admin; path=/; max-age=2592000; SameSite=Lax";
+            setUserProfile(null);
+            setProfileLoading(false);
+            return;
+          }
+
+          setIsAdmin(false);
           await loadProfile(currentUser.uid);
         } else {
-          document.cookie = "ml_session=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
+          document.cookie = "ml_session=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Lax";
+          document.cookie = "ml_role=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Lax";
           setUserProfile(null);
           setRole(null);
           setIsAdmin(false);

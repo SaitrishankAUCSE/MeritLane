@@ -159,7 +159,7 @@ export default function EmployerApplicantsPage() {
               <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-[#78716C]" />
               <input
                 type="text"
-                placeholder="Search candidates, skills, or Telemetry Record ID (e.g. #I8XEESRN)..."
+                placeholder="Search candidates, skills, or Candidate ID (e.g. ML-73977F0B)..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full bg-[#FAF8F5] border border-[#E7E2DA] rounded pl-10 pr-4 py-2 text-[13px] text-[#1C1917] placeholder:text-[#A8A29E] outline-none focus:border-[#1C1917] transition-colors"
@@ -297,7 +297,7 @@ export default function EmployerApplicantsPage() {
                           {app.candidateName}
                         </h2>
                         <span className="text-[11px] font-mono text-[#78716C] bg-[#FAF8F5] border border-[#E7E2DA] px-2.5 py-0.5 rounded">
-                          {app.candidateKey || `#${app.candidateId.slice(0, 8).toUpperCase()}`}
+                          {app.candidateKey || (app.candidateId ? `ML-${app.candidateId.slice(0, 8).toUpperCase()}` : "CANDIDATE")}
                         </span>
                         <span className="text-[11px] font-mono text-[#064E3B] bg-[#064E3B]/10 border border-[#064E3B]/20 px-2.5 py-0.5 rounded font-semibold flex items-center gap-1">
                           <CheckCircle2 className="h-3 w-3" /> 100% Verified Profile

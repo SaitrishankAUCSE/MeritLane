@@ -159,7 +159,7 @@ export default function EditJobPostingPage() {
             BACK TO POSTED ROLES
           </Link>
           <span className="text-[11px] font-sans font-semibold uppercase tracking-wide text-[#78716C]">
-            Edit Job #{id.slice(0, 8)}
+            Edit Job Opening
           </span>
         </div>
       </div>

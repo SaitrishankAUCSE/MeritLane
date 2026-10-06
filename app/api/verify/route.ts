@@ -23,12 +23,12 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
     }
     // easyCode/mediumCode: dual-task submissions; code: legacy single-task
-    const { skill, answers, code, easyCode, mediumCode, language, isPublicTest, customInput, questionId } = body;
+    const { skill, answers, code, easyCode, mediumCode, language, isPublicTest, dryRun, customInput, questionId } = body;
     
     if (!skill) {
       return NextResponse.json({ error: "Skill is required" }, { status: 400 });
     }
-    if (!isPublicTest && !code && !easyCode) {
+    if (!isPublicTest && !dryRun && !code && !easyCode) {
       return NextResponse.json({ error: "Code is required" }, { status: 400 });
     }
 
@@ -42,19 +42,23 @@ export async function POST(req: NextRequest) {
 
     const uid = decodedToken.uid;
     const userRef = adminDb.collection("users").doc(uid);
-    const userDoc = await userRef.get();
+    const candidateRef = adminDb.collection("candidates").doc(uid);
+
+    // Fetch user and candidate docs in parallel to cut two sequential reads to one round-trip
+    const [userDoc, candidateDoc] = await Promise.all([
+      userRef.get(),
+      candidateRef.get(),
+    ]);
 
     if (!userDoc.exists) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
-    const candidateRef = adminDb.collection("candidates").doc(uid);
-    const candidateDoc = await candidateRef.get();
     const candidateData = candidateDoc.exists ? (candidateDoc.data() || {}) : {};
     const userData = userDoc.data() || {};
 
     // ─── Session validation ───────────────────────────────────────────────────
-    if (!isPublicTest) {
+    if (!isPublicTest && !dryRun) {
       const userSkill = (userData.assessmentSkill || "").toLowerCase().trim();
       const targetSkill = (skill || "").toLowerCase().trim();
       if (!userData.assessmentStartedAt || (userSkill !== targetSkill && !userSkill.includes(targetSkill) && !targetSkill.includes(userSkill))) {
@@ -90,14 +94,14 @@ export async function POST(req: NextRequest) {
     const mediumQId = userData.assessmentMediumQuestionId;
     const isBankAssessment = !!(easyQId || mediumQId);
 
-    // ─── Run Code (isPublicTest) — run specified question ────────────────────
-    if (isPublicTest) {
+    // ─── Run Code (isPublicTest or dryRun) — run specified question ──────────
+    if (isPublicTest || dryRun) {
       const resolvedCode = code || easyCode || "";
       const execResult = await executeCode({
         skill,
         code: resolvedCode,
         language,
-        isPublicTest: true,
+        isPublicTest: !!isPublicTest, // if dryRun is true and isPublicTest is false, runs 50 cases
         variant,
         customInput,
         questionId: questionId || easyQId || undefined,
@@ -205,7 +209,10 @@ export async function POST(req: NextRequest) {
       const bank = await getBankForSkill(skill);
       const sessionMcqIds: string[] = userData.assessmentMcqIds || [];
       if (bank && answers && Array.isArray(answers)) {
-        const sessionMcqs = bank.mcqs.filter(m => sessionMcqIds.includes(m.id));
+        // Map in exact session order so index matches candidate answers array
+        const sessionMcqs = sessionMcqIds
+          .map((id) => bank.mcqs.find((m) => m.id === id))
+          .filter(Boolean) as typeof bank.mcqs;
         totalMcqs = sessionMcqs.length;
         sessionMcqs.forEach((mcq, idx) => {
           if (typeof answers[idx] === "number" && mcq.answerIndex === answers[idx]) {
@@ -302,7 +309,17 @@ export async function POST(req: NextRequest) {
       }
     }
     if (!aiFeedback) {
-      aiFeedback = `Submission demonstrates solid grasp of ${skill} patterns. Logic structure is modular and handles standard edge cases effectively.`;
+      if (passed) {
+        aiFeedback = `Excellent work! Your submission demonstrates a solid grasp of ${skill} patterns.\n\nYou have successfully passed this assessment with a score of ${score}%. Keep up the great work and attempt your remaining skill assessments to unlock the employer portal!`;
+      } else {
+        aiFeedback = `You showed good effort but scored ${score}%, which doesn't quite meet the 75% threshold this time.\n\nDon't worry! Review the concepts, practice more, and you can re-attempt this assessment in 14 days.`;
+      }
+    } else {
+      if (passed) {
+        aiFeedback += `\n\nExcellent work passing with ${score}%! Keep up the great work and attempt your remaining skill assessments to unlock the employer portal!`;
+      } else {
+        aiFeedback += `\n\nYou showed good effort but scored ${score}%. Don't give up! You can re-attempt this assessment in 14 days.`;
+      }
     }
 
     // ── Step 5: Write result to Firestore ────────────────────────────────────

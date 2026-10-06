@@ -241,7 +241,7 @@ export default function EmployerDashboardPage() {
 
           {/* Institutional Telemetry Strip */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-2">
-            <div className="bg-white border border-[#E5E5E5] p-4 rounded shadow-xs">
+            <motion.div whileHover={{ y: -3, scale: 1.02 }} transition={{ type: "spring", stiffness: 300 }} className="bg-white border border-[#E5E5E5] p-4 rounded shadow-xs">
               <div className="text-[11px] font-sans font-semibold uppercase tracking-wide text-[#737373] mb-1">
                 Verified Engineers
               </div>
@@ -249,9 +249,9 @@ export default function EmployerDashboardPage() {
                 {candidates.length}
               </div>
               <div className="text-[11px] text-[#737373] mt-1">Evaluated practitioners in pool</div>
-            </div>
+            </motion.div>
 
-            <div className="bg-white border border-[#E5E5E5] p-4 rounded shadow-xs">
+            <motion.div whileHover={{ y: -3, scale: 1.02 }} transition={{ type: "spring", stiffness: 300 }} className="bg-white border border-[#E5E5E5] p-4 rounded shadow-xs">
               <div className="text-[11px] font-sans font-semibold uppercase tracking-wide text-[#064E3B] mb-1">
                 High Scorers (≥85%)
               </div>
@@ -259,9 +259,9 @@ export default function EmployerDashboardPage() {
                 {candidates.filter(c => Object.values(c.verifiedSkills || {}).some((v: any) => (v.score || 0) >= 85)).length}
               </div>
               <div className="text-[11px] text-[#737373] mt-1">Distinction level evaluations</div>
-            </div>
+            </motion.div>
 
-            <div className="bg-white border border-[#E5E5E5] p-4 rounded shadow-xs">
+            <motion.div whileHover={{ y: -3, scale: 1.02 }} transition={{ type: "spring", stiffness: 300 }} className="bg-white border border-[#E5E5E5] p-4 rounded shadow-xs">
               <div className="text-[11px] font-sans font-semibold uppercase tracking-wide text-[#737373] mb-1">
                 Audited Projects
               </div>
@@ -269,7 +269,7 @@ export default function EmployerDashboardPage() {
                 {candidates.reduce((acc, c) => acc + (c.projects?.length || 0), 0)}
               </div>
               <div className="text-[11px] text-[#737373] mt-1">Linked code repositories</div>
-            </div>
+            </motion.div>
           </div>
         </div>
 
@@ -281,7 +281,7 @@ export default function EmployerDashboardPage() {
               <Search className="absolute left-4 h-4 w-4 text-[#78716C] pointer-events-none" />
               <input
                 type="text"
-                placeholder="Search candidates by name, skills, target role, or Telemetry Record ID (e.g. #I8XEESRN)..."
+                placeholder="Search candidates by name, skills, role, or Candidate ID (e.g. ML-73977F0B)..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 onKeyDown={(e) => {
@@ -353,19 +353,21 @@ export default function EmployerDashboardPage() {
               {COMMON_SKILLS.slice(0, 14).map((skill) => {
                 const isActive = selectedSkills.includes(skill);
                 return (
-                  <button
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
                     key={skill}
                     type="button"
                     onClick={() => toggleSkillFilter(skill)}
                     className={
-                      "px-3.5 py-1.5 rounded text-[12px] font-medium transition-all duration-200 border " +
+                      "px-3.5 py-1.5 rounded text-[12px] font-medium transition-colors duration-150 border " +
                       (isActive
                         ? "bg-[#0D0D0D] text-white border-[#0D0D0D] shadow-sm"
                         : "bg-[#FAFAFA] text-[#737373] border-[#E5E5E5] hover:bg-white hover:border-[#D2D2D2]")
                     }
                   >
                     {skill}
-                  </button>
+                  </motion.button>
                 );
               })}
               {selectedSkills.length > 0 && (
@@ -582,9 +584,10 @@ export default function EmployerDashboardPage() {
                       initial={{ opacity: 0, scale: 0.98, y: 10 }}
                       animate={{ opacity: 1, scale: 1, y: 0 }}
                       exit={{ opacity: 0, scale: 0.95, y: -10 }}
-                      transition={{ duration: 0.3, ease: "easeOut" }}
+                      whileHover={{ y: -4, scale: 1.005, boxShadow: "0 12px 40px -10px rgba(0,0,0,0.08)" }}
+                      transition={{ duration: 0.15, ease: "easeOut" }}
                       key={c.uid}
-                      className="group border border-[#E5E5E5] rounded bg-white p-4 sm:p-6 md:p-8 hover:shadow-[0_8px_30px_rgba(0,0,0,0.04)] transition-all duration-300"
+                      className="group border border-[#E5E5E5] rounded bg-white p-4 sm:p-6 md:p-8 transition-colors duration-150 hover:border-[#1C1917]/20"
                     >
                     <div className="flex flex-col md:flex-row md:items-start justify-between gap-5 sm:gap-6">
                       {/* Candidate Identity & Evidence */}
@@ -603,7 +606,7 @@ export default function EmployerDashboardPage() {
                               {c.name || "Anonymous Candidate"}
                             </h3>
                             <span className="text-[11px] font-mono font-semibold text-[#064E3B] bg-[#064E3B]/10 px-2.5 py-0.5 rounded border border-[#064E3B]/20">
-                              {c.telemetryRecordId || `#${c.uid.slice(0, 8).toUpperCase()}`}
+                              {c.candidateKey || (c.id ? `ML-${c.id.slice(0, 8).toUpperCase()}` : "CANDIDATE")}
                             </span>
                             <span className="text-[11px] font-medium font-bold uppercase tracking-[0.1em] text-[#15803D] bg-[#15803D]/10 px-2 py-0.5 rounded-sm">
                               Verified Practitioner
@@ -715,7 +718,7 @@ export default function EmployerDashboardPage() {
                           </div>
                           <div className="w-32 bg-[#E5E5E5] h-1.5 rounded-full overflow-hidden mt-1.5 md:ml-auto">
                             <div
-                              className="bg-[#059669] h-full rounded-full transition-all duration-500"
+                              className="bg-[#059669] h-full rounded-full transition-all duration-150"
                               style={{ width: `${Math.min(100, Math.max(5, verificationPct))}%` }}
                             />
                           </div>

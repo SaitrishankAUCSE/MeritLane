@@ -1,3 +1,5 @@
+import { EXPANDED_MCQS } from "./expanded-bank";
+
 export interface MCQ {
   id?: string;
   question: string;
@@ -111,6 +113,65 @@ SELECT
 FROM orders
 WHERE status = 'COMPLETED'
 `
+  },
+  {
+    id: "golang",
+    name: "Go (Golang)",
+    monacoLang: "go",
+    template: `package main
+
+import "fmt"
+
+func processTransactions(csvString string) map[string]float64 {
+    totals := make(map[string]float64)
+    // Write your solution here
+    return totals
+}
+`
+  },
+  {
+    id: "csharp",
+    name: "C# (.NET 8)",
+    monacoLang: "csharp",
+    template: `using System;
+using System.Collections.Generic;
+
+public class Solution {
+    public static Dictionary<string, double> ProcessTransactions(string csvString) {
+        var totals = new Dictionary<string, double>();
+        // Write your solution here
+        return totals;
+    }
+}
+`
+  },
+  {
+    id: "django",
+    name: "Python (Django)",
+    monacoLang: "python",
+    template: `from django.db import models
+
+# Assume a Django environment is available
+def process_transactions(csv_string: str) -> dict:
+    # Write your solution here
+    pass
+`
+  },
+  {
+    id: "angular",
+    name: "TypeScript (Angular)",
+    monacoLang: "typescript",
+    template: `import { Injectable } from '@angular/core';
+
+@Injectable({ providedIn: 'root' })
+export class TransactionService {
+    processTransactions(csvString: string): Record<string, number> {
+        const totals: Record<string, number> = {};
+        // Write your solution here
+        return totals;
+    }
+}
+`
   }
 ];
 
@@ -135,7 +196,7 @@ WHERE status = 'COMPLETED'
   }
 ];
 
-export const QUESTION_BANKS: Record<string, { mcqPool: MCQ[]; codingPool: CodingChallenge[] }> = {
+const BASE_QUESTION_BANKS: Record<string, { mcqPool: MCQ[]; codingPool: CodingChallenge[] }> = {
   // 1. REACT
   react: {
     mcqPool: [
@@ -3277,6 +3338,19 @@ FROM node:20-alpine AS runner
   }
 };
 
+export const QUESTION_BANKS: Record<string, { mcqPool: MCQ[]; codingPool: CodingChallenge[] }> = Object.fromEntries(
+  Object.entries(BASE_QUESTION_BANKS).map(([skill, bank]) => [
+    skill,
+    {
+      ...bank,
+      mcqPool: [
+        ...bank.mcqPool,
+        ...(EXPANDED_MCQS[skill] || [])
+      ]
+    }
+  ])
+);
+
 export const SKILL_ALIASES: Record<string, string> = {
   js: "javascript",
   ts: "typescript",
@@ -3345,15 +3419,15 @@ function shuffleArray<T>(array: T[], seed?: number): T[] {
   return arr;
 }
 
-export function resolveSkillKey(skillName: string): string {
-  if (!skillName) return "python";
+export function resolveSkillKey(skillName: string): string | null {
+  if (!skillName) return null;
   const normalized = skillName.toLowerCase().trim();
   if (QUESTION_BANKS[normalized]) return normalized;
   if (SKILL_ALIASES[normalized]) return SKILL_ALIASES[normalized];
   for (const key of Object.keys(QUESTION_BANKS)) {
     if (normalized.includes(key)) return key;
   }
-  return "python";
+  return null;
 }
 
 export function sanitizeAssessmentContent(content: AssessmentContent): AssessmentContent {
@@ -3372,9 +3446,11 @@ export function getAssessmentContent(
   skillName: string,
   userSeed?: string | number,
   options?: { sanitize?: boolean }
-): AssessmentContent {
+): AssessmentContent | null {
   const key = resolveSkillKey(skillName);
-  const bank = QUESTION_BANKS[key] || QUESTION_BANKS.python;
+  if (!key) return null;
+  const bank = QUESTION_BANKS[key];
+  if (!bank) return null;
 
   let seedNum: number;
   if (typeof userSeed === "number") {
@@ -3386,11 +3462,26 @@ export function getAssessmentContent(
   }
 
   const hasCoding = Boolean(bank.codingPool && bank.codingPool.length > 0);
-  const targetMcqCount = hasCoding ? 15 : 20;
 
-  // 1. Shuffle and pick 15 distinct MCQs from the pool (or 20 for non-coding skills)
-  const shuffledPool = shuffleArray(bank.mcqPool, seedNum);
-  const selectedMcqs = shuffledPool.slice(0, Math.min(targetMcqCount, shuffledPool.length));
+  // Exact requirement: 15 questions = 5 easy + 5 medium + 5 hard, and in strict sequential order
+  const easyPool = bank.mcqPool.filter((q) => q.difficulty === "easy");
+  const mediumPool = bank.mcqPool.filter((q) => q.difficulty === "medium");
+  const hardPool = bank.mcqPool.filter((q) => q.difficulty === "hard");
+
+  // Pick 5 from each difficulty pool deterministically using seed
+  const selectedEasy = shuffleArray(easyPool.length >= 5 ? easyPool : bank.mcqPool, (seedNum + 101) >>> 0).slice(0, 5);
+  const selectedMedium = shuffleArray(mediumPool.length >= 5 ? mediumPool : bank.mcqPool, (seedNum + 202) >>> 0).slice(0, 5);
+  const selectedHard = shuffleArray(hardPool.length >= 5 ? hardPool : bank.mcqPool, (seedNum + 303) >>> 0).slice(0, 5);
+
+  // Strictly in sequential order:
+  // Questions 1 to 5: Easy
+  // Questions 6 to 10: Medium
+  // Questions 11 to 15: Hard
+  const selectedMcqs: MCQ[] = [
+    ...selectedEasy,
+    ...selectedMedium,
+    ...selectedHard,
+  ].slice(0, 15);
 
   // 2. Shuffle option choices for each MCQ while preserving the correct answer index
   const randomizedMcqs: MCQ[] = selectedMcqs.map((mcq, mIdx) => {
@@ -3401,6 +3492,7 @@ export function getAssessmentContent(
 
     if (options?.sanitize) {
       return {
+        id: mcq.id || `mcq-${mIdx + 1}`,
         question: mcq.question,
         options: shuffledOptions,
         difficulty: mcq.difficulty,
@@ -3409,9 +3501,10 @@ export function getAssessmentContent(
     }
 
     return {
+      id: mcq.id || `mcq-${mIdx + 1}`,
       question: mcq.question,
       options: shuffledOptions,
-      answerIndex: newAnswerIndex,
+      answerIndex: newAnswerIndex >= 0 ? newAnswerIndex : 0,
       explanation: mcq.explanation,
       difficulty: mcq.difficulty,
       topic: mcq.topic,
@@ -3431,6 +3524,7 @@ export function getAssessmentContent(
     mcqs: randomizedMcqs,
     coding: selectedCoding,
     hasCoding,
-    timeLimitMinutes: 60,
+    timeLimitMinutes: hasCoding ? 90 : 35,
+    assessmentType: hasCoding ? "coding_capable" : "mcq_only",
   };
 }

@@ -54,8 +54,11 @@ export async function POST(req: NextRequest) {
   }
 
   if (violationCount >= 2) {
-    // Second violation -> Terminate the assessment and apply a 3-month lockout
-    const lockoutTimestamp = Date.now() + (90 * 24 * 60 * 60 * 1000); // 90 days
+    const ADMIN_EMAILS = ["saitrishankb9@gmail.com", "saitrishankb1311@gmail.com"];
+    const isAdmin = decodedToken.admin === true || ADMIN_EMAILS.includes(decodedToken.email?.toLowerCase() || "");
+    // Ban is strictly for specific said days (30 days) for this specific language only, NOT for all languages
+    const BAN_DAYS = 30;
+    const lockoutTimestamp = isAdmin ? null : Date.now() + (BAN_DAYS * 24 * 60 * 60 * 1000);
 
     const sessionClearFields = {
       assessmentStartedAt: FieldValue.delete(),
@@ -71,13 +74,19 @@ export async function POST(req: NextRequest) {
 
     const batch = adminDb.batch();
     
-    // 1. Update User Record
-    batch.update(userRef, {
-      [`failedAssessments.${skill}`]: FieldValue.serverTimestamp(), // standard failure fallback
-      proctoringLockoutUntil: lockoutTimestamp, // 3-month global lockout
-      [`proctoringTerminations.${skill}`]: FieldValue.serverTimestamp(), // distinct termination flag
+    // 1. Update User Record - Ban strictly for this language only
+    const userUpdate: Record<string, any> = {
+      [`failedAssessments.${skill}`]: FieldValue.serverTimestamp(),
+      [`proctoringTerminations.${skill}`]: FieldValue.serverTimestamp(),
+      proctoringLockoutUntil: FieldValue.delete(), // ensure no global ban
       ...sessionClearFields
-    });
+    };
+    if (lockoutTimestamp) {
+      userUpdate[`skillLockoutUntil.${skill}`] = lockoutTimestamp;
+    } else {
+      userUpdate[`skillLockoutUntil.${skill}`] = FieldValue.delete();
+    }
+    batch.update(userRef, userUpdate);
 
     // 2. Update Candidate Record
     const candidateRef = adminDb.collection("candidates").doc(uid);
@@ -90,7 +99,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ 
       action: "terminate", 
-      message: "Assessment terminated due to repeated proctoring violations. A 3-month lockout has been applied." 
+      message: `Assessment terminated due to proctoring violation. A ${BAN_DAYS}-day cooldown applies specifically to ${skill}. Other languages remain accessible.` 
     }, { status: 200 });
   }
 

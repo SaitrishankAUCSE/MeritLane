@@ -13,18 +13,21 @@ export async function POST(req: NextRequest) {
     const decodedToken = await adminAuth!.verifyIdToken(token);
     const employerUid = decodedToken.uid;
 
-    const userDoc = await adminDb!.collection("users").doc(employerUid).get();
-    if (!userDoc.exists || userDoc.data()?.role !== "employer") {
-      return NextResponse.json({ error: "Forbidden: Not an employer" }, { status: 403 });
-    }
-
     const { candidateId } = await req.json();
     if (!candidateId) {
       return NextResponse.json({ error: "Missing candidateId" }, { status: 400 });
     }
 
-    // Verify candidate exists
-    const candidateDoc = await adminDb!.collection("candidates").doc(candidateId).get();
+    // Parallel reads: verify employer role and candidate existence in one round-trip
+    const [userDoc, candidateDoc] = await Promise.all([
+      adminDb!.collection("users").doc(employerUid).get(),
+      adminDb!.collection("candidates").doc(candidateId).get(),
+    ]);
+
+    if (!userDoc.exists || userDoc.data()?.role !== "employer") {
+      return NextResponse.json({ error: "Forbidden: Not an employer" }, { status: 403 });
+    }
+
     if (!candidateDoc.exists) {
       return NextResponse.json({ error: "Candidate not found" }, { status: 404 });
     }

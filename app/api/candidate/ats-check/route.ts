@@ -285,6 +285,7 @@ export async function POST(req: NextRequest) {
     const uid = decodedToken.uid;
     let resumeText = "";
     let skills: string[] = [];
+    let uploadBuffer: Buffer | null = null;
 
     const contentType = req.headers.get("content-type") || "";
 
@@ -325,6 +326,7 @@ export async function POST(req: NextRequest) {
 
       const bytes = await file.arrayBuffer();
       const buffer = Buffer.from(bytes);
+      uploadBuffer = buffer;
       resumeText = await extractPdfText(buffer);
 
       if (!resumeText || resumeText.trim().length < 30) {
@@ -432,19 +434,29 @@ Ensure recommendedRoles has 3-4 top matches sorted by matchPercentage descending
           const parsed = JSON.parse(clean);
 
           if (parsed && typeof parsed.score === "number") {
-            await adminDb.collection("candidates").doc(uid).set({
+            const resumeUpdates: Record<string, any> = {
               atsScore: parsed.score,
               atsRating: parsed.rating,
               atsSummary: parsed.summary,
               atsRoles: parsed.recommendedRoles || [],
               atsAnalyzedAt: Date.now(),
-              parsedProfile: parsedEntities
-            }, { merge: true });
+              parsedProfile: parsedEntities,
+              resumeText: resumeText,
+              resumeFileName: uploadedFileName || "Candidate_Resume.pdf",
+              resumeUploadedAt: Date.now(),
+            };
+            if (uploadBuffer && uploadBuffer.length <= 750000) {
+              resumeUpdates.resumePdfDataUrl = `data:application/pdf;base64,${uploadBuffer.toString("base64")}`;
+            }
+
+            await adminDb.collection("candidates").doc(uid).set(resumeUpdates, { merge: true });
 
             return NextResponse.json({ 
               result: parsed, 
               parsed: parsedEntities,
-              extractedText: resumeText 
+              extractedText: resumeText,
+              resumeFileName: uploadedFileName || "Candidate_Resume.pdf",
+              resumePdfDataUrl: resumeUpdates.resumePdfDataUrl || "",
             }, { status: 200 });
           }
         }
@@ -455,19 +467,29 @@ Ensure recommendedRoles has 3-4 top matches sorted by matchPercentage descending
 
     const result = evaluateResumeDeterministically(resumeText, skills);
 
-    await adminDb.collection("candidates").doc(uid).set({
+    const fallbackUpdates: Record<string, any> = {
       atsScore: result.score,
       atsRating: result.rating,
       atsSummary: result.summary,
       atsRoles: result.recommendedRoles || [],
       atsAnalyzedAt: Date.now(),
-      parsedProfile: parsedEntities
-    }, { merge: true });
+      parsedProfile: parsedEntities,
+      resumeText: resumeText,
+      resumeFileName: uploadedFileName || "Candidate_Resume.pdf",
+      resumeUploadedAt: Date.now(),
+    };
+    if (uploadBuffer && uploadBuffer.length <= 750000) {
+      fallbackUpdates.resumePdfDataUrl = `data:application/pdf;base64,${uploadBuffer.toString("base64")}`;
+    }
+
+    await adminDb.collection("candidates").doc(uid).set(fallbackUpdates, { merge: true });
 
     return NextResponse.json({ 
       result, 
       parsed: parsedEntities,
-      extractedText: resumeText 
+      extractedText: resumeText,
+      resumeFileName: uploadedFileName || "Candidate_Resume.pdf",
+      resumePdfDataUrl: fallbackUpdates.resumePdfDataUrl || "",
     }, { status: 200 });
   } catch (error: any) {
     console.error("ATS check route error:", error);
