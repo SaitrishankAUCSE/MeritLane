@@ -21,7 +21,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   useEffect(() => {
     if (!loading && !user) {
-      router.replace("/login");
+      router.replace("/");
     }
   }, [user, loading, router]);
 

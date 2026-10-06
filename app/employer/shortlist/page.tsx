@@ -78,7 +78,7 @@ export default function EmployerShortlistPage() {
   useEffect(() => {
     if (!loading) {
       if (!user) {
-        router.replace("/login");
+        router.replace("/");
         return;
       }
       fetchCandidates();

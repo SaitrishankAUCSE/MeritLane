@@ -27,7 +27,7 @@ export default function DashboardRouter() {
 
     // Not logged in — send to login
     if (!user) {
-      router.replace("/login");
+      router.replace("/");
       return;
     }
 
@@ -63,7 +63,7 @@ export default function DashboardRouter() {
     // Fallback — role not yet resolved or unknown
     // Wait a moment, then try login
     const timeout = setTimeout(() => {
-      router.replace("/login");
+      router.replace("/");
     }, 3000);
     return () => clearTimeout(timeout);
   }, [user, role, loading, profileLoading, router]);

@@ -139,7 +139,7 @@ export default function CandidateProfilePage() {
           setIsInitializing(false);
         });
     } else if (!loading && !user) {
-      router.push("/login");
+      router.push("/");
     }
   }, [user, loading, router]);
 

@@ -65,7 +65,7 @@ export default function JobApplicantsPage() {
 
   useEffect(() => {
     if (!authLoading && (!user || role !== "employer")) {
-      router.replace("/login");
+      router.replace("/");
       return;
     }
     if (user && role === "employer" && id) {

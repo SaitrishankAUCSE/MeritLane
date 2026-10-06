@@ -120,7 +120,7 @@ export default function EmployerDashboardPage() {
   useEffect(() => {
     if (!loading) {
       if (!user) {
-        router.replace("/login");
+        router.replace("/");
         return;
       }
       const timeoutId = setTimeout(() => {

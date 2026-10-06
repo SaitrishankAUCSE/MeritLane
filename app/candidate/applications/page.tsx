@@ -25,7 +25,7 @@ export default function CandidateApplicationsPage() {
 
   useEffect(() => {
     if (!authLoading && (!user || role !== "candidate")) {
-      router.replace("/login");
+      router.replace("/");
       return;
     }
 

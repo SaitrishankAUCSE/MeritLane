@@ -43,7 +43,7 @@ export default function ProtectedRoute({ children, allowedRoles }: ProtectedRout
         setIsAuthorized(false);
         if (!authPrompted) {
           setAuthPrompted(true);
-          openAuthModal("login");
+          router.replace("/");
         }
         return;
       }
@@ -73,7 +73,7 @@ export default function ProtectedRoute({ children, allowedRoles }: ProtectedRout
         await signOut(auth);
         if (!authPrompted) {
           setAuthPrompted(true);
-          openAuthModal("login");
+          router.replace("/");
         }
         return;
       }

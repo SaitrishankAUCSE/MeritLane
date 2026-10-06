@@ -265,7 +265,7 @@ export default function CandidateInboxPage() {
   useEffect(() => {
     if (!loading) {
       if (!user) {
-        router.replace("/login");
+        router.replace("/");
         return;
       }
       fetchMessages();

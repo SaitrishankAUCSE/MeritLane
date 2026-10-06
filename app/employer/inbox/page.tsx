@@ -117,7 +117,7 @@ export default function EmployerInboxPage() {
 
   useEffect(() => {
     if (!authLoading && (!user || role !== "employer")) {
-      router.replace("/login");
+      router.replace("/");
     }
   }, [user, role, authLoading, router]);
 

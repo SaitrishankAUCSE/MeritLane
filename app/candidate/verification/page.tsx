@@ -31,7 +31,7 @@ export default function CandidateVerificationPage() {
   const [isFetching, setIsFetching] = useState(true);
 
   useEffect(() => {
-    if (!loading && !user) router.replace("/login");
+    if (!loading && !user) router.replace("/");
   }, [user, loading, router]);
 
   useEffect(() => {

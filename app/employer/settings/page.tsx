@@ -36,7 +36,14 @@ export default function EmployerSettingsPage() {
               <span className="font-medium text-[#737373] flex items-center gap-2">
                 <Mail className="h-4 w-4" /> Recruiter Email
               </span>
-              <span className="font-semibold text-[#0D0D0D]">{user?.email || "employer@example.com"}</span>
+              <div className="flex items-center gap-2">
+                <span className="font-semibold text-[#0D0D0D]">{user?.email || "employer@example.com"}</span>
+                {user?.emailVerified ? (
+                  <span className="text-[10px] font-bold text-green-600 bg-green-50 px-2 py-0.5 rounded border border-green-200">VERIFIED</span>
+                ) : (
+                  <span className="text-[10px] font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded border border-amber-200">UNVERIFIED</span>
+                )}
+              </div>
             </div>
             <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-[#E5E5E5]">
               <span className="font-medium text-[#737373] flex items-center gap-2">
@@ -53,6 +60,62 @@ export default function EmployerSettingsPage() {
               <span className="font-medium text-[#0D0D0D] capitalize">
                 {userProfile?.authProvider || "Firebase Auth"}
               </span>
+            </div>
+          </div>
+        </div>
+
+        {/* Contact Information */}
+        <div className="bg-white border border-[#E5E5E5] rounded overflow-hidden shadow-sm">
+          <div className="px-6 py-5 border-b border-[#E5E5E5] bg-[#FAFAFA]">
+            <h2 className="text-[15px] font-bold text-[#0D0D0D]">Contact Information</h2>
+            <p className="mt-1 text-[12px] text-[#737373]">Manage your company contact details for candidates and platform notifications.</p>
+          </div>
+          <div className="p-6 space-y-4">
+            <div className="flex items-center justify-between border-b border-[#E5E5E5] pb-4">
+              <div className="space-y-1">
+                <span className="block text-[14px] font-medium text-[#0D0D0D]">Company Phone Number</span>
+                <span className="block text-[12px] text-[#737373]">Add a phone number for direct urgent candidate communication.</span>
+              </div>
+              <button className="text-xs font-semibold uppercase tracking-widest px-4 py-2 border border-[#E5E5E5] hover:bg-[#FAFAFA] text-[#0D0D0D] rounded-md transition-colors">
+                Add Phone
+              </button>
+            </div>
+            <div className="flex items-center justify-between">
+              <div className="space-y-1">
+                <span className="block text-[14px] font-medium text-[#0D0D0D]">Billing Email</span>
+                <span className="block text-[12px] text-[#737373]">Add a specific email address for invoices and receipts.</span>
+              </div>
+              <button className="text-xs font-semibold uppercase tracking-widest px-4 py-2 border border-[#E5E5E5] hover:bg-[#FAFAFA] text-[#0D0D0D] rounded-md transition-colors">
+                Add Email
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Password & Security */}
+        <div className="bg-white border border-[#E5E5E5] rounded overflow-hidden shadow-sm">
+          <div className="px-6 py-5 border-b border-[#E5E5E5] bg-[#FAFAFA]">
+            <h2 className="text-[15px] font-bold text-[#0D0D0D]">Password & Security</h2>
+            <p className="mt-1 text-[12px] text-[#737373]">Manage your security settings and authentication methods.</p>
+          </div>
+          <div className="p-6 space-y-4">
+            <div className="flex items-center justify-between border-b border-[#E5E5E5] pb-4">
+              <div className="space-y-1">
+                <span className="block text-[14px] font-medium text-[#0D0D0D]">Change Password</span>
+                <span className="block text-[12px] text-[#737373]">Update your recruiter account password.</span>
+              </div>
+              <button className="text-xs font-semibold uppercase tracking-widest px-4 py-2 border border-[#E5E5E5] hover:bg-[#FAFAFA] text-[#0D0D0D] rounded-md transition-colors">
+                Update
+              </button>
+            </div>
+            <div className="flex items-center justify-between">
+              <div className="space-y-1">
+                <span className="block text-[14px] font-medium text-[#0D0D0D]">Two-Factor Authentication</span>
+                <span className="block text-[12px] text-[#737373]">Require a security code on sign in for the entire workspace.</span>
+              </div>
+              <button className="text-xs font-semibold uppercase tracking-widest px-4 py-2 border border-[#E5E5E5] hover:bg-[#FAFAFA] text-[#0D0D0D] rounded-md transition-colors">
+                Enable 2FA
+              </button>
             </div>
           </div>
         </div>

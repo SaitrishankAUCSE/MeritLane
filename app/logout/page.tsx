@@ -16,7 +16,7 @@ export default function LogoutPage() {
       } catch (err) {
         console.error("Sign out error:", err);
       }
-      router.replace("/login");
+      router.replace("/");
     }
 
     executeSignOut();

@@ -538,7 +538,7 @@ export default function QuestionDraftsPage() {
 
   // Redirect if not admin
   useEffect(() => {
-    if (!loading && !user) router.replace("/login");
+    if (!loading && !user) router.replace("/");
   }, [user, loading, router]);
 
   const loadDrafts = useCallback(async () => {

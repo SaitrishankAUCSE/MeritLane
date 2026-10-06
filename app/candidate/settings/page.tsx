@@ -16,7 +16,7 @@ export default function SettingsPage() {
 
   useEffect(() => {
     if (!loading && !profileLoading && (!user || !userProfile)) {
-      router.push("/login");
+      router.push("/");
     }
   }, [user, loading, profileLoading, router]);
 
@@ -59,10 +59,24 @@ export default function SettingsPage() {
           <div className="px-6 py-5">
             <div className="space-y-4 text-xs">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 border-b border-[#E5E5E5] pb-4">
-                <span className="font-semibold text-[#737373] flex items-center gap-2">
-                  <Mail className="h-4 w-4" /> Email Address
-                </span>
-                <span className="font-medium text-[#0D0D0D] sm:text-right">{user.email}</span>
+                <div className="space-y-1">
+                  <span className="font-semibold text-[#737373] flex items-center gap-2">
+                    <Mail className="h-4 w-4" /> Email Address
+                  </span>
+                  <div className="flex items-center gap-2">
+                    <span className="font-medium text-[#0D0D0D]">{user.email}</span>
+                    {user.emailVerified ? (
+                      <span className="text-[10px] font-bold text-green-600 bg-green-50 px-2 py-0.5 rounded border border-green-200">VERIFIED</span>
+                    ) : (
+                      <span className="text-[10px] font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded border border-amber-200">UNVERIFIED</span>
+                    )}
+                  </div>
+                </div>
+                {!user.emailVerified && (
+                  <button className="text-xs font-semibold uppercase tracking-widest px-4 py-2 border border-[#E5E5E5] hover:bg-[#FAFAFA] text-[#0D0D0D] rounded-md transition-colors">
+                    Verify Email
+                  </button>
+                )}
               </div>
               
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 border-b border-[#E5E5E5] pb-4">
@@ -82,6 +96,34 @@ export default function SettingsPage() {
           </div>
         </div>
 
+        {/* Contact & Personal Information */}
+        <div className="border border-[#E5E5E5] bg-[#FFFFFF] rounded overflow-hidden">
+          <div className="border-b border-[#E5E5E5] px-6 py-5">
+            <h2 className="text-base font-bold text-[#0D0D0D]">Contact Information</h2>
+            <p className="mt-1 text-xs text-[#666666]">Manage how employers and MeritLane can reach you.</p>
+          </div>
+          <div className="px-6 py-5 space-y-4">
+            <div className="flex items-center justify-between border-b border-[#E5E5E5] pb-4">
+              <div className="space-y-1">
+                <span className="block text-sm font-semibold text-[#0D0D0D]">Phone Number</span>
+                <span className="block text-xs text-[#666666]">Add a phone number for SMS notifications and employer outreach.</span>
+              </div>
+              <button className="text-xs font-semibold uppercase tracking-widest px-4 py-2 border border-[#E5E5E5] hover:bg-[#FAFAFA] text-[#0D0D0D] rounded-md transition-colors">
+                Add Phone
+              </button>
+            </div>
+            <div className="flex items-center justify-between">
+              <div className="space-y-1">
+                <span className="block text-sm font-semibold text-[#0D0D0D]">Secondary Email</span>
+                <span className="block text-xs text-[#666666]">Add a backup email for account recovery.</span>
+              </div>
+              <button className="text-xs font-semibold uppercase tracking-widest px-4 py-2 border border-[#E5E5E5] hover:bg-[#FAFAFA] text-[#0D0D0D] rounded-md transition-colors">
+                Add Email
+              </button>
+            </div>
+          </div>
+        </div>
+
         {/* Password & Security Block */}
         <div className="border border-[#E5E5E5] bg-[#FFFFFF] rounded overflow-hidden">
           <div className="border-b border-[#E5E5E5] px-6 py-5">
@@ -94,8 +136,8 @@ export default function SettingsPage() {
                 <span className="block text-sm font-semibold text-[#0D0D0D]">Change Password</span>
                 <span className="block text-xs text-[#666666]">Update your account password</span>
               </div>
-              <button disabled className="text-xs font-semibold uppercase tracking-widest px-4 py-2 border border-[#E5E5E5] bg-[#FAFAFA] text-[#D2D2D2] rounded-md transition-colors cursor-not-allowed" title="Coming soon">
-                Coming Soon
+              <button className="text-xs font-semibold uppercase tracking-widest px-4 py-2 border border-[#E5E5E5] hover:bg-[#FAFAFA] text-[#0D0D0D] rounded-md transition-colors">
+                Update
               </button>
             </div>
             <div className="flex items-center justify-between">
@@ -103,8 +145,8 @@ export default function SettingsPage() {
                 <span className="block text-sm font-semibold text-[#0D0D0D]">Two-Factor Authentication</span>
                 <span className="block text-xs text-[#666666]">Add an extra layer of security to your account</span>
               </div>
-              <button disabled className="text-xs font-semibold uppercase tracking-widest px-4 py-2 bg-[#F3F3F1] text-[#D2D2D2] rounded-md transition-colors cursor-not-allowed" title="Coming soon">
-                Coming Soon
+              <button className="text-xs font-semibold uppercase tracking-widest px-4 py-2 border border-[#E5E5E5] hover:bg-[#FAFAFA] text-[#0D0D0D] rounded-md transition-colors">
+                Enable 2FA
               </button>
             </div>
           </div>
