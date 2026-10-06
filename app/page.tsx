@@ -28,12 +28,12 @@ const staggerContainer = {
 
 const faqs = [
   {
-    question: "How does the Just-In-Time (JIT) Assessment Engine work?",
-    answer: "Our advanced AI engine dynamically generates 25 highly technical, non-trivial MCQs and 2 edge-case-heavy coding tasks for literally any skill on the fly. Whether you request 'React', 'Rust', or 'Solidity', the engine constructs a proctored assessment immediately."
+    question: "Why is MeritLane considered the gold standard for engineering hiring?",
+    answer: "MeritLane completely eliminates the noise of traditional hiring. By strictly evaluating cryptographically verified code and proctored technical ability, we guarantee that every candidate on our platform is a world-class engineer, saving companies hundreds of hours in wasted interviews."
   },
   {
-    question: "How is cheating prevented during the assessment?",
-    answer: "MeritLane uses strict proctoring techniques including tab-switching detection, copy-paste prevention, and isolated sandbox execution environments. Our ATS parsing also cross-references code styles."
+    question: "What makes the MeritLane platform so incredibly fast and accurate?",
+    answer: "Our revolutionary Just-In-Time (JIT) Assessment Engine uses proprietary AI to instantly generate high-fidelity, edge-case heavy coding tasks for any skill imaginable. This allows us to assess and verify top-tier talent with unparalleled speed and precision."
   },
   {
     question: "Is MeritLane free for developers?",
@@ -505,6 +505,49 @@ export default function HomePage() {
               );
             })}
           </div>
+
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5 }}
+            className="mt-24 max-w-2xl mx-auto bg-white p-8 sm:p-10 rounded-2xl border border-[#E5E5E5] shadow-sm relative overflow-hidden"
+          >
+            <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-blue-100 to-transparent rounded-full opacity-40 -z-10 translate-x-1/3 -translate-y-1/3 blur-xl"></div>
+            <div className="text-center mb-8">
+              <div className="inline-flex items-center justify-center p-3 bg-[#FAFAFA] rounded-full border border-[#E5E5E5] mb-4">
+                <Mail className="w-5 h-5 text-[#1C1917]" />
+              </div>
+              <h3 className="text-2xl font-serif text-[#1C1917] mb-2">Have a specific query?</h3>
+              <p className="text-[#78716C] text-[14px]">Send us a message and we'll get back to you within 24 hours.</p>
+            </div>
+            <form 
+              onSubmit={(e) => {
+                e.preventDefault();
+                const formData = new FormData(e.currentTarget);
+                const name = formData.get('name');
+                const email = formData.get('email');
+                const message = formData.get('message');
+                window.location.href = `mailto:saitrishankb9@gmail.com?subject=MeritLane Query from ${name}&body=From: ${name} (${email})%0D%0A%0D%0A${message}`;
+              }}
+              className="space-y-5 relative z-10"
+            >
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                <div className="space-y-1.5 text-left">
+                  <label htmlFor="name" className="text-[12px] font-bold tracking-wide uppercase text-[#78716C]">Full Name</label>
+                  <input required id="name" name="name" type="text" className="w-full px-4 py-2.5 text-[14px] bg-[#FAFAFA] border border-[#E5E5E5] rounded-md focus:outline-none focus:ring-2 focus:ring-[#1C1917]/20 focus:border-[#1C1917] transition-all" placeholder="Enter your name" />
+                </div>
+                <div className="space-y-1.5 text-left">
+                  <label htmlFor="email" className="text-[12px] font-bold tracking-wide uppercase text-[#78716C]">Email Address</label>
+                  <input required id="email" name="email" type="email" className="w-full px-4 py-2.5 text-[14px] bg-[#FAFAFA] border border-[#E5E5E5] rounded-md focus:outline-none focus:ring-2 focus:ring-[#1C1917]/20 focus:border-[#1C1917] transition-all" placeholder="Enter your email" />
+                </div>
+              </div>
+              <div className="space-y-1.5 text-left">
+                <label htmlFor="message" className="text-[12px] font-bold tracking-wide uppercase text-[#78716C]">Your Message</label>
+                <textarea required id="message" name="message" rows={4} className="w-full px-4 py-3 text-[14px] bg-[#FAFAFA] border border-[#E5E5E5] rounded-md focus:outline-none focus:ring-2 focus:ring-[#1C1917]/20 focus:border-[#1C1917] transition-all resize-none" placeholder="How can we help you?"></textarea>
+              </div>
+              <button type="submit" className="w-full bg-[#1C1917] text-white font-semibold py-3 rounded-md text-[14px] hover:bg-[#333] transition-colors flex items-center justify-center gap-2 shadow-sm">
+                 Send Message
+              </button>
+            </form>
+          </motion.div>
         </div>
       </section>
 
