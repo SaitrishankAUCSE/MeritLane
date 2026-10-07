@@ -50,6 +50,9 @@ export default function HomePage() {
   const router = useRouter();
   const [hasCachedSession, setHasCachedSession] = useState(false);
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(null);
+  const [contactStatus, setContactStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
+  const [contactError, setContactError] = useState<string | null>(null);
+  const [contactSubmittedEmail, setContactSubmittedEmail] = useState<string>("");
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -518,35 +521,92 @@ export default function HomePage() {
               <h3 className="text-2xl font-serif text-[#1C1917] mb-2">Have a specific query?</h3>
               <p className="text-[#78716C] text-[14px]">Send us a message and we'll get back to you within 24 hours.</p>
             </div>
-            <form 
-              onSubmit={(e) => {
-                e.preventDefault();
-                const formData = new FormData(e.currentTarget);
-                const name = formData.get('name');
-                const email = formData.get('email');
-                const message = formData.get('message');
-                window.location.href = `mailto:saitrishankb9@gmail.com?subject=MeritLane Query from ${name}&body=From: ${name} (${email})%0D%0A%0D%0A${message}`;
-              }}
-              className="space-y-5 relative z-10"
-            >
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                <div className="space-y-1.5 text-left">
-                  <label htmlFor="name" className="text-[12px] font-bold tracking-wide uppercase text-[#78716C]">Full Name</label>
-                  <input required id="name" name="name" type="text" className="w-full px-4 py-2.5 text-[14px] bg-[#FAFAFA] border border-[#E5E5E5] rounded-md focus:outline-none focus:ring-2 focus:ring-[#1C1917]/20 focus:border-[#1C1917] transition-all" placeholder="Enter your name" />
+            {contactStatus === "success" ? (
+              <div className="text-center py-6 space-y-4">
+                <div className="inline-flex items-center justify-center p-3.5 bg-emerald-50 text-emerald-700 rounded-full border border-emerald-200">
+                  <CheckCircle className="w-8 h-8" />
                 </div>
-                <div className="space-y-1.5 text-left">
-                  <label htmlFor="email" className="text-[12px] font-bold tracking-wide uppercase text-[#78716C]">Email Address</label>
-                  <input required id="email" name="email" type="email" className="w-full px-4 py-2.5 text-[14px] bg-[#FAFAFA] border border-[#E5E5E5] rounded-md focus:outline-none focus:ring-2 focus:ring-[#1C1917]/20 focus:border-[#1C1917] transition-all" placeholder="Enter your email" />
+                <h4 className="text-xl font-serif text-[#1C1917] font-semibold">Message Delivered</h4>
+                <p className="text-[#525252] text-[15px] max-w-md mx-auto leading-relaxed">
+                  Thank you for reaching out! Your message has been saved to the administrative inbox. We will get back to you at <strong>{contactSubmittedEmail}</strong> within 24 hours.
+                </p>
+                <div className="pt-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setContactStatus("idle");
+                      setContactError(null);
+                    }}
+                    className="inline-flex items-center text-[13px] font-semibold text-[#1C1917] hover:text-[#059669] transition-colors underline underline-offset-4"
+                  >
+                    Send another message &rarr;
+                  </button>
                 </div>
               </div>
-              <div className="space-y-1.5 text-left">
-                <label htmlFor="message" className="text-[12px] font-bold tracking-wide uppercase text-[#78716C]">Your Message</label>
-                <textarea required id="message" name="message" rows={4} className="w-full px-4 py-3 text-[14px] bg-[#FAFAFA] border border-[#E5E5E5] rounded-md focus:outline-none focus:ring-2 focus:ring-[#1C1917]/20 focus:border-[#1C1917] transition-all resize-none" placeholder="How can we help you?"></textarea>
-              </div>
-              <button type="submit" className="w-full bg-[#1C1917] text-white font-semibold py-3 rounded-md text-[14px] hover:bg-[#333] transition-colors flex items-center justify-center gap-2 shadow-sm">
-                 Send Message
-              </button>
-            </form>
+            ) : (
+              <form 
+                onSubmit={async (e) => {
+                  e.preventDefault();
+                  setContactStatus("loading");
+                  setContactError(null);
+
+                  const form = e.currentTarget;
+                  const formData = new FormData(form);
+                  const name = String(formData.get("name") || "").trim();
+                  const email = String(formData.get("email") || "").trim();
+                  const message = String(formData.get("message") || "").trim();
+
+                  try {
+                    const res = await fetch("/api/contact", {
+                      method: "POST",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify({ name, email, message }),
+                    });
+
+                    const data = await res.json().catch(() => ({}));
+
+                    if (!res.ok) {
+                      throw new Error(data.error || "Failed to submit message. Please try again.");
+                    }
+
+                    setContactSubmittedEmail(email);
+                    setContactStatus("success");
+                    form.reset();
+                  } catch (err: any) {
+                    setContactStatus("error");
+                    setContactError(err.message || "Failed to deliver message. Please try again.");
+                  }
+                }}
+                className="space-y-5 relative z-10"
+              >
+                {contactError && (
+                  <div className="p-3 rounded-md bg-red-50 border border-red-200 text-red-700 text-xs text-left">
+                    {contactError}
+                  </div>
+                )}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                  <div className="space-y-1.5 text-left">
+                    <label htmlFor="name" className="text-[12px] font-bold tracking-wide uppercase text-[#78716C]">Full Name</label>
+                    <input required id="name" name="name" type="text" className="w-full px-4 py-2.5 text-[14px] bg-[#FAFAFA] border border-[#E5E5E5] rounded-md focus:outline-none focus:ring-2 focus:ring-[#1C1917]/20 focus:border-[#1C1917] transition-all" placeholder="Enter your name" disabled={contactStatus === "loading"} />
+                  </div>
+                  <div className="space-y-1.5 text-left">
+                    <label htmlFor="email" className="text-[12px] font-bold tracking-wide uppercase text-[#78716C]">Email Address</label>
+                    <input required id="email" name="email" type="email" className="w-full px-4 py-2.5 text-[14px] bg-[#FAFAFA] border border-[#E5E5E5] rounded-md focus:outline-none focus:ring-2 focus:ring-[#1C1917]/20 focus:border-[#1C1917] transition-all" placeholder="Enter your email" disabled={contactStatus === "loading"} />
+                  </div>
+                </div>
+                <div className="space-y-1.5 text-left">
+                  <label htmlFor="message" className="text-[12px] font-bold tracking-wide uppercase text-[#78716C]">Your Message</label>
+                  <textarea required id="message" name="message" rows={4} className="w-full px-4 py-3 text-[14px] bg-[#FAFAFA] border border-[#E5E5E5] rounded-md focus:outline-none focus:ring-2 focus:ring-[#1C1917]/20 focus:border-[#1C1917] transition-all resize-none" placeholder="How can we help you?" disabled={contactStatus === "loading"}></textarea>
+                </div>
+                <button 
+                  type="submit" 
+                  disabled={contactStatus === "loading"}
+                  className="w-full bg-[#1C1917] text-white font-semibold py-3 rounded-md text-[14px] hover:bg-[#333] transition-colors flex items-center justify-center gap-2 shadow-sm disabled:opacity-50"
+                >
+                  {contactStatus === "loading" ? "Delivering Message..." : "Send Message"}
+                </button>
+              </form>
+            )}
           </motion.div>
         </div>
       </section>

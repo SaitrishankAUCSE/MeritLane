@@ -43,11 +43,13 @@ import {
   ShieldAlert, 
   GitBranch, 
   TerminalSquare, 
-  MessageSquareCode
+  MessageSquareCode,
+  Mail
 } from "lucide-react";
 import { MeritlaneLoader } from "@/components/ui/MeritlaneLoader";
 import { ReviewConsole } from "@/components/admin/ReviewConsole";
 import { ContextGuide } from "@/components/ui/ContextGuide";
+import { InquiriesView, InquiryRecord } from "@/components/admin/InquiriesView";
 
 import { collection, onSnapshot, doc, updateDoc, serverTimestamp, getDocs, writeBatch } from "firebase/firestore";
 import { db, auth } from "@/lib/firebase/config";
@@ -104,8 +106,10 @@ export default function AdminDashboardPage() {
   const [error, setError] = useState<string | null>(null);
   const [selectedCandidate, setSelectedCandidate] = useState<CandidateAdminRecord | null>(null);
 
-  // Active Tab: queue, directory, analytics, audit
-  const [activeTab, setActiveTab] = useState<"queue" | "directory" | "analytics" | "audit">("queue");
+  // Active Tab: queue, directory, analytics, audit, inquiries
+  const [activeTab, setActiveTab] = useState<"queue" | "directory" | "analytics" | "audit" | "inquiries">("queue");
+  const [inquiries, setInquiries] = useState<InquiryRecord[]>([]);
+  const [inquiriesLoading, setInquiriesLoading] = useState(false);
 
   // Action dialog states
   const [actionType, setActionType] = useState<"verified" | "changes_required" | "rejected" | null>(null);
@@ -205,6 +209,101 @@ export default function AdminDashboardPage() {
 
     return () => unsubscribeCandidates();
   }, [user, fetchCandidates]);
+
+  const fetchInquiries = useCallback(async () => {
+    if (!user) return;
+    setInquiriesLoading(true);
+    try {
+      const idToken = await user.getIdToken();
+      const res = await fetch("/api/admin/inquiries", {
+        headers: { Authorization: `Bearer ${idToken}` },
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (Array.isArray(data.inquiries)) {
+          setInquiries(data.inquiries);
+        }
+      }
+    } catch (e) {
+      console.error("fetchInquiries fallback error:", e);
+    } finally {
+      setInquiriesLoading(false);
+    }
+  }, [user]);
+
+  // Real-time Firestore snapshot listener for landing page inquiries
+  useEffect(() => {
+    if (!user) return;
+    setInquiriesLoading(true);
+
+    try {
+      const unsubscribeInquiries = onSnapshot(
+        collection(db, "inquiries"),
+        (snapshot) => {
+          const records: InquiryRecord[] = [];
+          snapshot.forEach((docSnap) => {
+            const d = docSnap.data();
+            records.push({
+              id: docSnap.id,
+              name: d.name || "Anonymous",
+              email: d.email || "",
+              message: d.message || "",
+              createdAt: d.createdAt || Date.now(),
+              read: Boolean(d.read),
+              status: d.status || (d.read ? "read" : "new"),
+            });
+          });
+          records.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+          setInquiries(records);
+          setInquiriesLoading(false);
+        },
+        (error) => {
+          console.warn("Firestore inquiries onSnapshot error, using API fallback:", error);
+          fetchInquiries();
+        }
+      );
+
+      return () => unsubscribeInquiries();
+    } catch {
+      fetchInquiries();
+    }
+  }, [user, fetchInquiries]);
+
+  const handleMarkInquiryRead = async (id: string, read: boolean) => {
+    if (!user) return;
+    try {
+      // Optimistic update
+      setInquiries((prev) =>
+        prev.map((i) => (i.id === id ? { ...i, read, status: read ? "read" : "new" } : i))
+      );
+      const idToken = await user.getIdToken();
+      await fetch("/api/admin/inquiries", {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${idToken}`,
+        },
+        body: JSON.stringify({ id, read }),
+      });
+    } catch (err) {
+      console.error("Failed to mark inquiry read:", err);
+    }
+  };
+
+  const handleDeleteInquiry = async (id: string) => {
+    if (!user) return;
+    try {
+      setInquiries((prev) => prev.filter((i) => i.id !== id));
+      const idToken = await user.getIdToken();
+      await fetch(`/api/admin/inquiries?id=${id}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${idToken}` },
+      });
+      setSuccessToast("Inquiry deleted.");
+    } catch (err) {
+      console.error("Failed to delete inquiry:", err);
+    }
+  };
 
   useEffect(() => {
     if (successToast) {
@@ -416,6 +515,7 @@ export default function AdminDashboardPage() {
   const changesCount = candidates.filter((c) => c.verificationStatus === "changes_required").length;
   const totalCount = candidates.length;
   const verifiedRate = totalCount > 0 ? Math.round((verifiedCount / totalCount) * 100) : 0;
+  const unreadInquiriesCount = inquiries.filter((i) => !i.read).length;
 
   // Filtered list
   const filteredCandidates = useMemo(() => {
@@ -699,6 +799,23 @@ export default function AdminDashboardPage() {
             <History className="h-4 w-4" />
             <span>Audit Trail ({hasLoadedCandidates ? auditLogs.length : "..."})</span>
           </button>
+
+          <button
+            onClick={() => setActiveTab("inquiries")}
+            className={`flex items-center gap-2 border-b-2 pb-3 text-sm font-medium transition-colors ${
+              activeTab === "inquiries"
+                ? "border-foreground text-foreground font-semibold"
+                : "border-transparent text-muted-foreground hover:border-border hover:text-foreground"
+            }`}
+          >
+            <Mail className="h-4 w-4" />
+            <span>Inquiries ({inquiries.length})</span>
+            {unreadInquiriesCount > 0 && (
+              <span className="rounded-full bg-blue-600 px-2 py-0.5 text-[10px] font-bold text-white animate-pulse">
+                {unreadInquiriesCount} new
+              </span>
+            )}
+          </button>
         </div>
 
         {/* TAB 1: PENDING QUEUE */}
@@ -958,6 +1075,17 @@ export default function AdminDashboardPage() {
               </CardContent>
             </Card>
           </div>
+        )}
+
+        {/* TAB 5: INQUIRIES & MESSAGES */}
+        {activeTab === "inquiries" && (
+          <InquiriesView
+            inquiries={inquiries}
+            loading={inquiriesLoading}
+            onRefresh={fetchInquiries}
+            onMarkRead={handleMarkInquiryRead}
+            onDelete={handleDeleteInquiry}
+          />
         )}
       </div>
 
