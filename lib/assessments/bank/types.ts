@@ -14,18 +14,40 @@ export interface CodingQuestion {
   title: string;
   /** Full problem statement shown to the candidate */
   instructions: string;
-  /** Python function name the runner will locate in the candidate's code */
+  /** Python / language function name the runner will locate in the candidate's code */
   functionName: string;
+  /**
+   * Starter code keyed by language ID.
+   * Covers all 6 assessment modes: programming, query, config, debugging, markup, knowledge.
+   */
   starterCode: {
+    // Programming languages
     python?: string;
     javascript?: string;
+    typescript?: string;
     java?: string;
     cpp?: string;
-    typescript?: string;
+    go?: string;
+    rust?: string;
+    csharp?: string;
+    ruby?: string;
+    kotlin?: string;
+    swift?: string;
+    scala?: string;
+    r?: string;
+    // Query / data languages
     sql?: string;
+    // Config / IaC formats
     dockerfile?: string;
     yaml?: string;
     hcl?: string;
+    json?: string;
+    // Debugging / scripting
+    bash?: string;
+    // Markup / style
+    html?: string;
+    css?: string;
+    scss?: string;
   };
   supportedLanguages?: Array<{ id: string; name: string }>;
   /** Exactly 5 public test cases — shown after "Run Code" */
@@ -47,10 +69,12 @@ export interface MCQQuestion {
 
 export interface SkillBank {
   skill: string;
-  /** Pool of easy coding questions — select 1 per attempt */
+  /** Assessment mode used when this bank was generated */
+  assessmentMode?: "programming" | "query" | "config" | "debugging" | "markup" | "knowledge";
+  /** Pool of easy coding/task questions — select 1 per attempt */
   easy: CodingQuestion[];
-  /** Pool of medium-hard coding questions — select 1 per attempt */
+  /** Pool of medium-hard coding/task questions — select 1 per attempt */
   mediumHard: CodingQuestion[];
-  /** Pool of MCQ questions — select 8 per attempt */
+  /** Pool of MCQ questions */
   mcqs: MCQQuestion[];
 }

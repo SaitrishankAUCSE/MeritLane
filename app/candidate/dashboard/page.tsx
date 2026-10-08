@@ -32,7 +32,7 @@ import { MeritlaneLoader } from "@/components/ui/MeritlaneLoader";
 import { db } from "@/lib/firebase/config";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { motion, AnimatePresence } from "framer-motion";
-import { ContextGuide } from "@/components/ui/ContextGuide";
+
 import CooldownTimer from "@/components/candidate/cooldown-timer";
 
 export default function CandidateDashboardPage() {
@@ -45,6 +45,7 @@ export default function CandidateDashboardPage() {
   const [errorMsg, setErrorMsg] = useState("");
   const [copiedLink, setCopiedLink] = useState(false);
   const [cooldowns, setCooldowns] = useState<Record<string, { timestamp: number; daysLeft: number; score?: number }>>({});
+  const [supportedSkills, setSupportedSkills] = useState<{keys: string[], aliases: string[]} | null>(null);
 
   const [newProject, setNewProject] = useState<Partial<ProjectEntry>>({
     title: "",
@@ -61,9 +62,11 @@ export default function CandidateDashboardPage() {
         fetchCandidateProfile(user.uid),
         getDoc(doc(db, "users", user.uid)).then((d) => (d.exists() ? d.data() : null)).catch(() => null),
         getDoc(doc(db, "candidates", user.uid)).then((d) => (d.exists() ? d.data() : null)).catch(() => null),
+        fetch("/api/candidate/supported-skills").then(res => res.json()).catch(() => null)
       ])
-        .then(([p, uData, cData]) => {
+        .then(([p, uData, cData, ssData]) => {
           setProfile(p);
+          if (ssData && ssData.keys) setSupportedSkills(ssData);
           if (p?.skills && p.skills.length > 0) {
             setNewProject((prev) => ({ ...prev, supportsClaim: p.skills[0] }));
           }
@@ -213,6 +216,12 @@ export default function CandidateDashboardPage() {
       console.error("Failed to remove evidence", err);
     }
   };
+  const isSkillSupported = (skill: string) => {
+    if (!supportedSkills) return true; // optimistic if not loaded
+    const normalized = skill.toLowerCase().trim();
+    if (supportedSkills.keys.includes(normalized) || supportedSkills.aliases.includes(normalized)) return true;
+    return supportedSkills.keys.some(key => normalized.includes(key));
+  };
 
   if (loading && !user) {
     return <MeritlaneLoader level="page" text="Authenticating" />;
@@ -230,7 +239,7 @@ export default function CandidateDashboardPage() {
                 Projects &amp; Evidence · Meritlane
               </span>
               <span className="text-[11px] font-mono font-semibold text-[#064E3B] bg-[#064E3B]/10 px-2.5 py-0.5 rounded border border-[#064E3B]/20">
-                ID: #{user?.uid.slice(0, 8).toUpperCase()}
+                Candidate ID: {profile?.candidateKey || (user?.uid ? `ML-${user.uid.slice(0, 8).toUpperCase()}` : "—")}
               </span>
               <span className="text-[11px] text-[#78716C] font-mono">
                 · Employer Discovery: {isEmployerPortalUnlocked ? "Unlocked" : `${verifiedSkillsCount}/${requiredForEmployerPortal} (50% needed)`}
@@ -292,93 +301,9 @@ export default function CandidateDashboardPage() {
       </div>
 
       <div className="w-full px-4 sm:px-6 lg:px-8 py-8 space-y-8">
-        {/* Context Guide */}
-        <ContextGuide 
-          storageKey="candidate_dashboard"
-          title="Your Projects & Proof"
-          steps={[
-            { title: "Add Skills", isCompleted: true },
-            { title: "Add Projects", isCompleted: projects.length > 0 },
-            { title: "Pass Skill Tests", isCompleted: verifiedSkillsCount > 0 }
-          ]}
-          ctaLabel="Take Skill Test"
-          ctaHref="/candidate/verification"
-        />
 
-        {/* 4-Pillar Telemetry Grid */}
-        <div className="border border-[#E7E2DA] bg-white rounded shadow-2xs overflow-hidden">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 divide-y sm:divide-y-0 sm:divide-x divide-[#E7E2DA]">
-            
-            {/* 1. Evidence Health */}
-            <div className="p-5 sm:p-6 bg-white">
-              <div className="flex items-center justify-between text-[11px] font-medium uppercase tracking-[0.15em] text-[#78716C] mb-1.5">
-                <span>Profile Strength</span>
-                <Activity className="h-3.5 w-3.5 text-[#064E3B]" />
-              </div>
-              <div className="text-[28px] font-serif text-[#1C1917] leading-tight mb-2">
-                {healthIndex}%
-              </div>
-              <div className="w-full bg-[#E7E2DA] h-1.5 rounded overflow-hidden mb-2">
-                <motion.div
-                  initial={{ width: 0 }}
-                  animate={{ width: `${healthIndex}%` }}
-                  transition={{ duration: 1.2, ease: "easeOut" }}
-                  className="bg-[#064E3B] h-full"
-                />
-              </div>
-              <div className="text-[11.5px] font-sans text-[#78716C]">
-                {healthIndex >= 80 ? "Your profile is in great shape!" : "Pass skill tests to reach verified status"}
-              </div>
-            </div>
 
-            {/* 2. Verified Assessments */}
-            <div className="p-5 sm:p-6 bg-white">
-              <div className="flex items-center justify-between text-[11px] font-medium uppercase tracking-[0.15em] text-[#064E3B] mb-1.5">
-                <span>Verified Skills</span>
-                <ShieldCheck className="h-3.5 w-3.5 text-[#064E3B]" />
-              </div>
-              <div className="text-[28px] font-serif text-[#064E3B] leading-tight mb-2">
-                {verifiedSkillsCount} / {skills.length || 0}
-              </div>
-              <div className="text-[11.5px] font-sans text-[#78716C]">
-                {isEmployerPortalUnlocked
-                  ? "✓ 50% Milestone Met (Visible to Employers)"
-                  : `${verifiedSkillsCount}/${requiredForEmployerPortal} with ≥75% (Reach 50% to unlock)`}
-              </div>
-            </div>
 
-            {/* 3. Git Provenance */}
-            <div className="p-5 sm:p-6 bg-white">
-              <div className="flex items-center justify-between text-[11px] font-medium uppercase tracking-[0.15em] text-[#78716C] mb-1.5">
-                <span>GitHub Commits</span>
-                <GitBranch className="h-3.5 w-3.5 text-[#1C1917]" />
-              </div>
-              <div className="text-[28px] font-serif text-[#1C1917] leading-tight mb-2">
-                {profile?.githubEvidence?.totalCommits || 0}
-              </div>
-              <div className="text-[11.5px] font-sans text-[#78716C]">
-                {profile?.githubEvidence
-                  ? `Across ${profile.githubEvidence.repoCount} repositories`
-                  : "GitHub not connected"}
-              </div>
-            </div>
-
-            {/* 4. ATS Keyword Match */}
-            <div className="p-5 sm:p-6 bg-white">
-              <div className="flex items-center justify-between text-[11px] font-medium uppercase tracking-[0.15em] text-[#78716C] mb-1.5">
-                <span>Resume Score</span>
-                <FileText className="h-3.5 w-3.5 text-[#78716C]" />
-              </div>
-              <div className="text-[28px] font-serif text-[#1C1917] leading-tight mb-2">
-                {typeof profile?.atsScore === "number" ? `${profile.atsScore}/100` : "Not scored"}
-              </div>
-              <div className="text-[11.5px] font-sans text-[#78716C]">
-                {profile?.atsRating ? `${profile.atsRating} match rating` : "Upload resume in Profile"}
-              </div>
-            </div>
-
-          </div>
-        </div>
 
       {/* Navigation Tabs */}
       <div className="flex items-center gap-2 border-b border-[#E7E2DA] mb-8 pb-px">
@@ -558,15 +483,24 @@ export default function CandidateDashboardPage() {
                               />
                             </div>
                           ) : (
-                            <Link
-                              href={`/candidate/assessment?skill=${encodeURIComponent(skill)}`}
-                              prefetch={true}
-                              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-[#1C1917] hover:bg-[#064E3B] text-white text-[12px] font-medium rounded transition-colors"
-                            >
-                              <Clock className="h-3 w-3" />
-                              <span>Take Test</span>
-                              <ArrowRight className="h-3 w-3" />
-                            </Link>
+                            isSkillSupported(skill) ? (
+                              <Link
+                                href={`/candidate/assessment?skill=${encodeURIComponent(skill)}`}
+                                prefetch={true}
+                                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-[#1C1917] hover:bg-[#064E3B] text-white text-[12px] font-medium rounded transition-colors"
+                              >
+                                <Clock className="h-3 w-3" />
+                                <span>Take Test</span>
+                                <ArrowRight className="h-3 w-3" />
+                              </Link>
+                            ) : (
+                              <span
+                                title="Assessment currently in development"
+                                className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#F2EFE9] text-[#78716C] text-[12px] font-medium rounded cursor-not-allowed border border-[#E7E2DA] select-none"
+                              >
+                                In Development
+                              </span>
+                            )
                           )}
                         </td>
                       </tr>

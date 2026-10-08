@@ -124,7 +124,7 @@ export default function CandidateApplicationsPage() {
               <div>STATUS</div>
             </div>
 
-            <div className="divide-y divide-[#F5F1EB]">
+            <div className="divide-y divide-[#E7E2DA]">
               {applications.map((app) => (
                 <div
                   key={app.id}

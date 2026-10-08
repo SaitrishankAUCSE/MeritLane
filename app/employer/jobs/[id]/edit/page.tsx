@@ -344,7 +344,7 @@ export default function EditJobPostingPage() {
             </div>
           </div>
 
-          <div className="pt-6 border-t border-[#F5F1EB] flex items-center justify-end gap-3">
+          <div className="pt-6 border-t border-[#E7E2DA] flex items-center justify-end gap-3">
             <button
               type="button"
               disabled={saving}

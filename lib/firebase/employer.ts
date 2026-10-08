@@ -14,6 +14,19 @@ export interface EmployerProfile {
   roles: JobPosting[];
   shortlistedCandidates?: string[];
   pipeline?: Record<string, "shortlisted" | "interviewing" | "offer" | "hired" | "rejected">;
+  
+  // Profile fields
+  companyName?: string;
+  role?: string;
+  linkedin?: string;
+  website?: string;
+  location?: string;
+  techStack?: string;
+  about?: string;
+  name?: string;
+  logoUrl?: string;
+  avatarUrl?: string;
+
   updatedAt: number;
 }
 

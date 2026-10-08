@@ -19,7 +19,7 @@ import {
   Building2,
 } from "lucide-react";
 import { Job, JobStatus } from "@/lib/firebase/jobs";
-import { ContextGuide } from "@/components/ui/ContextGuide";
+
 
 export default function EmployerJobsPage() {
   const { user, role, loading: authLoading } = useAuth();
@@ -30,6 +30,14 @@ export default function EmployerJobsPage() {
   const [actionLoading, setActionLoading] = useState<Record<string, boolean>>({});
   const [error, setError] = useState("");
   const [actionError, setActionError] = useState("");
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const ITEMS_PER_PAGE = 5;
+
+  const paginatedJobs = React.useMemo(() => {
+    const start = (currentPage - 1) * ITEMS_PER_PAGE;
+    return jobs.slice(start, start + ITEMS_PER_PAGE);
+  }, [jobs, currentPage]);
 
   const loadEmployerJobs = useCallback(async () => {
     if (!user) return;
@@ -133,16 +141,7 @@ export default function EmployerJobsPage() {
       </div>
 
       <div className="max-w-[1400px] mx-auto px-6 sm:px-10 py-8 space-y-6">
-        <ContextGuide
-          storageKey="employer_jobs_hub"
-          title="Jobs & Application Intake"
-          description="Publish verified engineering roles to the public MeritLane catalog. Applications are exclusively accepted from candidates who have completed 100% of their verified profile."
-          steps={[
-            { title: "Define Role", description: "Specify skills, environment, and job description.", isCompleted: true },
-            { title: "Publish Live", description: "Activate posting for public candidate intake.", isCompleted: jobs.some(j => j.status === "published") },
-            { title: "Review Dossiers", description: "Evaluate candidates through the existing proof pipeline.", isCompleted: jobs.some(j => j.applicationCount > 0) },
-          ]}
-        />
+
 
         {/* Action Error Banner */}
         {actionError && (
@@ -201,8 +200,8 @@ export default function EmployerJobsPage() {
               </div>
             </div>
 
-            <div className="divide-y divide-[#F5F1EB]">
-              {jobs.map((job) => {
+            <div className="divide-y divide-[#E7E2DA]">
+              {paginatedJobs.map((job) => {
                 const busy = actionLoading[job.id] || false;
                 return (
                   <div key={job.id} className="p-6 flex flex-col lg:flex-row lg:items-center justify-between gap-6 hover:bg-[#FAF8F5]/50 transition-colors">
@@ -309,6 +308,31 @@ export default function EmployerJobsPage() {
                 );
               })}
             </div>
+
+            {/* Pagination Controls */}
+            {jobs.length > ITEMS_PER_PAGE && (
+              <div className="flex items-center justify-between border-t border-[#E7E2DA] px-6 py-4">
+                <span className="text-xs text-[#78716C] font-medium">
+                  Showing {((currentPage - 1) * ITEMS_PER_PAGE) + 1} to {Math.min(currentPage * ITEMS_PER_PAGE, jobs.length)} of {jobs.length} jobs
+                </span>
+                <div className="flex gap-2">
+                  <button
+                    disabled={currentPage === 1}
+                    onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                    className="px-3 py-1 border border-[#E7E2DA] bg-white text-[#1C1917] text-xs rounded hover:bg-[#FAF8F5] disabled:opacity-50"
+                  >
+                    Previous
+                  </button>
+                  <button
+                    disabled={currentPage * ITEMS_PER_PAGE >= jobs.length}
+                    onClick={() => setCurrentPage(p => p + 1)}
+                    className="px-3 py-1 border border-[#E7E2DA] bg-white text-[#1C1917] text-xs rounded hover:bg-[#FAF8F5] disabled:opacity-50"
+                  >
+                    Next
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         )}
       </div>

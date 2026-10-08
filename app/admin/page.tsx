@@ -48,7 +48,7 @@ import {
 } from "lucide-react";
 import { MeritlaneLoader } from "@/components/ui/MeritlaneLoader";
 import { ReviewConsole } from "@/components/admin/ReviewConsole";
-import { ContextGuide } from "@/components/ui/ContextGuide";
+
 import { InquiriesView, InquiryRecord } from "@/components/admin/InquiriesView";
 
 import { collection, onSnapshot, doc, updateDoc, serverTimestamp, getDocs, writeBatch } from "firebase/firestore";
@@ -122,6 +122,18 @@ export default function AdminDashboardPage() {
   // Filter state
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [searchQuery, setSearchQuery] = useState("");
+
+  // Pagination state for Candidate Directory
+  const [directoryPage, setDirectoryPage] = useState(1);
+  const DIRECTORY_ITEMS_PER_PAGE = 10;
+  
+  // Pagination state for Audit Trail
+  const [auditPage, setAuditPage] = useState(1);
+  const AUDIT_ITEMS_PER_PAGE = 10;
+
+  useEffect(() => {
+    setDirectoryPage(1);
+  }, [statusFilter, searchQuery]);
 
   const fetchCandidates = useCallback(async () => {
     if (!user) return;
@@ -534,6 +546,11 @@ export default function AdminDashboardPage() {
   }, [candidates, statusFilter, searchQuery]);
 
   // Queue only candidates pending review
+  const paginatedCandidates = useMemo(() => {
+    const start = (directoryPage - 1) * DIRECTORY_ITEMS_PER_PAGE;
+    return filteredCandidates.slice(start, start + DIRECTORY_ITEMS_PER_PAGE);
+  }, [filteredCandidates, directoryPage]);
+
   const queueCandidates = useMemo(() => {
     return candidates.filter((c) => c.verificationStatus === "pending");
   }, [candidates]);
@@ -544,6 +561,11 @@ export default function AdminDashboardPage() {
       .filter((c) => c.verifiedAt || c.verificationStatus === "verified" || c.verificationStatus === "changes_required" || c.verificationStatus === "rejected")
       .sort((a, b) => (b.verifiedAt || b.updatedAt || 0) - (a.verifiedAt || a.updatedAt || 0));
   }, [candidates]);
+  
+  const paginatedAuditLogs = useMemo(() => {
+    const start = (auditPage - 1) * AUDIT_ITEMS_PER_PAGE;
+    return auditLogs.slice(start, start + AUDIT_ITEMS_PER_PAGE);
+  }, [auditLogs, auditPage]);
 
   // CSV Export for candidates
   const exportToCSV = () => {
@@ -600,16 +622,7 @@ export default function AdminDashboardPage() {
       )}
 
       <div className="mx-auto max-w-[1600px] px-4 sm:px-6 lg:px-8 space-y-8">
-        <ContextGuide 
-          storageKey="admin_dashboard"
-          title="Admin Verification Workspace"
-          description="You are responsible for reviewing candidate evidence and formally verifying their skills. Verified candidates are immediately visible to employers."
-          steps={[
-            { title: "Review Queue", description: "Monitor the 'Pending Review' queue for new candidates.", isCompleted: queueCandidates.length === 0 },
-            { title: "Inspect Evidence", description: "Review their Identity details and linked GitHub repositories.", isCompleted: false },
-            { title: "Decision", description: "Verify, Request Changes, or Reject based on the evidence provided.", isCompleted: false }
-          ]}
-        />
+
         {/* Header */}
         <div className="flex flex-col justify-between gap-4 border-b border-border pb-6 sm:flex-row sm:items-center">
           <div>
@@ -888,7 +901,7 @@ export default function AdminDashboardPage() {
                     <tbody className="divide-y divide-zinc-100">
                       {!hasLoadedCandidates ? (
                         <tr>
-                          <td colSpan={6} className="px-6 py-12 text-center">
+                          <td colSpan={6} className="px-6 py-16 text-center">
                             <div className="flex flex-col items-center justify-center space-y-3">
                               <MeritlaneLoader level="section" text="Loading directory" />
                             </div>
@@ -896,12 +909,18 @@ export default function AdminDashboardPage() {
                         </tr>
                       ) : filteredCandidates.length === 0 ? (
                         <tr>
-                          <td colSpan={6} className="px-6 py-8 text-center text-sm text-muted-foreground">
-                            No candidates found matching the current filters.
+                          <td colSpan={6} className="px-6 py-16 text-center">
+                            <div className="flex flex-col items-center justify-center space-y-3">
+                              <div className="h-12 w-12 rounded-full bg-surface-high flex items-center justify-center mb-2">
+                                <Search className="h-5 w-5 text-muted-foreground" />
+                              </div>
+                              <p className="text-foreground font-medium text-base">No candidates found</p>
+                              <p className="max-w-xs text-xs text-muted-foreground">There are no candidates matching your current filters. Try adjusting your search query or status filter.</p>
+                            </div>
                           </td>
                         </tr>
                       ) : (
-                        filteredCandidates.map((c) => (
+                        paginatedCandidates.map((c) => (
                         <tr key={c.uid} className="hover:bg-surface-low/70 transition-colors">
                           <td className="px-6 py-2 h-10">
                             <div className="font-semibold text-foreground">{c.name || "Unnamed"}</div>
@@ -955,6 +974,33 @@ export default function AdminDashboardPage() {
                 </div>
               </CardContent>
             </Card>
+
+            {/* Pagination Controls */}
+            {filteredCandidates.length > DIRECTORY_ITEMS_PER_PAGE && (
+              <div className="flex items-center justify-between pt-4">
+                <span className="text-xs text-muted-foreground">
+                  Showing {((directoryPage - 1) * DIRECTORY_ITEMS_PER_PAGE) + 1} to {Math.min(directoryPage * DIRECTORY_ITEMS_PER_PAGE, filteredCandidates.length)} of {filteredCandidates.length} entries
+                </span>
+                <div className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    disabled={directoryPage === 1}
+                    onClick={() => setDirectoryPage(p => Math.max(1, p - 1))}
+                  >
+                    Previous
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    disabled={directoryPage * DIRECTORY_ITEMS_PER_PAGE >= filteredCandidates.length}
+                    onClick={() => setDirectoryPage(p => p + 1)}
+                  >
+                    Next
+                  </Button>
+                </div>
+              </div>
+            )}
           </div>
         )}
 
@@ -1033,12 +1079,16 @@ export default function AdminDashboardPage() {
             <Card>
               <CardContent className="p-0">
                 {!hasLoadedCandidates ? (
-                  <div className="p-12 text-center text-xs text-muted-foreground flex flex-col items-center justify-center space-y-3">
+                  <div className="p-16 text-center flex flex-col items-center justify-center space-y-3">
                     <MeritlaneLoader level="section" text="Loading audit logs" />
                   </div>
                 ) : auditLogs.length === 0 ? (
-                  <div className="p-12 text-center text-xs text-muted-foreground">
-                    No decisions logged yet.
+                  <div className="p-16 text-center flex flex-col items-center justify-center space-y-3">
+                    <div className="h-12 w-12 rounded-full bg-surface-high flex items-center justify-center mb-2">
+                      <History className="h-5 w-5 text-muted-foreground" />
+                    </div>
+                    <p className="text-foreground font-medium text-base">No decisions logged yet</p>
+                    <p className="max-w-sm text-xs text-muted-foreground">Verification decisions (approvals, rejections, or changes requested) will appear here once you process candidates.</p>
                   </div>
                 ) : (
                   <div className="overflow-x-auto">
@@ -1052,7 +1102,7 @@ export default function AdminDashboardPage() {
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-zinc-100">
-                        {auditLogs.map((c) => (
+                        {paginatedAuditLogs.map((c) => (
                           <tr key={c.uid} className="hover:bg-surface-low/70">
                             <td className="px-6 py-2 h-10 font-semibold text-foreground">
                               {c.name || c.email || c.uid}
@@ -1074,6 +1124,33 @@ export default function AdminDashboardPage() {
                 )}
               </CardContent>
             </Card>
+
+            {/* Pagination Controls */}
+            {auditLogs.length > AUDIT_ITEMS_PER_PAGE && (
+              <div className="flex items-center justify-between pt-4">
+                <span className="text-xs text-muted-foreground">
+                  Showing {((auditPage - 1) * AUDIT_ITEMS_PER_PAGE) + 1} to {Math.min(auditPage * AUDIT_ITEMS_PER_PAGE, auditLogs.length)} of {auditLogs.length} entries
+                </span>
+                <div className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    disabled={auditPage === 1}
+                    onClick={() => setAuditPage(p => Math.max(1, p - 1))}
+                  >
+                    Previous
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    disabled={auditPage * AUDIT_ITEMS_PER_PAGE >= auditLogs.length}
+                    onClick={() => setAuditPage(p => p + 1)}
+                  >
+                    Next
+                  </Button>
+                </div>
+              </div>
+            )}
           </div>
         )}
 

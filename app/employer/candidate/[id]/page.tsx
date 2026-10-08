@@ -4,7 +4,7 @@ import { notFound, redirect } from "next/navigation";
 import { PublicProofRecord } from "@/components/public-record/PublicProofRecord";
 import { EmployerDossierActions } from "@/components/employer/EmployerDossierActions";
 import { cookies, headers } from "next/headers";
-import { ContextGuide } from "@/components/ui/ContextGuide";
+
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -100,30 +100,7 @@ export default async function EmployerCandidateDossierPage({ params }: Props) {
 
       {/* Candidate Public Proof Layout */}
       <div className="flex-1 mt-16 pb-24">
-        <div className="max-w-[1000px] mx-auto px-6 mt-6">
-          <ContextGuide
-            storageKey="employer_dossier"
-            title="Candidate Dossier"
-            description="You are viewing the verified claims and technical evidence for this candidate."
-            steps={[
-              {
-                title: "Review Claims",
-                description: "Inspect claimed and formally assessed capabilities.",
-                isCompleted: true,
-              },
-              {
-                title: "Review Evidence",
-                description: "Click into repositories to inspect commit history and code quality.",
-                isCompleted: false,
-              },
-              {
-                title: "Shortlist or Message",
-                description: "Use the top action bar to invite to an interview or save to your hiring pipeline.",
-                isCompleted: false,
-              },
-            ]}
-          />
-        </div>
+
         <PublicProofRecord id={id} candidate={candidate} user={user} hideHeader={true} />
       </div>
     </div>

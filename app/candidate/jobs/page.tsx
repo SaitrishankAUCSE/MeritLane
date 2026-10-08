@@ -128,7 +128,7 @@ export default function CandidateJobsPage() {
   }, [jobs, feedMode, getJobMatchStats]);
 
   return (
-    <div className="w-full min-h-full bg-[#FAF8F5] pb-24">
+    <div className="w-full min-h-full bg-transparent pb-24">
       {/* ── Header Strip ── */}
       <div className="border-b border-[#E7E2DA] bg-white px-4 sm:px-6 lg:px-8 py-5">
         <div className="w-full flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -177,7 +177,7 @@ export default function CandidateJobsPage() {
         
         {/* ── Match Switch Segmented Control ── */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#E7E2DA] pb-4">
-          <div className="inline-flex p-1 bg-[#F5F1EB] rounded border border-[#E7E2DA] self-start">
+          <div className="inline-flex p-1 bg-[#E7E2DA] rounded border border-[#E7E2DA] self-start">
             <button
               type="button"
               onClick={() => setFeedMode("all")}
@@ -258,36 +258,7 @@ export default function CandidateJobsPage() {
             </div>
           </div>
 
-          {/* Quick Skill Filters */}
-          <div className="flex items-center gap-2 flex-wrap pt-2 border-t border-[#F5F1EB]">
-            <span className="text-[11px] font-sans font-semibold uppercase tracking-wide text-[#78716C] mr-1">
-              Top Skills:
-            </span>
-            {COMMON_SKILLS.slice(0, 8).map((skill) => {
-              const active = selectedSkill.toLowerCase() === skill.toLowerCase();
-              return (
-                <button
-                  key={skill}
-                  onClick={() => setSelectedSkill(active ? "" : skill)}
-                  className={`text-[11px] font-mono px-3 py-1 rounded transition-colors border ${
-                    active
-                      ? "bg-[#064E3B] text-white border-[#064E3B]"
-                      : "bg-[#FAF8F5] text-[#78716C] border-[#E7E2DA] hover:border-[#1C1917] hover:text-[#1C1917]"
-                  }`}
-                >
-                  {skill}
-                </button>
-              );
-            })}
-            {selectedSkill && (
-              <button
-                onClick={() => setSelectedSkill("")}
-                className="text-[11px] font-mono text-[#B42318] underline hover:text-[#7A1810] ml-2"
-              >
-                Clear Skill Filter
-              </button>
-            )}
-          </div>
+          {/* Search Input, Work Mode, and Employment Type remain without the extra quick filters row */}
         </div>
 
         {/* ── Results Feed ── */}

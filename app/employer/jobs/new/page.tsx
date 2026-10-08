@@ -311,7 +311,7 @@ export default function NewJobPostingPage() {
           </div>
 
           {/* Action Bar */}
-          <div className="pt-6 border-t border-[#F5F1EB] flex flex-col sm:flex-row items-center justify-end gap-3">
+          <div className="pt-6 border-t border-[#E7E2DA] flex flex-col sm:flex-row items-center justify-end gap-3">
             <button
               type="button"
               disabled={saving}

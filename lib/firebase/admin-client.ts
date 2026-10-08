@@ -56,3 +56,4 @@ const app = getAdminApp();
 // Centralized explicit connection to the "default" database.
 export const adminDb: Firestore | null = app ? getFirestore(app, "default") : null;
 export const adminAuth: Auth | null = app ? getAuth(app) : null;
+export const adminStorage = app ? require('firebase-admin/storage').getStorage(app) : null;

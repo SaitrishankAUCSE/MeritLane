@@ -49,6 +49,14 @@ export function InquiriesView({
   const [actionInProgress, setActionInProgress] = useState<string | null>(null);
   const [selectedInquiry, setSelectedInquiry] = useState<InquiryRecord | null>(null);
 
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const ITEMS_PER_PAGE = 10;
+
+  React.useEffect(() => {
+    setCurrentPage(1);
+  }, [filterStatus, searchQuery]);
+
   const filteredInquiries = useMemo(() => {
     return inquiries.filter((inq) => {
       const matchesFilter =
@@ -66,6 +74,11 @@ export function InquiriesView({
       return matchesFilter && matchesSearch;
     });
   }, [inquiries, filterStatus, searchQuery]);
+
+  const paginatedInquiries = useMemo(() => {
+    const start = (currentPage - 1) * ITEMS_PER_PAGE;
+    return filteredInquiries.slice(start, start + ITEMS_PER_PAGE);
+  }, [filteredInquiries, currentPage]);
 
   const unreadCount = useMemo(() => inquiries.filter((i) => !i.read).length, [inquiries]);
 
@@ -224,7 +237,7 @@ export function InquiriesView({
         </Card>
       ) : (
         <div className="grid grid-cols-1 gap-4">
-          {filteredInquiries.map((inq) => {
+          {paginatedInquiries.map((inq) => {
             const isUnread = !inq.read;
             const isProcessing = actionInProgress === inq.id;
 
@@ -315,6 +328,33 @@ export function InquiriesView({
               </div>
             );
           })}
+
+          {/* Pagination Controls */}
+          {filteredInquiries.length > ITEMS_PER_PAGE && (
+            <div className="flex items-center justify-between pt-4">
+              <span className="text-xs text-muted-foreground">
+                Showing {((currentPage - 1) * ITEMS_PER_PAGE) + 1} to {Math.min(currentPage * ITEMS_PER_PAGE, filteredInquiries.length)} of {filteredInquiries.length} inquiries
+              </span>
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={currentPage === 1}
+                  onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                >
+                  Previous
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={currentPage * ITEMS_PER_PAGE >= filteredInquiries.length}
+                  onClick={() => setCurrentPage(p => p + 1)}
+                >
+                  Next
+                </Button>
+              </div>
+            </div>
+          )}
         </div>
       )}
     </div>

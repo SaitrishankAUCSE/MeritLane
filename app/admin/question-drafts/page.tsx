@@ -527,6 +527,10 @@ export default function QuestionDraftsPage() {
   const [loadingDrafts, setLoadingDrafts] = useState(false);
   const [actionLoading, setActionLoading] = useState<Record<string, boolean>>({});
 
+  const [mcqPage, setMcqPage] = useState(1);
+  const [codingPage, setCodingPage] = useState(1);
+  const ITEMS_PER_PAGE = 10;
+
   const isUserAdmin = isAdmin || user?.email?.toLowerCase().trim() === ADMIN_EMAIL;
 
   // Fetch token
@@ -638,6 +642,16 @@ export default function QuestionDraftsPage() {
   const approvedMCQs = mcqDrafts.filter(q => q.status === "approved").length;
   const pendingMCQs = mcqDrafts.filter(q => q.status === "pending").length;
   const approvedCoding = codingDrafts.filter(q => q.status === "approved").length;
+
+  const paginatedMcqDrafts = React.useMemo(() => {
+    const start = (mcqPage - 1) * ITEMS_PER_PAGE;
+    return mcqDrafts.slice(start, start + ITEMS_PER_PAGE);
+  }, [mcqDrafts, mcqPage]);
+
+  const paginatedCodingDrafts = React.useMemo(() => {
+    const start = (codingPage - 1) * ITEMS_PER_PAGE;
+    return codingDrafts.slice(start, start + ITEMS_PER_PAGE);
+  }, [codingDrafts, codingPage]);
 
   return (
     <div className="min-h-full bg-[#F8F6F3]">
@@ -808,7 +822,7 @@ export default function QuestionDraftsPage() {
               </p>
             </div>
             <div className="space-y-3">
-              {mcqDrafts.map((draft, i) => (
+              {paginatedMcqDrafts.map((draft, i) => (
                 <MCQDraftCard
                   key={draft.id}
                   draft={draft}
@@ -818,6 +832,30 @@ export default function QuestionDraftsPage() {
                 />
               ))}
             </div>
+            
+            {mcqDrafts.length > ITEMS_PER_PAGE && (
+              <div className="flex items-center justify-between pt-6">
+                <span className="text-xs text-stone-500">
+                  Showing {((mcqPage - 1) * ITEMS_PER_PAGE) + 1} to {Math.min(mcqPage * ITEMS_PER_PAGE, mcqDrafts.length)} of {mcqDrafts.length} drafts
+                </span>
+                <div className="flex gap-2">
+                  <button
+                    className="h-8 px-3 rounded border border-stone-300 text-[12px] bg-white text-stone-700 disabled:opacity-50"
+                    disabled={mcqPage === 1}
+                    onClick={() => setMcqPage(p => Math.max(1, p - 1))}
+                  >
+                    Previous
+                  </button>
+                  <button
+                    className="h-8 px-3 rounded border border-stone-300 text-[12px] bg-white text-stone-700 disabled:opacity-50"
+                    disabled={mcqPage * ITEMS_PER_PAGE >= mcqDrafts.length}
+                    onClick={() => setMcqPage(p => p + 1)}
+                  >
+                    Next
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         )}
 
@@ -830,7 +868,7 @@ export default function QuestionDraftsPage() {
               </p>
             </div>
             <div className="space-y-4">
-              {codingDrafts.map((draft) => (
+              {paginatedCodingDrafts.map((draft) => (
                 <CodingDraftCard
                   key={draft.id}
                   draft={draft}
@@ -842,6 +880,30 @@ export default function QuestionDraftsPage() {
                 />
               ))}
             </div>
+
+            {codingDrafts.length > ITEMS_PER_PAGE && (
+              <div className="flex items-center justify-between pt-6">
+                <span className="text-xs text-stone-500">
+                  Showing {((codingPage - 1) * ITEMS_PER_PAGE) + 1} to {Math.min(codingPage * ITEMS_PER_PAGE, codingDrafts.length)} of {codingDrafts.length} drafts
+                </span>
+                <div className="flex gap-2">
+                  <button
+                    className="h-8 px-3 rounded border border-stone-300 text-[12px] bg-white text-stone-700 disabled:opacity-50"
+                    disabled={codingPage === 1}
+                    onClick={() => setCodingPage(p => Math.max(1, p - 1))}
+                  >
+                    Previous
+                  </button>
+                  <button
+                    className="h-8 px-3 rounded border border-stone-300 text-[12px] bg-white text-stone-700 disabled:opacity-50"
+                    disabled={codingPage * ITEMS_PER_PAGE >= codingDrafts.length}
+                    onClick={() => setCodingPage(p => p + 1)}
+                  >
+                    Next
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         )}
       </div>

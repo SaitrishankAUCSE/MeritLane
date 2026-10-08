@@ -19,7 +19,7 @@ import { useRouter } from "next/navigation";
 import { MeritlaneLoader } from "@/components/ui/MeritlaneLoader";
 import { Button } from "@/components/ui/Button";
 import { MessageModal } from "@/components/employer/MessageModal";
-import { ContextGuide } from "@/components/ui/ContextGuide";
+
 
 import { useToast } from "@/components/ui/Toast";
 import { ErrorState } from "@/components/ui/ErrorState";
@@ -186,59 +186,10 @@ export default function EmployerShortlistPage() {
           </div>
         </div>
 
-        {/* First-time guide */}
-        <div className="max-w-[1000px] mx-auto">
-          <ContextGuide
-            storageKey="employer_shortlist"
-            title="Your Hiring Pipeline"
-            description="This is where you manage every candidate you've saved from the Discover page. Move them through stages as your process progresses."
-            steps={[
-              { title: "Shortlist candidates", description: "Go to Discover, open a candidate's dossier, and click 'Save to Shortlist' to add them here." },
-              { title: "Track pipeline stages", description: "Use the stage selector on each card to move candidates from Shortlisted → Interviewing → Offer Extended → Hired." },
-              { title: "Message directly", description: "Click 'Message' on any candidate card to send them an interview invitation right from this page." },
-            ]}
-            ctaLabel="Discover candidates"
-            ctaHref="/employer/dashboard"
-          />
-        </div>
+
 
         <div className="max-w-[1000px] mx-auto">
-          {/* Pipeline Stage Summary Bar */}
-          {candidates.length > 0 && (
-            <div className="mb-8 grid grid-cols-2 sm:grid-cols-5 gap-3">
-              <button
-                type="button"
-                onClick={() => setStageFilter("all")}
-                className={`p-3 rounded border text-left transition-all ${
-                  stageFilter === "all"
-                    ? "bg-[#0D0D0D] text-white border-[#0D0D0D] shadow-sm"
-                    : "bg-white border-[#E5E5E5] text-[#0D0D0D] hover:border-[#D2D2D2]"
-                }`}
-              >
-                <div className="text-[11px] font-sans font-semibold uppercase tracking-wide opacity-70">Total Saved</div>
-                <div className="text-[20px] font-bold font-serif">{candidates.length}</div>
-              </button>
-              {PIPELINE_STAGES.slice(0, 4).map((st) => {
-                const count = stageCounts[st.id] || 0;
-                const isActive = stageFilter === st.id;
-                return (
-                  <button
-                    key={st.id}
-                    type="button"
-                    onClick={() => setStageFilter(isActive ? "all" : st.id)}
-                    className={`p-3 rounded border text-left transition-all ${
-                      isActive
-                        ? "bg-[#0D0D0D] text-white border-[#0D0D0D] shadow-sm"
-                        : "bg-white border-[#E5E5E5] text-[#0D0D0D] hover:border-[#D2D2D2]"
-                    }`}
-                  >
-                    <div className="text-[11px] font-sans font-semibold uppercase tracking-wide opacity-70">{st.label}</div>
-                    <div className="text-[20px] font-bold font-serif">{count}</div>
-                  </button>
-                );
-              })}
-            </div>
-          )}
+
 
           {fetching ? (
             <div className="flex flex-col items-center justify-center py-20 text-[#737373]">

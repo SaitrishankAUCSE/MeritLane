@@ -257,7 +257,7 @@ export function AuthForm({ mode: initialMode }: AuthFormProps) {
             <div className="relative aspect-[16/11] overflow-hidden bg-[#1C1917]">
               <img 
                 src="/editorial_archive.jpg" 
-                alt="Meritlane Institutional Verification Archive" 
+                alt="Meritlane Verification Archive" 
                 className="w-full h-full object-cover contrast-[1.03]"
               />
             </div>

@@ -185,39 +185,51 @@ export default function AdminQuestionsPage() {
   const isCodingValid = validationResult && validationResult.success;
 
   return (
-    <div className="p-8 max-w-5xl mx-auto font-sans text-neutral-900">
-      <div className="mb-8">
-        <h1 className="text-3xl font-serif text-[#0D1B12] mb-2">Question Authoring</h1>
-        <p className="text-muted-foreground">Manually draft and validate assessment content to ensure zero external sourcing.</p>
+    <div className="min-h-full bg-[#F8F6F3]">
+      {/* Header */}
+      <div className="bg-white border-b border-stone-200">
+        <div className="max-w-[1400px] mx-auto px-6 sm:px-10 py-6 sm:py-8 flex flex-col gap-2">
+          <div className="text-[11px] font-semibold tracking-widest text-stone-500 uppercase">
+            Admin Workspace · Question Bank
+          </div>
+          <h1 className="text-2xl sm:text-3xl font-serif text-stone-800 font-bold tracking-tight">
+            Question Authoring Studio
+          </h1>
+          <p className="text-sm text-stone-500 mt-1 max-w-2xl">
+            Manually draft and validate assessment content to ensure zero external sourcing.
+          </p>
+        </div>
       </div>
 
-      <div className="flex gap-4 mb-6">
-        <button
-          onClick={() => setActiveTab("mcq")}
-          className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${activeTab === "mcq" ? "border-primary text-primary" : "border-transparent text-muted-foreground hover:text-primary"}`}
-        >
-          MCQ Question
-        </button>
-        <button
-          onClick={() => setActiveTab("coding")}
-          className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${activeTab === "coding" ? "border-primary text-primary" : "border-transparent text-muted-foreground hover:text-primary"}`}
-        >
-          Coding Problem
-        </button>
-      </div>
+      <div className="max-w-[1400px] mx-auto px-6 sm:px-10 py-8 font-sans">
 
-      <div className="mb-6">
-        <label className="block text-sm font-medium mb-1">Target Skill</label>
-        <input 
-          type="text" 
-          value={skill} 
-          onChange={e => setSkill(e.target.value)} 
-          className="w-full max-w-xs border rounded-md p-2"
-        />
-      </div>
+        <div className="flex gap-4 mb-6">
+          <button
+            onClick={() => setActiveTab("mcq")}
+            className={`px-5 py-2 text-[13px] font-semibold border-b-2 transition-colors ${activeTab === "mcq" ? "border-stone-800 text-stone-800" : "border-transparent text-stone-500 hover:text-stone-700"}`}
+          >
+            MCQ Question
+          </button>
+          <button
+            onClick={() => setActiveTab("coding")}
+            className={`px-5 py-2 text-[13px] font-semibold border-b-2 transition-colors ${activeTab === "coding" ? "border-stone-800 text-stone-800" : "border-transparent text-stone-500 hover:text-stone-700"}`}
+          >
+            Coding Problem
+          </button>
+        </div>
 
-      {activeTab === "mcq" && (
-        <div className="space-y-6 bg-white p-6 border rounded-xl shadow-sm">
+        <div className="mb-6">
+          <label className="block text-[13px] font-semibold text-stone-700 mb-1.5">Target Skill Domain</label>
+          <input 
+            type="text" 
+            value={skill} 
+            onChange={e => setSkill(e.target.value)} 
+            className="w-full max-w-xs border border-stone-300 rounded-md p-2.5 text-sm bg-white shadow-sm focus:outline-none focus:ring-1 focus:ring-stone-400"
+          />
+        </div>
+
+        {activeTab === "mcq" && (
+          <div className="space-y-6 bg-white p-8 border border-stone-200 rounded-2xl shadow-sm">
           <div>
             <label className="block text-sm font-medium mb-1">Question Text</label>
             <textarea 
@@ -281,12 +293,12 @@ export default function AdminQuestionsPage() {
             />
           </div>
 
-          <div className="flex items-center gap-4 pt-4 border-t">
-            <button 
-              onClick={handleSaveMcq}
-              disabled={saving || !mcqData.question || mcqData.options.some(o => !o)}
-              className="px-6 py-2 bg-primary text-white font-medium rounded-md flex items-center gap-2 hover:bg-[#162D1E] disabled:opacity-50"
-            >
+            <div className="flex items-center gap-4 pt-6 border-t border-stone-200">
+              <button 
+                onClick={handleSaveMcq}
+                disabled={saving || !mcqData.question || mcqData.options.some(o => !o)}
+                className="px-6 py-2.5 bg-stone-800 text-white text-[13px] font-semibold rounded-lg flex items-center gap-2 hover:bg-stone-700 disabled:opacity-50 transition-colors"
+              >
               <Save className="w-4 h-4" /> Save MCQ to Bank
             </button>
             {saveMessage && <span className="text-sm font-medium text-emerald-600">{saveMessage}</span>}
@@ -294,8 +306,8 @@ export default function AdminQuestionsPage() {
         </div>
       )}
 
-      {activeTab === "coding" && (
-        <div className="space-y-6 bg-white p-6 border rounded-xl shadow-sm">
+        {activeTab === "coding" && (
+          <div className="space-y-8 bg-white p-8 border border-stone-200 rounded-2xl shadow-sm">
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium mb-1">Title</label>
@@ -422,12 +434,12 @@ export default function AdminQuestionsPage() {
             )}
           </div>
 
-          <div className="flex items-center gap-4 pt-4 border-t">
-            <button 
-              onClick={handleSaveCoding}
-              disabled={saving || !isCodingValid}
-              className={`px-6 py-2 font-medium rounded-md flex items-center gap-2 ${isCodingValid ? 'bg-primary text-white hover:bg-[#162D1E]' : 'bg-neutral-200 text-neutral-400 cursor-not-allowed'}`}
-            >
+            <div className="flex items-center gap-4 pt-6 border-t border-stone-200">
+              <button 
+                onClick={handleSaveCoding}
+                disabled={saving || !isCodingValid}
+                className={`px-6 py-2.5 font-semibold text-[13px] rounded-lg flex items-center gap-2 transition-colors ${isCodingValid ? 'bg-stone-800 text-white hover:bg-stone-700' : 'bg-stone-200 text-stone-500 cursor-not-allowed'}`}
+              >
               <Save className="w-4 h-4" /> Save Coding Problem to Bank
             </button>
             {!isCodingValid && <span className="text-sm text-muted-foreground">Validation must pass before saving.</span>}
@@ -435,6 +447,7 @@ export default function AdminQuestionsPage() {
           </div>
         </div>
       )}
+      </div>
     </div>
   );
 }

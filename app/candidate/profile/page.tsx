@@ -46,6 +46,7 @@ export default function CandidateProfilePage() {
   const [isGithubModalOpen, setIsGithubModalOpen] = useState(false);
   const [githubInput, setGithubInput] = useState("");
   const [cooldowns, setCooldowns] = useState<Record<string, { timestamp: number; daysLeft: number; score?: number }>>({});
+  const [supportedSkills, setSupportedSkills] = useState<{keys: string[], aliases: string[]} | null>(null);
 
   // Resume Upload State at Top of Profile
   const [uploadingResume, setUploadingResume] = useState(false);
@@ -62,9 +63,11 @@ export default function CandidateProfilePage() {
         fetchCandidateProfile(user.uid),
         getDoc(doc(db, "users", user.uid)).then((d) => (d.exists() ? d.data() : null)).catch(() => null),
         getDoc(doc(db, "candidates", user.uid)).then((d) => (d.exists() ? d.data() : null)).catch(() => null),
+        fetch("/api/candidate/supported-skills").then(res => res.json()).catch(() => null)
       ])
-        .then(([p, uData, cData]) => {
+        .then(([p, uData, cData, ssData]) => {
           setProfile(p);
+          if (ssData && ssData.keys) setSupportedSkills(ssData);
           if (p && typeof window !== "undefined") {
             try {
               localStorage.setItem("meritlane_current_candidate", JSON.stringify({
@@ -228,8 +231,8 @@ export default function CandidateProfilePage() {
       branch: parsed.branch || profile?.branch || "",
       gradYear: parsed.gradYear || profile?.gradYear || "",
       githubUrl: parsed.githubUrl || profile?.githubUrl || "",
-      resumeUrl: profile?.resumeUrl || "",
-      resumeFileName: resumeFileName || profile?.resumeFileName || "Candidate_Resume.pdf",
+      resumeUrl: data.resumeUrl || profile?.resumeUrl || "",
+      resumeFileName: data.resumeFileName || profile?.resumeFileName || "Candidate_Resume.pdf",
       resumeUploadedAt: Date.now(),
       resumePdfDataUrl: data.resumePdfDataUrl || profile?.resumePdfDataUrl || "",
       skills: Array.from(existingSkills),
@@ -348,8 +351,15 @@ export default function CandidateProfilePage() {
 
   const candidateKey = profile?.candidateKey || (user?.uid ? `ML-${user.uid.slice(0, 8).toUpperCase()}` : "—");
 
+  const isSkillSupported = (skill: string) => {
+    if (!supportedSkills) return true; // optimistic if not loaded
+    const normalized = skill.toLowerCase().trim();
+    if (supportedSkills.keys.includes(normalized) || supportedSkills.aliases.includes(normalized)) return true;
+    return supportedSkills.keys.some(key => normalized.includes(key));
+  };
+
   return (
-    <div className="w-full min-h-full bg-[#FAF8F5] pb-24">
+    <div className="w-full min-h-full bg-transparent pb-24">
 
       {/* ── Registry Command Header ── */}
       <div className="border-b border-[#E7E2DA] bg-white px-4 sm:px-6 lg:px-8 py-6">
@@ -392,7 +402,7 @@ export default function CandidateProfilePage() {
           </div>
           <button
             onClick={() => setIsEditing(true)}
-            className="flex items-center gap-2 px-4 py-2 border border-[#E7E2DA] bg-white hover:bg-[#F5F1EB] text-[#1C1917] text-[11px] font-mono font-semibold transition-colors shrink-0 tracking-[0.06em] rounded shadow-2xs"
+            className="flex items-center gap-2 px-4 py-2 border border-[#E7E2DA] bg-white hover:bg-[#E7E2DA] text-[#1C1917] text-[11px] font-mono font-semibold transition-colors shrink-0 tracking-[0.06em] rounded shadow-2xs"
           >
             <PenTool className="h-3 w-3" />
             EDIT PROFILE
@@ -540,7 +550,7 @@ export default function CandidateProfilePage() {
                   if (file) handleResumeUpload(file);
                 }}
                 onClick={() => resumeInputRef.current?.click()}
-                className="border-2 border-dashed border-[#E7E2DA] hover:border-[#064E3B] bg-[#FAF8F5] hover:bg-[#F5F1EB] rounded-lg p-6 text-center transition-colors cursor-pointer"
+                className="border-2 border-dashed border-[#E7E2DA] hover:border-[#064E3B] bg-[#FAF8F5] hover:bg-[#E7E2DA] rounded-lg p-6 text-center transition-colors cursor-pointer"
               >
                 <input
                   type="file"
@@ -626,7 +636,7 @@ export default function CandidateProfilePage() {
               </div>
 
               {/* Preferred Locations, Working Model, and Notice */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-3 border-t border-[#F5F1EB]">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-3 border-t border-[#E7E2DA]">
                 <div>
                   <span className="text-[10px] font-mono font-semibold uppercase tracking-wider text-[#78716C] block mb-1">
                     Preferred Locations
@@ -668,7 +678,7 @@ export default function CandidateProfilePage() {
 
           {/* Skills Ledger Table */}
           <div className="border border-[#E7E2DA] bg-white">
-            <div className="border-b border-[#E7E2DA] bg-[#F5F1EB] px-5 py-3 flex items-center justify-between">
+            <div className="border-b border-[#E7E2DA] bg-[#E7E2DA] px-5 py-3 flex items-center justify-between">
               <div className="text-[9px] font-medium tracking-[0.18em] text-[#78716C] uppercase">
                 Technical Skills
               </div>
@@ -677,19 +687,7 @@ export default function CandidateProfilePage() {
               </div>
             </div>
 
-            {/* Assessment requirement notice */}
-            <div className="p-3.5 bg-[#FAF8F5] border-b border-[#E7E2DA] flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-[11px] font-mono text-[#78716C]">
-              <span className="flex items-center gap-1.5">
-                <AlertCircle className="h-3.5 w-3.5 text-[#064E3B] shrink-0" />
-                Take a quick skill test to verify each skill and earn a verified badge.
-              </span>
-              <button
-                onClick={() => setIsEditing(true)}
-                className="text-[#064E3B] font-semibold underline hover:text-[#1C1917] shrink-0 text-left"
-              >
-                Edit Skills
-              </button>
-            </div>
+
 
             {skills.length === 0 ? (
               <div className="p-10 text-center">
@@ -760,7 +758,7 @@ export default function CandidateProfilePage() {
                             ? "text-[#064E3B] bg-[#064E3B]/[0.08] border-[#064E3B]/30"
                             : inCooldown
                             ? "text-[#92400E] bg-[#FEF3C7] border-[#FDE68A]"
-                            : "text-[#78716C] bg-[#F5F1EB] border-[#C8BFB0]"
+                            : "text-[#78716C] bg-[#E7E2DA] border-[#C8BFB0]"
                         }`}>
                           {isVerified ? "VERIFIED" : inCooldown ? "COOLDOWN" : "NOT TESTED"}
                         </span>
@@ -796,13 +794,22 @@ export default function CandidateProfilePage() {
                             />
                           </span>
                         ) : (
-                          <button
-                            onClick={() => router.push(`/candidate/assessment?skill=${encodeURIComponent(skill)}`)}
-                            className="text-[10px] font-mono font-semibold text-white bg-[#1C1917] hover:bg-[#064E3B] px-3 py-1.5 transition-colors rounded shadow-2xs cursor-pointer"
-                            title={`Take test to verify ${skill}`}
-                          >
-                            TAKE TEST →
-                          </button>
+                          isSkillSupported(skill) ? (
+                            <button
+                              onClick={() => router.push(`/candidate/assessment?skill=${encodeURIComponent(skill)}`)}
+                              className="text-[10px] font-mono font-semibold text-white bg-[#1C1917] hover:bg-[#064E3B] px-3 py-1.5 transition-colors rounded shadow-2xs cursor-pointer"
+                              title={`Take test to verify ${skill}`}
+                            >
+                              TAKE TEST →
+                            </button>
+                          ) : (
+                            <span
+                              title="Assessment currently in development"
+                              className="inline-flex items-center gap-1 text-[10px] font-mono font-semibold bg-[#F2EFE9] border border-[#E7E2DA] text-[#78716C] px-2.5 py-1 rounded cursor-not-allowed select-none tabular-nums"
+                            >
+                              IN DEVELOPMENT
+                            </span>
+                          )
                         )}
                       </div>
                     </div>
@@ -814,7 +821,7 @@ export default function CandidateProfilePage() {
 
           {/* Education Record */}
           <div className="border border-[#E7E2DA] bg-white">
-            <div className="border-b border-[#E7E2DA] bg-[#F5F1EB] px-5 py-3">
+            <div className="border-b border-[#E7E2DA] bg-[#E7E2DA] px-5 py-3">
               <div className="text-[9px] font-medium tracking-[0.18em] text-[#78716C] uppercase">
                 Education
               </div>
@@ -822,7 +829,7 @@ export default function CandidateProfilePage() {
             <div className="p-5">
               {profile?.college ? (
                 <div className="flex gap-5 items-start">
-                  <div className="h-10 w-10 border border-[#E7E2DA] bg-[#F5F1EB] flex items-center justify-center shrink-0">
+                  <div className="h-10 w-10 border border-[#E7E2DA] bg-[#E7E2DA] flex items-center justify-center shrink-0">
                     <BookOpen className="h-4 w-4 text-[#78716C]" />
                   </div>
                   <div>
@@ -842,7 +849,7 @@ export default function CandidateProfilePage() {
                   </p>
                   <button
                     onClick={() => setIsEditing(true)}
-                    className="text-[11px] font-mono text-[#1C1917] border border-[#E7E2DA] px-4 py-2 hover:bg-[#F5F1EB] transition-colors rounded"
+                    className="text-[11px] font-mono text-[#1C1917] border border-[#E7E2DA] px-4 py-2 hover:bg-[#E7E2DA] transition-colors rounded"
                   >
                     ADD EDUCATION
                   </button>
@@ -854,7 +861,7 @@ export default function CandidateProfilePage() {
           {/* Projects */}
           {profile?.projects && profile.projects.length > 0 && (
             <div className="border border-[#E7E2DA] bg-white">
-              <div className="border-b border-[#E7E2DA] bg-[#F5F1EB] px-5 py-3">
+              <div className="border-b border-[#E7E2DA] bg-[#E7E2DA] px-5 py-3">
                 <div className="text-[9px] font-medium tracking-[0.18em] text-[#78716C] uppercase">
                   Projects
                 </div>
@@ -875,7 +882,7 @@ export default function CandidateProfilePage() {
         <div className="space-y-5">
           {/* Record Status */}
           <div className="border border-[#E7E2DA] bg-white">
-            <div className="border-b border-[#E7E2DA] bg-[#F5F1EB] px-5 py-3 flex items-center justify-between">
+            <div className="border-b border-[#E7E2DA] bg-[#E7E2DA] px-5 py-3 flex items-center justify-between">
               <div className="text-[9px] font-medium tracking-[0.18em] text-[#78716C] uppercase">
                 Profile Overview
               </div>
@@ -980,7 +987,7 @@ export default function CandidateProfilePage() {
 
           {/* GitHub Archive Panel */}
           <div className="border border-[#E7E2DA] bg-white">
-            <div className="border-b border-[#E7E2DA] bg-[#F5F1EB] px-5 py-3 flex items-center justify-between">
+            <div className="border-b border-[#E7E2DA] bg-[#E7E2DA] px-5 py-3 flex items-center justify-between">
               <div className="text-[9px] font-medium tracking-[0.18em] text-[#78716C] uppercase">
                 GitHub Archive
               </div>
@@ -1012,7 +1019,7 @@ export default function CandidateProfilePage() {
                         {profile!.githubEvidence!.topLanguages.slice(0, 4).map((lang) => (
                           <span
                             key={lang}
-                            className="text-[10px] font-mono bg-[#F5F1EB] border border-[#E7E2DA] text-[#1C1917] px-2 py-0.5"
+                            className="text-[10px] font-mono bg-[#E7E2DA] border border-[#E7E2DA] text-[#1C1917] px-2 py-0.5"
                           >
                             {lang}
                           </span>
@@ -1023,7 +1030,7 @@ export default function CandidateProfilePage() {
                   <button
                     onClick={openGithubModal}
                     disabled={isSyncingGithub}
-                    className="w-full flex items-center justify-center gap-2 py-2 border border-[#E7E2DA] text-[11px] font-mono text-[#1C1917] hover:bg-[#F5F1EB] transition-colors disabled:opacity-50 cursor-pointer"
+                    className="w-full flex items-center justify-center gap-2 py-2 border border-[#E7E2DA] text-[11px] font-mono text-[#1C1917] hover:bg-[#E7E2DA] transition-colors disabled:opacity-50 cursor-pointer"
                   >
                     <RefreshCw className={`h-3 w-3 ${isSyncingGithub ? "animate-spin" : ""}`} />
                     {isSyncingGithub ? "SYNCING…" : "RESYNC NOW"}
@@ -1135,7 +1142,7 @@ export default function CandidateProfilePage() {
                   type="button"
                   onClick={() => setIsGithubModalOpen(false)}
                   disabled={isSyncingGithub}
-                  className="px-4 py-2 border border-[#E7E2DA] hover:bg-[#F5F1EB] text-[#1C1917] text-[12px] font-mono font-medium rounded transition-colors cursor-pointer"
+                  className="px-4 py-2 border border-[#E7E2DA] hover:bg-[#E7E2DA] text-[#1C1917] text-[12px] font-mono font-medium rounded transition-colors cursor-pointer"
                 >
                   Cancel
                 </button>

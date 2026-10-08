@@ -361,3 +361,12 @@ h1, h2, h3, h4, h5, h6 {
   0% { transform: translateX(-100%); }
   100% { transform: translateX(300%); }
 }
+
+/* Hide scrollbar globally */
+::-webkit-scrollbar {
+  display: none;
+}
+* {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}

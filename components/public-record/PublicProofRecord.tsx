@@ -248,7 +248,7 @@ export function PublicProofRecord({
             </Link>
             <div className="hidden md:flex items-center gap-2 pl-3 border-l border-[#E7E2DA]">
               <span className="text-[10px] font-mono uppercase tracking-[0.16em] px-2 py-0.5 rounded bg-[#FAF8F5] border border-[#E7E2DA] text-[#78716C]">
-                INSTITUTIONAL TECHNICAL PROOF
+                VERIFIED TECHNICAL PROOF
               </span>
             </div>
           </div>
@@ -405,16 +405,6 @@ export function PublicProofRecord({
               <span>See Resume</span>
             </button>
 
-            {/* ── DOWNLOAD RESUME BUTTON ── */}
-            <button
-              type="button"
-              onClick={handleDownloadResume}
-              className="flex items-center gap-1.5 text-[12px] font-medium bg-white text-[#1C1917] hover:bg-[#FAF8F5] border border-[#E7E2DA] px-3.5 py-2 rounded-lg transition-colors shadow-xs cursor-pointer"
-              title="Download Resume Document"
-            >
-              <Download className="h-3.5 w-3.5 text-[#064E3B]" />
-              <span>Download Resume</span>
-            </button>
           </div>
 
         </div>
@@ -499,7 +489,7 @@ export function PublicProofRecord({
                 <div className="flex items-center gap-2">
                   <Shield className="h-4 w-4 text-[#064E3B]" />
                   <h3 className="text-[14px] font-bold text-[#1C1917] tracking-tight uppercase">
-                    Institutional Record
+                    Official Record
                   </h3>
                 </div>
                 <span className="text-[10px] font-mono text-[#064E3B] font-semibold bg-[#064E3B]/10 px-2 py-0.5 rounded">
@@ -1105,7 +1095,7 @@ export function PublicProofRecord({
                 </div>
                 <div>
                   <div className="text-[13px] font-bold text-[#1C1917]">
-                    Meritlane Institutional Verification Authority
+                    Meritlane Verification Authority
                   </div>
                   <div className="text-[11.5px] text-[#78716C]">
                     Verified technical skills and project assessments for engineering hiring teams.
@@ -1195,150 +1185,14 @@ export function PublicProofRecord({
                   />
                 </div>
               ) : (
-                /* High-fidelity Institutional Resume Document */
-                <div className="bg-white border border-[#E7E2DA] rounded-lg p-6 sm:p-10 shadow-xs max-w-3xl mx-auto space-y-6 text-[#1C1917]">
-                  {/* Resume Header */}
-                  <div className="border-b border-[#E7E2DA] pb-6">
-                    <div className="flex items-start justify-between gap-4">
-                      <div>
-                        <h1 className="font-serif text-[28px] sm:text-[34px] font-bold text-[#1C1917] leading-tight">
-                          {name}
-                        </h1>
-                        <p className="text-[14px] text-[#064E3B] font-medium mt-1">
-                          {candidate.branch || "Software Engineering"} · Class of {candidate.gradYear || "2026"}
-                        </p>
-                        <p className="text-[13px] text-[#78716C] mt-0.5">
-                          {candidate.college}
-                        </p>
-                      </div>
-                      <div className="text-right shrink-0">
-                        <span className="inline-block text-[11px] font-mono px-2.5 py-1 rounded bg-[#FAF8F5] border border-[#E7E2DA] text-[#78716C]">
-                          ID: {candidateKey}
-                        </span>
-                      </div>
-                    </div>
-
-                    {/* Contact & Links */}
-                    <div className="flex flex-wrap items-center gap-3 mt-4 text-[12px] text-[#57534E]">
-                      {candidate.githubUrl && (
-                        <a href={candidate.githubUrl} target="_blank" rel="noreferrer" className="flex items-center gap-1 hover:text-[#064E3B] underline underline-offset-2">
-                          <GithubIcon className="h-3.5 w-3.5" />
-                          <span>GitHub</span>
-                        </a>
-                      )}
-                      {candidate.linkedinUrl && (
-                        <a href={candidate.linkedinUrl} target="_blank" rel="noreferrer" className="flex items-center gap-1 hover:text-[#064E3B] underline underline-offset-2">
-                          <Globe className="h-3.5 w-3.5 text-[#0A66C2]" />
-                          <span>LinkedIn</span>
-                        </a>
-                      )}
-                      {resolvedPortfolioUrl && (
-                        <a href={resolvedPortfolioUrl} target="_blank" rel="noreferrer" className="flex items-center gap-1 hover:text-[#064E3B] underline underline-offset-2">
-                          <Globe className="h-3.5 w-3.5 text-[#064E3B]" />
-                          <span>Portfolio</span>
-                        </a>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Summary */}
-                  {candidate.bio && (
-                    <div>
-                      <h4 className="text-[11px] font-mono uppercase tracking-[0.16em] text-[#78716C] font-semibold mb-2">
-                        Professional Summary
-                      </h4>
-                      <p className="text-[13.5px] leading-relaxed text-[#44403C]">
-                        {candidate.bio}
-                      </p>
-                    </div>
-                  )}
-
-                  {/* Verified Skills */}
-                  <div>
-                    <h4 className="text-[11px] font-mono uppercase tracking-[0.16em] text-[#78716C] font-semibold mb-3">
-                      Verified Technical Skills
-                    </h4>
-                    <div className="flex flex-wrap gap-2">
-                      {skills.map((skill) => {
-                        const isVer = verifiedSkillsMap[skill]?.status === "verified";
-                        const score = verifiedSkillsMap[skill]?.score;
-                        return (
-                          <span
-                            key={skill}
-                            className={`inline-flex items-center gap-1.5 px-3 py-1 rounded text-[12px] font-mono border ${
-                              isVer
-                                ? "bg-[#DCFCE7] text-[#166534] border-[#86EFAC] font-semibold"
-                                : "bg-[#FAF8F5] text-[#57534E] border-[#E7E2DA]"
-                            }`}
-                          >
-                            {isVer && <CheckCircle2 className="h-3 w-3 text-[#166534]" />}
-                            <span>{skill}</span>
-                            {score !== undefined && <span className="opacity-70 text-[10px]">({score}%)</span>}
-                          </span>
-                        );
-                      })}
-                    </div>
-                  </div>
-
-                  {/* Featured Projects */}
-                  {projects.length > 0 && (
-                    <div>
-                      <h4 className="text-[11px] font-mono uppercase tracking-[0.16em] text-[#78716C] font-semibold mb-3">
-                        Engineering Projects
-                      </h4>
-                      <div className="space-y-4">
-                        {projects.map((proj, idx) => (
-                          <div key={idx} className="p-4 rounded-lg border border-[#E7E2DA] bg-[#FAF8F5]/60">
-                            <div className="flex items-start justify-between gap-3">
-                              <h5 className="font-semibold text-[14px] text-[#1C1917]">
-                                {proj.title}
-                              </h5>
-                              <div className="flex items-center gap-2 shrink-0">
-                                {proj.repoUrl && (
-                                  <a href={proj.repoUrl} target="_blank" rel="noreferrer" className="text-[11px] font-mono text-[#064E3B] hover:underline flex items-center gap-1">
-                                    <FolderGit2 className="h-3 w-3" />
-                                    <span>Code</span>
-                                  </a>
-                                )}
-                                {proj.liveUrl && (
-                                  <a href={proj.liveUrl} target="_blank" rel="noreferrer" className="text-[11px] font-mono text-[#064E3B] hover:underline flex items-center gap-1">
-                                    <ExternalLink className="h-3 w-3" />
-                                    <span>Live</span>
-                                  </a>
-                                )}
-                              </div>
-                            </div>
-                            {proj.description && (
-                              <p className="text-[12.5px] text-[#57534E] mt-1.5 leading-relaxed">
-                                {proj.description}
-                              </p>
-                            )}
-                            {proj.skillsUsed && proj.skillsUsed.length > 0 && (
-                              <div className="flex flex-wrap gap-1.5 mt-2">
-                                {proj.skillsUsed.map((sk) => (
-                                  <span key={sk} className="text-[10.5px] font-mono px-2 py-0.5 rounded bg-white border border-[#E7E2DA] text-[#78716C]">
-                                    {sk}
-                                  </span>
-                                ))}
-                              </div>
-                            )}
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Extracted Resume Text if available and relevant */}
-                  {candidate.resumeText && candidate.resumeText.length > 100 && (
-                    <div className="pt-4 border-t border-[#E7E2DA]">
-                      <h4 className="text-[11px] font-mono uppercase tracking-[0.16em] text-[#78716C] font-semibold mb-2">
-                        Resume Transcript &amp; Raw Evidence
-                      </h4>
-                      <div className="p-4 rounded bg-[#FAF8F5] border border-[#E7E2DA] text-[12px] font-mono text-[#57534E] whitespace-pre-wrap max-h-64 overflow-y-auto leading-relaxed">
-                        {candidate.resumeText}
-                      </div>
-                    </div>
-                  )}
+                <div className="bg-white border border-[#E7E2DA] rounded-lg p-6 sm:p-10 shadow-xs max-w-3xl mx-auto space-y-6 text-[#1C1917] flex flex-col items-center justify-center min-h-[50vh]">
+                  <FileText className="h-12 w-12 text-[#E7E2DA] mb-4" />
+                  <p className="text-[14px] font-mono text-[#78716C] mb-2">
+                    PDF document is not available.
+                  </p>
+                  <p className="text-[12px] font-sans text-[#A8A29E] max-w-sm text-center">
+                    The candidate's original resume file was not saved or is too large to display in the viewer.
+                  </p>
                 </div>
               )}
             </div>

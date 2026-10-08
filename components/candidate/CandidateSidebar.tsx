@@ -241,38 +241,7 @@ export function CandidateSidebar() {
           })}
         </nav>
 
-        {/* ── Divider ── */}
-        <div className="mx-3 h-px bg-[#E7E2DA]" />
 
-        {/* ── Add evidence shortcut ── */}
-        <div className="px-3 py-3">
-          <button
-            onClick={() => router.push("/candidate/dashboard")}
-            title={isCollapsed ? "Add evidence" : undefined}
-            className={`
-              flex items-center h-9 w-full rounded
-              text-[13px] font-medium text-[#78716C] hover:text-[#1C1917] hover:bg-[#F2EFE9]
-              transition-colors overflow-hidden
-            `}
-          >
-            <div className={`flex justify-center shrink-0 ${isCollapsed ? "w-full" : "w-10"}`}>
-              <span className="text-[16px] leading-none font-light text-[#A8A29E] group-hover:text-[#1C1917]">+</span>
-            </div>
-            <AnimatePresence initial={false}>
-              {!isCollapsed && (
-                <motion.span
-                  initial={{ opacity: 0, width: 0 }}
-                  animate={{ opacity: 1, width: "auto" }}
-                  exit={{ opacity: 0, width: 0 }}
-                  transition={{ duration: 0.22, ease: [0.4, 0, 0.2, 1] }}
-                  className="whitespace-nowrap pr-3 tracking-[-0.01em]"
-                >
-                  Add project
-                </motion.span>
-              )}
-            </AnimatePresence>
-          </button>
-        </div>
 
         {/* ── Bottom: user + collapse toggle ── */}
         <div className="mx-3 h-px bg-[#E7E2DA]" />

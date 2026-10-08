@@ -314,7 +314,7 @@ export default function EmployerInboxPage() {
                 </div>
               </div>
 
-              <div className="flex-1 overflow-y-auto divide-y divide-[#F5F1EB]">
+              <div className="flex-1 overflow-y-auto divide-y divide-[#E7E2DA]">
                 {filteredThreads.length === 0 ? (
                   <div className="p-10 text-center">
                     <Inbox className="h-10 w-10 text-[#C8BFB0] mx-auto mb-3" />
@@ -331,7 +331,7 @@ export default function EmployerInboxPage() {
                         key={thread.partnerId}
                         onClick={() => handleSelectThread(thread.partnerId)}
                         className={`w-full text-left p-4 hover:bg-[#FAF8F5] transition-colors ${
-                          selectedPartnerId === thread.partnerId ? "bg-[#F5F1EB]" : ""
+                          selectedPartnerId === thread.partnerId ? "bg-[#E7E2DA]" : ""
                         }`}
                       >
                         <div className="flex items-start gap-3">
@@ -411,7 +411,7 @@ export default function EmployerInboxPage() {
                             <div className={`px-4 py-3 rounded text-[14px] font-sans leading-relaxed border ${
                               isFromMe
                                 ? "bg-[#064E3B] text-white border-[#064E3B]/30"
-                                : "bg-[#F5F1EB] text-[#1C1917] border-[#E7E2DA]"
+                                : "bg-[#E7E2DA] text-[#1C1917] border-[#E7E2DA]"
                             }`}>
                               {m.content && <div>{m.content}</div>}
                               <MessageAttachmentsList attachments={m.attachments} isSentByMe={isFromMe} />

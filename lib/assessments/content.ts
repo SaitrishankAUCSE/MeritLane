@@ -1,4 +1,5 @@
 import { EXPANDED_MCQS } from "./expanded-bank";
+import { ADDITIONAL_QUESTION_BANKS } from "./additional-banks";
 
 export interface MCQ {
   id?: string;
@@ -3338,8 +3339,13 @@ FROM node:20-alpine AS runner
   }
 };
 
+const MERGED_RAW_BANKS: Record<string, { mcqPool: MCQ[]; codingPool: CodingChallenge[] }> = {
+  ...BASE_QUESTION_BANKS,
+  ...ADDITIONAL_QUESTION_BANKS
+};
+
 export const QUESTION_BANKS: Record<string, { mcqPool: MCQ[]; codingPool: CodingChallenge[] }> = Object.fromEntries(
-  Object.entries(BASE_QUESTION_BANKS).map(([skill, bank]) => [
+  Object.entries(MERGED_RAW_BANKS).map(([skill, bank]) => [
     skill,
     {
       ...bank,
@@ -3352,6 +3358,13 @@ export const QUESTION_BANKS: Record<string, { mcqPool: MCQ[]; codingPool: Coding
 );
 
 export const SKILL_ALIASES: Record<string, string> = {
+  c: "c",
+  "c programming": "c",
+  "c#": "csharp",
+  csharp: "csharp",
+  "c-sharp": "csharp",
+  ".net": "csharp",
+  dotnet: "csharp",
   js: "javascript",
   ts: "typescript",
   golang: "go",
@@ -3366,12 +3379,14 @@ export const SKILL_ALIASES: Record<string, string> = {
   fullstack: "react",
   next: "next.js",
   nextjs: "next.js",
+  "react.js": "react",
   ai: "machine learning",
   ml: "machine learning",
   "data science": "machine learning",
   pytorch: "machine learning",
   tensorflow: "machine learning",
   pandas: "machine learning",
+  numpy: "numpy",
   rust: "rust",
   "react native": "react native",
   "react-native": "react native",
@@ -3387,7 +3402,23 @@ export const SKILL_ALIASES: Record<string, string> = {
   agile: "technical management",
   scrum: "technical management",
   pm: "technical management",
-  "product management": "technical management"
+  "product management": "technical management",
+  html: "html5",
+  html5: "html5",
+  css: "css",
+  css3: "css",
+  rest: "rest",
+  "rest api": "rest",
+  "rest apis": "rest",
+  redis: "redis",
+  firebase: "firebase",
+  firestore: "firebase",
+  gcp: "gcp",
+  "google cloud": "gcp",
+  "google cloud platform": "gcp",
+  git: "git",
+  github: "git",
+  r: "r"
 };
 
 function hashString32(str: string): number {
@@ -3422,10 +3453,10 @@ function shuffleArray<T>(array: T[], seed?: number): T[] {
 export function resolveSkillKey(skillName: string): string | null {
   if (!skillName) return null;
   const normalized = skillName.toLowerCase().trim();
-  if (QUESTION_BANKS[normalized]) return normalized;
   if (SKILL_ALIASES[normalized]) return SKILL_ALIASES[normalized];
+  if (QUESTION_BANKS[normalized]) return normalized;
   for (const key of Object.keys(QUESTION_BANKS)) {
-    if (normalized.includes(key)) return key;
+    if (key.length >= 3 && normalized.includes(key)) return key;
   }
   return null;
 }
@@ -3463,25 +3494,38 @@ export function getAssessmentContent(
 
   const hasCoding = Boolean(bank.codingPool && bank.codingPool.length > 0);
 
-  // Exact requirement: 15 questions = 5 easy + 5 medium + 5 hard, and in strict sequential order
+  // Exact requirements:
+  // If coding is present: 15 MCQs (5 Easy, 5 Medium, 5 Hard) + 1-2 Coding challenges (90 mins).
+  // If skill does NOT have coding: increase MCQs to 22 questions (7 Easy, 8 Medium, 7 Hard)
+  // covering Query Writing, Code Error Finding, and Core Concepts (45 mins).
+  const targetEasy = hasCoding ? 5 : 7;
+  const targetMedium = hasCoding ? 5 : 8;
+  const targetHard = hasCoding ? 5 : 7;
+  const totalTarget = hasCoding ? 15 : 22;
+
   const easyPool = bank.mcqPool.filter((q) => q.difficulty === "easy");
   const mediumPool = bank.mcqPool.filter((q) => q.difficulty === "medium");
   const hardPool = bank.mcqPool.filter((q) => q.difficulty === "hard");
 
-  // Pick 5 from each difficulty pool deterministically using seed
-  const selectedEasy = shuffleArray(easyPool.length >= 5 ? easyPool : bank.mcqPool, (seedNum + 101) >>> 0).slice(0, 5);
-  const selectedMedium = shuffleArray(mediumPool.length >= 5 ? mediumPool : bank.mcqPool, (seedNum + 202) >>> 0).slice(0, 5);
-  const selectedHard = shuffleArray(hardPool.length >= 5 ? hardPool : bank.mcqPool, (seedNum + 303) >>> 0).slice(0, 5);
+  // Pick from each difficulty pool deterministically using seed
+  const selectedEasy = shuffleArray(easyPool.length >= targetEasy ? easyPool : bank.mcqPool, (seedNum + 101) >>> 0).slice(0, targetEasy);
+  const selectedMedium = shuffleArray(mediumPool.length >= targetMedium ? mediumPool : bank.mcqPool, (seedNum + 202) >>> 0).slice(0, targetMedium);
+  const selectedHard = shuffleArray(hardPool.length >= targetHard ? hardPool : bank.mcqPool, (seedNum + 303) >>> 0).slice(0, targetHard);
 
-  // Strictly in sequential order:
-  // Questions 1 to 5: Easy
-  // Questions 6 to 10: Medium
-  // Questions 11 to 15: Hard
-  const selectedMcqs: MCQ[] = [
+  // Strictly in sequential order: Easy -> Medium -> Hard
+  let selectedMcqs: MCQ[] = [
     ...selectedEasy,
     ...selectedMedium,
     ...selectedHard,
-  ].slice(0, 15);
+  ];
+
+  // Backfill up to totalTarget if any difficulty bucket was shallow
+  if (selectedMcqs.length < totalTarget) {
+    const remaining = bank.mcqPool.filter((q) => !selectedMcqs.some((m) => m.question === q.question));
+    selectedMcqs = [...selectedMcqs, ...remaining.slice(0, totalTarget - selectedMcqs.length)];
+  }
+
+  selectedMcqs = selectedMcqs.slice(0, totalTarget);
 
   // 2. Shuffle option choices for each MCQ while preserving the correct answer index
   const randomizedMcqs: MCQ[] = selectedMcqs.map((mcq, mIdx) => {
@@ -3524,7 +3568,8 @@ export function getAssessmentContent(
     mcqs: randomizedMcqs,
     coding: selectedCoding,
     hasCoding,
-    timeLimitMinutes: hasCoding ? 90 : 35,
+    timeLimitMinutes: hasCoding ? 90 : 45,
     assessmentType: hasCoding ? "coding_capable" : "mcq_only",
   };
 }
+

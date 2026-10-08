@@ -177,7 +177,7 @@ export function ProfileForm({ initialData, onSave, onCancel, isNew = false }: Pr
       }
     } catch (err: any) {
       console.error("Resume auto-parse error:", err);
-      setError(err.message || "Unable to complete institutional resume parsing.");
+      setError(err.message || "Unable to complete resume parsing.");
       setScannerOpen(false);
       setAnalyzingAts(false);
     }

@@ -13,7 +13,7 @@ import CooldownTimer from "@/components/candidate/cooldown-timer";
 function StatusStamp({ status }: { status: "VERIFIED" | "ELIGIBLE" | "COOLDOWN" }) {
   const map = {
     VERIFIED: "text-[#064E3B] bg-[#064E3B]/[0.08] border border-[#064E3B]/30",
-    ELIGIBLE: "text-[#1C1917] bg-[#F5F1EB] border border-[#C8BFB0]",
+    ELIGIBLE: "text-[#1C1917] bg-[#E7E2DA] border border-[#C8BFB0]",
     COOLDOWN: "text-[#92400E] bg-[#FEF3C7] border border-[#D97706]/30",
   };
   return (
@@ -29,6 +29,7 @@ export default function CandidateVerificationPage() {
   const [profile, setProfile] = useState<CandidateProfile | null>(null);
   const [cooldowns, setCooldowns] = useState<Record<string, number>>({});
   const [isFetching, setIsFetching] = useState(true);
+  const [supportedSkills, setSupportedSkills] = useState<{keys: string[], aliases: string[]} | null>(null);
 
   useEffect(() => {
     if (!loading && !user) router.replace("/");
@@ -41,8 +42,10 @@ export default function CandidateVerificationPage() {
       getDoc(doc(db, "users", user.uid))
         .then((d) => (d.exists() ? d.data() : null))
         .catch(() => null),
-    ]).then(([p, uData]) => {
+      fetch("/api/candidate/supported-skills").then(res => res.json()).catch(() => null)
+    ]).then(([p, uData, ssData]) => {
       setProfile(p);
+      if (ssData && ssData.keys) setSupportedSkills(ssData);
       if (p?.skills) {
         const cd: Record<string, number> = {};
         const now = Date.now();
@@ -79,8 +82,15 @@ export default function CandidateVerificationPage() {
   const requiredForEmployerPortal = Math.max(1, Math.ceil(skills.length / 2));
   const isEmployerPortalUnlocked = skills.length > 0 && verifiedCount >= requiredForEmployerPortal;
 
+  const isSkillSupported = (skill: string) => {
+    if (!supportedSkills) return true; // optimistic if not loaded
+    const normalized = skill.toLowerCase().trim();
+    if (supportedSkills.keys.includes(normalized) || supportedSkills.aliases.includes(normalized)) return true;
+    return supportedSkills.keys.some(key => normalized.includes(key));
+  };
+
   return (
-    <div className="w-full min-h-full bg-[#FAF8F5] pb-24">
+    <div className="w-full min-h-full bg-transparent pb-24">
 
       {/* ── Header Strip ── */}
       <div className="border-b border-[#E7E2DA] bg-white px-4 sm:px-6 lg:px-8 py-5">
@@ -156,7 +166,7 @@ export default function CandidateVerificationPage() {
           ) : (
             <div className="border border-[#E7E2DA] bg-white overflow-hidden">
               {/* Table head */}
-              <div className="hidden sm:grid sm:grid-cols-[2rem_1fr_7rem_5rem_7rem_8rem] border-b border-[#E7E2DA] bg-[#F5F1EB] px-4 py-2.5">
+              <div className="hidden sm:grid sm:grid-cols-[2rem_1fr_7rem_5rem_7rem_8rem] border-b border-[#E7E2DA] bg-[#E7E2DA] px-4 py-2.5">
                 {["#", "Skill", "Status", "Score", "Test Date", "Action"].map((h) => (
                   <div key={h} className={`text-[9px] font-medium text-[#78716C] uppercase tracking-[0.18em] ${h === "Action" ? "text-right" : ""}`}>
                     {h}
@@ -252,11 +262,20 @@ export default function CandidateVerificationPage() {
                           />
                         </span>
                       ) : (
-                        <Link href={`/candidate/assessment?skill=${encodeURIComponent(skill)}`}>
-                          <button className="flex items-center gap-1 text-[10px] font-mono font-semibold bg-[#1C1917] hover:bg-[#064E3B] text-white px-3.5 py-1 transition-colors rounded">
-                            TAKE TEST <ArrowRight className="h-2.5 w-2.5" />
-                          </button>
-                        </Link>
+                        isSkillSupported(skill) ? (
+                          <Link href={`/candidate/assessment?skill=${encodeURIComponent(skill)}`}>
+                            <button className="flex items-center gap-1 text-[10px] font-mono font-semibold bg-[#1C1917] hover:bg-[#064E3B] text-white px-3.5 py-1 transition-colors rounded">
+                              TAKE TEST <ArrowRight className="h-2.5 w-2.5" />
+                            </button>
+                          </Link>
+                        ) : (
+                          <span
+                            title="Assessment currently in development"
+                            className="inline-flex items-center gap-1 text-[10px] font-mono font-semibold bg-[#F2EFE9] border border-[#E7E2DA] text-[#78716C] px-3.5 py-1 rounded cursor-not-allowed select-none tabular-nums"
+                          >
+                            IN DEVELOPMENT
+                          </span>
+                        )
                       )}
                     </div>
                   </div>
@@ -268,7 +287,7 @@ export default function CandidateVerificationPage() {
           {/* Test History */}
           {verifiedCount > 0 && (
             <div className="border border-[#E7E2DA] bg-white">
-              <div className="border-b border-[#E7E2DA] bg-[#F5F1EB] px-5 py-3">
+              <div className="border-b border-[#E7E2DA] bg-[#E7E2DA] px-5 py-3">
                 <div className="text-[9px] font-medium tracking-[0.18em] text-[#78716C] uppercase">
                   Test History &amp; Verified Badges
                 </div>
@@ -306,7 +325,7 @@ export default function CandidateVerificationPage() {
         <div className="space-y-5">
 
           <div className="border border-[#E7E2DA] bg-white">
-            <div className="border-b border-[#E7E2DA] bg-[#F5F1EB] px-5 py-3">
+            <div className="border-b border-[#E7E2DA] bg-[#E7E2DA] px-5 py-3">
               <div className="text-[9px] font-medium tracking-[0.18em] text-[#78716C] uppercase">
                 Test Details
               </div>

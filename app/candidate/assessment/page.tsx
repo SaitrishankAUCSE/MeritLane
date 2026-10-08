@@ -2867,7 +2867,7 @@ function AssessmentContentWrapper() {
               Proctoring Lockout Active
             </h2>
             <p className="text-[14px] text-[#78716C] mb-6 leading-relaxed">
-              Assessment access is temporarily suspended due to repeated proctoring departures or fullscreen exits. To preserve institutional integrity, a cooldown period is enforced.
+              Assessment access is temporarily suspended due to repeated proctoring departures or fullscreen exits. To preserve assessment integrity, a cooldown period is enforced.
             </p>
             <div className="border border-[#E7E2DA] bg-[#F8F6F3] p-5 rounded mb-8">
               <div className="text-[13px] font-medium text-[#78716C] mb-3 flex items-center justify-between">
@@ -3857,11 +3857,11 @@ function AssessmentContentWrapper() {
                   </div>
                   <div className="flex items-center gap-3">
                     <span>Ln {cursorPos.line}, Col {cursorPos.col}</span>
-                    <span className={editorTheme === "dark" ? "text-[#30363D]" : "text-[#D6D3D1]"}>|</span>
+                    <span className={editorTheme === "dark" ? "text-[#30363D]" : "text-[#E7E2DA]"}>|</span>
                     <span className="hidden sm:inline">{code?.length || 0} chars</span>
-                    <span className={editorTheme === "dark" ? "text-[#30363D]" : "text-[#D6D3D1]"}>|</span>
+                    <span className={editorTheme === "dark" ? "text-[#30363D]" : "text-[#E7E2DA]"}>|</span>
                     <span className="hidden md:inline text-[#10B981] font-semibold">● Sandbox Ready</span>
-                    <span className={editorTheme === "dark" ? "text-[#30363D]" : "text-[#D6D3D1]"}>|</span>
+                    <span className={editorTheme === "dark" ? "text-[#30363D]" : "text-[#E7E2DA]"}>|</span>
                     <span className={editorTheme === "dark" ? "text-[#58A6FF] font-semibold" : "text-[#064E3B] font-semibold"}>
                       {selectedLanguage.toUpperCase()}
                     </span>
@@ -4320,7 +4320,7 @@ function AssessmentContentWrapper() {
         </div>
       )}
 
-      {/* Institutional 50-Test-Case Submission & Grading Progress Modal */}
+      {/* 50-Test-Case Submission & Grading Progress Modal */}
       {submittingModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-xs p-4 animate-in fade-in duration-200">
           <div className="max-w-lg w-full bg-white text-[#1C1917] rounded-2xl border border-[#E7E2DA] shadow-2xl p-6 sm:p-8 space-y-6">
@@ -4381,7 +4381,7 @@ function AssessmentContentWrapper() {
                   ) : submissionProgress >= 20 ? (
                     <Loader2 className="h-3.5 w-3.5 text-[#064E3B] animate-spin shrink-0" />
                   ) : (
-                    <span className="h-3.5 w-3.5 rounded-full border border-[#D6D3D1] shrink-0" />
+                    <span className="h-3.5 w-3.5 rounded-full border border-[#E7E2DA] shrink-0" />
                   )}
                   <span>Suites 11–25: Boundary &amp; Corner Cases</span>
                 </span>
@@ -4401,7 +4401,7 @@ function AssessmentContentWrapper() {
                   ) : submissionProgress >= 50 ? (
                     <Loader2 className="h-3.5 w-3.5 text-[#064E3B] animate-spin shrink-0" />
                   ) : (
-                    <span className="h-3.5 w-3.5 rounded-full border border-[#D6D3D1] shrink-0" />
+                    <span className="h-3.5 w-3.5 rounded-full border border-[#E7E2DA] shrink-0" />
                   )}
                   <span>Suites 26–40: Computational Scale</span>
                 </span>
@@ -4421,7 +4421,7 @@ function AssessmentContentWrapper() {
                   ) : submissionProgress >= 80 ? (
                     <Loader2 className="h-3.5 w-3.5 text-[#064E3B] animate-spin shrink-0" />
                   ) : (
-                    <span className="h-3.5 w-3.5 rounded-full border border-[#D6D3D1] shrink-0" />
+                    <span className="h-3.5 w-3.5 rounded-full border border-[#E7E2DA] shrink-0" />
                   )}
                   <span>Suites 41–50: Memory &amp; Concurrency</span>
                 </span>
@@ -4441,7 +4441,7 @@ function AssessmentContentWrapper() {
                   ) : submissionProgress >= 95 ? (
                     <Loader2 className="h-3.5 w-3.5 text-[#064E3B] animate-spin shrink-0" />
                   ) : (
-                    <span className="h-3.5 w-3.5 rounded-full border border-[#D6D3D1] shrink-0" />
+                    <span className="h-3.5 w-3.5 rounded-full border border-[#E7E2DA] shrink-0" />
                   )}
                   <span>Ledger Sync &amp; Assessment Scorecard</span>
                 </span>

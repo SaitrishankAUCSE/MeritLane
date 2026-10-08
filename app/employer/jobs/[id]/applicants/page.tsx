@@ -42,6 +42,15 @@ export default function JobApplicantsPage() {
   // Messaging state
   const [messagingTarget, setMessagingTarget] = useState<{ id: string; name: string } | null>(null);
 
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const ITEMS_PER_PAGE = 10;
+
+  const paginatedApplicants = React.useMemo(() => {
+    const start = (currentPage - 1) * ITEMS_PER_PAGE;
+    return applicants.slice(start, start + ITEMS_PER_PAGE);
+  }, [applicants, currentPage]);
+
   const loadApplicants = useCallback(async () => {
     if (!user) return;
     setLoading(true);
@@ -171,8 +180,8 @@ export default function JobApplicantsPage() {
               <div>VERIFIED MATCHING MATRIX</div>
             </div>
 
-            <div className="divide-y divide-[#F5F1EB]">
-              {applicants.map((app) => {
+            <div className="divide-y divide-[#E7E2DA]">
+              {paginatedApplicants.map((app) => {
                 const isBusy = updatingStage[app.candidateId] || false;
                 const requiredSkills = job?.requiredSkills || [];
                 const verifiedSkillsMap = app.candidateVerifiedSkills || {};
@@ -280,6 +289,31 @@ export default function JobApplicantsPage() {
                 );
               })}
             </div>
+
+            {/* Pagination Controls */}
+            {applicants.length > ITEMS_PER_PAGE && (
+              <div className="flex items-center justify-between border-t border-[#E7E2DA] px-6 py-4">
+                <span className="text-xs text-[#78716C] font-medium">
+                  Showing {((currentPage - 1) * ITEMS_PER_PAGE) + 1} to {Math.min(currentPage * ITEMS_PER_PAGE, applicants.length)} of {applicants.length} applicants
+                </span>
+                <div className="flex gap-2">
+                  <button
+                    disabled={currentPage === 1}
+                    onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                    className="px-3 py-1 border border-[#E7E2DA] bg-white text-[#1C1917] text-xs rounded hover:bg-[#FAF8F5] disabled:opacity-50"
+                  >
+                    Previous
+                  </button>
+                  <button
+                    disabled={currentPage * ITEMS_PER_PAGE >= applicants.length}
+                    onClick={() => setCurrentPage(p => p + 1)}
+                    className="px-3 py-1 border border-[#E7E2DA] bg-white text-[#1C1917] text-xs rounded hover:bg-[#FAF8F5] disabled:opacity-50"
+                  >
+                    Next
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         )}
       </div>

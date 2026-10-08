@@ -224,10 +224,11 @@ export async function POST(req: NextRequest) {
       // Legacy MCQ scoring
       const candidateSeed = userData.assessmentSeed || uid;
       const content = getAssessmentContent(skill, candidateSeed);
-      totalMcqs = content.mcqs?.length || 8;
+      totalMcqs = content?.mcqs?.length || 8;
       if (answers && Array.isArray(answers)) {
         answers.forEach((ans: number, idx: number) => {
-          if (content.mcqs[idx] && content.mcqs[idx].answerIndex === ans) {
+          const mcq = content?.mcqs?.[idx];
+          if (mcq && mcq.answerIndex === ans) {
             mcqCorrectCount++;
           }
         });

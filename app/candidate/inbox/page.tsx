@@ -1,13 +1,12 @@
 "use client";
 
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, useCallback } from "react";
 import { useAuth } from "@/lib/auth/AuthContext";
 import { useRouter } from "next/navigation";
 import { getIdToken } from "firebase/auth";
 import { auth } from "@/lib/firebase/config";
 import {
   Inbox,
-  MailOpen,
   Mail,
   Search,
   RefreshCw,
@@ -34,6 +33,7 @@ import {
   MessageAttachmentsList,
   processFileForAttachment,
 } from "@/components/ui/MessageAttachments";
+import { Button } from "@/components/ui/Button";
 
 interface Message {
   id: string;
@@ -232,8 +232,8 @@ export default function CandidateInboxPage() {
     setReplyAttachments((prev) => prev.filter((a) => a.id !== id));
   };
 
-  const fetchMessages = async (quiet = false) => {
-    if (!quiet) setFetching(true);
+  const fetchMessages = useCallback(async (quiet = false) => {
+    if (!quiet) setFetching((prev) => messages.length === 0);
     else setRefreshing(true);
     try {
       if (!auth.currentUser) return;
@@ -260,7 +260,7 @@ export default function CandidateInboxPage() {
       setFetching(false);
       setRefreshing(false);
     }
-  };
+  }, [user?.uid, selectedPartnerId, messages.length]);
 
   useEffect(() => {
     if (!loading) {
@@ -269,8 +269,14 @@ export default function CandidateInboxPage() {
         return;
       }
       fetchMessages();
+      
+      const intervalId = setInterval(() => {
+        fetchMessages(true);
+      }, 5000);
+
+      return () => clearInterval(intervalId);
     }
-  }, [user, loading, router]);
+  }, [user, loading, router, fetchMessages]);
 
   // Group messages into conversations by partner UID (the employer)
   const threadsMap = new Map<
@@ -440,7 +446,7 @@ export default function CandidateInboxPage() {
             <span className="font-bold text-[#1C1917]">{activeNonArchivedThreads.length}</span>
             {totalUnreadCount > 0 && (
               <>
-                <span className="text-[#D6D3D1]">|</span>
+                <span className="text-[#E7E2DA]">|</span>
                 <span className="text-[#064E3B] font-bold">{totalUnreadCount} unread</span>
               </>
             )}
@@ -529,7 +535,7 @@ export default function CandidateInboxPage() {
           </div>
 
           {/* Conversation Cards Scroll Stream (ONLY THIS SCROLLS) */}
-          <div className="flex-1 min-h-0 overflow-y-auto divide-y divide-[#F5F1EB]">
+          <div className="flex-1 min-h-0 overflow-y-auto divide-y divide-[#E7E2DA]">
             {fetching ? (
               <div className="flex flex-col items-center justify-center p-12 gap-2.5 text-[#78716C]">
                 <div className="h-5 w-5 border-2 border-[#E7E2DA] border-t-[#064E3B] rounded-full animate-spin" />
@@ -578,7 +584,7 @@ export default function CandidateInboxPage() {
                     onClick={() => handleSelectThread(thread.partnerId)}
                     className={`group w-full p-3.5 transition-all cursor-pointer flex items-start gap-3 relative select-none ${
                       isSelected
-                        ? "bg-[#F3EFE9] border-l-4 border-l-[#064E3B]"
+                        ? "bg-[#E7E2DA] border-l-4 border-l-[#064E3B]"
                         : hasUnread
                         ? "bg-white hover:bg-[#FAF8F5]"
                         : "bg-white/80 hover:bg-[#FAF8F5]"
@@ -643,7 +649,7 @@ export default function CandidateInboxPage() {
                         onClick={(e) => toggleArchive(thread.partnerId, e)}
                         className={`p-1.5 rounded-md border border-transparent transition-all ${
                           isArchived
-                            ? "text-[#064E3B] hover:bg-[#E7E2DA] hover:border-[#D6D3D1] opacity-100"
+                            ? "text-[#064E3B] hover:bg-[#E7E2DA] hover:border-[#E7E2DA] opacity-100"
                             : "text-[#A8A29E] hover:text-[#1C1917] hover:bg-[#FAF8F5] hover:border-[#E7E2DA] opacity-0 group-hover:opacity-100"
                         }`}
                         title={isArchived ? "Unarchive conversation" : "Archive conversation"}
@@ -736,7 +742,7 @@ export default function CandidateInboxPage() {
               </div>
 
               {/* Verified Topic Protocol Ribbon */}
-              <div className="px-4 sm:px-6 py-1.5 bg-[#F4F1EB] border-b border-[#E7E2DA] flex items-center justify-between text-[10.5px] font-mono text-[#78716C] uppercase tracking-wider shrink-0">
+              <div className="px-4 sm:px-6 py-1.5 bg-[#E7E2DA] border-b border-[#E7E2DA] flex items-center justify-between text-[10.5px] font-mono text-[#78716C] uppercase tracking-wider shrink-0">
                 <div className="flex items-center gap-1.5">
                   <Lock className="h-3 w-3 text-[#064E3B]" />
                   <span>Secured Protocol · Interview & Evaluation Wire</span>
@@ -916,27 +922,20 @@ export default function CandidateInboxPage() {
                           for newline
                         </span>
 
-                        <button
+                        <Button
                           type="submit"
+                          variant="success"
+                          size="sm"
                           disabled={
                             sendingReply ||
                             uploadingAttachment ||
                             (!replyText.trim() && replyAttachments.length === 0)
                           }
-                          className="flex items-center gap-1.5 px-4 py-1.5 bg-[#064E3B] hover:bg-[#043327] disabled:opacity-40 disabled:cursor-not-allowed text-white text-[12px] font-semibold rounded-lg transition-all shadow-xs"
+                          loading={sendingReply}
+                          rightIcon={!sendingReply && <Send className="h-3.5 w-3.5" />}
                         >
-                          {sendingReply ? (
-                            <>
-                              <div className="h-3 w-3 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                              <span>Sending…</span>
-                            </>
-                          ) : (
-                            <>
-                              <span>Send</span>
-                              <Send className="h-3 w-3" />
-                            </>
-                          )}
-                        </button>
+                          Send
+                        </Button>
                       </div>
                     </div>
                   </div>

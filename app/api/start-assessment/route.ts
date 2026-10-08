@@ -152,9 +152,10 @@ export async function POST(req: NextRequest) {
     // ─── Bank-aware path (Firestore / Dynamic) ─────────────────────────────
     let bank = await getBankForSkill(skill);
     
-    // JIT Generation if bank is missing or stale
+    // JIT Generation: create the bank if it doesn't exist yet
     if (!bank) {
       try {
+        console.log(`[JIT] No bank found for "${skill}". Generating via AI…`);
         await generateAndPublishSkillBank(skill);
         bank = await getBankForSkill(skill);
       } catch (err) {
@@ -162,13 +163,35 @@ export async function POST(req: NextRequest) {
       }
     }
 
+    // JIT Expansion: if the candidate has seen ≥60% of the MCQ pool, silently
+    // queue another generation batch in the background so the pool grows ahead
+    // of their next attempt. We do NOT await this — it must not block the response.
+    if (bank && bank.mcqs.length > 0) {
+      const seenMcqRaw = candidateData.seenQuestions?.[normalizedSkill]?.mcq || [];
+      const seenRatio = seenMcqRaw.length / bank.mcqs.length;
+      if (seenRatio >= 0.6) {
+        const nextBatch = Math.ceil(seenMcqRaw.length / 25);
+        console.log(
+          `[JIT-EXPAND] "${skill}": candidate has seen ${seenMcqRaw.length}/${bank.mcqs.length} MCQs (${Math.round(seenRatio * 100)}%). ` +
+          `Queuing background batch #${nextBatch}…`
+        );
+        fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/admin/generate-drafts`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "x-seed-key": "meritlane-secret-seeder-key" },
+          body: JSON.stringify({ skill, batchIndex: nextBatch }),
+        }).catch(e => console.warn("[JIT-EXPAND] Background batch failed:", e.message));
+      }
+    }
+
     const hasBankSupport = Boolean(bank);
 
-    // Time limits per approved spec:
-    // Coding-capable: 90 min | MCQ-only: 35 min
-    const timeLimitMinutes = hasBankSupport ? 90 : 35;
+    // Time limits:
+    // Coding-capable: 90 min | MCQ / Query / Error finding: 45 min
+    const hasCodingPool = bank ? Boolean((bank.easy && bank.easy.length > 0) || (bank.mediumHard && bank.mediumHard.length > 0)) : false;
+    const timeLimitMinutes = hasCodingPool ? 90 : 45;
     const sessionWindowMs = timeLimitMinutes * 60 * 1000;
-    const gracePeriodMs = 2 * 60 * 1000;
+    const gracePeriodMs = 2 * 60 * 1000; // 2-minute grace on top of the time limit
+
 
     // Resume active session if within window
     if (userData.assessmentStartedAt && userData.assessmentSkill === skill) {
@@ -233,8 +256,8 @@ export async function POST(req: NextRequest) {
         mcq: Array.isArray(seenRaw.mcq) ? seenRaw.mcq : [],
       };
 
-      // Select non-repeating assignment
-      const assignment = selectAssignment(bank, seen, skill);
+      // Select non-repeating assignment (seeded by uid for per-user uniqueness)
+      const assignment = selectAssignment(bank, seen, skill, uid);
 
       // Store question IDs in user session
       firestoreUpdates.assessmentMcqIds = assignment.mcqIds;
@@ -263,11 +286,11 @@ export async function POST(req: NextRequest) {
           assessmentType: "coding_capable",
         };
       } else {
-        // MCQ Only assignment
+        // MCQ / Query Writing / Error Finding assignment
         freshContent = {
           mcqs: sanitiseMcqs(assignment.mcqs),
           hasCoding: false,
-          timeLimitMinutes: 35,
+          timeLimitMinutes: 45,
           assessmentType: "mcq_only",
         };
       }
@@ -284,7 +307,7 @@ export async function POST(req: NextRequest) {
         ...builtinContent,
         codingTasks: builtinContent.coding ? [builtinContent.coding] : [],
         assessmentType: builtinContent.hasCoding ? "coding_capable" : "mcq_only",
-        timeLimitMinutes: builtinContent.hasCoding ? 90 : 35,
+        timeLimitMinutes: builtinContent.hasCoding ? 90 : 45,
       };
     }
 

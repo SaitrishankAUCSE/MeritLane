@@ -2,23 +2,81 @@
 
 import React, { useState, useEffect } from "react";
 import { useAuth } from "@/lib/auth/AuthContext";
-import { Building, Globe, MapPin, Sparkles, CheckCircle2, Save, Layers } from "lucide-react";
+import { Building, Globe, MapPin, CheckCircle2, Save, Layers, User, Link } from "lucide-react";
 import { Button } from "@/components/ui/Button";
+import { fetchEmployerProfile, saveEmployerProfile } from "@/lib/firebase/employer";
+import { MeritlaneLoader } from "@/components/ui/MeritlaneLoader";
 
 export default function EmployerProfilePage() {
   const { user } = useAuth();
-  const [companyName, setCompanyName] = useState("BannuTech Global");
-  const [website, setWebsite] = useState("https://bannutech.io");
-  const [location, setLocation] = useState("Bengaluru, India");
-  const [techStack, setTechStack] = useState("React, Next.js, Python, PostgreSQL, AWS");
-  const [about, setAbout] = useState("Building next-generation enterprise AI software and high-throughput distributed systems.");
+  const [loading, setLoading] = useState(true);
+  
+  const [companyName, setCompanyName] = useState("");
+  const [role, setRole] = useState("");
+  const [linkedin, setLinkedin] = useState("");
+  const [website, setWebsite] = useState("");
+  const [location, setLocation] = useState("");
+  const [techStack, setTechStack] = useState("");
+  const [about, setAbout] = useState("");
   const [saved, setSaved] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
 
-  const handleSave = (e: React.FormEvent) => {
+  useEffect(() => {
+    if (!user) return;
+    
+    async function loadData() {
+      try {
+        const p = await fetchEmployerProfile(user!.uid);
+        if (p) {
+          setCompanyName(p.companyName || p.name || "");
+          setRole(p.role || "");
+          setLinkedin(p.linkedin || "");
+          setWebsite(p.website || "");
+          setLocation(p.location || "");
+          setTechStack(p.techStack || "");
+          setAbout(p.about || "");
+        }
+      } catch (err) {
+        console.error("Failed to load profile", err);
+      } finally {
+        setLoading(false);
+      }
+    }
+    
+    loadData();
+  }, [user]);
+
+  const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSaved(true);
-    setTimeout(() => setSaved(false), 2500);
+    if (!user) return;
+    
+    setIsSaving(true);
+    try {
+      await saveEmployerProfile(user.uid, {
+        companyName,
+        role,
+        linkedin,
+        website,
+        location,
+        techStack,
+        about,
+        name: companyName // Syncing name for consistency if needed by other parts of the app
+      });
+      setSaved(true);
+      setTimeout(() => setSaved(false), 2500);
+    } catch (err) {
+      console.error("Failed to save profile", err);
+    } finally {
+      setIsSaving(false);
+    }
   };
+
+  if (loading) {
+    return <MeritlaneLoader level="page" text="Loading Profile..." />;
+  }
+
+  const displayInitial = companyName ? companyName.charAt(0).toUpperCase() : (user?.displayName ? user.displayName.charAt(0).toUpperCase() : "E");
+  const displayCompany = companyName || "Company Name";
 
   return (
     <div className="flex flex-col h-full bg-[#FAFAFA] overflow-y-auto">
@@ -36,21 +94,58 @@ export default function EmployerProfilePage() {
         {/* Company Card Header Preview */}
         <div className="bg-white border border-[#E5E5E5] rounded p-4 sm:p-8 shadow-sm flex items-start gap-4 sm:gap-5">
           <div className="h-12 w-12 sm:h-16 sm:w-16 rounded bg-[#0D0D0D] text-white flex items-center justify-center font-serif text-[20px] sm:text-[26px] font-bold shrink-0">
-            {companyName.charAt(0).toUpperCase()}
+            {displayInitial}
           </div>
           <div className="flex-1">
             <div className="flex items-center gap-3 flex-wrap">
-              <h2 className="font-serif text-[24px] font-bold text-[#0D0D0D]">{companyName}</h2>
+              <h2 className="font-serif text-[24px] font-bold text-[#0D0D0D]">{displayCompany}</h2>
               <span className="text-[11px] font-medium font-bold uppercase tracking-wider text-[#15803D] bg-[#15803D]/10 px-2.5 py-0.5 rounded-sm">
                 Verified Hiring Partner
               </span>
             </div>
-            <p className="text-[13px] text-[#737373] mt-1">{location} · {website}</p>
+            <p className="text-[13px] text-[#737373] mt-1">{location || "Location"} · {website || "Website"}</p>
           </div>
         </div>
 
         {/* Edit Form */}
         <form onSubmit={handleSave} className="bg-white border border-[#E5E5E5] rounded p-6 sm:p-8 shadow-sm space-y-5">
+          
+          {/* New Row: Personal Role & LinkedIn */}
+          <div className="grid gap-5 sm:grid-cols-2">
+            <div>
+              <label className="text-[12px] font-medium text-[#0D0D0D] block mb-1">
+                Your Role / Title
+              </label>
+              <div className="relative">
+                <User className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-[#737373]" />
+                <input
+                  type="text"
+                  required
+                  placeholder="e.g. CTO, Recruiter, Engineering Manager"
+                  value={role}
+                  onChange={(e) => setRole(e.target.value)}
+                  className="w-full pl-10 pr-4 py-2.5 rounded border border-[#E5E5E5] text-[14px] text-[#0D0D0D] focus:border-[#0D0D0D] focus:ring-1 focus:ring-[#0D0D0D] outline-none transition-all"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="text-[12px] font-medium text-[#0D0D0D] block mb-1">
+                LinkedIn Profile URL
+              </label>
+              <div className="relative">
+                <Link className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-[#737373]" />
+                <input
+                  type="url"
+                  placeholder="https://linkedin.com/in/..."
+                  value={linkedin}
+                  onChange={(e) => setLinkedin(e.target.value)}
+                  className="w-full pl-10 pr-4 py-2.5 rounded border border-[#E5E5E5] text-[14px] text-[#0D0D0D] focus:border-[#0D0D0D] focus:ring-1 focus:ring-[#0D0D0D] outline-none transition-all"
+                />
+              </div>
+            </div>
+          </div>
+
           <div className="grid gap-5 sm:grid-cols-2">
             <div>
               <label className="text-[12px] font-medium text-[#0D0D0D] block mb-1">
@@ -61,6 +156,7 @@ export default function EmployerProfilePage() {
                 <input
                   type="text"
                   required
+                  placeholder="Company Name"
                   value={companyName}
                   onChange={(e) => setCompanyName(e.target.value)}
                   className="w-full pl-10 pr-4 py-2.5 rounded border border-[#E5E5E5] text-[14px] text-[#0D0D0D] focus:border-[#0D0D0D] focus:ring-1 focus:ring-[#0D0D0D] outline-none transition-all"
@@ -77,6 +173,7 @@ export default function EmployerProfilePage() {
                 <input
                   type="url"
                   required
+                  placeholder="https://company.com"
                   value={website}
                   onChange={(e) => setWebsite(e.target.value)}
                   className="w-full pl-10 pr-4 py-2.5 rounded border border-[#E5E5E5] text-[14px] text-[#0D0D0D] focus:border-[#0D0D0D] focus:ring-1 focus:ring-[#0D0D0D] outline-none transition-all"
@@ -95,6 +192,7 @@ export default function EmployerProfilePage() {
                 <input
                   type="text"
                   required
+                  placeholder="e.g. San Francisco, CA"
                   value={location}
                   onChange={(e) => setLocation(e.target.value)}
                   className="w-full pl-10 pr-4 py-2.5 rounded border border-[#E5E5E5] text-[14px] text-[#0D0D0D] focus:border-[#0D0D0D] focus:ring-1 focus:ring-[#0D0D0D] outline-none transition-all"
@@ -111,6 +209,7 @@ export default function EmployerProfilePage() {
                 <input
                   type="text"
                   required
+                  placeholder="e.g. React, Node, AWS"
                   value={techStack}
                   onChange={(e) => setTechStack(e.target.value)}
                   className="w-full pl-10 pr-4 py-2.5 rounded border border-[#E5E5E5] text-[14px] text-[#0D0D0D] focus:border-[#0D0D0D] focus:ring-1 focus:ring-[#0D0D0D] outline-none transition-all"
@@ -125,6 +224,8 @@ export default function EmployerProfilePage() {
             </label>
             <textarea
               rows={3}
+              required
+              placeholder="Tell candidates what makes your engineering team unique..."
               value={about}
               onChange={(e) => setAbout(e.target.value)}
               className="w-full px-4 py-2.5 rounded border border-[#E5E5E5] text-[14px] text-[#0D0D0D] focus:border-[#0D0D0D] focus:ring-1 focus:ring-[#0D0D0D] outline-none transition-all resize-none"
@@ -139,8 +240,8 @@ export default function EmployerProfilePage() {
             ) : (
               <div />
             )}
-            <Button type="submit" leftIcon={<Save className="h-4 w-4" />}>
-              Save Identity
+            <Button type="submit" leftIcon={<Save className="h-4 w-4" />} disabled={isSaving}>
+              {isSaving ? "Saving..." : "Save Identity"}
             </Button>
           </div>
         </form>

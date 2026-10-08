@@ -132,12 +132,12 @@ export default function HomePage() {
           className="flex flex-col sm:flex-row items-center justify-center gap-4 w-full sm:w-auto mb-16"
         >
           <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} className="w-full sm:w-auto">
-            <Button href="/employer/dashboard" variant="primary" size="lg" className="rounded-none px-8 w-full sm:w-auto">
+            <Button href="/employer/dashboard" variant="primary" size="lg" className="px-8 w-full sm:w-auto">
               Hire Verified Talent
             </Button>
           </motion.div>
           <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} className="w-full sm:w-auto">
-            <Button href="/signup" variant="outline" size="lg" className="rounded-none px-8 w-full sm:w-auto">
+            <Button href="/signup" variant="outline" size="lg" className="px-8 w-full sm:w-auto">
               Prove Your Skills
             </Button>
           </motion.div>
@@ -172,7 +172,7 @@ export default function HomePage() {
             initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-100px" }} variants={fadeUp}
             className="mb-16 text-center max-w-3xl mx-auto"
           >
-            <div className="text-[11px] font-medium uppercase tracking-[0.25em] mb-4" style={{ color: "#D6D3D1" }}>
+            <div className="text-[11px] font-medium uppercase tracking-[0.25em] mb-4" style={{ color: "#E7E2DA" }}>
               The Status Quo
             </div>
             <h2 className="text-3xl sm:text-4xl lg:text-5xl font-serif tracking-tight leading-snug" style={{ color: "#FFFFFF" }}>
@@ -263,9 +263,9 @@ export default function HomePage() {
                   <span className="text-[#A8A29E]">engine/generate.ts</span>
                 </div>
                 <p className="text-[#10B981]">➜ Requesting: "Rust Concurrency"</p>
-                <p className="text-[#D6D3D1] mt-2">[INFO] Initializing Gemini 2.5 Pro Model...</p>
-                <p className="text-[#D6D3D1]">[INFO] Synthesizing 25 distractors...</p>
-                <p className="text-[#D6D3D1]">[INFO] Building 45 hidden O(N) boundary tests...</p>
+                <p className="text-[#E7E2DA] mt-2">[INFO] Initializing Gemini 2.5 Pro Model...</p>
+                <p className="text-[#E7E2DA]">[INFO] Synthesizing 25 distractors...</p>
+                <p className="text-[#E7E2DA]">[INFO] Building 45 hidden O(N) boundary tests...</p>
                 <p className="text-[#10B981] mt-2">✔ Assessment locked and ready.</p>
               </div>
             </motion.div>
@@ -344,7 +344,7 @@ export default function HomePage() {
             initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-100px" }} variants={fadeUp}
             className="mb-16 text-center"
           >
-            <div className="text-[11px] font-medium uppercase tracking-[0.25em] mb-4" style={{ color: "#D6D3D1" }}>
+            <div className="text-[11px] font-medium uppercase tracking-[0.25em] mb-4" style={{ color: "#E7E2DA" }}>
               Two Sides, One Platform
             </div>
             <h2 className="text-3xl sm:text-4xl lg:text-5xl font-serif tracking-tight leading-snug" style={{ color: "#FFFFFF" }}>
@@ -360,7 +360,7 @@ export default function HomePage() {
               <motion.div 
                 whileHover={{ scale: 1.1, rotate: [0, -10, 10, -10, 0] }} 
                 transition={{ duration: 0.4 }} 
-                className="inline-flex items-center justify-center p-3 bg-[#1C1917] border border-[#444] mb-6 rounded-none cursor-pointer"
+                className="inline-flex items-center justify-center p-3 bg-[#1C1917] border border-[#444] mb-6 rounded-2xl cursor-pointer"
               >
                 <Code className="w-6 h-6 text-white" />
               </motion.div>
@@ -386,7 +386,7 @@ export default function HomePage() {
               <motion.div 
                 whileHover={{ scale: 1.1, rotate: [0, -10, 10, -10, 0] }} 
                 transition={{ duration: 0.4 }} 
-                className="inline-flex items-center justify-center p-3 bg-[#1C1917] border border-[#444] mb-6 rounded-none cursor-pointer"
+                className="inline-flex items-center justify-center p-3 bg-[#1C1917] border border-[#444] mb-6 rounded-2xl cursor-pointer"
               >
                 <Database className="w-6 h-6 text-white" />
               </motion.div>
@@ -432,7 +432,7 @@ export default function HomePage() {
               </p>
               
               <div className="bg-[#FAFAFA] border border-[#E5E5E5] p-6 rounded-lg my-10 relative">
-                <div className="absolute -top-3 -left-3 text-4xl text-[#D6D3D1] font-serif">"</div>
+                <div className="absolute -top-3 -left-3 text-4xl text-[#E7E2DA] font-serif">"</div>
                 <p className="text-[18px] font-serif italic text-[#1C1917] leading-relaxed text-center px-4 relative z-10">
                   MeritLane was built on a single, uncompromising belief: Code speaks louder than keywords. We evaluate candidates exactly how they build software in the real world.
                 </p>
@@ -483,7 +483,7 @@ export default function HomePage() {
                 <motion.div 
                   key={i}
                   initial={{ opacity: 0, y: 10 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.1 }}
-                  className="border border-[#E5E5E5] bg-white rounded-lg overflow-hidden transition-colors hover:border-[#D6D3D1]"
+                  className="border border-[#E5E5E5] bg-white rounded-lg overflow-hidden transition-colors hover:border-[#E7E2DA]"
                 >
                   <button 
                     onClick={() => setOpenFaqIndex(isOpen ? null : i)}
@@ -633,12 +633,12 @@ export default function HomePage() {
             className="flex flex-col sm:flex-row items-center justify-center gap-4"
           >
             <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-              <Button href="/employer/dashboard" variant="primary" size="lg" className="rounded-none px-8 w-full sm:w-auto !bg-white !text-black hover:!bg-[#E5E5E5] !border-white">
+              <Button href="/employer/dashboard" variant="primary" size="lg" className="px-8 w-full sm:w-auto !bg-white !text-black hover:!bg-[#E5E5E5] !border-white">
                 Start Hiring
               </Button>
             </motion.div>
             <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-              <Button href="/signup" variant="outline" size="lg" className="rounded-none px-8 w-full sm:w-auto !border-white !text-white !bg-transparent hover:!bg-white hover:!text-black">
+              <Button href="/signup" variant="outline" size="lg" className="px-8 w-full sm:w-auto !border-white !text-white !bg-transparent hover:!bg-white hover:!text-black">
                 Apply as Developer
               </Button>
             </motion.div>

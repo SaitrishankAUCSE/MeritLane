@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { adminAuth, adminDb } from "@/lib/firebase/admin";
+import { adminAuth, adminDb, adminStorage } from "@/lib/firebase/admin";
 import { extractPdfText, parseResumeEntities } from "@/lib/resume/parser";
 
 export interface RecommendedRole {
@@ -362,6 +362,19 @@ export async function POST(req: NextRequest) {
       console.warn("Could not fetch existing candidate profile for parser hints:", dbErr);
     }
 
+    let finalResumeUrl = "";
+    if (uploadBuffer && adminStorage) {
+      try {
+        const bucket = adminStorage.bucket(process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET || "meritlane.firebasestorage.app");
+        const fileRef = bucket.file(`resumes/${uid}/${Date.now()}_${uploadedFileName}`);
+        await fileRef.save(uploadBuffer, { contentType: "application/pdf" });
+        // Use the default firebasestorage download URL format
+        finalResumeUrl = `https://firebasestorage.googleapis.com/v0/b/${bucket.name}/o/${encodeURIComponent(fileRef.name)}?alt=media`;
+      } catch (err) {
+        console.warn("Could not upload resume to Firebase Storage:", err);
+      }
+    }
+
     const parsedEntities = parseResumeEntities(resumeText, {
       fileName: uploadedFileName,
       existingName: formCandidateName || existingProfile?.name,
@@ -383,7 +396,7 @@ Return ONLY a valid JSON object matching this exact schema:
 {
   "score": number (integer 0-100),
   "rating": "Needs Work" | "Good" | "Strong" | "Excellent",
-  "summary": "2-sentence executive institutional screening verdict",
+  "summary": "2-sentence executive screening verdict",
   "strengths": ["bullet 1", "bullet 2", "bullet 3"],
   "improvements": ["actionable feedback 1", "actionable feedback 2"],
   "keywordMatches": ["matched skill 1", "matched skill 2"],
@@ -445,7 +458,11 @@ Ensure recommendedRoles has 3-4 top matches sorted by matchPercentage descending
               resumeFileName: uploadedFileName || "Candidate_Resume.pdf",
               resumeUploadedAt: Date.now(),
             };
-            if (uploadBuffer && uploadBuffer.length <= 750000) {
+            
+            if (finalResumeUrl) {
+              resumeUpdates.resumeUrl = finalResumeUrl;
+              resumeUpdates.resumePdfDataUrl = ""; // clear old data url if any
+            } else if (uploadBuffer && uploadBuffer.length <= 750000) {
               resumeUpdates.resumePdfDataUrl = `data:application/pdf;base64,${uploadBuffer.toString("base64")}`;
             }
 
@@ -457,6 +474,7 @@ Ensure recommendedRoles has 3-4 top matches sorted by matchPercentage descending
               extractedText: resumeText,
               resumeFileName: uploadedFileName || "Candidate_Resume.pdf",
               resumePdfDataUrl: resumeUpdates.resumePdfDataUrl || "",
+              resumeUrl: resumeUpdates.resumeUrl || "",
             }, { status: 200 });
           }
         }
@@ -478,7 +496,11 @@ Ensure recommendedRoles has 3-4 top matches sorted by matchPercentage descending
       resumeFileName: uploadedFileName || "Candidate_Resume.pdf",
       resumeUploadedAt: Date.now(),
     };
-    if (uploadBuffer && uploadBuffer.length <= 750000) {
+    
+    if (finalResumeUrl) {
+      fallbackUpdates.resumeUrl = finalResumeUrl;
+      fallbackUpdates.resumePdfDataUrl = ""; // clear old data url
+    } else if (uploadBuffer && uploadBuffer.length <= 750000) {
       fallbackUpdates.resumePdfDataUrl = `data:application/pdf;base64,${uploadBuffer.toString("base64")}`;
     }
 
@@ -490,6 +512,7 @@ Ensure recommendedRoles has 3-4 top matches sorted by matchPercentage descending
       extractedText: resumeText,
       resumeFileName: uploadedFileName || "Candidate_Resume.pdf",
       resumePdfDataUrl: fallbackUpdates.resumePdfDataUrl || "",
+      resumeUrl: fallbackUpdates.resumeUrl || "",
     }, { status: 200 });
   } catch (error: any) {
     console.error("ATS check route error:", error);

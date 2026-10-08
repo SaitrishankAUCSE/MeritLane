@@ -24,31 +24,31 @@ export function Button({
   ...props
 }: ButtonProps) {
   const baseStyles =
-    "inline-flex items-center justify-center font-sans font-medium transition-all duration-75 select-none focus:outline-none focus-visible:ring-1 focus-visible:ring-[#1C1917] focus-visible:ring-offset-2 disabled:opacity-40 disabled:pointer-events-none whitespace-nowrap shrink-0";
+    "inline-flex items-center justify-center font-sans font-medium transition-all duration-200 ease-out select-none focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1C1917] focus-visible:ring-offset-2 disabled:opacity-40 disabled:pointer-events-none whitespace-nowrap shrink-0 group";
 
   const sizeStyles: Record<string, string> = {
-    xs:   "text-[12px] px-3 h-7 gap-1.5 rounded-none",
-    sm:   "text-[13px] px-4 h-8 gap-1.5 rounded-none",
-    md:   "text-[14px] px-5 h-9 gap-2 rounded-none",
-    lg:   "text-[15px] px-6 h-10 gap-2.5 rounded-none",
-    icon: "h-9 w-9 p-0 rounded-none",
+    xs:   "text-[12px] px-3 h-7 gap-1.5 rounded-full",
+    sm:   "text-[13px] px-4 h-8 gap-1.5 rounded-full",
+    md:   "text-[14px] px-5 h-9 gap-2 rounded-full",
+    lg:   "text-[15px] px-6 h-10 gap-2.5 rounded-full",
+    icon: "h-9 w-9 p-0 rounded-full",
   };
 
   const variantStyles: Record<string, string> = {
     primary:
-      "bg-[var(--color-primary)] text-[var(--color-primary-foreground)] border border-[var(--color-primary)] hover:bg-[#162D1E] active:bg-[#0D1B12]",
+      "bg-[var(--color-primary)] text-[var(--color-primary-foreground)] border border-[var(--color-primary)] shadow-sm hover:shadow hover:-translate-y-[1px] hover:bg-[#162D1E] active:translate-y-0 active:shadow-sm",
     secondary:
-      "bg-[var(--color-surface)] text-[var(--color-foreground)] border border-[var(--color-border)] hover:bg-[var(--color-surface-dim)] hover:border-[var(--color-foreground)] active:bg-[var(--color-surface-container)]",
+      "bg-[var(--color-surface)] text-[var(--color-foreground)] border border-[var(--color-border)] shadow-sm hover:shadow hover:-translate-y-[1px] hover:bg-[var(--color-surface-dim)] hover:border-[var(--color-foreground)] active:translate-y-0 active:shadow-sm active:bg-[var(--color-surface-container)]",
     outline:
-      "bg-[var(--color-surface)] text-[var(--color-foreground)] border border-[var(--color-border)] hover:bg-[var(--color-surface-dim)] hover:border-[var(--color-foreground)] active:bg-[var(--color-surface-container)]",
+      "bg-[var(--color-surface)] text-[var(--color-foreground)] border border-[var(--color-border)] hover:bg-[var(--color-surface-dim)] hover:border-[var(--color-foreground)] hover:-translate-y-[1px] active:translate-y-0 active:bg-[var(--color-surface-container)]",
     ghost:
       "bg-transparent text-[var(--color-muted-foreground)] border border-transparent hover:bg-[var(--color-surface-dim)] hover:text-[var(--color-foreground)] active:bg-[var(--color-surface-container)]",
     tertiary:
       "bg-transparent text-[var(--color-muted-foreground)] border border-transparent underline-offset-4 hover:underline hover:text-[var(--color-foreground)] p-0 h-auto",
     danger:
-      "bg-[var(--color-danger)] text-white border border-[var(--color-danger)] hover:bg-[#5E2D23] active:bg-[#4A241C]",
+      "bg-[var(--color-danger)] text-white border border-[var(--color-danger)] shadow-sm hover:shadow hover:-translate-y-[1px] hover:bg-[#5E2D23] active:translate-y-0 active:shadow-sm active:bg-[#4A241C]",
     success:
-      "bg-[var(--color-success)] text-white border border-[var(--color-success)] hover:bg-[#162D1E] active:bg-[#0D1B12]",
+      "bg-[var(--color-success)] text-white border border-[var(--color-success)] shadow-sm hover:shadow hover:-translate-y-[1px] hover:bg-[#162D1E] active:translate-y-0 active:shadow-sm active:bg-[#0D1B12]",
   };
 
   // Tertiary overrides sizing to be inline

@@ -54,7 +54,7 @@ export default function ProvenancePage() {
   };
 
   return (
-    <div className="w-full min-h-full bg-[#FAF8F5] pb-24">
+    <div className="w-full min-h-full bg-transparent pb-24">
 
       {/* ── Dossier Command Header ── */}
       <div className="border-b border-[#E7E2DA] bg-white px-4 sm:px-6 lg:px-8 py-5">
@@ -85,7 +85,7 @@ export default function ProvenancePage() {
               <div className="flex gap-2 shrink-0 flex-wrap">
                 <button
                   onClick={handleCopy}
-                  className="flex items-center gap-1.5 text-[11px] font-mono font-semibold px-4 py-2 border border-[#E7E2DA] bg-white hover:bg-[#F5F1EB] text-[#1C1917] transition-colors rounded shadow-2xs"
+                  className="flex items-center gap-1.5 text-[11px] font-mono font-semibold px-4 py-2 border border-[#E7E2DA] bg-white hover:bg-[#E7E2DA] text-[#1C1917] transition-colors rounded shadow-2xs"
                 >
                   {copied ? <Check className="h-3 w-3 text-[#064E3B]" /> : <Copy className="h-3 w-3" />}
                   {copied ? "COPIED" : "COPY LINK"}
@@ -159,7 +159,7 @@ export default function ProvenancePage() {
                   <span className={`text-[9px] font-medium font-semibold tracking-[0.14em] px-2 py-[2px] uppercase border ${
                     value
                       ? "text-[#064E3B] bg-[#064E3B]/[0.06] border-[#064E3B]/25"
-                      : "text-[#78716C] bg-[#F5F1EB] border-[#C8BFB0]"
+                      : "text-[#78716C] bg-[#E7E2DA] border-[#C8BFB0]"
                   }`}>
                     {value ? "YES" : "NO"}
                   </span>
@@ -170,7 +170,7 @@ export default function ProvenancePage() {
         </div>
 
         {/* ── Notice band ── */}
-        <div className="border border-[#E7E2DA] bg-[#F5F1EB] px-5 py-3 flex items-center gap-3">
+        <div className="border border-[#E7E2DA] bg-[#E7E2DA] px-5 py-3 flex items-center gap-3">
           <ShieldCheck className="h-4 w-4 text-[#064E3B] shrink-0" />
           <p className="text-[11px] font-mono text-[#525252]">
             This is a preview of your public profile as employers see it. It updates automatically when you pass tests.
@@ -198,7 +198,7 @@ export default function ProvenancePage() {
         ) : (
           <div className="border border-[#E7E2DA] bg-white">
             {/* Document header bar */}
-            <div className="border-b border-[#E7E2DA] bg-[#F5F1EB] px-6 py-3 flex items-center justify-between">
+            <div className="border-b border-[#E7E2DA] bg-[#E7E2DA] px-6 py-3 flex items-center justify-between">
               <div className="text-[9px] font-medium tracking-[0.18em] text-[#78716C] uppercase">
                 Public Profile Preview
               </div>
@@ -216,7 +216,7 @@ export default function ProvenancePage() {
               />
             </div>
             {/* Document footer */}
-            <div className="border-t border-[#E7E2DA] bg-[#F5F1EB] px-6 py-3 flex items-center justify-between">
+            <div className="border-t border-[#E7E2DA] bg-[#E7E2DA] px-6 py-3 flex items-center justify-between">
               <div className="text-[9px] font-mono text-[#78716C]">
                 Meritlane · merit-lane.vercel.app
               </div>

@@ -202,7 +202,7 @@ export default function EmployerApplicantsPage() {
           </div>
 
           {/* Stage Pills */}
-          <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-hide pt-1 border-t border-[#F5F1EB]">
+          <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-hide pt-1 border-t border-[#E7E2DA]">
             {PIPELINE_STAGES.map((s) => {
               const isActive = selectedStage === s.id;
               const count =
@@ -310,7 +310,7 @@ export default function EmployerApplicantsPage() {
                           <Briefcase className="h-3.5 w-3.5 text-[#064E3B]" />
                           <span>Applied for: {app.jobTitle}</span>
                         </div>
-                        <span className="text-[#D6D3D1]">·</span>
+                        <span className="text-[#E7E2DA]">·</span>
                         <div className="flex items-center gap-1 text-[#78716C] font-mono text-[12px]">
                           <Clock className="h-3.5 w-3.5" />
                           <span>{appliedDate}</span>
@@ -351,7 +351,7 @@ export default function EmployerApplicantsPage() {
                     </div>
 
                     {/* Stage Pipeline Controller & Action Buttons */}
-                    <div className="flex flex-col sm:flex-row lg:flex-col items-start lg:items-end gap-3 shrink-0 pt-3 lg:pt-0 border-t lg:border-t-0 border-[#F5F1EB]">
+                    <div className="flex flex-col sm:flex-row lg:flex-col items-start lg:items-end gap-3 shrink-0 pt-3 lg:pt-0 border-t lg:border-t-0 border-[#E7E2DA]">
                       {/* Pipeline Stage Selector */}
                       <div className="flex items-center gap-2">
                         <span className="text-[11px] font-medium uppercase text-[#78716C]">

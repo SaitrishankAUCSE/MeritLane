@@ -24,7 +24,7 @@ import { useRouter } from "next/navigation";
 import { COMMON_SKILLS } from "@/lib/constants";
 import { motion, AnimatePresence } from "framer-motion";
 import { MeritlaneLoader } from "@/components/ui/MeritlaneLoader";
-import { ContextGuide } from "@/components/ui/ContextGuide";
+
 import { ErrorState } from "@/components/ui/ErrorState";
 import { Button } from "@/components/ui/Button";
 import { MessageModal } from "@/components/employer/MessageModal";
@@ -50,13 +50,21 @@ export default function EmployerDashboardPage() {
   const [matchMode, setMatchMode] = useState<"any" | "all">("any");
   const [gradYearFilter, setGradYearFilter] = useState<string>("all");
   const [showAdvancedFilters, setShowAdvancedFilters] = useState<boolean>(false);
+  
+  // Pagination State
+  const [currentPage, setCurrentPage] = useState(1);
+  const ITEMS_PER_PAGE = 5;
+  
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, selectedSkills, minScore, requireLiveProject, requireGithub, minCommits, matchMode, gradYearFilter, sortBy]);
 
   // Messaging state
   const [messagingTarget, setMessagingTarget] = useState<{ id: string; name: string } | null>(null);
 
   const fetchCandidates = useCallback(async () => {
     if (!user) return;
-    setFetching(true);
+    setFetching((prev) => candidates.length === 0);
     try {
       const token = await user.getIdToken(true);
       const res = await fetch("/api/employer/discover", {
@@ -115,6 +123,7 @@ export default function EmployerDashboardPage() {
     minCommits,
     matchMode,
     gradYearFilter,
+    candidates.length
   ]);
 
   useEffect(() => {
@@ -126,7 +135,16 @@ export default function EmployerDashboardPage() {
       const timeoutId = setTimeout(() => {
         fetchCandidates();
       }, 300);
-      return () => clearTimeout(timeoutId);
+
+      // Dynamic real-time sync polling every 5 seconds
+      const intervalId = setInterval(() => {
+        fetchCandidates();
+      }, 5000);
+
+      return () => {
+        clearTimeout(timeoutId);
+        clearInterval(intervalId);
+      };
     }
   }, [loading, user, router, fetchCandidates]);
 
@@ -182,6 +200,11 @@ export default function EmployerDashboardPage() {
     // Default: match count
     return (b.matchedRequiredSkillCount || 0) - (a.matchedRequiredSkillCount || 0);
   });
+  
+  const paginatedCandidates = React.useMemo(() => {
+    const start = (currentPage - 1) * ITEMS_PER_PAGE;
+    return sortedCandidates.slice(start, start + ITEMS_PER_PAGE);
+  }, [sortedCandidates, currentPage]);
 
   if (loading && !user) {
     return <MeritlaneLoader level="page" text="Authenticating" />;
@@ -203,28 +226,14 @@ export default function EmployerDashboardPage() {
   return (
     <div className="flex h-full w-full flex-col overflow-hidden bg-[#FAFAFA]">
       <div className="flex-1 p-4 sm:p-8 md:p-10 lg:p-14 overflow-y-auto scrollbar-hide">
-        {/* Context Guide */}
-        <div className="max-w-[1000px] mx-auto">
-          <ContextGuide
-            storageKey="employer_dashboard"
-            title="Discovery Engine"
-            steps={[
-              { title: "Filter & Search", isCompleted: true },
-              { title: "Review Evidence", isCompleted: false },
-              { title: "Shortlist & Message", isCompleted: Object.values(shortlisted).some((v) => v) },
-            ]}
-          />
-        </div>
+
 
         {/* Hero Header & Institutional Telemetry */}
         <div className="max-w-[1000px] mx-auto mb-8 sm:mb-10">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-3">
             <div className="flex items-center gap-2 flex-wrap">
               <span className="text-[11px] font-medium font-bold uppercase tracking-[0.1em] text-[#064E3B] bg-[#064E3B]/10 px-2.5 py-1 rounded">
-                Institutional Talent Registry
-              </span>
-              <span className="text-[12px] text-[#737373] font-mono">
-                · Monitored Assessment Directory
+                Employer Dashboard
               </span>
             </div>
             <Link href="/employer/jobs">
@@ -239,38 +248,7 @@ export default function EmployerDashboardPage() {
             FIND PEOPLE WHOSE SKILLS ARE PROVEN.
           </h1>
 
-          {/* Institutional Telemetry Strip */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-2">
-            <motion.div whileHover={{ y: -3, scale: 1.02 }} transition={{ type: "spring", stiffness: 300 }} className="bg-white border border-[#E5E5E5] p-4 rounded shadow-xs">
-              <div className="text-[11px] font-sans font-semibold uppercase tracking-wide text-[#737373] mb-1">
-                Verified Engineers
-              </div>
-              <div className="text-[26px] font-serif text-[#0D0D0D] font-normal leading-none">
-                {candidates.length}
-              </div>
-              <div className="text-[11px] text-[#737373] mt-1">Evaluated practitioners in pool</div>
-            </motion.div>
 
-            <motion.div whileHover={{ y: -3, scale: 1.02 }} transition={{ type: "spring", stiffness: 300 }} className="bg-white border border-[#E5E5E5] p-4 rounded shadow-xs">
-              <div className="text-[11px] font-sans font-semibold uppercase tracking-wide text-[#064E3B] mb-1">
-                High Scorers (≥85%)
-              </div>
-              <div className="text-[26px] font-serif text-[#064E3B] font-normal leading-none">
-                {candidates.filter(c => Object.values(c.verifiedSkills || {}).some((v: any) => (v.score || 0) >= 85)).length}
-              </div>
-              <div className="text-[11px] text-[#737373] mt-1">Distinction level evaluations</div>
-            </motion.div>
-
-            <motion.div whileHover={{ y: -3, scale: 1.02 }} transition={{ type: "spring", stiffness: 300 }} className="bg-white border border-[#E5E5E5] p-4 rounded shadow-xs">
-              <div className="text-[11px] font-sans font-semibold uppercase tracking-wide text-[#737373] mb-1">
-                Audited Projects
-              </div>
-              <div className="text-[26px] font-serif text-[#0D0D0D] font-normal leading-none">
-                {candidates.reduce((acc, c) => acc + (c.projects?.length || 0), 0)}
-              </div>
-              <div className="text-[11px] text-[#737373] mt-1">Linked code repositories</div>
-            </motion.div>
-          </div>
         </div>
 
         {/* Search & Filter Controls */}
@@ -567,7 +545,7 @@ export default function EmployerDashboardPage() {
           ) : (
             <motion.div layout className="space-y-6">
               <AnimatePresence>
-                {sortedCandidates.map((c) => {
+                {paginatedCandidates.map((c: any) => {
                   const isShortlisted = shortlisted[c.uid] || false;
                   const verifiedSkillsList = Object.keys(c.verifiedSkills || {}).filter(
                     (k) => c.verifiedSkills[k].status === "verified"
@@ -770,6 +748,35 @@ export default function EmployerDashboardPage() {
               })}
               </AnimatePresence>
             </motion.div>
+          )}
+
+          {/* Pagination Controls */}
+          {sortedCandidates.length > ITEMS_PER_PAGE && (
+            <div className="flex items-center justify-between pt-8 pb-4">
+              <span className="text-xs text-[#737373] font-medium">
+                Showing {((currentPage - 1) * ITEMS_PER_PAGE) + 1} to {Math.min(currentPage * ITEMS_PER_PAGE, sortedCandidates.length)} of {sortedCandidates.length} candidates
+              </span>
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={currentPage === 1}
+                  onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                  className="bg-white border-[#E5E5E5] text-[#0D0D0D] text-[12px] h-8"
+                >
+                  Previous
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={currentPage * ITEMS_PER_PAGE >= sortedCandidates.length}
+                  onClick={() => setCurrentPage(p => p + 1)}
+                  className="bg-white border-[#E5E5E5] text-[#0D0D0D] text-[12px] h-8"
+                >
+                  Next
+                </Button>
+              </div>
+            </div>
           )}
         </div>
       </div>

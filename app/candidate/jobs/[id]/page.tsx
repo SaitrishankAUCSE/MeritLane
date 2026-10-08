@@ -160,7 +160,7 @@ export default function CandidateJobDetailPage() {
   const verifiedSkills = candidateProfile?.verifiedSkills || {};
 
   return (
-    <div className="w-full min-h-full bg-[#FAF8F5] pb-24 text-[#1C1917]">
+    <div className="w-full min-h-full bg-transparent pb-24 text-[#1C1917]">
       {/* ── Institutional Header Strip ── */}
       <div className="border-b border-[#E7E2DA] bg-white px-6 sm:px-10 py-5">
         <div className="max-w-[1400px] mx-auto flex items-center justify-between">
@@ -201,7 +201,7 @@ export default function CandidateJobDetailPage() {
               {job.title}
             </h1>
 
-            <div className="flex items-center gap-4 text-[14px] text-[#78716C] flex-wrap pb-6 border-b border-[#F5F1EB]">
+            <div className="flex items-center gap-4 text-[14px] text-[#78716C] flex-wrap pb-6 border-b border-[#E7E2DA]">
               <span className="flex items-center gap-1.5 font-medium text-[#1C1917]">
                 <Building2 className="h-4 w-4 text-[#78716C]" />
                 {job.companyName}
@@ -223,7 +223,7 @@ export default function CandidateJobDetailPage() {
             </div>
 
             {/* Required Skills Matrix */}
-            <div className="pt-6 border-t border-[#F5F1EB] space-y-3">
+            <div className="pt-6 border-t border-[#E7E2DA] space-y-3">
               <h2 className="text-[13px] font-medium font-semibold uppercase tracking-[0.08em] text-[#1C1917]">
                 REQUIRED TECHNICAL CAPABILITIES
               </h2>

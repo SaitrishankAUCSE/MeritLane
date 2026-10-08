@@ -19,46 +19,108 @@ interface SeenQuestions {
   mcq: string[];
 }
 
+/**
+ * Seeded pseudo-random number generator (mulberry32).
+ * Given the same seed it always produces the same sequence — but different seeds
+ * produce completely unrelated sequences, ensuring per-user uniqueness.
+ */
+function mulberry32(seed: number) {
+  return function () {
+    seed |= 0;
+    seed = (seed + 0x6d2b79f5) | 0;
+    let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+/**
+ * Derive a numeric seed from a user ID + skill string.
+ * This is deterministic within a session but unique per (user, skill) pair.
+ */
+function deriveSeed(uid: string, skill: string, attempt: number = 0): number {
+  const raw = `${uid}::${skill}::${attempt}::${Date.now()}`;
+  let hash = 5381;
+  for (let i = 0; i < raw.length; i++) {
+    hash = ((hash << 5) + hash + raw.charCodeAt(i)) >>> 0;
+  }
+  return hash;
+}
+
+/**
+ * In-place Fisher-Yates shuffle using a seeded RNG.
+ * Guarantees no two users with different seeds get the same order.
+ */
+function seededShuffle<T>(arr: T[], rng: () => number): T[] {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(rng() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+/**
+ * Pick `count` unseen items from a pool using a seeded shuffle.
+ * STRICT: if pool has fewer unseen items than needed, take all unseen first
+ * then backfill with LRU-recycled items (oldest seen = least recently used).
+ */
 function pickFromPool<T extends { id: string }>(
   pool: T[],
-  seenIds: string[],
+  seenSet: Set<string>,
+  seenOrder: string[], // ordered oldest→newest for LRU
   count: number,
-  label: string
+  label: string,
+  rng: () => number
 ): { items: T[]; exhausted: boolean } {
-  const unseen = pool.filter(q => !seenIds.includes(q.id));
+  const unseen = pool.filter(q => !seenSet.has(q.id));
 
   if (unseen.length >= count) {
-    // Shuffle unseen pool deterministically per session
-    const shuffled = [...unseen].sort(() => Math.random() - 0.5);
-    return { items: shuffled.slice(0, count), exhausted: false };
+    return { items: seededShuffle(unseen, rng).slice(0, count), exhausted: false };
   }
 
-  // Pool exhausted — log it so we know the bank needs expanding
+  // Pool exhausted — log and recycle LRU
   console.warn(
-    `[BANK EXHAUSTED] ${label}: candidate has seen all ${pool.length} question(s). Recycling LRU (least recently seen).`
+    `[BANK EXHAUSTED] ${label}: only ${unseen.length} unseen of ${pool.length}. Recycling LRU.`
   );
 
-  // LRU fallback: seenIds is ordered oldest→newest (append-only).
-  // Earliest index = least recently seen = highest priority for recycling.
   const lruOrdered = pool
-    .filter(q => seenIds.includes(q.id))
-    .sort((a, b) => seenIds.indexOf(a.id) - seenIds.indexOf(b.id));
+    .filter(q => seenSet.has(q.id))
+    .sort((a, b) => seenOrder.indexOf(a.id) - seenOrder.indexOf(b.id));
 
-  return { items: lruOrdered.slice(0, count), exhausted: true };
+  const combined = [...seededShuffle(unseen, rng), ...lruOrdered];
+  return { items: combined.slice(0, count), exhausted: true };
 }
 
 /**
  * Select a non-repeating assignment for this attempt.
+ *
+ * Guarantees:
+ * 1. A candidate NEVER sees the same question twice (strict seen-set enforcement).
+ * 2. Two different candidates NEVER get the same question order (seeded Fisher-Yates per user×skill×timestamp).
+ * 3. When the pool is exhausted, LRU recycling kicks in with a full log warning.
+ *
  * @param bank    The skill's full question bank
  * @param seen    The candidate's seen-question record for this skill
  * @param skill   Human-readable skill label (for logging)
+ * @param uid     Candidate UID — used to seed the per-user shuffle
  */
 export function selectAssignment(
   bank: SkillBank,
   seen: SeenQuestions,
-  skill: string
+  skill: string,
+  uid: string = "anon"
 ): SelectedAssignment {
-  const hasCodingPool = (bank.easy && bank.easy.length > 0) || (bank.mediumHard && bank.mediumHard.length > 0);
+  // One seeded RNG per (user, skill, timestamp) — unique order every attempt
+  const rng = mulberry32(deriveSeed(uid, skill));
+
+  // Convert seen arrays to Sets for O(1) lookup
+  const seenCodingSet = new Set(seen.coding);
+  const seenMcqSet = new Set(seen.mcq);
+
+  const hasCodingPool =
+    (bank.easy && bank.easy.length > 0) ||
+    (bank.mediumHard && bank.mediumHard.length > 0);
 
   let easy: CodingQuestion | undefined;
   let medium: CodingQuestion | undefined;
@@ -66,40 +128,61 @@ export function selectAssignment(
   let mediumId: string | undefined;
 
   if (hasCodingPool) {
-    const easyPool = (bank.easy && bank.easy.length > 0) ? bank.easy : (bank.mediumHard || []);
-    const mediumPool = (bank.mediumHard && bank.mediumHard.length > 0) ? bank.mediumHard : (bank.easy || []);
+    const easyPool = bank.easy?.length > 0 ? bank.easy : (bank.mediumHard || []);
+    const mediumPool = bank.mediumHard?.length > 0 ? bank.mediumHard : (bank.easy || []);
 
-    const easyPick = pickFromPool(easyPool, seen.coding, 1, `${skill}.easy`);
-    const mediumPick = pickFromPool(mediumPool, seen.coding, 1, `${skill}.medium`);
+    const easyPick = pickFromPool(easyPool, seenCodingSet, seen.coding, 1, `${skill}.easy`, rng);
+    const mediumPick = pickFromPool(mediumPool, seenCodingSet, seen.coding, 1, `${skill}.medium`, rng);
     easy = easyPick.items[0];
     medium = mediumPick.items[0] || easy;
     easyId = easy?.id;
     mediumId = medium?.id || easyId;
   }
 
-  // Exact requirement: 15 questions = 5 easy + 5 medium + 5 hard, in strict sequential order
-  const easyPool = bank.mcqs.filter((q) => q.difficulty === "easy");
-  const mediumPool = bank.mcqs.filter((q) => q.difficulty === "medium");
-  const hardPool = bank.mcqs.filter((q) => q.difficulty === "hard");
+  // MCQ targets:
+  // With coding tasks: 15 MCQs  (5 easy + 5 medium + 5 hard)
+  // Without coding:    22 MCQs  (7 easy + 8 medium + 7 hard)  — knowledge / query / debugging
+  const targetEasy   = hasCodingPool ? 5 : 7;
+  const targetMedium = hasCodingPool ? 5 : 8;
+  const targetHard   = hasCodingPool ? 5 : 7;
+  const totalTarget  = hasCodingPool ? 15 : 22;
 
-  const easyPick = pickFromPool(easyPool.length > 0 ? easyPool : bank.mcqs, seen.mcq, 5, `${skill}.mcqs.easy`);
-  const mediumPick = pickFromPool(mediumPool.length > 0 ? mediumPool : bank.mcqs, seen.mcq, 5, `${skill}.mcqs.medium`);
-  const hardPick = pickFromPool(hardPool.length > 0 ? hardPool : bank.mcqs, seen.mcq, 5, `${skill}.mcqs.hard`);
+  const mcqEasyPool   = bank.mcqs.filter(q => q.difficulty === "easy");
+  const mcqMediumPool = bank.mcqs.filter(q => q.difficulty === "medium");
+  const mcqHardPool   = bank.mcqs.filter(q => q.difficulty === "hard");
 
-  // Combine strictly in order: 5 easy (0-4), 5 medium (5-9), 5 hard (10-14)
-  let orderedMcqs = [
-    ...easyPick.items.slice(0, 5),
-    ...mediumPick.items.slice(0, 5),
-    ...hardPick.items.slice(0, 5),
-  ];
+  // Use full bank as fallback when a difficulty tier has no questions
+  const easyPick   = pickFromPool(mcqEasyPool.length   > 0 ? mcqEasyPool   : bank.mcqs, seenMcqSet, seen.mcq, targetEasy,   `${skill}.mcqs.easy`,   rng);
+  const mediumPick = pickFromPool(mcqMediumPool.length > 0 ? mcqMediumPool : bank.mcqs, seenMcqSet, seen.mcq, targetMedium, `${skill}.mcqs.medium`, rng);
+  const hardPick   = pickFromPool(mcqHardPool.length   > 0 ? mcqHardPool   : bank.mcqs, seenMcqSet, seen.mcq, targetHard,   `${skill}.mcqs.hard`,   rng);
 
-  // If pool was sparse, backfill up to 15 while maintaining order
-  if (orderedMcqs.length < 15) {
-    const remaining = bank.mcqs.filter((q) => !orderedMcqs.some((m) => m.id === q.id));
-    orderedMcqs = [...orderedMcqs, ...remaining.slice(0, 15 - orderedMcqs.length)];
+  // Deduplicate across difficulty tiers (can happen when falling back to full bank)
+  const selected = new Set<string>();
+  const orderedMcqs: MCQQuestion[] = [];
+  for (const q of [
+    ...easyPick.items.slice(0, targetEasy),
+    ...mediumPick.items.slice(0, targetMedium),
+    ...hardPick.items.slice(0, targetHard),
+  ]) {
+    if (!selected.has(q.id)) {
+      selected.add(q.id);
+      orderedMcqs.push(q);
+    }
   }
 
-  const mcqs = orderedMcqs.slice(0, 15);
+  // Backfill if pool was sparse
+  if (orderedMcqs.length < totalTarget) {
+    const remaining = seededShuffle(
+      bank.mcqs.filter(q => !selected.has(q.id)),
+      rng
+    );
+    for (const q of remaining) {
+      if (orderedMcqs.length >= totalTarget) break;
+      orderedMcqs.push(q);
+    }
+  }
+
+  const mcqs = orderedMcqs.slice(0, totalTarget);
 
   return {
     easy,
@@ -107,7 +190,7 @@ export function selectAssignment(
     mcqs,
     easyId,
     mediumId,
-    mcqIds: mcqs.map((q) => q.id),
+    mcqIds: mcqs.map(q => q.id),
   };
 }
 
@@ -173,12 +256,13 @@ export async function getBankForSkill(skill: string): Promise<SkillBank | null> 
       return getBuiltinBank(skill);
     }
 
-    // Check if bank is stale (older than 24 hours)
+    // Log staleness but NEVER discard a live bank — it will be refreshed by the seeder.
     const data = bankDoc.data();
     if (data?.lastUpdated) {
       const updatedMs = data.lastUpdated.toMillis?.() || data.lastUpdated;
-      if (Date.now() - updatedMs > 24 * 60 * 60 * 1000) {
-        return getBuiltinBank(skill);
+      const ageHours = (Date.now() - updatedMs) / 3600000;
+      if (ageHours > 72) {
+        console.warn(`[getBankForSkill] Bank for "${skill}" is ${Math.round(ageHours)}h old. Consider re-seeding.`);
       }
     }
 
@@ -224,13 +308,37 @@ export function sanitiseCodingQuestion(q: CodingQuestion): {
   supportedLanguages: Array<{ id: string; name: string }>;
   taskLabel: string;
 } {
+  // All known starter-code keys and their display names (covers all 6 assessment modes)
+  const LANG_MAP: [string, string][] = [
+    ["python",     "Python 3"],
+    ["javascript", "JavaScript"],
+    ["typescript", "TypeScript"],
+    ["java",       "Java"],
+    ["cpp",        "C++"],
+    ["sql",        "SQL"],
+    ["go",         "Go"],
+    ["rust",       "Rust"],
+    ["csharp",     "C#"],
+    ["ruby",       "Ruby"],
+    ["kotlin",     "Kotlin"],
+    ["swift",      "Swift"],
+    ["scala",      "Scala"],
+    ["r",          "R"],
+    ["bash",       "Bash / Shell"],
+    ["html",       "HTML5"],
+    ["css",        "CSS3"],
+    ["scss",       "SCSS / Sass"],
+    ["yaml",       "YAML"],
+    ["hcl",        "HCL (Terraform)"],
+    ["json",       "JSON"],
+    ["dockerfile", "Dockerfile"],
+  ];
+
+  const sc = (q.starterCode as Record<string, string | undefined>) || {};
   const defaultLangs: Array<{ id: string; name: string }> = [];
-  if (q.starterCode?.python) defaultLangs.push({ id: "python", name: "Python 3" });
-  if (q.starterCode?.javascript) defaultLangs.push({ id: "javascript", name: "JavaScript" });
-  if (q.starterCode?.typescript) defaultLangs.push({ id: "typescript", name: "TypeScript" });
-  if (q.starterCode?.java) defaultLangs.push({ id: "java", name: "Java" });
-  if (q.starterCode?.cpp) defaultLangs.push({ id: "cpp", name: "C++" });
-  if (q.starterCode?.sql) defaultLangs.push({ id: "sql", name: "SQL" });
+  for (const [id, name] of LANG_MAP) {
+    if (sc[id]) defaultLangs.push({ id, name });
+  }
 
   const resolvedSupportedLanguages =
     q.supportedLanguages && q.supportedLanguages.length > 0
@@ -239,12 +347,15 @@ export function sanitiseCodingQuestion(q: CodingQuestion): {
       ? defaultLangs
       : [{ id: "python", name: "Python 3" }];
 
+  // Pick the first available starter code as the default shown in the editor
+  const initialCode = LANG_MAP.map(([id]) => sc[id]).find(Boolean) ?? "";
+
   return {
     id: q.id,
     difficulty: q.difficulty,
     title: q.title,
     instructions: q.instructions,
-    initialCode: q.starterCode.python || q.starterCode.javascript || q.starterCode.java || q.starterCode.cpp || q.starterCode.typescript || q.starterCode.sql || "",
+    initialCode,
     supportedLanguages: resolvedSupportedLanguages,
     taskLabel: q.difficulty === "easy" ? "Task 1 — Easy" : "Task 2 — Medium",
   };

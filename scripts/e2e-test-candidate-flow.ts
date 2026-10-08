@@ -86,7 +86,7 @@ async function runEndToEndVerification() {
   const userDocPython = await adminDb.collection("users").doc(uid).get();
   const seedPython = userDocPython.data()?.assessmentSeed || uid;
   const unsanitizedPython = getAssessmentContent("python", seedPython);
-  const pythonMcqAnswers = unsanitizedPython.mcqs.map((m: any) => m.answerIndex ?? 0);
+  const pythonMcqAnswers = unsanitizedPython?.mcqs?.map((m: any) => m.answerIndex ?? 0) || [];
 
   const pythonCode = `def process_transactions(csv_string):
     totals = {}
@@ -161,7 +161,7 @@ async function runEndToEndVerification() {
   const userDocJs = await adminDb.collection("users").doc(uid).get();
   const seedJs = userDocJs.data()?.assessmentSeed || uid;
   const unsanitizedJs = getAssessmentContent("javascript", seedJs);
-  const jsMcqAnswers = unsanitizedJs.mcqs.map((m: any) => m.answerIndex ?? 0);
+  const jsMcqAnswers = unsanitizedJs?.mcqs?.map((m: any) => m.answerIndex ?? 0) || [];
 
   const jsCode = `export function processTransactions(csvString) {
   const totals = {};
