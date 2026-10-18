@@ -18,6 +18,7 @@ import {
   Briefcase,
   ShieldCheck,
   X,
+  Trophy,
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -66,24 +67,30 @@ export default function EmployerDashboardPage() {
     if (!user) return;
     setFetching((prev) => candidates.length === 0);
     try {
-      const token = await user.getIdToken(true);
-      const res = await fetch("/api/employer/discover", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: "Bearer " + token,
-        },
-        body: JSON.stringify({
-          searchQuery,
-          skills: selectedSkills,
-          minScore,
-          requireLiveProject,
-          requireGithub,
-          minCommits,
-          matchMode,
-          gradYear: gradYearFilter,
+      const token = await user.getIdToken();
+      
+      const [res, shortlistRes] = await Promise.all([
+        fetch("/api/employer/discover", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + token,
+          },
+          body: JSON.stringify({
+            searchQuery,
+            skills: selectedSkills,
+            minScore,
+            requireLiveProject,
+            requireGithub,
+            minCommits,
+            matchMode,
+            gradYear: gradYearFilter,
+          }),
         }),
-      });
+        fetch("/api/employer/shortlist", {
+          headers: { Authorization: "Bearer " + token },
+        }),
+      ]);
 
       if (!res.ok) {
         const data = await res.json();
@@ -95,9 +102,6 @@ export default function EmployerDashboardPage() {
       const data = await res.json();
       setCandidates(data.candidates || []);
 
-      const shortlistRes = await fetch("/api/employer/shortlist", {
-        headers: { Authorization: "Bearer " + token },
-      });
       if (shortlistRes.ok) {
         const shortlistData = await shortlistRes.json();
         const shortlistMap: Record<string, boolean> = {};
@@ -134,12 +138,12 @@ export default function EmployerDashboardPage() {
       }
       const timeoutId = setTimeout(() => {
         fetchCandidates();
-      }, 300);
+      }, 150);
 
-      // Dynamic real-time sync polling every 5 seconds
+      // Periodic background sync every 30 seconds to preserve network bandwidth and responsiveness
       const intervalId = setInterval(() => {
         fetchCandidates();
-      }, 5000);
+      }, 30000);
 
       return () => {
         clearTimeout(timeoutId);
@@ -157,7 +161,7 @@ export default function EmployerDashboardPage() {
     }));
 
     try {
-      const token = await user?.getIdToken(true);
+      const token = await user?.getIdToken();
       const res = await fetch("/api/employer/shortlist", {
         method: isCurrentlyShortlisted ? "DELETE" : "POST",
         headers: {
@@ -225,26 +229,26 @@ export default function EmployerDashboardPage() {
 
   return (
     <div className="flex h-full w-full flex-col overflow-hidden bg-[#FAFAFA]">
-      <div className="flex-1 p-4 sm:p-8 md:p-10 lg:p-14 overflow-y-auto scrollbar-hide">
+      <div className="flex-1 px-4 sm:px-8 lg:px-10 py-6 sm:py-8 overflow-y-auto scrollbar-hide w-full">
 
 
         {/* Hero Header & Institutional Telemetry */}
-        <div className="max-w-[1000px] mx-auto mb-8 sm:mb-10">
+        <div className="w-full mb-8 sm:mb-10">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-3">
             <div className="flex items-center gap-2 flex-wrap">
-              <span className="text-[11px] font-medium font-bold uppercase tracking-[0.1em] text-[#064E3B] bg-[#064E3B]/10 px-2.5 py-1 rounded">
+              <span className="text-[11px] font-medium font-bold uppercase tracking-[0.1em] text-emerald-900 bg-emerald-900/10 px-2.5 py-1 rounded">
                 Employer Dashboard
               </span>
             </div>
             <Link href="/employer/jobs">
-              <button className="flex items-center gap-2 px-4 py-2 border border-[#E7E2DA] bg-white hover:bg-[#FAF8F5] text-[12px] font-mono font-semibold rounded text-[#1C1917] transition-colors shadow-2xs">
-                <Briefcase className="h-3.5 w-3.5 text-[#064E3B]" />
+              <button className="flex items-center gap-2 px-4 py-2 border border-border bg-white hover:bg-surface text-[12px] font-mono font-semibold rounded text-foreground transition-colors shadow-2xs">
+                <Briefcase className="h-3.5 w-3.5 text-emerald-900" />
                 <span>MANAGE JOBS & APPLICANTS</span>
                 <ArrowRight className="h-3 w-3" />
               </button>
             </Link>
           </div>
-          <h1 className="text-[26px] sm:text-[34px] lg:text-[38px] font-bold uppercase tracking-[0.06em] text-[#0D0D0D] leading-tight mb-6">
+          <h1 className="text-[26px] sm:text-[34px] lg:text-[38px] font-bold uppercase tracking-[0.06em] text-foreground leading-tight mb-6">
             FIND PEOPLE WHOSE SKILLS ARE PROVEN.
           </h1>
 
@@ -252,11 +256,11 @@ export default function EmployerDashboardPage() {
         </div>
 
         {/* Search & Filter Controls */}
-        <div className="max-w-[1000px] mx-auto">
-          <div className="mb-8 bg-white border border-[#E5E5E5] p-4 sm:p-6 rounded shadow-[0_2px_10px_rgba(0,0,0,0.02)] space-y-4 sm:space-y-5">
+        <div className="w-full">
+          <div className="mb-8 bg-white border border-border p-4 sm:p-6 rounded shadow-[0_2px_10px_rgba(0,0,0,0.02)] space-y-4 sm:space-y-5">
             {/* Search Bar */}
             <div className="relative flex items-center">
-              <Search className="absolute left-4 h-4 w-4 text-[#78716C] pointer-events-none" />
+              <Search className="absolute left-4 h-4 w-4 text-muted-foreground pointer-events-none" />
               <input
                 type="text"
                 placeholder="Search candidates by name, skills, role, or Candidate ID (e.g. ML-73977F0B)..."
@@ -265,13 +269,13 @@ export default function EmployerDashboardPage() {
                 onKeyDown={(e) => {
                   if (e.key === "Enter") fetchCandidates();
                 }}
-                className="w-full h-12 pl-11 pr-10 bg-[#FAF8F5] border border-[#E7E2DA] focus:border-[#064E3B] focus:bg-white text-[14px] font-sans text-[#1C1917] placeholder:text-[#A8A29E] rounded transition-all outline-none"
+                className="w-full h-12 pl-11 pr-10 bg-surface border border-border focus:border-emerald-900 focus:bg-white text-[14px] font-sans text-foreground placeholder:text-muted-foreground/70 rounded transition-all outline-none"
               />
               {searchQuery && (
                 <button
                   type="button"
                   onClick={() => setSearchQuery("")}
-                  className="absolute right-3.5 text-[#78716C] hover:text-[#1C1917] p-1 rounded transition-colors"
+                  className="absolute right-3.5 text-muted-foreground hover:text-foreground p-1 rounded transition-colors"
                   title="Clear search"
                 >
                   <X className="h-4 w-4" />
@@ -282,14 +286,14 @@ export default function EmployerDashboardPage() {
             {/* Active Filter Indicators */}
             {(selectedSkills.length > 0 || searchQuery.trim()) && (
               <div className="flex items-center gap-2 flex-wrap text-[12px] pt-1">
-                <span className="text-[#78716C] font-mono text-[10px] uppercase tracking-wider font-semibold">Active:</span>
+                <span className="text-muted-foreground font-mono text-[10px] uppercase tracking-wider font-semibold">Active:</span>
                 {searchQuery.trim() && (
-                  <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded bg-[#FAF8F5] border border-[#E7E2DA] text-[#1C1917] text-[12px] font-mono">
+                  <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded bg-surface border border-border text-foreground text-[12px] font-mono">
                     Keyword: &ldquo;{searchQuery}&rdquo;
                     <button
                       type="button"
                       onClick={() => setSearchQuery("")}
-                      className="hover:text-[#B42318] text-[#78716C] ml-1"
+                      className="hover:text-danger text-muted-foreground ml-1"
                     >
                       <X className="h-3 w-3" />
                     </button>
@@ -298,7 +302,7 @@ export default function EmployerDashboardPage() {
                 {selectedSkills.map((sk) => (
                   <span
                     key={sk}
-                    className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded bg-[#1C1917] text-white text-[12px] font-mono shadow-2xs"
+                    className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded bg-foreground text-white text-[12px] font-mono shadow-2xs"
                   >
                     {sk}
                     <button
@@ -316,7 +320,7 @@ export default function EmployerDashboardPage() {
                     setSearchQuery("");
                     setSelectedSkills([]);
                   }}
-                  className="text-[11px] font-sans text-[#78716C] hover:text-[#B42318] hover:underline transition-colors ml-1 font-medium"
+                  className="text-[11px] font-sans text-muted-foreground hover:text-danger hover:underline transition-colors ml-1 font-medium"
                 >
                   Clear all
                 </button>
@@ -325,7 +329,7 @@ export default function EmployerDashboardPage() {
 
             {/* Skill Filter Chips */}
             <div className="flex items-center gap-2.5 flex-wrap pt-1">
-              <div className="flex items-center gap-1.5 text-[12px] font-medium text-[#737373] uppercase tracking-wider mr-1">
+              <div className="flex items-center gap-1.5 text-[12px] font-medium text-muted-foreground uppercase tracking-wider mr-1">
                 <Filter className="h-3.5 w-3.5" /> Filter by Skill:
               </div>
               {COMMON_SKILLS.slice(0, 14).map((skill) => {
@@ -340,8 +344,8 @@ export default function EmployerDashboardPage() {
                     className={
                       "px-3.5 py-1.5 rounded text-[12px] font-medium transition-colors duration-150 border " +
                       (isActive
-                        ? "bg-[#0D0D0D] text-white border-[#0D0D0D] shadow-sm"
-                        : "bg-[#FAFAFA] text-[#737373] border-[#E5E5E5] hover:bg-white hover:border-[#D2D2D2]")
+                        ? "bg-foreground text-white border-foreground shadow-sm"
+                        : "bg-[#FAFAFA] text-muted-foreground border-border hover:bg-white hover:border-[#D2D2D2]")
                     }
                   >
                     {skill}
@@ -352,7 +356,7 @@ export default function EmployerDashboardPage() {
                 <button
                   type="button"
                   onClick={() => setSelectedSkills([])}
-                  className="px-2.5 py-1 text-[12px] text-[#737373] hover:text-[#0D0D0D] underline decoration-[#D2D2D2] underline-offset-4"
+                  className="px-2.5 py-1 text-[12px] text-muted-foreground hover:text-foreground underline decoration-[#D2D2D2] underline-offset-4"
                 >
                   Clear skills
                 </button>
@@ -365,7 +369,7 @@ export default function EmployerDashboardPage() {
                 <button
                   type="button"
                   onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
-                  className="flex items-center gap-1.5 text-[12px] font-semibold text-[#0D0D0D] hover:text-[#737373] transition-colors"
+                  className="flex items-center gap-1.5 text-[12px] font-semibold text-foreground hover:text-muted-foreground transition-colors"
                 >
                   <Layers className="h-3.5 w-3.5" />
                   {showAdvancedFilters ? "Hide Advanced Filters" : "Show Advanced Search Filters"}
@@ -385,7 +389,7 @@ export default function EmployerDashboardPage() {
                       setMatchMode("any");
                       setGradYearFilter("all");
                     }}
-                    className="text-[12px] text-[#B42318] hover:underline"
+                    className="text-[12px] text-danger hover:underline"
                   >
                     Reset advanced filters
                   </button>
@@ -393,16 +397,16 @@ export default function EmployerDashboardPage() {
               </div>
 
               {showAdvancedFilters && (
-                <div className="mt-4 p-4 rounded bg-[#FAFAFA] border border-[#E5E5E5] grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-[12px]">
+                <div className="mt-4 p-4 rounded bg-[#FAFAFA] border border-border grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-[12px]">
                   {/* Verified Score Threshold */}
                   <div>
-                    <label className="block font-semibold text-[#0D0D0D] mb-1.5">
+                    <label className="block font-semibold text-foreground mb-1.5">
                       Minimum Verified Score
                     </label>
                     <select
                       value={minScore}
                       onChange={(e) => setMinScore(Number(e.target.value))}
-                      className="w-full bg-white border border-[#E5E5E5] rounded px-2.5 py-1.5 text-[#0D0D0D] outline-none"
+                      className="w-full bg-white border border-border rounded px-2.5 py-1.5 text-foreground outline-none"
                     >
                       <option value={0}>Any Score</option>
                       <option value={80}>Verified (Passed)</option>
@@ -412,7 +416,7 @@ export default function EmployerDashboardPage() {
 
                   {/* Evidence Artifacts */}
                   <div>
-                    <label className="block font-semibold text-[#0D0D0D] mb-1.5">
+                    <label className="block font-semibold text-foreground mb-1.5">
                       Required Evidence
                     </label>
                     <div className="space-y-1.5 pt-0.5">
@@ -421,7 +425,7 @@ export default function EmployerDashboardPage() {
                           type="checkbox"
                           checked={requireLiveProject}
                           onChange={(e) => setRequireLiveProject(e.target.checked)}
-                          className="rounded border-[#E5E5E5] text-[#0D0D0D] focus:ring-0"
+                          className="rounded border-border text-foreground focus:ring-0"
                         />
                         <span>Has Live Deployed App</span>
                       </label>
@@ -430,7 +434,7 @@ export default function EmployerDashboardPage() {
                           type="checkbox"
                           checked={requireGithub}
                           onChange={(e) => setRequireGithub(e.target.checked)}
-                          className="rounded border-[#E5E5E5] text-[#0D0D0D] focus:ring-0"
+                          className="rounded border-border text-foreground focus:ring-0"
                         />
                         <span>GitHub Account Linked</span>
                       </label>
@@ -439,13 +443,13 @@ export default function EmployerDashboardPage() {
 
                   {/* GitHub Activity & Matching */}
                   <div>
-                    <label className="block font-semibold text-[#0D0D0D] mb-1.5">
+                    <label className="block font-semibold text-foreground mb-1.5">
                       GitHub Activity &amp; Mode
                     </label>
                     <select
                       value={minCommits}
                       onChange={(e) => setMinCommits(Number(e.target.value))}
-                      className="w-full bg-white border border-[#E5E5E5] rounded px-2.5 py-1.5 text-[#0D0D0D] outline-none mb-2"
+                      className="w-full bg-white border border-border rounded px-2.5 py-1.5 text-foreground outline-none mb-2"
                     >
                       <option value={0}>Any Commit History</option>
                       <option value={25}>≥ 25 Total Commits</option>
@@ -457,8 +461,8 @@ export default function EmployerDashboardPage() {
                         onClick={() => setMatchMode(matchMode === "any" ? "all" : "any")}
                         className={`text-[11px] px-2 py-0.5 rounded border transition-colors ${
                           matchMode === "all"
-                            ? "bg-[#0D0D0D] text-white border-[#0D0D0D]"
-                            : "bg-white text-[#737373] border-[#E5E5E5]"
+                            ? "bg-foreground text-white border-foreground"
+                            : "bg-white text-muted-foreground border-border"
                         }`}
                       >
                         {matchMode === "all" ? "Must Match ALL Skills" : "Match ANY Selected Skill"}
@@ -468,13 +472,13 @@ export default function EmployerDashboardPage() {
 
                   {/* Graduation Cohort */}
                   <div>
-                    <label className="block font-semibold text-[#0D0D0D] mb-1.5">
+                    <label className="block font-semibold text-foreground mb-1.5">
                       Graduation Year
                     </label>
                     <select
                       value={gradYearFilter}
                       onChange={(e) => setGradYearFilter(e.target.value)}
-                      className="w-full bg-white border border-[#E5E5E5] rounded px-2.5 py-1.5 text-[#0D0D0D] outline-none"
+                      className="w-full bg-white border border-border rounded px-2.5 py-1.5 text-foreground outline-none"
                     >
                       <option value="all">All Cohorts</option>
                       <option value="2024">2024 Graduates</option>
@@ -487,11 +491,11 @@ export default function EmployerDashboardPage() {
             </div>
 
             {/* Sort & Count Row */}
-            <div className="flex items-center justify-between pt-3 border-t border-[#E5E5E5] text-[13px] text-[#737373]">
+            <div className="flex items-center justify-between pt-3 border-t border-border text-[13px] text-muted-foreground">
               <div>
-                Showing <span className="font-semibold text-[#0D0D0D]">{sortedCandidates.length}</span> verified candidate{sortedCandidates.length === 1 ? "" : "s"}
+                Showing <span className="font-semibold text-foreground">{sortedCandidates.length}</span> verified candidate{sortedCandidates.length === 1 ? "" : "s"}
                 {selectedSkills.length > 0 && (
-                  <span className="text-[#737373] ml-1">
+                  <span className="text-muted-foreground ml-1">
                     matching {selectedSkills.join(", ")}
                   </span>
                 )}
@@ -502,7 +506,7 @@ export default function EmployerDashboardPage() {
                 <select
                   value={sortBy}
                   onChange={(e: any) => setSortBy(e.target.value)}
-                  className="text-[12px] bg-[#FAFAFA] border border-[#E5E5E5] rounded-md px-2 py-1 text-[#0D0D0D] outline-none cursor-pointer"
+                  className="text-[12px] bg-[#FAFAFA] border border-border rounded-md px-2 py-1 text-foreground outline-none cursor-pointer"
                 >
                   <option value="match">Best Match</option>
                   <option value="skills">Most Verified Skills</option>
@@ -514,16 +518,16 @@ export default function EmployerDashboardPage() {
 
           {/* Results List */}
           {fetching ? (
-            <div className="py-20 flex flex-col items-center justify-center space-y-3 bg-white border border-[#E7E2DA] rounded shadow-2xs">
-              <div className="h-7 w-7 border-2 border-[#E7E2DA] border-t-[#064E3B] rounded-full animate-spin" />
-              <div className="text-[12px] font-mono text-[#78716C] uppercase tracking-[0.16em]">
+            <div className="py-20 flex flex-col items-center justify-center space-y-3 bg-white border border-border rounded shadow-2xs">
+              <div className="h-7 w-7 border-2 border-border border-t-[#064E3B] rounded-full animate-spin" />
+              <div className="text-[12px] font-mono text-muted-foreground uppercase tracking-[0.16em]">
                 Querying verified practitioner ledger…
               </div>
             </div>
           ) : sortedCandidates.length === 0 ? (
-            <div className="border border-[#E5E5E5] border-dashed rounded bg-white p-16 text-center shadow-sm">
-              <h2 className="text-[20px] font-serif text-[#0D0D0D] mb-3">No verified candidates found</h2>
-              <p className="text-[14px] text-[#737373] mb-6 max-w-md mx-auto">
+            <div className="border border-border border-dashed rounded bg-white p-16 text-center shadow-sm">
+              <h2 className="text-[20px] font-serif text-foreground mb-3">No verified candidates found</h2>
+              <p className="text-[14px] text-muted-foreground mb-6 max-w-md mx-auto">
                 No candidates match your current search query or skill filters. Try broadening your criteria or reset all filters.
               </p>
               <Button
@@ -565,7 +569,7 @@ export default function EmployerDashboardPage() {
                       whileHover={{ y: -4, scale: 1.005, boxShadow: "0 12px 40px -10px rgba(0,0,0,0.08)" }}
                       transition={{ duration: 0.15, ease: "easeOut" }}
                       key={c.uid}
-                      className="group border border-[#E5E5E5] rounded bg-white p-4 sm:p-6 md:p-8 transition-colors duration-150 hover:border-[#1C1917]/20"
+                      className="group border border-border rounded bg-white p-4 sm:p-6 md:p-8 transition-colors duration-150 hover:border-foreground/20"
                     >
                     <div className="flex flex-col md:flex-row md:items-start justify-between gap-5 sm:gap-6">
                       {/* Candidate Identity & Evidence */}
@@ -580,17 +584,17 @@ export default function EmployerDashboardPage() {
                         />
                         <div>
                           <div className="flex items-center gap-2.5 flex-wrap">
-                            <h3 className="font-serif text-[26px] text-[#0D0D0D] leading-tight">
+                            <h3 className="font-serif text-[26px] text-foreground leading-tight">
                               {c.name || "Anonymous Candidate"}
                             </h3>
-                            <span className="text-[11px] font-mono font-semibold text-[#064E3B] bg-[#064E3B]/10 px-2.5 py-0.5 rounded border border-[#064E3B]/20">
+                            <span className="text-[11px] font-mono font-semibold text-emerald-900 bg-emerald-900/10 px-2.5 py-0.5 rounded border border-emerald-900/20">
                               {c.candidateKey || (c.id ? `ML-${c.id.slice(0, 8).toUpperCase()}` : "CANDIDATE")}
                             </span>
                             <span className="text-[11px] font-medium font-bold uppercase tracking-[0.1em] text-[#15803D] bg-[#15803D]/10 px-2 py-0.5 rounded-sm">
                               Verified Practitioner
                             </span>
                             <div className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-sm bg-[#ECFDF5] border border-[#A7F3D0] text-[#065F46] text-[11px] font-semibold">
-                              <ShieldCheck className="h-3.5 w-3.5 text-[#059669]" />
+                              <ShieldCheck className="h-3.5 w-3.5 text-emerald-600" />
                               <span>{verificationPct}% Skills Verified</span>
                               <span className="text-[#047857] font-normal text-[10px]">
                                 ({verifiedCount}/{totalSkills} passed ≥75%)
@@ -600,23 +604,23 @@ export default function EmployerDashboardPage() {
 
                           {/* Target Roles & Location preview if available */}
                           {((c.targetRoles && c.targetRoles.length > 0) || c.workPreference) && (
-                            <div className="flex items-center gap-2 flex-wrap mt-1 text-[11px] font-mono text-[#064E3B]">
+                            <div className="flex items-center gap-2 flex-wrap mt-1 text-[11px] font-mono text-emerald-900">
                               {c.targetRoles?.slice(0, 2).map((role: string) => (
-                                <span key={role} className="bg-[#FAF8F5] border border-[#E7E2DA] px-2 py-0.5 rounded text-[#1C1917]">
+                                <span key={role} className="bg-surface border border-border px-2 py-0.5 rounded text-foreground">
                                   {role}
                                 </span>
                               ))}
                               {c.workPreference && (
-                                <span className="text-[#78716C]">· {c.workPreference}</span>
+                                <span className="text-muted-foreground">· {c.workPreference}</span>
                               )}
                               {c.availability && (
-                                <span className="text-[#059669]">· {c.availability}</span>
+                                <span className="text-emerald-600">· {c.availability}</span>
                               )}
                             </div>
                           )}
 
                           {(c.college || c.branch) && (
-                            <p className="text-[14px] text-[#737373] mt-1 mb-4 flex items-center gap-1.5">
+                            <p className="text-[14px] text-muted-foreground mt-1 mb-4 flex items-center gap-1.5">
                               <GraduationCap className="h-4 w-4 opacity-70" />
                               {c.branch}
                               {c.branch && c.college ? " · " : ""}
@@ -629,15 +633,31 @@ export default function EmployerDashboardPage() {
                             <div className="flex flex-wrap gap-2 mt-3">
                               {verifiedSkillsList.map((skill, idx) => {
                                 const skillObj = c.verifiedSkills[skill];
+                                const isGold = skillObj?.badge === "gold_honors" || skillObj?.track === "advanced";
                                 return (
                                   <div
                                     key={idx}
-                                    className="flex items-center gap-1.5 px-3 py-1.5 rounded border border-[#15803D]/20 bg-[#15803D]/5 text-[#15803D] text-[12px] font-medium"
+                                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded border text-[12px] font-medium ${
+                                      isGold
+                                        ? "border-amber-300 bg-amber-50 text-amber-800"
+                                        : "border-[#15803D]/20 bg-[#15803D]/5 text-[#15803D]"
+                                    }`}
                                   >
-                                    <CheckCircle2 className="h-3.5 w-3.5" />
+                                    {isGold ? (
+                                      <Trophy className="h-3.5 w-3.5 text-amber-700" />
+                                    ) : (
+                                      <CheckCircle2 className="h-3.5 w-3.5" />
+                                    )}
                                     {skill}
+                                    {isGold && (
+                                      <span className="text-[9px] uppercase tracking-wider font-bold bg-amber-200/60 text-amber-900 px-1 rounded">
+                                        Gold
+                                      </span>
+                                    )}
                                     {skillObj?.score && (
-                                      <span className="text-[10px] font-mono bg-white px-1.5 py-0.2 rounded text-[#15803D] font-bold border border-[#15803D]/30">
+                                      <span className={`text-[10px] font-mono bg-white px-1.5 py-0.2 rounded font-bold border ${
+                                        isGold ? "text-amber-800 border-amber-300" : "text-[#15803D] border-[#15803D]/30"
+                                      }`}>
                                         {skillObj.score}%
                                       </span>
                                     )}
@@ -646,20 +666,20 @@ export default function EmployerDashboardPage() {
                               })}
                             </div>
                           ) : (
-                            <div className="mt-3 text-[13px] text-[#737373] italic">
+                            <div className="mt-3 text-[13px] text-muted-foreground italic">
                               Claimed skills under assessment verification.
                             </div>
                           )}
 
                           {/* Evidence Strip: GitHub & ATS signals */}
-                          <div className="flex flex-wrap items-center gap-2.5 mt-3 text-[11px] font-mono text-[#737373]">
+                          <div className="flex flex-wrap items-center gap-2.5 mt-3 text-[11px] font-mono text-muted-foreground">
                             {c.githubEvidence && (
-                              <div className="flex items-center gap-1.5 bg-[#F5F5F4] px-2.5 py-1 rounded-md text-[#44403C]">
-                                <Code2 className="h-3.5 w-3.5 text-[#1C1917]" />
+                              <div className="flex items-center gap-1.5 bg-surface px-2.5 py-1 rounded-md text-[#44403C]">
+                                <Code2 className="h-3.5 w-3.5 text-foreground" />
                                 <span>{c.githubEvidence.totalCommits || 0} commits</span>
                                 <span>· {c.githubEvidence.repoCount || 0} repos</span>
                                 {c.githubEvidence.topLanguages?.length > 0 && (
-                                  <span className="text-[#78716C]">
+                                  <span className="text-muted-foreground">
                                     ({c.githubEvidence.topLanguages.slice(0, 2).join(", ")})
                                   </span>
                                 )}
@@ -674,7 +694,7 @@ export default function EmployerDashboardPage() {
                             )}
 
                             {c.projects?.some((p: any) => p.liveUrl) && (
-                              <div className="flex items-center gap-1 bg-[#FAF8F5] border border-[#E7E2DA] px-2.5 py-1 rounded-md text-[#1C1917]">
+                              <div className="flex items-center gap-1 bg-surface border border-border px-2.5 py-1 rounded-md text-foreground">
                                 <ExternalLink className="h-3 w-3" />
                                 <span>Live Demo Available</span>
                               </div>
@@ -690,17 +710,17 @@ export default function EmployerDashboardPage() {
                             <span className="text-[11px] font-bold text-[#065F46] bg-[#ECFDF5] border border-[#A7F3D0] px-2 py-0.5 rounded">
                               {verificationPct}% Verified
                             </span>
-                            <span className="text-[13px] text-[#0D0D0D] font-medium">
+                            <span className="text-[13px] text-foreground font-medium">
                               {verifiedCount}/{totalSkills} skills (≥75%)
                             </span>
                           </div>
-                          <div className="w-32 bg-[#E5E5E5] h-1.5 rounded-full overflow-hidden mt-1.5 md:ml-auto">
+                          <div className="w-32 bg-border h-1.5 rounded-full overflow-hidden mt-1.5 md:ml-auto">
                             <div
-                              className="bg-[#059669] h-full rounded-full transition-all duration-150"
+                              className="bg-emerald-600 h-full rounded-full transition-all duration-150"
                               style={{ width: `${Math.min(100, Math.max(5, verificationPct))}%` }}
                             />
                           </div>
-                          <div className="text-[12px] text-[#737373] mt-1">
+                          <div className="text-[12px] text-muted-foreground mt-1">
                             {c.projects?.length || 0} evidence project{c.projects?.length === 1 ? "" : "s"}
                           </div>
                         </div>
@@ -712,9 +732,9 @@ export default function EmployerDashboardPage() {
                             variant="outline"
                             size="sm"
                             onClick={() => setMessagingTarget({ id: c.uid, name: c.name || "Candidate" })}
-                            className="gap-1.5 text-[12px] border-[#E5E5E5] text-[#0D0D0D] hover:bg-white"
+                            className="gap-1.5 text-[12px] border-border text-foreground hover:bg-white"
                           >
-                            <MessageSquare className="h-3.5 w-3.5 text-[#737373]" />
+                            <MessageSquare className="h-3.5 w-3.5 text-muted-foreground" />
                             Message
                           </Button>
 
@@ -723,20 +743,20 @@ export default function EmployerDashboardPage() {
                             size="sm"
                             className={`gap-1.5 text-[12px] ${
                               isShortlisted
-                                ? "bg-[#FAFAFA] border-[#D2D2D2] text-[#0D0D0D]"
-                                : "border-[#E5E5E5] text-[#0D0D0D]"
+                                ? "bg-[#FAFAFA] border-[#D2D2D2] text-foreground"
+                                : "border-border text-foreground"
                             }`}
                             onClick={() => toggleShortlist(c.uid)}
                           >
                             {isShortlisted ? (
                               <><BookmarkCheck className="h-3.5 w-3.5 text-[#15803D]" /> Shortlisted</>
                             ) : (
-                              <><Bookmark className="h-3.5 w-3.5 text-[#737373]" /> Shortlist</>
+                              <><Bookmark className="h-3.5 w-3.5 text-muted-foreground" /> Shortlist</>
                             )}
                           </Button>
 
                           <Link href={`/employer/candidate/${c.uid}`}>
-                            <Button size="sm" className="gap-1.5 text-[12px] bg-[#0D0D0D] hover:bg-[#404040]">
+                            <Button size="sm" className="gap-1.5 text-[12px] bg-foreground hover:bg-[#404040]">
                               View Dossier <ArrowRight className="h-3.5 w-3.5" />
                             </Button>
                           </Link>
@@ -753,7 +773,7 @@ export default function EmployerDashboardPage() {
           {/* Pagination Controls */}
           {sortedCandidates.length > ITEMS_PER_PAGE && (
             <div className="flex items-center justify-between pt-8 pb-4">
-              <span className="text-xs text-[#737373] font-medium">
+              <span className="text-xs text-muted-foreground font-medium">
                 Showing {((currentPage - 1) * ITEMS_PER_PAGE) + 1} to {Math.min(currentPage * ITEMS_PER_PAGE, sortedCandidates.length)} of {sortedCandidates.length} candidates
               </span>
               <div className="flex gap-2">
@@ -762,7 +782,7 @@ export default function EmployerDashboardPage() {
                   size="sm"
                   disabled={currentPage === 1}
                   onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-                  className="bg-white border-[#E5E5E5] text-[#0D0D0D] text-[12px] h-8"
+                  className="bg-white border-border text-foreground text-[12px] h-8"
                 >
                   Previous
                 </Button>
@@ -771,7 +791,7 @@ export default function EmployerDashboardPage() {
                   size="sm"
                   disabled={currentPage * ITEMS_PER_PAGE >= sortedCandidates.length}
                   onClick={() => setCurrentPage(p => p + 1)}
-                  className="bg-white border-[#E5E5E5] text-[#0D0D0D] text-[12px] h-8"
+                  className="bg-white border-border text-foreground text-[12px] h-8"
                 >
                   Next
                 </Button>

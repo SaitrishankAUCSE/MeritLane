@@ -83,6 +83,7 @@ export async function POST(req: NextRequest) {
           assessmentMediumQuestionId: FieldValue.delete(),
           assessmentMcqIds: FieldValue.delete(),
           assessmentSeed: FieldValue.delete(),
+          assessmentTrack: FieldValue.delete(),
         });
         return NextResponse.json({ error: "Assessment time expired" }, { status: 400 });
       }
@@ -249,7 +250,9 @@ export async function POST(req: NextRequest) {
     const easyPct = easyResult.totalTests > 0 ? (easyResult.passedTests / easyResult.totalTests) * 100 : 0;
     const mediumPct = mediumResult.totalTests > 0 ? (mediumResult.passedTests / mediumResult.totalTests) * 100 : 0;
 
-    const isDualTask = hasCodingSubmission && (mediumCode || (isBankAssessment && mediumQId));
+    const assessmentTrack: "standard" | "advanced" = userData.assessmentTrack || (mediumQId ? "standard" : "advanced");
+    const credentialBadge = assessmentTrack === "advanced" ? "gold_honors" : "verified_professional";
+    const isDualTask = hasCodingSubmission && assessmentTrack === "standard" && (mediumCode || (isBankAssessment && mediumQId));
     
     let score = 0;
     if (hasCodingSubmission) {
@@ -278,6 +281,8 @@ export async function POST(req: NextRequest) {
       mcq: mcqScore,
       mcqPassed: mcqPct >= 75,
       overall: score,
+      track: assessmentTrack,
+      badge: credentialBadge,
     };
 
     // ── Step 4: AI code review ───────────────────────────────────────────────
@@ -332,19 +337,24 @@ export async function POST(req: NextRequest) {
       assessmentEasyQuestionId: FieldValue.delete(),
       assessmentMediumQuestionId: FieldValue.delete(),
       assessmentMcqIds: FieldValue.delete(),
+      assessmentTrack: FieldValue.delete(),
     };
 
     if (passed) {
       const nowMs = Date.now();
+      const verifiedSkillRecord = {
+        status: "verified",
+        score,
+        track: assessmentTrack,
+        badge: credentialBadge,
+        assessmentScores,
+        verifiedAt: nowMs,
+        aiFeedback,
+      };
+
       const updatedVerifiedSkills = {
         ...(candidateData.verifiedSkills || {}),
-        [skill]: {
-          status: "verified",
-          score,
-          assessmentScores,
-          verifiedAt: nowMs,
-          aiFeedback,
-        },
+        [skill]: verifiedSkillRecord,
       };
 
       // ── 50% Assessments Milestone Rule for Employer Portal ──
@@ -363,13 +373,7 @@ export async function POST(req: NextRequest) {
       await Promise.all([
         userRef.update({
           [`assessmentScores.${skill}`]: assessmentScores,
-          [`verifiedSkills.${skill}`]: {
-            status: "verified",
-            score,
-            assessmentScores,
-            verifiedAt: nowMs,
-            aiFeedback,
-          },
+          [`verifiedSkills.${skill}`]: verifiedSkillRecord,
           verificationStatus: newVerificationStatus,
           assessmentDate: FieldValue.serverTimestamp(),
           ...sessionClearFields,
@@ -379,13 +383,7 @@ export async function POST(req: NextRequest) {
         }),
         candidateRef.update({
           verificationStatus: newVerificationStatus,
-          [`verifiedSkills.${skill}`]: {
-            status: "verified",
-            score,
-            assessmentScores,
-            verifiedAt: nowMs,
-            aiFeedback,
-          },
+          [`verifiedSkills.${skill}`]: verifiedSkillRecord,
           updatedAt: nowMs,
         }),
       ]);
@@ -395,6 +393,8 @@ export async function POST(req: NextRequest) {
         score,
         status: "verified",
         skill,
+        track: assessmentTrack,
+        badge: credentialBadge,
         assessmentScores,
         aiFeedback,
         employerPortalUnlocked: isEligibleForEmployerPortal,
@@ -416,6 +416,7 @@ export async function POST(req: NextRequest) {
         passed: false,
         score,
         status: "failed",
+        track: assessmentTrack,
         retryAvailableAt: retryDate,
         assessmentScores,
         aiFeedback,

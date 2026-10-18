@@ -29,8 +29,8 @@ export function Footerdemo() {
           <div>
             <h3 className="mb-4 text-[11px] font-medium uppercase tracking-[0.18em] text-muted-foreground">Institution</h3>
             <nav className="space-y-2.5">
-              <Link href="/" className="block text-[13px] text-foreground hover:text-muted-foreground transition-colors">About Us</Link>
-              <a href="mailto:hello@meritlane.app" className="block text-[13px] text-foreground hover:text-muted-foreground transition-colors">Contact Support</a>
+              <Link href="/about" className="block text-[13px] text-foreground hover:text-muted-foreground transition-colors">About Us</Link>
+              <a href="mailto:saitrishankb9@gmail.com" className="block text-[13px] text-foreground hover:text-muted-foreground transition-colors">Contact Support</a>
               <Link href="/privacy" className="block text-[13px] text-foreground hover:text-muted-foreground transition-colors">Privacy Policy</Link>
               <Link href="/terms" className="block text-[13px] text-foreground hover:text-muted-foreground transition-colors">Terms of Service</Link>
             </nav>
@@ -39,9 +39,9 @@ export function Footerdemo() {
           <div>
             <h3 className="mb-4 text-[11px] font-medium uppercase tracking-[0.18em] text-muted-foreground">Contact</h3>
             <div className="space-y-2.5">
-              <a href="mailto:hello@meritlane.app" className="block text-[13px] text-foreground hover:text-muted-foreground transition-colors">hello@meritlane.app</a>
-              <a href="https://twitter.com/meritlane" target="_blank" rel="noopener noreferrer" className="block text-[13px] text-foreground hover:text-muted-foreground transition-colors">Twitter / X</a>
-              <a href="https://linkedin.com/company/meritlane" target="_blank" rel="noopener noreferrer" className="block text-[13px] text-foreground hover:text-muted-foreground transition-colors">LinkedIn</a>
+              <a href="mailto:saitrishankb9@gmail.com" className="block text-[13px] text-foreground hover:text-muted-foreground transition-colors font-mono">saitrishankb9@gmail.com</a>
+              <a href="https://x.com/saitrishank" target="_blank" rel="noopener noreferrer" className="block text-[13px] text-foreground hover:text-muted-foreground transition-colors">Twitter / X</a>
+              <a href="https://www.linkedin.com/in/saitrishank/" target="_blank" rel="noopener noreferrer" className="block text-[13px] text-foreground hover:text-muted-foreground transition-colors">LinkedIn</a>
             </div>
           </div>
         </div>

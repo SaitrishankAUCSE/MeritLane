@@ -24,7 +24,7 @@ export function Button({
   ...props
 }: ButtonProps) {
   const baseStyles =
-    "inline-flex items-center justify-center font-sans font-medium transition-all duration-200 ease-out select-none focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1C1917] focus-visible:ring-offset-2 disabled:opacity-40 disabled:pointer-events-none whitespace-nowrap shrink-0 group";
+    "relative inline-flex items-center justify-center font-sans font-medium transition-all duration-200 ease-out select-none focus:outline-none focus-visible:ring-2 focus-visible:ring-foreground focus-visible:ring-offset-2 disabled:opacity-40 disabled:pointer-events-none whitespace-nowrap shrink-0 group";
 
   const sizeStyles: Record<string, string> = {
     xs:   "text-[12px] px-3 h-7 gap-1.5 rounded-full",
@@ -57,13 +57,16 @@ export function Button({
 
   const content = (
     <>
-      {loading ? (
-        <span aria-hidden="true"><MeritlaneLoader level="button" /></span>
-      ) : (
-        leftIcon && <span aria-hidden="true" className={size === "icon" ? "" : "shrink-0"}>{leftIcon}</span>
+      {loading && (
+        <span className="absolute inset-0 flex items-center justify-center" aria-hidden="true">
+          <MeritlaneLoader level="button" />
+        </span>
       )}
-      {children}
-      {!loading && rightIcon && <span aria-hidden="true" className="shrink-0">{rightIcon}</span>}
+      <span className={`inline-flex items-center gap-2 ${loading ? 'opacity-0' : 'opacity-100'} transition-opacity`}>
+        {leftIcon && <span aria-hidden="true" className={size === "icon" ? "" : "shrink-0"}>{leftIcon}</span>}
+        {children}
+        {rightIcon && <span aria-hidden="true" className="shrink-0">{rightIcon}</span>}
+      </span>
     </>
   );
 

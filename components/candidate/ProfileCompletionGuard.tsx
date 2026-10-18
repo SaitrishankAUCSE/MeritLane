@@ -28,6 +28,8 @@ export function ProfileCompletionGuard({ children }: ProfileCompletionGuardProps
   const [isProfileComplete, setIsProfileComplete] = useState<boolean | null>(null);
   const [checking, setChecking] = useState(true);
 
+  const [isNavigating, setIsNavigating] = useState(false);
+
   const checkProfile = async () => {
     if (!user || role !== "candidate") {
       setChecking(false);
@@ -52,8 +54,29 @@ export function ProfileCompletionGuard({ children }: ProfileCompletionGuardProps
     }
   }, [user, role, loading, profileLoading, pathname]);
 
+  // Pre-load the profile page chunk for an instantaneous transition
+  useEffect(() => {
+    if (user && role === "candidate") {
+      try {
+        router.prefetch("/candidate/profile");
+      } catch {}
+    }
+  }, [user, role, router]);
+
   const isProfilePage = pathname === "/candidate/profile";
   const shouldBlur = !checking && isProfileComplete === false && !isProfilePage;
+
+  // Reset navigating state once on profile page
+  useEffect(() => {
+    if (isProfilePage) {
+      setIsNavigating(false);
+    }
+  }, [isProfilePage]);
+
+  const handleOpenProfile = () => {
+    setIsNavigating(true);
+    router.push("/candidate/profile");
+  };
 
   return (
     <div className="relative h-full min-h-0 w-full flex flex-col">
@@ -64,51 +87,62 @@ export function ProfileCompletionGuard({ children }: ProfileCompletionGuardProps
           opacity: shouldBlur ? 0.45 : 1,
           pointerEvents: shouldBlur ? "none" : "auto",
         }}
-        transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+        transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
         className="h-full min-h-0 w-full flex-1 flex flex-col"
       >
         {children}
       </motion.div>
 
       {/* Professional Blur Overlay & Guidance Dialog */}
-      <AnimatePresence>
+      <AnimatePresence mode="wait">
         {shouldBlur && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.3 }}
+            transition={{ duration: 0.25, ease: "easeInOut" }}
             className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/30 backdrop-blur-md"
           >
             <motion.div
-              initial={{ opacity: 0, scale: 0.95, y: 15 }}
+              initial={{ opacity: 0, scale: 0.95, y: 12 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 15 }}
-              transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-              className="max-w-md w-full bg-white border border-[#E7E2DA] rounded p-7 sm:p-8 shadow-2xl text-center"
+              exit={{ opacity: 0, scale: 0.96, y: 8 }}
+              transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
+              className="max-w-md w-full bg-white border border-border rounded p-7 sm:p-8 shadow-2xl text-center"
             >
-              <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded bg-[#F8F6F3] text-[#1C1917] border border-[#E7E2DA]">
+              <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded bg-[#F8F6F3] text-foreground border border-border">
                 <UserCheck className="h-7 w-7" />
               </div>
 
-              <div className="text-[11px] font-medium uppercase tracking-[0.15em] text-[#78716C] mb-2">
+              <div className="text-[11px] font-medium uppercase tracking-[0.15em] text-muted-foreground mb-2">
                 Quick Setup
               </div>
 
-              <h2 className="text-[22px] font-semibold text-[#1C1917] tracking-tight mb-2">
+              <h2 className="text-[22px] font-semibold text-foreground tracking-tight mb-2">
                 Please Complete Your Profile
               </h2>
 
-              <p className="text-[14px] text-[#78716C] leading-relaxed mb-6">
+              <p className="text-[14px] text-muted-foreground leading-relaxed mb-6">
                 Fill in your basic details and skills first to unlock skill tests, job applications, and get discovered by employers.
               </p>
 
               <button
-                onClick={() => router.push("/candidate/profile")}
-                className="w-full h-11 bg-[#1C1917] hover:bg-[#292524] text-white text-[13px] font-semibold rounded transition-all duration-150 flex items-center justify-center gap-2 shadow-sm focus:outline-none focus:ring-2 focus:ring-[#1C1917] focus:ring-offset-2"
+                type="button"
+                onClick={handleOpenProfile}
+                disabled={isNavigating}
+                className="w-full h-11 bg-foreground hover:bg-stone-800 disabled:opacity-85 text-white text-[13px] font-semibold rounded transition-all duration-150 flex items-center justify-center gap-2 shadow-sm focus:outline-none focus:ring-2 focus:ring-foreground focus:ring-offset-2 cursor-pointer active:scale-[0.99]"
               >
-                <span>Go to Profile</span>
-                <ArrowRight className="h-4 w-4" />
+                {isNavigating ? (
+                  <>
+                    <div className="h-4 w-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    <span>Opening Profile…</span>
+                  </>
+                ) : (
+                  <>
+                    <span>Open Profile</span>
+                    <ArrowRight className="h-4 w-4" />
+                  </>
+                )}
               </button>
             </motion.div>
           </motion.div>

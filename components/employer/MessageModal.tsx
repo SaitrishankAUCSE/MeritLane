@@ -106,7 +106,7 @@ export function MessageModal({
     setAttachmentError(null);
 
     try {
-      const token = await user.getIdToken(true);
+      const token = await user.getIdToken();
       const res = await fetch("/api/messages", {
         method: "POST",
         headers: {
@@ -142,26 +142,26 @@ export function MessageModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-in fade-in duration-200">
-      <div className="bg-white w-full max-w-lg rounded border border-[#E5E5E5] shadow-2xl flex flex-col overflow-hidden">
+      <div className="bg-white w-full max-w-lg rounded border border-border shadow-2xl flex flex-col overflow-hidden">
         {/* Header */}
-        <div className="px-6 py-5 border-b border-[#E5E5E5] flex items-center justify-between bg-[#FAFAFA]">
+        <div className="px-6 py-5 border-b border-border flex items-center justify-between bg-[#FAFAFA]">
           <div className="flex items-center gap-3">
-            <div className="h-9 w-9 rounded bg-[#0D0D0D] text-white flex items-center justify-center">
+            <div className="h-9 w-9 rounded bg-foreground text-white flex items-center justify-center">
               <MessageSquare className="h-4 w-4" />
             </div>
             <div>
-              <h3 className="font-serif text-[18px] text-[#0D0D0D] leading-tight">
+              <h3 className="font-serif text-[18px] text-foreground leading-tight">
                 Message Candidate
               </h3>
-              <p className="text-[12px] text-[#737373] font-sans">
-                Sending direct inquiry to <span className="font-semibold text-[#0D0D0D]">{recipientName}</span>
+              <p className="text-[12px] text-muted-foreground font-sans">
+                Sending direct inquiry to <span className="font-semibold text-foreground">{recipientName}</span>
               </p>
             </div>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="p-1.5 rounded text-[#737373] hover:text-[#0D0D0D] hover:bg-[#E5E5E5]/50 transition-colors"
+            className="p-1.5 rounded text-muted-foreground hover:text-foreground hover:bg-border/50 transition-colors"
           >
             <X className="h-4 w-4" />
           </button>
@@ -173,8 +173,8 @@ export function MessageModal({
             <div className="h-12 w-12 rounded bg-[#15803D]/10 text-[#15803D] flex items-center justify-center">
               <CheckCircle2 className="h-6 w-6" />
             </div>
-            <h4 className="font-serif text-[20px] text-[#0D0D0D]">Message Delivered</h4>
-            <p className="text-[13px] text-[#737373]">
+            <h4 className="font-serif text-[20px] text-foreground">Message Delivered</h4>
+            <p className="text-[13px] text-muted-foreground">
               Your outreach has been delivered to {recipientName}&apos;s verified inbox.
             </p>
           </div>
@@ -188,7 +188,7 @@ export function MessageModal({
 
             {/* Quick Templates */}
             <div>
-              <div className="flex items-center gap-1.5 text-[11px] font-sans font-semibold uppercase tracking-wide text-[#737373] mb-2">
+              <div className="flex items-center gap-1.5 text-[11px] font-sans font-semibold uppercase tracking-wide text-muted-foreground mb-2">
                 <Sparkles className="h-3 w-3 text-[#15803D]" /> Quick Recruiter Templates
               </div>
               <div className="flex flex-wrap gap-2">
@@ -197,7 +197,7 @@ export function MessageModal({
                     key={idx}
                     type="button"
                     onClick={() => setContent(tmpl.text)}
-                    className="text-[12px] px-3 py-1 rounded border border-[#E5E5E5] bg-[#FAFAFA] hover:bg-white hover:border-[#0D0D0D] text-[#0D0D0D] font-medium transition-all"
+                    className="text-[12px] px-3 py-1 rounded border border-border bg-[#FAFAFA] hover:bg-white hover:border-foreground text-foreground font-medium transition-all"
                   >
                     {tmpl.title}
                   </button>
@@ -207,11 +207,11 @@ export function MessageModal({
 
             <div>
               <div className="flex items-center justify-between mb-1.5">
-                <label className="text-[12px] font-medium text-[#0D0D0D]">
+                <label className="text-[12px] font-medium text-foreground">
                   Message Body
                 </label>
                 {uploadingAttachment && (
-                  <span className="text-[11px] font-mono text-[#737373] flex items-center gap-1">
+                  <span className="text-[11px] font-mono text-muted-foreground flex items-center gap-1">
                     <span className="h-2.5 w-2.5 border-2 border-[#15803D] border-t-transparent rounded-full animate-spin" />
                     Processing file…
                   </span>
@@ -224,13 +224,13 @@ export function MessageModal({
                 </div>
               )}
 
-              <div className="border border-[#E5E5E5] rounded focus-within:border-[#0D0D0D] transition-all bg-[#FAFAFA]">
+              <div className="border border-border rounded focus-within:border-foreground transition-all bg-[#FAFAFA]">
                 <textarea
                   rows={4}
                   value={content}
                   onChange={(e) => setContent(e.target.value)}
                   placeholder="Type your message, opportunity details, or interview scheduling link..."
-                  className="w-full px-4 py-3 bg-transparent text-[14px] text-[#0D0D0D] outline-none resize-none placeholder:text-[#737373]"
+                  className="w-full px-4 py-3 bg-transparent text-[14px] text-foreground outline-none resize-none placeholder:text-muted-foreground"
                 />
 
                 {attachments.length > 0 && (
@@ -267,10 +267,10 @@ export function MessageModal({
                   type="button"
                   onClick={() => fileInputRef.current?.click()}
                   disabled={uploadingAttachment || attachments.length >= 5}
-                  className="flex items-center gap-1.5 px-3 py-1.5 bg-[#FAFAFA] hover:bg-white border border-[#E5E5E5] hover:border-[#0D0D0D] rounded text-[12px] font-medium text-[#0D0D0D] transition-colors disabled:opacity-50"
+                  className="flex items-center gap-1.5 px-3 py-1.5 bg-[#FAFAFA] hover:bg-white border border-border hover:border-foreground rounded text-[12px] font-medium text-foreground transition-colors disabled:opacity-50"
                   title="Attach file (PDF, Doc, Archive)"
                 >
-                  <Paperclip className="h-3.5 w-3.5 text-[#737373]" />
+                  <Paperclip className="h-3.5 w-3.5 text-muted-foreground" />
                   <span>Attach File</span>
                 </button>
 
@@ -278,10 +278,10 @@ export function MessageModal({
                   type="button"
                   onClick={() => imageInputRef.current?.click()}
                   disabled={uploadingAttachment || attachments.length >= 5}
-                  className="flex items-center gap-1.5 px-3 py-1.5 bg-[#FAFAFA] hover:bg-white border border-[#E5E5E5] hover:border-[#0D0D0D] rounded text-[12px] font-medium text-[#0D0D0D] transition-colors disabled:opacity-50"
+                  className="flex items-center gap-1.5 px-3 py-1.5 bg-[#FAFAFA] hover:bg-white border border-border hover:border-foreground rounded text-[12px] font-medium text-foreground transition-colors disabled:opacity-50"
                   title="Attach image"
                 >
-                  <ImageIcon className="h-3.5 w-3.5 text-[#737373]" />
+                  <ImageIcon className="h-3.5 w-3.5 text-muted-foreground" />
                   <span>Attach Image</span>
                 </button>
               </div>

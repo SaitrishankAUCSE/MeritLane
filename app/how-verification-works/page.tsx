@@ -4,18 +4,18 @@ import { CheckCircle2, Shield, ArrowRight, Clock, Award, Users, AlertCircle } fr
 
 export default function HowVerificationWorksPage() {
   return (
-    <div className="min-h-screen bg-[#F8F6F3] text-[#1C1917] font-sans">
+    <div className="min-h-screen bg-[#F8F6F3] text-foreground font-sans">
 
       {/* Hero */}
-      <section className="px-4 sm:px-8 lg:px-16 pt-12 sm:pt-20 pb-12 sm:pb-16 border-b border-[#E7E2DA] bg-white text-center">
+      <section className="px-4 sm:px-8 lg:px-16 pt-12 sm:pt-20 pb-12 sm:pb-16 border-b border-border bg-white text-center">
         <div className="max-w-3xl mx-auto">
-          <div className="inline-flex items-center gap-2 text-[11px] font-medium uppercase tracking-[0.15em] text-[#78716C] mb-4 border border-[#E7E2DA] px-3 py-1 rounded bg-[#F8F6F3]">
+          <div className="inline-flex items-center gap-2 text-[11px] font-medium uppercase tracking-[0.15em] text-muted-foreground mb-4 border border-border px-3 py-1 rounded bg-[#F8F6F3]">
             <Shield className="h-3 w-3 text-[#16A34A]" /> Verification Methodology
           </div>
-          <h1 className="font-serif text-[42px] sm:text-[54px] text-[#1C1917] tracking-tight leading-[1.1] mb-6">
+          <h1 className="font-serif text-[42px] sm:text-[54px] text-foreground tracking-tight leading-[1.1] mb-6">
             How MeritLane Verification Works
           </h1>
-          <p className="text-[16px] sm:text-[18px] text-[#78716C] leading-relaxed max-w-2xl mx-auto">
+          <p className="text-[16px] sm:text-[18px] text-muted-foreground leading-relaxed max-w-2xl mx-auto">
             MeritLane verifies candidate technical capabilities through timed, monitored evaluations and authenticated evidence. We replace self-reported resumes with verified skill records.
           </p>
         </div>
@@ -23,7 +23,7 @@ export default function HowVerificationWorksPage() {
 
       {/* Six-step flow */}
       <section className="px-4 sm:px-8 lg:px-16 py-12 sm:py-20 max-w-4xl mx-auto">
-        <h2 className="text-[22px] sm:text-[26px] font-semibold text-[#1C1917] text-center mb-10 sm:mb-14">
+        <h2 className="text-[22px] sm:text-[26px] font-semibold text-foreground text-center mb-10 sm:mb-14">
           The Verification Process
         </h2>
 
@@ -62,14 +62,14 @@ export default function HowVerificationWorksPage() {
           ].map((item, idx) => (
             <div
               key={idx}
-              className="flex items-start gap-6 border border-[#E7E2DA] bg-white rounded p-7 shadow-sm"
+              className="flex items-start gap-6 border border-border bg-white rounded p-7 shadow-sm"
             >
-              <span className="font-mono text-[18px] font-bold text-[#78716C] shrink-0 mt-0.5">
+              <span className="font-mono text-[18px] font-bold text-muted-foreground shrink-0 mt-0.5">
                 {item.step}
               </span>
               <div>
-                <h3 className="text-[17px] font-semibold text-[#1C1917] mb-2">{item.title}</h3>
-                <p className="text-[14px] text-[#78716C] leading-relaxed font-sans">{item.desc}</p>
+                <h3 className="text-[17px] font-semibold text-foreground mb-2">{item.title}</h3>
+                <p className="text-[14px] text-muted-foreground leading-relaxed font-sans">{item.desc}</p>
               </div>
             </div>
           ))}
@@ -77,45 +77,45 @@ export default function HowVerificationWorksPage() {
       </section>
 
       {/* Rules & Safeguards */}
-      <section className="px-4 sm:px-8 lg:px-16 py-12 sm:py-16 bg-white border-y border-[#E7E2DA]">
+      <section className="px-4 sm:px-8 lg:px-16 py-12 sm:py-16 bg-white border-y border-border">
         <div className="max-w-4xl mx-auto">
-          <h2 className="text-[22px] sm:text-[26px] font-semibold text-[#1C1917] text-center mb-8 sm:mb-12">
+          <h2 className="text-[22px] sm:text-[26px] font-semibold text-foreground text-center mb-8 sm:mb-12">
             Assessment Safeguards & Rules
           </h2>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="border border-[#E7E2DA] bg-[#F8F6F3] rounded p-6">
-              <div className="flex items-center gap-2.5 text-[15px] font-semibold text-[#1C1917] mb-3">
-                <Clock className="h-4 w-4 text-[#78716C]" /> 45-Minute Server Timer
+            <div className="border border-border bg-[#F8F6F3] rounded p-6">
+              <div className="flex items-center gap-2.5 text-[15px] font-semibold text-foreground mb-3">
+                <Clock className="h-4 w-4 text-muted-foreground" /> 45-Minute Server Timer
               </div>
-              <p className="text-[13px] text-[#78716C] leading-relaxed">
+              <p className="text-[13px] text-muted-foreground leading-relaxed">
                 The timer is tracked and validated server-side from the moment an assessment begins. Refreshing or navigating away does not extend the allotted duration.
               </p>
             </div>
 
-            <div className="border border-[#E7E2DA] bg-[#F8F6F3] rounded p-6">
-              <div className="flex items-center gap-2.5 text-[15px] font-semibold text-[#1C1917] mb-3">
+            <div className="border border-border bg-[#F8F6F3] rounded p-6">
+              <div className="flex items-center gap-2.5 text-[15px] font-semibold text-foreground mb-3">
                 <Shield className="h-4 w-4 text-[#16A34A]" /> Fullscreen & Tab Monitoring
               </div>
-              <p className="text-[13px] text-[#78716C] leading-relaxed">
+              <p className="text-[13px] text-muted-foreground leading-relaxed">
                 Assessments require fullscreen mode. Leaving fullscreen, navigating back, or switching browser tabs generates integrity warnings and may terminate the session.
               </p>
             </div>
 
-            <div className="border border-[#E7E2DA] bg-[#F8F6F3] rounded p-6">
-              <div className="flex items-center gap-2.5 text-[15px] font-semibold text-[#1C1917] mb-3">
-                <AlertCircle className="h-4 w-4 text-[#D97706]" /> Cooldown Periods
+            <div className="border border-border bg-[#F8F6F3] rounded p-6">
+              <div className="flex items-center gap-2.5 text-[15px] font-semibold text-foreground mb-3">
+                <AlertCircle className="h-4 w-4 text-amber-600" /> Cooldown Periods
               </div>
-              <p className="text-[13px] text-[#78716C] leading-relaxed">
+              <p className="text-[13px] text-muted-foreground leading-relaxed">
                 Failing to meet component thresholds enforces a 14-day study cooldown before a retake. Assessments terminated for integrity infractions enforce a 21-day cooldown.
               </p>
             </div>
 
-            <div className="border border-[#E7E2DA] bg-[#F8F6F3] rounded p-6">
-              <div className="flex items-center gap-2.5 text-[15px] font-semibold text-[#1C1917] mb-3">
-                <Award className="h-4 w-4 text-[#1C1917]" /> Component Threshold Standard
+            <div className="border border-border bg-[#F8F6F3] rounded p-6">
+              <div className="flex items-center gap-2.5 text-[15px] font-semibold text-foreground mb-3">
+                <Award className="h-4 w-4 text-foreground" /> Component Threshold Standard
               </div>
-              <p className="text-[13px] text-[#78716C] leading-relaxed">
+              <p className="text-[13px] text-muted-foreground leading-relaxed">
                 Verification is not graded on a curve. A consistent passing standard for each component ensures employers that all verified candidates met the same objective technical standard.
               </p>
             </div>
@@ -130,7 +130,7 @@ export default function HowVerificationWorksPage() {
             <div className="flex items-center gap-2 text-[15px] font-semibold text-[#16A34A] mb-4">
               <CheckCircle2 className="h-5 w-5" /> What Verification Means
             </div>
-            <ul className="space-y-3 text-[13px] text-[#78716C] leading-relaxed">
+            <ul className="space-y-3 text-[13px] text-muted-foreground leading-relaxed">
               <li className="flex items-start gap-2">
                 <span className="text-[#16A34A] mt-0.5">•</span>
                 The candidate passed an objective, timed evaluation by meeting all component thresholds.
@@ -150,25 +150,25 @@ export default function HowVerificationWorksPage() {
             </ul>
           </div>
 
-          <div className="border border-[#E7E2DA] bg-white rounded p-8 shadow-sm">
-            <div className="flex items-center gap-2 text-[15px] font-semibold text-[#78716C] mb-4">
+          <div className="border border-border bg-white rounded p-8 shadow-sm">
+            <div className="flex items-center gap-2 text-[15px] font-semibold text-muted-foreground mb-4">
               <AlertCircle className="h-5 w-5" /> What Verification Does Not Mean
             </div>
-            <ul className="space-y-3 text-[13px] text-[#78716C] leading-relaxed">
+            <ul className="space-y-3 text-[13px] text-muted-foreground leading-relaxed">
               <li className="flex items-start gap-2">
-                <span className="text-[#78716C] mt-0.5">•</span>
+                <span className="text-muted-foreground mt-0.5">•</span>
                 It does not guarantee employment or job offers with partner companies.
               </li>
               <li className="flex items-start gap-2">
-                <span className="text-[#78716C] mt-0.5">•</span>
+                <span className="text-muted-foreground mt-0.5">•</span>
                 It does not certify every aspect of a candidate&apos;s overall engineering capacity.
               </li>
               <li className="flex items-start gap-2">
-                <span className="text-[#78716C] mt-0.5">•</span>
+                <span className="text-muted-foreground mt-0.5">•</span>
                 It does not substitute for an employer&apos;s internal interview and evaluation process.
               </li>
               <li className="flex items-start gap-2">
-                <span className="text-[#78716C] mt-0.5">•</span>
+                <span className="text-muted-foreground mt-0.5">•</span>
                 It does not represent a professional licensure or accredited degree.
               </li>
             </ul>
@@ -179,7 +179,7 @@ export default function HowVerificationWorksPage() {
         <div className="mt-16 text-center">
           <Link
             href="/candidate/verification"
-            className="inline-flex items-center gap-2 px-6 h-12 bg-[#1C1917] text-white text-[14px] font-semibold rounded hover:bg-[#292524] transition-colors shadow-sm"
+            className="inline-flex items-center gap-2 px-6 h-12 bg-foreground text-white text-[14px] font-semibold rounded hover:bg-stone-800 transition-colors shadow-sm"
           >
             Start Your Verification
             <ArrowRight className="h-4 w-4" />
@@ -188,7 +188,7 @@ export default function HowVerificationWorksPage() {
       </section>
 
       {/* Footer */}
-      <footer className="border-t border-[#E7E2DA] bg-white px-4 sm:px-8 lg:px-16 py-8 sm:py-10 text-center text-[13px] text-[#78716C]">
+      <footer className="border-t border-border bg-white px-4 sm:px-8 lg:px-16 py-8 sm:py-10 text-center text-[13px] text-muted-foreground">
         <p>© {new Date().getFullYear()} MeritLane. All verification records are evaluated under MeritLane integrity standards.</p>
       </footer>
     </div>

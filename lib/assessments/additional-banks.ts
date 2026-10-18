@@ -49,6 +49,41 @@ public class Solution {
 }`,
         language: "csharp",
         supportedLanguages: CSHARP_LANGS
+      },
+      {
+        id: "csharp_task_2",
+        title: "Sliding Window Rate Limiter",
+        difficulty: "medium",
+        instructions: "Implement `SlidingWindowLimiter` with method `bool AllowRequest(string clientId, int maxRequests, TimeSpan window)` that tracks timestamps of requests per client in a sliding time window. Return `true` if request is allowed and record the timestamp, or `false` if client exceeded `maxRequests` within `window`.",
+        initialCode: `using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
+
+public class SlidingWindowLimiter {
+    private readonly ConcurrentDictionary<string, List<DateTime>> _requestLogs = new();
+    private readonly object _lock = new();
+
+    public bool AllowRequest(string clientId, int maxRequests, TimeSpan window) {
+        if (string.IsNullOrWhiteSpace(clientId)) return false;
+        
+        lock (_lock) {
+            var now = DateTime.UtcNow;
+            var cutoff = now - window;
+            
+            var list = _requestLogs.GetOrAdd(clientId, _ => new List<DateTime>());
+            list.RemoveAll(ts => ts < cutoff);
+            
+            if (list.Count >= maxRequests) {
+                return false;
+            }
+            
+            list.Add(now);
+            return true;
+        }
+    }
+}`,
+        language: "csharp",
+        supportedLanguages: CSHARP_LANGS
       }
     ],
     mcqPool: [
@@ -260,6 +295,51 @@ int removeDuplicates(int* nums, int numsSize) {
         supportedLanguages: [
           { id: "c", name: "C (GCC)", monacoLang: "cpp", template: `int removeDuplicates(int* nums, int numsSize) {\n    return 0;\n}` },
           { id: "cpp", name: "C++ (GCC 14)", monacoLang: "cpp", template: `int removeDuplicates(int* nums, int numsSize) {\n    return 0;\n}` }
+        ]
+      },
+      {
+        id: "c_task_2",
+        title: "Circular Byte FIFO Buffer",
+        difficulty: "medium",
+        instructions: "Implement a circular byte FIFO queue in C. Provide `fifo_init(FifoBuffer* fifo, uint8_t* buffer, size_t capacity)`, `fifo_push(FifoBuffer* fifo, uint8_t byte)` (returns 1 on success, 0 if full), and `fifo_pop(FifoBuffer* fifo, uint8_t* out_byte)` (returns 1 on success, 0 if empty).",
+        initialCode: `#include <stdint.h>
+#include <stddef.h>
+
+typedef struct {
+    uint8_t* buffer;
+    size_t capacity;
+    size_t head;
+    size_t tail;
+    size_t count;
+} FifoBuffer;
+
+void fifo_init(FifoBuffer* fifo, uint8_t* buffer, size_t capacity) {
+    fifo->buffer = buffer;
+    fifo->capacity = capacity;
+    fifo->head = 0;
+    fifo->tail = 0;
+    fifo->count = 0;
+}
+
+int fifo_push(FifoBuffer* fifo, uint8_t byte) {
+    if (fifo->count >= fifo->capacity) return 0;
+    fifo->buffer[fifo->tail] = byte;
+    fifo->tail = (fifo->tail + 1) % fifo->capacity;
+    fifo->count++;
+    return 1;
+}
+
+int fifo_pop(FifoBuffer* fifo, uint8_t* out_byte) {
+    if (fifo->count == 0) return 0;
+    *out_byte = fifo->buffer[fifo->head];
+    fifo->head = (fifo->head + 1) % fifo->capacity;
+    fifo->count--;
+    return 1;
+}`,
+        language: "c",
+        supportedLanguages: [
+          { id: "c", name: "C (GCC)", monacoLang: "cpp", template: `// Implement FIFO functions\n` },
+          { id: "cpp", name: "C++ (GCC 14)", monacoLang: "cpp", template: `// Implement FIFO functions\n` }
         ]
       }
     ],
@@ -2021,6 +2101,34 @@ int removeDuplicates(int* nums, int numsSize) {
             row.append(round(val, 4))
         result.append(row)
     return result
+`,
+        language: "python",
+        supportedLanguages: PYTHON_LANGS
+      },
+      {
+        id: "numpy_task_2",
+        title: "Vectorized Moving Average & Bollinger Bands",
+        difficulty: "medium",
+        instructions: "Implement `compute_bollinger_bands(prices, window=5, num_std=2.0)` in Python. Given a 1D list of prices, calculate the simple moving average (SMA), upper Bollinger band (SMA + num_std * rolling_std), and lower Bollinger band (SMA - num_std * rolling_std) for each point where a full window of data is available. Return a dictionary with keys `'sma'`, `'upper'`, and `'lower'` rounded to 4 decimal places.",
+        initialCode: `def compute_bollinger_bands(prices: list, window: int = 5, num_std: float = 2.0) -> dict:
+    if not prices or len(prices) < window:
+        return {"sma": [], "upper": [], "lower": []}
+    
+    sma = []
+    upper = []
+    lower = []
+    
+    for i in range(window - 1, len(prices)):
+        sub = prices[i - window + 1 : i + 1]
+        mean = sum(sub) / window
+        variance = sum((x - mean) ** 2 for x in sub) / window
+        std = variance ** 0.5
+        
+        sma.append(round(mean, 4))
+        upper.append(round(mean + num_std * std, 4))
+        lower.append(round(mean - num_std * std, 4))
+        
+    return {"sma": sma, "upper": upper, "lower": lower}
 `,
         language: "python",
         supportedLanguages: PYTHON_LANGS

@@ -17,6 +17,7 @@ import {
 import { Job } from "@/lib/firebase/jobs";
 import { fetchCandidateProfile, CandidateProfile } from "@/lib/firebase/candidate";
 import { calculateProfileCompletion, ProfileCompletionResult } from "@/lib/profileCompletion";
+import { MeritlaneLoader } from "@/components/ui/MeritlaneLoader";
 
 export default function CandidateJobDetailPage() {
   const params = useParams();
@@ -43,7 +44,7 @@ export default function CandidateJobDetailPage() {
     setLoading(true);
     setError("");
     try {
-      const token = user ? await user.getIdToken(true) : null;
+      const token = user ? await user.getIdToken() : null;
       const headers: Record<string, string> = {};
       if (token) headers["Authorization"] = `Bearer ${token}`;
 
@@ -98,7 +99,7 @@ export default function CandidateJobDetailPage() {
     setApplyError("");
 
     try {
-      const token = await user.getIdToken(true);
+      const token = await user.getIdToken();
       const res = await fetch(`/api/jobs/${id}/apply`, {
         method: "POST",
         headers: {
@@ -124,30 +125,25 @@ export default function CandidateJobDetailPage() {
 
   if (loading) {
     return (
-      <div className="w-full min-h-full bg-[#FAF8F5] flex items-center justify-center p-16">
-        <div className="text-center">
-          <div className="h-6 w-6 border-2 border-[#E7E2DA] border-t-[#1C1917] rounded-full animate-spin mx-auto mb-3" />
-          <div className="text-[12px] font-medium text-[#78716C] uppercase tracking-wider">
-            Loading role specifications…
-          </div>
-        </div>
+      <div className="w-full min-h-full bg-surface flex items-center justify-center p-16">
+        <MeritlaneLoader level="section" text="Loading role specifications…" />
       </div>
     );
   }
 
   if (error || !job) {
     return (
-      <div className="w-full min-h-full bg-[#FAF8F5] flex items-center justify-center p-16 text-[#1C1917]">
-        <div className="max-w-md w-full bg-white border border-[#E7E2DA] p-8 text-center rounded-2xl shadow-xs">
-          <AlertCircle className="h-10 w-10 text-[#B42318] mx-auto mb-3" />
+      <div className="w-full min-h-full bg-surface flex items-center justify-center p-16 text-foreground">
+        <div className="max-w-md w-full bg-white border border-border p-8 text-center rounded-2xl shadow-xs">
+          <AlertCircle className="h-10 w-10 text-danger mx-auto mb-3" />
           <h2 className="text-[20px] font-semibold mb-2">
             Opportunity Unavailable
           </h2>
-          <p className="text-[13px] text-[#78716C] mb-6">
+          <p className="text-[13px] text-muted-foreground mb-6">
             {error || "The requested job posting could not be found or has been removed."}
           </p>
           <Link href="/candidate/jobs">
-            <button className="px-5 py-2.5 bg-[#1C1917] text-white text-[12px] font-medium font-semibold rounded hover:bg-[#064E3B] transition-colors uppercase">
+            <button className="px-5 py-2.5 bg-foreground text-white text-[12px] font-medium font-semibold rounded hover:bg-emerald-900 transition-colors uppercase">
               Return to Roles
             </button>
           </Link>
@@ -160,61 +156,61 @@ export default function CandidateJobDetailPage() {
   const verifiedSkills = candidateProfile?.verifiedSkills || {};
 
   return (
-    <div className="w-full min-h-full bg-transparent pb-24 text-[#1C1917]">
+    <div className="w-full min-h-full bg-transparent pb-24 text-foreground">
       {/* ── Institutional Header Strip ── */}
-      <div className="border-b border-[#E7E2DA] bg-white px-6 sm:px-10 py-5">
-        <div className="max-w-[1400px] mx-auto flex items-center justify-between">
+      <div className="border-b border-border bg-white px-6 sm:px-10 py-5">
+        <div className="w-full flex items-center justify-between">
           <Link
             href="/candidate/jobs"
-            className="inline-flex items-center gap-2 text-[12px] font-mono font-semibold text-[#78716C] hover:text-[#1C1917] transition-colors"
+            className="inline-flex items-center gap-2 text-[12px] font-mono font-semibold text-muted-foreground hover:text-foreground transition-colors"
           >
             <ArrowLeft className="h-3.5 w-3.5" />
             BACK TO ALL ROLES
           </Link>
 
-          <span className="text-[11px] font-medium text-[#78716C] uppercase tracking-wider">
+          <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
             Verified Role
           </span>
         </div>
       </div>
 
-      <div className="max-w-[1400px] mx-auto px-6 sm:px-10 py-8 grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="w-full px-6 sm:px-10 py-8 grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* ── LEFT: Main Job Specification ── */}
         <div className="lg:col-span-2 space-y-6">
-          <div className="border border-[#E7E2DA] bg-white p-7 sm:p-9 rounded-2xl shadow-xs">
+          <div className="border border-border bg-white p-7 sm:p-9 rounded-2xl shadow-xs">
             {/* Metadata Tags */}
             <div className="flex items-center gap-2.5 flex-wrap mb-3">
-              <span className="text-[10px] font-medium font-semibold uppercase tracking-[0.14em] text-[#064E3B] bg-[#064E3B]/10 px-3 py-1 rounded border border-[#064E3B]/20">
+              <span className="text-[10px] font-medium font-semibold uppercase tracking-[0.14em] text-emerald-900 bg-emerald-900/10 px-3 py-1 rounded border border-emerald-900/20">
                 {job.workMode.toUpperCase()}
               </span>
-              <span className="text-[10px] font-medium uppercase tracking-[0.14em] text-[#78716C] bg-[#FAF8F5] px-3 py-1 rounded border border-[#E7E2DA]">
+              <span className="text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground bg-surface px-3 py-1 rounded border border-border">
                 {job.employmentType.replace("-", " ").toUpperCase()}
               </span>
               {job.salaryRange && (
-                <span className="text-[12px] font-mono text-[#1C1917] font-semibold bg-[#FAF8F5] px-3 py-1 rounded border border-[#E7E2DA]">
+                <span className="text-[12px] font-mono text-foreground font-semibold bg-surface px-3 py-1 rounded border border-border">
                   {job.salaryRange}
                 </span>
               )}
             </div>
 
-            <h1 className="text-[26px] sm:text-[32px] font-semibold text-[#1C1917] tracking-tight leading-tight mb-2">
+            <h1 className="text-[26px] sm:text-[32px] font-semibold text-foreground tracking-tight leading-tight mb-2">
               {job.title}
             </h1>
 
-            <div className="flex items-center gap-4 text-[14px] text-[#78716C] flex-wrap pb-6 border-b border-[#E7E2DA]">
-              <span className="flex items-center gap-1.5 font-medium text-[#1C1917]">
-                <Building2 className="h-4 w-4 text-[#78716C]" />
+            <div className="flex items-center gap-4 text-[14px] text-muted-foreground flex-wrap pb-6 border-b border-border">
+              <span className="flex items-center gap-1.5 font-medium text-foreground">
+                <Building2 className="h-4 w-4 text-muted-foreground" />
                 {job.companyName}
               </span>
               <span className="flex items-center gap-1.5">
-                <MapPin className="h-4 w-4 text-[#78716C]" />
+                <MapPin className="h-4 w-4 text-muted-foreground" />
                 {job.location}
               </span>
             </div>
 
             {/* Description */}
             <div className="py-6 space-y-4">
-              <h2 className="text-[13px] font-medium font-semibold uppercase tracking-[0.08em] text-[#1C1917]">
+              <h2 className="text-[13px] font-medium font-semibold uppercase tracking-[0.08em] text-foreground">
                 ROLE SPECIFICATION & RESPONSIBILITIES
               </h2>
               <div className="text-[14px] text-[#333333] leading-relaxed whitespace-pre-line font-sans">
@@ -223,8 +219,8 @@ export default function CandidateJobDetailPage() {
             </div>
 
             {/* Required Skills Matrix */}
-            <div className="pt-6 border-t border-[#E7E2DA] space-y-3">
-              <h2 className="text-[13px] font-medium font-semibold uppercase tracking-[0.08em] text-[#1C1917]">
+            <div className="pt-6 border-t border-border space-y-3">
+              <h2 className="text-[13px] font-medium font-semibold uppercase tracking-[0.08em] text-foreground">
                 REQUIRED TECHNICAL CAPABILITIES
               </h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1">
@@ -235,17 +231,17 @@ export default function CandidateJobDetailPage() {
                       key={skill}
                       className={`flex items-center justify-between px-3.5 py-2.5 border rounded-xl text-[12px] font-mono ${
                         isVerified
-                          ? "bg-[#064E3B]/[0.03] border-[#064E3B]/30 text-[#064E3B]"
-                          : "bg-[#FAF8F5] border-[#E7E2DA] text-[#1C1917]"
+                          ? "bg-emerald-900/[0.03] border-emerald-900/30 text-emerald-900"
+                          : "bg-surface border-border text-foreground"
                       }`}
                     >
                       <span className="font-semibold">{skill}</span>
                       {isVerified ? (
-                        <span className="inline-flex items-center gap-1 text-[10px] text-[#064E3B] font-semibold">
+                        <span className="inline-flex items-center gap-1 text-[10px] text-emerald-900 font-semibold">
                           <ShieldCheck className="h-3 w-3" /> VERIFIED
                         </span>
                       ) : (
-                        <span className="text-[10px] text-[#78716C]">Required</span>
+                        <span className="text-[10px] text-muted-foreground">Required</span>
                       )}
                     </div>
                   );
@@ -257,8 +253,8 @@ export default function CandidateJobDetailPage() {
 
         {/* ── RIGHT: Application & Profile Gate Column ── */}
         <div className="space-y-6">
-          <div className="border border-[#E7E2DA] bg-white p-6 sm:p-7 rounded-2xl shadow-xs space-y-5">
-            <h2 className="text-[13px] font-medium font-semibold uppercase tracking-[0.08em] text-[#1C1917]">
+          <div className="border border-border bg-white p-6 sm:p-7 rounded-2xl shadow-xs space-y-5">
+            <h2 className="text-[13px] font-medium font-semibold uppercase tracking-[0.08em] text-foreground">
               APPLICATION DOSSIER
             </h2>
 
@@ -269,23 +265,23 @@ export default function CandidateJobDetailPage() {
                 <div className="text-[12px] font-bold uppercase text-[#92400E]">
                   APPLICATIONS CLOSED
                 </div>
-                <p className="text-[12px] text-[#78716C] mt-1">
+                <p className="text-[12px] text-muted-foreground mt-1">
                   This opportunity is currently paused or no longer accepting new submissions.
                 </p>
               </div>
             ) : hasApplied ? (
-              <div className="border border-[#064E3B]/30 bg-[#064E3B]/[0.04] p-5 rounded-xl text-center space-y-2">
-                <CheckCircle2 className="h-8 w-8 text-[#064E3B] mx-auto" />
-                <div className="text-[14px] font-bold uppercase tracking-wide text-[#064E3B]">
+              <div className="border border-emerald-900/30 bg-emerald-900/[0.04] p-5 rounded-xl text-center space-y-2">
+                <CheckCircle2 className="h-8 w-8 text-emerald-900 mx-auto" />
+                <div className="text-[14px] font-bold uppercase tracking-wide text-emerald-900">
                   APPLICATION SUBMITTED
                 </div>
-                <p className="text-[12px] text-[#78716C] leading-relaxed">
+                <p className="text-[12px] text-muted-foreground leading-relaxed">
                   Your verified candidate dossier has been delivered to {job.companyName || "the hiring organization"} for review.
                 </p>
                 <div className="pt-1">
                   <Link
                     href="/candidate/applications"
-                    className="inline-flex items-center gap-1 text-[11px] font-mono text-[#064E3B] font-semibold hover:underline"
+                    className="inline-flex items-center gap-1 text-[11px] font-mono text-emerald-900 font-semibold hover:underline"
                   >
                     View in My Applications →
                   </Link>
@@ -294,19 +290,19 @@ export default function CandidateJobDetailPage() {
             ) : !user ? (
               /* Unauthenticated Call to Action */
               <div className="space-y-3 text-center">
-                <p className="text-[13px] text-[#78716C]">
+                <p className="text-[13px] text-muted-foreground">
                   Sign in with your verified MeritLane candidate credentials to submit your application.
                 </p>
                 <Link href={`/login?redirect=/candidate/jobs/${job.id}`}>
-                  <button className="w-full h-11 bg-[#1C1917] hover:bg-[#064E3B] text-white text-[12px] font-sans font-semibold uppercase tracking-wide rounded transition-colors shadow-2xs">
+                  <button className="w-full h-11 bg-foreground hover:bg-emerald-900 text-white text-[12px] font-sans font-semibold uppercase tracking-wide rounded transition-colors shadow-2xs">
                     AUTHENTICATE TO APPLY
                   </button>
                 </Link>
               </div>
             ) : role !== "candidate" ? (
               /* Employer / Admin Account Warning */
-              <div className="border border-[#E7E2DA] bg-[#FAF8F5] p-4 rounded-xl text-center">
-                <p className="text-[12px] text-[#78716C]">
+              <div className="border border-border bg-surface p-4 rounded-xl text-center">
+                <p className="text-[12px] text-muted-foreground">
                   You are signed in as an {role}. Only candidate accounts may submit job applications.
                 </p>
               </div>
@@ -315,19 +311,19 @@ export default function CandidateJobDetailPage() {
               <div className="space-y-4">
                 <div>
                   <div className="flex items-center justify-between text-[11px] font-sans font-semibold uppercase tracking-wide mb-1.5">
-                    <span className="text-[#78716C]">Profile Completeness:</span>
+                    <span className="text-muted-foreground">Profile Completeness:</span>
                     <span
                       className={`font-semibold ${
-                        completion?.isComplete ? "text-[#064E3B]" : "text-[#B45309]"
+                        completion?.isComplete ? "text-emerald-900" : "text-[#B45309]"
                       }`}
                     >
                       {completion?.percentage || 0}%
                     </span>
                   </div>
-                  <div className="w-full bg-[#E7E2DA] h-2 rounded overflow-hidden">
+                  <div className="w-full bg-border h-2 rounded overflow-hidden">
                     <div
                       className={`h-full transition-all duration-500 ${
-                        completion?.isComplete ? "bg-[#064E3B]" : "bg-[#B45309]"
+                        completion?.isComplete ? "bg-emerald-900" : "bg-[#B45309]"
                       }`}
                       style={{ width: `${completion?.percentage || 0}%` }}
                     />
@@ -341,7 +337,7 @@ export default function CandidateJobDetailPage() {
                       <Lock className="h-4 w-4 shrink-0" />
                       100% Profile Required
                     </div>
-                    <p className="text-[12px] text-[#78716C] leading-relaxed">
+                    <p className="text-[12px] text-muted-foreground leading-relaxed">
                       Complete your profile to 100% before applying. Please resolve the following missing sections:
                     </p>
                     <ul className="text-[11px] font-mono text-[#92400E] space-y-1 list-disc list-inside">
@@ -358,7 +354,7 @@ export default function CandidateJobDetailPage() {
                     </div>
                   </div>
                 ) : (
-                  <div className="border border-[#064E3B]/30 bg-[#064E3B]/[0.03] p-3 rounded-xl flex items-center gap-2 text-[12px] text-[#064E3B] font-mono font-semibold">
+                  <div className="border border-emerald-900/30 bg-emerald-900/[0.03] p-3 rounded-xl flex items-center gap-2 text-[12px] text-emerald-900 font-mono font-semibold">
                     <CheckCircle2 className="h-4 w-4 shrink-0" />
                     Profile 100% Complete · Application Eligible
                   </div>
@@ -366,7 +362,7 @@ export default function CandidateJobDetailPage() {
 
                 {/* Error Banner */}
                 {applyError && (
-                  <div className="p-3 bg-[#FEF2F2] border border-[#B42318]/20 rounded-xl text-[12px] text-[#B42318] font-sans">
+                  <div className="p-3 bg-danger/10 border border-danger/20 rounded-xl text-[12px] text-danger font-sans">
                     {applyError}
                   </div>
                 )}
@@ -375,7 +371,7 @@ export default function CandidateJobDetailPage() {
                 <button
                   onClick={handleApply}
                   disabled={applying || !completion?.isComplete || (completion?.percentage || 0) < 100}
-                  className="w-full h-11 bg-[#064E3B] hover:bg-[#043327] text-white text-[12px] font-sans font-semibold uppercase tracking-wide rounded transition-colors shadow-xs disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                  className="w-full h-11 bg-emerald-900 hover:bg-emerald-950 text-white text-[12px] font-sans font-semibold uppercase tracking-wide rounded transition-colors shadow-xs disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 >
                   {applying ? (
                     <>
@@ -394,8 +390,8 @@ export default function CandidateJobDetailPage() {
           </div>
 
           {/* Institutional Trust Note */}
-          <div className="border border-[#E7E2DA] bg-white p-5 rounded-2xl shadow-xs space-y-2 text-[12px] text-[#78716C] leading-relaxed font-sans">
-            <div className="text-[10px] font-sans font-semibold uppercase tracking-wide text-[#1C1917] font-semibold">
+          <div className="border border-border bg-white p-5 rounded-2xl shadow-xs space-y-2 text-[12px] text-muted-foreground leading-relaxed font-sans">
+            <div className="text-[10px] font-sans font-semibold uppercase tracking-wide text-foreground font-semibold">
               Evaluation Protocol
             </div>
             <p>

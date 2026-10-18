@@ -17,14 +17,14 @@ import {
 } from "lucide-react";
 import { Job, JobApplication, ApplicationStage } from "@/lib/firebase/jobs";
 import { MessageModal } from "@/components/employer/MessageModal";
-
+import { MeritlaneLoader } from "@/components/ui/MeritlaneLoader";
 const PIPELINE_OPTIONS: { id: ApplicationStage; label: string; color: string }[] = [
-  { id: "applied", label: "Applied", color: "text-[#78716C] bg-[#FAF8F5] border-[#E7E2DA]" },
+  { id: "applied", label: "Applied", color: "text-muted-foreground bg-surface border-border" },
   { id: "shortlisted", label: "Shortlisted", color: "text-[#1D4ED8] bg-[#EFF6FF] border-[#BFDBFE]" },
   { id: "interviewing", label: "Interviewing", color: "text-[#B45309] bg-[#FFFBEB] border-[#FDE68A]" },
   { id: "offer", label: "Offer Extended", color: "text-[#7E22CE] bg-[#FAF5FF] border-[#E9D5FF]" },
-  { id: "hired", label: "Hired", color: "text-[#064E3B] bg-[#ECFDF5] border-[#A7F3D0]" },
-  { id: "rejected", label: "Archived / Rejected", color: "text-[#B42318] bg-[#FEF2F2] border-[#FECACA]" },
+  { id: "hired", label: "Hired", color: "text-emerald-900 bg-[#ECFDF5] border-[#A7F3D0]" },
+  { id: "rejected", label: "Archived / Rejected", color: "text-danger bg-danger/10 border-[#FECACA]" },
 ];
 
 export default function JobApplicantsPage() {
@@ -109,45 +109,40 @@ export default function JobApplicantsPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#FAF8F5] flex items-center justify-center p-8">
-        <div className="text-center">
-          <div className="h-6 w-6 border-2 border-[#E7E2DA] border-t-[#1C1917] rounded-full animate-spin mx-auto mb-3" />
-          <div className="text-[12px] font-medium text-[#78716C] uppercase tracking-wider">
-            Loading applicant dossiers…
-          </div>
-        </div>
+      <div className="min-h-screen bg-surface flex items-center justify-center p-8">
+        <MeritlaneLoader level="section" text="Loading applicant dossiers…" />
       </div>
     );
   }
 
   return (
-    <div className="w-full min-h-screen bg-[#FAF8F5] pb-24 text-[#1C1917]">
+    <div className="w-full min-h-screen bg-surface pb-24 text-foreground">
       {/* ── Header Strip ── */}
-      <div className="border-b border-[#E7E2DA] bg-white px-6 sm:px-10 py-6">
-        <div className="max-w-[1400px] mx-auto flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="border-b border-border bg-white px-6 sm:px-10 py-6">
+        <div className="w-full flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <Link
               href="/employer/jobs"
-              className="inline-flex items-center gap-2 text-[12px] font-mono font-semibold text-[#78716C] hover:text-[#1C1917] transition-colors mb-2"
+              className="inline-flex items-center gap-2 text-[12px] font-mono font-semibold text-muted-foreground hover:text-foreground transition-colors mb-2"
             >
               <ArrowLeft className="h-3.5 w-3.5" />
               BACK TO JOBS HUB
             </Link>
-            <h1 className="text-[24px] sm:text-[30px] font-bold uppercase tracking-[0.06em] text-[#1C1917] leading-tight">
+            <h1 className="text-[24px] sm:text-[30px] font-bold uppercase tracking-[0.06em] text-foreground leading-tight">
               APPLICANTS — {job?.title}
             </h1>
-            <div className="flex items-center gap-3 text-[12px] text-[#78716C] font-mono mt-1">
+            <div className="flex items-center gap-3 text-[12px] text-muted-foreground font-mono mt-1">
               <span>{job?.location}</span>
               <span>·</span>
               <span>{job?.workMode?.toUpperCase()}</span>
               <span>·</span>
-              <span className="text-[#064E3B] font-semibold">{applicants.length} SUBMISSIONS</span>
+              <span className="text-emerald-900 font-semibold">{applicants.length} SUBMISSIONS</span>
             </div>
           </div>
 
           <div className="flex items-center gap-3">
             <Link href={`/jobs/${id}`} target="_blank">
-              <button className="px-4 py-2 border border-[#E7E2DA] bg-white hover:bg-[#FAF8F5] text-[12px] font-mono font-semibold rounded transition-colors shadow-2xs">
+              <button className="px-4 py-2 border border-border bg-white hover:bg-surface text-[12px] font-mono font-semibold rounded transition-colors shadow-2xs">
                 VIEW PUBLIC POSTING ↗
               </button>
             </Link>
@@ -155,27 +150,27 @@ export default function JobApplicantsPage() {
         </div>
       </div>
 
-      <div className="max-w-[1400px] mx-auto px-6 sm:px-10 py-8">
+      <div className="w-full px-6 sm:px-10 py-8">
         {error ? (
-          <div className="border border-[#B42318]/20 bg-[#FEF2F2] p-8 text-center rounded-2xl">
-            <p className="text-[14px] text-[#B42318] mb-4">{error}</p>
-            <button onClick={loadApplicants} className="px-4 py-2 bg-[#1C1917] text-white text-[12px] font-mono rounded">
+          <div className="border border-danger/20 bg-danger/10 p-8 text-center rounded-2xl">
+            <p className="text-[14px] text-danger mb-4">{error}</p>
+            <button onClick={loadApplicants} className="px-4 py-2 bg-foreground text-white text-[12px] font-mono rounded">
               RETRY
             </button>
           </div>
         ) : applicants.length === 0 ? (
           <div className="border border-dashed border-[#C8BFB0] bg-white p-16 text-center rounded-2xl">
             <Users className="h-10 w-10 text-[#C8BFB0] mx-auto mb-4" />
-            <h2 className="text-[18px] font-bold uppercase tracking-[0.06em] text-[#1C1917] mb-2">
+            <h2 className="text-[18px] font-bold uppercase tracking-[0.06em] text-foreground mb-2">
               NO SUBMISSIONS YET
             </h2>
-            <p className="text-[13px] text-[#78716C] font-sans max-w-md mx-auto">
+            <p className="text-[13px] text-muted-foreground font-sans max-w-md mx-auto">
               This job is actively accepting candidates with 100% profile completion. As soon as candidates apply, their verified dossiers will appear here.
             </p>
           </div>
         ) : (
-          <div className="border border-[#E7E2DA] bg-white rounded-2xl shadow-xs overflow-hidden">
-            <div className="border-b border-[#E7E2DA] bg-[#FAF8F5] px-6 py-3.5 flex items-center justify-between text-[11px] font-medium text-[#78716C] uppercase font-semibold">
+          <div className="border border-border bg-white rounded-2xl shadow-xs overflow-hidden">
+            <div className="border-b border-border bg-surface px-6 py-3.5 flex items-center justify-between text-[11px] font-medium text-muted-foreground uppercase font-semibold">
               <div>APPLICANT DOSSIER INDEX ({applicants.length})</div>
               <div>VERIFIED MATCHING MATRIX</div>
             </div>
@@ -189,27 +184,27 @@ export default function JobApplicantsPage() {
                 return (
                   <div
                     key={app.id}
-                    className="p-6 sm:p-7 flex flex-col lg:flex-row lg:items-center justify-between gap-6 hover:bg-[#FAF8F5]/40 transition-colors"
+                    className="p-6 sm:p-7 flex flex-col lg:flex-row lg:items-center justify-between gap-6 hover:bg-surface/40 transition-colors"
                   >
                     <div className="space-y-3 flex-1">
                       {/* Candidate Name */}
                       <div className="flex items-center gap-3 flex-wrap">
-                        <span className="font-serif text-[22px] sm:text-[24px] text-[#1C1917] leading-tight font-bold">
+                        <span className="font-serif text-[22px] sm:text-[24px] text-foreground leading-tight font-bold">
                           {app.candidateName}
                         </span>
-                        <span className="text-[10px] font-mono font-semibold text-[#064E3B] bg-[#064E3B]/10 px-2 py-0.5 rounded border border-[#064E3B]/20">
+                        <span className="text-[10px] font-mono font-semibold text-emerald-900 bg-emerald-900/10 px-2 py-0.5 rounded border border-emerald-900/20">
                           {app.candidateKey || (app.candidateId ? `ML-${app.candidateId.slice(0, 8).toUpperCase()}` : "CANDIDATE")}
                         </span>
-                        <span className="text-[11px] font-mono text-[#78716C]">
+                        <span className="text-[11px] font-mono text-muted-foreground">
                           Applied {new Date(app.appliedAt).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" })}
                         </span>
                       </div>
 
                       {/* Academic Background */}
                       {(app.candidateCollege || app.candidateBranch) && (
-                        <div className="flex items-center gap-2 text-[13px] text-[#78716C] font-sans">
-                          <GraduationCap className="h-4 w-4 text-[#064E3B] shrink-0" />
-                          <span className="font-medium text-[#1C1917]">{app.candidateBranch}</span>
+                        <div className="flex items-center gap-2 text-[13px] text-muted-foreground font-sans">
+                          <GraduationCap className="h-4 w-4 text-emerald-900 shrink-0" />
+                          <span className="font-medium text-foreground">{app.candidateBranch}</span>
                           {app.candidateCollege && <span>· {app.candidateCollege}</span>}
                           {app.candidateGradYear && <span className="font-mono">({app.candidateGradYear})</span>}
                         </div>
@@ -217,7 +212,7 @@ export default function JobApplicantsPage() {
 
                       {/* Required vs Verified Skill Match Matrix */}
                       <div className="pt-1">
-                        <div className="text-[10px] font-medium uppercase text-[#78716C] tracking-wider mb-1.5">
+                        <div className="text-[10px] font-medium uppercase text-muted-foreground tracking-wider mb-1.5">
                           Capabilities vs Role Requirements:
                         </div>
                         <div className="flex items-center gap-2 flex-wrap">
@@ -229,10 +224,10 @@ export default function JobApplicantsPage() {
                                 key={reqSkill}
                                 className={`text-[11px] font-mono px-2.5 py-0.5 rounded border flex items-center gap-1 ${
                                   isVerified
-                                    ? "bg-[#064E3B]/10 text-[#064E3B] border-[#064E3B]/30 font-semibold"
+                                    ? "bg-emerald-900/10 text-emerald-900 border-emerald-900/30 font-semibold"
                                     : isDeclared
-                                    ? "bg-[#FAF8F5] text-[#1C1917] border-[#E7E2DA]"
-                                    : "bg-white text-[#A8A29E] border-[#E7E2DA] line-through opacity-70"
+                                    ? "bg-surface text-foreground border-border"
+                                    : "bg-white text-muted-foreground/70 border-border line-through opacity-70"
                                 }`}
                               >
                                 {isVerified && <ShieldCheck className="h-3 w-3" />}
@@ -253,7 +248,7 @@ export default function JobApplicantsPage() {
                           value={app.status}
                           disabled={isBusy}
                           onChange={(e) => handleStageChange(app.candidateId, e.target.value as ApplicationStage)}
-                          className="h-10 px-3.5 bg-white border border-[#E7E2DA] rounded text-[12px] font-mono font-semibold text-[#1C1917] focus:outline-none shadow-2xs cursor-pointer"
+                          className="h-10 px-3.5 bg-white border border-border rounded text-[12px] font-mono font-semibold text-foreground focus:outline-none shadow-2xs cursor-pointer"
                         >
                           {PIPELINE_OPTIONS.map((opt) => (
                             <option key={opt.id} value={opt.id}>
@@ -265,7 +260,7 @@ export default function JobApplicantsPage() {
 
                       {/* Open Full Dossier */}
                       <Link href={`/employer/candidate/${app.candidateId}`} target="_blank">
-                        <button className="flex items-center justify-center gap-1.5 px-4 h-10 bg-[#1C1917] hover:bg-[#064E3B] text-white text-[11px] font-sans font-semibold uppercase tracking-wide rounded transition-colors shadow-xs">
+                        <button className="flex items-center justify-center gap-1.5 px-4 h-10 bg-foreground hover:bg-emerald-900 text-white text-[11px] font-sans font-semibold uppercase tracking-wide rounded transition-colors shadow-xs">
                           <span>OPEN DOSSIER</span>
                           <ExternalLink className="h-3.5 w-3.5" />
                         </button>
@@ -279,9 +274,9 @@ export default function JobApplicantsPage() {
                             name: app.candidateName,
                           })
                         }
-                        className="flex items-center justify-center gap-1.5 px-4 h-10 border border-[#E7E2DA] bg-white hover:bg-[#FAF8F5] text-[#1C1917] text-[11px] font-sans font-semibold uppercase tracking-wide rounded transition-colors shadow-2xs"
+                        className="flex items-center justify-center gap-1.5 px-4 h-10 border border-border bg-white hover:bg-surface text-foreground text-[11px] font-sans font-semibold uppercase tracking-wide rounded transition-colors shadow-2xs"
                       >
-                        <MessageSquare className="h-3.5 w-3.5 text-[#78716C]" />
+                        <MessageSquare className="h-3.5 w-3.5 text-muted-foreground" />
                         <span>MESSAGE</span>
                       </button>
                     </div>
@@ -292,22 +287,22 @@ export default function JobApplicantsPage() {
 
             {/* Pagination Controls */}
             {applicants.length > ITEMS_PER_PAGE && (
-              <div className="flex items-center justify-between border-t border-[#E7E2DA] px-6 py-4">
-                <span className="text-xs text-[#78716C] font-medium">
+              <div className="flex items-center justify-between border-t border-border px-6 py-4">
+                <span className="text-xs text-muted-foreground font-medium">
                   Showing {((currentPage - 1) * ITEMS_PER_PAGE) + 1} to {Math.min(currentPage * ITEMS_PER_PAGE, applicants.length)} of {applicants.length} applicants
                 </span>
                 <div className="flex gap-2">
                   <button
                     disabled={currentPage === 1}
                     onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-                    className="px-3 py-1 border border-[#E7E2DA] bg-white text-[#1C1917] text-xs rounded hover:bg-[#FAF8F5] disabled:opacity-50"
+                    className="px-3 py-1 border border-border bg-white text-foreground text-xs rounded hover:bg-surface disabled:opacity-50"
                   >
                     Previous
                   </button>
                   <button
                     disabled={currentPage * ITEMS_PER_PAGE >= applicants.length}
                     onClick={() => setCurrentPage(p => p + 1)}
-                    className="px-3 py-1 border border-[#E7E2DA] bg-white text-[#1C1917] text-xs rounded hover:bg-[#FAF8F5] disabled:opacity-50"
+                    className="px-3 py-1 border border-border bg-white text-foreground text-xs rounded hover:bg-surface disabled:opacity-50"
                   >
                     Next
                   </button>

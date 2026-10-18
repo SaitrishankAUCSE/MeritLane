@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useRef } from "react";
+import React, { useState, useMemo, useRef, useEffect } from "react";
 import { Save, Sparkles, FileText, CheckCircle2, UploadCloud, Trash2, ShieldCheck, RefreshCw, AlertCircle, Briefcase, MapPin, Clock, DollarSign, Camera } from "lucide-react";
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
@@ -40,6 +40,31 @@ const PREFERRED_LOCATION_SUGGESTIONS = [
   "Singapore",
 ];
 
+function formatProfessionalError(err: any): string {
+  if (!err) return "Unable to save profile changes. Please verify your details and try again.";
+  const msg = typeof err === "string" ? err : err.message || "";
+
+  if (msg.includes("Unsupported field value: undefined") || msg.includes("Function setDoc()")) {
+    return "Some profile information could not be processed. Please review your entries and try saving again.";
+  }
+  if (msg.includes("permission-denied") || msg.includes("insufficient permissions")) {
+    return "You do not currently have permission to update this profile. Please ensure you are signed in.";
+  }
+  if (msg.includes("network-request-failed") || msg.includes("failed-precondition") || msg.includes("offline")) {
+    return "A network connectivity issue occurred. Please check your internet connection and try again.";
+  }
+  if (msg.includes("auth/") || msg.includes("invalid-credential")) {
+    return "Your session may have expired. Please sign in again to save your profile.";
+  }
+  if (msg.toLowerCase().includes("quota")) {
+    return "The service is temporarily experiencing high demand. Please try again in a few moments.";
+  }
+  if (msg.includes("FirebaseError:") || msg.includes("Error:") || msg.includes("at ")) {
+    return "Unable to save profile changes at this time. Please review your details and try again.";
+  }
+  return msg;
+}
+
 interface ProfileFormProps {
   initialData: CandidateProfile | null;
   onSave: (data: CandidateProfile) => void;
@@ -61,11 +86,19 @@ export function ProfileForm({ initialData, onSave, onCancel, isNew = false }: Pr
 
   // PDF File Upload & Scan State
   const [resumeFile, setResumeFile] = useState<File | null>(null);
-  const [resumeFileName, setResumeFileName] = useState<string>(initialData?.resumeUrl ? "Existing Resume Document" : "");
+  const [resumeFileName, setResumeFileName] = useState<string>(
+    initialData?.resumeFileName || (initialData?.resumeUrl ? "Candidate_Resume.pdf" : "")
+  );
   const [isDragging, setIsDragging] = useState(false);
   const [scannerOpen, setScannerOpen] = useState(false);
   const [parsedProfile, setParsedProfile] = useState<ParsedResumeProfile | null>(null);
   const pendingParseDataRef = useRef<any>(null);
+
+  useEffect(() => {
+    if (initialData?.resumeFileName) {
+      setResumeFileName(initialData.resumeFileName);
+    }
+  }, [initialData?.resumeFileName]);
 
   const initialValues = useMemo(() => ({
     name: initialData?.name || user?.displayName || "",
@@ -153,9 +186,10 @@ export function ProfileForm({ initialData, onSave, onCancel, isNew = false }: Pr
     pendingParseDataRef.current = null;
 
     try {
-      const token = await user?.getIdToken(true);
+      const token = await user?.getIdToken();
       const data = new FormData();
       data.append("file", file);
+      data.append("fileName", file.name);
       data.append("skills", JSON.stringify(formData.skills));
 
       const res = await fetch("/api/candidate/ats-check", {
@@ -392,7 +426,7 @@ export function ProfileForm({ initialData, onSave, onCancel, isNew = false }: Pr
     try {
       const updatedProfile: Partial<CandidateProfile> = {
         ...formData,
-        avatarUrl: formData.avatarUrl || undefined,
+        avatarUrl: formData.avatarUrl || "",
         resumeFileName: resumeFileName || initialData?.resumeFileName,
         resumeUploadedAt: resumeFile ? Date.now() : (initialData?.resumeUploadedAt || Date.now()),
         updatedAt: Date.now(),
@@ -409,12 +443,12 @@ export function ProfileForm({ initialData, onSave, onCancel, isNew = false }: Pr
       // Sync users doc in Firestore and auth photoURL
       if (user) {
         try {
-          const { doc, updateDoc } = await import("firebase/firestore");
+          const { doc, setDoc } = await import("firebase/firestore");
           const { db } = await import("@/lib/firebase/config");
-          await updateDoc(doc(db, "users", user.uid), {
+          await setDoc(doc(db, "users", user.uid), {
             avatarUrl: formData.avatarUrl || "",
             photoURL: formData.avatarUrl || "",
-          });
+          }, { merge: true });
         } catch {}
       }
 
@@ -445,7 +479,7 @@ export function ProfileForm({ initialData, onSave, onCancel, isNew = false }: Pr
         ...updatedProfile,
       } as CandidateProfile);
     } catch (err: any) {
-      setError(err.message || "Failed to save profile. Please try again.");
+      setError(formatProfessionalError(err));
     } finally {
       setLoading(false);
     }
@@ -521,9 +555,12 @@ export function ProfileForm({ initialData, onSave, onCancel, isNew = false }: Pr
         </div>
 
         {error && (
-          <div className="bg-[#7A3B2E]/10 border border-[#7A3B2E]/30 text-[#7A3B2E] text-[13px] font-mono p-4 flex items-center gap-2.5">
-            <AlertCircle className="h-4 w-4 shrink-0" />
-            <span>{error}</span>
+          <div className="bg-[#FAF5F4] border border-[#E8D8D5] p-4.5 rounded-lg flex items-start gap-3.5 text-[#5A251C] shadow-xs animate-in fade-in duration-150">
+            <AlertCircle className="h-5 w-5 text-[#8B3525] shrink-0 mt-0.5" />
+            <div className="text-[13px] font-sans leading-relaxed">
+              <p className="font-semibold text-[#3D140D] mb-0.5">Profile Update Notice</p>
+              <p className="text-[#6E2B1E] font-normal">{error}</p>
+            </div>
           </div>
         )}
 
@@ -684,7 +721,7 @@ export function ProfileForm({ initialData, onSave, onCancel, isNew = false }: Pr
 
           <div className="space-y-6">
             {/* ── Instagram-Style Profile Photo Section ── */}
-            <div className="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6 p-4 sm:p-5 bg-white border border-[#E7E2DA] rounded-xl shadow-2xs">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6 p-4 sm:p-5 bg-white border border-border rounded-xl shadow-2xs">
               <div
                 className="relative group cursor-pointer shrink-0 self-start sm:self-center"
                 onClick={() => {
@@ -709,11 +746,11 @@ export function ProfileForm({ initialData, onSave, onCancel, isNew = false }: Pr
 
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 mb-0.5">
-                  <span className="text-[15px] sm:text-[16px] font-bold text-[#1C1917] truncate">
+                  <span className="text-[15px] sm:text-[16px] font-bold text-foreground truncate">
                     {formData.name || "Candidate Portrait"}
                   </span>
                 </div>
-                <p className="text-[12px] text-[#78716C] mb-3 font-sans">
+                <p className="text-[12px] text-muted-foreground mb-3 font-sans">
                   Profile photo visible to employers and on your public technical record.
                 </p>
 
@@ -722,7 +759,7 @@ export function ProfileForm({ initialData, onSave, onCancel, isNew = false }: Pr
                     type="button"
                     onClick={() => avatarInputRef.current?.click()}
                     disabled={isProcessingAvatar}
-                    className="text-[11px] font-mono font-semibold px-3.5 py-1.5 bg-[#1C1917] hover:bg-[#064E3B] text-white rounded transition-colors shadow-2xs flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+                    className="text-[11px] font-mono font-semibold px-3.5 py-1.5 bg-foreground hover:bg-emerald-900 text-white rounded transition-colors shadow-2xs flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
                   >
                     <UploadCloud className="h-3.5 w-3.5" />
                     <span>{formData.avatarUrl ? "Update Photo" : "Upload Photo"}</span>
@@ -733,7 +770,7 @@ export function ProfileForm({ initialData, onSave, onCancel, isNew = false }: Pr
                       type="button"
                       onClick={handleRemoveAvatar}
                       disabled={isProcessingAvatar}
-                      className="text-[11px] font-mono font-semibold px-3 py-1.5 border border-[#E7E2DA] hover:border-[#B42318] hover:bg-[#FEF2F2] text-[#B42318] rounded transition-colors flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+                      className="text-[11px] font-mono font-semibold px-3 py-1.5 border border-border hover:border-danger hover:bg-danger/10 text-danger rounded transition-colors flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
                     >
                       <Trash2 className="h-3.5 w-3.5" />
                       <span>Remove</span>
@@ -758,11 +795,11 @@ export function ProfileForm({ initialData, onSave, onCancel, isNew = false }: Pr
                 onClick={() => setShowPhotoActionSheet(false)}
               >
                 <div
-                  className="w-full max-w-xs bg-white rounded-2xl border border-[#E7E2DA] shadow-2xl overflow-hidden text-center divide-y divide-[#F5F1EB] animate-in zoom-in-95 duration-150"
+                  className="w-full max-w-xs bg-white rounded-2xl border border-border shadow-2xl overflow-hidden text-center divide-y divide-[#F5F1EB] animate-in zoom-in-95 duration-150"
                   onClick={(e) => e.stopPropagation()}
                 >
-                  <div className="py-4 px-6 bg-[#FAF8F5]">
-                    <h3 className="text-[15px] font-bold text-[#1C1917]">Change Profile Photo</h3>
+                  <div className="py-4 px-6 bg-surface">
+                    <h3 className="text-[15px] font-bold text-foreground">Change Profile Photo</h3>
                   </div>
                   <button
                     type="button"
@@ -770,21 +807,21 @@ export function ProfileForm({ initialData, onSave, onCancel, isNew = false }: Pr
                       setShowPhotoActionSheet(false);
                       avatarInputRef.current?.click();
                     }}
-                    className="w-full py-3.5 text-[13px] font-semibold text-[#064E3B] hover:bg-[#FAF8F5] transition-colors cursor-pointer"
+                    className="w-full py-3.5 text-[13px] font-semibold text-emerald-900 hover:bg-surface transition-colors cursor-pointer"
                   >
                     Upload New Photo
                   </button>
                   <button
                     type="button"
                     onClick={handleRemoveAvatar}
-                    className="w-full py-3.5 text-[13px] font-semibold text-[#B42318] hover:bg-[#FEF2F2] transition-colors cursor-pointer"
+                    className="w-full py-3.5 text-[13px] font-semibold text-danger hover:bg-danger/10 transition-colors cursor-pointer"
                   >
                     Remove Current Photo
                   </button>
                   <button
                     type="button"
                     onClick={() => setShowPhotoActionSheet(false)}
-                    className="w-full py-3 text-[13px] font-medium text-[#78716C] hover:bg-[#FAF8F5] transition-colors cursor-pointer"
+                    className="w-full py-3 text-[13px] font-medium text-muted-foreground hover:bg-surface transition-colors cursor-pointer"
                   >
                     Cancel
                   </button>
@@ -880,6 +917,8 @@ export function ProfileForm({ initialData, onSave, onCancel, isNew = false }: Pr
                   placeholder="React, Python, Systems Design..."
                   helperText="The first skill listed will be your primary focus. Separate with commas or press Enter."
                   options={COMMON_SKILLS}
+                  splitOnComma={true}
+                  mode="skills"
                 />
               </div>
             </div>
@@ -904,8 +943,10 @@ export function ProfileForm({ initialData, onSave, onCancel, isNew = false }: Pr
                     tags={formData.targetRoles}
                     onChange={(tags) => setFormData((prev) => ({ ...prev, targetRoles: tags }))}
                     placeholder="e.g. Full-Stack Developer, Backend Engineer, DevOps..."
-                    helperText="Specify the roles you are best suited for. Separate with commas or press Enter."
+                    helperText="Specify the roles you are best suited for. Select from suggestions or press Enter."
                     options={TARGET_ROLE_SUGGESTIONS}
+                    splitOnComma={false}
+                    mode="text"
                   />
                 </div>
 
@@ -915,9 +956,11 @@ export function ProfileForm({ initialData, onSave, onCancel, isNew = false }: Pr
                     label="Preferred Work Locations"
                     tags={formData.preferredLocations}
                     onChange={(tags) => setFormData((prev) => ({ ...prev, preferredLocations: tags }))}
-                    placeholder="e.g. Remote, Bangalore, Hyderabad, Pune..."
-                    helperText="Where are you willing or eager to work? (Includes Remote)"
+                    placeholder="e.g. Remote, Hyderabad, India, Bangalore, India..."
+                    helperText="Where are you willing or eager to work? (Type 'City, Country' and press Enter, or choose from suggestions)"
                     options={PREFERRED_LOCATION_SUGGESTIONS}
+                    splitOnComma={false}
+                    mode="text"
                   />
                 </div>
 
@@ -989,44 +1032,53 @@ export function ProfileForm({ initialData, onSave, onCancel, isNew = false }: Pr
 
             {/* External Links */}
             <div className="pt-3 border-t border-[var(--color-border)]">
-              <h4 className="font-serif text-[16px] text-[var(--color-foreground)] font-semibold mb-1">
-                Links &amp; Portfolio
-              </h4>
+              <div className="flex items-center justify-between mb-1">
+                <h4 className="font-serif text-[16px] text-[var(--color-foreground)] font-semibold">
+                  Links &amp; Portfolio
+                </h4>
+                <span className="text-[11px] font-sans font-medium text-[var(--color-muted-foreground)]">
+                  All fields optional
+                </span>
+              </div>
               <p className="text-[12px] text-[var(--color-muted-foreground)] mb-4 font-sans">
                 Add links to your code repository, professional network, and personal portfolio.
               </p>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <Input
-                  label="GitHub URL"
+                  label="GitHub URL (Optional)"
                   name="githubUrl"
                   value={formData.githubUrl}
                   onChange={handleChange}
-                  placeholder="https://github.com/username"
+                  placeholder="https://github.com/SaitrishankAUCSE"
                   type="url"
+                  helperText="Link to your code repository or open-source profile"
                 />
                 <Input
-                  label="LinkedIn URL"
+                  label="LinkedIn URL (Optional)"
                   name="linkedinUrl"
                   value={formData.linkedinUrl}
                   onChange={handleChange}
-                  placeholder="https://linkedin.com/in/username"
+                  placeholder="https://www.linkedin.com/in/saitrishank/"
                   type="url"
+                  helperText="Link to your professional profile"
                 />
                 <Input
-                  label="Portfolio / Personal Website URL"
+                  label="Portfolio / Personal Website URL (Optional)"
                   name="portfolioUrl"
                   value={formData.portfolioUrl}
                   onChange={handleChange}
-                  placeholder="https://yourportfolio.com"
+                  placeholder="https://saitrishank-portfolio.vercel.app/"
                   type="url"
+                  helperText="Link to your personal website or portfolio"
                 />
                 <Input
-                  label="Resume Document / PDF Link"
+                  label="Resume Document / PDF Link (Optional)"
                   name="resumeUrl"
                   value={formData.resumeUrl}
                   onChange={handleChange}
                   placeholder="https://drive.google.com/... or direct PDF link"
                   type="url"
+                  helperText="Direct URL to your hosted resume or Google Drive document"
                 />
               </div>
             </div>

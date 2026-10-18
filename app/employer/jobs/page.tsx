@@ -19,6 +19,7 @@ import {
   Building2,
 } from "lucide-react";
 import { Job, JobStatus } from "@/lib/firebase/jobs";
+import { MeritlaneLoader } from "@/components/ui/MeritlaneLoader";
 
 
 export default function EmployerJobsPage() {
@@ -44,7 +45,7 @@ export default function EmployerJobsPage() {
     setLoading(true);
     setError("");
     try {
-      const token = await user.getIdToken(true);
+      const token = await user.getIdToken();
       const res = await fetch("/api/employer/jobs", {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -74,7 +75,7 @@ export default function EmployerJobsPage() {
     setActionLoading((prev) => ({ ...prev, [jobId]: true }));
     setActionError("");
     try {
-      const token = await user.getIdToken(true);
+      const token = await user.getIdToken();
       const res = await fetch(`/api/jobs/${jobId}`, {
         method: "PATCH",
         headers: {
@@ -98,40 +99,40 @@ export default function EmployerJobsPage() {
   const getStatusBadge = (status: JobStatus) => {
     switch (status) {
       case "published":
-        return "text-[#064E3B] bg-[#064E3B]/10 border-[#064E3B]/30";
+        return "text-emerald-900 bg-emerald-900/10 border-emerald-900/30";
       case "draft":
-        return "text-[#78716C] bg-[#FAF8F5] border-[#E7E2DA]";
+        return "text-muted-foreground bg-surface border-border";
       case "paused":
-        return "text-[#B45309] bg-[#FEF3C7] border-[#D97706]/30";
+        return "text-[#B45309] bg-[#FEF3C7] border-amber-600/30";
       case "closed":
-        return "text-[#B42318] bg-[#FEF2F2] border-[#B42318]/30";
+        return "text-danger bg-danger/10 border-danger/30";
       default:
-        return "text-[#78716C] bg-[#FAF8F5] border-[#E7E2DA]";
+        return "text-muted-foreground bg-surface border-border";
     }
   };
 
   return (
-    <div className="w-full min-h-screen bg-[#FAF8F5] pb-24 text-[#1C1917]">
+    <div className="w-full min-h-screen bg-surface pb-24 text-foreground">
       {/* ── Command Header Strip ── */}
-      <div className="border-b border-[#E7E2DA] bg-white px-6 sm:px-10 py-6">
-        <div className="max-w-[1400px] mx-auto flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="border-b border-border bg-white px-6 sm:px-10 py-6">
+        <div className="w-full flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <div className="text-[10px] font-medium tracking-[0.2em] text-[#78716C] uppercase mb-1">
+            <div className="text-[10px] font-medium tracking-[0.2em] text-muted-foreground uppercase mb-1">
               Employer Hiring Operations · Meritlane Registry
             </div>
-            <h1 className="text-[26px] sm:text-[32px] font-bold uppercase tracking-[0.06em] text-[#1C1917] leading-tight">
+            <h1 className="text-[26px] sm:text-[32px] font-bold uppercase tracking-[0.06em] text-foreground leading-tight">
               JOBS MANAGEMENT HUB
             </h1>
           </div>
 
           <div className="flex items-center gap-3">
             <Link href="/employer/dashboard">
-              <button className="px-4 py-2 border border-[#E7E2DA] bg-white hover:bg-[#FAF8F5] text-[12px] font-mono font-semibold rounded transition-colors shadow-2xs">
+              <button className="px-4 py-2 border border-border bg-white hover:bg-surface text-[12px] font-mono font-semibold rounded transition-colors shadow-2xs">
                 CANDIDATE DISCOVERY
               </button>
             </Link>
             <Link href="/employer/jobs/new">
-              <button className="flex items-center gap-2 px-5 py-2 bg-[#064E3B] hover:bg-[#043327] text-white text-[12px] font-sans font-semibold uppercase tracking-wide rounded transition-colors shadow-xs">
+              <button className="flex items-center gap-2 px-5 py-2 bg-emerald-900 hover:bg-emerald-950 text-white text-[12px] font-sans font-semibold uppercase tracking-wide rounded transition-colors shadow-xs">
                 <Plus className="h-4 w-4" />
                 POST A NEW JOB
               </button>
@@ -140,16 +141,16 @@ export default function EmployerJobsPage() {
         </div>
       </div>
 
-      <div className="max-w-[1400px] mx-auto px-6 sm:px-10 py-8 space-y-6">
+      <div className="w-full px-6 sm:px-10 py-8 space-y-6">
 
 
         {/* Action Error Banner */}
         {actionError && (
-          <div className="border border-[#B42318]/20 bg-[#FEF2F2] rounded px-5 py-3 flex items-center justify-between gap-4">
-            <p className="text-[13px] text-[#B42318]">{actionError}</p>
+          <div className="border border-danger/20 bg-danger/10 rounded px-5 py-3 flex items-center justify-between gap-4">
+            <p className="text-[13px] text-danger">{actionError}</p>
             <button
               onClick={() => setActionError("")}
-              className="text-[11px] font-mono text-[#B42318] hover:underline shrink-0"
+              className="text-[11px] font-mono text-danger hover:underline shrink-0"
             >
               DISMISS
             </button>
@@ -158,18 +159,15 @@ export default function EmployerJobsPage() {
 
 
         {loading ? (
-          <div className="border border-[#E7E2DA] bg-white p-16 text-center rounded">
-            <div className="h-6 w-6 border-2 border-[#E7E2DA] border-t-[#1C1917] rounded-full animate-spin mx-auto mb-3" />
-            <div className="text-[12px] font-medium text-[#78716C] uppercase tracking-wider">
-              Loading your posted roles…
-            </div>
+          <div className="border border-border bg-white p-16 text-center rounded">
+            <MeritlaneLoader level="section" text="Loading your posted roles…" />
           </div>
         ) : error ? (
-          <div className="border border-[#B42318]/20 bg-[#FEF2F2] p-8 text-center rounded">
-            <p className="text-[14px] text-[#B42318] mb-4">{error}</p>
+          <div className="border border-danger/20 bg-danger/10 p-8 text-center rounded">
+            <p className="text-[14px] text-danger mb-4">{error}</p>
             <button
               onClick={loadEmployerJobs}
-              className="px-4 py-2 bg-[#1C1917] text-white text-[12px] font-mono font-semibold rounded"
+              className="px-4 py-2 bg-foreground text-white text-[12px] font-mono font-semibold rounded"
             >
               RETRY
             </button>
@@ -177,25 +175,25 @@ export default function EmployerJobsPage() {
         ) : jobs.length === 0 ? (
           <div className="border border-dashed border-[#C8BFB0] bg-white p-16 text-center rounded">
             <Briefcase className="h-10 w-10 text-[#C8BFB0] mx-auto mb-4" />
-            <h2 className="text-[18px] font-bold uppercase tracking-[0.06em] text-[#1C1917] mb-2">
+            <h2 className="text-[18px] font-bold uppercase tracking-[0.06em] text-foreground mb-2">
               NO ROLES POSTED YET
             </h2>
-            <p className="text-[13px] text-[#78716C] font-sans max-w-md mx-auto mb-6">
+            <p className="text-[13px] text-muted-foreground font-sans max-w-md mx-auto mb-6">
               Establish your first engineering job posting to start receiving verified candidate dossiers directly into your hiring pipeline.
             </p>
             <Link href="/employer/jobs/new">
-              <button className="px-6 py-2.5 bg-[#064E3B] hover:bg-[#043327] text-white text-[12px] font-sans font-semibold uppercase tracking-wide rounded transition-colors shadow-xs">
+              <button className="px-6 py-2.5 bg-emerald-900 hover:bg-emerald-950 text-white text-[12px] font-sans font-semibold uppercase tracking-wide rounded transition-colors shadow-xs">
                 + POST YOUR FIRST JOB
               </button>
             </Link>
           </div>
         ) : (
-          <div className="border border-[#E7E2DA] bg-white rounded shadow-xs overflow-hidden">
-            <div className="border-b border-[#E7E2DA] bg-[#FAF8F5] px-6 py-3.5 flex items-center justify-between">
-              <div className="text-[11px] font-medium tracking-[0.14em] text-[#78716C] uppercase font-semibold">
+          <div className="border border-border bg-white rounded shadow-xs overflow-hidden">
+            <div className="border-b border-border bg-surface px-6 py-3.5 flex items-center justify-between">
+              <div className="text-[11px] font-medium tracking-[0.14em] text-muted-foreground uppercase font-semibold">
                 POSTED ROLES DIRECTORY ({jobs.length})
               </div>
-              <div className="text-[11px] font-mono text-[#78716C]">
+              <div className="text-[11px] font-mono text-muted-foreground">
                 Proof-Based Hiring
               </div>
             </div>
@@ -204,27 +202,27 @@ export default function EmployerJobsPage() {
               {paginatedJobs.map((job) => {
                 const busy = actionLoading[job.id] || false;
                 return (
-                  <div key={job.id} className="p-6 flex flex-col lg:flex-row lg:items-center justify-between gap-6 hover:bg-[#FAF8F5]/50 transition-colors">
+                  <div key={job.id} className="p-6 flex flex-col lg:flex-row lg:items-center justify-between gap-6 hover:bg-surface/50 transition-colors">
                     <div className="space-y-2 flex-1">
                       <div className="flex items-center gap-2.5 flex-wrap">
                         <span className={`text-[10px] font-medium font-semibold uppercase tracking-[0.14em] px-2.5 py-0.5 rounded border ${getStatusBadge(job.status)}`}>
                           {job.status.toUpperCase()}
                         </span>
-                        <span className="text-[11px] font-medium text-[#78716C] uppercase">
+                        <span className="text-[11px] font-medium text-muted-foreground uppercase">
                           {job.workMode} · {job.employmentType}
                         </span>
-                        <span className="text-[11px] font-mono text-[#78716C]">
+                        <span className="text-[11px] font-mono text-muted-foreground">
                           · {job.location}
                         </span>
                       </div>
 
-                      <h2 className="text-[18px] sm:text-[20px] font-bold text-[#1C1917] tracking-tight">
+                      <h2 className="text-[18px] sm:text-[20px] font-bold text-foreground tracking-tight">
                         {job.title}
                       </h2>
 
                       <div className="flex items-center gap-2 flex-wrap">
                         {job.requiredSkills.map((sk) => (
-                          <span key={sk} className="text-[10px] font-mono bg-[#FAF8F5] text-[#1C1917] border border-[#E7E2DA] px-2 py-0.5 rounded">
+                          <span key={sk} className="text-[10px] font-mono bg-surface text-foreground border border-border px-2 py-0.5 rounded">
                             {sk}
                           </span>
                         ))}
@@ -235,15 +233,15 @@ export default function EmployerJobsPage() {
                     <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 shrink-0">
                       {/* Applicants Button */}
                       <Link href={`/employer/jobs/${job.id}/applicants`}>
-                        <button className="flex items-center justify-center gap-2 px-4 py-2 border border-[#E7E2DA] bg-white hover:bg-[#FAF8F5] text-[12px] font-mono font-semibold text-[#1C1917] rounded transition-colors shadow-2xs">
-                          <Users className="h-3.5 w-3.5 text-[#064E3B]" />
+                        <button className="flex items-center justify-center gap-2 px-4 py-2 border border-border bg-white hover:bg-surface text-[12px] font-mono font-semibold text-foreground rounded transition-colors shadow-2xs">
+                          <Users className="h-3.5 w-3.5 text-emerald-900" />
                           <span>APPLICANTS ({job.applicationCount || 0})</span>
                         </button>
                       </Link>
 
                       {/* Edit Button */}
                       <Link href={`/employer/jobs/${job.id}/edit`}>
-                        <button className="flex items-center justify-center gap-1.5 px-3.5 py-2 border border-[#E7E2DA] bg-white hover:bg-[#FAF8F5] text-[12px] font-mono font-semibold text-[#1C1917] rounded transition-colors">
+                        <button className="flex items-center justify-center gap-1.5 px-3.5 py-2 border border-border bg-white hover:bg-surface text-[12px] font-mono font-semibold text-foreground rounded transition-colors">
                           <Edit3 className="h-3.5 w-3.5" />
                           <span>EDIT</span>
                         </button>
@@ -252,7 +250,7 @@ export default function EmployerJobsPage() {
                       {/* Public Preview Button (if published) */}
                       {job.status === "published" && (
                         <Link href={`/jobs/${job.id}`} target="_blank">
-                          <button className="flex items-center justify-center gap-1.5 px-3.5 py-2 border border-[#E7E2DA] bg-white hover:bg-[#FAF8F5] text-[12px] font-mono font-semibold text-[#1C1917] rounded transition-colors">
+                          <button className="flex items-center justify-center gap-1.5 px-3.5 py-2 border border-border bg-white hover:bg-surface text-[12px] font-mono font-semibold text-foreground rounded transition-colors">
                             <Eye className="h-3.5 w-3.5" />
                             <span>VIEW LIVE</span>
                           </button>
@@ -264,7 +262,7 @@ export default function EmployerJobsPage() {
                         <button
                           onClick={() => handleStatusChange(job.id, "published")}
                           disabled={busy}
-                          className="px-4 py-2 bg-[#064E3B] text-white text-[12px] font-sans font-semibold uppercase tracking-wide rounded hover:bg-[#043327] transition-colors disabled:opacity-50"
+                          className="px-4 py-2 bg-emerald-900 text-white text-[12px] font-sans font-semibold uppercase tracking-wide rounded hover:bg-emerald-950 transition-colors disabled:opacity-50"
                         >
                           PUBLISH NOW
                         </button>
@@ -274,7 +272,7 @@ export default function EmployerJobsPage() {
                         <button
                           onClick={() => handleStatusChange(job.id, "paused")}
                           disabled={busy}
-                          className="px-3.5 py-2 border border-[#D97706]/30 text-[#92400E] bg-[#FFFBEB] text-[11px] font-sans font-semibold uppercase tracking-wide rounded hover:bg-[#FEF3C7] transition-colors disabled:opacity-50"
+                          className="px-3.5 py-2 border border-amber-600/30 text-[#92400E] bg-[#FFFBEB] text-[11px] font-sans font-semibold uppercase tracking-wide rounded hover:bg-[#FEF3C7] transition-colors disabled:opacity-50"
                         >
                           PAUSE
                         </button>
@@ -284,7 +282,7 @@ export default function EmployerJobsPage() {
                         <button
                           onClick={() => handleStatusChange(job.id, "published")}
                           disabled={busy}
-                          className="px-3.5 py-2 bg-[#064E3B] text-white text-[11px] font-sans font-semibold uppercase tracking-wide rounded hover:bg-[#043327] transition-colors disabled:opacity-50"
+                          className="px-3.5 py-2 bg-emerald-900 text-white text-[11px] font-sans font-semibold uppercase tracking-wide rounded hover:bg-emerald-950 transition-colors disabled:opacity-50"
                         >
                           RESUME
                         </button>
@@ -298,7 +296,7 @@ export default function EmployerJobsPage() {
                             }
                           }}
                           disabled={busy}
-                          className="px-3.5 py-2 border border-[#B42318]/30 text-[#B42318] bg-[#FEF2F2] text-[11px] font-sans font-semibold uppercase tracking-wide rounded hover:bg-[#FEE2E2] transition-colors disabled:opacity-50"
+                          className="px-3.5 py-2 border border-danger/30 text-danger bg-danger/10 text-[11px] font-sans font-semibold uppercase tracking-wide rounded hover:bg-[#FEE2E2] transition-colors disabled:opacity-50"
                         >
                           CLOSE
                         </button>
@@ -311,22 +309,22 @@ export default function EmployerJobsPage() {
 
             {/* Pagination Controls */}
             {jobs.length > ITEMS_PER_PAGE && (
-              <div className="flex items-center justify-between border-t border-[#E7E2DA] px-6 py-4">
-                <span className="text-xs text-[#78716C] font-medium">
+              <div className="flex items-center justify-between border-t border-border px-6 py-4">
+                <span className="text-xs text-muted-foreground font-medium">
                   Showing {((currentPage - 1) * ITEMS_PER_PAGE) + 1} to {Math.min(currentPage * ITEMS_PER_PAGE, jobs.length)} of {jobs.length} jobs
                 </span>
                 <div className="flex gap-2">
                   <button
                     disabled={currentPage === 1}
                     onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-                    className="px-3 py-1 border border-[#E7E2DA] bg-white text-[#1C1917] text-xs rounded hover:bg-[#FAF8F5] disabled:opacity-50"
+                    className="px-3 py-1 border border-border bg-white text-foreground text-xs rounded hover:bg-surface disabled:opacity-50"
                   >
                     Previous
                   </button>
                   <button
                     disabled={currentPage * ITEMS_PER_PAGE >= jobs.length}
                     onClick={() => setCurrentPage(p => p + 1)}
-                    className="px-3 py-1 border border-[#E7E2DA] bg-white text-[#1C1917] text-xs rounded hover:bg-[#FAF8F5] disabled:opacity-50"
+                    className="px-3 py-1 border border-border bg-white text-foreground text-xs rounded hover:bg-surface disabled:opacity-50"
                   >
                     Next
                   </button>

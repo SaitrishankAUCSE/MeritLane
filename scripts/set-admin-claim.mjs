@@ -18,8 +18,11 @@
 
 import { initializeApp, cert, getApps } from 'firebase-admin/app';
 import { getAuth } from 'firebase-admin/auth';
+import * as dotenv from 'dotenv';
 import fs from 'fs';
 import path from 'path';
+
+dotenv.config({ path: '.env.local' });
 
 const ADMIN_EMAIL = 'saitrishankb9@gmail.com';
 
@@ -30,11 +33,18 @@ async function provisionAdminClaim() {
 
   // 1. Check environment variable
   if (process.env.FIREBASE_SERVICE_ACCOUNT_KEY) {
+    const rawKey = process.env.FIREBASE_SERVICE_ACCOUNT_KEY;
     try {
-      serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_KEY);
+      serviceAccount = JSON.parse(rawKey);
       console.log('[Auth] Loaded service account from FIREBASE_SERVICE_ACCOUNT_KEY env var.');
-    } catch (e) {
-      console.error('[Error] Failed to parse FIREBASE_SERVICE_ACCOUNT_KEY JSON:', e.message);
+    } catch {
+      try {
+        const decoded = Buffer.from(rawKey, 'base64').toString('utf8');
+        serviceAccount = JSON.parse(decoded);
+        console.log('[Auth] Loaded service account from base64 FIREBASE_SERVICE_ACCOUNT_KEY.');
+      } catch (e) {
+        console.error('[Error] Failed to parse FIREBASE_SERVICE_ACCOUNT_KEY JSON or Base64:', e.message);
+      }
     }
   }
 

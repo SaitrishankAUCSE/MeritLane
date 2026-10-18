@@ -40,7 +40,7 @@ export function isImageAttachment(att: MessageAttachment): boolean {
 function getFileIcon(type: string, name: string) {
   const lowerName = name.toLowerCase();
   if (type.includes("pdf") || lowerName.endsWith(".pdf")) {
-    return <FileText className="h-4 w-4 text-[#DC2626]" />;
+    return <FileText className="h-4 w-4 text-red-600" />;
   }
   if (
     type.includes("javascript") ||
@@ -48,7 +48,7 @@ function getFileIcon(type: string, name: string) {
     type.includes("json") ||
     /\.(js|ts|tsx|jsx|json|py|go|sql|html|css|cpp|c|rs)$/i.test(lowerName)
   ) {
-    return <FileCode className="h-4 w-4 text-[#0284C7]" />;
+    return <FileCode className="h-4 w-4 text-sky-600" />;
   }
   if (
     type.includes("zip") ||
@@ -56,9 +56,9 @@ function getFileIcon(type: string, name: string) {
     type.includes("compressed") ||
     /\.(zip|tar|gz|rar|7z)$/i.test(lowerName)
   ) {
-    return <FileArchive className="h-4 w-4 text-[#D97706]" />;
+    return <FileArchive className="h-4 w-4 text-amber-600" />;
   }
-  return <FileGeneric className="h-4 w-4 text-[#78716C]" />;
+  return <FileGeneric className="h-4 w-4 text-muted-foreground" />;
 }
 
 /**
@@ -169,35 +169,35 @@ export function AttachmentPreviewTray({
   if (attachments.length === 0) return null;
 
   return (
-    <div className="flex flex-wrap gap-2 pt-2 pb-1 border-t border-[#E7E2DA]/60">
+    <div className="flex flex-wrap gap-2 pt-2 pb-1 border-t border-border/60">
       {attachments.map((att) => {
         const isImg = isImageAttachment(att);
         return (
           <div
             key={att.id}
-            className="flex items-center gap-2 pl-2 pr-1.5 py-1 bg-white border border-[#E7E2DA] rounded text-[12px] shadow-2xs group"
+            className="flex items-center gap-2 pl-2 pr-1.5 py-1 bg-white border border-border rounded text-[12px] shadow-2xs group"
           >
             {isImg ? (
               <img
                 src={att.url}
                 alt={att.name}
-                className="h-6 w-6 object-cover rounded border border-[#E7E2DA]"
+                className="h-6 w-6 object-cover rounded border border-border"
               />
             ) : (
               getFileIcon(att.type, att.name)
             )}
             <div className="flex flex-col min-w-0 max-w-[140px] sm:max-w-[180px]">
-              <span className="font-mono text-[11px] text-[#1C1917] truncate leading-tight">
+              <span className="font-mono text-[11px] text-foreground truncate leading-tight">
                 {att.name}
               </span>
-              <span className="text-[9px] font-mono text-[#A8A29E] leading-tight">
+              <span className="text-[9px] font-mono text-muted-foreground leading-tight">
                 {formatBytes(att.size)}
               </span>
             </div>
             <button
               type="button"
               onClick={() => onRemove(att.id)}
-              className="p-1 hover:bg-[#FAF8F5] text-[#78716C] hover:text-[#1C1917] rounded transition-colors"
+              className="p-1 hover:bg-surface text-muted-foreground hover:text-foreground rounded transition-colors"
               title="Remove attachment"
             >
               <X className="h-3 w-3" />
@@ -248,14 +248,14 @@ export function MessageAttachmentsList({
                 loading="lazy"
               />
               <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
-                <span className="p-1.5 bg-white/90 rounded text-[#1C1917] hover:bg-white transition-colors">
+                <span className="p-1.5 bg-white/90 rounded text-foreground hover:bg-white transition-colors">
                   <Eye className="h-3.5 w-3.5" />
                 </span>
                 <a
                   href={img.url}
                   download={img.name}
                   onClick={(e) => e.stopPropagation()}
-                  className="p-1.5 bg-white/90 rounded text-[#1C1917] hover:bg-white transition-colors"
+                  className="p-1.5 bg-white/90 rounded text-foreground hover:bg-white transition-colors"
                   title="Download image"
                 >
                   <Download className="h-3.5 w-3.5" />
@@ -282,13 +282,13 @@ export function MessageAttachmentsList({
               className={`flex items-center justify-between gap-3 p-2.5 rounded border text-[12px] font-sans transition-colors ${
                 isSentByMe
                   ? "bg-white/10 hover:bg-white/20 border-white/20 text-white"
-                  : "bg-white hover:bg-[#FAF8F5] border-[#E7E2DA] text-[#1C1917]"
+                  : "bg-white hover:bg-surface border-border text-foreground"
               }`}
             >
               <div className="flex items-center gap-2.5 min-w-0">
                 <div
                   className={`p-1.5 rounded ${
-                    isSentByMe ? "bg-white/20 text-white" : "bg-[#FAF8F5] text-[#1C1917]"
+                    isSentByMe ? "bg-white/20 text-white" : "bg-surface text-foreground"
                   }`}
                 >
                   {getFileIcon(file.type, file.name)}
@@ -299,7 +299,7 @@ export function MessageAttachmentsList({
                   </span>
                   <span
                     className={`text-[10px] font-mono ${
-                      isSentByMe ? "text-white/70" : "text-[#78716C]"
+                      isSentByMe ? "text-white/70" : "text-muted-foreground"
                     }`}
                   >
                     {formatBytes(file.size)}
@@ -308,7 +308,7 @@ export function MessageAttachmentsList({
               </div>
               <Download
                 className={`h-4 w-4 shrink-0 ${
-                  isSentByMe ? "text-white/80" : "text-[#78716C]"
+                  isSentByMe ? "text-white/80" : "text-muted-foreground"
                 }`}
               />
             </a>

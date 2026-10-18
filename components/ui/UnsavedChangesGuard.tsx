@@ -35,32 +35,32 @@ function UnsavedChangesModal({ message, onStay, onLeave }: UnsavedChangesModalPr
       aria-describedby="unsaved-desc"
       className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/40 backdrop-blur-sm p-6"
     >
-      <div className="w-full max-w-sm bg-white rounded border border-[#E7E2DA] shadow-2xl overflow-hidden">
+      <div className="w-full max-w-sm bg-white rounded border border-border shadow-2xl overflow-hidden">
         <div className="p-7">
           <h2
             id="unsaved-title"
-            className="text-[18px] font-semibold text-[#1C1917] mb-2 leading-tight"
+            className="text-[18px] font-semibold text-foreground mb-2 leading-tight"
           >
             Unsaved changes
           </h2>
-          <p id="unsaved-desc" className="text-[14px] text-[#78716C] leading-relaxed mb-6">
+          <p id="unsaved-desc" className="text-[14px] text-muted-foreground leading-relaxed mb-6">
             {message}
           </p>
           <div className="flex flex-col gap-2.5">
             <button
               ref={stayRef}
               onClick={onStay}
-              className="w-full h-11 bg-[#1C1917] text-white text-[14px] font-semibold rounded
-                         hover:bg-[#292524] transition-colors focus:outline-none focus:ring-2
-                         focus:ring-[#1C1917] focus:ring-offset-2"
+              className="w-full h-11 bg-foreground text-white text-[14px] font-semibold rounded
+                         hover:bg-foreground/90 transition-colors focus:outline-none focus:ring-2
+                         focus:ring-foreground focus:ring-offset-2"
             >
               Continue Editing
             </button>
             <button
               onClick={onLeave}
-              className="w-full h-11 border border-[#E7E2DA] text-[#78716C] text-[14px] font-semibold rounded
-                         hover:border-[#B42318] hover:text-[#B42318] transition-colors focus:outline-none focus:ring-2
-                         focus:ring-[#B42318] focus:ring-offset-2"
+              className="w-full h-11 border border-border text-muted-foreground text-[14px] font-semibold rounded
+                         hover:border-danger hover:text-danger transition-colors focus:outline-none focus:ring-2
+                         focus:ring-danger focus:ring-offset-2"
             >
               Leave Without Saving
             </button>

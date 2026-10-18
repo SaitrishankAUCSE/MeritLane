@@ -45,7 +45,9 @@ export default async function PublicProfilePage({ params }: Props) {
       sanitizedVerifiedSkills[skillKey] = {
         status: skillVal.status || "unverified",
         verifiedAt: typeof skillVal.verifiedAt === "number" ? skillVal.verifiedAt : parseTimestamp(skillVal.verifiedAt),
-        score: skillVal.score || undefined
+        score: skillVal.score || undefined,
+        track: skillVal.track || undefined,
+        badge: skillVal.badge || undefined,
       };
     }
   }

@@ -53,13 +53,13 @@ export default function Navbar() {
         {/* Public Visitor Nav */}
         <div className="flex items-center gap-3">
           <div className="hidden items-center gap-6 md:flex">
-            <Link href="/how-verification-works" className="text-[13px] text-[#78716C] hover:text-[#1C1917] transition-colors font-medium">
+            <Link href="/how-verification-works" className="text-[13px] text-muted-foreground hover:text-foreground transition-colors font-medium">
               How it works
             </Link>
-            <button onClick={() => openAuthModal("login")} className="text-[13px] text-[#78716C] hover:text-[#1C1917] transition-colors font-medium cursor-pointer">
+            <button onClick={() => openAuthModal("login")} className="text-[13px] text-muted-foreground hover:text-foreground transition-colors font-medium cursor-pointer">
               Log in
             </button>
-            <button onClick={() => openAuthModal("signup", undefined, "candidate")} className="text-[13px] text-[#78716C] hover:text-[#1C1917] transition-colors font-medium cursor-pointer">
+            <button onClick={() => openAuthModal("signup", undefined, "candidate")} className="text-[13px] text-muted-foreground hover:text-foreground transition-colors font-medium cursor-pointer">
               Register
             </button>
             <Button
@@ -88,7 +88,7 @@ export default function Navbar() {
             <Link 
               href="/how-verification-works" 
               onClick={() => setMobileMenuOpen(false)}
-              className="text-sm font-medium py-2 text-[#78716C] hover:text-[#1C1917]"
+              className="text-sm font-medium py-2 text-muted-foreground hover:text-foreground"
             >
               How it works
             </Link>

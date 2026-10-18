@@ -163,7 +163,7 @@ export function CandidateSidebar() {
         animate={{ width: isCollapsed ? 72 : 228 }}
         transition={{ duration: 0.28, ease: [0.4, 0, 0.2, 1] }}
         className="scrollbar-hide hidden lg:flex shrink-0 flex-col h-[100dvh] overflow-hidden
-                   bg-[#FEFCF9] border-r border-[#E7E2DA]"
+                   bg-[#FEFCF9] border-r border-border"
       >
         {/* ── Brand ── */}
         <div className="flex h-[64px] items-center shrink-0 relative overflow-hidden px-4">
@@ -210,15 +210,15 @@ export function CandidateSidebar() {
                   relative flex items-center h-9 rounded text-[13.5px] font-medium
                   transition-all duration-150 group overflow-hidden
                   ${isActive
-                    ? "bg-[#F0EDE8] text-[#1C1917] font-semibold border-l-2 border-[#064E3B]"
-                    : "text-[#78716C] hover:text-[#1C1917] hover:bg-[#F2EFE9]"
+                    ? "bg-[#F0EDE8] text-foreground font-semibold border-l-2 border-emerald-900"
+                    : "text-muted-foreground hover:text-foreground hover:bg-[#F2EFE9]"
                   }
                 `}
               >
                 <div className={`flex justify-center shrink-0 ${isCollapsed ? "w-full" : "w-10"}`}>
                   <Icon
                     className={`h-[17px] w-[17px] transition-colors ${
-                      isActive ? "text-[#FAFAF9]" : "text-[#A8A29E] group-hover:text-[#1C1917]"
+                      isActive ? "text-[#FAFAF9]" : "text-muted-foreground/70 group-hover:text-foreground"
                     }`}
                     aria-hidden="true"
                   />
@@ -244,7 +244,7 @@ export function CandidateSidebar() {
 
 
         {/* ── Bottom: user + collapse toggle ── */}
-        <div className="mx-3 h-px bg-[#E7E2DA]" />
+        <div className="mx-3 h-px bg-border" />
         <div className="px-3 py-3 shrink-0">
           <div
             ref={menuRef}
@@ -258,11 +258,11 @@ export function CandidateSidebar() {
                   animate={{ opacity: 1, y: 0, scale: 1 }}
                   exit={{ opacity: 0, y: 8, scale: 0.96 }}
                   transition={{ duration: 0.14, ease: "easeOut" }}
-                  className="absolute bottom-full mb-2 left-0 w-52 bg-white border border-[#E7E2DA]
+                  className="absolute bottom-full mb-2 left-0 w-52 bg-white border border-border
                              rounded shadow-lg overflow-hidden z-50 py-1"
                 >
                   <div className="px-4 py-3 border-b border-[#F2EFE9] flex items-center gap-3">
-                    <div className="h-8 w-8 rounded-full bg-[#1C1917] text-[#FAFAF9] flex items-center justify-center text-[11px] font-semibold shrink-0 overflow-hidden border border-[#E7E2DA]">
+                    <div className="h-8 w-8 rounded-full bg-foreground text-[#FAFAF9] flex items-center justify-center text-[11px] font-semibold shrink-0 overflow-hidden border border-border">
                       {avatarUrl ? (
                         <img src={avatarUrl} alt={name} className="h-full w-full object-cover" />
                       ) : (
@@ -270,33 +270,33 @@ export function CandidateSidebar() {
                       )}
                     </div>
                     <div className="min-w-0 flex-1">
-                      <div className="text-[13px] font-semibold text-[#1C1917] truncate">{name}</div>
-                      <div className="text-[11px] text-[#A8A29E] truncate mt-0.5">{email}</div>
+                      <div className="text-[13px] font-semibold text-foreground truncate">{name}</div>
+                      <div className="text-[11px] text-muted-foreground/70 truncate mt-0.5">{email}</div>
                     </div>
                   </div>
                   <div className="px-2 py-1.5 space-y-0.5">
                     <Link
                       href="/candidate/profile"
                       className="flex items-center gap-2.5 px-2.5 py-2 text-[13px] text-[#44403C]
-                                 hover:bg-[#F2EFE9] hover:text-[#1C1917] rounded transition-colors"
+                                 hover:bg-[#F2EFE9] hover:text-foreground rounded transition-colors"
                     >
-                      <Fingerprint className="h-3.5 w-3.5 text-[#A8A29E]" />
+                      <Fingerprint className="h-3.5 w-3.5 text-muted-foreground/70" />
                       View Profile
                     </Link>
                     <Link
                       href="/candidate/settings"
                       className="flex items-center gap-2.5 px-2.5 py-2 text-[13px] text-[#44403C]
-                                 hover:bg-[#F2EFE9] hover:text-[#1C1917] rounded transition-colors"
+                                 hover:bg-[#F2EFE9] hover:text-foreground rounded transition-colors"
                     >
-                      <Settings className="h-3.5 w-3.5 text-[#A8A29E]" />
+                      <Settings className="h-3.5 w-3.5 text-muted-foreground/70" />
                       Settings
                     </Link>
                     <Link
                       href="/candidate/support"
                       className="flex items-center gap-2.5 px-2.5 py-2 text-[13px] text-[#44403C]
-                                 hover:bg-[#F2EFE9] hover:text-[#1C1917] rounded transition-colors"
+                                 hover:bg-[#F2EFE9] hover:text-foreground rounded transition-colors"
                     >
-                      <HelpCircle className="h-3.5 w-3.5 text-[#A8A29E]" />
+                      <HelpCircle className="h-3.5 w-3.5 text-muted-foreground/70" />
                       Help & Support
                     </Link>
                   </div>
@@ -327,8 +327,8 @@ export function CandidateSidebar() {
                 ${isUserMenuOpen ? "bg-[#F2EFE9]" : "hover:bg-[#F2EFE9]"}
               `}
             >
-              <div className="h-7 w-7 rounded-full bg-[#1C1917] text-[#FAFAF9] flex items-center
-                              justify-center text-[11px] font-semibold shrink-0 overflow-hidden border border-[#E7E2DA]">
+              <div className="h-7 w-7 rounded-full bg-foreground text-[#FAFAF9] flex items-center
+                              justify-center text-[11px] font-semibold shrink-0 overflow-hidden border border-border">
                 {avatarUrl
                   ? <img src={avatarUrl} alt={name} className="h-full w-full object-cover" />
                   : initials
@@ -347,7 +347,7 @@ export function CandidateSidebar() {
                       {name}
                     </span>
                     <ChevronUp
-                      className={`h-3 w-3 text-[#A8A29E] shrink-0 transition-transform ${
+                      className={`h-3 w-3 text-muted-foreground/70 shrink-0 transition-transform ${
                         isUserMenuOpen ? "rotate-180" : ""
                       }`}
                     />
@@ -360,7 +360,7 @@ export function CandidateSidebar() {
             <button
               type="button"
               onClick={() => setIsCollapsed(!isCollapsed)}
-              className="p-1.5 text-[#A8A29E] hover:text-[#1C1917] hover:bg-[#F2EFE9] rounded
+              className="p-1.5 text-muted-foreground/70 hover:text-foreground hover:bg-[#F2EFE9] rounded
                          transition-colors shrink-0"
               aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
             >

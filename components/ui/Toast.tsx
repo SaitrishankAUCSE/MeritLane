@@ -41,17 +41,17 @@ export function useToast() {
 // ─── Icon map ─────────────────────────────────────────────────────────────────
 
 const ICONS: Record<ToastType, React.ReactNode> = {
-  success: <CheckCircle2 className="h-4 w-4 text-[#16A34A]" />,
-  error:   <AlertTriangle className="h-4 w-4 text-[#C0392B]" />,
-  info:    <Info className="h-4 w-4 text-[#4A6FA5]" />,
-  message: <Mail className="h-4 w-4 text-[#7C3AED]" />,
+  success: <CheckCircle2 className="h-4 w-4 text-success" />,
+  error:   <AlertTriangle className="h-4 w-4 text-danger" />,
+  info:    <Info className="h-4 w-4 text-info" />,
+  message: <Mail className="h-4 w-4 text-primary" />,
 };
 
 const ACCENT: Record<ToastType, string> = {
-  success: "border-l-[#16A34A]",
-  error:   "border-l-[#C0392B]",
-  info:    "border-l-[#4A6FA5]",
-  message: "border-l-[#7C3AED]",
+  success: "border-l-success",
+  error:   "border-l-danger",
+  info:    "border-l-info",
+  message: "border-l-primary",
 };
 
 // ─── Single Toast Card ────────────────────────────────────────────────────────
@@ -77,19 +77,19 @@ function ToastCard({ toast, onDismiss }: { toast: Toast; onDismiss: (id: string)
       exit={{    opacity: 0, y: 16, scale: 0.97  }}
       transition={{ duration: 0.22, ease: [0.4, 0, 0.2, 1] }}
       className={`
-        flex items-start gap-3 w-full max-w-[340px] bg-white
-        border border-[#E7E2DA] border-l-4 ${ACCENT[toast.type]}
+        flex items-start gap-3 w-full max-w-[340px] bg-surface-bright
+        border border-border border-l-4 ${ACCENT[toast.type]}
         rounded shadow-lg px-4 py-3.5 pointer-events-auto
       `}
     >
       <div className="shrink-0 mt-0.5">{ICONS[toast.type]}</div>
 
       <div className="flex-1 min-w-0">
-        <p className="text-[13.5px] font-semibold text-[#1C1917] leading-snug">
+        <p className="text-[13.5px] font-semibold text-foreground leading-snug">
           {toast.title}
         </p>
         {toast.description && (
-          <p className="text-[12px] text-[#78716C] mt-0.5 leading-relaxed">
+          <p className="text-[12px] text-muted-foreground mt-0.5 leading-relaxed">
             {toast.description}
           </p>
         )}
@@ -99,7 +99,7 @@ function ToastCard({ toast, onDismiss }: { toast: Toast; onDismiss: (id: string)
               toast.action!.onClick();
               onDismiss(toast.id);
             }}
-            className="mt-2 text-[12px] font-semibold text-[#1C1917] underline underline-offset-2
+            className="mt-2 text-[12px] font-semibold text-foreground underline underline-offset-2
                        hover:opacity-60 transition-opacity"
           >
             {toast.action.label}
@@ -110,7 +110,7 @@ function ToastCard({ toast, onDismiss }: { toast: Toast; onDismiss: (id: string)
       <button
         onClick={() => onDismiss(toast.id)}
         className="shrink-0 h-6 w-6 rounded-md flex items-center justify-center
-                   text-[#A8A29E] hover:text-[#1C1917] hover:bg-[#F2EFE9] transition-colors"
+                   text-muted-foreground hover:text-foreground hover:bg-surface-dim transition-colors"
         aria-label="Dismiss"
       >
         <X className="h-3.5 w-3.5" />

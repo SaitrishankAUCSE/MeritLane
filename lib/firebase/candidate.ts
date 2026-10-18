@@ -17,6 +17,8 @@ export interface SkillVerification {
   status: "verified" | "failed";
   verifiedAt?: number;
   score?: number;
+  track?: "standard" | "advanced";
+  badge?: "verified_professional" | "gold_honors";
 }
 
 export interface GithubEvidence {
@@ -57,6 +59,9 @@ export interface CandidateProfile {
   expectedSalary?: string;        // e.g. "₹8-12 LPA", "$90,000/yr"
   bio?: string;                   // Brief professional summary
   verifiedSkills?: Record<string, SkillVerification>;
+  phone?: string;
+  secondaryEmail?: string;
+  twoFactorEnabled?: boolean;
   projects: ProjectEntry[];
   githubEvidence?: GithubEvidence;
   verificationStatus: VerificationStatus;
@@ -74,6 +79,14 @@ const PROFILE_CACHE_TTL_MS = 60_000;
 
 export const invalidateCandidateProfileCache = (uid: string) => {
   profileCache.delete(uid);
+};
+
+export const getCachedCandidateProfile = (uid: string): CandidateProfile | null => {
+  const cached = profileCache.get(uid);
+  if (cached && Date.now() - cached.ts < PROFILE_CACHE_TTL_MS) {
+    return cached.data;
+  }
+  return null;
 };
 
 export const fetchCandidateProfile = async (uid: string): Promise<CandidateProfile | null> => {
@@ -127,7 +140,27 @@ export const saveCandidateProfile = async (uid: string, profile: Partial<Candida
     }
   }
 
-  await setDoc(docRef, { ...profile, candidateKey, updatedAt: Date.now() }, { merge: true });
+  // Sanitize all values: remove undefined properties so Firestore never throws
+  const rawPayload = { ...profile, candidateKey, updatedAt: Date.now() };
+  const cleanPayload: Record<string, any> = {};
+  for (const [key, value] of Object.entries(rawPayload)) {
+    if (value !== undefined) {
+      cleanPayload[key] = value;
+    }
+  }
+
+  // Ensure client writes never include restricted admin audit keys that would be rejected by rules
+  const restrictedAdminKeys = ['verifiedBy', 'verifiedByUid', 'verifiedByEmail', 'verifiedAt', 'verifiedSkills'];
+  for (const k of restrictedAdminKeys) {
+    delete cleanPayload[k];
+  }
+
+  // Ensure default verificationStatus is set if not already defined
+  if (!cleanPayload.verificationStatus) {
+    cleanPayload.verificationStatus = "draft";
+  }
+
+  await setDoc(docRef, cleanPayload, { merge: true });
   // Invalidate cache so the next read fetches fresh data
   invalidateCandidateProfileCache(uid);
 };

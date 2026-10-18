@@ -65,12 +65,12 @@ export function MobileNav({ role }: { role: "candidate" | "employer" | "admin" }
   };
 
   return (
-    <div className="lg:hidden flex items-center justify-between px-6 h-16 border-b border-[#E5E5E5] bg-[#FAFAFA] shrink-0">
+    <div className="lg:hidden flex items-center justify-between px-6 h-16 border-b border-border bg-background shrink-0">
       <img src="/logo-full.png" alt="Meritlane" className="h-6 w-auto" />
       
       <button 
         onClick={() => setIsOpen(true)}
-        className="p-2 -mr-2 text-[#0D0D0D]"
+        className="p-2 -mr-2 text-foreground"
         aria-label="Open mobile menu"
       >
         <Menu className="h-6 w-6" />
@@ -82,13 +82,13 @@ export function MobileNav({ role }: { role: "candidate" | "employer" | "admin" }
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
-            className="fixed inset-0 z-50 bg-[#FAFAFA] flex flex-col"
+            className="fixed inset-0 z-50 bg-background flex flex-col"
           >
-            <div className="flex items-center justify-between px-6 h-16 border-b border-[#E5E5E5] shrink-0">
+            <div className="flex items-center justify-between px-6 h-16 border-b border-border shrink-0">
               <img src="/logo-full.png" alt="Meritlane" className="h-6 w-auto" />
               <button 
                 onClick={() => setIsOpen(false)}
-                className="p-2 -mr-2 text-[#0D0D0D]"
+                className="p-2 -mr-2 text-foreground"
                 aria-label="Close mobile menu"
               >
                 <X className="h-6 w-6" />
@@ -102,7 +102,7 @@ export function MobileNav({ role }: { role: "candidate" | "employer" | "admin" }
 
                 if (item.disabled) {
                   return (
-                    <div key={item.name} className="flex items-center px-4 py-4 text-[16px] font-sans text-[#D2D2D2] rounded-md">
+                    <div key={item.name} className="flex items-center px-4 py-4 text-[16px] font-sans text-muted rounded-md">
                       <Icon className="mr-4 h-[20px] w-[20px] opacity-30" />
                       {item.name}
                     </div>
@@ -116,8 +116,8 @@ export function MobileNav({ role }: { role: "candidate" | "employer" | "admin" }
                     onClick={() => setIsOpen(false)}
                     className={`flex items-center px-4 py-4 text-[16px] font-sans rounded-md transition-colors ${
                       isActive 
-                        ? "text-[#0D0D0D] bg-[#FFFFFF] border border-[#E5E5E5]" 
-                        : "text-[#737373] hover:text-[#0D0D0D] hover:bg-[#FFFFFF]/50"
+                        ? "text-foreground bg-surface border border-border" 
+                        : "text-muted-foreground hover:text-foreground hover:bg-surface/50"
                     }`}
                   >
                     <Icon className="mr-4 h-[20px] w-[20px]" />
@@ -127,10 +127,10 @@ export function MobileNav({ role }: { role: "candidate" | "employer" | "admin" }
               })}
 
               {/* Sign Out */}
-              <div className="pt-4 mt-4 border-t border-[#E5E5E5]">
+              <div className="pt-4 mt-4 border-t border-border">
                 <button 
                   onClick={onSignOut}
-                  className="flex items-center px-4 py-4 text-[16px] font-sans text-[#737373] hover:text-[#B42318] rounded-md transition-colors w-full"
+                  className="flex items-center px-4 py-4 text-[16px] font-sans text-muted-foreground hover:text-danger rounded-md transition-colors w-full"
                 >
                   <LogOut className="mr-4 h-[20px] w-[20px]" />
                   Sign Out

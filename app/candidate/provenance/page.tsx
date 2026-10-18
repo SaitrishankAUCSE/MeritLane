@@ -57,27 +57,27 @@ export default function ProvenancePage() {
     <div className="w-full min-h-full bg-transparent pb-24">
 
       {/* ── Dossier Command Header ── */}
-      <div className="border-b border-[#E7E2DA] bg-white px-4 sm:px-6 lg:px-8 py-5">
+      <div className="border-b border-border bg-white px-4 sm:px-6 lg:px-8 py-5">
         <div className="w-full">
           <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
             <div>
-              <div className="text-[10px] font-medium tracking-[0.2em] text-[#78716C] uppercase mb-1">
+              <div className="text-[10px] font-medium tracking-[0.2em] text-muted-foreground uppercase mb-1">
                 Public Profile · Meritlane
               </div>
-              <h1 className="text-[26px] sm:text-[32px] text-[#1C1917] font-semibold tracking-tight leading-tight">
+              <h1 className="text-[26px] sm:text-[32px] text-foreground font-semibold tracking-tight leading-tight">
                 Verified Public Record
               </h1>
               <div className="mt-2 flex items-center gap-3 flex-wrap">
-                <span className="text-[11px] font-mono text-[#78716C]">
-                  Candidate ID: <span className="text-[#1C1917] font-semibold">{candidateKey}</span>
+                <span className="text-[11px] font-mono text-muted-foreground">
+                  Candidate ID: <span className="text-foreground font-semibold">{candidateKey}</span>
                 </span>
-                <div className="w-px h-3 bg-[#E7E2DA]" />
-                <span className="text-[11px] font-mono text-[#78716C]">
-                  Last Updated: <span className="text-[#1C1917]">{auditDate}</span>
+                <div className="w-px h-3 bg-border" />
+                <span className="text-[11px] font-mono text-muted-foreground">
+                  Last Updated: <span className="text-foreground">{auditDate}</span>
                 </span>
-                <div className="w-px h-3 bg-[#E7E2DA]" />
-                <span className="text-[11px] font-mono text-[#78716C]">
-                  Verified by: <span className="text-[#1C1917]">Meritlane</span>
+                <div className="w-px h-3 bg-border" />
+                <span className="text-[11px] font-mono text-muted-foreground">
+                  Verified by: <span className="text-foreground">Meritlane</span>
                 </span>
               </div>
             </div>
@@ -85,13 +85,13 @@ export default function ProvenancePage() {
               <div className="flex gap-2 shrink-0 flex-wrap">
                 <button
                   onClick={handleCopy}
-                  className="flex items-center gap-1.5 text-[11px] font-mono font-semibold px-4 py-2 border border-[#E7E2DA] bg-white hover:bg-[#E7E2DA] text-[#1C1917] transition-colors rounded shadow-2xs"
+                  className="flex items-center gap-1.5 text-[11px] font-mono font-semibold px-4 py-2 border border-border bg-white hover:bg-border text-foreground transition-colors rounded shadow-2xs"
                 >
-                  {copied ? <Check className="h-3 w-3 text-[#064E3B]" /> : <Copy className="h-3 w-3" />}
+                  {copied ? <Check className="h-3 w-3 text-emerald-900" /> : <Copy className="h-3 w-3" />}
                   {copied ? "COPIED" : "COPY LINK"}
                 </button>
                 <Link href={publicUrl} target="_blank">
-                  <button className="flex items-center gap-1.5 text-[11px] font-mono font-semibold px-4 py-2 bg-[#1C1917] hover:bg-[#064E3B] text-white transition-colors rounded shadow-2xs">
+                  <button className="flex items-center gap-1.5 text-[11px] font-mono font-semibold px-4 py-2 bg-foreground hover:bg-emerald-900 text-white transition-colors rounded shadow-2xs">
                     <ExternalLink className="h-3 w-3" />
                     VIEW PUBLIC PROFILE
                   </button>
@@ -105,17 +105,17 @@ export default function ProvenancePage() {
       <div className="w-full px-4 sm:px-6 lg:px-8 py-6 space-y-6">
 
         {/* ── Metadata Strip: 3 columns ── */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 border border-[#E7E2DA] bg-white divide-y sm:divide-y-0 sm:divide-x divide-[#E7E2DA]">
+        <div className="grid grid-cols-1 sm:grid-cols-3 border border-border bg-white divide-y sm:divide-y-0 sm:divide-x divide-[#E7E2DA]">
 
           {/* Record Status */}
           <div className="p-5">
-            <div className="text-[9px] font-medium tracking-[0.18em] text-[#78716C] uppercase mb-3">
+            <div className="text-[9px] font-medium tracking-[0.18em] text-muted-foreground uppercase mb-3">
               Profile Status
             </div>
-            <div className={`text-[22px] font-serif mb-1 ${isDiscoverable ? "text-[#064E3B]" : "text-[#78716C]"}`}>
+            <div className={`text-[22px] font-serif mb-1 ${isDiscoverable ? "text-emerald-900" : "text-muted-foreground"}`}>
               {isDiscoverable ? "Active" : "Inactive"}
             </div>
-            <div className="text-[11px] font-sans text-[#78716C] leading-relaxed">
+            <div className="text-[11px] font-sans text-muted-foreground leading-relaxed">
               {isDiscoverable
                 ? `${verifiedCount} verified skill${verifiedCount !== 1 ? "s" : ""} on record. Active and visible to employers.`
                 : "Pass at least one skill test to activate your public profile."}
@@ -124,7 +124,7 @@ export default function ProvenancePage() {
 
           {/* Chain of Custody */}
           <div className="p-5">
-            <div className="text-[9px] font-medium tracking-[0.18em] text-[#78716C] uppercase mb-3">
+            <div className="text-[9px] font-medium tracking-[0.18em] text-muted-foreground uppercase mb-3">
               How Verification Works
             </div>
             <div className="space-y-2.5">
@@ -136,7 +136,7 @@ export default function ProvenancePage() {
               ].map(({ step, party }) => (
                 <div key={step} className="flex gap-3">
                   <div className="text-[9px] font-mono text-[#C8BFB0] pt-0.5 shrink-0 w-16">{step}</div>
-                  <div className="text-[11px] font-sans text-[#525252]">{party}</div>
+                  <div className="text-[11px] font-sans text-muted-foreground">{party}</div>
                 </div>
               ))}
             </div>
@@ -144,7 +144,7 @@ export default function ProvenancePage() {
 
           {/* Disclosure Status */}
           <div className="p-5">
-            <div className="text-[9px] font-medium tracking-[0.18em] text-[#78716C] uppercase mb-3">
+            <div className="text-[9px] font-medium tracking-[0.18em] text-muted-foreground uppercase mb-3">
               Visibility
             </div>
             <div className="space-y-2.5">
@@ -155,11 +155,11 @@ export default function ProvenancePage() {
                 { label: "Public Link Active", value: !!user },
               ].map(({ label, value }) => (
                 <div key={label} className="flex items-center justify-between gap-3">
-                  <span className="text-[11px] font-sans text-[#525252]">{label}</span>
+                  <span className="text-[11px] font-sans text-muted-foreground">{label}</span>
                   <span className={`text-[9px] font-medium font-semibold tracking-[0.14em] px-2 py-[2px] uppercase border ${
                     value
-                      ? "text-[#064E3B] bg-[#064E3B]/[0.06] border-[#064E3B]/25"
-                      : "text-[#78716C] bg-[#E7E2DA] border-[#C8BFB0]"
+                      ? "text-emerald-900 bg-emerald-900/[0.06] border-emerald-900/25"
+                      : "text-muted-foreground bg-border border-[#C8BFB0]"
                   }`}>
                     {value ? "YES" : "NO"}
                   </span>
@@ -170,39 +170,39 @@ export default function ProvenancePage() {
         </div>
 
         {/* ── Notice band ── */}
-        <div className="border border-[#E7E2DA] bg-[#E7E2DA] px-5 py-3 flex items-center gap-3">
-          <ShieldCheck className="h-4 w-4 text-[#064E3B] shrink-0" />
-          <p className="text-[11px] font-mono text-[#525252]">
+        <div className="border border-border bg-border px-5 py-3 flex items-center gap-3">
+          <ShieldCheck className="h-4 w-4 text-emerald-900 shrink-0" />
+          <p className="text-[11px] font-mono text-muted-foreground">
             This is a preview of your public profile as employers see it. It updates automatically when you pass tests.
           </p>
         </div>
 
         {/* ── Profile Preview Frame ── */}
         {fetching ? (
-          <div className="border border-[#E7E2DA] bg-white p-16 text-center">
-            <div className="h-5 w-5 border-2 border-[#E7E2DA] border-t-[#1C1917] rounded-full animate-spin mx-auto mb-3" />
-            <p className="text-[12px] font-mono text-[#78716C]">Loading public profile…</p>
+          <div className="border border-border bg-white p-16 text-center">
+            <div className="h-5 w-5 border-2 border-border border-t-[#1C1917] rounded-full animate-spin mx-auto mb-3" />
+            <p className="text-[12px] font-mono text-muted-foreground">Loading public profile…</p>
           </div>
         ) : !candidate ? (
           <div className="border border-dashed border-[#C8BFB0] bg-white p-16 text-center">
-            <p className="text-[16px] font-serif text-[#1C1917] mb-2">Profile not set up yet</p>
-            <p className="text-[13px] text-[#78716C] mb-6 font-sans">
+            <p className="text-[16px] font-serif text-foreground mb-2">Profile not set up yet</p>
+            <p className="text-[13px] text-muted-foreground mb-6 font-sans">
               Complete your profile details to create your public link.
             </p>
             <Link href="/candidate/profile">
-              <button className="text-[11px] font-mono font-semibold px-5 py-2.5 bg-[#1C1917] hover:bg-[#064E3B] text-white transition-colors tracking-[0.06em]">
+              <button className="text-[11px] font-mono font-semibold px-5 py-2.5 bg-foreground hover:bg-emerald-900 text-white transition-colors tracking-[0.06em]">
                 COMPLETE PROFILE
               </button>
             </Link>
           </div>
         ) : (
-          <div className="border border-[#E7E2DA] bg-white">
+          <div className="border border-border bg-white">
             {/* Document header bar */}
-            <div className="border-b border-[#E7E2DA] bg-[#E7E2DA] px-6 py-3 flex items-center justify-between">
-              <div className="text-[9px] font-medium tracking-[0.18em] text-[#78716C] uppercase">
+            <div className="border-b border-border bg-border px-6 py-3 flex items-center justify-between">
+              <div className="text-[9px] font-medium tracking-[0.18em] text-muted-foreground uppercase">
                 Public Profile Preview
               </div>
-              <div className="text-[9px] font-mono text-[#78716C]">
+              <div className="text-[9px] font-mono text-muted-foreground">
                 Candidate ID: {candidateKey}
               </div>
             </div>
@@ -216,11 +216,11 @@ export default function ProvenancePage() {
               />
             </div>
             {/* Document footer */}
-            <div className="border-t border-[#E7E2DA] bg-[#E7E2DA] px-6 py-3 flex items-center justify-between">
-              <div className="text-[9px] font-mono text-[#78716C]">
+            <div className="border-t border-border bg-border px-6 py-3 flex items-center justify-between">
+              <div className="text-[9px] font-mono text-muted-foreground">
                 Meritlane · merit-lane.vercel.app
               </div>
-              <div className="text-[9px] font-mono text-[#78716C]">
+              <div className="text-[9px] font-mono text-muted-foreground">
                 Updated: {auditDate}
               </div>
             </div>
@@ -228,8 +228,8 @@ export default function ProvenancePage() {
         )}
 
         {/* ── Usage guidance ── */}
-        <div className="border border-[#E7E2DA] bg-white p-5 grid grid-cols-1 sm:grid-cols-3 gap-5">
-          <div className="text-[9px] font-medium tracking-[0.18em] text-[#78716C] uppercase sm:col-span-3 pb-3 border-b border-[#E7E2DA]">
+        <div className="border border-border bg-white p-5 grid grid-cols-1 sm:grid-cols-3 gap-5">
+          <div className="text-[9px] font-medium tracking-[0.18em] text-muted-foreground uppercase sm:col-span-3 pb-3 border-b border-border">
             How to Use Your Public Profile
           </div>
           {[
@@ -250,10 +250,10 @@ export default function ProvenancePage() {
             },
           ].map(({ step, title, desc }) => (
             <div key={step} className="flex gap-4">
-              <div className="text-[20px] font-serif text-[#E7E2DA] shrink-0 leading-none mt-0.5">{step}</div>
+              <div className="text-[20px] font-serif text-border shrink-0 leading-none mt-0.5">{step}</div>
               <div>
-                <div className="text-[12px] font-mono font-semibold text-[#1C1917] mb-1">{title}</div>
-                <div className="text-[11px] font-sans text-[#78716C] leading-relaxed">{desc}</div>
+                <div className="text-[12px] font-mono font-semibold text-foreground mb-1">{title}</div>
+                <div className="text-[11px] font-sans text-muted-foreground leading-relaxed">{desc}</div>
               </div>
             </div>
           ))}

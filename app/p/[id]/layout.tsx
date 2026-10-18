@@ -71,7 +71,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default function PublicProofLayout({ children }: { children: ReactNode }) {
   return (
-    <div className={`${sourceSerif.variable} min-h-screen bg-[#F8F6F3] text-[#1C1917]`}>
+    <div className={`${sourceSerif.variable} min-h-screen bg-[#F8F6F3] text-foreground`}>
       {children}
     </div>
   );

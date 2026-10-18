@@ -70,7 +70,7 @@ export function LogoutConfirmModal({ isOpen, onConfirm, onCancel }: LogoutConfir
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 12 }}
             transition={{ type: "spring", damping: 25, stiffness: 350 }}
-            className="relative z-10 w-full max-w-md overflow-hidden rounded-3xl bg-white shadow-2xl border border-[#E5E5E5] p-6 sm:p-8"
+            className="relative z-10 w-full max-w-md overflow-hidden rounded-3xl bg-white shadow-2xl border border-border p-6 sm:p-8"
             role="dialog"
             aria-modal="true"
             aria-labelledby="logout-title"
@@ -81,7 +81,7 @@ export function LogoutConfirmModal({ isOpen, onConfirm, onCancel }: LogoutConfir
               <button
                 type="button"
                 onClick={onCancel}
-                className="absolute top-5 right-5 p-1.5 rounded text-[#737373] hover:text-[#0D0D0D] hover:bg-[#F3F3F1] transition-colors"
+                className="absolute top-5 right-5 p-1.5 rounded text-muted-foreground hover:text-foreground hover:bg-surface transition-colors"
                 aria-label="Close modal"
               >
                 <X className="h-4 w-4" />
@@ -95,10 +95,10 @@ export function LogoutConfirmModal({ isOpen, onConfirm, onCancel }: LogoutConfir
 
             {/* Title & Description */}
             <div className="text-center mb-6">
-              <h2 id="logout-title" className="font-serif text-[22px] font-bold text-[#0D0D0D] tracking-tight mb-2">
+              <h2 id="logout-title" className="font-serif text-[22px] font-bold text-foreground tracking-tight mb-2">
                 Sign out of MeritLane?
               </h2>
-              <p id="logout-description" className="text-[14px] text-[#737373] font-sans leading-relaxed">
+              <p id="logout-description" className="text-[14px] text-muted-foreground font-sans leading-relaxed">
                 You will be securely signed out. You can log back in at any time to access your profile, assessments, and verified talent feed.
               </p>
             </div>
@@ -109,7 +109,7 @@ export function LogoutConfirmModal({ isOpen, onConfirm, onCancel }: LogoutConfir
                 type="button"
                 onClick={onCancel}
                 disabled={isLoggingOut}
-                className="w-full h-11 px-4 rounded border border-[#E5E5E5] bg-white text-[#0D0D0D] font-sans font-semibold text-[14px] hover:bg-[#F5F5F5] active:scale-[0.98] transition-all disabled:opacity-50"
+                className="w-full h-11 px-4 rounded border border-border bg-white text-foreground font-sans font-semibold text-[14px] hover:bg-surface active:scale-[0.98] transition-all disabled:opacity-50"
               >
                 Cancel
               </button>
@@ -118,7 +118,7 @@ export function LogoutConfirmModal({ isOpen, onConfirm, onCancel }: LogoutConfir
                 type="button"
                 onClick={handleConfirm}
                 disabled={isLoggingOut}
-                className="w-full h-11 px-4 rounded bg-[#B42318] hover:bg-[#912018] text-white font-sans font-semibold text-[14px] shadow-sm active:scale-[0.98] transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+                className="w-full h-11 px-4 rounded bg-danger hover:bg-danger/90 text-white font-sans font-semibold text-[14px] shadow-sm active:scale-[0.98] transition-all flex items-center justify-center gap-2 disabled:opacity-50"
               >
                 {isLoggingOut ? (
                   <>

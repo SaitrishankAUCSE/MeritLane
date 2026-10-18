@@ -42,7 +42,7 @@ export function CandidateAvatar({
   const sizeMap = {
     sm: {
       container: "h-8 w-8 text-xs",
-      ring: effectiveBadge === "job_ready" ? "ring-2 ring-[#059669] ring-offset-1" : "",
+      ring: effectiveBadge === "job_ready" ? "ring-2 ring-emerald-600 ring-offset-1" : "",
       badge: "bottom-0 -left-2 -right-2 py-0.5",
       badgeText: "READY",
       textSize: "text-[5.5px]",
@@ -50,7 +50,7 @@ export function CandidateAvatar({
     },
     md: {
       container: "h-11 w-11 text-sm",
-      ring: effectiveBadge === "job_ready" ? "ring-2 ring-[#059669] ring-offset-1" : "",
+      ring: effectiveBadge === "job_ready" ? "ring-2 ring-emerald-600 ring-offset-1" : "",
       badge: "bottom-1 -left-3 -right-3 py-0.5",
       badgeText: "#JOB READY",
       textSize: "text-[6.5px]",
@@ -58,7 +58,7 @@ export function CandidateAvatar({
     },
     lg: {
       container: "h-14 w-14 text-base",
-      ring: effectiveBadge === "job_ready" ? "ring-2 ring-[#059669] ring-offset-1.5" : "",
+      ring: effectiveBadge === "job_ready" ? "ring-2 ring-emerald-600 ring-offset-1.5" : "",
       badge: "bottom-1.5 -left-4 -right-4 py-0.5 sm:py-1",
       badgeText: "#JOB READY",
       textSize: "text-[7px]",
@@ -66,7 +66,7 @@ export function CandidateAvatar({
     },
     xl: {
       container: "h-[74px] w-[74px] sm:h-[82px] sm:w-[82px] text-xl",
-      ring: effectiveBadge === "job_ready" ? "ring-2.5 ring-[#059669] ring-offset-2" : "",
+      ring: effectiveBadge === "job_ready" ? "ring-2.5 ring-emerald-600 ring-offset-2" : "",
       badge: "bottom-2 -left-5 -right-5 py-1 sm:py-1.5",
       badgeText: "#JOB READY",
       textSize: "text-[8px] sm:text-[8.5px]",
@@ -74,7 +74,7 @@ export function CandidateAvatar({
     },
     "2xl": {
       container: "h-20 w-20 sm:h-[90px] sm:w-[90px] text-2xl",
-      ring: effectiveBadge === "job_ready" ? "ring-3 ring-[#059669] ring-offset-2" : "",
+      ring: effectiveBadge === "job_ready" ? "ring-3 ring-emerald-600 ring-offset-2" : "",
       badge: "bottom-2.5 -left-6 -right-6 py-1.5",
       badgeText: "#JOB READY",
       textSize: "text-[8.5px] sm:text-[9.5px]",
@@ -86,7 +86,7 @@ export function CandidateAvatar({
     <div className={`relative inline-block shrink-0 select-none ${className}`}>
       {/* Circular Avatar Container */}
       <div
-        className={`relative ${sizeMap.container} rounded-full overflow-hidden border border-[#E7E2DA] bg-[#F5F1EB] shadow-2xs transition-all ${sizeMap.ring}`}
+        className={`relative ${sizeMap.container} rounded-full overflow-hidden border border-border bg-surface shadow-2xs transition-all ${sizeMap.ring}`}
         title={
           effectiveBadge === "job_ready"
             ? "Eligible for Job: 100% verified technical skills (all assessments passed ≥75%)"
@@ -101,7 +101,7 @@ export function CandidateAvatar({
             className="h-full w-full object-cover rounded-full"
           />
         ) : (
-          <div className="h-full w-full rounded-full bg-gradient-to-br from-[#064E3B] via-[#043E30] to-[#022A21] flex items-center justify-center font-serif font-bold text-white shadow-inner tracking-tight">
+          <div className="h-full w-full rounded-full bg-gradient-to-br from-emerald-900 via-emerald-950 to-green-950 flex items-center justify-center font-serif font-bold text-white shadow-inner tracking-tight">
             {initials}
           </div>
         )}
@@ -109,7 +109,7 @@ export function CandidateAvatar({
         {/* Diagonal Semi-Transparent Verified Tag: ONLY rendered when all skills verifications are passed */}
         {effectiveBadge === "job_ready" && (
           <div
-            className={`absolute ${sizeMap.badge} z-10 flex items-center justify-center pointer-events-none transition-all -rotate-12 shadow-[0_2px_8px_rgba(0,0,0,0.25)] bg-[#059669]/90 backdrop-blur-[2px] border-y border-white/50 text-white`}
+            className={`absolute ${sizeMap.badge} z-10 flex items-center justify-center pointer-events-none transition-all -rotate-12 shadow-[0_2px_8px_rgba(0,0,0,0.25)] bg-emerald-600/90 backdrop-blur-[2px] border-y border-white/50 text-white`}
           >
             <span
               className={`font-mono font-black uppercase tracking-wider flex items-center justify-center gap-1 leading-none text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.9)] ${sizeMap.textSize}`}

@@ -91,11 +91,11 @@ export default function HomePage() {
           initial="hidden" animate="visible" variants={fadeUp}
           className="mb-8 flex items-center justify-center gap-3"
         >
-          <span className="h-px w-12 bg-[#1C1917]/20" />
-          <span className="text-[11px] font-medium tracking-[0.25em] uppercase text-[#78716C]">
+          <span className="h-px w-12 bg-foreground/20" />
+          <span className="text-[11px] font-medium tracking-[0.25em] uppercase text-muted-foreground">
             Meritlane
           </span>
-          <span className="h-px w-12 bg-[#1C1917]/20" />
+          <span className="h-px w-12 bg-foreground/20" />
         </motion.div>
 
         <motion.div 
@@ -122,7 +122,7 @@ export default function HomePage() {
 
         <motion.p 
           initial="hidden" animate="visible" variants={fadeUp}
-          className="text-[16px] sm:text-[18px] text-[#525252] max-w-2xl mx-auto leading-[1.7] mb-12 font-sans"
+          className="text-[16px] sm:text-[18px] text-muted-foreground max-w-2xl mx-auto leading-[1.7] mb-12 font-sans"
         >
           The traditional hiring pipeline is broken. Resumes are padded, degrees are proxies, and keyword-matching filters out genuine talent. Meritlane replaces the noise with standardized, proctored assessments and verifiable proof of work.
         </motion.p>
@@ -146,27 +146,27 @@ export default function HomePage() {
         {/* Trust Banner */}
         <motion.div
           initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3, duration: 0.4 }}
-          className="w-full max-w-3xl border-t border-[#E5E5E5] pt-8 flex flex-col sm:flex-row items-center justify-center gap-6 sm:gap-12"
+          className="w-full max-w-3xl border-t border-border pt-8 flex flex-col sm:flex-row items-center justify-center gap-6 sm:gap-12"
         >
           <div className="flex -space-x-3">
             {[1,2,3,4].map((i) => (
-              <div key={i} className={`w-10 h-10 rounded-full border-2 border-white bg-[#F5F5F4] flex items-center justify-center z-${10-i} shadow-sm`}>
-                <User className="w-4 h-4 text-[#A8A29E]" />
+              <div key={i} className={`w-10 h-10 rounded-full border-2 border-white bg-surface flex items-center justify-center z-${10-i} shadow-sm`}>
+                <User className="w-4 h-4 text-muted-foreground/70" />
               </div>
             ))}
           </div>
           <div className="text-left">
-            <div className="flex items-center gap-2 text-[14px] font-semibold text-[#1C1917]">
+            <div className="flex items-center gap-2 text-[14px] font-semibold text-foreground">
               <ShieldCheck className="w-4 h-4 text-green-600" />
               Built for the Next Generation of Engineers
             </div>
-            <div className="text-[13px] text-[#78716C] mt-1">Evaluating talent based on cryptographically verified code.</div>
+            <div className="text-[13px] text-muted-foreground mt-1">Evaluating talent based on cryptographically verified code.</div>
           </div>
         </motion.div>
       </section>
 
       {/* 2. THE PROBLEM */}
-      <section className="py-24 bg-[#0A0A0A] text-white border-y border-[#333]">
+      <section className="py-24 bg-foreground text-white border-y border-[#333]">
         <div className="mx-auto max-w-6xl px-6 lg:px-12">
           <motion.div 
             initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-100px" }} variants={fadeUp}
@@ -202,7 +202,7 @@ export default function HomePage() {
                 whileHover={{ y: -6, boxShadow: "0 10px 40px -10px rgba(0,0,0,0.5)" }}
                 viewport={{ once: true, margin: "-50px" }}
                 transition={{ duration: 0.3, delay: i * 0.1 }}
-                className="p-8 bg-[#1C1917] border border-[#333] shadow-sm transition-colors hover:border-[#525252] cursor-default"
+                className="p-8 bg-foreground border border-[#333] shadow-sm transition-colors hover:border-muted-foreground cursor-default"
               >
                 <h3 className="text-lg font-serif font-medium mb-3" style={{ color: "#FFFFFF" }}>{problem.title}</h3>
                 <p className="text-sm leading-relaxed" style={{ color: "#D1D5DB" }}>{problem.description}</p>
@@ -212,17 +212,17 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* 3. WHAT IS MERITLANE */}
-      <section className="py-24 sm:py-32 bg-white">
+      {/* 3. WHAT IS MERITLANE (EXAMINATION STANDARD) */}
+      <section id="standards" className="py-24 sm:py-32 bg-white scroll-mt-12">
         <div className="mx-auto max-w-5xl px-6 lg:px-12 text-center">
           <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp}>
-            <div className="inline-flex items-center justify-center p-4 bg-[#1C1917] rounded-full mb-8">
+            <div className="inline-flex items-center justify-center p-4 bg-foreground rounded-full mb-8">
               <Globe className="w-8 h-8 text-white" />
             </div>
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-serif text-[#1C1917] tracking-tight leading-snug max-w-4xl mx-auto mb-6">
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-serif text-foreground tracking-tight leading-snug max-w-4xl mx-auto mb-6">
               The Unified Ground Truth for Technical Talent.
             </h2>
-            <p className="text-[16px] sm:text-[18px] text-[#525252] max-w-3xl mx-auto leading-[1.8] font-sans">
+            <p className="text-[16px] sm:text-[18px] text-muted-foreground max-w-3xl mx-auto leading-[1.8] font-sans">
               MeritLane is a dual-sided ecosystem designed to eliminate hiring friction. We provide candidates with an unforgeable, cryptographically secure <strong>Evidence Dossier</strong>, while providing employers with a zero-noise, pre-vetted talent pool where every profile is backed by executed code.
             </p>
           </motion.div>
@@ -239,33 +239,33 @@ export default function HomePage() {
               initial={{ opacity: 0, x: -30 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ duration: 0.5 }}
               className="flex-1"
             >
-              <div className="text-[11px] font-medium uppercase tracking-[0.25em] text-[#059669] mb-4 flex items-center gap-2">
+              <div className="text-[11px] font-medium uppercase tracking-[0.25em] text-emerald-600 mb-4 flex items-center gap-2">
                 <BrainCircuit className="w-4 h-4" /> Just-In-Time Generation
               </div>
-              <h3 className="text-3xl font-serif text-[#1C1917] mb-6 leading-tight">Infinite scale. Any skill. Instant exams.</h3>
-              <p className="text-[15px] text-[#525252] leading-[1.8] mb-6">
+              <h3 className="text-3xl font-serif text-foreground mb-6 leading-tight">Infinite scale. Any skill. Instant exams.</h3>
+              <p className="text-[15px] text-muted-foreground leading-[1.8] mb-6">
                 Need to hire for an obscure framework? MeritLane's proprietary AI Assessment Engine generates high-fidelity, edge-case heavy coding tasks and deep multiple-choice questions for <strong>literally any technology</strong> on the fly.
               </p>
-              <ul className="space-y-3 text-[14px] text-[#525252]">
-                <li className="flex items-center gap-2"><CheckCircle className="w-4 h-4 text-[#059669]" /> 25 deep technical MCQs generated in seconds.</li>
-                <li className="flex items-center gap-2"><CheckCircle className="w-4 h-4 text-[#059669]" /> 2 Algorithmic coding tasks with 45 hidden test cases.</li>
-                <li className="flex items-center gap-2"><CheckCircle className="w-4 h-4 text-[#059669]" /> Tests for memory management, concurrency & edge cases.</li>
+              <ul className="space-y-3 text-[14px] text-muted-foreground">
+                <li className="flex items-center gap-2"><CheckCircle className="w-4 h-4 text-emerald-600" /> 25 deep technical MCQs generated in seconds.</li>
+                <li className="flex items-center gap-2"><CheckCircle className="w-4 h-4 text-emerald-600" /> 2 Algorithmic coding tasks with 45 hidden test cases.</li>
+                <li className="flex items-center gap-2"><CheckCircle className="w-4 h-4 text-emerald-600" /> Tests for memory management, concurrency & edge cases.</li>
               </ul>
             </motion.div>
             <motion.div 
               initial={{ opacity: 0, x: 30 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ duration: 0.5 }}
               className="flex-1 relative"
             >
-              <div className="absolute -inset-4 bg-[#059669]/10 rounded-lg -z-10 transform rotate-3"></div>
-              <div className="bg-[#1C1917] p-6 rounded shadow-xl border border-[#333] text-white font-mono text-[13px] leading-relaxed">
+              <div className="absolute -inset-4 bg-emerald-600/10 rounded-lg -z-10 transform rotate-3"></div>
+              <div className="bg-foreground p-6 rounded shadow-xl border border-[#333] text-white font-mono text-[13px] leading-relaxed">
                 <div className="flex items-center gap-2 mb-4 border-b border-[#333] pb-2">
                   <Terminal className="w-4 h-4 text-[#10B981]" /> 
-                  <span className="text-[#A8A29E]">engine/generate.ts</span>
+                  <span className="text-muted-foreground/70">engine/generate.ts</span>
                 </div>
                 <p className="text-[#10B981]">➜ Requesting: "Rust Concurrency"</p>
-                <p className="text-[#E7E2DA] mt-2">[INFO] Initializing Gemini 2.5 Pro Model...</p>
-                <p className="text-[#E7E2DA]">[INFO] Synthesizing 25 distractors...</p>
-                <p className="text-[#E7E2DA]">[INFO] Building 45 hidden O(N) boundary tests...</p>
+                <p className="text-border mt-2">[INFO] Initializing Gemini 2.5 Pro Model...</p>
+                <p className="text-border">[INFO] Synthesizing 25 distractors...</p>
+                <p className="text-border">[INFO] Building 45 hidden O(N) boundary tests...</p>
                 <p className="text-[#10B981] mt-2">✔ Assessment locked and ready.</p>
               </div>
             </motion.div>
@@ -280,20 +280,20 @@ export default function HomePage() {
               <div className="text-[11px] font-medium uppercase tracking-[0.25em] text-[#2563EB] mb-4 flex items-center gap-2">
                 <GitBranch className="w-4 h-4" /> 360° Candidate Dossier
               </div>
-              <h3 className="text-3xl font-serif text-[#1C1917] mb-6 leading-tight">Don't trust resumes. Trust data.</h3>
-              <p className="text-[15px] text-[#525252] leading-[1.8] mb-6">
+              <h3 className="text-3xl font-serif text-foreground mb-6 leading-tight">Don't trust resumes. Trust data.</h3>
+              <p className="text-[15px] text-muted-foreground leading-[1.8] mb-6">
                 A test score isn't enough. MeritLane aggregates real-world evidence. We securely connect to GitHub to index commit history, parse ATS semantic data, and showcase live deployed projects.
               </p>
               <div className="grid grid-cols-2 gap-4">
-                <div className="p-4 bg-white border border-[#E5E5E5] rounded hover:border-[#2563EB]/40 transition-colors duration-300">
+                <div className="p-4 bg-white border border-border rounded hover:border-[#2563EB]/40 transition-colors duration-300">
                   <Activity className="w-5 h-5 text-[#2563EB] mb-2" />
-                  <div className="font-semibold text-[#1C1917] text-[14px]">ATS Analysis</div>
-                  <div className="text-[12px] text-[#78716C]">Semantic resume scoring</div>
+                  <div className="font-semibold text-foreground text-[14px]">ATS Analysis</div>
+                  <div className="text-[12px] text-muted-foreground">Semantic resume scoring</div>
                 </div>
-                <div className="p-4 bg-white border border-[#E5E5E5] rounded hover:border-[#2563EB]/40 transition-colors duration-300">
+                <div className="p-4 bg-white border border-border rounded hover:border-[#2563EB]/40 transition-colors duration-300">
                   <Code className="w-5 h-5 text-[#2563EB] mb-2" />
-                  <div className="font-semibold text-[#1C1917] text-[14px]">Git Telemetry</div>
-                  <div className="text-[12px] text-[#78716C]">Commit volume & stacks</div>
+                  <div className="font-semibold text-foreground text-[14px]">Git Telemetry</div>
+                  <div className="text-[12px] text-muted-foreground">Commit volume & stacks</div>
                 </div>
               </div>
             </motion.div>
@@ -306,8 +306,8 @@ export default function HomePage() {
                 <div className="border border-[var(--color-border)] bg-white p-6 sm:p-8 shadow-sm">
                   <div className="flex justify-between border-b border-[var(--color-border)] pb-4 mb-6">
                     <div>
-                      <div className="text-[10px] font-medium uppercase tracking-[0.2em] text-[#78716C]">Evidence Profile</div>
-                      <div className="text-[18px] font-serif text-[#1C1917] mt-1">Preview Mode</div>
+                      <div className="text-[10px] font-medium uppercase tracking-[0.2em] text-muted-foreground">Evidence Profile</div>
+                      <div className="text-[18px] font-serif text-foreground mt-1">Preview Mode</div>
                     </div>
                     <div className="text-[11px] font-mono text-green-600 font-bold flex items-center gap-1.5">
                       <Shield className="w-3.5 h-3.5" /> VERIFIED
@@ -315,15 +315,15 @@ export default function HomePage() {
                   </div>
                   <div className="grid grid-cols-2 gap-4 text-sm font-sans mb-4">
                     <div>
-                      <div className="text-[10px] font-medium text-[#78716C] uppercase mb-1">Git Telemetry</div>
-                      <div className="font-mono text-[#1C1917] font-semibold">Authenticated</div>
+                      <div className="text-[10px] font-medium text-muted-foreground uppercase mb-1">Git Telemetry</div>
+                      <div className="font-mono text-foreground font-semibold">Authenticated</div>
                     </div>
                     <div>
-                      <div className="text-[10px] font-medium text-[#78716C] uppercase mb-1">Status</div>
-                      <div className="font-mono text-[#1C1917] font-semibold">Pre-vetted</div>
+                      <div className="text-[10px] font-medium text-muted-foreground uppercase mb-1">Status</div>
+                      <div className="font-mono text-foreground font-semibold">Pre-vetted</div>
                     </div>
                   </div>
-                  <div className="border-t border-[#E5E5E5] pt-4">
+                  <div className="border-t border-border pt-4">
                     <div className="flex gap-2">
                       <Badge variant="neutral" className="text-[10px]">React (98%)</Badge>
                       <Badge variant="neutral" className="text-[10px]">Node (92%)</Badge>
@@ -338,7 +338,7 @@ export default function HomePage() {
       </section>
 
       {/* 5. HOW IT WORKS */}
-      <section className="py-24 bg-[#0A0A0A] text-white border-y border-[#333]">
+      <section className="py-24 bg-foreground text-white border-y border-[#333]">
         <div className="mx-auto max-w-6xl px-6 lg:px-12">
           <motion.div 
             initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-100px" }} variants={fadeUp}
@@ -360,7 +360,7 @@ export default function HomePage() {
               <motion.div 
                 whileHover={{ scale: 1.1, rotate: [0, -10, 10, -10, 0] }} 
                 transition={{ duration: 0.4 }} 
-                className="inline-flex items-center justify-center p-3 bg-[#1C1917] border border-[#444] mb-6 rounded-2xl cursor-pointer"
+                className="inline-flex items-center justify-center p-3 bg-foreground border border-[#444] mb-6 rounded-2xl cursor-pointer"
               >
                 <Code className="w-6 h-6 text-white" />
               </motion.div>
@@ -386,7 +386,7 @@ export default function HomePage() {
               <motion.div 
                 whileHover={{ scale: 1.1, rotate: [0, -10, 10, -10, 0] }} 
                 transition={{ duration: 0.4 }} 
-                className="inline-flex items-center justify-center p-3 bg-[#1C1917] border border-[#444] mb-6 rounded-2xl cursor-pointer"
+                className="inline-flex items-center justify-center p-3 bg-foreground border border-[#444] mb-6 rounded-2xl cursor-pointer"
               >
                 <Database className="w-6 h-6 text-white" />
               </motion.div>
@@ -413,37 +413,37 @@ export default function HomePage() {
       {/* 6. THE STORY / WHO BUILT THIS */}
       <section className="py-24 sm:py-32 bg-white relative overflow-hidden">
         {/* Subtle background decoration */}
-        <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-gradient-to-bl from-[#F5F5F4] to-transparent rounded-full opacity-50 -z-10 translate-x-1/3 -translate-y-1/3 blur-3xl"></div>
+        <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-gradient-to-bl from-surface to-transparent rounded-full opacity-50 -z-10 translate-x-1/3 -translate-y-1/3 blur-3xl"></div>
         
         <div className="mx-auto max-w-5xl px-6 lg:px-12 text-center">
           <motion.div 
             initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5 }}
           >
-            <div className="text-[11px] font-medium uppercase tracking-[0.25em] text-[#78716C] mb-6">
+            <div className="text-[11px] font-medium uppercase tracking-[0.25em] text-muted-foreground mb-6">
               The Mission
             </div>
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-serif text-[#1C1917] tracking-tight mb-10 max-w-3xl mx-auto">
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-serif text-foreground tracking-tight mb-10 max-w-3xl mx-auto">
               Built by engineers, for engineers.
             </h2>
             
             <div className="max-w-2xl mx-auto text-left">
-              <p className="text-[16px] text-[#525252] leading-[1.8] mb-6">
+              <p className="text-[16px] text-muted-foreground leading-[1.8] mb-6">
                 The technical hiring loop is broken. We watched brilliant developers get auto-rejected by keyword-matching algorithms because they didn't have the right "pedigree", while companies wasted thousands of hours interviewing candidates who couldn't write a basic sorting algorithm.
               </p>
               
-              <div className="bg-[#FAFAFA] border border-[#E5E5E5] p-6 rounded-lg my-10 relative">
-                <div className="absolute -top-3 -left-3 text-4xl text-[#E7E2DA] font-serif">"</div>
-                <p className="text-[18px] font-serif italic text-[#1C1917] leading-relaxed text-center px-4 relative z-10">
+              <div className="bg-[#FAFAFA] border border-border p-6 rounded-lg my-10 relative">
+                <div className="absolute -top-3 -left-3 text-4xl text-border font-serif">"</div>
+                <p className="text-[18px] font-serif italic text-foreground leading-relaxed text-center px-4 relative z-10">
                   MeritLane was built on a single, uncompromising belief: Code speaks louder than keywords. We evaluate candidates exactly how they build software in the real world.
                 </p>
               </div>
 
               <motion.div 
                 whileHover={{ y: -6, boxShadow: "0 25px 50px -12px rgba(0,0,0,0.15)" }}
-                className="flex flex-col sm:flex-row items-center gap-8 mt-12 bg-white border border-[#E5E5E5] p-8 rounded-2xl shadow-lg transition-all duration-300 relative overflow-hidden"
+                className="flex flex-col sm:flex-row items-center gap-8 mt-12 bg-white border border-border p-8 rounded-2xl shadow-lg transition-all duration-300 relative overflow-hidden"
               >
                 <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-amber-100 to-transparent rounded-full opacity-40 -z-10 translate-x-1/3 -translate-y-1/3 blur-xl"></div>
-                <div className="w-24 h-24 sm:w-32 sm:h-32 bg-gradient-to-tr from-[#1C1917] to-[#44403C] rounded-full flex items-center justify-center shrink-0 border-4 border-white shadow-xl overflow-hidden relative group">
+                <div className="w-24 h-24 sm:w-32 sm:h-32 bg-gradient-to-tr from-foreground to-[#44403C] rounded-full flex items-center justify-center shrink-0 border-4 border-white shadow-xl overflow-hidden relative group">
                   <div className="absolute inset-0 bg-black/20 mix-blend-overlay group-hover:opacity-0 transition-opacity duration-300"></div>
                   <div className="text-white font-serif text-3xl sm:text-4xl z-10 drop-shadow-md">SB</div>
                 </div>
@@ -451,13 +451,13 @@ export default function HomePage() {
                   <div className="inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-amber-600 bg-amber-50 px-2.5 py-1 rounded-full mb-3 border border-amber-200">
                     <Sparkles className="w-3 h-3" /> Founder Profile
                   </div>
-                  <h4 className="text-[24px] font-serif font-bold text-[#1C1917] leading-tight">Saitrishank B</h4>
-                  <div className="text-[15px] font-medium text-[#78716C] mb-4">Founder & Lead Engineer, MeritLane</div>
+                  <h4 className="text-[24px] font-serif font-bold text-foreground leading-tight">Saitrishank B</h4>
+                  <div className="text-[15px] font-medium text-muted-foreground mb-4">Founder & Lead Engineer, MeritLane</div>
                   <div className="flex gap-4 justify-center sm:justify-start">
-                    <a href="https://github.com/SaitrishankAUCSE" target="_blank" rel="noreferrer" className="flex items-center gap-2 text-[13px] font-semibold text-[#1C1917] hover:text-[#2563EB] transition-colors p-2.5 px-4 bg-[#FAFAFA] rounded border border-[#E5E5E5] hover:border-[#2563EB]/30 hover:bg-blue-50">
+                    <a href="https://github.com/SaitrishankAUCSE" target="_blank" rel="noreferrer" className="flex items-center gap-2 text-[13px] font-semibold text-foreground hover:text-[#2563EB] transition-colors p-2.5 px-4 bg-[#FAFAFA] rounded border border-border hover:border-[#2563EB]/30 hover:bg-blue-50">
                       <Code className="w-4 h-4" /> GitHub
                     </a>
-                    <a href="mailto:saitrishankb9@gmail.com" className="flex items-center gap-2 text-[13px] font-semibold text-[#1C1917] hover:text-amber-600 transition-colors p-2.5 px-4 bg-[#FAFAFA] rounded border border-[#E5E5E5] hover:border-amber-600/30 hover:bg-amber-50">
+                    <a href="mailto:saitrishankb9@gmail.com" className="flex items-center gap-2 text-[13px] font-semibold text-foreground hover:text-amber-600 transition-colors p-2.5 px-4 bg-[#FAFAFA] rounded border border-border hover:border-amber-600/30 hover:bg-amber-50">
                       <Mail className="w-4 h-4" /> Email
                     </a>
                   </div>
@@ -472,8 +472,8 @@ export default function HomePage() {
       <section className="py-24 bg-[#FAFAFA] border-t border-[var(--color-border)]">
         <div className="mx-auto max-w-3xl px-6">
           <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} className="text-center mb-12">
-            <h2 className="text-3xl font-serif text-[#1C1917] mb-4">Frequently Asked Questions</h2>
-            <p className="text-[#78716C] text-[15px]">Everything you need to know about the MeritLane standard.</p>
+            <h2 className="text-3xl font-serif text-foreground mb-4">Frequently Asked Questions</h2>
+            <p className="text-muted-foreground text-[15px]">Everything you need to know about the MeritLane standard.</p>
           </motion.div>
 
           <div className="space-y-4">
@@ -483,14 +483,14 @@ export default function HomePage() {
                 <motion.div 
                   key={i}
                   initial={{ opacity: 0, y: 10 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.1 }}
-                  className="border border-[#E5E5E5] bg-white rounded-lg overflow-hidden transition-colors hover:border-[#E7E2DA]"
+                  className="border border-border bg-white rounded-lg overflow-hidden transition-colors hover:border-border"
                 >
                   <button 
                     onClick={() => setOpenFaqIndex(isOpen ? null : i)}
                     className="w-full flex items-center justify-between p-5 text-left focus:outline-none"
                   >
-                    <span className="font-semibold text-[#1C1917] text-[15px]">{faq.question}</span>
-                    <ChevronDown className={`w-5 h-5 text-[#A8A29E] transition-transform duration-300 ${isOpen ? "rotate-180" : ""}`} />
+                    <span className="font-semibold text-foreground text-[15px]">{faq.question}</span>
+                    <ChevronDown className={`w-5 h-5 text-muted-foreground/70 transition-transform duration-300 ${isOpen ? "rotate-180" : ""}`} />
                   </button>
                   <AnimatePresence>
                     {isOpen && (
@@ -498,7 +498,7 @@ export default function HomePage() {
                         initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }}
                         transition={{ duration: 0.2, ease: "easeInOut" }}
                       >
-                        <div className="px-5 pb-5 text-[14px] text-[#525252] leading-relaxed border-t border-[#FAFAFA] pt-3">
+                        <div className="px-5 pb-5 text-[14px] text-muted-foreground leading-relaxed border-t border-[#FAFAFA] pt-3">
                           {faq.answer}
                         </div>
                       </motion.div>
@@ -511,23 +511,23 @@ export default function HomePage() {
 
           <motion.div 
             initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5 }}
-            className="mt-24 max-w-2xl mx-auto bg-white p-8 sm:p-10 rounded-2xl border border-[#E5E5E5] shadow-sm relative overflow-hidden"
+            className="mt-24 max-w-2xl mx-auto bg-white p-8 sm:p-10 rounded-2xl border border-border shadow-sm relative overflow-hidden"
           >
             <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-blue-100 to-transparent rounded-full opacity-40 -z-10 translate-x-1/3 -translate-y-1/3 blur-xl"></div>
             <div className="text-center mb-8">
-              <div className="inline-flex items-center justify-center p-3 bg-[#FAFAFA] rounded-full border border-[#E5E5E5] mb-4">
-                <Mail className="w-5 h-5 text-[#1C1917]" />
+              <div className="inline-flex items-center justify-center p-3 bg-[#FAFAFA] rounded-full border border-border mb-4">
+                <Mail className="w-5 h-5 text-foreground" />
               </div>
-              <h3 className="text-2xl font-serif text-[#1C1917] mb-2">Have a specific query?</h3>
-              <p className="text-[#78716C] text-[14px]">Send us a message and we'll get back to you within 24 hours.</p>
+              <h3 className="text-2xl font-serif text-foreground mb-2">Have a specific query?</h3>
+              <p className="text-muted-foreground text-[14px]">Send us a message and we'll get back to you within 24 hours.</p>
             </div>
             {contactStatus === "success" ? (
               <div className="text-center py-6 space-y-4">
                 <div className="inline-flex items-center justify-center p-3.5 bg-emerald-50 text-emerald-700 rounded-full border border-emerald-200">
                   <CheckCircle className="w-8 h-8" />
                 </div>
-                <h4 className="text-xl font-serif text-[#1C1917] font-semibold">Message Delivered</h4>
-                <p className="text-[#525252] text-[15px] max-w-md mx-auto leading-relaxed">
+                <h4 className="text-xl font-serif text-foreground font-semibold">Message Delivered</h4>
+                <p className="text-muted-foreground text-[15px] max-w-md mx-auto leading-relaxed">
                   Thank you for reaching out! Your message has been saved to the administrative inbox. We will get back to you at <strong>{contactSubmittedEmail}</strong> within 24 hours.
                 </p>
                 <div className="pt-2">
@@ -537,7 +537,7 @@ export default function HomePage() {
                       setContactStatus("idle");
                       setContactError(null);
                     }}
-                    className="inline-flex items-center text-[13px] font-semibold text-[#1C1917] hover:text-[#059669] transition-colors underline underline-offset-4"
+                    className="inline-flex items-center text-[13px] font-semibold text-foreground hover:text-emerald-600 transition-colors underline underline-offset-4"
                   >
                     Send another message &rarr;
                   </button>
@@ -586,22 +586,22 @@ export default function HomePage() {
                 )}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                   <div className="space-y-1.5 text-left">
-                    <label htmlFor="name" className="text-[12px] font-bold tracking-wide uppercase text-[#78716C]">Full Name</label>
-                    <input required id="name" name="name" type="text" className="w-full px-4 py-2.5 text-[14px] bg-[#FAFAFA] border border-[#E5E5E5] rounded-md focus:outline-none focus:ring-2 focus:ring-[#1C1917]/20 focus:border-[#1C1917] transition-all" placeholder="Enter your name" disabled={contactStatus === "loading"} />
+                    <label htmlFor="name" className="text-[12px] font-bold tracking-wide uppercase text-muted-foreground">Full Name</label>
+                    <input required id="name" name="name" type="text" className="w-full px-4 py-2.5 text-[14px] bg-[#FAFAFA] border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-foreground/20 focus:border-foreground transition-all" placeholder="Enter your name" disabled={contactStatus === "loading"} />
                   </div>
                   <div className="space-y-1.5 text-left">
-                    <label htmlFor="email" className="text-[12px] font-bold tracking-wide uppercase text-[#78716C]">Email Address</label>
-                    <input required id="email" name="email" type="email" className="w-full px-4 py-2.5 text-[14px] bg-[#FAFAFA] border border-[#E5E5E5] rounded-md focus:outline-none focus:ring-2 focus:ring-[#1C1917]/20 focus:border-[#1C1917] transition-all" placeholder="Enter your email" disabled={contactStatus === "loading"} />
+                    <label htmlFor="email" className="text-[12px] font-bold tracking-wide uppercase text-muted-foreground">Email Address</label>
+                    <input required id="email" name="email" type="email" className="w-full px-4 py-2.5 text-[14px] bg-[#FAFAFA] border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-foreground/20 focus:border-foreground transition-all" placeholder="Enter your email" disabled={contactStatus === "loading"} />
                   </div>
                 </div>
                 <div className="space-y-1.5 text-left">
-                  <label htmlFor="message" className="text-[12px] font-bold tracking-wide uppercase text-[#78716C]">Your Message</label>
-                  <textarea required id="message" name="message" rows={4} className="w-full px-4 py-3 text-[14px] bg-[#FAFAFA] border border-[#E5E5E5] rounded-md focus:outline-none focus:ring-2 focus:ring-[#1C1917]/20 focus:border-[#1C1917] transition-all resize-none" placeholder="How can we help you?" disabled={contactStatus === "loading"}></textarea>
+                  <label htmlFor="message" className="text-[12px] font-bold tracking-wide uppercase text-muted-foreground">Your Message</label>
+                  <textarea required id="message" name="message" rows={4} className="w-full px-4 py-3 text-[14px] bg-[#FAFAFA] border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-foreground/20 focus:border-foreground transition-all resize-none" placeholder="How can we help you?" disabled={contactStatus === "loading"}></textarea>
                 </div>
                 <button 
                   type="submit" 
                   disabled={contactStatus === "loading"}
-                  className="w-full bg-[#1C1917] text-white font-semibold py-3 rounded-md text-[14px] hover:bg-[#333] transition-colors flex items-center justify-center gap-2 shadow-sm disabled:opacity-50"
+                  className="w-full bg-foreground text-white font-semibold py-3 rounded-md text-[14px] hover:bg-[#333] transition-colors flex items-center justify-center gap-2 shadow-sm disabled:opacity-50"
                 >
                   {contactStatus === "loading" ? "Delivering Message..." : "Send Message"}
                 </button>
@@ -612,7 +612,7 @@ export default function HomePage() {
       </section>
 
       {/* 8. CALL TO ACTION */}
-      <section className="py-24 sm:py-32 bg-[#0A0A0A] text-center border-t border-[#333]">
+      <section className="py-24 sm:py-32 bg-foreground text-center border-t border-[#333]">
         <div className="mx-auto max-w-3xl px-6">
           <motion.h2 
             initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.4 }}
@@ -633,7 +633,7 @@ export default function HomePage() {
             className="flex flex-col sm:flex-row items-center justify-center gap-4"
           >
             <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-              <Button href="/employer/dashboard" variant="primary" size="lg" className="px-8 w-full sm:w-auto !bg-white !text-black hover:!bg-[#E5E5E5] !border-white">
+              <Button href="/employer/dashboard" variant="primary" size="lg" className="px-8 w-full sm:w-auto !bg-white !text-black hover:!bg-border !border-white">
                 Start Hiring
               </Button>
             </motion.div>
@@ -650,45 +650,45 @@ export default function HomePage() {
       <footer className="py-16 border-t border-[var(--color-border)] bg-[var(--color-background)]">
         <div className="max-w-6xl mx-auto px-6 grid grid-cols-1 md:grid-cols-4 gap-12 md:gap-8">
           <div className="col-span-1 md:col-span-1 flex flex-col gap-4">
-            <span className="text-[14px] font-medium tracking-[0.25em] uppercase text-[#1C1917] flex items-center gap-2">
+            <span className="text-[14px] font-medium tracking-[0.25em] uppercase text-foreground flex items-center gap-2">
               <Globe className="w-4 h-4" /> Meritlane
             </span>
-            <p className="text-[13px] text-[#78716C] leading-relaxed max-w-xs">
+            <p className="text-[13px] text-muted-foreground leading-relaxed max-w-xs">
               Technical verification for the modern web. We replace noise with signal through rigorous code assessment.
             </p>
           </div>
           
           <div>
-            <h4 className="text-[11px] font-semibold tracking-wider uppercase text-[#1C1917] mb-4">Product</h4>
-            <ul className="space-y-3 text-[13px] text-[#78716C]">
-              <li><a href="#" className="hover:text-[#1C1917] transition-colors">For Employers</a></li>
-              <li><a href="#" className="hover:text-[#1C1917] transition-colors">For Candidates</a></li>
-              <li><a href="#" className="hover:text-[#1C1917] transition-colors">Assessment Engine</a></li>
-              <li><a href="#" className="hover:text-[#1C1917] transition-colors">Pricing</a></li>
+            <h4 className="text-[11px] font-semibold tracking-wider uppercase text-foreground mb-4">Product</h4>
+            <ul className="space-y-3 text-[13px] text-muted-foreground">
+              <li><a href="#" className="hover:text-foreground transition-colors">For Employers</a></li>
+              <li><a href="#" className="hover:text-foreground transition-colors">For Candidates</a></li>
+              <li><a href="#" className="hover:text-foreground transition-colors">Assessment Engine</a></li>
+              <li><a href="#" className="hover:text-foreground transition-colors">Pricing</a></li>
             </ul>
           </div>
 
           <div>
-            <h4 className="text-[11px] font-semibold tracking-wider uppercase text-[#1C1917] mb-4">Company</h4>
-            <ul className="space-y-3 text-[13px] text-[#78716C]">
-              <li><a href="#" className="hover:text-[#1C1917] transition-colors">About Us</a></li>
-              <li><a href="https://github.com/SaitrishankAUCSE" target="_blank" rel="noreferrer" className="hover:text-[#1C1917] transition-colors">Our Creator</a></li>
-              <li><a href="#" className="hover:text-[#1C1917] transition-colors">Privacy Policy</a></li>
-              <li><a href="#" className="hover:text-[#1C1917] transition-colors">Terms of Service</a></li>
+            <h4 className="text-[11px] font-semibold tracking-wider uppercase text-foreground mb-4">Company</h4>
+            <ul className="space-y-3 text-[13px] text-muted-foreground">
+              <li><a href="#" className="hover:text-foreground transition-colors">About Us</a></li>
+              <li><a href="https://github.com/SaitrishankAUCSE" target="_blank" rel="noreferrer" className="hover:text-foreground transition-colors">Our Creator</a></li>
+              <li><a href="#" className="hover:text-foreground transition-colors">Privacy Policy</a></li>
+              <li><a href="#" className="hover:text-foreground transition-colors">Terms of Service</a></li>
             </ul>
           </div>
 
           <div>
-            <h4 className="text-[11px] font-semibold tracking-wider uppercase text-[#1C1917] mb-4">Connect</h4>
+            <h4 className="text-[11px] font-semibold tracking-wider uppercase text-foreground mb-4">Connect</h4>
             <div className="flex gap-4">
-              <a href="https://github.com/SaitrishankAUCSE" target="_blank" rel="noreferrer" className="w-8 h-8 rounded-full bg-[#FAFAFA] border border-[#E5E5E5] flex items-center justify-center text-[#525252] hover:text-[#1C1917] hover:border-[#1C1917] transition-colors" title="GitHub">
+              <a href="https://github.com/SaitrishankAUCSE" target="_blank" rel="noreferrer" className="w-8 h-8 rounded-full bg-[#FAFAFA] border border-border flex items-center justify-center text-muted-foreground hover:text-foreground hover:border-foreground transition-colors" title="GitHub">
                 <Code className="w-4 h-4" />
               </a>
-              <a href="mailto:saitrishankb9@gmail.com" className="w-8 h-8 rounded-full bg-[#FAFAFA] border border-[#E5E5E5] flex items-center justify-center text-[#525252] hover:text-[#1C1917] hover:border-[#1C1917] transition-colors">
+              <a href="mailto:saitrishankb9@gmail.com" className="w-8 h-8 rounded-full bg-[#FAFAFA] border border-border flex items-center justify-center text-muted-foreground hover:text-foreground hover:border-foreground transition-colors">
                 <User className="w-4 h-4" />
               </a>
             </div>
-            <div className="mt-6 text-[12px] text-[#A8A29E]">
+            <div className="mt-6 text-[12px] text-muted-foreground/70">
               © {new Date().getFullYear()} Meritlane. All rights reserved.
             </div>
           </div>

@@ -8,11 +8,11 @@ import { useRouter } from "next/navigation";
 import { MessageModal } from "@/components/employer/MessageModal";
 
 const PIPELINE_STAGES = [
-  { id: "shortlisted", label: "Shortlisted", color: "bg-[#FAF8F5] text-[#1C1917] border-[#E7E2DA]" },
+  { id: "shortlisted", label: "Shortlisted", color: "bg-surface text-foreground border-border" },
   { id: "interviewing", label: "Interviewing", color: "bg-amber-50/80 text-amber-900 border-amber-200" },
-  { id: "offer", label: "Offer Extended", color: "bg-emerald-50 text-[#064E3B] border-emerald-200" },
-  { id: "hired", label: "Hired", color: "bg-[#1C1917] text-white border-[#1C1917]" },
-  { id: "rejected", label: "Archived / Rejected", color: "bg-[#F5F5F4] text-[#78716C] border-[#E7E2DA]" },
+  { id: "offer", label: "Offer Extended", color: "bg-emerald-50 text-emerald-900 border-emerald-200" },
+  { id: "hired", label: "Hired", color: "bg-foreground text-white border-foreground" },
+  { id: "rejected", label: "Archived / Rejected", color: "bg-surface text-muted-foreground border-border" },
 ];
 
 interface EmployerDossierActionsProps {
@@ -38,7 +38,7 @@ export function EmployerDossierActions({ candidateId, candidateName = "Candidate
     
     const checkStatus = async () => {
       try {
-        const token = await user.getIdToken(true);
+        const token = await user.getIdToken();
         const res = await fetch("/api/employer/shortlist/list", {
           headers: { Authorization: `Bearer ${token}` }
         });
@@ -65,7 +65,7 @@ export function EmployerDossierActions({ candidateId, candidateName = "Candidate
     setIsShortlisted(nextState);
 
     try {
-      const token = await user?.getIdToken(true);
+      const token = await user?.getIdToken();
       const res = await fetch("/api/employer/shortlist", {
         method: nextState ? "POST" : "DELETE",
         headers: {
@@ -86,7 +86,7 @@ export function EmployerDossierActions({ candidateId, candidateName = "Candidate
   const handleStageChange = async (newStage: string) => {
     setPipelineStage(newStage);
     try {
-      const token = await user?.getIdToken(true);
+      const token = await user?.getIdToken();
       await fetch("/api/employer/pipeline", {
         method: "POST",
         headers: {
@@ -102,10 +102,10 @@ export function EmployerDossierActions({ candidateId, candidateName = "Candidate
 
   return (
     <>
-      <div className="fixed top-16 lg:top-0 left-0 lg:left-[240px] right-0 h-16 bg-[#FAF8F5]/95 backdrop-blur-md border-b border-[#E7E2DA] z-[40] flex items-center justify-between px-6 lg:px-12 transition-all duration-300">
+      <div className="fixed top-16 lg:top-0 left-0 lg:left-[240px] right-0 h-16 bg-surface/95 backdrop-blur-md border-b border-border z-[40] flex items-center justify-between px-6 lg:px-12 transition-all duration-300">
         <button 
           onClick={() => router.back()} 
-          className="flex items-center gap-2 text-[13px] font-sans font-medium text-[#78716C] hover:text-[#1C1917] transition-colors"
+          className="flex items-center gap-2 text-[13px] font-sans font-medium text-muted-foreground hover:text-foreground transition-colors"
         >
           <ArrowLeft className="h-4 w-4" />
           Back
@@ -118,9 +118,9 @@ export function EmployerDossierActions({ candidateId, candidateName = "Candidate
             variant="outline"
             size="sm"
             onClick={() => setIsMessageModalOpen(true)}
-            className="gap-1.5 text-[12px] border-[#E7E2DA] text-[#1C1917] hover:bg-[#FAF8F5]"
+            className="gap-1.5 text-[12px] border-border text-foreground hover:bg-surface"
           >
-            <MessageSquare className="h-3.5 w-3.5 text-[#78716C]" />
+            <MessageSquare className="h-3.5 w-3.5 text-muted-foreground" />
             Message
           </Button>
 
@@ -130,7 +130,7 @@ export function EmployerDossierActions({ candidateId, candidateName = "Candidate
               <select
                 value={pipelineStage}
                 onChange={(e) => handleStageChange(e.target.value)}
-                className="text-[12px] font-medium bg-white border border-[#E7E2DA] rounded px-3 py-1.5 text-[#1C1917] outline-none cursor-pointer hover:border-[#1C1917] transition-colors"
+                className="text-[12px] font-medium bg-white border border-border rounded px-3 py-1.5 text-foreground outline-none cursor-pointer hover:border-foreground transition-colors"
               >
                 {PIPELINE_STAGES.map((s) => (
                   <option key={s.id} value={s.id}>
@@ -147,12 +147,12 @@ export function EmployerDossierActions({ candidateId, candidateName = "Candidate
               variant="outline" 
               size="sm"
               onClick={toggleShortlist}
-              className={`gap-1.5 text-[12px] ${isShortlisted ? "bg-white border-[#E7E2DA] text-[#064E3B] font-semibold" : "border-[#E7E2DA] text-[#1C1917] hover:bg-white"}`}
+              className={`gap-1.5 text-[12px] ${isShortlisted ? "bg-white border-border text-emerald-900 font-semibold" : "border-border text-foreground hover:bg-white"}`}
             >
               {isShortlisted ? (
-                <><BookmarkCheck className="h-3.5 w-3.5 text-[#064E3B]" /> Shortlisted</>
+                <><BookmarkCheck className="h-3.5 w-3.5 text-emerald-900" /> Shortlisted</>
               ) : (
-                <><Bookmark className="h-3.5 w-3.5 text-[#78716C]" /> Shortlist</>
+                <><Bookmark className="h-3.5 w-3.5 text-muted-foreground" /> Shortlist</>
               )}
             </Button>
           )}

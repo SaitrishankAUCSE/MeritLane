@@ -187,11 +187,11 @@ export function ProofTrace({
             aria-modal="true"
             aria-labelledby="proof-trace-title"
             onClick={(e) => e.stopPropagation()}
-            className="w-full max-w-2xl bg-[#0D0D0D] border border-zinc-800 rounded-md overflow-hidden shadow-sm animate-in zoom-in-95 duration-200 flex flex-col"
+            className="w-full max-w-2xl bg-foreground border border-zinc-800 rounded-md overflow-hidden shadow-sm animate-in zoom-in-95 duration-200 flex flex-col"
           >
             
             {/* Terminal Header */}
-            <div className="flex items-center justify-between bg-[#1A1A1A] border-b border-zinc-800 px-4 py-3 select-none">
+            <div className="flex items-center justify-between bg-zinc-900 border-b border-zinc-800 px-4 py-3 select-none">
               <div className="flex items-center gap-3">
                 <div className="flex items-center gap-1.5" aria-hidden="true">
                   <div className="h-3 w-3 rounded bg-red-500/80"></div>

@@ -31,16 +31,16 @@ export default async function EmployerCandidateDossierPage({ params }: Props) {
 
   if (!candidateDoc?.exists && !userDoc?.exists) {
     return (
-      <div className="min-h-screen bg-[#FAF8F5] flex flex-col items-center justify-center p-6 text-center">
-        <div className="border border-[#E7E2DA] bg-white p-10 rounded-2xl max-w-md shadow-xs space-y-4">
-          <h2 className="text-[20px] font-serif font-bold text-[#1C1917]">Candidate Dossier Not Found</h2>
-          <p className="text-[13px] text-[#78716C] leading-relaxed font-sans">
+      <div className="min-h-screen bg-surface flex flex-col items-center justify-center p-6 text-center">
+        <div className="border border-border bg-white p-10 rounded-2xl max-w-md shadow-xs space-y-4">
+          <h2 className="text-[20px] font-serif font-bold text-foreground">Candidate Dossier Not Found</h2>
+          <p className="text-[13px] text-muted-foreground leading-relaxed font-sans">
             The requested candidate record could not be located in the verification registry.
           </p>
           <div className="pt-2">
             <a
               href="/employer/dashboard"
-              className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#1C1917] text-white text-[12px] font-medium font-semibold rounded uppercase tracking-wider hover:bg-[#064E3B] transition-colors"
+              className="inline-flex items-center gap-2 px-5 py-2.5 bg-foreground text-white text-[12px] font-medium font-semibold rounded uppercase tracking-wider hover:bg-emerald-900 transition-colors"
             >
               Back to Talent Discovery
             </a>
@@ -68,25 +68,44 @@ export default async function EmployerCandidateDossierPage({ params }: Props) {
             ? skillVal.verifiedAt
             : parseTimestamp(skillVal.verifiedAt),
         score: skillVal.score || undefined,
+        track: skillVal.track || undefined,
+        badge: skillVal.badge || undefined,
       };
     }
   }
 
   const candidate = {
-    name: rawCandidate.name || rawUser.name || "Candidate",
-    skills: rawCandidate.skills || [],
-    projects: rawCandidate.projects || [],
-    college: rawCandidate.college || "",
-    branch: rawCandidate.branch || "",
-    gradYear: rawCandidate.gradYear || "",
-    githubEvidence: rawCandidate.githubEvidence || null,
-    githubUrl: rawCandidate.githubUrl || null,
+    name: rawCandidate.name || rawUser.displayName || rawUser.name || "Candidate",
+    skills: rawCandidate.skills || rawUser.skills || [],
+    projects: rawCandidate.projects || rawUser.projects || [],
+    college: rawCandidate.college || rawUser.college || "",
+    degree: rawCandidate.degree || rawUser.degree || "",
+    branch: rawCandidate.branch || rawUser.branch || "",
+    gradYear: rawCandidate.gradYear || rawUser.gradYear || "",
     verificationStatus: rawCandidate.verificationStatus || (hasVerifiedSkills ? "verified" : "draft"),
     verifiedSkills: sanitizedVerifiedSkills,
+    githubEvidence: rawCandidate.githubEvidence || rawUser.githubEvidence || null,
+    githubUsername: rawCandidate.githubUsername || rawUser.githubUsername || "",
+    githubUrl: rawCandidate.githubUrl || rawUser.githubUrl || (rawCandidate.githubUsername ? `https://github.com/${rawCandidate.githubUsername}` : ""),
+    linkedinUrl: rawCandidate.linkedinUrl || rawUser.linkedinUrl || "",
+    portfolioUrl: rawCandidate.portfolioUrl || rawUser.portfolioUrl || "",
+    resumeUrl: rawCandidate.resumeUrl || rawUser.resumeUrl || "",
+    resumeFileName: rawCandidate.resumeFileName || rawUser.resumeFileName || "",
+    resumeText: rawCandidate.resumeText || rawUser.resumeText || "",
+    resumePdfDataUrl: rawCandidate.resumePdfDataUrl || rawUser.resumePdfDataUrl || "",
+    candidateKey: rawCandidate.candidateKey || rawUser.candidateKey || (id ? `ML-${id.substring(0, 8).toUpperCase()}` : ""),
     avatarUrl: rawCandidate.avatarUrl || rawUser.photoURL || "",
     avatarBadge: rawCandidate.avatarBadge || "auto",
-    verifiedAt: parseTimestamp(rawCandidate.verifiedAt) || null,
-    updatedAt: parseTimestamp(rawCandidate.updatedAt) || null,
+    atsScore: rawCandidate.atsScore || rawUser.atsScore || null,
+    atsRating: rawCandidate.atsRating || rawUser.atsRating || "",
+    targetRoles: rawCandidate.targetRoles || rawUser.targetRoles || [],
+    preferredLocations: rawCandidate.preferredLocations || rawUser.preferredLocations || [],
+    workPreference: rawCandidate.workPreference || rawUser.workPreference || "",
+    availability: rawCandidate.availability || rawUser.availability || "",
+    bio: rawCandidate.bio || rawUser.bio || "",
+    headline: rawCandidate.headline || rawUser.headline || "",
+    verifiedAt: parseTimestamp(rawCandidate.verifiedAt || rawUser.verifiedAt) || null,
+    updatedAt: parseTimestamp(rawCandidate.updatedAt || rawUser.updatedAt) || null,
   };
 
   const user = {
@@ -94,7 +113,7 @@ export default async function EmployerCandidateDossierPage({ params }: Props) {
   };
 
   return (
-    <div className="relative min-h-screen bg-[#FAF8F5] flex flex-col">
+    <div className="relative min-h-screen bg-surface flex flex-col">
       {/* Client Component for floating shortlist button, message, AI summary, and navigation */}
       <EmployerDossierActions candidateId={id} candidateName={candidate.name} />
 

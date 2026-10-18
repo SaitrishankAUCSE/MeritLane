@@ -135,10 +135,10 @@ export default function EditJobPostingPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#FAF8F5] flex items-center justify-center p-8">
+      <div className="min-h-screen bg-surface flex items-center justify-center p-8">
         <div className="text-center">
-          <div className="h-6 w-6 border-2 border-[#E7E2DA] border-t-[#1C1917] rounded-full animate-spin mx-auto mb-3" />
-          <div className="text-[12px] font-medium text-[#78716C] uppercase tracking-wider">
+          <div className="h-6 w-6 border-2 border-border border-t-[#1C1917] rounded-full animate-spin mx-auto mb-3" />
+          <div className="text-[12px] font-medium text-muted-foreground uppercase tracking-wider">
             Loading job #{id}…
           </div>
         </div>
@@ -147,42 +147,42 @@ export default function EditJobPostingPage() {
   }
 
   return (
-    <div className="w-full min-h-screen bg-[#FAF8F5] pb-24 text-[#1C1917]">
+    <div className="w-full min-h-screen bg-surface pb-24 text-foreground">
       {/* ── Top Header Strip ── */}
-      <div className="border-b border-[#E7E2DA] bg-white px-6 sm:px-10 py-5">
-        <div className="max-w-[1000px] mx-auto flex items-center justify-between">
+      <div className="border-b border-border bg-white px-6 sm:px-10 py-5">
+        <div className="w-full flex items-center justify-between">
           <Link
             href="/employer/jobs"
-            className="inline-flex items-center gap-2 text-[12px] font-mono font-semibold text-[#78716C] hover:text-[#1C1917] transition-colors"
+            className="inline-flex items-center gap-2 text-[12px] font-mono font-semibold text-muted-foreground hover:text-foreground transition-colors"
           >
             <ArrowLeft className="h-3.5 w-3.5" />
             BACK TO POSTED ROLES
           </Link>
-          <span className="text-[11px] font-sans font-semibold uppercase tracking-wide text-[#78716C]">
+          <span className="text-[11px] font-sans font-semibold uppercase tracking-wide text-muted-foreground">
             Edit Job Opening
           </span>
         </div>
       </div>
 
-      <div className="max-w-[1000px] mx-auto px-6 sm:px-10 py-8">
-        <div className="border border-[#E7E2DA] bg-white p-7 sm:p-10 rounded-2xl shadow-xs space-y-8">
+      <div className="w-full px-6 sm:px-10 py-8">
+        <div className="border border-border bg-white p-7 sm:p-10 rounded-2xl shadow-xs space-y-8">
           <div className="flex items-center justify-between flex-wrap gap-3">
             <div>
-              <div className="text-[10px] font-medium tracking-[0.2em] text-[#78716C] uppercase mb-1">
+              <div className="text-[10px] font-medium tracking-[0.2em] text-muted-foreground uppercase mb-1">
                 Edit Opportunity
               </div>
-              <h1 className="text-[24px] sm:text-[30px] font-bold uppercase tracking-[0.06em] text-[#1C1917]">
+              <h1 className="text-[24px] sm:text-[30px] font-bold uppercase tracking-[0.06em] text-foreground">
                 MODIFY JOB SPECIFICATION
               </h1>
             </div>
 
             {/* Current Status Selector */}
             <div className="flex items-center gap-2">
-              <span className="text-[11px] font-medium uppercase text-[#78716C]">Status:</span>
+              <span className="text-[11px] font-medium uppercase text-muted-foreground">Status:</span>
               <select
                 value={status}
                 onChange={(e) => setStatus(e.target.value as JobStatus)}
-                className="h-9 px-3 bg-[#FAF8F5] border border-[#E7E2DA] rounded text-[12px] font-mono font-semibold text-[#1C1917] focus:outline-none"
+                className="h-9 px-3 bg-surface border border-border rounded text-[12px] font-mono font-semibold text-foreground focus:outline-none"
               >
                 <option value="draft">DRAFT</option>
                 <option value="published">PUBLISHED</option>
@@ -193,7 +193,7 @@ export default function EditJobPostingPage() {
           </div>
 
           {error && (
-            <div className="p-4 bg-[#FEF2F2] border border-[#B42318]/20 rounded-xl text-[13px] text-[#B42318] flex items-center gap-2 font-sans">
+            <div className="p-4 bg-danger/10 border border-danger/20 rounded-xl text-[13px] text-danger flex items-center gap-2 font-sans">
               <AlertCircle className="h-4 w-4 shrink-0" />
               <span>{error}</span>
             </div>
@@ -202,39 +202,39 @@ export default function EditJobPostingPage() {
           <div className="space-y-6">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
               <div>
-                <label className="block text-[12px] font-sans font-semibold uppercase tracking-wide text-[#1C1917] mb-2">
+                <label className="block text-[12px] font-sans font-semibold uppercase tracking-wide text-foreground mb-2">
                   Job Title
                 </label>
                 <input
                   type="text"
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
-                  className="w-full h-11 px-4 bg-[#FAF8F5] border border-[#E7E2DA] rounded-xl text-[14px] text-[#1C1917] focus:outline-none focus:ring-1 focus:ring-[#1C1917]"
+                  className="w-full h-11 px-4 bg-surface border border-border rounded-xl text-[14px] text-foreground focus:outline-none focus:ring-1 focus:ring-foreground"
                 />
               </div>
 
               <div>
-                <label className="block text-[12px] font-sans font-semibold uppercase tracking-wide text-[#1C1917] mb-2">
+                <label className="block text-[12px] font-sans font-semibold uppercase tracking-wide text-foreground mb-2">
                   Department / Squad
                 </label>
                 <input
                   type="text"
                   value={department}
                   onChange={(e) => setDepartment(e.target.value)}
-                  className="w-full h-11 px-4 bg-[#FAF8F5] border border-[#E7E2DA] rounded-xl text-[14px] text-[#1C1917] focus:outline-none focus:ring-1 focus:ring-[#1C1917]"
+                  className="w-full h-11 px-4 bg-surface border border-border rounded-xl text-[14px] text-foreground focus:outline-none focus:ring-1 focus:ring-foreground"
                 />
               </div>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
               <div>
-                <label className="block text-[12px] font-sans font-semibold uppercase tracking-wide text-[#1C1917] mb-2">
+                <label className="block text-[12px] font-sans font-semibold uppercase tracking-wide text-foreground mb-2">
                   Work Mode
                 </label>
                 <select
                   value={workMode}
                   onChange={(e) => setWorkMode(e.target.value as WorkMode)}
-                  className="w-full h-11 px-4 bg-[#FAF8F5] border border-[#E7E2DA] rounded-xl text-[13px] text-[#1C1917] focus:outline-none focus:ring-1 focus:ring-[#1C1917]"
+                  className="w-full h-11 px-4 bg-surface border border-border rounded-xl text-[13px] text-foreground focus:outline-none focus:ring-1 focus:ring-foreground"
                 >
                   <option value="remote">Remote</option>
                   <option value="hybrid">Hybrid</option>
@@ -243,13 +243,13 @@ export default function EditJobPostingPage() {
               </div>
 
               <div>
-                <label className="block text-[12px] font-sans font-semibold uppercase tracking-wide text-[#1C1917] mb-2">
+                <label className="block text-[12px] font-sans font-semibold uppercase tracking-wide text-foreground mb-2">
                   Role Type
                 </label>
                 <select
                   value={employmentType}
                   onChange={(e) => setEmploymentType(e.target.value as EmploymentType)}
-                  className="w-full h-11 px-4 bg-[#FAF8F5] border border-[#E7E2DA] rounded-xl text-[13px] text-[#1C1917] focus:outline-none focus:ring-1 focus:ring-[#1C1917]"
+                  className="w-full h-11 px-4 bg-surface border border-border rounded-xl text-[13px] text-foreground focus:outline-none focus:ring-1 focus:ring-foreground"
                 >
                   <option value="full-time">Full-Time</option>
                   <option value="part-time">Part-Time</option>
@@ -259,46 +259,46 @@ export default function EditJobPostingPage() {
               </div>
 
               <div>
-                <label className="block text-[12px] font-sans font-semibold uppercase tracking-wide text-[#1C1917] mb-2">
+                <label className="block text-[12px] font-sans font-semibold uppercase tracking-wide text-foreground mb-2">
                   Location
                 </label>
                 <input
                   type="text"
                   value={location}
                   onChange={(e) => setLocation(e.target.value)}
-                  className="w-full h-11 px-4 bg-[#FAF8F5] border border-[#E7E2DA] rounded-xl text-[14px] text-[#1C1917] focus:outline-none focus:ring-1 focus:ring-[#1C1917]"
+                  className="w-full h-11 px-4 bg-surface border border-border rounded-xl text-[14px] text-foreground focus:outline-none focus:ring-1 focus:ring-foreground"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-[12px] font-sans font-semibold uppercase tracking-wide text-[#1C1917] mb-2">
+              <label className="block text-[12px] font-sans font-semibold uppercase tracking-wide text-foreground mb-2">
                 Annual Compensation Range
               </label>
               <input
                 type="text"
                 value={salaryRange}
                 onChange={(e) => setSalaryRange(e.target.value)}
-                className="w-full h-11 px-4 bg-[#FAF8F5] border border-[#E7E2DA] rounded-xl text-[14px] text-[#1C1917] focus:outline-none focus:ring-1 focus:ring-[#1C1917]"
+                className="w-full h-11 px-4 bg-surface border border-border rounded-xl text-[14px] text-foreground focus:outline-none focus:ring-1 focus:ring-foreground"
               />
             </div>
 
             {/* Skills */}
             <div className="space-y-3">
-              <label className="block text-[12px] font-sans font-semibold uppercase tracking-wide text-[#1C1917]">
+              <label className="block text-[12px] font-sans font-semibold uppercase tracking-wide text-foreground">
                 Required Technical Capabilities
               </label>
-              <div className="flex items-center gap-2 flex-wrap min-h-[40px] p-2 bg-[#FAF8F5] border border-[#E7E2DA] rounded-xl">
+              <div className="flex items-center gap-2 flex-wrap min-h-[40px] p-2 bg-surface border border-border rounded-xl">
                 {skills.map((skill) => (
                   <span
                     key={skill}
-                    className="inline-flex items-center gap-1.5 px-3 py-1 bg-white border border-[#E7E2DA] rounded text-[12px] font-mono text-[#1C1917] shadow-2xs"
+                    className="inline-flex items-center gap-1.5 px-3 py-1 bg-white border border-border rounded text-[12px] font-mono text-foreground shadow-2xs"
                   >
                     <span>{skill}</span>
                     <button
                       type="button"
                       onClick={() => handleRemoveSkill(skill)}
-                      className="text-[#78716C] hover:text-[#B42318]"
+                      className="text-muted-foreground hover:text-danger"
                     >
                       <X className="h-3 w-3" />
                     </button>
@@ -318,12 +318,12 @@ export default function EditJobPostingPage() {
                     }
                   }}
                   placeholder="Type a capability and press Add…"
-                  className="flex-1 h-10 px-3.5 bg-white border border-[#E7E2DA] rounded-xl text-[13px] text-[#1C1917]"
+                  className="flex-1 h-10 px-3.5 bg-white border border-border rounded-xl text-[13px] text-foreground"
                 />
                 <button
                   type="button"
                   onClick={() => handleAddSkill(skillInput)}
-                  className="px-4 h-10 border border-[#E7E2DA] bg-white hover:bg-[#FAF8F5] text-[12px] font-mono font-semibold rounded-xl"
+                  className="px-4 h-10 border border-border bg-white hover:bg-surface text-[12px] font-mono font-semibold rounded-xl"
                 >
                   ADD
                 </button>
@@ -332,24 +332,24 @@ export default function EditJobPostingPage() {
 
             {/* Description */}
             <div>
-              <label className="block text-[12px] font-sans font-semibold uppercase tracking-wide text-[#1C1917] mb-2">
+              <label className="block text-[12px] font-sans font-semibold uppercase tracking-wide text-foreground mb-2">
                 Full Role Specification
               </label>
               <textarea
                 rows={8}
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                className="w-full p-4 bg-[#FAF8F5] border border-[#E7E2DA] rounded-xl text-[14px] text-[#1C1917] font-sans leading-relaxed"
+                className="w-full p-4 bg-surface border border-border rounded-xl text-[14px] text-foreground font-sans leading-relaxed"
               />
             </div>
           </div>
 
-          <div className="pt-6 border-t border-[#E7E2DA] flex items-center justify-end gap-3">
+          <div className="pt-6 border-t border-border flex items-center justify-end gap-3">
             <button
               type="button"
               disabled={saving}
               onClick={() => handleSave()}
-              className="px-7 h-11 bg-[#064E3B] hover:bg-[#043327] text-white text-[12px] font-sans font-semibold uppercase tracking-wide rounded transition-colors shadow-xs disabled:opacity-50 flex items-center justify-center gap-2"
+              className="px-7 h-11 bg-emerald-900 hover:bg-emerald-950 text-white text-[12px] font-sans font-semibold uppercase tracking-wide rounded transition-colors shadow-xs disabled:opacity-50 flex items-center justify-center gap-2"
             >
               {saving ? "SAVING CHANGES…" : "SAVE UPDATES"}
             </button>

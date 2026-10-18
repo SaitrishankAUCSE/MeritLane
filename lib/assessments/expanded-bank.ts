@@ -1,7 +1,7 @@
 import type { MCQ } from "./content";
 
 /**
- * High-Calibre Expanded Question Bank (~210 Verified Questions)
+ * High-Calibre Expanded Question Bank (~210 Curated Technical Questions)
  * Sourced from official language specifications, RFCs, engine documentation,
  * and standard industry tech interview benchmarks.
  * 

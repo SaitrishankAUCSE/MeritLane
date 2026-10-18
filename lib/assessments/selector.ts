@@ -128,15 +128,39 @@ export function selectAssignment(
   let mediumId: string | undefined;
 
   if (hasCodingPool) {
-    const easyPool = bank.easy?.length > 0 ? bank.easy : (bank.mediumHard || []);
-    const mediumPool = bank.mediumHard?.length > 0 ? bank.mediumHard : (bank.easy || []);
+    const allCoding = [...(bank.easy || []), ...(bank.mediumHard || [])];
+    // Deduplicate by ID
+    const uniqueCoding = Array.from(new Map(allCoding.map(q => [q.id, q])).values());
 
+    // 1. Pick Easy question (prioritise bank.easy unseen)
+    const easyUnseen = (bank.easy || []).filter(q => !seenCodingSet.has(q.id));
+    const easyPool = easyUnseen.length > 0 ? easyUnseen : (bank.easy?.length > 0 ? bank.easy : uniqueCoding);
     const easyPick = pickFromPool(easyPool, seenCodingSet, seen.coding, 1, `${skill}.easy`, rng);
-    const mediumPick = pickFromPool(mediumPool, seenCodingSet, seen.coding, 1, `${skill}.medium`, rng);
     easy = easyPick.items[0];
-    medium = mediumPick.items[0] || easy;
     easyId = easy?.id;
-    mediumId = medium?.id || easyId;
+
+    // 2. Pick Medium question — strictly EXCLUDING easy.id to prevent duplicate tasks!
+    const remainingForMedium = uniqueCoding.filter(q => q.id !== easyId);
+    if (remainingForMedium.length > 0) {
+      const mediumPoolPreferred = (bank.mediumHard || []).filter(q => q.id !== easyId);
+      const mediumUnseen = mediumPoolPreferred.filter(q => !seenCodingSet.has(q.id));
+      const mediumPool = mediumUnseen.length > 0
+        ? mediumUnseen
+        : (mediumPoolPreferred.length > 0 ? mediumPoolPreferred : remainingForMedium);
+
+      const mediumPick = pickFromPool(mediumPool, seenCodingSet, seen.coding, 1, `${skill}.medium`, rng);
+      medium = mediumPick.items[0];
+
+      // Invariant safeguard: medium MUST NEVER be the same question as easy
+      if (medium && medium.id === easyId) {
+        medium = remainingForMedium.find(q => q.id !== easyId);
+      }
+      mediumId = medium?.id;
+    } else {
+      // The bank only has 1 unique coding challenge total
+      medium = undefined;
+      mediumId = undefined;
+    }
   }
 
   // MCQ targets:
@@ -214,9 +238,10 @@ function getBuiltinBank(skill: string): SkillBank | null {
 
   const pool = fallbackBank.codingPool || [];
   pool.forEach((c, idx) => {
+    const isEasy = c.difficulty === "easy" || idx === 0;
     const q: CodingQuestion = {
       id: c.id || `${key}_coding_${idx + 1}`,
-      difficulty: idx === 0 ? "easy" : "medium_hard",
+      difficulty: isEasy ? "easy" : "medium_hard",
       title: c.title,
       instructions: c.instructions,
       functionName: "solution",
@@ -227,11 +252,8 @@ function getBuiltinBank(skill: string): SkillBank | null {
       publicTests: [],
       hiddenTests: [],
     };
-    if (idx === 0) {
+    if (isEasy) {
       easy.push(q);
-      if (pool.length === 1) {
-        mediumHard.push(q); // Ensure both pools have an assignment for single-task skills
-      }
     } else {
       mediumHard.push(q);
     }

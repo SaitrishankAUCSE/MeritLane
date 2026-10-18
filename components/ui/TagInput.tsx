@@ -12,16 +12,20 @@ export interface TagInputProps {
   helperText?: string;
   disabled?: boolean;
   options?: string[]; // for autocomplete
+  splitOnComma?: boolean;
+  mode?: "skills" | "text";
 }
 
 export function TagInput({
   label,
   tags,
   onChange,
-  placeholder = "Add skill (press Enter)...",
+  placeholder = "Add item (press Enter)...",
   helperText,
   disabled = false,
-  options = []
+  options = [],
+  splitOnComma = false,
+  mode = "text"
 }: TagInputProps) {
   const [inputValue, setInputValue] = useState("");
   const [showDropdown, setShowDropdown] = useState(false);
@@ -42,7 +46,7 @@ export function TagInput({
     if (inputValue.trim() && options.length > 0) {
       const lower = inputValue.toLowerCase();
       const filtered = options.filter(opt => 
-        opt.toLowerCase().includes(lower) && !tags.includes(opt)
+        opt.toLowerCase().includes(lower) && !tags.some(t => t.toLowerCase() === opt.toLowerCase())
       );
       setFilteredOptions(filtered.slice(0, 15)); // top 15 matches
       setShowDropdown(true);
@@ -52,31 +56,56 @@ export function TagInput({
   }, [inputValue, tags, options]);
 
   const addTag = (valueOverride?: string) => {
-    const val = valueOverride || inputValue;
-    if (val.trim() !== "") {
-      const parsed = parseSkillInput(val);
-      let newTags = [...tags];
-      let changed = false;
-      for (const t of parsed) {
-        if (!newTags.includes(t)) {
-          newTags.push(t);
-          changed = true;
+    const rawVal = valueOverride !== undefined ? valueOverride : inputValue;
+    const val = rawVal.trim();
+    if (!val) return;
+
+    let itemsToAdd: string[] = [];
+
+    if (valueOverride) {
+      // Direct selection from suggestions - do not split
+      itemsToAdd = [val];
+    } else if (mode === "skills" && splitOnComma) {
+      // Multiple skills separated by comma
+      const parts = val.includes(",") ? val.split(",") : [val];
+      for (const p of parts) {
+        const trimmed = p.trim();
+        if (trimmed) {
+          const matched = options.find(opt => opt.toLowerCase() === trimmed.toLowerCase());
+          itemsToAdd.push(matched || trimmed);
         }
       }
-      if (changed) {
-        onChange(newTags);
-      }
-      setInputValue("");
-      setShowDropdown(false);
+    } else if (splitOnComma && val.includes(",")) {
+      itemsToAdd = val.split(",").map(s => s.trim()).filter(Boolean);
+    } else {
+      // Single continuous phrase (e.g. "Hyderabad, India" or "Full-Stack Developer")
+      const matched = options.find(opt => opt.toLowerCase() === val.toLowerCase());
+      itemsToAdd = [matched || val];
     }
+
+    let newTags = [...tags];
+    let changed = false;
+    for (const item of itemsToAdd) {
+      if (item && !newTags.some(t => t.toLowerCase() === item.toLowerCase())) {
+        newTags.push(item);
+        changed = true;
+      }
+    }
+
+    if (changed) {
+      onChange(newTags);
+    }
+    setInputValue("");
+    setShowDropdown(false);
   };
 
   const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
     if (disabled) return;
-    if (e.key === "Enter" || e.key === ",") {
+    if (e.key === "Enter") {
       e.preventDefault();
-      // If there's an exact match in the filtered options and user hits enter, they probably want to type it directly,
-      // but let's just let addTag handle the raw input string.
+      addTag();
+    } else if (splitOnComma && e.key === ",") {
+      e.preventDefault();
       addTag();
     }
   };
@@ -97,14 +126,14 @@ export function TagInput({
         {tags.map((tag, idx) => (
           <span
             key={idx}
-            className="inline-flex items-center gap-1.5 border border-[#D2D2D2] bg-[#F3F3F1] px-2.5 py-1 rounded-sm font-mono text-[12px] text-[#0D0D0D] select-none"
+            className="inline-flex items-center gap-1.5 border border-border bg-surface-dim px-2.5 py-1 rounded-sm font-mono text-[12px] text-foreground select-none"
           >
             {tag}
             {!disabled && (
               <button
                 type="button"
                 onClick={() => removeTag(idx)}
-                className="text-[#737373] hover:text-[#0D0D0D] focus:outline-none focus-visible:ring-1 focus-visible:ring-white rounded-sm transition-colors"
+                className="text-muted-foreground hover:text-foreground focus:outline-none focus-visible:ring-1 focus-visible:ring-foreground rounded-sm transition-colors"
                 aria-label={`Remove ${tag}`}
                 disabled={disabled}
               >
@@ -130,12 +159,12 @@ export function TagInput({
       </div>
 
       {showDropdown && filteredOptions.length > 0 && (
-        <div className="absolute top-[calc(100%+4px)] left-0 w-full max-h-[250px] overflow-y-auto bg-[#FFFFFF] border border-[#E5E5E5] rounded-md shadow-sm z-50 py-1 scrollbar-hide">
+        <div className="absolute top-[calc(100%+4px)] left-0 w-full max-h-[250px] overflow-y-auto bg-surface-bright border border-border rounded-md shadow-sm z-50 py-1 scrollbar-hide">
           {filteredOptions.map((opt, idx) => (
             <div
               key={idx}
               onClick={() => addTag(opt)}
-              className="px-4 py-2.5 text-[14px] font-sans text-[#0D0D0D] hover:bg-[#F3F3F1] hover:text-[#0D0D0D] cursor-pointer transition-colors"
+              className="px-4 py-2.5 text-[14px] font-sans text-foreground hover:bg-surface-dim cursor-pointer transition-colors"
             >
               {opt}
             </div>

@@ -25,11 +25,11 @@ import { useToast } from "@/components/ui/Toast";
 import { ErrorState } from "@/components/ui/ErrorState";
 
 const PIPELINE_STAGES = [
-  { id: "shortlisted", label: "Shortlisted", color: "bg-[#FAF8F5] text-[#1C1917] border-[#E7E2DA]" },
+  { id: "shortlisted", label: "Shortlisted", color: "bg-surface text-foreground border-border" },
   { id: "interviewing", label: "Interviewing", color: "bg-amber-50/80 text-amber-900 border-amber-200" },
-  { id: "offer", label: "Offer Extended", color: "bg-emerald-50 text-[#064E3B] border-emerald-200" },
-  { id: "hired", label: "Hired", color: "bg-[#1C1917] text-white border-[#1C1917]" },
-  { id: "rejected", label: "Archived / Rejected", color: "bg-[#F5F5F4] text-[#78716C] border-[#E7E2DA]" },
+  { id: "offer", label: "Offer Extended", color: "bg-emerald-50 text-emerald-900 border-emerald-200" },
+  { id: "hired", label: "Hired", color: "bg-foreground text-white border-foreground" },
+  { id: "rejected", label: "Archived / Rejected", color: "bg-surface text-muted-foreground border-border" },
 ];
 
 export default function EmployerShortlistPage() {
@@ -52,7 +52,7 @@ export default function EmployerShortlistPage() {
     setFetching(true);
     setErrorMsg("");
     try {
-      const token = await user.getIdToken(true);
+      const token = await user.getIdToken();
       const res = await fetch("/api/employer/shortlist/list", {
         headers: { Authorization: "Bearer " + token },
       });
@@ -88,7 +88,7 @@ export default function EmployerShortlistPage() {
   const updateStage = async (candidateId: string, stage: string) => {
     setPipeline((prev) => ({ ...prev, [candidateId]: stage }));
     try {
-      const token = await user?.getIdToken(true);
+      const token = await user?.getIdToken();
       const res = await fetch("/api/employer/pipeline", {
         method: "POST",
         headers: {
@@ -111,7 +111,7 @@ export default function EmployerShortlistPage() {
   const removeShortlist = async (candidateId: string) => {
     setCandidates((prev) => prev.filter((c) => c.uid !== candidateId));
     try {
-      const token = await user?.getIdToken(true);
+      const token = await user?.getIdToken();
       const res = await fetch("/api/employer/shortlist", {
         method: "DELETE",
         headers: {
@@ -165,21 +165,21 @@ export default function EmployerShortlistPage() {
 
   return (
     <div className="flex h-full w-full flex-col overflow-hidden bg-[#FAFAFA]">
-      <div className="flex-1 p-4 sm:p-8 md:p-10 lg:p-14 overflow-y-auto scrollbar-hide">
+      <div className="flex-1 px-4 sm:px-8 lg:px-10 py-6 sm:py-8 overflow-y-auto scrollbar-hide w-full">
         {/* Page Header */}
-        <div className="max-w-[1000px] mx-auto mb-8 border-b border-[#E5E5E5] pb-8">
+        <div className="w-full mb-8 border-b border-border pb-8">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
-              <div className="flex items-center gap-3 text-[#0D0D0D] mb-2">
-                <BookMarked className="h-7 w-7 text-[#0D0D0D]" />
+              <div className="flex items-center gap-3 text-foreground mb-2">
+                <BookMarked className="h-7 w-7 text-foreground" />
                 <h1 className="font-serif text-[28px] sm:text-[34px] lg:text-[38px] leading-tight">Shortlist & Pipeline</h1>
               </div>
-              <p className="text-[14px] sm:text-[15px] text-[#737373] font-sans">
+              <p className="text-[14px] sm:text-[15px] text-muted-foreground font-sans">
                 Manage your saved candidates, track interview progression, and message verified talent.
               </p>
             </div>
             <Link href="/employer/dashboard" className="w-full sm:w-auto">
-              <Button variant="outline" className="text-[13px] border-[#E5E5E5] w-full sm:w-auto justify-center">
+              <Button variant="outline" className="text-[13px] border-border w-full sm:w-auto justify-center">
                 + Discover More Talent
               </Button>
             </Link>
@@ -188,21 +188,18 @@ export default function EmployerShortlistPage() {
 
 
 
-        <div className="max-w-[1000px] mx-auto">
+        <div className="w-full">
 
 
           {fetching ? (
-            <div className="flex flex-col items-center justify-center py-20 text-[#737373]">
-              <div className="h-6 w-6 border-2 border-[#D2D2D2] border-t-[#0D0D0D] rounded-full animate-spin mb-4" />
-              <p className="text-[13px] font-sans">Loading shortlist...</p>
-            </div>
+            <MeritlaneLoader level="section" text="Loading shortlist..." className="py-20" />
           ) : candidates.length === 0 ? (
-            <div className="border border-[#E5E5E5] border-dashed rounded bg-white p-16 text-center shadow-sm">
-              <div className="h-12 w-12 rounded bg-[#F3F3F1] text-[#737373] flex items-center justify-center mx-auto mb-4">
+            <div className="border border-border border-dashed rounded bg-white p-16 text-center shadow-sm">
+              <div className="h-12 w-12 rounded bg-surface-dim text-muted-foreground flex items-center justify-center mx-auto mb-4">
                 <BookMarked className="h-6 w-6" />
               </div>
-              <h2 className="text-[20px] font-serif text-[#0D0D0D] mb-3">Your shortlist is empty</h2>
-              <p className="text-[14px] text-[#737373] mb-6 max-w-md mx-auto">
+              <h2 className="text-[20px] font-serif text-foreground mb-3">Your shortlist is empty</h2>
+              <p className="text-[14px] text-muted-foreground mb-6 max-w-md mx-auto">
                 You haven&apos;t saved any verified candidates yet. Explore the discovery engine to shortlist candidates with proven code skills.
               </p>
               <Link href="/employer/dashboard">
@@ -210,8 +207,8 @@ export default function EmployerShortlistPage() {
               </Link>
             </div>
           ) : filteredCandidates.length === 0 ? (
-            <div className="border border-[#E5E5E5] border-dashed rounded bg-white p-12 text-center">
-              <p className="text-[14px] text-[#737373] mb-4">No candidates currently in this pipeline stage.</p>
+            <div className="border border-border border-dashed rounded bg-white p-12 text-center">
+              <p className="text-[14px] text-muted-foreground mb-4">No candidates currently in this pipeline stage.</p>
               <Button variant="outline" size="sm" onClick={() => setStageFilter("all")}>
                 View all candidates
               </Button>
@@ -234,16 +231,16 @@ export default function EmployerShortlistPage() {
                 return (
                   <div
                     key={c.uid}
-                    className="border border-[#E5E5E5] rounded bg-white p-4 sm:p-6 md:p-8 hover:shadow-[0_8px_30px_rgba(0,0,0,0.04)] transition-all duration-300"
+                    className="border border-border rounded bg-white p-4 sm:p-6 md:p-8 hover:shadow-[0_8px_30px_rgba(0,0,0,0.04)] transition-all duration-300"
                   >
                     <div className="flex flex-col md:flex-row md:items-start justify-between gap-5 sm:gap-6">
                       <div className="flex items-start gap-4 sm:gap-6">
-                        <div className="h-12 w-12 sm:h-16 sm:w-16 shrink-0 rounded bg-[#F3F3F1] border border-[#E5E5E5] flex items-center justify-center text-[#0D0D0D] font-serif text-[20px] sm:text-[26px]">
+                        <div className="h-12 w-12 sm:h-16 sm:w-16 shrink-0 rounded bg-surface-dim border border-border flex items-center justify-center text-foreground font-serif text-[20px] sm:text-[26px]">
                           {c.name ? c.name.charAt(0).toUpperCase() : "C"}
                         </div>
                         <div>
                           <div className="flex items-center gap-2.5 flex-wrap">
-                            <h3 className="font-serif text-[24px] text-[#0D0D0D] leading-tight">
+                            <h3 className="font-serif text-[24px] text-foreground leading-tight">
                               {c.name || "Anonymous Candidate"}
                             </h3>
                             <span
@@ -252,7 +249,7 @@ export default function EmployerShortlistPage() {
                               {stageObj.label}
                             </span>
                             <div className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-sm bg-[#ECFDF5] border border-[#A7F3D0] text-[#065F46] text-[11px] font-semibold">
-                              <ShieldCheck className="h-3.5 w-3.5 text-[#059669]" />
+                              <ShieldCheck className="h-3.5 w-3.5 text-emerald-600" />
                               <span>{verificationPct}% Skills Verified</span>
                               <span className="text-[#047857] font-normal text-[10px]">
                                 ({verifiedCount}/{totalSkills})
@@ -261,7 +258,7 @@ export default function EmployerShortlistPage() {
                           </div>
 
                           {(c.college || c.branch) && (
-                            <p className="text-[14px] text-[#737373] mt-1 mb-4">
+                            <p className="text-[14px] text-muted-foreground mt-1 mb-4">
                               {c.branch}
                               {c.branch && c.college ? " · " : ""}
                               {c.college} {c.gradYear ? `(${c.gradYear.toString().slice(-2)})` : ""}
@@ -288,11 +285,11 @@ export default function EmployerShortlistPage() {
                       <div className="flex flex-col items-start md:items-end gap-3 shrink-0">
                         {/* Pipeline Stage Select */}
                         <div className="flex items-center gap-2">
-                          <span className="text-[12px] text-[#737373] font-medium">Stage:</span>
+                          <span className="text-[12px] text-muted-foreground font-medium">Stage:</span>
                           <select
                             value={currentStage}
                             onChange={(e) => updateStage(c.uid, e.target.value)}
-                            className="text-[12px] font-medium bg-[#FAFAFA] border border-[#E5E5E5] rounded px-3 py-1.5 text-[#0D0D0D] outline-none cursor-pointer hover:border-[#0D0D0D] transition-colors"
+                            className="text-[12px] font-medium bg-[#FAFAFA] border border-border rounded px-3 py-1.5 text-foreground outline-none cursor-pointer hover:border-foreground transition-colors"
                           >
                             {PIPELINE_STAGES.map((s) => (
                               <option key={s.id} value={s.id}>
@@ -308,14 +305,14 @@ export default function EmployerShortlistPage() {
                             variant="outline"
                             size="sm"
                             onClick={() => setMessagingTarget({ id: c.uid, name: c.name || "Candidate" })}
-                            className="gap-1.5 text-[12px] border-[#E5E5E5] text-[#0D0D0D] hover:bg-white"
+                            className="gap-1.5 text-[12px] border-border text-foreground hover:bg-white"
                           >
-                            <MessageSquare className="h-3.5 w-3.5 text-[#737373]" />
+                            <MessageSquare className="h-3.5 w-3.5 text-muted-foreground" />
                             Message
                           </Button>
 
                           <Link href={`/employer/candidate/${c.uid}`}>
-                            <Button size="sm" className="gap-1.5 text-[12px] bg-[#0D0D0D] hover:bg-[#404040]">
+                            <Button size="sm" className="gap-1.5 text-[12px] bg-foreground hover:bg-[#404040]">
                               Dossier <ArrowRight className="h-3.5 w-3.5" />
                             </Button>
                           </Link>
@@ -323,7 +320,7 @@ export default function EmployerShortlistPage() {
                           <Button
                             variant="outline"
                             size="sm"
-                            className="text-[#B42318] hover:text-[#B42318] hover:bg-[#B42318]/5 border-[#E5E5E5]"
+                            className="text-danger hover:text-danger hover:bg-danger/5 border-border"
                             onClick={() => removeShortlist(c.uid)}
                             title="Remove from shortlist"
                           >

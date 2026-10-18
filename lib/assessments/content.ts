@@ -24,6 +24,7 @@ export interface CodingChallenge {
   instructions: string;
   initialCode: string;
   language?: string;
+  difficulty?: "Easy" | "Medium" | "Hard" | string;
   supportedLanguages?: SupportedLanguage[];
 }
 
@@ -37,6 +38,7 @@ export interface AssessmentContent {
   timeLimitMinutes: number;
   /** "coding_capable" (bank) | "mcq_only" (legacy MCQ) */
   assessmentType?: "coding_capable" | "mcq_only";
+  track?: "standard" | "advanced";
 }
 
 export const COMMON_SUPPORTED_LANGUAGES: SupportedLanguage[] = [
@@ -398,6 +400,46 @@ export default function Counter() {
 }
 `,
         supportedLanguages: COMMON_SUPPORTED_LANGUAGES
+      },
+      {
+        id: "react-search-filter",
+        title: "Debounced Search Filter Component",
+        difficulty: "medium",
+        language: "javascript",
+        instructions: "Implement a React component `SearchFilter({ items, onSelect })` that allows users to search through a list of strings.\n\nRequirements:\n1. Render an input field with placeholder 'Search items...'.\n2. Filter the `items` array case-insensitively based on input value.\n3. Render filtered items in an unordered list (`<ul>`). When an item is clicked, invoke `onSelect(item)`.\n4. If no items match, display a fallback `<p>No matches found</p>`.\n5. If the search query is empty, display all items.",
+        initialCode: `import React, { useState } from 'react';
+
+export default function SearchFilter({ items = [], onSelect }) {
+    const [query, setQuery] = useState('');
+
+    const filtered = items.filter((item) =>
+        item.toLowerCase().includes(query.toLowerCase())
+    );
+
+    return (
+        <div className="search-container">
+            <input
+                type="text"
+                placeholder="Search items..."
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+            />
+            {filtered.length === 0 ? (
+                <p>No matches found</p>
+            ) : (
+                <ul>
+                    {filtered.map((item, idx) => (
+                        <li key={idx} onClick={() => onSelect && onSelect(item)}>
+                            {item}
+                        </li>
+                    ))}
+                </ul>
+            )}
+        </div>
+    );
+}
+`,
+        supportedLanguages: COMMON_SUPPORTED_LANGUAGES
       }
     ]
   },
@@ -582,6 +624,38 @@ export default function Counter() {
     """
     # Write your solution here
     pass
+`,
+        supportedLanguages: [
+          { id: "python", name: "Python 3", monacoLang: "python", template: "" }
+        ]
+      },
+      {
+        id: "python-lru-cache",
+        title: "LRU Cache Implementation",
+        difficulty: "medium",
+        language: "python",
+        instructions: "Design and implement a data structure for a Least Recently Used (LRU) Cache.\n\nImplement the `LRUCache` class:\n1. `__init__(self, capacity: int)`: Initialize the LRU cache with positive size capacity.\n2. `get(self, key: int) -> int`: Return the value of the key if it exists, otherwise return -1. Accessing a key marks it as most recently used.\n3. `put(self, key: int, value: int) -> None`: Update the value if key exists. Otherwise, add the key-value pair. If number of keys exceeds capacity, evict the least recently used key.",
+        initialCode: `class LRUCache:
+    def __init__(self, capacity: int):
+        self.capacity = capacity
+        self.cache = {}
+        self.order = []
+
+    def get(self, key: int) -> int:
+        if key not in self.cache:
+            return -1
+        self.order.remove(key)
+        self.order.append(key)
+        return self.cache[key]
+
+    def put(self, key: int, value: int) -> None:
+        if key in self.cache:
+            self.order.remove(key)
+        elif len(self.cache) >= self.capacity:
+            oldest = self.order.pop(0)
+            del self.cache[oldest]
+        self.cache[key] = value
+        self.order.append(key)
 `,
         supportedLanguages: [
           { id: "python", name: "Python 3", monacoLang: "python", template: "" }
@@ -798,6 +872,34 @@ export default function Counter() {
 }
 `,
         supportedLanguages: COMMON_SUPPORTED_LANGUAGES
+      },
+      {
+        id: "ts-deep-merge",
+        title: "Type-Safe Deep Object Merger",
+        difficulty: "medium",
+        language: "typescript",
+        instructions: "Implement a type-safe deep merge function `deepMerge<T extends Record<string, any>, U extends Record<string, any>>(target: T, source: U): T & U`.\n\nRequirements:\n1. Recursively merge nested plain objects without mutating the original arguments.\n2. If a key exists in both objects and both values are plain objects, recursively merge them.\n3. If a value in `source` is an array or primitive, it should overwrite the value in `target`.\n4. Return the new merged object.",
+        initialCode: `export function deepMerge<T extends Record<string, any>, U extends Record<string, any>>(target: T, source: U): T & U {
+  const result: any = { ...target };
+
+  for (const key of Object.keys(source)) {
+    const srcVal = source[key];
+    const tgtVal = result[key];
+
+    if (
+      srcVal && typeof srcVal === 'object' && !Array.isArray(srcVal) &&
+      tgtVal && typeof tgtVal === 'object' && !Array.isArray(tgtVal)
+    ) {
+      result[key] = deepMerge(tgtVal, srcVal);
+    } else {
+      result[key] = srcVal;
+    }
+  }
+
+  return result as T & U;
+}
+`,
+        supportedLanguages: COMMON_SUPPORTED_LANGUAGES
       }
     ]
   },
@@ -991,6 +1093,40 @@ export default function Counter() {
   };
 }
 `
+          }
+        ]
+      },
+      {
+        id: "js-deep-clone",
+        title: "Deep Clone with Circular Reference Support",
+        difficulty: "medium",
+        language: "javascript",
+        instructions: "Implement a function `deepClone(obj, hash = new WeakMap())` that creates a deep copy of any JavaScript value.\n\nRequirements:\n1. Correctly clone nested plain objects and arrays.\n2. Preserve primitive values, `Date` objects, and `RegExp` instances.\n3. Handle circular references gracefully without infinite recursion using a `WeakMap`.\n4. Return function references as-is.",
+        initialCode: `export function deepClone(obj, hash = new WeakMap()) {
+  if (obj === null || typeof obj !== 'object') {
+    return obj;
+  }
+  if (obj instanceof Date) return new Date(obj);
+  if (obj instanceof RegExp) return new RegExp(obj);
+  if (hash.has(obj)) {
+    return hash.get(obj);
+  }
+
+  const copy = Array.isArray(obj) ? [] : {};
+  hash.set(obj, copy);
+
+  for (const key of Object.keys(obj)) {
+    copy[key] = deepClone(obj[key], hash);
+  }
+  return copy;
+}
+`,
+        supportedLanguages: [
+          {
+            id: "javascript",
+            name: "JavaScript (ES6)",
+            monacoLang: "javascript",
+            template: `export function deepClone(obj, hash = new WeakMap()) {\n  // Implement deep clone\n}\n`
           }
         ]
       }
@@ -1196,6 +1332,39 @@ public class Solution {
     public static List<Integer> filterAndSort(List<Integer> numbers) {
         // Implement using Java Streams
         return new ArrayList<>();
+    }
+}
+`,
+        supportedLanguages: COMMON_SUPPORTED_LANGUAGES
+      },
+      {
+        id: "java-lru-cache",
+        title: "LRU Cache Implementation",
+        difficulty: "medium",
+        language: "java",
+        instructions: "Implement a generic LRU Cache `LRUCache<K, V>` in Java.\n\nRequirements:\n1. Initialize with an `int capacity`.\n2. `get(K key)`: Return the value if present, otherwise null. Mark key as most recently used.\n3. `put(K key, V value)`: Insert or update key. If capacity is exceeded, evict the least recently used entry.\n4. Ensure O(1) average lookup and eviction.",
+        initialCode: `import java.util.*;
+
+public class LRUCache<K, V> {
+    private final int capacity;
+    private final Map<K, V> map;
+
+    public LRUCache(int capacity) {
+        this.capacity = capacity;
+        this.map = new LinkedHashMap<K, V>(capacity, 0.75f, true) {
+            @Override
+            protected boolean removeEldestEntry(Map.Entry<K, V> eldest) {
+                return size() > LRUCache.this.capacity;
+            }
+        };
+    }
+
+    public synchronized V get(K key) {
+        return map.get(key);
+    }
+
+    public synchronized void put(K key, V value) {
+        map.put(key, value);
     }
 }
 `,
@@ -1410,6 +1579,34 @@ FROM orders
 WHERE status = 'COMPLETED'
 `,
         supportedLanguages: SQL_SUPPORTED_LANGUAGES
+      },
+      {
+        id: "sql-department-ranking",
+        title: "Department Salary Ranking with Window Functions",
+        difficulty: "medium",
+        language: "sql",
+        instructions: "Given an `employees` table with columns: `id, name, department_id, salary, hire_date`.\n\nWrite an SQL query using window functions to find the top 2 highest paid employees in each department.\n\nRequirements:\n1. Compute `salary_rank` partitioned by `department_id` ordered by `salary` DESC.\n2. Use `DENSE_RANK()` so employees with tied salaries share the same rank.\n3. Filter for employees with `salary_rank <= 2`.\n4. Output columns: `department_id, name, salary, salary_rank` ordered by `department_id ASC, salary_rank ASC`.",
+        initialCode: `-- Write your SQL query here using DENSE_RANK()
+-- Schema: employees (id, name, department_id, salary, hire_date)
+
+WITH RankedEmployees AS (
+    SELECT
+        department_id,
+        name,
+        salary,
+        DENSE_RANK() OVER (PARTITION BY department_id ORDER BY salary DESC) AS salary_rank
+    FROM employees
+)
+SELECT
+    department_id,
+    name,
+    salary,
+    salary_rank
+FROM RankedEmployees
+WHERE salary_rank <= 2
+ORDER BY department_id ASC, salary_rank ASC;
+`,
+        supportedLanguages: SQL_SUPPORTED_LANGUAGES
       }
     ]
   },
@@ -1621,6 +1818,35 @@ WHERE status = 'COMPLETED'
 int removeDuplicates(std::vector<int>& nums) {
     // Modify nums in-place and return unique count
     return 0;
+}
+`,
+        supportedLanguages: COMMON_SUPPORTED_LANGUAGES
+      },
+      {
+        id: "cpp-merge-intervals",
+        title: "Merge Overlapping Intervals",
+        difficulty: "medium",
+        language: "cpp",
+        instructions: "Given an array of `intervals` where `intervals[i] = [start_i, end_i]`, merge all overlapping intervals and return an array of the non-overlapping intervals that cover all the intervals in the input.\n\nRequirements:\n1. Sort intervals by start time.\n2. Iterate through and merge overlapping intervals when `curr.start <= prev.end`.\n3. Return the merged vector of `std::vector<int>`.",
+        initialCode: `#include <vector>
+#include <algorithm>
+
+std::vector<std::vector<int>> mergeIntervals(std::vector<std::vector<int>>& intervals) {
+    if (intervals.empty()) return {};
+
+    std::sort(intervals.begin(), intervals.end(), [](const auto& a, const auto& b) {
+        return a[0] < b[0];
+    });
+
+    std::vector<std::vector<int>> merged;
+    for (const auto& interval : intervals) {
+        if (merged.empty() || merged.back()[1] < interval[0]) {
+            merged.push_back(interval);
+        } else {
+            merged.back()[1] = std::max(merged.back()[1], interval[1]);
+        }
+    }
+    return merged;
 }
 `,
         supportedLanguages: COMMON_SUPPORTED_LANGUAGES
@@ -1842,6 +2068,62 @@ func ProcessJobs(jobs []int, numWorkers int) []int {
 }
 `,
         supportedLanguages: COMMON_SUPPORTED_LANGUAGES
+      },
+      {
+        id: "go-rate-limiter",
+        title: "Token Bucket Rate Limiter",
+        difficulty: "medium",
+        language: "go",
+        instructions: "Implement a thread-safe Token Bucket Rate Limiter in Go.\n\nRequirements:\n1. Type `RateLimiter struct` with fields: `capacity int`, `refillRate float64` (tokens/sec), `tokens float64`, `lastRefill time.Time`, and `mu sync.Mutex`.\n2. `NewRateLimiter(capacity int, refillRate float64) *RateLimiter`: Constructor.\n3. `Allow() bool`: Calculates token refill based on elapsed time, deducts 1 token if available and returns `true`, otherwise returns `false` without blocking.",
+        initialCode: `package main
+
+import (
+    "sync"
+    "time"
+)
+
+type RateLimiter struct {
+    capacity   float64
+    tokens     float64
+    refillRate float64
+    lastRefill time.Time
+    mu         sync.Mutex
+}
+
+func NewRateLimiter(capacity float64, refillRate float64) *RateLimiter {
+    return &RateLimiter{
+        capacity:   capacity,
+        tokens:     capacity,
+        refillRate: refillRate,
+        lastRefill: time.Now(),
+    }
+}
+
+func (rl *RateLimiter) Allow() bool {
+    rl.mu.Lock()
+    defer rl.mu.Unlock()
+
+    now := time.Now()
+    elapsed := now.Sub(rl.lastRefill).Seconds()
+    rl.lastRefill = now
+
+    rl.tokens = min(rl.capacity, rl.tokens+elapsed*rl.refillRate)
+
+    if rl.tokens >= 1.0 {
+        rl.tokens -= 1.0
+        return true
+    }
+    return false
+}
+
+func min(a, b float64) float64 {
+    if a < b {
+        return a
+    }
+    return b
+}
+`,
+        supportedLanguages: COMMON_SUPPORTED_LANGUAGES
       }
     ]
   },
@@ -2049,6 +2331,41 @@ export async function POST(req: Request) {
     // Implement validation and response
     return NextResponse.json({ success: true });
 }
+`,
+        supportedLanguages: COMMON_SUPPORTED_LANGUAGES
+      },
+      {
+        id: "nextjs-middleware-auth",
+        title: "Route Protection Middleware",
+        difficulty: "medium",
+        language: "typescript",
+        instructions: "Implement a Next.js `middleware(req: NextRequest)` function that protects private dashboard routes.\n\nRequirements:\n1. Check if the pathname starts with `/dashboard` or `/admin`.\n2. Read session cookie `auth-token` from `req.cookies`.\n3. If token is missing, redirect the user to `/login?callbackUrl=` with the encoded original path.\n4. If pathname starts with `/admin` and the cookie `user-role` is not 'admin', redirect to `/unauthorized`.\n5. Otherwise, call `NextResponse.next()` to continue.",
+        initialCode: `import { NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
+
+export function middleware(req: NextRequest) {
+    const { pathname } = req.nextUrl;
+    const token = req.cookies.get('auth-token')?.value;
+    const role = req.cookies.get('user-role')?.value;
+
+    if (pathname.startsWith('/dashboard') || pathname.startsWith('/admin')) {
+        if (!token) {
+            const loginUrl = new URL('/login', req.url);
+            loginUrl.searchParams.set('callbackUrl', pathname);
+            return NextResponse.redirect(loginUrl);
+        }
+
+        if (pathname.startsWith('/admin') && role !== 'admin') {
+            return NextResponse.redirect(new URL('/unauthorized', req.url));
+        }
+    }
+
+    return NextResponse.next();
+}
+
+export const config = {
+    matcher: ['/dashboard/:path*', '/admin/:path*'],
+};
 `,
         supportedLanguages: COMMON_SUPPORTED_LANGUAGES
       }
@@ -2265,6 +2582,62 @@ FROM node:20-alpine AS runner
 # Implement runner stage
 `,
         supportedLanguages: COMMON_SUPPORTED_LANGUAGES
+      },
+      {
+        id: "docker-compose-infra",
+        title: "Multi-Service Compose Stack",
+        difficulty: "medium",
+        language: "dockerfile",
+        instructions: "Write a production-ready `docker-compose.yml` configuration defining a 3-tier microservice architecture.\n\nRequirements:\n1. Service `web`: built from current directory context, port `3000:3000`, depends on `db` and `cache`.\n2. Service `db`: `postgres:16-alpine`, volume mount `pgdata:/var/lib/postgresql/data`, environment variables for user/password/dbname, and healthcheck.\n3. Service `cache`: `redis:7-alpine`, port `6379:6379`, maxmemory limits.\n4. Top-level named volume `pgdata` and custom bridge network `app-net`.",
+        initialCode: `version: '3.8'
+
+services:
+  web:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      - DATABASE_URL=postgres://user:password@db:5432/appdb
+      - REDIS_URL=redis://cache:6379
+    depends_on:
+      db:
+        condition: service_healthy
+      cache:
+        condition: service_started
+    networks:
+      - app-net
+
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: appdb
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U user -d appdb"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - app-net
+
+  cache:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    networks:
+      - app-net
+
+volumes:
+  pgdata:
+
+networks:
+  app-net:
+    driver: bridge
+`,
+        supportedLanguages: COMMON_SUPPORTED_LANGUAGES
       }
     ]
   },
@@ -2469,6 +2842,34 @@ FROM node:20-alpine AS runner
         initialCode: `def min_max_scale(data):
     # Implement Min-Max scaling
     return []
+`,
+        supportedLanguages: COMMON_SUPPORTED_LANGUAGES
+      },
+      {
+        id: "ml-cosine-similarity",
+        title: "Vector Cosine Similarity & Nearest Neighbors",
+        difficulty: "medium",
+        language: "python",
+        instructions: "Implement a function `cosine_similarity(vec_a, vec_b)` and `find_top_k_similar(query_vec, candidate_vectors, k)` in Python.\n\nRequirements:\n1. `cosine_similarity`: compute dot product divided by the product of Euclidean norms (L2 norms). Return 0.0 if either norm is zero.\n2. `find_top_k_similar`: given a query vector and list of candidates, calculate similarities, and return indices of the top `k` most similar candidate vectors in descending order of similarity.",
+        initialCode: `import math
+
+def cosine_similarity(vec_a: list[float], vec_b: list[float]) -> float:
+    if not vec_a or not vec_b or len(vec_a) != len(vec_b):
+        return 0.0
+    dot = sum(a * b for a, b in zip(vec_a, vec_b))
+    norm_a = math.sqrt(sum(a * a for a in vec_a))
+    norm_b = math.sqrt(sum(b * b for b in vec_b))
+    if norm_a == 0 or norm_b == 0:
+        return 0.0
+    return dot / (norm_a * norm_b)
+
+def find_top_k_similar(query_vec: list[float], candidate_vectors: list[list[float]], k: int) -> list[int]:
+    similarities = []
+    for idx, cand in enumerate(candidate_vectors):
+        sim = cosine_similarity(query_vec, cand)
+        similarities.append((sim, idx))
+    similarities.sort(key=lambda x: x[0], reverse=True)
+    return [idx for _, idx in similarities[:k]]
 `,
         supportedLanguages: COMMON_SUPPORTED_LANGUAGES
       }
@@ -2680,6 +3081,66 @@ FROM node:20-alpine AS runner
         initialCode: `pub fn reverse_words(s: &str) -> String {
     // Implement word reversal
     String::new()
+}
+`,
+        supportedLanguages: COMMON_SUPPORTED_LANGUAGES
+      },
+      {
+        id: "rust-ring-buffer",
+        title: "Bounded Circular Ring Buffer",
+        difficulty: "medium",
+        language: "rust",
+        instructions: "Implement a generic fixed-capacity circular Ring Buffer in Rust `RingBuffer<T>`.\n\nRequirements:\n1. `RingBuffer::new(capacity: usize) -> Self`: Initialize buffer with fixed capacity.\n2. `push(&mut self, item: T) -> bool`: Add item to buffer. Return `true` if added, or `false` if buffer is full without overwriting.\n3. `pop(&mut self) -> Option<T>`: Remove and return the oldest item (FIFO), or `None` if empty.\n4. `len(&self) -> usize` and `is_empty(&self) -> bool`.",
+        initialCode: `pub struct RingBuffer<T> {
+    data: Vec<Option<T>>,
+    head: usize,
+    tail: usize,
+    size: usize,
+    capacity: usize,
+}
+
+impl<T> RingBuffer<T> {
+    pub fn new(capacity: usize) -> Self {
+        let mut data = Vec::with_capacity(capacity);
+        for _ in 0..capacity {
+            data.push(None);
+        }
+        Self {
+            data,
+            head: 0,
+            tail: 0,
+            size: 0,
+            capacity,
+        }
+    }
+
+    pub fn push(&mut self, item: T) -> bool {
+        if self.size >= self.capacity {
+            return false;
+        }
+        self.data[self.tail] = Some(item);
+        self.tail = (self.tail + 1) % self.capacity;
+        self.size += 1;
+        true
+    }
+
+    pub fn pop(&mut self) -> Option<T> {
+        if self.size == 0 {
+            return None;
+        }
+        let item = self.data[self.head].take();
+        self.head = (self.head + 1) % self.capacity;
+        self.size -= 1;
+        item
+    }
+
+    pub fn len(&self) -> usize {
+        self.size
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.size == 0
+    }
 }
 `,
         supportedLanguages: COMMON_SUPPORTED_LANGUAGES
@@ -3084,6 +3545,32 @@ FROM node:20-alpine AS runner
         initialCode: `export function filterItems(items, search) {
     // Filter items by title substring
     return [];
+}
+`,
+        supportedLanguages: COMMON_SUPPORTED_LANGUAGES
+      },
+      {
+        id: "rn-virtualized-pagination",
+        title: "Paginated List Batcher",
+        difficulty: "medium",
+        language: "javascript",
+        instructions: "Implement a helper function `paginateDataset(dataset, page, pageSize)` for React Native FlatList infinite scrolling.\n\nRequirements:\n1. Validate that `page >= 1` and `pageSize >= 1`. If invalid, return an empty array with `hasMore: false`.\n2. Calculate start and end indices: `start = (page - 1) * pageSize`, `end = start + pageSize`.\n3. Return `{ items: dataset.slice(start, end), totalPages: Math.ceil(dataset.length / pageSize), currentPage: page, hasMore: end < dataset.length }`.",
+        initialCode: `export function paginateDataset(dataset = [], page = 1, pageSize = 10) {
+    if (!Array.isArray(dataset) || page < 1 || pageSize < 1) {
+        return { items: [], totalPages: 0, currentPage: page, hasMore: false };
+    }
+    const start = (page - 1) * pageSize;
+    const end = start + pageSize;
+    const items = dataset.slice(start, end);
+    const totalPages = Math.ceil(dataset.length / pageSize);
+    const hasMore = end < dataset.length;
+
+    return {
+        items,
+        totalPages,
+        currentPage: page,
+        hasMore,
+    };
 }
 `,
         supportedLanguages: COMMON_SUPPORTED_LANGUAGES
@@ -3555,18 +4042,24 @@ export function getAssessmentContent(
     };
   });
 
-  // 3. Pick a coding challenge dynamically from the pool if available
+  // 3. Pick coding challenges from the pool if available
   let selectedCoding: CodingChallenge | undefined = undefined;
-  if (hasCoding && bank.codingPool) {
+  let selectedCodingTasks: CodingChallenge[] | undefined = undefined;
+  if (hasCoding && bank.codingPool && bank.codingPool.length > 0) {
     const codingPool = bank.codingPool;
-    const codingRand = mulberry32((seedNum + 54321) >>> 0)();
-    const codingIndex = Math.floor(codingRand * codingPool.length);
-    selectedCoding = codingPool[codingIndex] || codingPool[0];
+    const easyQ = codingPool[0];
+    const mediumQ = codingPool.length > 1 ? codingPool[1] : undefined;
+    selectedCoding = easyQ;
+    selectedCodingTasks = [easyQ];
+    if (mediumQ && mediumQ.id !== easyQ.id) {
+      selectedCodingTasks.push(mediumQ);
+    }
   }
 
   return {
     mcqs: randomizedMcqs,
     coding: selectedCoding,
+    codingTasks: selectedCodingTasks,
     hasCoding,
     timeLimitMinutes: hasCoding ? 90 : 45,
     assessmentType: hasCoding ? "coding_capable" : "mcq_only",

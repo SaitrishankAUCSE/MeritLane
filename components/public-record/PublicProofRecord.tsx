@@ -18,6 +18,7 @@ import {
   Code,
   Layers,
   Award,
+  Trophy,
   Search,
   Share2,
   FileText,
@@ -73,6 +74,8 @@ interface PublicProofRecordProps {
         score?: number;
         verifiedAt?: string | number;
         aiFeedback?: string;
+        badge?: string;
+        track?: string;
       }
     >;
     githubEvidence?: {
@@ -127,13 +130,24 @@ export function PublicProofRecord({
 
   const isResumeActuallyPortfolio = Boolean(
     candidate.resumeUrl &&
+    !candidate.resumeUrl.includes("firebasestorage") &&
+    !candidate.resumeUrl.includes("drive.google.com") &&
+    !candidate.resumeUrl.toLowerCase().includes(".pdf") &&
+    !candidate.resumeUrl.startsWith("data:") &&
     (candidate.resumeUrl.includes("portfolio") ||
      candidate.resumeUrl.includes("vercel.app") ||
-     candidate.resumeUrl.includes("github.io") ||
-     (!candidate.resumeUrl.toLowerCase().includes(".pdf") && !candidate.resumeUrl.includes("drive.google.com")))
+     candidate.resumeUrl.includes("github.io"))
   );
   const resolvedPortfolioUrl = candidate.portfolioUrl || (isResumeActuallyPortfolio ? candidate.resumeUrl : undefined);
-  const resolvedResumeUrl = isResumeActuallyPortfolio ? (candidate.portfolioUrl ? candidate.resumeUrl : undefined) : candidate.resumeUrl;
+  const resolvedResumeUrl = isResumeActuallyPortfolio ? undefined : candidate.resumeUrl;
+
+  const getEmbeddableResumeUrl = (url?: string) => {
+    if (!url) return "";
+    if (url.includes("drive.google.com/file/d/")) {
+      return url.replace(/\/view(\?.*)?$/, "/preview").replace(/\/edit(\?.*)?$/, "/preview");
+    }
+    return url;
+  };
 
   const handleDownloadResume = () => {
     const filename = candidate.resumeFileName || `${name.replace(/\s+/g, "_")}_Resume.pdf`;
@@ -234,20 +248,20 @@ export function PublicProofRecord({
       });
 
   return (
-    <div className="min-h-screen bg-[#F8F6F3] text-[#1C1917] font-sans selection:bg-[#064E3B]/10 selection:text-[#064E3B]">
+    <div className="min-h-screen bg-[#F8F6F3] text-foreground font-sans selection:bg-emerald-900/10 selection:text-emerald-900">
       
       {/* ── Institution Header ── */}
       {!hideHeader && (
-        <header className="sticky top-0 z-50 flex h-[70px] items-center justify-between px-4 sm:px-8 lg:px-12 border-b border-[#E7E2DA] bg-white/95 backdrop-blur-md">
+        <header className="sticky top-0 z-50 flex h-[70px] items-center justify-between px-4 sm:px-8 lg:px-12 border-b border-border bg-white/95 backdrop-blur-md">
           <div className="flex items-center gap-3">
             <Link
               href="/"
-              className="font-serif text-[24px] sm:text-[26px] font-semibold tracking-tight text-[#1C1917] hover:text-[#064E3B] transition-colors"
+              className="font-serif text-[24px] sm:text-[26px] font-semibold tracking-tight text-foreground hover:text-emerald-900 transition-colors"
             >
               Meritlane
             </Link>
-            <div className="hidden md:flex items-center gap-2 pl-3 border-l border-[#E7E2DA]">
-              <span className="text-[10px] font-mono uppercase tracking-[0.16em] px-2 py-0.5 rounded bg-[#FAF8F5] border border-[#E7E2DA] text-[#78716C]">
+            <div className="hidden md:flex items-center gap-2 pl-3 border-l border-border">
+              <span className="text-[10px] font-mono uppercase tracking-[0.16em] px-2 py-0.5 rounded bg-surface border border-border text-muted-foreground">
                 VERIFIED TECHNICAL PROOF
               </span>
             </div>
@@ -256,7 +270,7 @@ export function PublicProofRecord({
           <div className="flex items-center gap-3">
             <button
               onClick={() => setIsResumeModalOpen(true)}
-              className="flex items-center gap-1.5 text-[12px] font-semibold text-white bg-[#064E3B] hover:bg-[#043327] px-3.5 py-1.5 rounded-lg transition-all shadow-xs cursor-pointer"
+              className="flex items-center gap-1.5 text-[12px] font-semibold text-white bg-emerald-900 hover:bg-emerald-950 px-3.5 py-1.5 rounded-lg transition-all shadow-xs cursor-pointer"
               title="See Candidate Resume"
             >
               <FileText className="h-3.5 w-3.5" />
@@ -265,7 +279,7 @@ export function PublicProofRecord({
 
             <button
               onClick={handleCopyLink}
-              className="flex items-center gap-1.5 text-[12px] font-medium text-[#1C1917] hover:text-[#064E3B] px-3.5 py-1.5 rounded-lg border border-[#E7E2DA] bg-[#FAF8F5] hover:bg-white transition-all shadow-xs cursor-pointer"
+              className="flex items-center gap-1.5 text-[12px] font-medium text-foreground hover:text-emerald-900 px-3.5 py-1.5 rounded-lg border border-border bg-surface hover:bg-white transition-all shadow-xs cursor-pointer"
               title="Copy public portfolio link"
             >
               {copied ? (
@@ -275,15 +289,15 @@ export function PublicProofRecord({
                 </>
               ) : (
                 <>
-                  <Share2 className="h-3.5 w-3.5 text-[#78716C]" />
+                  <Share2 className="h-3.5 w-3.5 text-muted-foreground" />
                   <span>Share Profile</span>
                 </>
               )}
             </button>
 
             {candidateKey && (
-              <div className="hidden sm:inline-flex items-center gap-1.5 text-[11px] font-mono text-[#064E3B] font-semibold px-2.5 py-1 rounded bg-[#064E3B]/10 border border-[#064E3B]/20">
-                <ShieldCheck className="h-3.5 w-3.5 text-[#064E3B]" />
+              <div className="hidden sm:inline-flex items-center gap-1.5 text-[11px] font-mono text-emerald-900 font-semibold px-2.5 py-1 rounded bg-emerald-900/10 border border-emerald-900/20">
+                <ShieldCheck className="h-3.5 w-3.5 text-emerald-900" />
                 <span>ID: {candidateKey}</span>
               </div>
             )}
@@ -292,7 +306,7 @@ export function PublicProofRecord({
       )}
 
       {/* ── Hero Profile Dossier ── */}
-      <section className="w-full px-4 sm:px-8 lg:px-12 pt-8 sm:pt-12 pb-8 border-b border-[#E7E2DA] bg-gradient-to-b from-white via-white to-[#FAF8F5]">
+      <section className="w-full px-4 sm:px-8 lg:px-12 pt-8 sm:pt-12 pb-8 border-b border-border bg-gradient-to-b from-white via-white to-surface">
         <div className="w-full flex flex-col md:flex-row gap-6 sm:gap-8 items-start justify-between">
           
           {/* Left Avatar & Identity */}
@@ -312,34 +326,34 @@ export function PublicProofRecord({
                   className={`text-[10px] font-mono font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full border ${
                     isCandidateVerified
                       ? "bg-[#DCFCE7] text-[#166534] border-[#86EFAC]"
-                      : "bg-[#F5F1EB] text-[#78716C] border-[#E7E2DA]"
+                      : "bg-surface text-muted-foreground border-border"
                   }`}
                 >
                   {isCandidateVerified ? `✓ Verified Practitioner (${verifiedPercentage}% Verified)` : "Engineering Candidate"}
                 </span>
                 {candidateKey && (
-                  <span className="text-[12px] font-mono text-[#78716C]">
+                  <span className="text-[12px] font-mono text-muted-foreground">
                     ID: {candidateKey}
                   </span>
                 )}
                 <span className="text-[#C8BFB0]">·</span>
-                <span className="text-[12px] text-[#78716C]">
+                <span className="text-[12px] text-muted-foreground">
                   Evaluated {formattedDate}
                 </span>
               </div>
 
-              <h1 className="font-serif text-[32px] sm:text-[42px] lg:text-[48px] font-bold text-[#1C1917] tracking-tight leading-tight">
+              <h1 className="font-serif text-[32px] sm:text-[42px] lg:text-[48px] font-bold text-foreground tracking-tight leading-tight">
                 {name}
               </h1>
 
               {(candidate.college || candidate.branch) && (
                 <div className="flex flex-wrap items-center gap-2 text-[13px] sm:text-[14px] text-[#57534E]">
-                  <GraduationCap className="h-4 w-4 text-[#064E3B] shrink-0" />
-                  <span className="font-medium text-[#1C1917]">{candidate.branch || "Software Engineering"}</span>
+                  <GraduationCap className="h-4 w-4 text-emerald-900 shrink-0" />
+                  <span className="font-medium text-foreground">{candidate.branch || "Software Engineering"}</span>
                   {candidate.branch && candidate.college && <span className="text-[#C8BFB0]">·</span>}
                   <span>{candidate.college}</span>
                   {candidate.gradYear && (
-                    <span className="text-[11px] font-mono bg-[#FAF8F5] px-2 py-0.5 rounded border border-[#E7E2DA] text-[#78716C]">
+                    <span className="text-[11px] font-mono bg-surface px-2 py-0.5 rounded border border-border text-muted-foreground">
                       Class of {candidate.gradYear}
                     </span>
                   )}
@@ -347,7 +361,7 @@ export function PublicProofRecord({
               )}
 
               {candidate.bio && (
-                <p className="text-[13.5px] text-[#78716C] max-w-2xl leading-relaxed mt-1">
+                <p className="text-[13.5px] text-muted-foreground max-w-2xl leading-relaxed mt-1">
                   {candidate.bio}
                 </p>
               )}
@@ -361,7 +375,7 @@ export function PublicProofRecord({
                 href={candidate.githubUrl}
                 target="_blank"
                 rel="noreferrer"
-                className="flex items-center gap-2 text-[12px] font-medium bg-[#1C1917] text-white hover:bg-[#292524] px-4 py-2 rounded-lg transition-colors shadow-xs"
+                className="flex items-center gap-2 text-[12px] font-medium bg-foreground text-white hover:bg-stone-800 px-4 py-2 rounded-lg transition-colors shadow-xs"
               >
                 <GithubIcon className="h-4 w-4" />
                 <span>GitHub Profile</span>
@@ -374,11 +388,11 @@ export function PublicProofRecord({
                 href={candidate.linkedinUrl}
                 target="_blank"
                 rel="noreferrer"
-                className="flex items-center gap-1.5 text-[12px] font-medium bg-white text-[#1C1917] hover:bg-[#FAF8F5] border border-[#E7E2DA] px-3.5 py-2 rounded-lg transition-colors shadow-xs"
+                className="flex items-center gap-1.5 text-[12px] font-medium bg-white text-foreground hover:bg-surface border border-border px-3.5 py-2 rounded-lg transition-colors shadow-xs"
               >
                 <Globe className="h-3.5 w-3.5 text-[#0A66C2]" />
                 <span>LinkedIn</span>
-                <ExternalLink className="h-3 w-3 text-[#78716C]" />
+                <ExternalLink className="h-3 w-3 text-muted-foreground" />
               </a>
             )}
 
@@ -387,11 +401,11 @@ export function PublicProofRecord({
                 href={resolvedPortfolioUrl}
                 target="_blank"
                 rel="noreferrer"
-                className="flex items-center gap-1.5 text-[12px] font-medium bg-white text-[#1C1917] hover:bg-[#FAF8F5] border border-[#E7E2DA] px-3.5 py-2 rounded-lg transition-colors shadow-xs"
+                className="flex items-center gap-1.5 text-[12px] font-medium bg-white text-foreground hover:bg-surface border border-border px-3.5 py-2 rounded-lg transition-colors shadow-xs"
               >
-                <Globe className="h-3.5 w-3.5 text-[#064E3B]" />
+                <Globe className="h-3.5 w-3.5 text-emerald-900" />
                 <span>Portfolio</span>
-                <ExternalLink className="h-3 w-3 text-[#78716C]" />
+                <ExternalLink className="h-3 w-3 text-muted-foreground" />
               </a>
             )}
 
@@ -399,7 +413,7 @@ export function PublicProofRecord({
             <button
               type="button"
               onClick={() => setIsResumeModalOpen(true)}
-              className="flex items-center gap-2 text-[12px] font-semibold bg-[#064E3B] text-white hover:bg-[#043327] px-4 py-2 rounded-lg transition-colors shadow-xs cursor-pointer"
+              className="flex items-center gap-2 text-[12px] font-semibold bg-emerald-900 text-white hover:bg-emerald-950 px-4 py-2 rounded-lg transition-colors shadow-xs cursor-pointer"
             >
               <FileText className="h-4 w-4" />
               <span>See Resume</span>
@@ -410,65 +424,65 @@ export function PublicProofRecord({
         </div>
 
         {/* ── Executive Competency Metrics Strip ── */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 mt-8 pt-6 border-t border-[#E7E2DA]/80">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 mt-8 pt-6 border-t border-border/80">
           
           {/* Metric 1 */}
-          <div className="p-4 rounded-xl border border-[#E7E2DA] bg-white shadow-xs">
-            <div className="flex items-center justify-between text-[11px] font-mono uppercase text-[#78716C] mb-1">
+          <div className="p-4 rounded-xl border border-border bg-white shadow-xs">
+            <div className="flex items-center justify-between text-[11px] font-mono uppercase text-muted-foreground mb-1">
               <span>Cataloged Skills</span>
-              <Code className="h-3.5 w-3.5 text-[#064E3B]" />
+              <Code className="h-3.5 w-3.5 text-emerald-900" />
             </div>
-            <div className="text-[26px] font-serif font-bold text-[#1C1917]">
+            <div className="text-[26px] font-serif font-bold text-foreground">
               {skills.length}
             </div>
-            <div className="text-[11px] text-[#78716C]">
+            <div className="text-[11px] text-muted-foreground">
               {categorized.languages.length} Languages · {categorized.frameworks.length} Web Tech
             </div>
           </div>
 
           {/* Metric 2 */}
-          <div className="p-4 rounded-xl border border-[#E7E2DA] bg-white shadow-xs">
-            <div className="flex items-center justify-between text-[11px] font-mono uppercase text-[#78716C] mb-1">
+          <div className="p-4 rounded-xl border border-border bg-white shadow-xs">
+            <div className="flex items-center justify-between text-[11px] font-mono uppercase text-muted-foreground mb-1">
               <span>Verified Proofs</span>
               <ShieldCheck className="h-3.5 w-3.5 text-[#16A34A]" />
             </div>
             <div className="flex items-baseline gap-2">
-              <span className={`text-[26px] font-serif font-bold ${verifiedCount > 0 ? "text-[#16A34A]" : "text-[#1C1917]"}`}>
+              <span className={`text-[26px] font-serif font-bold ${verifiedCount > 0 ? "text-[#16A34A]" : "text-foreground"}`}>
                 {verifiedCount}
               </span>
               <span className="text-[13px] font-mono text-[#16A34A] font-semibold">
                 ({verifiedPercentage}%)
               </span>
             </div>
-            <div className="text-[11px] text-[#78716C]">
+            <div className="text-[11px] text-muted-foreground">
               {verifiedCount > 0 ? `${verifiedPercentage}% of ${skills.length} skills passed ≥75%` : "Standard tests available"}
             </div>
           </div>
 
           {/* Metric 3 */}
-          <div className="p-4 rounded-xl border border-[#E7E2DA] bg-white shadow-xs">
-            <div className="flex items-center justify-between text-[11px] font-mono uppercase text-[#78716C] mb-1">
+          <div className="p-4 rounded-xl border border-border bg-white shadow-xs">
+            <div className="flex items-center justify-between text-[11px] font-mono uppercase text-muted-foreground mb-1">
               <span>Git Commits</span>
-              <GitCommit className="h-3.5 w-3.5 text-[#064E3B]" />
+              <GitCommit className="h-3.5 w-3.5 text-emerald-900" />
             </div>
-            <div className="text-[26px] font-serif font-bold text-[#1C1917]">
+            <div className="text-[26px] font-serif font-bold text-foreground">
               ~{candidate.githubEvidence?.totalCommits || 760}+
             </div>
-            <div className="text-[11px] text-[#78716C]">
+            <div className="text-[11px] text-muted-foreground">
               Across {candidate.githubEvidence?.repoCount || 17} repositories
             </div>
           </div>
 
           {/* Metric 4 */}
-          <div className="p-4 rounded-xl border border-[#E7E2DA] bg-white shadow-xs">
-            <div className="flex items-center justify-between text-[11px] font-mono uppercase text-[#78716C] mb-1">
+          <div className="p-4 rounded-xl border border-border bg-white shadow-xs">
+            <div className="flex items-center justify-between text-[11px] font-mono uppercase text-muted-foreground mb-1">
               <span>Project Artifacts</span>
-              <FolderGit2 className="h-3.5 w-3.5 text-[#064E3B]" />
+              <FolderGit2 className="h-3.5 w-3.5 text-emerald-900" />
             </div>
-            <div className="text-[26px] font-serif font-bold text-[#1C1917]">
+            <div className="text-[26px] font-serif font-bold text-foreground">
               {projects.length}
             </div>
-            <div className="text-[11px] text-[#78716C]">
+            <div className="text-[11px] text-muted-foreground">
               Repository &amp; architecture evidence
             </div>
           </div>
@@ -484,61 +498,61 @@ export function PublicProofRecord({
           <aside className="lg:col-span-4 space-y-6">
             
             {/* Dossier Card */}
-            <div className="bg-white border border-[#E7E2DA] rounded-xl p-6 shadow-xs space-y-4">
-              <div className="flex items-center justify-between border-b border-[#E7E2DA] pb-3">
+            <div className="bg-white border border-border rounded-xl p-6 shadow-xs space-y-4">
+              <div className="flex items-center justify-between border-b border-border pb-3">
                 <div className="flex items-center gap-2">
-                  <Shield className="h-4 w-4 text-[#064E3B]" />
-                  <h3 className="text-[14px] font-bold text-[#1C1917] tracking-tight uppercase">
+                  <Shield className="h-4 w-4 text-emerald-900" />
+                  <h3 className="text-[14px] font-bold text-foreground tracking-tight uppercase">
                     Official Record
                   </h3>
                 </div>
-                <span className="text-[10px] font-mono text-[#064E3B] font-semibold bg-[#064E3B]/10 px-2 py-0.5 rounded">
+                <span className="text-[10px] font-mono text-emerald-900 font-semibold bg-emerald-900/10 px-2 py-0.5 rounded">
                   VERIFIED AUDIT
                 </span>
               </div>
 
               <div className="space-y-3 text-[13px]">
-                <div className="flex items-center justify-between border-b border-[#E7E2DA]/60 pb-2">
-                  <span className="text-[#78716C]">Candidate ID</span>
-                  <span className="font-mono font-semibold text-[#1C1917]">{candidateKey}</span>
+                <div className="flex items-center justify-between border-b border-border/60 pb-2">
+                  <span className="text-muted-foreground">Candidate ID</span>
+                  <span className="font-mono font-semibold text-foreground">{candidateKey}</span>
                 </div>
-                <div className="flex items-center justify-between border-b border-[#E7E2DA]/60 pb-2">
-                  <span className="text-[#78716C]">Platform Authenticity</span>
-                  <span className="font-semibold text-[#064E3B] flex items-center gap-1">
+                <div className="flex items-center justify-between border-b border-border/60 pb-2">
+                  <span className="text-muted-foreground">Platform Authenticity</span>
+                  <span className="font-semibold text-emerald-900 flex items-center gap-1">
                     <CheckCircle2 className="h-3.5 w-3.5 text-[#16A34A]" />
                     Meritlane Verified
                   </span>
                 </div>
-                <div className="flex items-center justify-between border-b border-[#E7E2DA]/60 pb-2">
-                  <span className="text-[#78716C]">Assessment Protocol</span>
-                  <span className="font-mono text-[#1C1917]">75%+ Passing Standard</span>
+                <div className="flex items-center justify-between border-b border-border/60 pb-2">
+                  <span className="text-muted-foreground">Assessment Protocol</span>
+                  <span className="font-mono text-foreground">75%+ Passing Standard</span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-[#78716C]">Evaluation Status</span>
-                  <span className="font-medium text-[#1C1917]">{isCandidateVerified ? "Verified Practitioner" : "In Progress"}</span>
+                  <span className="text-muted-foreground">Evaluation Status</span>
+                  <span className="font-medium text-foreground">{isCandidateVerified ? "Verified Practitioner" : "In Progress"}</span>
                 </div>
               </div>
             </div>
 
             {/* Academic Credentials Card */}
             {candidate.college && (
-              <div className="bg-white border border-[#E7E2DA] rounded-xl p-6 shadow-xs space-y-3">
-                <div className="flex items-center gap-2 border-b border-[#E7E2DA] pb-3 text-[#064E3B]">
+              <div className="bg-white border border-border rounded-xl p-6 shadow-xs space-y-3">
+                <div className="flex items-center gap-2 border-b border-border pb-3 text-emerald-900">
                   <GraduationCap className="h-4 w-4" />
-                  <h3 className="text-[14px] font-bold text-[#1C1917] uppercase tracking-tight">
+                  <h3 className="text-[14px] font-bold text-foreground uppercase tracking-tight">
                     Academic Background
                   </h3>
                 </div>
                 <div>
-                  <div className="text-[16px] font-serif font-bold text-[#1C1917]">
+                  <div className="text-[16px] font-serif font-bold text-foreground">
                     {candidate.college}
                   </div>
                   <div className="text-[13px] text-[#57534E] mt-0.5">
                     {candidate.degree || "Bachelor of Technology"} · {candidate.branch}
                   </div>
                   {candidate.gradYear && (
-                    <div className="text-[12px] font-mono text-[#78716C] mt-2 flex items-center gap-1.5">
-                      <Calendar className="h-3.5 w-3.5 text-[#78716C]" />
+                    <div className="text-[12px] font-mono text-muted-foreground mt-2 flex items-center gap-1.5">
+                      <Calendar className="h-3.5 w-3.5 text-muted-foreground" />
                       <span>Graduating Class of {candidate.gradYear}</span>
                     </div>
                   )}
@@ -548,29 +562,29 @@ export function PublicProofRecord({
 
             {/* GitHub Evidence Card */}
             {candidate.githubEvidence && (
-              <div className="bg-white border border-[#E7E2DA] rounded-xl p-6 shadow-xs space-y-4">
-                <div className="flex items-center justify-between border-b border-[#E7E2DA] pb-3">
+              <div className="bg-white border border-border rounded-xl p-6 shadow-xs space-y-4">
+                <div className="flex items-center justify-between border-b border-border pb-3">
                   <div className="flex items-center gap-2">
-                    <GithubIcon className="h-4 w-4 text-[#1C1917]" />
-                    <h3 className="text-[14px] font-bold text-[#1C1917] uppercase tracking-tight">
+                    <GithubIcon className="h-4 w-4 text-foreground" />
+                    <h3 className="text-[14px] font-bold text-foreground uppercase tracking-tight">
                       GitHub Activity
                     </h3>
                   </div>
-                  <span className="text-[10px] font-mono text-[#78716C] bg-[#FAF8F5] px-2 py-0.5 rounded border border-[#E7E2DA]">
+                  <span className="text-[10px] font-mono text-muted-foreground bg-surface px-2 py-0.5 rounded border border-border">
                     SYNCHRONIZED
                   </span>
                 </div>
 
                 <div className="grid grid-cols-2 gap-3">
-                  <div className="p-3 bg-[#FAF8F5] border border-[#E7E2DA] rounded-lg">
-                    <div className="text-[10px] font-mono uppercase text-[#78716C]">Public Repos</div>
-                    <div className="text-[20px] font-serif font-bold text-[#1C1917] mt-0.5">
+                  <div className="p-3 bg-surface border border-border rounded-lg">
+                    <div className="text-[10px] font-mono uppercase text-muted-foreground">Public Repos</div>
+                    <div className="text-[20px] font-serif font-bold text-foreground mt-0.5">
                       {candidate.githubEvidence.repoCount}
                     </div>
                   </div>
-                  <div className="p-3 bg-[#FAF8F5] border border-[#E7E2DA] rounded-lg">
-                    <div className="text-[10px] font-mono uppercase text-[#78716C]">Total Commits</div>
-                    <div className="text-[20px] font-serif font-bold text-[#1C1917] mt-0.5">
+                  <div className="p-3 bg-surface border border-border rounded-lg">
+                    <div className="text-[10px] font-mono uppercase text-muted-foreground">Total Commits</div>
+                    <div className="text-[20px] font-serif font-bold text-foreground mt-0.5">
                       ~{candidate.githubEvidence.totalCommits}
                     </div>
                   </div>
@@ -578,14 +592,14 @@ export function PublicProofRecord({
 
                 {candidate.githubEvidence.topLanguages && candidate.githubEvidence.topLanguages.length > 0 && (
                   <div>
-                    <div className="text-[11px] font-mono uppercase text-[#78716C] mb-2">
+                    <div className="text-[11px] font-mono uppercase text-muted-foreground mb-2">
                       Top Verified Languages
                     </div>
                     <div className="flex flex-wrap gap-1.5">
                       {candidate.githubEvidence.topLanguages.map((lang) => (
                         <span
                           key={lang}
-                          className="text-[11px] font-mono bg-[#FAF8F5] text-[#1C1917] border border-[#E7E2DA] px-2.5 py-1 rounded-md"
+                          className="text-[11px] font-mono bg-surface text-foreground border border-border px-2.5 py-1 rounded-md"
                         >
                           {lang}
                         </span>
@@ -597,62 +611,62 @@ export function PublicProofRecord({
             )}
 
             {/* Engineering Focus & Specialization Card */}
-            <div className="bg-white border border-[#E7E2DA] rounded-xl p-6 shadow-xs space-y-3.5">
-              <div className="flex items-center justify-between border-b border-[#E7E2DA] pb-3">
-                <div className="flex items-center gap-2 text-[#064E3B]">
+            <div className="bg-white border border-border rounded-xl p-6 shadow-xs space-y-3.5">
+              <div className="flex items-center justify-between border-b border-border pb-3">
+                <div className="flex items-center gap-2 text-emerald-900">
                   <Briefcase className="h-4 w-4" />
-                  <h3 className="text-[14px] font-bold text-[#1C1917] uppercase tracking-tight">
+                  <h3 className="text-[14px] font-bold text-foreground uppercase tracking-tight">
                     Engineering Focus
                   </h3>
                 </div>
-                <span className="text-[10px] font-mono text-[#064E3B] font-semibold bg-[#064E3B]/10 px-2 py-0.5 rounded">
+                <span className="text-[10px] font-mono text-emerald-900 font-semibold bg-emerald-900/10 px-2 py-0.5 rounded">
                   {candidate.availability || "AVAILABLE"}
                 </span>
               </div>
               <div className="space-y-2.5 text-[13px]">
-                <div className="flex items-start justify-between border-b border-[#E7E2DA]/60 pb-2">
-                  <span className="text-[#78716C] shrink-0">Target Roles</span>
-                  <span className="font-semibold text-[#1C1917] text-right">
+                <div className="flex items-start justify-between border-b border-border/60 pb-2">
+                  <span className="text-muted-foreground shrink-0">Target Roles</span>
+                  <span className="font-semibold text-foreground text-right">
                     {candidate.targetRoles && candidate.targetRoles.length > 0
                       ? candidate.targetRoles.join(", ")
                       : "Software & Full-Stack Engineer"}
                   </span>
                 </div>
                 {candidate.preferredLocations && candidate.preferredLocations.length > 0 && (
-                  <div className="flex items-start justify-between border-b border-[#E7E2DA]/60 pb-2">
-                    <span className="text-[#78716C] shrink-0">Locations</span>
-                    <span className="font-mono text-[12px] text-[#1C1917] text-right">
+                  <div className="flex items-start justify-between border-b border-border/60 pb-2">
+                    <span className="text-muted-foreground shrink-0">Locations</span>
+                    <span className="font-mono text-[12px] text-foreground text-right">
                       {candidate.preferredLocations.join(", ")}
                     </span>
                   </div>
                 )}
                 {candidate.workPreference && (
-                  <div className="flex items-center justify-between border-b border-[#E7E2DA]/60 pb-2">
-                    <span className="text-[#78716C]">Work Model</span>
-                    <span className="font-mono text-[#064E3B] text-right font-semibold">{candidate.workPreference}</span>
+                  <div className="flex items-center justify-between border-b border-border/60 pb-2">
+                    <span className="text-muted-foreground">Work Model</span>
+                    <span className="font-mono text-emerald-900 text-right font-semibold">{candidate.workPreference}</span>
                   </div>
                 )}
-                <div className="flex items-center justify-between border-b border-[#E7E2DA]/60 pb-2">
-                  <span className="text-[#78716C]">Verified Standard</span>
-                  <span className="font-semibold text-[#064E3B] text-right">≥75% Production Passing</span>
+                <div className="flex items-center justify-between border-b border-border/60 pb-2">
+                  <span className="text-muted-foreground">Verified Standard</span>
+                  <span className="font-semibold text-emerald-900 text-right">≥75% Production Passing</span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-[#78716C]">Graduation Class</span>
-                  <span className="font-mono text-[#1C1917]">{candidate.gradYear ? `Class of ${candidate.gradYear}` : "Engineering Cohort"}</span>
+                  <span className="text-muted-foreground">Graduation Class</span>
+                  <span className="font-mono text-foreground">{candidate.gradYear ? `Class of ${candidate.gradYear}` : "Engineering Cohort"}</span>
                 </div>
               </div>
             </div>
 
             {/* Architecture & Competency Domain Stack */}
-            <div className="bg-white border border-[#E7E2DA] rounded-xl p-6 shadow-xs space-y-3.5">
-              <div className="flex items-center justify-between border-b border-[#E7E2DA] pb-3">
-                <div className="flex items-center gap-2 text-[#064E3B]">
+            <div className="bg-white border border-border rounded-xl p-6 shadow-xs space-y-3.5">
+              <div className="flex items-center justify-between border-b border-border pb-3">
+                <div className="flex items-center gap-2 text-emerald-900">
                   <Layers className="h-4 w-4" />
-                  <h3 className="text-[14px] font-bold text-[#1C1917] uppercase tracking-tight">
+                  <h3 className="text-[14px] font-bold text-foreground uppercase tracking-tight">
                     Domain Architecture
                   </h3>
                 </div>
-                <span className="text-[10px] font-mono text-[#78716C] bg-[#FAF8F5] px-2 py-0.5 rounded border border-[#E7E2DA]">
+                <span className="text-[10px] font-mono text-muted-foreground bg-surface px-2 py-0.5 rounded border border-border">
                   {skills.length} SKILLS
                 </span>
               </div>
@@ -660,9 +674,9 @@ export function PublicProofRecord({
               <div className="space-y-3 text-[12px]">
                 {categorized.languages.length > 0 && (
                   <div>
-                    <div className="text-[10px] font-mono uppercase text-[#78716C] mb-1.5 flex items-center justify-between">
+                    <div className="text-[10px] font-mono uppercase text-muted-foreground mb-1.5 flex items-center justify-between">
                       <span>Languages &amp; Runtimes</span>
-                      <span className="text-[#064E3B] font-bold">{categorized.languages.length}</span>
+                      <span className="text-emerald-900 font-bold">{categorized.languages.length}</span>
                     </div>
                     <div className="flex flex-wrap gap-1.5">
                       {categorized.languages.map((s) => {
@@ -673,7 +687,7 @@ export function PublicProofRecord({
                             className={`px-2 py-0.5 rounded text-[11px] font-mono flex items-center gap-1 border ${
                               isVer
                                 ? "bg-[#DCFCE7] text-[#166534] border-[#86EFAC] font-semibold"
-                                : "bg-[#FAF8F5] text-[#57534E] border-[#E7E2DA]"
+                                : "bg-surface text-[#57534E] border-border"
                             }`}
                           >
                             {isVer && <Check className="h-3 w-3 text-[#166534]" />}
@@ -686,10 +700,10 @@ export function PublicProofRecord({
                 )}
 
                 {categorized.frameworks.length > 0 && (
-                  <div className="border-t border-[#E7E2DA]/60 pt-2.5">
-                    <div className="text-[10px] font-mono uppercase text-[#78716C] mb-1.5 flex items-center justify-between">
+                  <div className="border-t border-border/60 pt-2.5">
+                    <div className="text-[10px] font-mono uppercase text-muted-foreground mb-1.5 flex items-center justify-between">
                       <span>Web &amp; Application Frameworks</span>
-                      <span className="text-[#064E3B] font-bold">{categorized.frameworks.length}</span>
+                      <span className="text-emerald-900 font-bold">{categorized.frameworks.length}</span>
                     </div>
                     <div className="flex flex-wrap gap-1.5">
                       {categorized.frameworks.map((s) => {
@@ -700,7 +714,7 @@ export function PublicProofRecord({
                             className={`px-2 py-0.5 rounded text-[11px] font-mono flex items-center gap-1 border ${
                               isVer
                                 ? "bg-[#DCFCE7] text-[#166534] border-[#86EFAC] font-semibold"
-                                : "bg-[#FAF8F5] text-[#57534E] border-[#E7E2DA]"
+                                : "bg-surface text-[#57534E] border-border"
                             }`}
                           >
                             {isVer && <Check className="h-3 w-3 text-[#166534]" />}
@@ -713,10 +727,10 @@ export function PublicProofRecord({
                 )}
 
                 {categorized.data.length > 0 && (
-                  <div className="border-t border-[#E7E2DA]/60 pt-2.5">
-                    <div className="text-[10px] font-mono uppercase text-[#78716C] mb-1.5 flex items-center justify-between">
+                  <div className="border-t border-border/60 pt-2.5">
+                    <div className="text-[10px] font-mono uppercase text-muted-foreground mb-1.5 flex items-center justify-between">
                       <span>Databases &amp; Systems</span>
-                      <span className="text-[#064E3B] font-bold">{categorized.data.length}</span>
+                      <span className="text-emerald-900 font-bold">{categorized.data.length}</span>
                     </div>
                     <div className="flex flex-wrap gap-1.5">
                       {categorized.data.map((s) => {
@@ -727,7 +741,7 @@ export function PublicProofRecord({
                             className={`px-2 py-0.5 rounded text-[11px] font-mono flex items-center gap-1 border ${
                               isVer
                                 ? "bg-[#DCFCE7] text-[#166534] border-[#86EFAC] font-semibold"
-                                : "bg-[#FAF8F5] text-[#57534E] border-[#E7E2DA]"
+                                : "bg-surface text-[#57534E] border-border"
                             }`}
                           >
                             {isVer && <Check className="h-3 w-3 text-[#166534]" />}
@@ -742,11 +756,11 @@ export function PublicProofRecord({
             </div>
 
             {/* Cryptographic Session Integrity & Security Card */}
-            <div className="bg-white border border-[#E7E2DA] rounded-xl p-6 shadow-xs space-y-3.5">
-              <div className="flex items-center justify-between border-b border-[#E7E2DA] pb-3">
-                <div className="flex items-center gap-2 text-[#064E3B]">
+            <div className="bg-white border border-border rounded-xl p-6 shadow-xs space-y-3.5">
+              <div className="flex items-center justify-between border-b border-border pb-3">
+                <div className="flex items-center gap-2 text-emerald-900">
                   <Lock className="h-4 w-4" />
-                  <h3 className="text-[14px] font-bold text-[#1C1917] uppercase tracking-tight">
+                  <h3 className="text-[14px] font-bold text-foreground uppercase tracking-tight">
                     Integrity Audit
                   </h3>
                 </div>
@@ -755,21 +769,21 @@ export function PublicProofRecord({
                 </span>
               </div>
               <div className="space-y-2.5 text-[12px] font-mono text-[#57534E]">
-                <div className="flex items-center justify-between border-b border-[#E7E2DA]/60 pb-2">
+                <div className="flex items-center justify-between border-b border-border/60 pb-2">
                   <span>Proctoring Security</span>
                   <span className="text-[#166534] font-semibold">Active &amp; Compliant</span>
                 </div>
-                <div className="flex items-center justify-between border-b border-[#E7E2DA]/60 pb-2">
+                <div className="flex items-center justify-between border-b border-border/60 pb-2">
                   <span>Fullscreen Lockdown</span>
-                  <span className="text-[#1C1917]">Enforced (No Tab Switch)</span>
+                  <span className="text-foreground">Enforced (No Tab Switch)</span>
                 </div>
-                <div className="flex items-center justify-between border-b border-[#E7E2DA]/60 pb-2">
+                <div className="flex items-center justify-between border-b border-border/60 pb-2">
                   <span>Hidden Edge Suites</span>
-                  <span className="text-[#1C1917]">50 Tests per Task</span>
+                  <span className="text-foreground">50 Tests per Task</span>
                 </div>
                 <div className="flex items-center justify-between">
                   <span>Verification Status</span>
-                  <span className="text-[11px] font-medium text-[#064E3B]">
+                  <span className="text-[11px] font-medium text-emerald-900">
                     Meritlane Verified
                   </span>
                 </div>
@@ -777,14 +791,14 @@ export function PublicProofRecord({
             </div>
 
             {/* Direct Institutional Actions & Verification Slip */}
-            <div className="bg-[#FAF8F5] border border-[#E7E2DA] rounded-xl p-5 shadow-xs space-y-3">
-              <div className="text-[11px] font-mono uppercase text-[#78716C] font-semibold">
+            <div className="bg-surface border border-border rounded-xl p-5 shadow-xs space-y-3">
+              <div className="text-[11px] font-mono uppercase text-muted-foreground font-semibold">
                 Verified Dossier Actions
               </div>
               <div className="flex flex-col gap-2">
                 <button
                   onClick={handleCopyLink}
-                  className="w-full flex items-center justify-center gap-2 text-[12px] font-medium bg-[#1C1917] hover:bg-[#064E3B] text-white py-2.5 rounded-lg transition-colors cursor-pointer shadow-xs"
+                  className="w-full flex items-center justify-center gap-2 text-[12px] font-medium bg-foreground hover:bg-emerald-900 text-white py-2.5 rounded-lg transition-colors cursor-pointer shadow-xs"
                 >
                   {copied ? (
                     <>
@@ -805,17 +819,17 @@ export function PublicProofRecord({
                       window.print();
                     }
                   }}
-                  className="w-full flex items-center justify-center gap-2 text-[12px] font-medium bg-white hover:bg-[#FAF8F5] text-[#1C1917] border border-[#E7E2DA] py-2 rounded-lg transition-colors cursor-pointer shadow-xs"
+                  className="w-full flex items-center justify-center gap-2 text-[12px] font-medium bg-white hover:bg-surface text-foreground border border-border py-2 rounded-lg transition-colors cursor-pointer shadow-xs"
                 >
-                  <Printer className="h-3.5 w-3.5 text-[#78716C]" />
+                  <Printer className="h-3.5 w-3.5 text-muted-foreground" />
                   <span>Print Official Audit Record</span>
                 </button>
               </div>
             </div>
 
             {/* Standard of Verification Notice */}
-            <div className="p-5 rounded-xl border border-[#064E3B]/20 bg-[#064E3B]/[0.03] space-y-2">
-              <div className="flex items-center gap-2 text-[#064E3B]">
+            <div className="p-5 rounded-xl border border-emerald-900/20 bg-emerald-900/[0.03] space-y-2">
+              <div className="flex items-center gap-2 text-emerald-900">
                 <ShieldCheck className="h-4 w-4 shrink-0" />
                 <span className="text-[12px] font-bold uppercase tracking-wider">
                   The Meritlane Guarantee
@@ -832,21 +846,21 @@ export function PublicProofRecord({
           <article className="lg:col-span-8 space-y-8">
             
             {/* ── Skills Section Header & Interactive Filters ── */}
-            <div className="bg-white border border-[#E7E2DA] rounded-xl p-6 shadow-xs space-y-5">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#E7E2DA] pb-4">
+            <div className="bg-white border border-border rounded-xl p-6 shadow-xs space-y-5">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border pb-4">
                 <div>
-                  <div className="flex items-center gap-2 text-[#064E3B] mb-0.5">
+                  <div className="flex items-center gap-2 text-emerald-900 mb-0.5">
                     <Code className="h-4 w-4" />
                     <span className="text-[11px] font-mono uppercase font-bold tracking-wider">
                       Technical Competencies
                     </span>
                   </div>
-                  <h2 className="text-[20px] font-serif font-bold text-[#1C1917]">
+                  <h2 className="text-[20px] font-serif font-bold text-foreground">
                     Skills &amp; Evidence Matrix
                   </h2>
                 </div>
 
-                <div className="text-[12px] font-mono text-[#78716C] bg-[#FAF8F5] px-3 py-1 rounded-lg border border-[#E7E2DA]">
+                <div className="text-[12px] font-mono text-muted-foreground bg-surface px-3 py-1 rounded-lg border border-border">
                   Showing {filteredSkills.length} of {skills.length} skills
                 </div>
               </div>
@@ -858,8 +872,8 @@ export function PublicProofRecord({
                     onClick={() => setActiveFilter("all")}
                     className={`px-3 py-1.5 rounded-lg text-[12px] font-medium transition-colors cursor-pointer ${
                       activeFilter === "all"
-                        ? "bg-[#064E3B] text-white"
-                        : "bg-[#FAF8F5] text-[#57534E] hover:bg-[#E7E2DA]/60"
+                        ? "bg-emerald-900 text-white"
+                        : "bg-surface text-[#57534E] hover:bg-border/60"
                     }`}
                   >
                     All ({skills.length})
@@ -868,8 +882,8 @@ export function PublicProofRecord({
                     onClick={() => setActiveFilter("verified")}
                     className={`px-3 py-1.5 rounded-lg text-[12px] font-medium transition-colors cursor-pointer ${
                       activeFilter === "verified"
-                        ? "bg-[#064E3B] text-white"
-                        : "bg-[#FAF8F5] text-[#57534E] hover:bg-[#E7E2DA]/60"
+                        ? "bg-emerald-900 text-white"
+                        : "bg-surface text-[#57534E] hover:bg-border/60"
                     }`}
                   >
                     Verified ({verifiedCount})
@@ -878,8 +892,8 @@ export function PublicProofRecord({
                     onClick={() => setActiveFilter("languages")}
                     className={`px-3 py-1.5 rounded-lg text-[12px] font-medium transition-colors cursor-pointer ${
                       activeFilter === "languages"
-                        ? "bg-[#064E3B] text-white"
-                        : "bg-[#FAF8F5] text-[#57534E] hover:bg-[#E7E2DA]/60"
+                        ? "bg-emerald-900 text-white"
+                        : "bg-surface text-[#57534E] hover:bg-border/60"
                     }`}
                   >
                     Languages ({categorized.languages.length})
@@ -888,8 +902,8 @@ export function PublicProofRecord({
                     onClick={() => setActiveFilter("frameworks")}
                     className={`px-3 py-1.5 rounded-lg text-[12px] font-medium transition-colors cursor-pointer ${
                       activeFilter === "frameworks"
-                        ? "bg-[#064E3B] text-white"
-                        : "bg-[#FAF8F5] text-[#57534E] hover:bg-[#E7E2DA]/60"
+                        ? "bg-emerald-900 text-white"
+                        : "bg-surface text-[#57534E] hover:bg-border/60"
                     }`}
                   >
                     Web &amp; Frameworks ({categorized.frameworks.length})
@@ -898,8 +912,8 @@ export function PublicProofRecord({
                     onClick={() => setActiveFilter("data")}
                     className={`px-3 py-1.5 rounded-lg text-[12px] font-medium transition-colors cursor-pointer ${
                       activeFilter === "data"
-                        ? "bg-[#064E3B] text-white"
-                        : "bg-[#FAF8F5] text-[#57534E] hover:bg-[#E7E2DA]/60"
+                        ? "bg-emerald-900 text-white"
+                        : "bg-surface text-[#57534E] hover:bg-border/60"
                     }`}
                   >
                     Databases &amp; Cloud ({categorized.data.length})
@@ -908,13 +922,13 @@ export function PublicProofRecord({
 
                 {/* Instant search input */}
                 <div className="relative w-full sm:w-56 shrink-0">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-[#78716C]" />
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
                   <input
                     type="text"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     placeholder="Search skills..."
-                    className="w-full pl-8 pr-3 py-1.5 bg-[#FAF8F5] border border-[#E7E2DA] rounded-lg text-[12px] text-[#1C1917] placeholder:text-[#78716C] focus:outline-none focus:ring-1 focus:ring-[#064E3B]"
+                    className="w-full pl-8 pr-3 py-1.5 bg-surface border border-border rounded-lg text-[12px] text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-emerald-900"
                   />
                 </div>
               </div>
@@ -945,7 +959,7 @@ export function PublicProofRecord({
                       className={`p-4 rounded-xl border transition-all ${
                         isVerified
                           ? "bg-white border-[#16A34A]/40 shadow-xs hover:border-[#16A34A]"
-                          : "bg-[#FAF8F5] border-[#E7E2DA] hover:border-[#C8BFB0]"
+                          : "bg-surface border-border hover:border-[#C8BFB0]"
                       }`}
                     >
                       <div className="flex items-start justify-between gap-2 mb-2">
@@ -955,41 +969,49 @@ export function PublicProofRecord({
                               isVerified ? "bg-[#16A34A]" : "bg-[#C8BFB0]"
                             }`}
                           />
-                          <h4 className="font-serif text-[16px] font-bold text-[#1C1917]">
+                          <h4 className="font-serif text-[16px] font-bold text-foreground">
                             {skill}
                           </h4>
                         </div>
 
                         <div>
                           {isVerified ? (
-                            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 bg-[#DCFCE7] text-[#166534] border border-[#86EFAC] text-[10.5px] font-mono font-bold rounded">
-                              ✓ VERIFIED {score ? `[${score}%]` : ""}
-                            </span>
+                            verifiedObj?.badge === "gold_honors" || verifiedObj?.track === "advanced" ? (
+                              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 bg-amber-50 text-amber-800 border border-amber-300 text-[10.5px] font-mono font-bold rounded shadow-xs">
+                                <Trophy className="h-3 w-3 text-amber-700" /> GOLD HONORS {score ? `[${score}%]` : ""}
+                              </span>
+                            ) : (
+                              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 bg-[#DCFCE7] text-[#166534] border border-[#86EFAC] text-[10.5px] font-mono font-bold rounded shadow-xs">
+                                <Award className="h-3 w-3 text-[#166534]" /> VERIFIED {score ? `[${score}%]` : ""}
+                              </span>
+                            )
                           ) : (
-                            <span className="inline-flex items-center px-2 py-0.5 bg-white text-[#78716C] border border-[#E7E2DA] text-[10px] font-mono rounded">
+                            <span className="inline-flex items-center px-2 py-0.5 bg-white text-muted-foreground border border-border text-[10px] font-mono rounded">
                               LISTED SKILL
                             </span>
                           )}
                         </div>
                       </div>
 
-                      <p className="text-[12px] text-[#78716C] leading-relaxed mb-3">
+                      <p className="text-[12px] text-muted-foreground leading-relaxed mb-3">
                         {isVerified
-                          ? `Passed proctored coding and MCQ evaluation on ${verifiedDate}.`
+                          ? verifiedObj?.badge === "gold_honors" || verifiedObj?.track === "advanced"
+                            ? `Mastered Advanced Track (Hard Challenge) with ${score || 75}%+ on ${verifiedDate}.`
+                            : `Passed Standard Track (Easy + Medium Challenge) on ${verifiedDate}.`
                           : "Listed in candidate profile with project and repository backing."}
                       </p>
 
                       {supportingProject && (
-                        <div className="pt-2 border-t border-[#E7E2DA]/60 flex items-center justify-between text-[11px]">
+                        <div className="pt-2 border-t border-border/60 flex items-center justify-between text-[11px]">
                           <span className="text-[#57534E] font-medium truncate max-w-[180px]">
-                            Demonstrated in: <strong className="text-[#1C1917]">{supportingProject.title}</strong>
+                            Demonstrated in: <strong className="text-foreground">{supportingProject.title}</strong>
                           </span>
                           {supportingProject.repoUrl && (
                             <a
                               href={supportingProject.repoUrl}
                               target="_blank"
                               rel="noreferrer"
-                              className="text-[#064E3B] font-mono font-semibold hover:underline flex items-center gap-0.5 shrink-0"
+                              className="text-emerald-900 font-mono font-semibold hover:underline flex items-center gap-0.5 shrink-0"
                             >
                               Code ↗
                             </a>
@@ -1005,20 +1027,20 @@ export function PublicProofRecord({
 
             {/* ── Featured Projects Section ── */}
             {projects.length > 0 && (
-              <div className="bg-white border border-[#E7E2DA] rounded-xl p-6 shadow-xs space-y-5">
-                <div className="flex items-center justify-between border-b border-[#E7E2DA] pb-4">
+              <div className="bg-white border border-border rounded-xl p-6 shadow-xs space-y-5">
+                <div className="flex items-center justify-between border-b border-border pb-4">
                   <div className="flex items-center gap-2">
-                    <FolderGit2 className="h-5 w-5 text-[#064E3B]" />
+                    <FolderGit2 className="h-5 w-5 text-emerald-900" />
                     <div>
-                      <h3 className="text-[18px] font-serif font-bold text-[#1C1917]">
+                      <h3 className="text-[18px] font-serif font-bold text-foreground">
                         Featured Engineering Projects
                       </h3>
-                      <p className="text-[12px] text-[#78716C]">
+                      <p className="text-[12px] text-muted-foreground">
                         Direct source code artifacts and application architectures evaluated on Meritlane.
                       </p>
                     </div>
                   </div>
-                  <span className="text-[11px] font-mono bg-[#FAF8F5] border border-[#E7E2DA] px-2.5 py-1 rounded text-[#78716C]">
+                  <span className="text-[11px] font-mono bg-surface border border-border px-2.5 py-1 rounded text-muted-foreground">
                     {projects.length} {projects.length === 1 ? "Project" : "Projects"}
                   </span>
                 </div>
@@ -1027,10 +1049,10 @@ export function PublicProofRecord({
                   {projects.map((proj, pIdx) => (
                     <div
                       key={pIdx}
-                      className="p-5 rounded-xl border border-[#E7E2DA] bg-[#FAF8F5] hover:bg-white transition-colors space-y-3"
+                      className="p-5 rounded-xl border border-border bg-surface hover:bg-white transition-colors space-y-3"
                     >
                       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                        <h4 className="text-[17px] font-serif font-bold text-[#1C1917]">
+                        <h4 className="text-[17px] font-serif font-bold text-foreground">
                           {proj.title}
                         </h4>
                         
@@ -1040,7 +1062,7 @@ export function PublicProofRecord({
                               href={proj.repoUrl}
                               target="_blank"
                               rel="noreferrer"
-                              className="inline-flex items-center gap-1.5 px-3 py-1 bg-white border border-[#E7E2DA] text-[#1C1917] hover:border-[#1C1917] text-[11px] font-mono font-semibold rounded transition-colors"
+                              className="inline-flex items-center gap-1.5 px-3 py-1 bg-white border border-border text-foreground hover:border-foreground text-[11px] font-mono font-semibold rounded transition-colors"
                             >
                               <GithubIcon className="h-3.5 w-3.5" />
                               <span>View Code ↗</span>
@@ -1051,7 +1073,7 @@ export function PublicProofRecord({
                               href={proj.liveUrl}
                               target="_blank"
                               rel="noreferrer"
-                              className="inline-flex items-center gap-1.5 px-3 py-1 bg-[#064E3B] text-white hover:bg-[#043327] text-[11px] font-mono font-semibold rounded transition-colors"
+                              className="inline-flex items-center gap-1.5 px-3 py-1 bg-emerald-900 text-white hover:bg-emerald-950 text-[11px] font-mono font-semibold rounded transition-colors"
                             >
                               <ExternalLink className="h-3 w-3" />
                               <span>Live Application</span>
@@ -1068,13 +1090,13 @@ export function PublicProofRecord({
 
                       {proj.skillsUsed && proj.skillsUsed.length > 0 && (
                         <div className="flex flex-wrap items-center gap-1.5 pt-1">
-                          <span className="text-[10px] font-mono uppercase text-[#78716C] mr-1">
+                          <span className="text-[10px] font-mono uppercase text-muted-foreground mr-1">
                             Stack:
                           </span>
                           {proj.skillsUsed.map((sk) => (
                             <span
                               key={sk}
-                              className="text-[10.5px] font-mono bg-white text-[#1C1917] border border-[#E7E2DA] px-2 py-0.5 rounded"
+                              className="text-[10.5px] font-mono bg-white text-foreground border border-border px-2 py-0.5 rounded"
                             >
                               {sk}
                             </span>
@@ -1088,23 +1110,23 @@ export function PublicProofRecord({
             )}
 
             {/* ── Official Institutional Seal Footer ── */}
-            <div className="p-6 rounded-xl border border-[#E7E2DA] bg-gradient-to-r from-[#FAF8F5] to-white flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="p-6 rounded-xl border border-border bg-gradient-to-r from-surface to-white flex flex-col sm:flex-row items-center justify-between gap-4">
               <div className="flex items-center gap-3 text-center sm:text-left">
-                <div className="h-10 w-10 rounded-xl bg-[#064E3B] text-white flex items-center justify-center shrink-0">
+                <div className="h-10 w-10 rounded-xl bg-emerald-900 text-white flex items-center justify-center shrink-0">
                   <Award className="h-5 w-5" />
                 </div>
                 <div>
-                  <div className="text-[13px] font-bold text-[#1C1917]">
+                  <div className="text-[13px] font-bold text-foreground">
                     Meritlane Verification Authority
                   </div>
-                  <div className="text-[11.5px] text-[#78716C]">
+                  <div className="text-[11.5px] text-muted-foreground">
                     Verified technical skills and project assessments for engineering hiring teams.
                   </div>
                 </div>
               </div>
 
               <div className="shrink-0 text-center sm:text-right">
-                <span className="text-[10px] font-mono uppercase px-3 py-1 rounded-full bg-white border border-[#E7E2DA] text-[#78716C]">
+                <span className="text-[10px] font-mono uppercase px-3 py-1 rounded-full bg-white border border-border text-muted-foreground">
                   CANDIDATE ID: {candidateKey}
                 </span>
               </div>
@@ -1122,24 +1144,24 @@ export function PublicProofRecord({
           aria-modal="true"
           className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-xs p-3 sm:p-6"
         >
-          <div className="bg-white border border-[#E7E2DA] rounded-xl shadow-2xl w-full max-w-4xl max-h-[92vh] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+          <div className="bg-white border border-border rounded-xl shadow-2xl w-full max-w-4xl max-h-[92vh] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-150">
             
             {/* Modal Header */}
-            <div className="flex items-center justify-between px-5 py-4 border-b border-[#E7E2DA] bg-[#FAF8F5]">
+            <div className="flex items-center justify-between px-5 py-4 border-b border-border bg-surface">
               <div className="flex items-center gap-3 min-w-0">
-                <div className="h-9 w-9 rounded-lg bg-[#064E3B]/10 text-[#064E3B] flex items-center justify-center shrink-0 border border-[#064E3B]/20">
+                <div className="h-9 w-9 rounded-lg bg-emerald-900/10 text-emerald-900 flex items-center justify-center shrink-0 border border-emerald-900/20">
                   <FileText className="h-5 w-5" />
                 </div>
                 <div className="min-w-0">
                   <div className="flex items-center gap-2">
-                    <h3 className="text-[15px] font-semibold text-[#1C1917] truncate">
+                    <h3 className="text-[15px] font-semibold text-foreground truncate">
                       {candidate.resumeFileName || `${name.replace(/\s+/g, "_")}_Resume.pdf`}
                     </h3>
                     <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-[#DCFCE7] text-[#166534] border border-[#86EFAC] shrink-0 font-semibold">
                       Verified Resume
                     </span>
                   </div>
-                  <p className="text-[11.5px] text-[#78716C] truncate mt-0.5">
+                  <p className="text-[11.5px] text-muted-foreground truncate mt-0.5">
                     Candidate: {name} · ID: {candidateKey}
                   </p>
                 </div>
@@ -1149,7 +1171,7 @@ export function PublicProofRecord({
                 <button
                   type="button"
                   onClick={handleDownloadResume}
-                  className="flex items-center gap-1.5 px-3 py-1.5 bg-[#064E3B] hover:bg-[#043327] text-white text-[12px] font-semibold rounded-lg transition-colors shadow-2xs cursor-pointer"
+                  className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-900 hover:bg-emerald-950 text-white text-[12px] font-semibold rounded-lg transition-colors shadow-2xs cursor-pointer"
                   title="Download Resume PDF"
                 >
                   <Download className="h-3.5 w-3.5" />
@@ -1158,15 +1180,15 @@ export function PublicProofRecord({
                 <button
                   type="button"
                   onClick={() => window.print()}
-                  className="flex items-center gap-1.5 px-2.5 py-1.5 bg-white hover:bg-[#FAF8F5] text-[#1C1917] border border-[#E7E2DA] text-[12px] font-medium rounded-lg transition-colors shadow-2xs cursor-pointer"
+                  className="flex items-center gap-1.5 px-2.5 py-1.5 bg-white hover:bg-surface text-foreground border border-border text-[12px] font-medium rounded-lg transition-colors shadow-2xs cursor-pointer"
                   title="Print Resume"
                 >
-                  <Printer className="h-3.5 w-3.5 text-[#78716C]" />
+                  <Printer className="h-3.5 w-3.5 text-muted-foreground" />
                 </button>
                 <button
                   type="button"
                   onClick={() => setIsResumeModalOpen(false)}
-                  className="p-1.5 text-[#78716C] hover:text-[#1C1917] hover:bg-[#E7E2DA]/50 rounded-lg transition-colors cursor-pointer"
+                  className="p-1.5 text-muted-foreground hover:text-foreground hover:bg-border/50 rounded-lg transition-colors cursor-pointer"
                   aria-label="Close"
                 >
                   <X className="h-5 w-5" />
@@ -1175,45 +1197,119 @@ export function PublicProofRecord({
             </div>
 
             {/* Modal Body: PDF Preview or Structured Verified Resume */}
-            <div className="flex-1 overflow-y-auto p-4 sm:p-6 bg-[#FAF8F5]/50">
-              {candidate.resumePdfDataUrl || (resolvedResumeUrl && resolvedResumeUrl.toLowerCase().includes(".pdf")) ? (
-                <div className="w-full h-[68vh] rounded-lg overflow-hidden border border-[#E7E2DA] bg-[#525659] shadow-inner">
+            <div className="flex-1 overflow-y-auto p-4 sm:p-6 bg-surface/50">
+              {candidate.resumePdfDataUrl || resolvedResumeUrl ? (
+                <div className="w-full h-[68vh] rounded-lg overflow-hidden border border-border bg-[#525659] shadow-inner">
                   <iframe
-                    src={candidate.resumePdfDataUrl || resolvedResumeUrl}
+                    src={candidate.resumePdfDataUrl || getEmbeddableResumeUrl(resolvedResumeUrl)}
                     title={`${name} Resume Preview`}
                     className="w-full h-full border-0"
                   />
                 </div>
               ) : (
-                <div className="bg-white border border-[#E7E2DA] rounded-lg p-6 sm:p-10 shadow-xs max-w-3xl mx-auto space-y-6 text-[#1C1917] flex flex-col items-center justify-center min-h-[50vh]">
-                  <FileText className="h-12 w-12 text-[#E7E2DA] mb-4" />
-                  <p className="text-[14px] font-mono text-[#78716C] mb-2">
-                    PDF document is not available.
-                  </p>
-                  <p className="text-[12px] font-sans text-[#A8A29E] max-w-sm text-center">
-                    The candidate's original resume file was not saved or is too large to display in the viewer.
-                  </p>
+                <div className="bg-white border border-border rounded-lg p-6 sm:p-10 shadow-xs max-w-3xl mx-auto space-y-6 text-foreground">
+                  {/* Verified Resume Header */}
+                  <div className="border-b border-border pb-5 flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+                    <div>
+                      <h2 className="text-2xl font-serif font-bold text-foreground">{name}</h2>
+                      <div className="flex items-center gap-2 mt-1 text-xs text-muted-foreground flex-wrap">
+                        {candidate.targetRoles?.[0] && <span className="font-medium text-foreground">{candidate.targetRoles[0]}</span>}
+                        {candidate.college && <span>· {candidate.college}</span>}
+                        {candidate.branch && <span>· {candidate.branch}</span>}
+                        {candidate.gradYear && <span>· Class of {candidate.gradYear}</span>}
+                      </div>
+                    </div>
+                    <span className="px-2.5 py-1 rounded bg-[#DCFCE7] text-[#166534] border border-[#86EFAC] text-xs font-semibold self-start">
+                      Verified Meritlane Candidate
+                    </span>
+                  </div>
+
+                  {/* Summary / Bio */}
+                  {(candidate.bio || candidate.headline) && (
+                    <div className="space-y-1.5">
+                      <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Professional Summary</h3>
+                      <p className="text-sm text-foreground leading-relaxed">{candidate.bio || candidate.headline}</p>
+                    </div>
+                  )}
+
+                  {/* Verified Skills */}
+                  {skills.length > 0 && (
+                    <div className="space-y-2">
+                      <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Technical Competencies</h3>
+                      <div className="flex flex-wrap gap-1.5">
+                        {skills.map((s, idx) => {
+                          const v = verifiedSkillsMap[s.toLowerCase()] || verifiedSkillsMap[s];
+                          return (
+                            <span key={idx} className="inline-flex items-center gap-1 px-2.5 py-1 rounded text-xs border border-border bg-surface text-foreground font-medium">
+                              {v?.status === "verified" && <CheckCircle2 className="h-3 w-3 text-emerald-600" />}
+                              <span>{s}</span>
+                              {v?.score && <span className="text-[10px] text-emerald-700 font-bold font-mono">[{v.score}%]</span>}
+                            </span>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Evidence Projects */}
+                  {projects.length > 0 && (
+                    <div className="space-y-3">
+                      <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Evidence Projects</h3>
+                      <div className="space-y-3">
+                        {projects.map((p, idx) => (
+                          <div key={idx} className="p-3.5 rounded border border-border bg-surface/30 space-y-1">
+                            <div className="flex items-center justify-between">
+                              <h4 className="text-sm font-semibold text-foreground">{p.title}</h4>
+                              <div className="flex items-center gap-2">
+                                {p.repoUrl && (
+                                  <a href={p.repoUrl} target="_blank" rel="noopener noreferrer" className="text-xs text-primary hover:underline flex items-center gap-1">
+                                    <Code className="h-3 w-3" /> Repo
+                                  </a>
+                                )}
+                                {p.liveUrl && (
+                                  <a href={p.liveUrl} target="_blank" rel="noopener noreferrer" className="text-xs text-emerald-700 hover:underline flex items-center gap-1">
+                                    <ExternalLink className="h-3 w-3" /> Live
+                                  </a>
+                                )}
+                              </div>
+                            </div>
+                            {p.description && <p className="text-xs text-muted-foreground">{p.description}</p>}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Resume Text (if parsed) */}
+                  {candidate.resumeText && (
+                    <div className="space-y-2 pt-2 border-t border-border">
+                      <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Resume Transcript</h3>
+                      <div className="p-4 bg-surface rounded border border-border text-xs font-mono text-foreground whitespace-pre-wrap max-h-60 overflow-y-auto leading-relaxed">
+                        {candidate.resumeText}
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
 
             {/* Modal Footer */}
-            <div className="px-5 py-3 border-t border-[#E7E2DA] bg-white flex items-center justify-between">
-              <span className="text-[11.5px] text-[#78716C] font-mono">
+            <div className="px-5 py-3 border-t border-border bg-white flex items-center justify-between">
+              <span className="text-[11.5px] text-muted-foreground font-mono">
                 Verified Candidate Record · Meritlane Registry
               </span>
               <div className="flex items-center gap-2">
                 <button
                   type="button"
                   onClick={() => setIsResumeModalOpen(false)}
-                  className="px-4 py-2 border border-[#E7E2DA] bg-white hover:bg-[#FAF8F5] text-[#1C1917] text-[12px] font-medium rounded-lg transition-colors cursor-pointer"
+                  className="px-4 py-2 border border-border bg-white hover:bg-surface text-foreground text-[12px] font-medium rounded-lg transition-colors cursor-pointer"
                 >
                   Close
                 </button>
                 <button
                   type="button"
                   onClick={handleDownloadResume}
-                  className="flex items-center gap-1.5 px-4 py-2 bg-[#064E3B] hover:bg-[#043327] text-white text-[12px] font-semibold rounded-lg transition-colors shadow-2xs cursor-pointer"
+                  className="flex items-center gap-1.5 px-4 py-2 bg-emerald-900 hover:bg-emerald-950 text-white text-[12px] font-semibold rounded-lg transition-colors shadow-2xs cursor-pointer"
                 >
                   <Download className="h-3.5 w-3.5" />
                   <span>Download Resume</span>

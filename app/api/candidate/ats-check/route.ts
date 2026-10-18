@@ -466,7 +466,14 @@ Ensure recommendedRoles has 3-4 top matches sorted by matchPercentage descending
               resumeUpdates.resumePdfDataUrl = `data:application/pdf;base64,${uploadBuffer.toString("base64")}`;
             }
 
-            await adminDb.collection("candidates").doc(uid).set(resumeUpdates, { merge: true });
+            await Promise.all([
+              adminDb.collection("candidates").doc(uid).set(resumeUpdates, { merge: true }),
+              adminDb.collection("users").doc(uid).set({
+                resumeFileName: resumeUpdates.resumeFileName,
+                resumeUrl: resumeUpdates.resumeUrl || "",
+                resumeUploadedAt: resumeUpdates.resumeUploadedAt,
+              }, { merge: true }),
+            ]);
 
             return NextResponse.json({ 
               result: parsed, 
@@ -504,7 +511,14 @@ Ensure recommendedRoles has 3-4 top matches sorted by matchPercentage descending
       fallbackUpdates.resumePdfDataUrl = `data:application/pdf;base64,${uploadBuffer.toString("base64")}`;
     }
 
-    await adminDb.collection("candidates").doc(uid).set(fallbackUpdates, { merge: true });
+    await Promise.all([
+      adminDb.collection("candidates").doc(uid).set(fallbackUpdates, { merge: true }),
+      adminDb.collection("users").doc(uid).set({
+        resumeFileName: fallbackUpdates.resumeFileName,
+        resumeUrl: fallbackUpdates.resumeUrl || "",
+        resumeUploadedAt: fallbackUpdates.resumeUploadedAt,
+      }, { merge: true }),
+    ]);
 
     return NextResponse.json({ 
       result, 

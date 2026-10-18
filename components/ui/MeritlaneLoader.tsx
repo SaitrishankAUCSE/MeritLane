@@ -38,10 +38,11 @@ export const MeritlaneLoader: React.FC<MeritlaneLoaderProps> = ({
 
   // ── SECTION LEVEL (default) ────────────────────────────────────
   return (
-    <div className={`flex flex-col items-center justify-center py-12 w-full ${className}`}>
+    <div className={`flex flex-col items-center justify-center py-12 w-full gap-4 ${className}`}>
       <div className="w-48 h-1 bg-[var(--color-surface-dim)] relative overflow-hidden rounded-full">
         <div className="absolute top-0 left-0 h-full w-1/2 bg-[var(--color-outline)] animate-[slideRight_1.5s_ease-in-out_infinite]" />
       </div>
+      {text && <p className="text-[13px] font-sans text-[var(--color-muted-foreground)]">{text}</p>}
     </div>
   );
 };

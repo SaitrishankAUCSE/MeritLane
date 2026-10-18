@@ -175,8 +175,8 @@ export function InquiriesView({
             onClick={() => setFilterStatus("all")}
             className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${
               filterStatus === "all"
-                ? "bg-[#1C1917] text-white"
-                : "bg-surface text-muted-foreground hover:bg-[#F5F5F4]"
+                ? "bg-foreground text-white"
+                : "bg-surface text-muted-foreground hover:bg-surface"
             }`}
           >
             All ({inquiries.length})
@@ -186,8 +186,8 @@ export function InquiriesView({
             onClick={() => setFilterStatus("unread")}
             className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${
               filterStatus === "unread"
-                ? "bg-[#1C1917] text-white"
-                : "bg-surface text-muted-foreground hover:bg-[#F5F5F4]"
+                ? "bg-foreground text-white"
+                : "bg-surface text-muted-foreground hover:bg-surface"
             }`}
           >
             Unread ({unreadCount})
@@ -197,8 +197,8 @@ export function InquiriesView({
             onClick={() => setFilterStatus("read")}
             className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${
               filterStatus === "read"
-                ? "bg-[#1C1917] text-white"
-                : "bg-surface text-muted-foreground hover:bg-[#F5F5F4]"
+                ? "bg-foreground text-white"
+                : "bg-surface text-muted-foreground hover:bg-surface"
             }`}
           >
             Read ({inquiries.length - unreadCount})
@@ -210,7 +210,7 @@ export function InquiriesView({
       {filteredInquiries.length === 0 ? (
         <Card className="border border-dashed border-border bg-white py-16 text-center">
           <CardContent className="space-y-3">
-            <div className="mx-auto w-12 h-12 rounded-full bg-[#F5F5F4] flex items-center justify-center text-muted-foreground">
+            <div className="mx-auto w-12 h-12 rounded-full bg-surface flex items-center justify-center text-muted-foreground">
               <Inbox className="h-6 w-6" />
             </div>
             <h3 className="font-serif text-base font-semibold text-foreground">
@@ -257,7 +257,7 @@ export function InquiriesView({
                       {isUnread && (
                         <span className="h-2 w-2 rounded-full bg-blue-600 shrink-0" title="Unread" />
                       )}
-                      <h4 className="font-serif text-[17px] font-semibold text-[#1C1917]">
+                      <h4 className="font-serif text-[17px] font-semibold text-foreground">
                         {inq.name}
                       </h4>
                       <Badge
@@ -269,7 +269,7 @@ export function InquiriesView({
                       </Badge>
                     </div>
 
-                    <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-[#78716C]">
+                    <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
                       <a
                         href={`mailto:${inq.email}?subject=Re: MeritLane Inquiry&body=Hi ${encodeURIComponent(inq.name)},%0D%0A%0D%0AThank you for reaching out to MeritLane.%0D%0A%0D%0A`}
                         className="inline-flex items-center gap-1 font-mono text-blue-600 hover:underline"
@@ -285,7 +285,7 @@ export function InquiriesView({
                     </div>
 
                     {/* Message Body */}
-                    <div className="mt-3.5 bg-white rounded-lg border border-[#E5E5E5] p-4 text-[14px] text-[#1C1917] leading-relaxed whitespace-pre-wrap font-sans">
+                    <div className="mt-3.5 bg-white rounded-lg border border-border p-4 text-[14px] text-foreground leading-relaxed whitespace-pre-wrap font-sans">
                       {inq.message}
                     </div>
                   </div>
@@ -294,7 +294,7 @@ export function InquiriesView({
                   <div className="flex sm:flex-col items-center sm:items-end gap-2 shrink-0 pt-2 sm:pt-0">
                     <a
                       href={`mailto:${inq.email}?subject=Re: MeritLane Inquiry&body=Hi ${encodeURIComponent(inq.name)},%0D%0A%0D%0AThank you for reaching out to MeritLane.%0D%0A%0D%0A`}
-                      className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-md bg-[#1C1917] text-white hover:bg-[#333] transition-colors shadow-xs"
+                      className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-md bg-foreground text-white hover:bg-[#333] transition-colors shadow-xs"
                     >
                       <Mail className="h-3.5 w-3.5" />
                       Reply via Email

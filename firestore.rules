@@ -43,11 +43,12 @@ service cloud.firestore {
       // Candidates can create profile with draft or pending status, but cannot set admin audit fields
       allow create: if (isOwner(userId) && (
         !request.resource.data.keys().hasAny(['verifiedBy', 'verifiedByUid', 'verifiedByEmail', 'verifiedAt', 'verifiedSkills']) &&
-        (request.resource.data.verificationStatus in ['draft', 'pending'])
+        (!('verificationStatus' in request.resource.data) || request.resource.data.verificationStatus in ['draft', 'pending'])
       )) || isAdmin();
-      // Candidates can update profile (draft or pending) but cannot self-verify or tamper with audit fields
+      // Candidates can update profile (draft or pending) but cannot self-verify or tamper with admin audit fields
       allow update: if (isOwner(userId) && (
-        !request.resource.data.diff(resource.data).affectedKeys().hasAny(['verificationStatus', 'verifiedAt', 'verifiedBy', 'verifiedByUid', 'verifiedByEmail', 'verifiedSkills'])
+        !request.resource.data.diff(resource.data).affectedKeys().hasAny(['verifiedAt', 'verifiedBy', 'verifiedByUid', 'verifiedByEmail', 'verifiedSkills']) &&
+        (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['verificationStatus']) || request.resource.data.verificationStatus in ['draft', 'pending'])
       )) || isAdmin();
       allow delete: if isAdmin();
     }

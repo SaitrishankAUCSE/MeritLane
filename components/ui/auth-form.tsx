@@ -9,6 +9,7 @@ import Link from "next/link";
 import { useAuth } from "@/lib/auth/AuthContext";
 import { motion, AnimatePresence } from "framer-motion";
 import posthog from "posthog-js";
+import { Button } from "@/components/ui/Button";
 
 interface AuthFormProps {
   mode: "login" | "signup";
@@ -232,8 +233,8 @@ export function AuthForm({ mode: initialMode }: AuthFormProps) {
 
   if (!isSigningUp && !signupSuccess && (profileLoading || (user && userRole))) {
     return (
-      <div className="min-h-screen bg-[#FAF8F5] flex items-center justify-center">
-        <div className="h-6 w-6 border-2 border-[#E7E2DA] border-t-[#1C1917] rounded-full animate-spin" />
+      <div className="min-h-screen bg-surface flex items-center justify-center">
+        <div className="h-6 w-6 border-2 border-border border-t-[#1C1917] rounded-full animate-spin" />
       </div>
     ); 
   }
@@ -241,20 +242,20 @@ export function AuthForm({ mode: initialMode }: AuthFormProps) {
   return (
     <div className="h-[100dvh] max-h-[100dvh] w-full flex flex-col md:flex-row bg-white overflow-hidden">
       {/* Left Side: Authentic Institutional Archival Column */}
-      <div className="relative hidden md:flex flex-col justify-between w-full md:w-5/12 lg:w-1/2 bg-[#FAF8F5] text-[#1C1917] p-6 lg:p-8 border-r border-[#E7E2DA] h-full overflow-hidden">
+      <div className="relative hidden md:flex flex-col justify-between w-full md:w-5/12 lg:w-1/2 bg-surface text-foreground p-6 lg:p-8 border-r border-border h-full overflow-hidden">
         
         {/* Top Header */}
         <div className="relative z-10 flex items-center justify-between shrink-0">
           <Link href="/" className="inline-flex items-center gap-2.5">
             <img src="/logo-m.png" alt="Meritlane Emblem" className="h-6 w-auto object-contain" />
-            <span className="font-semibold text-lg tracking-tight text-[#1C1917]">Meritlane</span>
+            <span className="font-semibold text-lg tracking-tight text-foreground">Meritlane</span>
           </Link>
         </div>
 
         {/* Centerpiece: Prestigious Archival Architecture */}
         <div className="relative z-10 my-auto max-w-sm mx-auto w-full">
-          <div className="mb-4 border border-[#E7E2DA] bg-white p-1.5 shadow-xs">
-            <div className="relative aspect-[16/11] overflow-hidden bg-[#1C1917]">
+          <div className="mb-4 border border-border bg-white p-1.5 shadow-xs">
+            <div className="relative aspect-[16/11] overflow-hidden bg-foreground">
               <img 
                 src="/editorial_archive.jpg" 
                 alt="Meritlane Verification Archive" 
@@ -263,15 +264,15 @@ export function AuthForm({ mode: initialMode }: AuthFormProps) {
             </div>
           </div>
 
-          <h1 className="text-xl lg:text-[22px] font-sans font-semibold tracking-tight leading-[1.25] mb-1.5 text-[#1C1917]">
+          <h1 className="text-xl lg:text-[22px] font-sans font-semibold tracking-tight leading-[1.25] mb-1.5 text-foreground">
             Verified Engineering Records
           </h1>
-          <p className="text-[13px] text-[#78716C] leading-relaxed font-sans">
+          <p className="text-[13px] text-muted-foreground leading-relaxed font-sans">
             Evaluated code, monitored technical assessments, and verified candidate proof.
           </p>
         </div>
 
-        <div className="relative z-10 text-[11px] font-sans text-[#78716C] shrink-0">
+        <div className="relative z-10 text-[11px] font-sans text-muted-foreground shrink-0">
           Meritlane
         </div>
       </div>
@@ -296,8 +297,8 @@ export function AuthForm({ mode: initialMode }: AuthFormProps) {
                 className="space-y-6"
               >
                 <div className="text-center mb-8">
-                  <h2 className="text-2xl font-serif font-medium tracking-tight text-[#1C1917] mb-2">Select Registration Category</h2>
-                  <p className="text-sm text-[#78716C]">Identify your organizational status within the registry</p>
+                  <h2 className="text-2xl font-serif font-medium tracking-tight text-foreground mb-2">Select Registration Category</h2>
+                  <p className="text-sm text-muted-foreground">Identify your organizational status within the registry</p>
                 </div>
                 
                 {error && (
@@ -311,26 +312,26 @@ export function AuthForm({ mode: initialMode }: AuthFormProps) {
                     type="button"
                     onClick={() => handleRoleSelection("candidate")}
                     disabled={loadingAction}
-                    className="flex flex-col items-center justify-center p-6 border border-[#E7E2DA] rounded-md hover:border-[#1C1917] hover:bg-[#FAF8F5] transition-all group disabled:opacity-50 cursor-pointer text-left"
+                    className="flex flex-col items-center justify-center p-6 border border-border rounded-md hover:border-foreground hover:bg-surface transition-all group disabled:opacity-50 cursor-pointer text-left"
                   >
-                    <div className="w-12 h-12 bg-[#FAF8F5] border border-[#E7E2DA] rounded-md flex items-center justify-center mb-4 group-hover:bg-[#1C1917] group-hover:text-white transition-colors">
+                    <div className="w-12 h-12 bg-surface border border-border rounded-md flex items-center justify-center mb-4 group-hover:bg-foreground group-hover:text-white transition-colors">
                       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
                     </div>
-                    <span className="font-serif font-medium text-[#1C1917]">Candidate</span>
-                    <span className="text-[11px] font-mono text-[#78716C] mt-1 text-center">Undergo Audit</span>
+                    <span className="font-serif font-medium text-foreground">Candidate</span>
+                    <span className="text-[11px] font-mono text-muted-foreground mt-1 text-center">Undergo Audit</span>
                   </button>
 
                   <button
                     type="button"
                     onClick={() => handleRoleSelection("employer")}
                     disabled={loadingAction}
-                    className="flex flex-col items-center justify-center p-6 border border-[#E7E2DA] rounded-md hover:border-[#1C1917] hover:bg-[#FAF8F5] transition-all group disabled:opacity-50 cursor-pointer text-left"
+                    className="flex flex-col items-center justify-center p-6 border border-border rounded-md hover:border-foreground hover:bg-surface transition-all group disabled:opacity-50 cursor-pointer text-left"
                   >
-                    <div className="w-12 h-12 bg-[#FAF8F5] border border-[#E7E2DA] rounded-md flex items-center justify-center mb-4 group-hover:bg-[#1C1917] group-hover:text-white transition-colors">
+                    <div className="w-12 h-12 bg-surface border border-border rounded-md flex items-center justify-center mb-4 group-hover:bg-foreground group-hover:text-white transition-colors">
                       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="20" height="14" x="2" y="7" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
                     </div>
-                    <span className="font-serif font-medium text-[#1C1917]">Organization</span>
-                    <span className="text-[11px] font-mono text-[#78716C] mt-1 text-center">Inspect Provenance</span>
+                    <span className="font-serif font-medium text-foreground">Organization</span>
+                    <span className="text-[11px] font-mono text-muted-foreground mt-1 text-center">Inspect Provenance</span>
                   </button>
                 </div>
               </motion.div>
@@ -357,24 +358,24 @@ export function AuthForm({ mode: initialMode }: AuthFormProps) {
                       </div>
                     </motion.div>
                   )}
-                  <h2 className="text-[20px] font-semibold tracking-tight text-[#1C1917]">
+                  <h2 className="text-[20px] font-semibold tracking-tight text-foreground">
                     {mode === "login" ? "Sign In" : "Create Account"}
                   </h2>
                 </div>
 
                 {/* Mode Switcher Tabs */}
-                <div className="grid grid-cols-2 border border-[#E7E2DA] bg-[#FAF8F5] p-0.5 rounded">
+                <div className="grid grid-cols-2 border border-border bg-surface p-0.5 rounded">
                   <button
                     type="button"
                     onClick={() => setMode("login")}
-                    className={`text-xs py-1.5 rounded font-sans tracking-normal transition-all ${mode === 'login' ? 'bg-white text-[#1C1917] font-semibold shadow-xs border border-[#E7E2DA]' : 'text-[#78716C] hover:text-[#1C1917]'}`}
+                    className={`text-xs py-1.5 rounded font-sans tracking-normal transition-all ${mode === 'login' ? 'bg-white text-foreground font-semibold shadow-xs border border-border' : 'text-muted-foreground hover:text-foreground'}`}
                   >
                     Sign In
                   </button>
                   <button
                     type="button"
                     onClick={() => setMode("signup")}
-                    className={`text-xs py-1.5 rounded font-sans tracking-normal transition-all ${mode === 'signup' ? 'bg-white text-[#1C1917] font-semibold shadow-xs border border-[#E7E2DA]' : 'text-[#78716C] hover:text-[#1C1917]'}`}
+                    className={`text-xs py-1.5 rounded font-sans tracking-normal transition-all ${mode === 'signup' ? 'bg-white text-foreground font-semibold shadow-xs border border-border' : 'text-muted-foreground hover:text-foreground'}`}
                   >
                     Register
                   </button>
@@ -389,7 +390,7 @@ export function AuthForm({ mode: initialMode }: AuthFormProps) {
                 <button
                   onClick={handleGoogleAuth}
                   disabled={loadingAction}
-                  className="w-full flex items-center justify-center gap-2.5 bg-white text-[#1C1917] border border-[#E7E2DA] hover:border-[#1C1917] rounded py-2 px-3 hover:bg-[#FAF8F5] focus:outline-none transition-colors disabled:opacity-50 text-xs font-sans font-medium shadow-2xs"
+                  className="w-full flex items-center justify-center gap-2.5 bg-white text-foreground border border-border hover:border-foreground rounded py-2 px-3 hover:bg-surface focus:outline-none transition-colors disabled:opacity-50 text-xs font-sans font-medium shadow-2xs"
                 >
                   <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24">
                     <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
@@ -401,32 +402,32 @@ export function AuthForm({ mode: initialMode }: AuthFormProps) {
                 </button>
 
                 <div className="flex items-center gap-3 py-0.5">
-                  <div className="flex-1 h-px bg-[#E7E2DA]"></div>
-                  <span className="text-[10px] font-sans font-medium text-[#78716C]">or with email</span>
-                  <div className="flex-1 h-px bg-[#E7E2DA]"></div>
+                  <div className="flex-1 h-px bg-border"></div>
+                  <span className="text-[10px] font-sans font-medium text-muted-foreground">or with email</span>
+                  <div className="flex-1 h-px bg-border"></div>
                 </div>
 
                 <form onSubmit={handleEmailAuth} className="space-y-3 font-sans">
                   {mode === "signup" && (
                     <div className="space-y-1.5">
-                      <label className="text-[11px] font-sans font-medium text-[#78716C] block">Role</label>
+                      <label className="text-[11px] font-sans font-medium text-muted-foreground block">Role</label>
                       <div className="flex gap-2.5">
-                        <label className={`flex-1 relative border rounded p-2 cursor-pointer transition-all ${selectedRole === 'candidate' ? 'border-[#1C1917] bg-[#FAF8F5]' : 'border-[#E7E2DA] hover:border-[#1C1917]'}`}>
+                        <label className={`flex-1 relative border rounded p-2 cursor-pointer transition-all ${selectedRole === 'candidate' ? 'border-foreground bg-surface' : 'border-border hover:border-foreground'}`}>
                           <input type="radio" name="role" value="candidate" checked={selectedRole === 'candidate'} onChange={() => setSelectedRole('candidate')} className="sr-only" />
                           <div className="flex items-center gap-2">
-                            <div className={`w-3.5 h-3.5 rounded border flex items-center justify-center ${selectedRole === 'candidate' ? 'border-[#1C1917]' : 'border-[#D5CEBF]'}`}>
-                              {selectedRole === 'candidate' && <div className="w-1.5 h-1.5 rounded-full bg-[#1C1917]" />}
+                            <div className={`w-3.5 h-3.5 rounded border flex items-center justify-center ${selectedRole === 'candidate' ? 'border-foreground' : 'border-[#D5CEBF]'}`}>
+                              {selectedRole === 'candidate' && <div className="w-1.5 h-1.5 rounded-full bg-foreground" />}
                             </div>
-                            <span className="text-xs font-sans font-medium text-[#1C1917]">Candidate</span>
+                            <span className="text-xs font-sans font-medium text-foreground">Candidate</span>
                           </div>
                         </label>
-                        <label className={`flex-1 relative border rounded p-2 cursor-pointer transition-all ${selectedRole === 'employer' ? 'border-[#1C1917] bg-[#FAF8F5]' : 'border-[#E7E2DA] hover:border-[#1C1917]'}`}>
+                        <label className={`flex-1 relative border rounded p-2 cursor-pointer transition-all ${selectedRole === 'employer' ? 'border-foreground bg-surface' : 'border-border hover:border-foreground'}`}>
                           <input type="radio" name="role" value="employer" checked={selectedRole === 'employer'} onChange={() => setSelectedRole('employer')} className="sr-only" />
                           <div className="flex items-center gap-2">
-                            <div className={`w-3.5 h-3.5 rounded border flex items-center justify-center ${selectedRole === 'employer' ? 'border-[#1C1917]' : 'border-[#D5CEBF]'}`}>
-                              {selectedRole === 'employer' && <div className="w-1.5 h-1.5 rounded-full bg-[#1C1917]" />}
+                            <div className={`w-3.5 h-3.5 rounded border flex items-center justify-center ${selectedRole === 'employer' ? 'border-foreground' : 'border-[#D5CEBF]'}`}>
+                              {selectedRole === 'employer' && <div className="w-1.5 h-1.5 rounded-full bg-foreground" />}
                             </div>
-                            <span className="text-xs font-sans font-medium text-[#1C1917]">Employer</span>
+                            <span className="text-xs font-sans font-medium text-foreground">Employer</span>
                           </div>
                         </label>
                       </div>
@@ -434,7 +435,7 @@ export function AuthForm({ mode: initialMode }: AuthFormProps) {
                   )}
 
                   <div>
-                    <label className="text-[11px] font-sans font-medium text-[#78716C] block mb-1">Email</label>
+                    <label className="text-[11px] font-sans font-medium text-muted-foreground block mb-1">Email</label>
                     <input 
                       type="email" 
                       required 
@@ -447,8 +448,8 @@ export function AuthForm({ mode: initialMode }: AuthFormProps) {
                       disabled={loadingAction} 
                       placeholder="name@example.com" 
                       className={`w-full px-3 py-2 rounded border ${
-                        emailStatus.error ? "border-amber-400 focus:border-amber-500" : "border-[#D5CEBF] focus:border-[#1C1917]"
-                      } focus:ring-1 focus:ring-[#1C1917] bg-white text-[#1C1917] text-[13px] outline-none transition-colors placeholder:text-[#A8A29E] font-sans`} 
+                        emailStatus.error ? "border-amber-400 focus:border-amber-500" : "border-[#D5CEBF] focus:border-foreground"
+                      } focus:ring-1 focus:ring-foreground bg-white text-foreground text-[13px] outline-none transition-colors placeholder:text-muted-foreground/70 font-sans`} 
                     />
 
                     {/* Email Typo / Format Feedback */}
@@ -477,7 +478,7 @@ export function AuthForm({ mode: initialMode }: AuthFormProps) {
                   </div>
                   
                   <div>
-                    <label className="text-[11px] font-sans font-medium text-[#78716C] block mb-1">Password</label>
+                    <label className="text-[11px] font-sans font-medium text-muted-foreground block mb-1">Password</label>
                     <div className="relative">
                       <input 
                         type={showPassword ? "text" : "password"} 
@@ -487,12 +488,12 @@ export function AuthForm({ mode: initialMode }: AuthFormProps) {
                         disabled={loadingAction} 
                         placeholder="••••••••" 
                         autoComplete={mode === "signup" ? "new-password" : "current-password"}
-                        className="w-full px-3 py-2 pr-9 rounded border border-[#D5CEBF] focus:border-[#1C1917] focus:ring-1 focus:ring-[#1C1917] bg-white text-[#1C1917] text-[13px] outline-none transition-colors placeholder:text-[#A8A29E] font-sans" 
+                        className="w-full px-3 py-2 pr-9 rounded border border-[#D5CEBF] focus:border-foreground focus:ring-1 focus:ring-foreground bg-white text-foreground text-[13px] outline-none transition-colors placeholder:text-muted-foreground/70 font-sans" 
                       />
                       <button
                         type="button"
                         onClick={() => setShowPassword(!showPassword)}
-                        className="absolute inset-y-0 right-0 flex items-center pr-3 text-[#78716C] hover:text-[#1C1917] focus:outline-none"
+                        className="absolute inset-y-0 right-0 flex items-center pr-3 text-muted-foreground hover:text-foreground focus:outline-none"
                         aria-label={showPassword ? "Hide password" : "Show password"}
                       >
                         {showPassword ? (
@@ -504,20 +505,14 @@ export function AuthForm({ mode: initialMode }: AuthFormProps) {
                     </div>
                   </div>
 
-                  <button 
+                  <Button 
                     type="submit" 
-                    disabled={loadingAction} 
-                    className="w-full bg-[#064E3B] hover:bg-[#043327] text-white rounded py-2.5 px-4 text-[13px] font-sans font-medium transition-colors shadow-xs disabled:opacity-50 mt-2 flex items-center justify-center gap-2"
+                    disabled={loadingAction}
+                    loading={loadingAction}
+                    className="w-full mt-2"
                   >
-                    {loadingAction ? (
-                      <>
-                        <svg className="animate-spin h-3.5 w-3.5 text-white opacity-70" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
-                        {mode === "signup" ? "Creating..." : "Signing in..."}
-                      </>
-                    ) : (
-                      mode === "signup" ? "Create Account" : "Sign In"
-                    )}
-                  </button>
+                    {mode === "signup" ? "Create Account" : "Sign In"}
+                  </Button>
                 </form>
               </motion.div>
             )}

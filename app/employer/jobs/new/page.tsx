@@ -95,39 +95,39 @@ export default function NewJobPostingPage() {
   };
 
   return (
-    <div className="w-full min-h-screen bg-[#FAF8F5] pb-24 text-[#1C1917]">
+    <div className="w-full min-h-screen bg-surface pb-24 text-foreground">
       {/* ── Top Header Strip ── */}
-      <div className="border-b border-[#E7E2DA] bg-white px-6 sm:px-10 py-5">
-        <div className="max-w-[1000px] mx-auto flex items-center justify-between">
+      <div className="border-b border-border bg-white px-6 sm:px-10 py-5">
+        <div className="w-full flex items-center justify-between">
           <Link
             href="/employer/jobs"
-            className="inline-flex items-center gap-2 text-[12px] font-mono font-semibold text-[#78716C] hover:text-[#1C1917] transition-colors"
+            className="inline-flex items-center gap-2 text-[12px] font-mono font-semibold text-muted-foreground hover:text-foreground transition-colors"
           >
             <ArrowLeft className="h-3.5 w-3.5" />
             BACK TO POSTED ROLES
           </Link>
-          <span className="text-[11px] font-sans font-semibold uppercase tracking-wide text-[#78716C]">
+          <span className="text-[11px] font-sans font-semibold uppercase tracking-wide text-muted-foreground">
             New Job Specification
           </span>
         </div>
       </div>
 
-      <div className="max-w-[1000px] mx-auto px-6 sm:px-10 py-8">
-        <div className="border border-[#E7E2DA] bg-white p-7 sm:p-10 rounded shadow-xs space-y-8">
+      <div className="w-full px-6 sm:px-10 py-8">
+        <div className="border border-border bg-white p-7 sm:p-10 rounded shadow-xs space-y-8">
           <div>
-            <div className="text-[10px] font-medium tracking-[0.2em] text-[#78716C] uppercase mb-1">
+            <div className="text-[10px] font-medium tracking-[0.2em] text-muted-foreground uppercase mb-1">
               Job Intake Formulation
             </div>
-            <h1 className="text-[24px] sm:text-[30px] font-bold uppercase tracking-[0.06em] text-[#1C1917]">
+            <h1 className="text-[24px] sm:text-[30px] font-bold uppercase tracking-[0.06em] text-foreground">
               POST AN ENGINEERING ROLE
             </h1>
-            <p className="text-[13px] text-[#78716C] mt-1">
+            <p className="text-[13px] text-muted-foreground mt-1">
               Create an audited opportunity. Candidates with 100% profile completion and matching capabilities will be able to submit their technical dossiers directly.
             </p>
           </div>
 
           {error && (
-            <div className="p-4 bg-[#FEF2F2] border border-[#B42318]/20 rounded text-[13px] text-[#B42318] flex items-center gap-2 font-sans">
+            <div className="p-4 bg-danger/10 border border-danger/20 rounded text-[13px] text-danger flex items-center gap-2 font-sans">
               <AlertCircle className="h-4 w-4 shrink-0" />
               <span>{error}</span>
             </div>
@@ -137,20 +137,20 @@ export default function NewJobPostingPage() {
             {/* Title & Department */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
               <div>
-                <label className="block text-[12px] font-sans font-semibold uppercase tracking-wide text-[#1C1917] mb-2">
-                  Job Title <span className="text-[#B42318]">*</span>
+                <label className="block text-[12px] font-sans font-semibold uppercase tracking-wide text-foreground mb-2">
+                  Job Title <span className="text-danger">*</span>
                 </label>
                 <input
                   type="text"
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
                   placeholder="e.g. Senior Frontend Engineer"
-                  className="w-full h-11 px-4 bg-[#FAF8F5] border border-[#E7E2DA] rounded text-[14px] text-[#1C1917] focus:outline-none focus:ring-1 focus:ring-[#1C1917]"
+                  className="w-full h-11 px-4 bg-surface border border-border rounded text-[14px] text-foreground focus:outline-none focus:ring-1 focus:ring-foreground"
                 />
               </div>
 
               <div>
-                <label className="block text-[12px] font-sans font-semibold uppercase tracking-wide text-[#1C1917] mb-2">
+                <label className="block text-[12px] font-sans font-semibold uppercase tracking-wide text-foreground mb-2">
                   Department / Squad
                 </label>
                 <input
@@ -158,7 +158,7 @@ export default function NewJobPostingPage() {
                   value={department}
                   onChange={(e) => setDepartment(e.target.value)}
                   placeholder="e.g. Core Infrastructure"
-                  className="w-full h-11 px-4 bg-[#FAF8F5] border border-[#E7E2DA] rounded text-[14px] text-[#1C1917] focus:outline-none focus:ring-1 focus:ring-[#1C1917]"
+                  className="w-full h-11 px-4 bg-surface border border-border rounded text-[14px] text-foreground focus:outline-none focus:ring-1 focus:ring-foreground"
                 />
               </div>
             </div>
@@ -166,13 +166,13 @@ export default function NewJobPostingPage() {
             {/* Work Mode, Employment Type, Location */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
               <div>
-                <label className="block text-[12px] font-sans font-semibold uppercase tracking-wide text-[#1C1917] mb-2">
-                  Work Mode <span className="text-[#B42318]">*</span>
+                <label className="block text-[12px] font-sans font-semibold uppercase tracking-wide text-foreground mb-2">
+                  Work Mode <span className="text-danger">*</span>
                 </label>
                 <select
                   value={workMode}
                   onChange={(e) => setWorkMode(e.target.value as WorkMode)}
-                  className="w-full h-11 px-4 bg-[#FAF8F5] border border-[#E7E2DA] rounded text-[13px] text-[#1C1917] focus:outline-none focus:ring-1 focus:ring-[#1C1917]"
+                  className="w-full h-11 px-4 bg-surface border border-border rounded text-[13px] text-foreground focus:outline-none focus:ring-1 focus:ring-foreground"
                 >
                   <option value="remote">Remote</option>
                   <option value="hybrid">Hybrid</option>
@@ -181,13 +181,13 @@ export default function NewJobPostingPage() {
               </div>
 
               <div>
-                <label className="block text-[12px] font-sans font-semibold uppercase tracking-wide text-[#1C1917] mb-2">
-                  Role Type <span className="text-[#B42318]">*</span>
+                <label className="block text-[12px] font-sans font-semibold uppercase tracking-wide text-foreground mb-2">
+                  Role Type <span className="text-danger">*</span>
                 </label>
                 <select
                   value={employmentType}
                   onChange={(e) => setEmploymentType(e.target.value as EmploymentType)}
-                  className="w-full h-11 px-4 bg-[#FAF8F5] border border-[#E7E2DA] rounded text-[13px] text-[#1C1917] focus:outline-none focus:ring-1 focus:ring-[#1C1917]"
+                  className="w-full h-11 px-4 bg-surface border border-border rounded text-[13px] text-foreground focus:outline-none focus:ring-1 focus:ring-foreground"
                 >
                   <option value="full-time">Full-Time</option>
                   <option value="part-time">Part-Time</option>
@@ -197,22 +197,22 @@ export default function NewJobPostingPage() {
               </div>
 
               <div>
-                <label className="block text-[12px] font-sans font-semibold uppercase tracking-wide text-[#1C1917] mb-2">
-                  Location <span className="text-[#B42318]">*</span>
+                <label className="block text-[12px] font-sans font-semibold uppercase tracking-wide text-foreground mb-2">
+                  Location <span className="text-danger">*</span>
                 </label>
                 <input
                   type="text"
                   value={location}
                   onChange={(e) => setLocation(e.target.value)}
                   placeholder="e.g. Bengaluru / Remote"
-                  className="w-full h-11 px-4 bg-[#FAF8F5] border border-[#E7E2DA] rounded text-[14px] text-[#1C1917] focus:outline-none focus:ring-1 focus:ring-[#1C1917]"
+                  className="w-full h-11 px-4 bg-surface border border-border rounded text-[14px] text-foreground focus:outline-none focus:ring-1 focus:ring-foreground"
                 />
               </div>
             </div>
 
             {/* Compensation Range */}
             <div>
-              <label className="block text-[12px] font-sans font-semibold uppercase tracking-wide text-[#1C1917] mb-2">
+              <label className="block text-[12px] font-sans font-semibold uppercase tracking-wide text-foreground mb-2">
                 Annual Compensation / Range (Optional)
               </label>
               <input
@@ -220,33 +220,33 @@ export default function NewJobPostingPage() {
                 value={salaryRange}
                 onChange={(e) => setSalaryRange(e.target.value)}
                 placeholder="e.g. ₹14,00,000 - ₹22,00,000 PA"
-                className="w-full h-11 px-4 bg-[#FAF8F5] border border-[#E7E2DA] rounded text-[14px] text-[#1C1917] focus:outline-none focus:ring-1 focus:ring-[#1C1917]"
+                className="w-full h-11 px-4 bg-surface border border-border rounded text-[14px] text-foreground focus:outline-none focus:ring-1 focus:ring-foreground"
               />
             </div>
 
             {/* Required Skills Picker */}
             <div className="space-y-3">
-              <label className="block text-[12px] font-sans font-semibold uppercase tracking-wide text-[#1C1917]">
-                Required Technical Capabilities <span className="text-[#B42318]">*</span>
+              <label className="block text-[12px] font-sans font-semibold uppercase tracking-wide text-foreground">
+                Required Technical Capabilities <span className="text-danger">*</span>
               </label>
 
               {/* Active Pills */}
-              <div className="flex items-center gap-2 flex-wrap min-h-[40px] p-2 bg-[#FAF8F5] border border-[#E7E2DA] rounded">
+              <div className="flex items-center gap-2 flex-wrap min-h-[40px] p-2 bg-surface border border-border rounded">
                 {skills.length === 0 ? (
-                  <span className="text-[12px] text-[#A8A29E] px-2 font-mono">
+                  <span className="text-[12px] text-muted-foreground/70 px-2 font-mono">
                     No capabilities added yet. Choose from below or type custom.
                   </span>
                 ) : (
                   skills.map((skill) => (
                     <span
                       key={skill}
-                      className="inline-flex items-center gap-1.5 px-3 py-1 bg-white border border-[#E7E2DA] rounded text-[12px] font-mono text-[#1C1917] shadow-2xs"
+                      className="inline-flex items-center gap-1.5 px-3 py-1 bg-white border border-border rounded text-[12px] font-mono text-foreground shadow-2xs"
                     >
                       <span>{skill}</span>
                       <button
                         type="button"
                         onClick={() => handleRemoveSkill(skill)}
-                        className="text-[#78716C] hover:text-[#B42318]"
+                        className="text-muted-foreground hover:text-danger"
                       >
                         <X className="h-3 w-3" />
                       </button>
@@ -268,12 +268,12 @@ export default function NewJobPostingPage() {
                     }
                   }}
                   placeholder="Type a capability and press Add…"
-                  className="flex-1 h-10 px-3.5 bg-white border border-[#E7E2DA] rounded text-[13px] text-[#1C1917] focus:outline-none focus:ring-1 focus:ring-[#1C1917]"
+                  className="flex-1 h-10 px-3.5 bg-white border border-border rounded text-[13px] text-foreground focus:outline-none focus:ring-1 focus:ring-foreground"
                 />
                 <button
                   type="button"
                   onClick={() => handleAddSkill(skillInput)}
-                  className="px-4 h-10 border border-[#E7E2DA] bg-white hover:bg-[#FAF8F5] text-[12px] font-mono font-semibold rounded"
+                  className="px-4 h-10 border border-border bg-white hover:bg-surface text-[12px] font-mono font-semibold rounded"
                 >
                   ADD
                 </button>
@@ -281,13 +281,13 @@ export default function NewJobPostingPage() {
 
               {/* Suggested Skills */}
               <div className="flex items-center gap-1.5 flex-wrap pt-1">
-                <span className="text-[10px] font-medium uppercase text-[#78716C] mr-1">Suggestions:</span>
+                <span className="text-[10px] font-medium uppercase text-muted-foreground mr-1">Suggestions:</span>
                 {COMMON_SKILLS.slice(0, 10).map((s) => (
                   <button
                     key={s}
                     type="button"
                     onClick={() => handleAddSkill(s)}
-                    className="text-[10px] font-mono px-2.5 py-0.5 border border-[#E7E2DA] bg-white hover:border-[#1C1917] rounded text-[#78716C] hover:text-[#1C1917]"
+                    className="text-[10px] font-mono px-2.5 py-0.5 border border-border bg-white hover:border-foreground rounded text-muted-foreground hover:text-foreground"
                   >
                     + {s}
                   </button>
@@ -297,26 +297,26 @@ export default function NewJobPostingPage() {
 
             {/* Description */}
             <div>
-              <label className="block text-[12px] font-sans font-semibold uppercase tracking-wide text-[#1C1917] mb-2">
-                Full Role Specification & Responsibilities <span className="text-[#B42318]">*</span>
+              <label className="block text-[12px] font-sans font-semibold uppercase tracking-wide text-foreground mb-2">
+                Full Role Specification & Responsibilities <span className="text-danger">*</span>
               </label>
               <textarea
                 rows={8}
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 placeholder="Detail the technical responsibilities, engineering expectations, project domain, and team structure…"
-                className="w-full p-4 bg-[#FAF8F5] border border-[#E7E2DA] rounded text-[14px] text-[#1C1917] focus:outline-none focus:ring-1 focus:ring-[#1C1917] font-sans leading-relaxed"
+                className="w-full p-4 bg-surface border border-border rounded text-[14px] text-foreground focus:outline-none focus:ring-1 focus:ring-foreground font-sans leading-relaxed"
               />
             </div>
           </div>
 
           {/* Action Bar */}
-          <div className="pt-6 border-t border-[#E7E2DA] flex flex-col sm:flex-row items-center justify-end gap-3">
+          <div className="pt-6 border-t border-border flex flex-col sm:flex-row items-center justify-end gap-3">
             <button
               type="button"
               disabled={saving}
               onClick={() => handleSubmit("draft")}
-              className="w-full sm:w-auto px-6 h-11 border border-[#E7E2DA] bg-white hover:bg-[#FAF8F5] text-[12px] font-sans font-semibold uppercase tracking-wide rounded transition-colors disabled:opacity-50 shadow-2xs"
+              className="w-full sm:w-auto px-6 h-11 border border-border bg-white hover:bg-surface text-[12px] font-sans font-semibold uppercase tracking-wide rounded transition-colors disabled:opacity-50 shadow-2xs"
             >
               SAVE AS DRAFT
             </button>
@@ -325,7 +325,7 @@ export default function NewJobPostingPage() {
               type="button"
               disabled={saving}
               onClick={() => handleSubmit("published")}
-              className="w-full sm:w-auto px-7 h-11 bg-[#064E3B] hover:bg-[#043327] text-white text-[12px] font-sans font-semibold uppercase tracking-wide rounded transition-colors shadow-xs disabled:opacity-50 flex items-center justify-center gap-2"
+              className="w-full sm:w-auto px-7 h-11 bg-emerald-900 hover:bg-emerald-950 text-white text-[12px] font-sans font-semibold uppercase tracking-wide rounded transition-colors shadow-xs disabled:opacity-50 flex items-center justify-center gap-2"
             >
               {saving ? (
                 <>

@@ -31,10 +31,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   if (!isUserAdmin) {
     return (
-      <div className="flex h-[100dvh] w-full flex-col bg-[#FAFAFA] text-[#0D0D0D] font-sans">
+      <div className="flex h-[100dvh] w-full flex-col bg-[#FAFAFA] text-foreground font-sans">
         <MobileNav role="admin" />
         <div className="flex flex-1 items-center justify-center p-6">
-          <div className="max-w-md w-full border border-danger bg-[#FFFFFF] p-8 rounded-md text-center">
+          <div className="max-w-md w-full border border-danger bg-white p-8 rounded-md text-center">
             <ShieldAlert className="h-8 w-8 text-danger mx-auto mb-4" />
             <h1 className="font-serif text-[24px] text-danger mb-2">Access Denied</h1>
             <p className="text-[14px] text-muted-foreground mb-6">
@@ -63,7 +63,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   }
 
   return (
-    <div className="flex flex-col h-[100dvh] w-full bg-[#FAFAFA] text-[#0D0D0D] font-sans">
+    <div className="flex flex-col h-[100dvh] w-full bg-[#FAFAFA] text-foreground font-sans">
       <MobileNav role="admin" />
       <div className="flex-1 overflow-y-auto">
         {children}

@@ -71,7 +71,7 @@ export function CandidateProofModal({ candidate, isOpen, onClose }: CandidatePro
               <h3 className="text-xs font-bold text-foreground uppercase tracking-widest">
                 Evidence Summary
               </h3>
-              <span className="text-[11px] font-mono text-[#059669] font-semibold bg-[#ECFDF5] px-2 py-0.5 rounded border border-[#A7F3D0]">
+              <span className="text-[11px] font-mono text-emerald-600 font-semibold bg-[#ECFDF5] px-2 py-0.5 rounded border border-[#A7F3D0]">
                 {verificationPct}% of Cataloged Skills Passed (≥75%)
               </span>
             </div>
@@ -81,16 +81,16 @@ export function CandidateProofModal({ candidate, isOpen, onClose }: CandidatePro
                   Verified Skills
                 </span>
                 <div className="flex items-baseline gap-1.5">
-                  <span className="text-base font-bold text-[#059669]">
+                  <span className="text-base font-bold text-emerald-600">
                     {verificationPct}%
                   </span>
                   <span className="text-xs text-muted-foreground">
                     ({verifiedSkillsCount}/{totalSkillsCount})
                   </span>
                 </div>
-                <div className="w-full bg-[#E5E5E5] h-1.5 rounded-full overflow-hidden mt-1">
+                <div className="w-full bg-border h-1.5 rounded-full overflow-hidden mt-1">
                   <div
-                    className="bg-[#059669] h-full rounded-full"
+                    className="bg-emerald-600 h-full rounded-full"
                     style={{ width: `${Math.min(100, Math.max(5, verificationPct))}%` }}
                   />
                 </div>
@@ -289,7 +289,7 @@ export function CandidateProofModal({ candidate, isOpen, onClose }: CandidatePro
                 
                 {candidate.assessmentScores && Object.keys(candidate.assessmentScores).length > 0 && (
                   <div className="relative pt-2">
-                    <div className="absolute -left-[17px] top-3 h-1.5 w-1.5 rounded bg-[#064E3B] ring-4 ring-white" />
+                    <div className="absolute -left-[17px] top-3 h-1.5 w-1.5 rounded bg-emerald-900 ring-4 ring-white" />
                     <p className="text-xs font-bold text-foreground">Standardized Assessment</p>
                     <p className="text-[10px] text-muted-foreground font-medium uppercase mt-0.5 tracking-wider">Source: Proctored Engine</p>
                   </div>

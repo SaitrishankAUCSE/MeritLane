@@ -22,15 +22,15 @@ export function ErrorState({
   return (
     <div
       role="alert"
-      className={`border border-[#E7E2DA] bg-white rounded p-8 text-center max-w-md mx-auto my-6 shadow-sm ${className}`}
+      className={`border border-border bg-white rounded p-8 text-center max-w-md mx-auto my-6 shadow-sm ${className}`}
     >
-      <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded bg-[#FEF2F2] text-[#B42318] border border-[#B42318]/20">
+      <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded bg-danger/10 text-danger border border-danger/20">
         <AlertCircle className="h-6 w-6" />
       </div>
-      <h3 className="text-[18px] font-semibold text-[#1C1917] mb-2 leading-snug">
+      <h3 className="text-[18px] font-semibold text-foreground mb-2 leading-snug">
         {title}
       </h3>
-      <p className="text-[14px] text-[#78716C] leading-relaxed mb-6 font-sans">
+      <p className="text-[14px] text-muted-foreground leading-relaxed mb-6 font-sans">
         {description}
       </p>
       {onRetry && (

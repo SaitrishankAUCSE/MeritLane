@@ -4,6 +4,7 @@ import { FieldValue } from 'firebase-admin/firestore';
 import { getAssessmentContent } from "@/lib/assessments/content";
 import { getBankForSkill, selectAssignment, sanitiseCodingQuestion, sanitiseMcqs } from "@/lib/assessments/selector";
 import { generateAndPublishSkillBank } from "@/lib/assessments/generator";
+import { selectRandomInterviewQuestions, getInterviewQuestionById } from "@/lib/assessments/interview-questions";
 
 export async function POST(req: NextRequest) {
   try {
@@ -22,11 +23,13 @@ export async function POST(req: NextRequest) {
     } catch {
       return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
     }
-    const { skill } = body;
+    const { skill, track = "standard", switchTrack = false } = body;
     
     if (!skill) {
       return NextResponse.json({ error: "Skill parameter is required" }, { status: 400 });
     }
+
+    const validTrack: "standard" | "advanced" = track === "advanced" ? "advanced" : "standard";
 
     const idToken = authHeader.split("Bearer ")[1];
     let decodedToken;
@@ -193,28 +196,50 @@ export async function POST(req: NextRequest) {
     const gracePeriodMs = 2 * 60 * 1000; // 2-minute grace on top of the time limit
 
 
-    // Resume active session if within window
-    if (userData.assessmentStartedAt && userData.assessmentSkill === skill) {
+    // Resume active session if within window (unless switchTrack is explicitly requested)
+    if (userData.assessmentStartedAt && userData.assessmentSkill === skill && !switchTrack) {
       const startedMs = userData.assessmentStartedAt.toMillis?.() || userData.assessmentStartedAt;
       if (now - startedMs < sessionWindowMs) {
         // Build resume content
         let resumeContent: Record<string, unknown> = {};
 
-        if (hasBankSupport && userData.assessmentEasyQuestionId && userData.assessmentMediumQuestionId) {
+        if (hasBankSupport && userData.assessmentEasyQuestionId) {
           // Bank-aware resume
-          const seenAll = [...(bank!.easy || []), ...(bank!.mediumHard || [])];
-          const easyQ = seenAll.find(q => q.id === userData.assessmentEasyQuestionId);
-          const mediumQ = seenAll.find(q => q.id === userData.assessmentMediumQuestionId);
+          let easyQ: any = undefined;
+          let mediumQ: any = undefined;
+
+          if (typeof userData.assessmentEasyQuestionId === "string" && userData.assessmentEasyQuestionId.startsWith("leetcode_")) {
+            easyQ = await getInterviewQuestionById(userData.assessmentEasyQuestionId);
+            if (userData.assessmentMediumQuestionId) {
+              mediumQ = await getInterviewQuestionById(userData.assessmentMediumQuestionId);
+            }
+          }
+
+          if (!easyQ) {
+            const seenAll = [...(bank!.easy || []), ...(bank!.mediumHard || [])];
+            const uniqueAll = Array.from(new Map(seenAll.map(q => [q.id, q])).values());
+            const bankEasy = uniqueAll.find(q => q.id === userData.assessmentEasyQuestionId);
+            if (bankEasy) easyQ = sanitiseCodingQuestion(bankEasy);
+            if (userData.assessmentMediumQuestionId && userData.assessmentMediumQuestionId !== userData.assessmentEasyQuestionId) {
+              const bankMed = uniqueAll.find(q => q.id === userData.assessmentMediumQuestionId);
+              if (bankMed) mediumQ = sanitiseCodingQuestion(bankMed);
+            }
+          }
+
+          const codingTasks = [];
+          if (easyQ) codingTasks.push(easyQ);
+          if (mediumQ && mediumQ.id !== easyQ?.id) codingTasks.push(mediumQ);
+
           const mcqIds: string[] = userData.assessmentMcqIds || [];
           const mcqItems = (bank!.mcqs || []).filter(m => mcqIds.includes(m.id));
 
           resumeContent = {
-            codingTasks: easyQ && mediumQ ? [sanitiseCodingQuestion(easyQ), sanitiseCodingQuestion(mediumQ)] : [],
+            codingTasks,
             coding: easyQ ? sanitiseCodingQuestion(easyQ) : undefined,
             mcqs: sanitiseMcqs(mcqItems),
-            hasCoding: !!(easyQ && mediumQ),
+            hasCoding: codingTasks.length > 0,
             timeLimitMinutes,
-            assessmentType: easyQ && mediumQ ? "coding_capable" : "mcq_only",
+            assessmentType: codingTasks.length > 0 ? "coding_capable" : "mcq_only",
           };
         } else {
           const candidateSeed = userData.assessmentSeed || uid;
@@ -224,18 +249,24 @@ export async function POST(req: NextRequest) {
           }
           resumeContent = {
             ...builtinContent,
-            codingTasks: builtinContent.coding ? [builtinContent.coding] : [],
+            codingTasks: builtinContent.codingTasks || (builtinContent.coding ? [builtinContent.coding] : []),
             assessmentType: builtinContent.hasCoding ? "coding_capable" : "mcq_only",
             timeLimitMinutes: builtinContent.hasCoding ? 90 : 35,
           };
         }
+
+        const activeTrack: "standard" | "advanced" = userData.assessmentTrack || (userData.assessmentMediumQuestionId ? "standard" : "advanced");
 
         return NextResponse.json({ 
           message: "Resuming session",
           startedAt: startedMs,
           variant: userData.assessmentVariant || "A",
           skill,
-          content: resumeContent
+          track: activeTrack,
+          content: {
+            ...resumeContent,
+            track: activeTrack,
+          }
         }, { status: 200 });
       }
     }
@@ -246,6 +277,7 @@ export async function POST(req: NextRequest) {
       assessmentStartedAt: FieldValue.serverTimestamp(),
       assessmentVariant: "A",
       assessmentSkill: skill,
+      assessmentTrack: validTrack,
     };
 
     if (hasBankSupport && bank) {
@@ -267,23 +299,71 @@ export async function POST(req: NextRequest) {
         [`seenQuestions.${normalizedSkill}.mcq`]: FieldValue.arrayUnion(...assignment.mcqIds),
       };
 
-      if (assignment.easy && assignment.easyId) {
-        const mediumQ = assignment.medium || assignment.easy;
-        const mediumId = assignment.mediumId || assignment.easyId;
-        firestoreUpdates.assessmentEasyQuestionId = assignment.easyId;
-        firestoreUpdates.assessmentMediumQuestionId = mediumId;
-        candidateUpdates[`seenQuestions.${normalizedSkill}.coding`] = FieldValue.arrayUnion(assignment.easyId, mediumId);
+      // Pick coding questions from 500 top interview questions pool if skill has coding
+      let interviewAssignment = null;
+      if (hasCodingPool) {
+        interviewAssignment = await selectRandomInterviewQuestions(
+          uid,
+          skill,
+          seen.coding,
+          `${uid}::${skill}::${Date.now()}`,
+          validTrack
+        );
+      }
+
+      if (interviewAssignment && interviewAssignment.tasks.length > 0) {
+        const codingTasks = interviewAssignment.tasks;
+        const easyId = interviewAssignment.easyId;
+        const mediumId = interviewAssignment.mediumId;
+
+        firestoreUpdates.assessmentEasyQuestionId = easyId;
+        const codingIdsToMarkSeen = [easyId];
+
+        if (mediumId && mediumId !== easyId) {
+          firestoreUpdates.assessmentMediumQuestionId = mediumId;
+          codingIdsToMarkSeen.push(mediumId);
+        } else {
+          firestoreUpdates.assessmentMediumQuestionId = FieldValue.delete();
+        }
+
+        candidateUpdates[`seenQuestions.${normalizedSkill}.coding`] = FieldValue.arrayUnion(...codingIdsToMarkSeen);
 
         freshContent = {
-          codingTasks: [
-            sanitiseCodingQuestion(assignment.easy),
-            sanitiseCodingQuestion(mediumQ),
-          ],
+          codingTasks,
+          coding: codingTasks[0], // backward compat for page.tsx
+          mcqs: sanitiseMcqs(assignment.mcqs),
+          hasCoding: true,
+          timeLimitMinutes: 90,
+          assessmentType: "coding_capable",
+          track: validTrack,
+        };
+      } else if (assignment.easy && assignment.easyId) {
+        const hasDistinctMedium = Boolean(
+          assignment.medium && assignment.mediumId && assignment.mediumId !== assignment.easyId
+        );
+        const codingTasks = [sanitiseCodingQuestion(assignment.easy)];
+        
+        firestoreUpdates.assessmentEasyQuestionId = assignment.easyId;
+        const codingIdsToMarkSeen = [assignment.easyId];
+
+        if (hasDistinctMedium) {
+          codingTasks.push(sanitiseCodingQuestion(assignment.medium!));
+          firestoreUpdates.assessmentMediumQuestionId = assignment.mediumId;
+          codingIdsToMarkSeen.push(assignment.mediumId!);
+        } else {
+          firestoreUpdates.assessmentMediumQuestionId = FieldValue.delete();
+        }
+
+        candidateUpdates[`seenQuestions.${normalizedSkill}.coding`] = FieldValue.arrayUnion(...codingIdsToMarkSeen);
+
+        freshContent = {
+          codingTasks,
           coding: sanitiseCodingQuestion(assignment.easy), // backward compat for page.tsx
           mcqs: sanitiseMcqs(assignment.mcqs),
           hasCoding: true,
           timeLimitMinutes: 90,
           assessmentType: "coding_capable",
+          track: validTrack,
         };
       } else {
         // MCQ / Query Writing / Error Finding assignment
@@ -292,6 +372,7 @@ export async function POST(req: NextRequest) {
           hasCoding: false,
           timeLimitMinutes: 45,
           assessmentType: "mcq_only",
+          track: validTrack,
         };
       }
 
@@ -305,7 +386,7 @@ export async function POST(req: NextRequest) {
       }
       freshContent = {
         ...builtinContent,
-        codingTasks: builtinContent.coding ? [builtinContent.coding] : [],
+        codingTasks: builtinContent.codingTasks || (builtinContent.coding ? [builtinContent.coding] : []),
         assessmentType: builtinContent.hasCoding ? "coding_capable" : "mcq_only",
         timeLimitMinutes: builtinContent.hasCoding ? 90 : 45,
       };
@@ -320,7 +401,11 @@ export async function POST(req: NextRequest) {
       startedAt,
       variant: "A",
       skill,
-      content: freshContent
+      track: validTrack,
+      content: {
+        ...freshContent,
+        track: validTrack,
+      }
     }, { status: 200 });
 
   } catch (error: unknown) {

@@ -79,7 +79,7 @@ export function ReviewConsole({
         </div>
         <div className="overflow-y-auto flex-1">
           {queueCandidates.length === 0 ? (
-            <div className="p-8 text-center text-[#737373] font-sans text-sm">Queue is clear</div>
+            <div className="p-8 text-center text-muted-foreground font-sans text-sm">Queue is clear</div>
           ) : (
             queueCandidates.map((c: any) => (
               <button
@@ -155,7 +155,7 @@ export function ReviewConsole({
                         <p className="text-sm text-muted-foreground mb-4">{proj.description}</p>
                         <div className="flex gap-3">
                           {proj.repoUrl && <a href={proj.repoUrl} target="_blank" rel="noreferrer" className="text-xs font-bold font-data text-muted-foreground hover:text-foreground">Source ↗</a>}
-                          {proj.liveUrl && <a href={proj.liveUrl} target="_blank" rel="noreferrer" className="text-xs font-bold font-data text-accent hover:text-[#064E3B]">Demo ↗</a>}
+                          {proj.liveUrl && <a href={proj.liveUrl} target="_blank" rel="noreferrer" className="text-xs font-bold font-data text-accent hover:text-emerald-900">Demo ↗</a>}
                         </div>
                       </div>
                     ))}
@@ -168,7 +168,7 @@ export function ReviewConsole({
             </div>
           </>
         ) : (
-          <div className="flex-1 flex items-center justify-center text-[#737373] font-sans text-sm">
+          <div className="flex-1 flex items-center justify-center text-muted-foreground font-sans text-sm">
             Select a candidate from the queue to inspect evidence
           </div>
         )}
@@ -187,7 +187,7 @@ export function ReviewConsole({
                   <div className="mb-4 bg-surface-low p-4 border border-border rounded">
                     <p className="text-xs text-muted-foreground mb-3 font-sans">Run a quick automated pass over candidate artifacts to generate a baseline recommendation.</p>
                     <Button 
-                      className="w-full justify-center bg-[#FAF8F5] hover:bg-white text-[#1C1917] border border-[#E7E2DA]" 
+                      className="w-full justify-center bg-surface hover:bg-white text-foreground border border-border" 
                       onClick={handleAutomatedAudit}
                       disabled={runningAudit}
                     >
@@ -237,7 +237,7 @@ export function ReviewConsole({
               )}
             </>
           ) : (
-            <div className="text-center text-sm font-sans text-[#737373] mb-4">
+            <div className="text-center text-sm font-sans text-muted-foreground mb-4">
               Decision actions locked
             </div>
           )}

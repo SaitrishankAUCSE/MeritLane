@@ -78,17 +78,62 @@ export async function POST(req: NextRequest) {
     });
 
     const candidateDocs: { id: string; data: CandidateProfile }[] = [];
+    const seenUids = new Set<string>();
+    const seenNames = new Set<string>();
 
     if (!candidatesSnapshot.empty) {
-      candidatesSnapshot.docs.forEach((d) => {
-        candidateDocs.push({ id: d.id, data: d.data() as CandidateProfile });
-      });
+      for (const d of candidatesSnapshot.docs) {
+        const cData = d.data() as CandidateProfile;
+        const nameLower = (cData.name || "").toLowerCase().trim();
+        const emailLower = ((cData as any).email || "").toLowerCase().trim();
+        const isFakeOrTest =
+          nameLower.startsWith("verified engineer") ||
+          nameLower.includes("test candidate") ||
+          emailLower.includes("example.com") ||
+          emailLower.includes("pilot_test_");
+
+        if (isFakeOrTest) {
+          // Permanently purge fake/test script records from Firestore
+          d.ref.delete().catch(() => null);
+          continue;
+        }
+
+        if (seenUids.has(d.id)) continue;
+        if (nameLower && nameLower !== "candidate" && nameLower !== "—" && seenNames.has(nameLower)) {
+          continue; // Duplicate candidate
+        }
+
+        seenUids.add(d.id);
+        if (nameLower && nameLower !== "candidate" && nameLower !== "—") seenNames.add(nameLower);
+        candidateDocs.push({ id: d.id, data: cData });
+      }
     }
 
     if (!usersCandidateSnapshot.empty) {
-      usersCandidateSnapshot.docs.forEach((uDoc) => {
+      for (const uDoc of usersCandidateSnapshot.docs) {
         const uData = uDoc.data();
-        if (!candidateDocs.some((c) => c.id === uDoc.id) && (uData.skills || uData.college)) {
+        const nameLower = (uData.displayName || uData.name || "").toLowerCase().trim();
+        const emailLower = (uData.email || "").toLowerCase().trim();
+        const isFakeOrTest =
+          nameLower.startsWith("verified engineer") ||
+          nameLower.includes("test candidate") ||
+          emailLower.includes("example.com") ||
+          emailLower.includes("pilot_test_");
+
+        if (isFakeOrTest) {
+          uDoc.ref.delete().catch(() => null);
+          continue;
+        }
+
+        if (seenUids.has(uDoc.id)) continue;
+        if (nameLower && nameLower !== "candidate" && nameLower !== "—" && seenNames.has(nameLower)) {
+          continue; // Duplicate candidate
+        }
+
+        if (uData.skills || uData.college) {
+          seenUids.add(uDoc.id);
+          if (nameLower && nameLower !== "candidate" && nameLower !== "—") seenNames.add(nameLower);
+
           candidateDocs.push({
             id: uDoc.id,
             data: {
@@ -106,7 +151,7 @@ export async function POST(req: NextRequest) {
             } as CandidateProfile,
           });
         }
-      });
+      }
     }
 
     if (candidateDocs.length === 0) {

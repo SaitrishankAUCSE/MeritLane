@@ -232,13 +232,13 @@ export function ProfilePhotoUploader({
   };
 
   return (
-    <div className="border border-[#E7E2DA] bg-white">
-      <div className="border-b border-[#E7E2DA] bg-[#F5F1EB] px-5 py-3 flex items-center justify-between">
-        <div className="text-[9px] font-medium tracking-[0.18em] text-[#78716C] uppercase">
+    <div className="border border-border bg-white">
+      <div className="border-b border-border bg-surface px-5 py-3 flex items-center justify-between">
+        <div className="text-[9px] font-medium tracking-[0.18em] text-muted-foreground uppercase">
           Profile Photo
         </div>
         {isEligibleForJob && (
-          <span className="text-[9px] font-mono text-[#064E3B] font-semibold uppercase tracking-wider bg-[#064E3B]/10 px-2 py-0.5 rounded border border-[#064E3B]/20">
+          <span className="text-[9px] font-mono text-emerald-900 font-semibold uppercase tracking-wider bg-emerald-900/10 px-2 py-0.5 rounded border border-emerald-900/20">
             Career Badge Active
           </span>
         )}
@@ -266,10 +266,10 @@ export function ProfilePhotoUploader({
           </div>
 
           <div className="flex-1 min-w-0">
-            <div className="text-[15px] font-serif text-[#1C1917] font-semibold truncate">
+            <div className="text-[15px] font-serif text-foreground font-semibold truncate">
               {name}
             </div>
-            <div className="text-[11px] font-sans text-[#78716C] mt-0.5">
+            <div className="text-[11px] font-sans text-muted-foreground mt-0.5">
               Official candidate portrait
             </div>
             <div className="flex items-center gap-2 mt-2.5">
@@ -277,7 +277,7 @@ export function ProfilePhotoUploader({
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
                 disabled={isProcessing}
-                className="inline-flex items-center gap-1.5 px-3 py-1 bg-[#1C1917] hover:bg-[#064E3B] text-white text-[11px] font-mono font-semibold rounded transition-colors shadow-2xs cursor-pointer disabled:opacity-50"
+                className="inline-flex items-center gap-1.5 px-3 py-1 bg-foreground hover:bg-emerald-900 text-white text-[11px] font-mono font-semibold rounded transition-colors shadow-2xs cursor-pointer disabled:opacity-50"
               >
                 <UploadCloud className="h-3 w-3" />
                 <span>{avatarUrl ? "Change Photo" : "Upload Photo"}</span>
@@ -287,7 +287,7 @@ export function ProfilePhotoUploader({
                   type="button"
                   onClick={handleRemovePhoto}
                   disabled={isProcessing}
-                  className="inline-flex items-center gap-1 px-2.5 py-1 bg-white hover:bg-[#FAF8F5] border border-[#E7E2DA] text-[#B42318] hover:border-[#B42318] text-[11px] font-mono font-semibold rounded transition-colors cursor-pointer"
+                  className="inline-flex items-center gap-1 px-2.5 py-1 bg-white hover:bg-surface border border-border text-danger hover:border-danger text-[11px] font-mono font-semibold rounded transition-colors cursor-pointer"
                 >
                   <Trash2 className="h-3 w-3" />
                   <span>Remove</span>
@@ -298,21 +298,21 @@ export function ProfilePhotoUploader({
         </div>
 
         {/* Verification Status Note */}
-        <div className="pt-3 border-t border-[#F5F1EB]">
+        <div className="pt-3 border-t border-surface">
           {isEligibleForJob ? (
-            <div className="flex items-center gap-2 text-[11px] font-mono text-[#064E3B] bg-[#064E3B]/[0.06] border border-[#064E3B]/20 p-2.5 rounded">
+            <div className="flex items-center gap-2 text-[11px] font-mono text-emerald-900 bg-emerald-900/[0.06] border border-emerald-900/20 p-2.5 rounded">
               <ShieldCheck className="h-3.5 w-3.5 shrink-0" />
               <span>All {totalSkillsCount} skills verified. Career badge is displayed on your portrait across Meritlane.</span>
             </div>
           ) : (
-            <div className="text-[11px] font-mono text-[#78716C] bg-[#FAF8F5] border border-[#E7E2DA] p-2.5 rounded space-y-1">
+            <div className="text-[11px] font-mono text-muted-foreground bg-surface border border-border p-2.5 rounded space-y-1">
               <div className="flex items-center justify-between text-[10px] uppercase font-semibold text-[#57534E]">
                 <span>Skills Verification Status</span>
-                <span className="text-[#064E3B] font-mono font-bold">
+                <span className="text-emerald-900 font-mono font-bold">
                   {verifiedCount}/{totalSkillsCount} Verified
                 </span>
               </div>
-              <p className="text-[11px] text-[#78716C] font-sans leading-relaxed">
+              <p className="text-[11px] text-muted-foreground font-sans leading-relaxed">
                 Career badge is awarded automatically once all {totalSkillsCount} skills assessments are verified (≥75% score).
               </p>
             </div>

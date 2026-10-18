@@ -11,14 +11,14 @@ export default function EmployerLayout({ children }: { children: React.ReactNode
   return (
     <ProtectedRoute allowedRoles={["employer"]}>
       <ToastProvider>
-        <div className="flex flex-col lg:flex-row h-[100dvh] w-full bg-[#F8F6F3] text-[#1C1917] font-sans overflow-hidden">
+        <div className="flex flex-col lg:flex-row h-[100dvh] w-full bg-[#F8F6F3] text-foreground font-sans overflow-hidden">
           <MobileNav role="employer" />
           <EmployerSidebar />
-          <EmployerProfileCompletionGuard>
-            <main className="flex-1 bg-[#F8F6F3] overflow-y-auto min-w-0">
+          <main className="flex-1 bg-[#F8F6F3] min-h-0 h-full overflow-y-auto min-w-0 flex flex-col">
+            <EmployerProfileCompletionGuard>
               {children}
-            </main>
-          </EmployerProfileCompletionGuard>
+            </EmployerProfileCompletionGuard>
+          </main>
         </div>
       </ToastProvider>
     </ProtectedRoute>

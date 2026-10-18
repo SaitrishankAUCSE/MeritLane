@@ -68,7 +68,7 @@ export default function CooldownTimer({
   );
 
   if (isExpired) {
-    return <span className={`text-[#064E3B] font-mono text-[11px] font-medium ${className}`}>Cooldown ended</span>;
+    return <span className={`text-emerald-900 font-mono text-[11px] font-medium ${className}`}>Cooldown ended</span>;
   }
 
   if (variant === "badge") {
@@ -91,26 +91,26 @@ export default function CooldownTimer({
   if (variant === "boxes") {
     return (
       <div className={`grid grid-cols-4 gap-2 text-center ${className}`}>
-        <div className="bg-[#FAF8F5] border border-[#E7E2DA] rounded p-2">
-          <div className="text-[18px] sm:text-[22px] font-mono font-bold text-[#1C1917] tabular-nums">
+        <div className="bg-surface border border-border rounded p-2">
+          <div className="text-[18px] sm:text-[22px] font-mono font-bold text-foreground tabular-nums">
             {days}
           </div>
-          <div className="text-[9px] uppercase font-mono text-[#78716C] tracking-widest">Days</div>
+          <div className="text-[9px] uppercase font-mono text-muted-foreground tracking-widest">Days</div>
         </div>
-        <div className="bg-[#FAF8F5] border border-[#E7E2DA] rounded p-2">
-          <div className="text-[18px] sm:text-[22px] font-mono font-bold text-[#1C1917] tabular-nums">
+        <div className="bg-surface border border-border rounded p-2">
+          <div className="text-[18px] sm:text-[22px] font-mono font-bold text-foreground tabular-nums">
             {String(hours).padStart(2, "0")}
           </div>
-          <div className="text-[9px] uppercase font-mono text-[#78716C] tracking-widest">Hours</div>
+          <div className="text-[9px] uppercase font-mono text-muted-foreground tracking-widest">Hours</div>
         </div>
-        <div className="bg-[#FAF8F5] border border-[#E7E2DA] rounded p-2">
-          <div className="text-[18px] sm:text-[22px] font-mono font-bold text-[#1C1917] tabular-nums">
+        <div className="bg-surface border border-border rounded p-2">
+          <div className="text-[18px] sm:text-[22px] font-mono font-bold text-foreground tabular-nums">
             {String(minutes).padStart(2, "0")}
           </div>
-          <div className="text-[9px] uppercase font-mono text-[#78716C] tracking-widest">Mins</div>
+          <div className="text-[9px] uppercase font-mono text-muted-foreground tracking-widest">Mins</div>
         </div>
-        <div className="bg-[#FAF8F5] border border-[#E7E2DA] rounded p-2 border-[#FDE68A] bg-[#FEF3C7]/40">
-          <div className="text-[18px] sm:text-[22px] font-mono font-bold text-[#B42318] tabular-nums animate-pulse">
+        <div className="bg-surface border border-border rounded p-2 border-[#FDE68A] bg-[#FEF3C7]/40">
+          <div className="text-[18px] sm:text-[22px] font-mono font-bold text-danger tabular-nums animate-pulse">
             {String(seconds).padStart(2, "0")}
           </div>
           <div className="text-[9px] uppercase font-mono text-[#92400E] tracking-widest font-semibold">Secs</div>
@@ -129,7 +129,7 @@ export default function CooldownTimer({
           {days > 0 && <span>{days}d </span>}
           <span>{String(hours).padStart(2, "0")}h </span>
           <span>{String(minutes).padStart(2, "0")}m </span>
-          <span className="text-[#B42318]">{String(seconds).padStart(2, "0")}s</span>
+          <span className="text-danger">{String(seconds).padStart(2, "0")}s</span>
         </strong>
       </span>
     </span>

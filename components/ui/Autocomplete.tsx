@@ -192,23 +192,23 @@ export function Autocomplete({
           disabled={disabled}
           className="absolute inset-y-0 right-0 flex items-center pr-3 text-muted-foreground focus:outline-none"
         >
-          {isLoading ? <div className="h-4 w-4 rounded border-[1.5px] border-[#E5E5E5] border-t-[#0D0D0D] animate-spin" /> : <ChevronDown className="h-4 w-4" />}
+          {isLoading ? <div className="h-4 w-4 rounded border-[1.5px] border-border border-t-foreground animate-spin" /> : <ChevronDown className="h-4 w-4" />}
         </button>
       </div>
 
       {isOpen && (
-        <div id={`${inputId}-listbox`} role="listbox" className="absolute top-[calc(100%+4px)] left-0 w-full max-h-[300px] flex flex-col bg-[#FFFFFF] border border-[#E5E5E5] rounded-md shadow-sm z-50 py-1">
+        <div id={`${inputId}-listbox`} role="listbox" className="absolute top-[calc(100%+4px)] left-0 w-full max-h-[300px] flex flex-col bg-surface-bright border border-border rounded-md shadow-sm z-50 py-1">
           <div className="overflow-y-auto scrollbar-hide flex-1">
             {isLoading ? (
-              <div className="px-4 py-3 text-[13px] text-[#737373] italic font-sans">
+              <div className="px-4 py-3 text-[13px] text-muted-foreground italic font-sans">
                 Searching...
               </div>
             ) : error ? (
-              <div className="px-4 py-3 text-[13px] text-[#B42318] font-sans">
+              <div className="px-4 py-3 text-[13px] text-danger font-sans">
                 {errorMessage}
               </div>
             ) : fetchOptions && !query ? (
-              <div className="px-4 py-3 text-[13px] text-[#737373] italic font-sans">
+              <div className="px-4 py-3 text-[13px] text-muted-foreground italic font-sans">
                 {emptyStateMessage}
               </div>
             ) : results.length > 0 ? (
@@ -218,17 +218,17 @@ export function Autocomplete({
                   role="option"
                   aria-selected={query === res}
                   onClick={() => handleSelect(res)}
-                  className="px-4 py-2.5 text-[14px] font-sans text-[#0D0D0D] hover:bg-[#F3F3F1] hover:text-[#0D0D0D] cursor-pointer transition-colors"
+                  className="px-4 py-2.5 text-[14px] font-sans text-foreground hover:bg-surface-dim cursor-pointer transition-colors"
                 >
                   {res}
                 </div>
               ))
             ) : (
               <div className="px-4 py-3">
-                <div className="text-[14px] font-medium text-[#0D0D0D] font-sans">
+                <div className="text-[14px] font-medium text-foreground font-sans">
                   {noResultsMessage}
                 </div>
-                <div className="text-[12px] text-[#737373] font-sans mt-0.5">
+                <div className="text-[12px] text-muted-foreground font-sans mt-0.5">
                   {noResultsSubMessage}
                 </div>
               </div>
@@ -236,11 +236,11 @@ export function Autocomplete({
           </div>
           
           {allowManualEntry && fetchOptions && query && !isLoading && !error && (
-            <div className="border-t border-[#E5E5E5] mt-1 pt-1 bg-[#FAFAFA] flex-shrink-0">
+            <div className="border-t border-border mt-1 pt-1 bg-surface flex-shrink-0">
               <div
                 role="option"
                 onClick={handleSelectOther}
-                className="px-4 py-3 text-[14px] font-sans text-primary font-medium hover:bg-[#F3F3F1] cursor-pointer transition-colors flex items-center"
+                className="px-4 py-3 text-[14px] font-sans text-primary font-medium hover:bg-surface-dim cursor-pointer transition-colors flex items-center"
               >
                 Other — My institution isn't listed
               </div>
