@@ -232,7 +232,7 @@ export default function CandidateDashboardPage() {
       
       {/* ── Registry Command Header (Full Width Strip) ── */}
       <div className="border-b border-border bg-white px-4 sm:px-6 lg:px-8 py-6">
-        <div className="w-full flex flex-col md:flex-row md:items-center justify-between gap-6">
+        <div className="max-w-7xl mx-auto w-full flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div>
             <div className="flex items-center gap-2.5 flex-wrap mb-1">
               <span className="text-[10px] font-medium tracking-[0.2em] text-muted-foreground uppercase">
@@ -287,6 +287,15 @@ export default function CandidateDashboardPage() {
               )}
             </motion.button>
 
+            <button
+              onClick={() => window.dispatchEvent(new CustomEvent("open-meritlane-welcome"))}
+              className="flex items-center justify-center gap-1.5 px-3.5 h-9 border border-emerald-900/20 bg-emerald-900/[0.04] hover:bg-emerald-900/10 text-emerald-900 rounded text-[13px] font-medium transition-colors cursor-pointer"
+              title="Learn how MeritLane works"
+            >
+              <Sparkles className="h-3.5 w-3.5 text-emerald-900" />
+              <span>Protocol Tour</span>
+            </button>
+
             <motion.button 
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
@@ -300,7 +309,7 @@ export default function CandidateDashboardPage() {
         </div>
       </div>
 
-      <div className="w-full px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+      <div className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 space-y-8">
 
 
 
@@ -694,46 +703,62 @@ export default function CandidateDashboardPage() {
       {/* Add Project Modal */}
       <AnimatePresence>
         {isModalOpen && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 overflow-y-auto font-sans">
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.2 }}
-              className="absolute inset-0 bg-foreground/40 backdrop-blur-sm"
+              className="fixed inset-0 bg-stone-900/40"
               onClick={() => setIsModalOpen(false)}
             />
             <motion.div 
-              initial={{ opacity: 0, scale: 0.95, y: 10 }}
+              initial={{ opacity: 0, scale: 0.96, y: 12 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 10 }}
-              transition={{ type: "spring", bounce: 0, duration: 0.3 }}
+              exit={{ opacity: 0, scale: 0.96, y: 12 }}
+              transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
               role="dialog"
               aria-modal="true"
               aria-labelledby="modal-evidence-title"
-              className="relative z-10 bg-white rounded shadow-2xl w-full max-w-lg overflow-hidden flex flex-col border border-border"
+              className="relative z-10 bg-[#FDFBF7] rounded-2xl shadow-2xl w-full max-w-xl overflow-hidden flex flex-col border-2 border-[#D8D2C5] my-auto max-h-[90vh]"
             >
-              <div className="flex items-center justify-between px-6 py-5 border-b border-border bg-surface">
-                <h2 id="modal-evidence-title" className="text-[18px] font-serif text-foreground">Add Project</h2>
+              {/* Modal Header */}
+              <div className="flex items-center justify-between px-6 py-4 border-b border-[#D8D2C5] bg-[#F3EFE6] shrink-0">
+                <div className="flex items-center gap-2.5">
+                  <div className="h-8 w-8 rounded-lg bg-emerald-900 text-white flex items-center justify-center font-bold text-xs shadow-xs">
+                    <Code className="h-4 w-4" />
+                  </div>
+                  <div>
+                    <h2 id="modal-evidence-title" className="text-[16px] font-bold text-[#1C1917] leading-tight font-sans">
+                      Add Project Repository
+                    </h2>
+                    <p className="text-[12px] text-[#78716C] font-sans">
+                      Attach verified GitHub code to showcase proof of work.
+                    </p>
+                  </div>
+                </div>
                 <button 
                   type="button"
                   onClick={() => setIsModalOpen(false)}
-                  className="text-muted-foreground hover:text-foreground"
+                  className="text-[#78716C] hover:text-[#1C1917] p-1.5 rounded-lg hover:bg-black/5 transition-colors cursor-pointer"
+                  title="Close"
                 >
                   <X className="h-5 w-5" />
                 </button>
               </div>
 
-              <form onSubmit={handleSaveEvidence} className="p-6 space-y-4">
+              {/* Modal Form Body */}
+              <form onSubmit={handleSaveEvidence} className="p-6 space-y-4.5 overflow-y-auto flex-1 font-sans">
                 {errorMsg && (
-                  <div className="p-3 bg-danger/10 border border-[#FECACA] text-[#991B1B] text-[13px] rounded">
-                    {errorMsg}
+                  <div className="p-3.5 bg-[#FAF5F4] border border-[#E8D8D5] text-[#8B3525] text-[13px] rounded-xl flex items-center gap-2">
+                    <span className="font-semibold">Notice:</span>
+                    <span>{errorMsg}</span>
                   </div>
                 )}
 
                 <div>
-                  <label className="block text-[12px] font-semibold text-foreground mb-1">
-                    Project Title *
+                  <label className="block text-[12px] font-bold text-[#1C1917] mb-1.5 font-sans">
+                    Project Title <span className="text-[#8B3525]">*</span>
                   </label>
                   <input
                     type="text"
@@ -741,13 +766,13 @@ export default function CandidateDashboardPage() {
                     value={newProject.title}
                     onChange={(e) => setNewProject({ ...newProject, title: e.target.value })}
                     placeholder="e.g. Distributed In-Memory Cache"
-                    className="w-full h-11 px-3.5 bg-surface border border-border rounded text-[14px] text-foreground outline-none focus:border-emerald-900 focus:bg-white"
+                    className="w-full h-11 px-3.5 bg-white border border-[#D8D2C5] rounded-xl text-[14px] text-[#1C1917] placeholder:text-[#A8A29E] outline-none focus:border-emerald-900 focus:ring-1 focus:ring-emerald-900 transition-all font-sans"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-[12px] font-semibold text-foreground mb-1">
-                    Repository URL *
+                  <label className="block text-[12px] font-bold text-[#1C1917] mb-1.5 font-sans">
+                    Repository URL <span className="text-[#8B3525]">*</span>
                   </label>
                   <input
                     type="url"
@@ -755,31 +780,31 @@ export default function CandidateDashboardPage() {
                     value={newProject.repoUrl}
                     onChange={(e) => setNewProject({ ...newProject, repoUrl: e.target.value })}
                     placeholder="https://github.com/username/project"
-                    className="w-full h-11 px-3.5 bg-surface border border-border rounded text-[14px] text-foreground outline-none focus:border-emerald-900 focus:bg-white"
+                    className="w-full h-11 px-3.5 bg-white border border-[#D8D2C5] rounded-xl text-[14px] text-[#1C1917] placeholder:text-[#A8A29E] outline-none focus:border-emerald-900 focus:ring-1 focus:ring-emerald-900 transition-all font-sans"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-[12px] font-semibold text-foreground mb-1">
-                    Live Demo / Website (Optional)
+                  <label className="block text-[12px] font-bold text-[#1C1917] mb-1.5 font-sans">
+                    Live Demo / Website <span className="text-[#78716C] font-normal">(Optional)</span>
                   </label>
                   <input
                     type="url"
                     value={newProject.liveUrl}
                     onChange={(e) => setNewProject({ ...newProject, liveUrl: e.target.value })}
                     placeholder="https://my-app.vercel.app"
-                    className="w-full h-11 px-3.5 bg-surface border border-border rounded text-[14px] text-foreground outline-none focus:border-emerald-900 focus:bg-white"
+                    className="w-full h-11 px-3.5 bg-white border border-[#D8D2C5] rounded-xl text-[14px] text-[#1C1917] placeholder:text-[#A8A29E] outline-none focus:border-emerald-900 focus:ring-1 focus:ring-emerald-900 transition-all font-sans"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-[12px] font-semibold text-foreground mb-1">
+                  <label className="block text-[12px] font-bold text-[#1C1917] mb-1 font-sans">
                     Skills Used in This Project
                   </label>
-                  <p className="text-[11.5px] text-muted-foreground mb-2">
-                    Click to select all skills and technologies used in this project:
+                  <p className="text-[12px] text-[#78716C] mb-2 font-sans">
+                    Select the key technologies, languages, and frameworks used:
                   </p>
-                  <div className="flex flex-wrap gap-1.5 p-2.5 bg-surface border border-border rounded max-h-40 overflow-y-auto">
+                  <div className="flex flex-wrap gap-1.5 p-3 bg-white border border-[#D8D2C5] rounded-xl max-h-36 overflow-y-auto">
                     {skills.map((s) => {
                       const isSelected = (newProject.skillsUsed || []).includes(s) || (newProject.supportsClaim === s && (!newProject.skillsUsed || newProject.skillsUsed.length === 0));
                       return (
@@ -799,13 +824,13 @@ export default function CandidateDashboardPage() {
                               supportsClaim: updated[0] || ""
                             });
                           }}
-                          className={`px-2.5 py-1 rounded text-[11px] font-mono font-medium transition-all flex items-center gap-1 cursor-pointer border ${
+                          className={`px-3 py-1 rounded-lg text-[11px] font-medium transition-all flex items-center gap-1.5 cursor-pointer border ${
                             isSelected
-                              ? "bg-emerald-900 text-white border-emerald-900"
-                              : "bg-white text-muted-foreground border-border hover:border-foreground"
+                              ? "bg-emerald-900 text-white border-emerald-900 shadow-xs"
+                              : "bg-[#FAF7F0] text-[#57534E] border-[#D8D2C5] hover:border-[#1C1917] hover:text-[#1C1917]"
                           }`}
                         >
-                          {isSelected && <Check className="h-3 w-3" />}
+                          {isSelected && <Check className="h-3 w-3 shrink-0" />}
                           <span>{s}</span>
                         </button>
                       );
@@ -820,38 +845,39 @@ export default function CandidateDashboardPage() {
                         const parsed = e.target.value.split(",").map(x => x.trim()).filter(Boolean);
                         setNewProject({ ...newProject, skillsUsed: parsed, supportsClaim: parsed[0] || "" });
                       }}
-                      className="w-full h-11 px-3.5 bg-surface border border-border rounded text-[14px] text-foreground outline-none focus:border-emerald-900 focus:bg-white mt-2"
+                      className="w-full h-11 px-3.5 bg-white border border-[#D8D2C5] rounded-xl text-[14px] text-[#1C1917] placeholder:text-[#A8A29E] outline-none focus:border-emerald-900 focus:ring-1 focus:ring-emerald-900 transition-all font-sans mt-2"
                     />
                   )}
                 </div>
 
                 <div>
-                  <label className="block text-[12px] font-semibold text-foreground mb-1">
+                  <label className="block text-[12px] font-bold text-[#1C1917] mb-1.5 font-sans">
                     Project Description
                   </label>
                   <textarea
                     rows={3}
                     value={newProject.description}
                     onChange={(e) => setNewProject({ ...newProject, description: e.target.value })}
-                    placeholder="Briefly describe what this project does and what tech you used."
-                    className="w-full p-3 bg-surface border border-border rounded text-[13px] text-foreground outline-none focus:border-emerald-900 focus:bg-white"
+                    placeholder="Briefly describe what this project does and the engineering problems you solved."
+                    className="w-full p-3 bg-white border border-[#D8D2C5] rounded-xl text-[13px] text-[#1C1917] placeholder:text-[#A8A29E] outline-none focus:border-emerald-900 focus:ring-1 focus:ring-emerald-900 transition-all font-sans resize-none"
                   />
                 </div>
 
-                <div className="pt-2 flex items-center justify-end gap-3">
+                {/* Modal Footer */}
+                <div className="pt-3 flex items-center justify-end gap-3 border-t border-[#D8D2C5]">
                   <button
                     type="button"
                     onClick={() => setIsModalOpen(false)}
-                    className="px-4 py-2 border border-border text-muted-foreground hover:text-foreground rounded text-[13px] font-medium"
+                    className="h-10 px-4 border border-[#D8D2C5] bg-white text-[#57534E] hover:text-[#1C1917] rounded-xl text-[13px] font-semibold transition-colors cursor-pointer shadow-xs"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
                     disabled={saving}
-                    className="px-5 py-2 bg-emerald-900 text-white rounded text-[13px] font-medium hover:bg-emerald-950 disabled:opacity-50"
+                    className="h-10 px-6 bg-emerald-900 hover:bg-emerald-950 text-white rounded-xl text-[13px] font-bold transition-all shadow-md hover:scale-[1.01] flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
                   >
-                    {saving ? "Saving..." : "Save Project"}
+                    {saving ? "Saving Project..." : "Save Project"}
                   </button>
                 </div>
               </form>

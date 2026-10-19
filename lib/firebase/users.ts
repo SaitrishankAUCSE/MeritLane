@@ -15,6 +15,8 @@ export interface UserProfile {
   assessmentDate?: any;
   createdAt?: string | FieldValue;
   lastLoginAt?: string | FieldValue;
+  hasSeenWelcomeOnboarding?: boolean;
+  isNewUser?: boolean;
 }
 
 export async function createUserProfile(uid: string, profile: Omit<UserProfile, "createdAt" | "lastLoginAt">): Promise<void> {

@@ -56,6 +56,9 @@ export default function Navbar() {
             <Link href="/how-verification-works" className="text-[13px] text-muted-foreground hover:text-foreground transition-colors font-medium">
               How it works
             </Link>
+            <Link href="/about" className="text-[13px] text-muted-foreground hover:text-foreground transition-colors font-medium">
+              About
+            </Link>
             <button onClick={() => openAuthModal("login")} className="text-[13px] text-muted-foreground hover:text-foreground transition-colors font-medium cursor-pointer">
               Log in
             </button>
@@ -91,6 +94,13 @@ export default function Navbar() {
               className="text-sm font-medium py-2 text-muted-foreground hover:text-foreground"
             >
               How it works
+            </Link>
+            <Link 
+              href="/about" 
+              onClick={() => setMobileMenuOpen(false)}
+              className="text-sm font-medium py-2 text-muted-foreground hover:text-foreground"
+            >
+              About
             </Link>
             <Button onClick={() => { setMobileMenuOpen(false); openAuthModal("login"); }} variant="secondary" className="w-full justify-center">
               Log in

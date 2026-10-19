@@ -49,8 +49,19 @@ export function EmployerProfileCompletionGuard({ children }: EmployerProfileComp
     }
   }, [user, role, loading, profileLoading, pathname]);
 
+  const [isTourActive, setIsTourActive] = useState(false);
+  useEffect(() => {
+    const checkTour = () => {
+      const active = typeof window !== "undefined" && localStorage.getItem("meritlane_live_tour_active") === "true";
+      setIsTourActive(active);
+    };
+    checkTour();
+    window.addEventListener("meritlane-tour-state-change", checkTour);
+    return () => window.removeEventListener("meritlane-tour-state-change", checkTour);
+  }, []);
+
   const isProfilePage = pathname === "/employer/profile";
-  const shouldBlur = !checking && isProfileComplete === false && !isProfilePage;
+  const shouldBlur = !checking && isProfileComplete === false && !isProfilePage && !isTourActive;
 
   return (
     <div className="relative h-full min-h-0 w-full flex-1 flex flex-col min-w-0">

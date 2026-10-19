@@ -48,8 +48,24 @@ export function TagInput({
       const filtered = options.filter(opt => 
         opt.toLowerCase().includes(lower) && !tags.some(t => t.toLowerCase() === opt.toLowerCase())
       );
-      setFilteredOptions(filtered.slice(0, 15)); // top 15 matches
-      setShowDropdown(true);
+      // Smart ranking: prefix matches first, then word-start matches, then general substring matches
+      filtered.sort((a, b) => {
+        const aLower = a.toLowerCase();
+        const bLower = b.toLowerCase();
+        const aStarts = aLower.startsWith(lower);
+        const bStarts = bLower.startsWith(lower);
+        if (aStarts && !bStarts) return -1;
+        if (!aStarts && bStarts) return 1;
+
+        const aWordMatch = aLower.includes(" " + lower) || aLower.includes("(" + lower);
+        const bWordMatch = bLower.includes(" " + lower) || bLower.includes("(" + lower);
+        if (aWordMatch && !bWordMatch) return -1;
+        if (!aWordMatch && bWordMatch) return 1;
+
+        return a.localeCompare(b);
+      });
+      setFilteredOptions(filtered.slice(0, 20)); // top 20 matches
+      setShowDropdown(filtered.length > 0);
     } else {
       setShowDropdown(false);
     }

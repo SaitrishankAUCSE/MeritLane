@@ -2,11 +2,27 @@ import { NextRequest, NextResponse } from "next/server";
 import { adminDb } from "@/lib/firebase/admin";
 import { db } from "@/lib/firebase/config";
 import { collection, addDoc, serverTimestamp } from "firebase/firestore";
+import { checkRateLimit, getClientIp } from "@/lib/security/rateLimit";
 
 export const runtime = "nodejs";
 
 export async function POST(req: NextRequest) {
   try {
+    const clientIp = getClientIp(req);
+    // Rate limit: max 5 contact submissions per 10 minutes per IP
+    const rateLimit = checkRateLimit("contact", clientIp, 5, 10 * 60 * 1000);
+    if (!rateLimit.success) {
+      return NextResponse.json(
+        { error: "Too many requests. Please wait a few minutes before submitting another message." },
+        {
+          status: 429,
+          headers: {
+            "Retry-After": Math.ceil((rateLimit.reset - Date.now()) / 1000).toString(),
+          },
+        }
+      );
+    }
+
     const body = await req.json().catch(() => ({}));
     const { name, email, message } = body;
 

@@ -1,18 +1,26 @@
 import React from "react";
 import Link from "next/link";
-import { CheckCircle2, Shield, ArrowRight, Clock, Award, Users, AlertCircle } from "lucide-react";
+import { CheckCircle2, Shield, ArrowRight, Clock, Award, AlertCircle, ArrowLeft } from "lucide-react";
 
 export default function HowVerificationWorksPage() {
   return (
-    <div className="min-h-screen bg-[#F8F6F3] text-foreground font-sans">
+    <div className="min-h-screen bg-background text-foreground font-sans theme-public">
+      <div className="w-full max-w-5xl mx-auto px-6 pt-8">
+        <Link href="/" className="inline-flex items-center gap-1.5 text-[13px] text-muted-foreground hover:text-foreground transition-colors">
+          <ArrowLeft className="h-3.5 w-3.5" />
+          <span>Home</span>
+          <span className="text-muted-foreground/40">/</span>
+          <span className="text-foreground">How Verification Works</span>
+        </Link>
+      </div>
 
       {/* Hero */}
-      <section className="px-4 sm:px-8 lg:px-16 pt-12 sm:pt-20 pb-12 sm:pb-16 border-b border-border bg-white text-center">
+      <section className="px-4 sm:px-8 lg:px-16 pt-8 sm:pt-14 pb-12 sm:pb-16 border-b border-border bg-background text-center">
         <div className="max-w-3xl mx-auto">
-          <div className="inline-flex items-center gap-2 text-[11px] font-medium uppercase tracking-[0.15em] text-muted-foreground mb-4 border border-border px-3 py-1 rounded bg-[#F8F6F3]">
-            <Shield className="h-3 w-3 text-[#16A34A]" /> Verification Methodology
+          <div className="inline-flex items-center gap-2 text-[11px] font-medium uppercase tracking-[0.18em] text-emerald-800 mb-4 border border-border px-3.5 py-1 rounded bg-surface">
+            <Shield className="h-3.5 w-3.5 text-emerald-700" /> Verification Methodology
           </div>
-          <h1 className="font-serif text-[42px] sm:text-[54px] text-foreground tracking-tight leading-[1.1] mb-6">
+          <h1 className="font-serif text-[38px] sm:text-[52px] text-foreground tracking-tight leading-[1.12] mb-6">
             How MeritLane Verification Works
           </h1>
           <p className="text-[16px] sm:text-[18px] text-muted-foreground leading-relaxed max-w-2xl mx-auto">
@@ -23,11 +31,11 @@ export default function HowVerificationWorksPage() {
 
       {/* Six-step flow */}
       <section className="px-4 sm:px-8 lg:px-16 py-12 sm:py-20 max-w-4xl mx-auto">
-        <h2 className="text-[22px] sm:text-[26px] font-semibold text-foreground text-center mb-10 sm:mb-14">
+        <h2 className="text-[22px] sm:text-[26px] font-serif font-semibold text-foreground text-center mb-10 sm:mb-14">
           The Verification Process
         </h2>
 
-        <div className="space-y-6">
+        <div className="space-y-5">
           {[
             {
               step: "01",
@@ -62,13 +70,13 @@ export default function HowVerificationWorksPage() {
           ].map((item, idx) => (
             <div
               key={idx}
-              className="flex items-start gap-6 border border-border bg-white rounded p-7 shadow-sm"
+              className="flex items-start gap-6 border border-border bg-surface rounded-xl p-6 sm:p-7 shadow-sm transition-colors hover:border-foreground/30"
             >
               <span className="font-mono text-[18px] font-bold text-muted-foreground shrink-0 mt-0.5">
                 {item.step}
               </span>
               <div>
-                <h3 className="text-[17px] font-semibold text-foreground mb-2">{item.title}</h3>
+                <h3 className="text-[17px] font-semibold text-foreground mb-1.5">{item.title}</h3>
                 <p className="text-[14px] text-muted-foreground leading-relaxed font-sans">{item.desc}</p>
               </div>
             </div>
@@ -77,14 +85,14 @@ export default function HowVerificationWorksPage() {
       </section>
 
       {/* Rules & Safeguards */}
-      <section className="px-4 sm:px-8 lg:px-16 py-12 sm:py-16 bg-white border-y border-border">
+      <section className="px-4 sm:px-8 lg:px-16 py-12 sm:py-16 bg-surface/50 border-y border-border">
         <div className="max-w-4xl mx-auto">
-          <h2 className="text-[22px] sm:text-[26px] font-semibold text-foreground text-center mb-8 sm:mb-12">
-            Assessment Safeguards & Rules
+          <h2 className="text-[22px] sm:text-[26px] font-serif font-semibold text-foreground text-center mb-8 sm:mb-12">
+            Assessment Safeguards &amp; Rules
           </h2>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="border border-border bg-[#F8F6F3] rounded p-6">
+            <div className="border border-border bg-surface rounded-xl p-6 shadow-sm">
               <div className="flex items-center gap-2.5 text-[15px] font-semibold text-foreground mb-3">
                 <Clock className="h-4 w-4 text-muted-foreground" /> 45-Minute Server Timer
               </div>
@@ -93,16 +101,16 @@ export default function HowVerificationWorksPage() {
               </p>
             </div>
 
-            <div className="border border-border bg-[#F8F6F3] rounded p-6">
+            <div className="border border-border bg-surface rounded-xl p-6 shadow-sm">
               <div className="flex items-center gap-2.5 text-[15px] font-semibold text-foreground mb-3">
-                <Shield className="h-4 w-4 text-[#16A34A]" /> Fullscreen & Tab Monitoring
+                <Shield className="h-4 w-4 text-emerald-700" /> Fullscreen &amp; Tab Monitoring
               </div>
               <p className="text-[13px] text-muted-foreground leading-relaxed">
                 Assessments require fullscreen mode. Leaving fullscreen, navigating back, or switching browser tabs generates integrity warnings and may terminate the session.
               </p>
             </div>
 
-            <div className="border border-border bg-[#F8F6F3] rounded p-6">
+            <div className="border border-border bg-surface rounded-xl p-6 shadow-sm">
               <div className="flex items-center gap-2.5 text-[15px] font-semibold text-foreground mb-3">
                 <AlertCircle className="h-4 w-4 text-amber-600" /> Cooldown Periods
               </div>
@@ -111,7 +119,7 @@ export default function HowVerificationWorksPage() {
               </p>
             </div>
 
-            <div className="border border-border bg-[#F8F6F3] rounded p-6">
+            <div className="border border-border bg-surface rounded-xl p-6 shadow-sm">
               <div className="flex items-center gap-2.5 text-[15px] font-semibold text-foreground mb-3">
                 <Award className="h-4 w-4 text-foreground" /> Component Threshold Standard
               </div>
@@ -126,31 +134,31 @@ export default function HowVerificationWorksPage() {
       {/* What it means / does not mean */}
       <section className="px-4 sm:px-8 lg:px-16 py-12 sm:py-20 max-w-4xl mx-auto">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
-          <div className="border border-[#16A34A]/30 bg-white rounded p-6 sm:p-8 shadow-sm">
-            <div className="flex items-center gap-2 text-[15px] font-semibold text-[#16A34A] mb-4">
-              <CheckCircle2 className="h-5 w-5" /> What Verification Means
+          <div className="border border-emerald-600/30 bg-surface rounded-xl p-6 sm:p-8 shadow-sm">
+            <div className="flex items-center gap-2 text-[15px] font-semibold text-emerald-800 mb-4">
+              <CheckCircle2 className="h-5 w-5 text-emerald-700" /> What Verification Means
             </div>
             <ul className="space-y-3 text-[13px] text-muted-foreground leading-relaxed">
               <li className="flex items-start gap-2">
-                <span className="text-[#16A34A] mt-0.5">•</span>
+                <span className="text-emerald-700 mt-0.5">•</span>
                 The candidate passed an objective, timed evaluation by meeting all component thresholds.
               </li>
               <li className="flex items-start gap-2">
-                <span className="text-[#16A34A] mt-0.5">•</span>
+                <span className="text-emerald-700 mt-0.5">•</span>
                 Code was executed and validated against unit tests and hidden test suites.
               </li>
               <li className="flex items-start gap-2">
-                <span className="text-[#16A34A] mt-0.5">•</span>
+                <span className="text-emerald-700 mt-0.5">•</span>
                 Evaluation took place under monitored session integrity conditions.
               </li>
               <li className="flex items-start gap-2">
-                <span className="text-[#16A34A] mt-0.5">•</span>
+                <span className="text-emerald-700 mt-0.5">•</span>
                 Public record reflects genuine system evaluations, not self-declarations.
               </li>
             </ul>
           </div>
 
-          <div className="border border-border bg-white rounded p-8 shadow-sm">
+          <div className="border border-border bg-surface rounded-xl p-6 sm:p-8 shadow-sm">
             <div className="flex items-center gap-2 text-[15px] font-semibold text-muted-foreground mb-4">
               <AlertCircle className="h-5 w-5" /> What Verification Does Not Mean
             </div>
@@ -178,19 +186,14 @@ export default function HowVerificationWorksPage() {
         {/* CTA */}
         <div className="mt-16 text-center">
           <Link
-            href="/candidate/verification"
-            className="inline-flex items-center gap-2 px-6 h-12 bg-foreground text-white text-[14px] font-semibold rounded hover:bg-stone-800 transition-colors shadow-sm"
+            href="/signup"
+            className="inline-flex items-center gap-2 px-8 h-12 bg-foreground text-background text-[14px] font-semibold rounded-lg hover:opacity-90 transition-opacity shadow-sm"
           >
-            Start Your Verification
+            Start Your Verification — Free
             <ArrowRight className="h-4 w-4" />
           </Link>
         </div>
       </section>
-
-      {/* Footer */}
-      <footer className="border-t border-border bg-white px-4 sm:px-8 lg:px-16 py-8 sm:py-10 text-center text-[13px] text-muted-foreground">
-        <p>© {new Date().getFullYear()} MeritLane. All verification records are evaluated under MeritLane integrity standards.</p>
-      </footer>
     </div>
   );
 }

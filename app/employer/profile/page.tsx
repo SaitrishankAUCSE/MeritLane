@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { useAuth } from "@/lib/auth/AuthContext";
-import { Building, Globe, MapPin, CheckCircle2, Save, Layers, User, Link } from "lucide-react";
+import { Building, Globe, MapPin, CheckCircle2, Save, Layers, User, Link, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { fetchEmployerProfile, saveEmployerProfile } from "@/lib/firebase/employer";
 import { MeritlaneLoader } from "@/components/ui/MeritlaneLoader";
@@ -90,6 +90,28 @@ export default function EmployerProfilePage() {
             Your public company profile displayed to candidates when you reach out or send interview invitations.
           </p>
         </div>
+
+        {/* Step 1 Welcome Callout for Uncompleted Profile */}
+        {(!companyName || !location) && (
+          <div className="bg-[#FAF7F0] border border-emerald-900/30 rounded-xl p-4 sm:p-5 flex items-start gap-4 shadow-xs animate-in fade-in duration-200">
+            <div className="h-10 w-10 rounded-lg bg-emerald-900 text-white flex items-center justify-center shrink-0 mt-0.5">
+              <Sparkles className="h-5 w-5" />
+            </div>
+            <div className="space-y-1">
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="text-[14px] font-bold text-emerald-950 font-sans">
+                  Step 1 of 4: Set Up Your Company Profile
+                </span>
+                <span className="text-[10px] font-bold uppercase tracking-wider bg-emerald-900/10 text-emerald-900 border border-emerald-900/20 px-2 py-0.5 rounded-full">
+                  You Are Here
+                </span>
+              </div>
+              <p className="text-[13px] text-[#78716C] leading-relaxed font-sans">
+                Complete your company identity below to unlock verified candidate search, job postings, and direct engineering outreach.
+              </p>
+            </div>
+          </div>
+        )}
 
         {/* Company Card Header Preview */}
         <div className="bg-white border border-border rounded p-4 sm:p-8 shadow-sm flex items-start gap-4 sm:gap-5">

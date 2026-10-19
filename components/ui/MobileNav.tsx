@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Menu, X, Fingerprint, LayoutDashboard, Network, ShieldCheck, Search, Bookmark, Inbox, Settings, HelpCircle, LogOut, Briefcase, FileText, Users } from "lucide-react";
+import { Menu, X, Fingerprint, LayoutDashboard, Network, ShieldCheck, Search, Bookmark, Inbox, Settings, HelpCircle, LogOut, Briefcase, FileText, Users, Sparkles } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 import { useAuth } from "@/lib/auth/AuthContext";
 import { LogoutConfirmModal } from "@/components/ui/LogoutConfirmModal";
@@ -126,13 +126,23 @@ export function MobileNav({ role }: { role: "candidate" | "employer" | "admin" }
                 );
               })}
 
-              {/* Sign Out */}
-              <div className="pt-4 mt-4 border-t border-border">
+              {/* How MeritLane Works & Sign Out */}
+              <div className="pt-4 mt-4 border-t border-border space-y-1">
+                <button
+                  onClick={() => {
+                    setIsOpen(false);
+                    window.dispatchEvent(new CustomEvent("open-meritlane-welcome"));
+                  }}
+                  className="flex items-center px-4 py-3.5 text-[15px] font-sans font-medium text-emerald-900 bg-emerald-900/5 hover:bg-emerald-900/10 rounded-md transition-colors w-full cursor-pointer"
+                >
+                  <Sparkles className="mr-4 h-[18px] w-[18px] text-emerald-900" />
+                  How MeritLane Works
+                </button>
                 <button 
                   onClick={onSignOut}
-                  className="flex items-center px-4 py-4 text-[16px] font-sans text-muted-foreground hover:text-danger rounded-md transition-colors w-full"
+                  className="flex items-center px-4 py-3.5 text-[15px] font-sans text-muted-foreground hover:text-danger rounded-md transition-colors w-full cursor-pointer"
                 >
-                  <LogOut className="mr-4 h-[20px] w-[20px]" />
+                  <LogOut className="mr-4 h-[18px] w-[18px]" />
                   Sign Out
                 </button>
               </div>

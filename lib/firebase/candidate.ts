@@ -163,4 +163,27 @@ export const saveCandidateProfile = async (uid: string, profile: Partial<Candida
   await setDoc(docRef, cleanPayload, { merge: true });
   // Invalidate cache so the next read fetches fresh data
   invalidateCandidateProfileCache(uid);
+
+  // Automatically notify and register any new/unsupported skills for Admin inspection
+  if (Array.isArray(cleanPayload.skills) && cleanPayload.skills.length > 0 && typeof window !== "undefined") {
+    fetch("/api/candidate/new-skills", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        uid,
+        name: cleanPayload.name || "",
+        email: cleanPayload.email || "",
+        phone: cleanPayload.phone || "",
+        college: cleanPayload.college || "",
+        branch: cleanPayload.branch || "",
+        gradYear: cleanPayload.gradYear || "",
+        githubUrl: cleanPayload.githubUrl || "",
+        resumeUrl: cleanPayload.resumeUrl || "",
+        bio: cleanPayload.bio || "",
+        candidateKey,
+        skills: cleanPayload.skills,
+      }),
+    }).catch((err) => console.warn("[New Skills auto-sync notice]:", err));
+  }
 };
+

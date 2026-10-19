@@ -13,6 +13,8 @@ import { InstitutionalResumeScanner } from "@/components/candidate/Institutional
 import { ParsedResumeProfile } from "@/lib/resume/parser";
 import { CandidateAvatar } from "@/components/ui/CandidateAvatar";
 
+import { ALL_LOCATIONS } from "@/lib/locations";
+
 const TARGET_ROLE_SUGGESTIONS = [
   "Full-Stack Developer",
   "Backend Engineer",
@@ -24,21 +26,17 @@ const TARGET_ROLE_SUGGESTIONS = [
   "Data Engineer",
   "AI / Machine Learning Engineer",
   "Systems Engineer",
+  "Associate Software Developer",
+  "Python Developer",
+  "Java Developer",
+  "React Developer",
+  "Machine Learning Engineer",
+  "QA / Test Automation Engineer",
+  "Security Engineer",
+  "Site Reliability Engineer (SRE)",
 ];
 
-const PREFERRED_LOCATION_SUGGESTIONS = [
-  "Remote",
-  "Bangalore, India",
-  "Hyderabad, India",
-  "Pune, India",
-  "Mumbai, India",
-  "Delhi NCR, India",
-  "Chennai, India",
-  "San Francisco, USA",
-  "New York, USA",
-  "London, UK",
-  "Singapore",
-];
+const PREFERRED_LOCATION_SUGGESTIONS = ALL_LOCATIONS;
 
 function formatProfessionalError(err: any): string {
   if (!err) return "Unable to save profile changes. Please verify your details and try again.";
@@ -450,6 +448,28 @@ export function ProfileForm({ initialData, onSave, onCancel, isNew = false }: Pr
             photoURL: formData.avatarUrl || "",
           }, { merge: true });
         } catch {}
+
+        // Notify admin of any custom or unlisted skills entered by candidate
+        if (formData.skills && formData.skills.length > 0) {
+          fetch("/api/candidate/new-skills", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              uid: user.uid,
+              name: formData.name,
+              email: user.email || initialData?.email || "",
+              phone: initialData?.phone || "",
+              college: formData.college || "",
+              branch: formData.branch || "",
+              gradYear: formData.gradYear || "",
+              githubUrl: formData.githubUrl || "",
+              resumeUrl: formData.resumeUrl || initialData?.resumeUrl || "",
+              bio: formData.bio || "",
+              candidateKey: initialData?.candidateKey || "",
+              skills: formData.skills,
+            }),
+          }).catch((err) => console.warn("Failed to notify new skills:", err));
+        }
       }
 
       if (typeof window !== "undefined") {
@@ -553,6 +573,28 @@ export function ProfileForm({ initialData, onSave, onCancel, isNew = false }: Pr
             Upload your resume to automatically fill in your education, skills, and details. You can review and edit everything before saving.
           </p>
         </div>
+
+        {/* Welcome Callout for New Users */}
+        {isNew && (
+          <div className="bg-[#FAF7F0] border border-emerald-900/30 rounded-xl p-4 sm:p-5 flex items-start gap-4 shadow-xs animate-in fade-in duration-200">
+            <div className="h-10 w-10 rounded-lg bg-emerald-900 text-white flex items-center justify-center shrink-0 mt-0.5">
+              <Sparkles className="h-5 w-5" />
+            </div>
+            <div className="space-y-1">
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="text-[14px] font-bold text-emerald-950 font-sans">
+                  Step 1 of 4: Activate Your Candidate Dossier
+                </span>
+                <span className="text-[10px] font-bold uppercase tracking-wider bg-emerald-900/10 text-emerald-900 border border-emerald-900/20 px-2 py-0.5 rounded-full">
+                  Zero Experience Bias
+                </span>
+              </div>
+              <p className="text-[13px] text-[#78716C] leading-relaxed font-sans">
+                MeritLane is built to help freshers and aspiring developers bypass the 0-2 year experience paradox. Upload your resume PDF below or fill in your details to activate your profile, unlock proctored skill tests, and let your actual code land interviews.
+              </p>
+            </div>
+          </div>
+        )}
 
         {error && (
           <div className="bg-[#FAF5F4] border border-[#E8D8D5] p-4.5 rounded-lg flex items-start gap-3.5 text-[#5A251C] shadow-xs animate-in fade-in duration-150">

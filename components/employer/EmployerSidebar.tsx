@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { Search, Bookmark, Briefcase, Users, Settings, HelpCircle, LogOut, Activity, ChevronUp, Inbox } from "lucide-react";
+import { Search, Bookmark, Briefcase, Users, Settings, HelpCircle, LogOut, Activity, ChevronUp, Inbox, Sparkles } from "lucide-react";
 import { useAuth } from "@/lib/auth/AuthContext";
 import { db } from "@/lib/firebase/config";
 import { doc, onSnapshot } from "firebase/firestore";
@@ -163,6 +163,17 @@ export function EmployerSidebar() {
                       <HelpCircle className="h-3.5 w-3.5 text-muted-foreground/70" />
                       Help & Support
                     </Link>
+                    <button
+                      onClick={() => {
+                        setIsUserMenuOpen(false);
+                        window.dispatchEvent(new CustomEvent("open-meritlane-welcome"));
+                      }}
+                      className="flex items-center gap-2.5 w-full text-left px-2.5 py-2 text-[13px] text-emerald-900 font-medium
+                                 hover:bg-emerald-900/10 rounded transition-colors cursor-pointer"
+                    >
+                      <Sparkles className="h-3.5 w-3.5 text-emerald-900" />
+                      How MeritLane Works
+                    </button>
                   </div>
                   <div className="px-2 pt-1 pb-1 mt-1 border-t border-[#F2EFE9]">
                     <button

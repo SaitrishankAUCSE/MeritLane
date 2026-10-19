@@ -86,6 +86,158 @@ export interface AssessmentContent {
   track?: "standard" | "advanced";
 }
 
+// ─── LeetCode-style Problem Description Formatter ────────────────────────────
+
+function parseLeetCodeExamples(raw: string) {
+  if (!raw) return [];
+  const text = raw.replace(/\r/g, "");
+  const exRegex = /(?:\*\*)?Example(?:\s*:\s*Example)?\s*\d*:?\*?\*?[\s\S]*?(?:Input:?\*{0,2}\s*([\s\S]*?))\s*(?:Output:?\*{0,2}\s*([\s\S]*?))(?=(?:(?:\*\*)?Example|Explanation:?\*{0,2}|Constraints:|$|```))/gi;
+  const list: Array<{ input: string; output: string }> = [];
+  let m;
+  while ((m = exRegex.exec(text)) !== null) {
+    const inStr = m[1].replace(/```/g, "").replace(/[\*~]/g, "").trim();
+    const outStr = m[2].replace(/```/g, "").replace(/[\*~]/g, "").trim();
+    if (inStr && outStr) {
+      list.push({ input: inStr, output: outStr });
+    }
+  }
+  return list;
+}
+
+function parseLeetCodeInstructions(raw: string) {
+  if (!raw) return { description: "", examples: [], constraints: [] };
+  const text = raw.replace(/\r/g, "").trim();
+
+  // Extract constraints
+  let constraints: string[] = [];
+  const constrMatch = text.match(/(?:Constraints:?\*{0,2}|Constraints:)([\s\S]*)$/i);
+  let mainAndExamples = text;
+  if (constrMatch) {
+    mainAndExamples = text.slice(0, constrMatch.index).trim();
+    const constrBlock = constrMatch[1];
+    constraints = constrBlock
+      .split("\n")
+      .map((line) => line.replace(/^[-*•\t\s]+/, "").replace(/`+/g, "").replace(/\*+/g, "").replace(/~/g, "").trim())
+      .filter((line) => line.length > 0 && !line.startsWith("Follow-up") && line !== "19" && line !== "- 19");
+  }
+
+  // Find where examples start
+  const exStart = mainAndExamples.search(/(?:\*\*)?Example(?:\s*:\s*Example)?\s*1:?/i);
+  const description = exStart > 0 
+    ? mainAndExamples.slice(0, exStart).replace(/```/g, "").replace(/\*\*/g, "").replace(/~/g, "").trim() 
+    : mainAndExamples.split(/(?:\*\*)?Example/i)[0].replace(/\*\*/g, "").replace(/~/g, "").trim();
+
+  const examples: Array<{ num: string; input: string; output: string; explanation?: string }> = [];
+  const blocks = mainAndExamples.split(/(?=(?:\*\*)?Example(?:\s*:\s*Example)?\s*\d+:?)/i);
+  for (const block of blocks) {
+    const numMatch = block.match(/Example(?:\s*:\s*Example)?\s*(\d+)/i);
+    if (!numMatch) continue;
+    const exNum = numMatch[1];
+
+    const inMatch = block.match(/Input:?\*{0,2}\s*([\s\S]*?)(?=Output:?\*{0,2}|$)/i);
+    const outMatch = block.match(/Output:?\*{0,2}\s*([\s\S]*?)(?=Explanation:?\*{0,2}|$)/i);
+    const expMatch = block.match(/Explanation:?\*{0,2}\s*([\s\S]*?)$/i);
+
+    const inputVal = inMatch ? inMatch[1].replace(/```/g, "").replace(/[\*~]/g, "").trim() : "";
+    const outputVal = outMatch ? outMatch[1].replace(/```/g, "").replace(/[\*~]/g, "").trim() : "";
+    const explanationVal = expMatch ? expMatch[1].replace(/```/g, "").replace(/[\*~]/g, "").trim() : undefined;
+
+    if (inputVal || outputVal) {
+      examples.push({
+        num: exNum,
+        input: inputVal,
+        output: outputVal,
+        explanation: explanationVal,
+      });
+    }
+  }
+
+  return { description, examples, constraints };
+}
+
+function LeetCodeProblemDescription({ instructions }: { instructions: string }) {
+  const parsed = useMemo(() => parseLeetCodeInstructions(instructions), [instructions]);
+
+  if (parsed.examples.length === 0) {
+    return (
+      <div className="text-[13.5px] leading-relaxed text-foreground whitespace-pre-wrap font-sans space-y-3">
+        {instructions}
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-5 text-[13.5px] leading-relaxed text-foreground font-sans">
+      {/* Problem statement description */}
+      <div className="space-y-3">
+        {parsed.description.split("\n\n").map((p, pIdx) => {
+          const clean = p.trim();
+          if (!clean) return null;
+          const parts = clean.split(/(`[^`]+`)/g);
+          return (
+            <p key={pIdx} className="text-foreground/90 leading-relaxed">
+              {parts.map((part, i) => {
+                if (part.startsWith("`") && part.endsWith("`")) {
+                  return (
+                    <code
+                      key={i}
+                      className="bg-surface border border-border text-emerald-900 font-mono text-[12px] px-1.5 py-0.5 rounded mx-0.5"
+                    >
+                      {part.slice(1, -1)}
+                    </code>
+                  );
+                }
+                return part;
+              })}
+            </p>
+          );
+        })}
+      </div>
+
+      {/* Styled Example Cards */}
+      {parsed.examples.map((ex, exIdx) => (
+        <div key={exIdx} className="space-y-1.5">
+          <div className="text-[13px] font-semibold text-foreground flex items-center gap-2">
+            <span>Example {ex.num}:</span>
+          </div>
+          <div className="bg-surface/80 border border-border rounded-lg p-3 space-y-1.5 text-[12.5px] font-mono shadow-2xs">
+            <div className="flex flex-col sm:flex-row sm:gap-2">
+              <span className="font-semibold text-muted-foreground select-none shrink-0 font-sans">Input:</span>
+              <span className="text-foreground break-all">{ex.input}</span>
+            </div>
+            <div className="flex flex-col sm:flex-row sm:gap-2">
+              <span className="font-semibold text-muted-foreground select-none shrink-0 font-sans">Output:</span>
+              <span className="text-foreground font-semibold break-all">{ex.output}</span>
+            </div>
+            {ex.explanation && (
+              <div className="flex flex-col sm:flex-row sm:gap-2 pt-1 border-t border-border">
+                <span className="font-semibold text-muted-foreground select-none shrink-0 font-sans">Explanation:</span>
+                <span className="text-foreground/80 font-sans text-[12px]">{ex.explanation}</span>
+              </div>
+            )}
+          </div>
+        </div>
+      ))}
+
+      {/* Constraints */}
+      {parsed.constraints.length > 0 && (
+        <div className="space-y-2 pt-2 border-t border-border">
+          <div className="text-[13px] font-semibold text-foreground">Constraints:</div>
+          <ul className="space-y-1.5 list-disc list-inside text-[12px] text-muted-foreground font-mono">
+            {parsed.constraints.map((c, cIdx) => (
+              <li key={cIdx} className="leading-normal">
+                <code className="bg-surface border border-border px-1.5 py-0.5 rounded text-foreground text-[11.5px]">
+                  {c}
+                </code>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ─── Infraction Overlay ───────────────────────────────────────────────────────
 
 interface InfractionOverlayProps {
@@ -333,6 +485,7 @@ function AssessmentContentWrapper() {
     showExitWarningRef.current = showExitWarning;
   }, [showExitWarning]);
   const [selectedTrack, setSelectedTrack] = useState<"standard" | "advanced">("standard");
+  const [switchingTrack, setSwitchingTrack] = useState<boolean>(false);
   const [assessmentResult, setAssessmentResult] = useState<{
     passed: boolean;
     score: number;
@@ -402,8 +555,46 @@ function AssessmentContentWrapper() {
   const [showSubmitModal, setShowSubmitModal] = useState<boolean>(false);
   const [code, setCode] = useState("");
   const [evaluating, setEvaluating] = useState(false);
-  const [output, setOutput] = useState("");
-  const [activeConsoleTab, setActiveConsoleTab] = useState<"console" | "testcases" | "custom">("console");
+
+  // Task-isolated compiler outputs and test run statistics
+  const [outputByTask, setOutputByTask] = useState<{ [taskIdx: number]: string }>({});
+  const [testRunStatsByTask, setTestRunStatsByTask] = useState<{
+    [taskIdx: number]: {
+      total: number;
+      passed: number;
+      durationMs: number;
+      cases: Array<{ name: string; input: string; expected: string; actual: string; passed: boolean; status?: string; runtimeMs?: number }>;
+    } | null;
+  }>({});
+  const [selectedCaseIdxByTask, setSelectedCaseIdxByTask] = useState<{ [taskIdx: number]: number }>({});
+  const [activeConsoleTabByTask, setActiveConsoleTabByTask] = useState<{ [taskIdx: number]: "console" | "testcases" | "custom" }>({});
+  const [isConsoleExpanded, setIsConsoleExpanded] = useState<boolean>(false);
+
+  // Active task accessors to guarantee 100% isolation between Task 1 and Task 2
+  const output = outputByTask[activeCodingTaskIdx] || "";
+  const setOutput = useCallback((val: string | ((prev: string) => string)) => {
+    setOutputByTask((prev) => {
+      const current = prev[activeCodingTaskIdx] || "";
+      const next = typeof val === "function" ? val(current) : val;
+      return { ...prev, [activeCodingTaskIdx]: next };
+    });
+  }, [activeCodingTaskIdx]);
+
+  const testRunStats = testRunStatsByTask[activeCodingTaskIdx] || null;
+  const setTestRunStats = useCallback((val: any) => {
+    setTestRunStatsByTask((prev) => ({ ...prev, [activeCodingTaskIdx]: val }));
+  }, [activeCodingTaskIdx]);
+
+  const selectedCaseIdx = selectedCaseIdxByTask[activeCodingTaskIdx] ?? 0;
+  const setSelectedCaseIdx = useCallback((idx: number) => {
+    setSelectedCaseIdxByTask((prev) => ({ ...prev, [activeCodingTaskIdx]: idx }));
+  }, [activeCodingTaskIdx]);
+
+  const activeConsoleTab = activeConsoleTabByTask[activeCodingTaskIdx] || "testcases";
+  const setActiveConsoleTab = useCallback((tab: "console" | "testcases" | "custom") => {
+    setActiveConsoleTabByTask((prev) => ({ ...prev, [activeCodingTaskIdx]: tab }));
+  }, [activeCodingTaskIdx]);
+
   const [customInput, setCustomInput] = useState<string>("");
   const [flaggedQuestions, setFlaggedQuestions] = useState<boolean[]>([]);
   const [showResetConfirm, setShowResetConfirm] = useState(false);
@@ -411,19 +602,12 @@ function AssessmentContentWrapper() {
   const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [cursorPos, setCursorPos] = useState({ line: 1, col: 1 });
-  const [selectedCaseIdx, setSelectedCaseIdx] = useState<number>(0);
   const [editorTheme, setEditorTheme] = useState<"dark" | "light">("dark");
   const [editorFontSize, setEditorFontSize] = useState<number>(13);
   const [copiedCodeToast, setCopiedCodeToast] = useState<boolean>(false);
   const [copiedInputIdx, setCopiedInputIdx] = useState<number | null>(null);
   const [submittingModal, setSubmittingModal] = useState<boolean>(false);
   const [submissionProgress, setSubmissionProgress] = useState<number>(0);
-  const [testRunStats, setTestRunStats] = useState<{
-    total: number;
-    passed: number;
-    durationMs: number;
-    cases: Array<{ name: string; input: string; expected: string; actual: string; passed: boolean }>;
-  } | null>(null);
 
   // Overlay states
   const [infractionOverlay, setInfractionOverlay] = useState<{
@@ -630,7 +814,51 @@ function AssessmentContentWrapper() {
     return () => {
       isMounted = false;
     };
-  }, [user, loading, router, skillParam, selectedTrack]);
+  }, [user, loading, router, skillParam]);
+
+  // Handle explicit track switching from pre-flight intro screen
+  const handleTrackSelect = async (track: "standard" | "advanced") => {
+    if (track === selectedTrack || switchingTrack) return;
+    setSelectedTrack(track);
+    setSwitchingTrack(true);
+    try {
+      const token = user ? await user.getIdToken() : "";
+      const res = await fetch("/api/start-assessment", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          skill: skillParam,
+          track,
+          switchTrack: true,
+        }),
+      });
+      const data = await res.json();
+      if (res.ok && data.content) {
+        setContent(data.content);
+        const resolvedTrack = data.track || data.content.track || track;
+        setSelectedTrack(resolvedTrack);
+
+        if (data.content.codingTasks && data.content.codingTasks.length > 0) {
+          const easy = data.content.codingTasks[0];
+          const med = data.content.codingTasks[1];
+          setCodeEasy(easy?.initialCode || "");
+          setCodeMedium(med?.initialCode || "");
+          setCode(easy?.initialCode || "");
+        } else if (data.content.coding) {
+          setCode(data.content.coding.initialCode || "");
+        }
+      } else if (!res.ok) {
+        console.error("Failed to switch track:", data.error);
+      }
+    } catch (err) {
+      console.error("Track switch error:", err);
+    } finally {
+      setSwitchingTrack(false);
+    }
+  };
 
   // Auto-save draft progress to sessionStorage
   useEffect(() => {
@@ -1095,6 +1323,61 @@ function AssessmentContentWrapper() {
     setOutput("");
   };
 
+  const handleEditorMount = (editor: any, monaco: any) => {
+    // Smart Indentation Rule on Enter:
+    // Strictly preserves user's typed indentation, never touching or corrupting previous lines.
+    // When entering an indented block (e.g. if condition, loops, functions, or lines ending in '{', ':', '(', '['),
+    // automatically indents the next line by 4 spaces.
+    editor.addCommand(monaco.KeyCode.Enter, () => {
+      const model = editor.getModel();
+      const position = editor.getPosition();
+      if (!model || !position) return;
+
+      const lineNumber = position.lineNumber;
+      const lineContent = model.getLineContent(lineNumber);
+      const textBeforeCursor = lineContent.substring(0, position.column - 1);
+      const textAfterCursor = lineContent.substring(position.column - 1);
+
+      // Preserve current line's leading indentation exactly
+      const leadingMatch = lineContent.match(/^(\s*)/);
+      const currentIndent = leadingMatch ? leadingMatch[1] : "";
+
+      // Check if current statement triggers an extra block indent:
+      // 1. Line ends with '{', '[', '(', or ':' (Python/TS/JS)
+      // 2. Starts with control flow keywords: if, for, while, else, elif, switch, case, try, catch, finally, def, function, class
+      const trimmedBefore = textBeforeCursor.trim();
+      const isBlockStarter =
+        /[{\[:(]$/.test(trimmedBefore) ||
+        /^(?:if|else|elif|for|while|switch|case|default|try|catch|finally|function|def|class)\b/i.test(trimmedBefore);
+
+      // Cursor placed between matching braces: { | }
+      const isBetweenBraces = /{\s*$/.test(textBeforeCursor) && /^\s*}/.test(textAfterCursor);
+
+      if (isBetweenBraces) {
+        const innerIndent = currentIndent + "    ";
+        editor.executeEdits("indent-rules", [
+          {
+            range: new monaco.Range(lineNumber, position.column, lineNumber, position.column),
+            text: "\n" + innerIndent + "\n" + currentIndent,
+          },
+        ]);
+        editor.setPosition({ lineNumber: lineNumber + 1, column: innerIndent.length + 1 });
+        return;
+      }
+
+      // Next line indentation (current indent + 4 spaces if block starter, otherwise exact match)
+      const nextIndent = isBlockStarter ? currentIndent + "    " : currentIndent;
+
+      editor.executeEdits("indent-rules", [
+        {
+          range: new monaco.Range(lineNumber, position.column, lineNumber, position.column),
+          text: "\n" + nextIndent,
+        },
+      ]);
+      editor.setPosition({ lineNumber: lineNumber + 1, column: nextIndent.length + 1 });
+    });
+  };
+
   // ── IDE Ergonomics: Keydown Handler for Code Editor ───────────────────────
 
   const handleEditorKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -1337,6 +1620,8 @@ function AssessmentContentWrapper() {
           // Dual-task: send easy + medium separately, ensuring current editor code is used for active task
           easyCode: isDualTask ? (activeCodingTaskIdx === 0 ? code : (codeEasy || code)) : undefined,
           mediumCode: isDualTask ? (activeCodingTaskIdx === 1 ? code : (codeMedium || code)) : undefined,
+          easyQuestionId: isDualTask ? content?.codingTasks?.[0]?.id : (content?.coding?.id || undefined),
+          mediumQuestionId: isDualTask ? content?.codingTasks?.[1]?.id : undefined,
           // Legacy fallback
           code: code,
           language: selectedLanguage,
@@ -1494,6 +1779,32 @@ function AssessmentContentWrapper() {
 
   // ── Public Test Cases (5 Test Cases for Run Code) ─────────────────────────
   const defaultPublicTestCases = useMemo<any[]>(() => {
+    // 1. Check if the active task instructions contain parsed LeetCode examples
+    const activeTask = content?.codingTasks?.[activeCodingTaskIdx] || content?.coding;
+    if (activeTask?.instructions) {
+      const parsed = parseLeetCodeExamples(activeTask.instructions);
+      if (parsed.length > 0) {
+        const cases = parsed.map((ex, idx) => ({
+          name: `Test Case ${idx + 1}: Public Example ${idx + 1}`,
+          input: ex.input,
+          expected: ex.output,
+          actual: "",
+          passed: null as boolean | null,
+        }));
+        while (cases.length < 5) {
+          const base = cases[cases.length % parsed.length];
+          cases.push({
+            name: `Test Case ${cases.length + 1}: Public Assertion ${cases.length + 1}`,
+            input: base.input,
+            expected: base.expected,
+            actual: "",
+            passed: null as boolean | null,
+          });
+        }
+        return cases;
+      }
+    }
+
     const skillLower = (skillParam || "").toLowerCase();
     const langLower = (selectedLanguage || "").toLowerCase();
 
@@ -1655,7 +1966,7 @@ function AssessmentContentWrapper() {
         passed: null as boolean | null,
       },
     ];
-  }, [skillParam, selectedLanguage, content]);
+  }, [skillParam, selectedLanguage, content, activeCodingTaskIdx]);
 
   const displayCases = useMemo(() => {
     if (testRunStats?.cases && testRunStats.cases.length > 0) {
@@ -3051,7 +3362,7 @@ function AssessmentContentWrapper() {
           <FullscreenUnsupportedOverlay onRetry={handleRetryFullscreen} />
         )}
         <div className="min-h-[100dvh] w-full bg-[#F8F6F3] text-foreground font-sans p-4 sm:px-6 lg:px-8 py-6 overflow-y-auto">
-          <div className="w-full flex flex-col gap-8">
+          <div className="max-w-7xl mx-auto w-full flex flex-col gap-8">
             {/* Header Banner */}
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 pb-6 border-b border-border">
               <div>
@@ -3059,18 +3370,18 @@ function AssessmentContentWrapper() {
                   <ShieldCheck className="h-3.5 w-3.5 text-emerald-900" />
                   {displaySkill.toUpperCase()} · Technical Assessment & Verification
                 </div>
-                <h1 className="text-[32px] sm:text-[38px] font-semibold text-foreground leading-tight">
-                  Before you begin
+                <h1 className="text-[30px] sm:text-[36px] font-serif font-bold text-foreground leading-tight">
+                  Assessment Verification Protocol
                 </h1>
-                <p className="text-[14px] sm:text-[15px] text-muted-foreground mt-1.5 max-w-2xl leading-relaxed">
-                  Review the assessment integrity protocols and environment requirements. The timer and automated proctoring begin the moment you enter fullscreen.
+                <p className="text-[14px] text-muted-foreground mt-1 max-w-2xl leading-relaxed">
+                  Review the assessment rules, select your challenge track, and verify system readiness. The proctored timer begins immediately upon entering fullscreen.
                 </p>
               </div>
               <div className="flex items-center gap-3 shrink-0">
                 <div className="bg-white border border-border px-4 py-2.5 rounded text-right shadow-xs">
-                  <div className="text-[11px] uppercase tracking-wider text-muted-foreground font-semibold">Session Protocol</div>
-                  <div className="text-[14px] font-semibold text-foreground flex items-center gap-1.5">
-                    <Maximize2 className="h-3.5 w-3.5 text-emerald-900" /> Strict Fullscreen
+                  <div className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold font-mono">Session Protocol</div>
+                  <div className="text-[13px] font-semibold text-foreground flex items-center gap-1.5 font-mono">
+                    <Maximize2 className="h-3.5 w-3.5 text-emerald-900" /> STRICT FULLSCREEN
                   </div>
                 </div>
               </div>
@@ -3078,13 +3389,132 @@ function AssessmentContentWrapper() {
 
             {/* Main Content Grid */}
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-              {/* Left Column: Integrity Protocols & Rules (8 cols) */}
+              {/* Left Column: Track Selection, Proctoring Requirements & Guardrails (7-8 cols) */}
               <div className="lg:col-span-7 xl:col-span-8 space-y-6">
+
+                {/* ── Step 1: Track Selection Card (when coding challenges exist) ── */}
+                {content.hasCoding && (
+                  <div className="border border-border bg-white rounded overflow-hidden shadow-xs">
+                    <div className="px-6 py-4 border-b border-border bg-surface flex items-center justify-between">
+                      <div className="flex items-center gap-2 text-[12px] font-semibold text-foreground uppercase tracking-[0.08em]">
+                        <Layers className="h-4 w-4 text-emerald-900" />
+                        Step 1 · Choose Your Assessment Track
+                      </div>
+                      <span className={`text-[10px] font-mono font-bold uppercase tracking-wider px-2.5 py-0.5 rounded border transition-colors ${
+                        switchingTrack
+                          ? "bg-stone-100 text-stone-600 border-stone-300 animate-pulse"
+                          : selectedTrack === "advanced"
+                          ? "bg-amber-100 text-amber-800 border-amber-300"
+                          : "bg-emerald-900/10 text-emerald-900 border-emerald-900/20"
+                      }`}>
+                        {switchingTrack
+                          ? "Switching Track..."
+                          : selectedTrack === "advanced"
+                          ? "Gold Honors Track Selected"
+                          : "Professional Track Selected"}
+                      </span>
+                    </div>
+
+                    <div className="p-6">
+                      <p className="text-[13px] text-muted-foreground leading-relaxed mb-4">
+                        Choose your assessment difficulty level. Both tracks feature the same comprehensive MCQ section. The credential and honor badge awarded upon scoring ≥ 75% depends on the track you choose.
+                      </p>
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {/* Standard Track */}
+                        <button
+                          type="button"
+                          disabled={switchingTrack}
+                          onClick={() => handleTrackSelect("standard")}
+                          className={`relative text-left p-5 rounded-lg border-2 transition-all cursor-pointer flex flex-col justify-between ${
+                            selectedTrack === "standard"
+                              ? "border-emerald-700 bg-emerald-900/[0.04] ring-1 ring-emerald-700/30 shadow-xs"
+                              : "border-border bg-surface hover:border-[#C8BFB0] hover:bg-white"
+                          } ${switchingTrack ? "opacity-75 cursor-wait" : ""}`}
+                        >
+                          <div>
+                            <div className="flex items-center justify-between mb-3">
+                              <div className="flex items-center gap-2.5">
+                                <div className="h-10 w-10 rounded-lg bg-emerald-900/10 border border-emerald-900/20 flex items-center justify-center shrink-0">
+                                  <ShieldCheck className="h-5 w-5 text-emerald-900" />
+                                </div>
+                                <div>
+                                  <div className="text-[15px] font-bold text-foreground">Standard Track</div>
+                                  <div className="text-[11px] text-muted-foreground">Recommended for most engineers</div>
+                                </div>
+                              </div>
+                              <div className={`h-5 w-5 rounded-full border flex items-center justify-center ${
+                                selectedTrack === "standard"
+                                  ? "bg-emerald-700 border-emerald-700 text-white"
+                                  : "border-[#C8BFB0] bg-white"
+                              }`}>
+                                {selectedTrack === "standard" && <Check className="h-3 w-3" />}
+                              </div>
+                            </div>
+                            <p className="text-[12.5px] text-muted-foreground leading-relaxed mb-3">
+                              Solve <strong className="text-foreground">1 Easy</strong> + <strong className="text-foreground">1 Medium</strong> coding challenge from the core technical question bank.
+                            </p>
+                          </div>
+                          <div className="pt-3 border-t border-border/60 flex items-center justify-between">
+                            <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-emerald-900 bg-emerald-900/10 border border-emerald-900/20 px-2 py-0.5 rounded">
+                              <Award className="h-3 w-3" /> Verified Professional
+                            </span>
+                            <span className="text-[11px] font-mono text-muted-foreground">Tier 1</span>
+                          </div>
+                        </button>
+
+                        {/* Advanced Track */}
+                        <button
+                          type="button"
+                          disabled={switchingTrack}
+                          onClick={() => handleTrackSelect("advanced")}
+                          className={`relative text-left p-5 rounded-lg border-2 transition-all cursor-pointer flex flex-col justify-between ${
+                            selectedTrack === "advanced"
+                              ? "border-amber-600 bg-amber-50/50 ring-1 ring-amber-500/30 shadow-xs"
+                              : "border-border bg-surface hover:border-[#C8BFB0] hover:bg-white"
+                          } ${switchingTrack ? "opacity-75 cursor-wait" : ""}`}
+                        >
+                          <div>
+                            <div className="flex items-center justify-between mb-3">
+                              <div className="flex items-center gap-2.5">
+                                <div className="h-10 w-10 rounded-lg bg-amber-100 border border-amber-300 flex items-center justify-center shrink-0">
+                                  <Trophy className="h-5 w-5 text-amber-700" />
+                                </div>
+                                <div>
+                                  <div className="text-[15px] font-bold text-foreground">Advanced Track</div>
+                                  <div className="text-[11px] text-muted-foreground">For senior & competitive engineers</div>
+                                </div>
+                              </div>
+                              <div className={`h-5 w-5 rounded-full border flex items-center justify-center ${
+                                selectedTrack === "advanced"
+                                  ? "bg-amber-600 border-amber-600 text-white"
+                                  : "border-[#C8BFB0] bg-white"
+                              }`}>
+                                {selectedTrack === "advanced" && <Check className="h-3 w-3" />}
+                              </div>
+                            </div>
+                            <p className="text-[12.5px] text-muted-foreground leading-relaxed mb-3">
+                              Solve <strong className="text-foreground">1 Hard</strong> challenge designed to test algorithmic depth and performance optimization under pressure.
+                            </p>
+                          </div>
+                          <div className="pt-3 border-t border-border/60 flex items-center justify-between">
+                            <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-amber-800 bg-amber-100 border border-amber-300 px-2 py-0.5 rounded">
+                              <Trophy className="h-3 w-3" /> Gold Honors
+                            </span>
+                            <span className="text-[11px] font-mono text-amber-800 font-semibold">Honors Distinction</span>
+                          </div>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* ── Step 2: Assessment Integrity & Proctoring Requirements ── */}
                 <div className="border border-border bg-white rounded overflow-hidden shadow-xs">
                   <div className="px-6 py-4 border-b border-border bg-surface flex items-center justify-between">
                     <div className="flex items-center gap-2 text-[12px] font-semibold text-foreground uppercase tracking-[0.08em]">
                       <ShieldAlert className="h-4 w-4 text-danger" />
-                      Assessment Integrity & Proctoring Requirements
+                      {content.hasCoding ? "Step 2 · Integrity & Proctoring Requirements" : "Assessment Integrity & Proctoring Requirements"}
                     </div>
                     <span className="text-[11px] font-sans font-semibold text-muted-foreground bg-white border border-border px-2 py-0.5 rounded">
                       Enforced
@@ -3147,143 +3577,120 @@ function AssessmentContentWrapper() {
                   </div>
                 </div>
 
-                {/* Candidate Checklist & Preparation */}
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                  <div className="border border-border bg-white p-4 rounded shadow-xs">
-                    <div className="text-[11px] font-semibold uppercase tracking-wider text-foreground mb-1">
-                      Focus Guard
-                    </div>
-                    <div className="text-[12px] text-muted-foreground leading-normal">
-                      Disable desktop notifications and maintain single-window focus throughout.
-                    </div>
+                {/* ── Step 3: Candidate Checklist & Session Guardrails ── */}
+                <div className="border border-border bg-white rounded p-5 shadow-xs">
+                  <div className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mb-3 flex items-center gap-2">
+                    <Lock className="h-3.5 w-3.5 text-foreground" />
+                    Active Session Security Guardrails
                   </div>
-                  <div className="border border-border bg-white p-4 rounded shadow-xs">
-                    <div className="text-[11px] font-semibold uppercase tracking-wider text-foreground mb-1">
-                      Anti-Tamper
+                  <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3.5">
+                    <div className="p-3.5 bg-surface border border-border rounded">
+                      <div className="text-[11px] font-semibold uppercase tracking-wider text-foreground mb-1 flex items-center gap-1.5">
+                        <Monitor className="h-3.5 w-3.5 text-emerald-900" /> Focus Guard
+                      </div>
+                      <div className="text-[11.5px] text-muted-foreground leading-normal">
+                        Single-window fullscreen focus strictly enforced.
+                      </div>
                     </div>
-                    <div className="text-[12px] text-muted-foreground leading-normal">
-                      Right-click, developer shortcuts, and copy-paste are strictly locked.
+                    <div className="p-3.5 bg-surface border border-border rounded">
+                      <div className="text-[11px] font-semibold uppercase tracking-wider text-foreground mb-1 flex items-center gap-1.5">
+                        <ShieldAlert className="h-3.5 w-3.5 text-danger" /> Anti-Tamper
+                      </div>
+                      <div className="text-[11.5px] text-muted-foreground leading-normal">
+                        Right-click, dev shortcuts, and copy-paste locked.
+                      </div>
                     </div>
-                  </div>
-                  <div className="border border-border bg-white p-4 rounded shadow-xs">
-                    <div className="text-[11px] font-semibold uppercase tracking-wider text-foreground mb-1">
-                      Auto-Save
+                    <div className="p-3.5 bg-surface border border-border rounded">
+                      <div className="text-[11px] font-semibold uppercase tracking-wider text-foreground mb-1 flex items-center gap-1.5">
+                        <CheckCircle2 className="h-3.5 w-3.5 text-emerald-900" /> Auto-Save
+                      </div>
+                      <div className="text-[11.5px] text-muted-foreground leading-normal">
+                        MCQ answers and code drafts persist in real-time.
+                      </div>
                     </div>
-                    <div className="text-[12px] text-muted-foreground leading-normal">
-                      MCQ responses and code drafts persist automatically in real-time.
+                    <div className="p-3.5 bg-surface border border-border rounded">
+                      <div className="text-[11px] font-semibold uppercase tracking-wider text-foreground mb-1 flex items-center gap-1.5">
+                        <Cpu className="h-3.5 w-3.5 text-amber-700" /> Live Ledger
+                      </div>
+                      <div className="text-[11.5px] text-muted-foreground leading-normal">
+                        Results cryptographically signed upon submission.
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
 
-              {/* Right Column: Track Selection & Call-To-Action (4-5 cols) */}
-              <div className="lg:col-span-5 xl:col-span-4 space-y-6">
-
-                {/* ── Track Selection Card ── */}
-                {content.hasCoding && (
-                  <div className="border border-border bg-white rounded p-6 shadow-xs space-y-4">
-                    <div className="text-[12px] font-semibold uppercase tracking-wider text-foreground pb-3 border-b border-border flex items-center gap-2">
-                      <Layers className="h-3.5 w-3.5 text-emerald-900" />
-                      Choose Your Assessment Track
-                    </div>
-                    <p className="text-[12px] text-muted-foreground leading-relaxed">
-                      Select a difficulty track. Both tracks include the same MCQ section. Your credential badge depends on the track you choose.
-                    </p>
-                    <div className="grid grid-cols-1 gap-3">
-                      {/* Standard Track */}
-                      <button
-                        onClick={() => setSelectedTrack("standard")}
-                        className={`relative w-full text-left p-4 rounded-lg border-2 transition-all cursor-pointer ${
-                          selectedTrack === "standard"
-                            ? "border-emerald-700 bg-emerald-900/[0.03] ring-1 ring-emerald-700/30"
-                            : "border-border bg-white hover:border-[#C8BFB0]"
-                        }`}
-                      >
-                        {selectedTrack === "standard" && (
-                          <div className="absolute top-2.5 right-2.5 h-5 w-5 rounded-full bg-emerald-700 flex items-center justify-center">
-                            <Check className="h-3 w-3 text-white" />
-                          </div>
-                        )}
-                        <div className="flex items-center gap-2.5 mb-2">
-                          <div className="h-9 w-9 rounded-lg bg-emerald-900/10 border border-emerald-900/20 flex items-center justify-center">
-                            <ShieldCheck className="h-4.5 w-4.5 text-emerald-900" />
-                          </div>
-                          <div>
-                            <div className="text-[14px] font-bold text-foreground">Standard Track</div>
-                            <div className="text-[11px] text-muted-foreground">Recommended for most candidates</div>
-                          </div>
-                        </div>
-                        <div className="text-[12px] text-muted-foreground leading-relaxed mb-2.5">
-                          Solve <strong className="text-foreground">1 Easy</strong> + <strong className="text-foreground">1 Medium</strong> coding challenge from the top interview question bank.
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-emerald-900 bg-emerald-900/10 border border-emerald-900/20 px-2 py-0.5 rounded">
-                            <Award className="h-3 w-3" /> Verified Professional
-                          </span>
-                        </div>
-                      </button>
-
-                      {/* Advanced Track */}
-                      <button
-                        onClick={() => setSelectedTrack("advanced")}
-                        className={`relative w-full text-left p-4 rounded-lg border-2 transition-all cursor-pointer ${
-                          selectedTrack === "advanced"
-                            ? "border-amber-600 bg-amber-50/40 ring-1 ring-amber-500/30"
-                            : "border-border bg-white hover:border-[#C8BFB0]"
-                        }`}
-                      >
-                        {selectedTrack === "advanced" && (
-                          <div className="absolute top-2.5 right-2.5 h-5 w-5 rounded-full bg-amber-600 flex items-center justify-center">
-                            <Check className="h-3 w-3 text-white" />
-                          </div>
-                        )}
-                        <div className="flex items-center gap-2.5 mb-2">
-                          <div className="h-9 w-9 rounded-lg bg-amber-100 border border-amber-300 flex items-center justify-center">
-                            <Trophy className="h-4.5 w-4.5 text-amber-700" />
-                          </div>
-                          <div>
-                            <div className="text-[14px] font-bold text-foreground">Advanced Track</div>
-                            <div className="text-[11px] text-muted-foreground">For experienced engineers</div>
-                          </div>
-                        </div>
-                        <div className="text-[12px] text-muted-foreground leading-relaxed mb-2.5">
-                          Solve <strong className="text-foreground">1 Hard</strong> coding challenge from the top interview question bank.
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-amber-800 bg-amber-100 border border-amber-300 px-2 py-0.5 rounded">
-                            <Trophy className="h-3 w-3" /> Gold Honors
-                          </span>
-                        </div>
-                      </button>
-                    </div>
-                  </div>
-                )}
-
-                {/* Assessment Overview Card */}
+              {/* Right Column: Sticky Assessment Overview, Verification Details & Action (4-5 cols) */}
+              <div className="lg:col-span-5 xl:col-span-4 space-y-6 lg:sticky lg:top-6 self-start">
                 <div className="border border-border bg-white rounded p-6 shadow-xs space-y-5">
-                  <div className="text-[12px] font-semibold uppercase tracking-wider text-foreground pb-3 border-b border-border">
-                    Assessment Overview
+                  <div className="flex items-center justify-between pb-3 border-b border-border">
+                    <div className="text-[12px] font-semibold uppercase tracking-wider text-foreground">
+                      Assessment Overview
+                    </div>
+                    <span className="text-[10px] font-mono text-muted-foreground">SESSION PRE-FLIGHT</span>
                   </div>
+
+                  {/* Active Track Status Banner */}
+                  {content.hasCoding && (
+                    <div className={`p-3 rounded border flex items-center justify-between ${
+                      selectedTrack === "advanced"
+                        ? "bg-amber-50/70 border-amber-300"
+                        : "bg-emerald-900/[0.04] border-emerald-900/20"
+                    }`}>
+                      <div className="flex items-center gap-2">
+                        {selectedTrack === "advanced" ? (
+                          <Trophy className="h-4 w-4 text-amber-700" />
+                        ) : (
+                          <Award className="h-4 w-4 text-emerald-900" />
+                        )}
+                        <div>
+                          <div className="text-[11px] font-mono uppercase text-muted-foreground">Active Track</div>
+                          <div className="text-[13px] font-bold text-foreground">
+                            {selectedTrack === "advanced" ? "Advanced Track" : "Standard Track"}
+                          </div>
+                        </div>
+                      </div>
+                      <span className={`text-[10px] font-mono font-bold uppercase px-2 py-0.5 rounded ${
+                        selectedTrack === "advanced" ? "bg-amber-200/60 text-amber-900" : "bg-emerald-900/10 text-emerald-900"
+                      }`}>
+                        {selectedTrack === "advanced" ? "Gold Honors" : "Professional"}
+                      </span>
+                    </div>
+                  )}
                   
+                  {/* Assessment Metric Boxes */}
                   <div className="grid grid-cols-2 gap-3">
                     <div className="border border-border bg-surface p-3.5 rounded">
                       <div className="text-[11px] text-muted-foreground mb-1">Duration</div>
-                      <div className="text-[15px] font-semibold text-foreground flex items-center gap-1.5">
+                      <div className="text-[15px] font-semibold text-foreground flex items-center gap-1.5 font-mono">
                         <Clock className="h-4 w-4 text-muted-foreground" /> 60 mins
                       </div>
                     </div>
                     <div className="border border-border bg-surface p-3.5 rounded">
-                      <div className="text-[11px] text-muted-foreground mb-1">Coding Format</div>
-                      <div className="text-[14px] font-semibold text-foreground truncate">
+                      <div className="text-[11px] text-muted-foreground mb-1">Coding Challenge</div>
+                      <div className="text-[13px] font-semibold text-foreground truncate font-mono">
                         {content.hasCoding
                           ? selectedTrack === "advanced"
-                            ? "1 Hard Challenge"
+                            ? "1 Hard Task"
                             : "1 Easy + 1 Medium"
-                          : `${content.mcqs?.length || 0} MCQs`}
+                          : "No Coding"}
+                      </div>
+                    </div>
+                    <div className="border border-border bg-surface p-3.5 rounded">
+                      <div className="text-[11px] text-muted-foreground mb-1">Technical MCQs</div>
+                      <div className="text-[15px] font-semibold text-foreground font-mono">
+                        {content.mcqs?.length || 15} Questions
+                      </div>
+                    </div>
+                    <div className="border border-border bg-surface p-3.5 rounded">
+                      <div className="text-[11px] text-muted-foreground mb-1">Passing Mark</div>
+                      <div className="text-[15px] font-semibold text-emerald-900 font-mono">
+                        ≥ 75% Overall
                       </div>
                     </div>
                   </div>
 
+                  {/* Credential Earned Card */}
                   <div className="border border-border bg-surface p-3.5 rounded">
                     <div className="text-[11px] text-muted-foreground mb-1">Credential Earned On Pass</div>
                     <div className="text-[13px] font-semibold text-foreground flex items-center gap-1.5">
@@ -3293,11 +3700,28 @@ function AssessmentContentWrapper() {
                         <><Award className="h-3.5 w-3.5 text-emerald-900" /> Verified Professional Credential</>
                       )}
                     </div>
-                    <div className="text-[11px] text-muted-foreground mt-0.5">
-                      Earned on achieving overall ≥ 75% threshold.
+                    <div className="text-[11px] text-muted-foreground mt-0.5 leading-relaxed">
+                      Publishes directly to your public record and unlocks direct recruiter discovery.
                     </div>
                   </div>
 
+                  {/* Readiness Status Checklist */}
+                  <div className="p-3 bg-surface border border-border rounded space-y-1.5 text-[11px] text-muted-foreground font-mono">
+                    <div className="flex items-center gap-2 text-foreground font-semibold">
+                      <CheckCircle2 className="h-3.5 w-3.5 text-emerald-900" />
+                      <span>Fullscreen display mode armed</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-foreground font-semibold">
+                      <CheckCircle2 className="h-3.5 w-3.5 text-emerald-900" />
+                      <span>Tab &amp; focus tamper tracker armed</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-foreground font-semibold">
+                      <CheckCircle2 className="h-3.5 w-3.5 text-emerald-900" />
+                      <span>Cryptographic verification ready</span>
+                    </div>
+                  </div>
+
+                  {/* Action Buttons */}
                   <div className="pt-2 space-y-3">
                     <button
                       onClick={handleStart}
@@ -3314,9 +3738,10 @@ function AssessmentContentWrapper() {
                     </button>
                   </div>
 
+                  {/* Important Integrity Alert */}
                   <div className="p-3.5 bg-[#FFFBEB] border border-[#FDE68A] rounded text-[11px] text-[#92400E] leading-relaxed">
                     <span className="font-semibold block mb-0.5">⚠️ Important Integrity Rule:</span>
-                    Do not click browser Back after starting. Forcefully navigating back will terminate your exam and register a 0% score.
+                    Do not click browser Back or switch tabs after starting. Forcefully navigating away will terminate your exam and register a 0% score with a 21-day lockout.
                   </div>
                 </div>
               </div>
@@ -3502,6 +3927,17 @@ function AssessmentContentWrapper() {
               <Clock className="h-3.5 w-3.5" />
               <span>{formatTime(timeLeft)}</span>
             </div>
+
+            {/* Prominent Submit Assessment Button */}
+            <button
+              onClick={() => setShowSubmitModal(true)}
+              disabled={evaluating}
+              className="inline-flex items-center gap-1.5 text-[12px] font-sans font-semibold px-3.5 py-1.5 rounded bg-emerald-900 text-white hover:bg-emerald-950 active:scale-95 transition-all shadow-xs cursor-pointer disabled:opacity-50"
+              title="Submit entire assessment (MCQs + Coding Tasks) for final grading"
+            >
+              <CheckCircle2 className="h-3.5 w-3.5" />
+              <span>Submit Assessment</span>
+            </button>
           </div>
         </header>
 
@@ -3741,11 +4177,13 @@ function AssessmentContentWrapper() {
               {/* Problem Content */}
               <div className="flex-1 overflow-y-auto p-5 sm:p-6 space-y-6 min-h-0">
                 <div>
-                  <h3 className="text-[12px] font-medium text-muted-foreground uppercase tracking-wider mb-2">
-                    Description &amp; Specifications
+                  <h3 className="text-[11px] font-sans font-semibold text-muted-foreground uppercase tracking-wider mb-3">
+                    Problem Description
                   </h3>
-                  <div className="text-[14px] leading-relaxed text-foreground whitespace-pre-wrap font-sans space-y-3 bg-surface p-4 rounded border border-border">
-                    {(content.codingTasks?.[activeCodingTaskIdx] || content.coding)?.instructions}
+                  <div className="bg-surface/50 p-4 sm:p-5 rounded-lg border border-border">
+                    <LeetCodeProblemDescription
+                      instructions={(content.codingTasks?.[activeCodingTaskIdx] || content.coding)?.instructions || ""}
+                    />
                   </div>
                 </div>
 
@@ -3942,6 +4380,7 @@ function AssessmentContentWrapper() {
                     }
                     theme={editorTheme === "dark" ? "vs-dark" : "light"}
                     defaultValue={code}
+                    onMount={handleEditorMount}
                     onChange={(val) => handleCodeChange(val || "")}
                     options={{
                       fontSize: editorFontSize,
@@ -3958,10 +4397,14 @@ function AssessmentContentWrapper() {
                       automaticLayout: true,
                       tabSize: 4,
                       insertSpaces: true,
-                      autoIndent: "full",
+                      detectIndentation: false,
+                      autoIndent: "advanced",
                       matchBrackets: "always",
-                      formatOnPaste: true,
-                      formatOnType: true,
+                      autoClosingBrackets: "always",
+                      autoClosingQuotes: "always",
+                      formatOnPaste: false,
+                      formatOnType: false,
+                      trimAutoWhitespace: false,
                       wordWrap: "on",
                       cursorBlinking: "smooth",
                       cursorSmoothCaretAnimation: "on",
@@ -4032,17 +4475,19 @@ function AssessmentContentWrapper() {
               </div>
 
               {/* Bottom Section: Testcase Console & Action Buttons */}
-              <div className={`h-[240px] lg:h-[265px] rounded flex flex-col overflow-hidden shadow-xs shrink-0 border ${
-                editorTheme === "dark" ? "bg-[#0D1117] border-[#30363D]" : "bg-white border-border"
+              <div className={`rounded-lg flex flex-col overflow-hidden shadow-sm shrink-0 border transition-all duration-300 ease-in-out ${
+                isConsoleExpanded ? "h-[460px] lg:h-[500px]" : "h-[240px] lg:h-[265px]"
+              } ${
+                editorTheme === "dark" ? "bg-[#0B111A]/95 backdrop-blur-md border-[#30363D]" : "bg-white/95 backdrop-blur-md border-border"
               }`}>
                 {/* Console Tab Header */}
-                <div className={`flex items-center justify-between px-4 py-2 shrink-0 border-b ${
-                  editorTheme === "dark" ? "bg-[#161B22] border-[#30363D]" : "bg-surface border-border"
+                <div className={`flex flex-wrap items-center justify-between px-3.5 py-2 shrink-0 border-b gap-2 ${
+                  editorTheme === "dark" ? "bg-[#161B22]/90 border-[#30363D]" : "bg-surface/90 border-border"
                 }`}>
-                  <div className="flex items-center gap-4">
+                  <div className="flex items-center gap-3">
                     <button
                       onClick={() => setActiveConsoleTab("testcases")}
-                      className={`text-[12px] font-sans font-semibold pb-1 border-b-2 transition-colors flex items-center gap-1.5 ${
+                      className={`text-[12px] font-sans font-semibold pb-1 border-b-2 transition-colors flex items-center gap-1.5 cursor-pointer ${
                         activeConsoleTab === "testcases"
                           ? editorTheme === "dark" ? "border-[#58A6FF] text-[#58A6FF]" : "border-emerald-900 text-emerald-900"
                           : editorTheme === "dark" ? "border-transparent text-[#8B949E] hover:text-[#E6EDF3]" : "border-transparent text-muted-foreground hover:text-foreground"
@@ -4063,24 +4508,16 @@ function AssessmentContentWrapper() {
                     </button>
                     <button
                       onClick={() => setActiveConsoleTab("console")}
-                      className={`text-[12px] font-sans font-semibold pb-1 border-b-2 transition-colors ${
+                      className={`text-[12px] font-sans font-semibold pb-1 border-b-2 transition-colors flex items-center gap-1.5 cursor-pointer ${
                         activeConsoleTab === "console"
                           ? editorTheme === "dark" ? "border-[#58A6FF] text-[#58A6FF]" : "border-emerald-900 text-emerald-900"
                           : editorTheme === "dark" ? "border-transparent text-[#8B949E] hover:text-[#E6EDF3]" : "border-transparent text-muted-foreground hover:text-foreground"
                       }`}
                     >
-                      Console Output
-                    </button>
-                    <button
-                      onClick={() => setActiveConsoleTab("custom")}
-                      className={`text-[12px] font-sans font-semibold pb-1 border-b-2 transition-colors flex items-center gap-1.5 ${
-                        activeConsoleTab === "custom"
-                          ? editorTheme === "dark" ? "border-[#58A6FF] text-[#58A6FF]" : "border-emerald-900 text-emerald-900"
-                          : editorTheme === "dark" ? "border-transparent text-[#8B949E] hover:text-[#E6EDF3]" : "border-transparent text-muted-foreground hover:text-foreground"
-                      }`}
-                    >
-                      <Terminal className="h-3.5 w-3.5" />
-                      <span>Custom Input</span>
+                      <span>Console Output</span>
+                      {output && (
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                      )}
                     </button>
                   </div>
 
@@ -4088,7 +4525,7 @@ function AssessmentContentWrapper() {
                     {activeConsoleTab === "console" && output && (
                       <button
                         onClick={handleClearOutput}
-                        className={`text-[11px] font-mono px-2 py-1 rounded border transition-colors ${
+                        className={`text-[11px] font-mono px-2 py-1.5 rounded border transition-colors cursor-pointer ${
                           editorTheme === "dark"
                             ? "bg-[#21262D] border-[#30363D] text-[#8B949E] hover:text-white"
                             : "bg-white border-border text-muted-foreground hover:text-foreground"
@@ -4101,19 +4538,18 @@ function AssessmentContentWrapper() {
                     <button
                       onClick={() => handleTest(false)}
                       disabled={evaluating || timeLeft <= 0}
-                      className={`text-[12px] font-sans font-semibold border px-3 py-1.5 rounded transition-all shadow-2xs flex items-center gap-1.5 ${
+                      className={`text-[12px] font-sans font-semibold border px-3.5 py-1.5 rounded transition-all shadow-2xs flex items-center gap-1.5 cursor-pointer ${
                         editorTheme === "dark"
                           ? "bg-[#21262D] border-[#30363D] text-[#E6EDF3] hover:bg-[#30363D]"
                           : "bg-white border-border text-foreground hover:bg-surface"
                       } disabled:opacity-50`}
+                      title="Run code against the 5 public test cases"
                     >
                       {evaluating ? (
                         <>
                           <span className="h-2 w-2 rounded-full bg-[#10B981] animate-ping" />
                           <span>Running 5 Cases...</span>
                         </>
-                      ) : activeConsoleTab === "custom" ? (
-                        "Run Custom"
                       ) : (
                         "Run Code (5 Cases)"
                       )}
@@ -4121,9 +4557,10 @@ function AssessmentContentWrapper() {
                     <button
                       onClick={() => handleTest(true)}
                       disabled={evaluating || timeLeft <= 0}
-                      className="text-[12px] font-sans font-semibold bg-emerald-900 text-white px-4 py-1.5 hover:bg-emerald-950 disabled:opacity-50 rounded transition-colors shadow-2xs flex items-center gap-1.5"
+                      className="text-[12px] font-sans font-semibold bg-emerald-900 hover:bg-emerald-950 text-white px-4 py-1.5 disabled:opacity-50 rounded transition-all shadow-xs flex items-center gap-1.5 cursor-pointer"
+                      title="Run all 50 evaluation test suites for this task"
                     >
-                      <span>Submit (50 Tests)</span>
+                      <span>Evaluate Task (50 Tests)</span>
                     </button>
                   </div>
                 </div>
@@ -4297,7 +4734,9 @@ function AssessmentContentWrapper() {
                                 )}
                               </button>
                             </div>
-                            <div className={`p-2.5 rounded font-mono text-[12px] whitespace-pre-wrap overflow-x-auto max-h-20 ${
+                            <div className={`p-2.5 rounded-md font-mono text-[12px] whitespace-pre-wrap overflow-x-auto transition-all ${
+                              isConsoleExpanded ? "max-h-36" : "max-h-20"
+                            } ${
                               editorTheme === "dark"
                                 ? "bg-[#161B22] text-[#E6EDF3] border border-[#30363D]"
                                 : "bg-white text-foreground border border-border"
@@ -4311,7 +4750,9 @@ function AssessmentContentWrapper() {
                             <div className="text-[10px] uppercase tracking-wider text-[#8B949E] mb-1">
                               Expected Output:
                             </div>
-                            <div className={`p-2.5 rounded font-mono text-[12px] whitespace-pre-wrap overflow-x-auto max-h-16 ${
+                            <div className={`p-2.5 rounded-md font-mono text-[12px] whitespace-pre-wrap overflow-x-auto transition-all ${
+                              isConsoleExpanded ? "max-h-28" : "max-h-16"
+                            } ${
                               editorTheme === "dark"
                                 ? "bg-[#161B22] text-[#7EE787] border border-[#30363D]"
                                 : "bg-white text-emerald-900 border border-border"
@@ -4329,7 +4770,9 @@ function AssessmentContentWrapper() {
                                   <span className="text-[10px] text-[#8B949E] font-sans">Runtime: {displayCases[selectedCaseIdx].runtimeMs} ms</span>
                                 )}
                               </div>
-                              <div className={`p-2.5 rounded font-mono text-[12px] whitespace-pre-wrap overflow-x-auto max-h-16 ${
+                              <div className={`p-2.5 rounded-md font-mono text-[12px] whitespace-pre-wrap overflow-x-auto transition-all ${
+                                isConsoleExpanded ? "max-h-28" : "max-h-16"
+                              } ${
                                 displayCases[selectedCaseIdx].passed
                                   ? editorTheme === "dark"
                                     ? "bg-[#10B981]/15 text-[#34D399] border border-[#10B981]/30"

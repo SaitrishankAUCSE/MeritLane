@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { DM_Sans, JetBrains_Mono, Lora } from "next/font/google";
+import { Inter, JetBrains_Mono, Lora } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
 import { SiteFooter } from "@/components/chrome/SiteFooter";
@@ -10,15 +10,15 @@ import { GlobalAuthModal } from "@/components/ui/AuthModal";
 import { PostHogProvider } from "@/providers/PostHogProvider";
 import NextTopLoader from "nextjs-toploader";
 
-// Primary UI font — DM Sans: humanist, warm, reads naturally at every weight
-const dmSans = DM_Sans({
+// Primary professional font — Inter: clean, modern, and high-readability across all devices
+const inter = Inter({
   subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700"],
+  weight: ["300", "400", "500", "600", "700", "800"],
   variable: "--font-sans",
   display: "swap",
 });
 
-// Serif font for authoritative headings
+// Fallback / legacy serif (retained so user can undo anytime in 1 line)
 const loraSerif = Lora({
   subsets: ["latin"],
   weight: ["400", "500", "600", "700"],
@@ -41,20 +41,24 @@ export const viewport = {
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://merit-lane.vercel.app"),
-  title: "Meritlane | Verified, Project-Based Engineering Hiring",
+  title: "MeritLane | Skill-Verified Technical Hiring for Freshers & Early Talent",
   description:
-    "A verified, project-based hiring platform for Tier-2 and Tier-3 engineering talent in India. Proof of skill over college pedigree.",
+    "MeritLane levels the playing field for fresh graduates and early-career software developers struggling with entry-level experience requirements. Verified coding benchmarks that land direct interviews.",
+  icons: {
+    icon: "/icon.png",
+    apple: "/apple-icon.png",
+  },
   openGraph: {
-    title: "Meritlane | Verified, Project-Based Engineering Hiring",
-    description: "A verified, project-based hiring platform for Tier-2 and Tier-3 engineering talent in India. Proof of skill over college pedigree.",
+    title: "MeritLane | Skill-Verified Technical Hiring for Freshers & Early Talent",
+    description: "MeritLane levels the playing field for fresh graduates and early-career software developers struggling with entry-level experience requirements. Verified coding benchmarks that land direct interviews.",
     url: "https://merit-lane.vercel.app",
     siteName: "Meritlane",
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Meritlane | Verified, Project-Based Engineering Hiring",
-    description: "A verified, project-based hiring platform for Tier-2 and Tier-3 engineering talent in India. Proof of skill over college pedigree.",
+    title: "MeritLane | Skill-Verified Technical Hiring for Freshers & Early Talent",
+    description: "MeritLane levels the playing field for fresh graduates and early-career software developers struggling with entry-level experience requirements. Verified coding benchmarks that land direct interviews.",
   }
 };
 
@@ -63,8 +67,10 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://merit-lane.vercel.app";
+
   return (
-    <html lang="en" suppressHydrationWarning className={`${dmSans.variable} ${jetbrainsMono.variable} ${loraSerif.variable} h-full antialiased`}>
+    <html lang="en" suppressHydrationWarning className={`${inter.variable} ${jetbrainsMono.variable} ${loraSerif.variable} h-full antialiased`}>
       <body className="flex min-h-full flex-col bg-background font-sans text-foreground">
         <script
           type="application/ld+json"
@@ -73,9 +79,9 @@ export default function RootLayout({
               "@context": "https://schema.org",
               "@type": "Organization",
               "name": "Meritlane",
-              "url": "https://meritlane.app",
+              "url": siteUrl,
               "description": "A verified, project-based hiring platform for engineering talent.",
-              "logo": "https://meritlane.app/icon.png"
+              "logo": `${siteUrl}/icon.png`
             })
           }}
         />

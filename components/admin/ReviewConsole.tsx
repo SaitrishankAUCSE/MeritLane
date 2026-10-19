@@ -4,6 +4,7 @@ import { ProofTrace } from "@/components/ui/ProofTrace";
 import { ProofSignal } from "@/components/ui/ProofSignal";
 import { ShieldCheck, CheckCircle2, AlertTriangle, XCircle, Code, FileText, ExternalLink, Clock } from "lucide-react";
 import { StatusMark } from "@/components/proof/StatusMark";
+import { sanitizeUrl } from "@/lib/security/url";
 
 export function ReviewConsole({
   queueCandidates,
@@ -132,12 +133,12 @@ export function ReviewConsole({
                 <h3 className="font-label text-muted-foreground uppercase text-xs mb-4">External Artifacts</h3>
                 <div className="flex gap-4">
                   {selectedCandidate.githubUrl && (
-                    <a href={selectedCandidate.githubUrl} target="_blank" rel="noreferrer" className="flex items-center gap-2 text-xs font-bold font-data bg-surface-low border border-border px-3 py-2 hover:bg-surface transition-colors">
+                    <a href={sanitizeUrl(selectedCandidate.githubUrl)} target="_blank" rel="noreferrer" className="flex items-center gap-2 text-xs font-bold font-data bg-surface-low border border-border px-3 py-2 hover:bg-surface transition-colors">
                       <Code className="h-4 w-4" /> GitHub
                     </a>
                   )}
                   {selectedCandidate.resumeUrl && (
-                    <a href={selectedCandidate.resumeUrl} target="_blank" rel="noreferrer" className="flex items-center gap-2 text-xs font-bold font-data bg-surface-low border border-border px-3 py-2 hover:bg-surface transition-colors">
+                    <a href={sanitizeUrl(selectedCandidate.resumeUrl)} target="_blank" rel="noreferrer" className="flex items-center gap-2 text-xs font-bold font-data bg-surface-low border border-border px-3 py-2 hover:bg-surface transition-colors">
                       <FileText className="h-4 w-4" /> Resume
                     </a>
                   )}
@@ -154,8 +155,8 @@ export function ReviewConsole({
                         <h4 className="font-serif text-xl font-medium text-foreground mb-2">{proj.title}</h4>
                         <p className="text-sm text-muted-foreground mb-4">{proj.description}</p>
                         <div className="flex gap-3">
-                          {proj.repoUrl && <a href={proj.repoUrl} target="_blank" rel="noreferrer" className="text-xs font-bold font-data text-muted-foreground hover:text-foreground">Source ↗</a>}
-                          {proj.liveUrl && <a href={proj.liveUrl} target="_blank" rel="noreferrer" className="text-xs font-bold font-data text-accent hover:text-emerald-900">Demo ↗</a>}
+                          {proj.repoUrl && <a href={sanitizeUrl(proj.repoUrl)} target="_blank" rel="noreferrer" className="text-xs font-bold font-data text-muted-foreground hover:text-foreground">Source ↗</a>}
+                          {proj.liveUrl && <a href={sanitizeUrl(proj.liveUrl)} target="_blank" rel="noreferrer" className="text-xs font-bold font-data text-accent hover:text-emerald-900">Demo ↗</a>}
                         </div>
                       </div>
                     ))}

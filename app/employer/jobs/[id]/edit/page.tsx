@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useAuth } from "@/lib/auth/AuthContext";
 import { ArrowLeft, Plus, X, AlertCircle } from "lucide-react";
 import { COMMON_SKILLS } from "@/lib/constants";
+import { ALL_LOCATIONS } from "@/lib/locations";
 import { WorkMode, EmploymentType, JobStatus } from "@/lib/firebase/jobs";
 
 export default function EditJobPostingPage() {
@@ -264,10 +265,17 @@ export default function EditJobPostingPage() {
                 </label>
                 <input
                   type="text"
+                  list="locations-list"
                   value={location}
                   onChange={(e) => setLocation(e.target.value)}
+                  placeholder="e.g. Visakhapatnam, India or Remote"
                   className="w-full h-11 px-4 bg-surface border border-border rounded-xl text-[14px] text-foreground focus:outline-none focus:ring-1 focus:ring-foreground"
                 />
+                <datalist id="locations-list">
+                  {ALL_LOCATIONS.map((loc) => (
+                    <option key={loc} value={loc} />
+                  ))}
+                </datalist>
               </div>
             </div>
 

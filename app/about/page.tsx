@@ -7,21 +7,15 @@ import { ArrowLeft, Shield, Award, Users, Target } from "lucide-react";
 export default function AboutPage() {
   return (
     <div className="min-h-screen bg-background text-foreground font-sans theme-public">
-      {/* Header bar */}
-      <header className="border-b border-border bg-surface sticky top-0 z-40">
-        <div className="max-w-5xl mx-auto px-6 h-16 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2 text-[14px] text-muted-foreground hover:text-foreground transition-colors">
-            <ArrowLeft className="h-4 w-4" />
-            <span>Back to Home</span>
+      <main className="w-full max-w-4xl mx-auto px-6 py-12 lg:px-8">
+        <div className="mb-8">
+          <Link href="/" className="inline-flex items-center gap-1.5 text-[13px] text-muted-foreground hover:text-foreground transition-colors">
+            <ArrowLeft className="h-3.5 w-3.5" />
+            <span>Home</span>
+            <span className="text-muted-foreground/40">/</span>
+            <span className="text-foreground">About</span>
           </Link>
-          <Link href="/" className="flex items-center gap-2">
-            <img src="/logo-full.png" alt="Meritlane" className="h-5 w-auto" />
-          </Link>
-          <div className="w-20" />
         </div>
-      </header>
-
-      <main className="w-full max-w-4xl mx-auto px-6 py-16 lg:px-8">
         {/* Hero */}
         <div className="mb-14 pb-8 border-b border-border text-center max-w-3xl mx-auto">
           <div className="inline-flex items-center gap-2 text-[11px] font-medium uppercase tracking-[0.2em] text-[var(--color-primary)] mb-4 border border-border px-3.5 py-1 rounded bg-surface">

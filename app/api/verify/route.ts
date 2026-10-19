@@ -23,13 +23,16 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
     }
     // easyCode/mediumCode: dual-task submissions; code: legacy single-task
-    const { skill, answers, code, easyCode, mediumCode, language, isPublicTest, dryRun, customInput, questionId } = body;
+    const { skill, answers, code, easyCode, mediumCode, easyQuestionId, mediumQuestionId, language, isPublicTest, dryRun, customInput, questionId } = body;
     
     if (!skill) {
       return NextResponse.json({ error: "Skill is required" }, { status: 400 });
     }
-    if (!isPublicTest && !dryRun && !code && !easyCode) {
-      return NextResponse.json({ error: "Code is required" }, { status: 400 });
+    const hasCodeInput = !!(easyCode || code);
+    const hasMcqSubmission = Array.isArray(answers) && answers.length > 0;
+
+    if (!isPublicTest && !dryRun && !hasCodeInput && !hasMcqSubmission) {
+      return NextResponse.json({ error: "Code or answers are required" }, { status: 400 });
     }
 
     const idToken = authHeader.split("Bearer ")[1];
@@ -91,8 +94,8 @@ export async function POST(req: NextRequest) {
 
     const variant = userData.assessmentVariant || "A";
     // Detect whether this is a bank-aware assessment
-    const easyQId = questionId || userData.assessmentEasyQuestionId;
-    const mediumQId = userData.assessmentMediumQuestionId;
+    const easyQId = questionId || easyQuestionId || userData.assessmentEasyQuestionId;
+    const mediumQId = mediumQuestionId || userData.assessmentMediumQuestionId;
     const isBankAssessment = !!(easyQId || mediumQId);
 
     // ─── Run Code (isPublicTest or dryRun) — run specified question ──────────

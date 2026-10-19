@@ -3,6 +3,7 @@
 import React, { useState, useMemo } from "react";
 import Link from "next/link";
 import { CandidateAvatar } from "@/components/ui/CandidateAvatar";
+import { sanitizeUrl } from "@/lib/security/url";
 import {
   CheckCircle2,
   Shield,
@@ -372,7 +373,7 @@ export function PublicProofRecord({
           <div className="flex flex-wrap items-center gap-2.5 shrink-0 w-full md:w-auto pt-2 md:pt-0">
             {candidate.githubUrl && (
               <a
-                href={candidate.githubUrl}
+                href={sanitizeUrl(candidate.githubUrl)}
                 target="_blank"
                 rel="noreferrer"
                 className="flex items-center gap-2 text-[12px] font-medium bg-foreground text-white hover:bg-stone-800 px-4 py-2 rounded-lg transition-colors shadow-xs"
@@ -385,7 +386,7 @@ export function PublicProofRecord({
 
             {candidate.linkedinUrl && (
               <a
-                href={candidate.linkedinUrl}
+                href={sanitizeUrl(candidate.linkedinUrl)}
                 target="_blank"
                 rel="noreferrer"
                 className="flex items-center gap-1.5 text-[12px] font-medium bg-white text-foreground hover:bg-surface border border-border px-3.5 py-2 rounded-lg transition-colors shadow-xs"
@@ -398,7 +399,7 @@ export function PublicProofRecord({
 
             {resolvedPortfolioUrl && (
               <a
-                href={resolvedPortfolioUrl}
+                href={sanitizeUrl(resolvedPortfolioUrl)}
                 target="_blank"
                 rel="noreferrer"
                 className="flex items-center gap-1.5 text-[12px] font-medium bg-white text-foreground hover:bg-surface border border-border px-3.5 py-2 rounded-lg transition-colors shadow-xs"
@@ -1008,7 +1009,7 @@ export function PublicProofRecord({
                           </span>
                           {supportingProject.repoUrl && (
                             <a
-                              href={supportingProject.repoUrl}
+                              href={sanitizeUrl(supportingProject.repoUrl)}
                               target="_blank"
                               rel="noreferrer"
                               className="text-emerald-900 font-mono font-semibold hover:underline flex items-center gap-0.5 shrink-0"
@@ -1059,7 +1060,7 @@ export function PublicProofRecord({
                         <div className="flex items-center gap-2">
                           {proj.repoUrl && (
                             <a
-                              href={proj.repoUrl}
+                              href={sanitizeUrl(proj.repoUrl)}
                               target="_blank"
                               rel="noreferrer"
                               className="inline-flex items-center gap-1.5 px-3 py-1 bg-white border border-border text-foreground hover:border-foreground text-[11px] font-mono font-semibold rounded transition-colors"
@@ -1070,7 +1071,7 @@ export function PublicProofRecord({
                           )}
                           {proj.liveUrl && (
                             <a
-                              href={proj.liveUrl}
+                              href={sanitizeUrl(proj.liveUrl)}
                               target="_blank"
                               rel="noreferrer"
                               className="inline-flex items-center gap-1.5 px-3 py-1 bg-emerald-900 text-white hover:bg-emerald-950 text-[11px] font-mono font-semibold rounded transition-colors"
@@ -1262,12 +1263,12 @@ export function PublicProofRecord({
                               <h4 className="text-sm font-semibold text-foreground">{p.title}</h4>
                               <div className="flex items-center gap-2">
                                 {p.repoUrl && (
-                                  <a href={p.repoUrl} target="_blank" rel="noopener noreferrer" className="text-xs text-primary hover:underline flex items-center gap-1">
+                                  <a href={sanitizeUrl(p.repoUrl)} target="_blank" rel="noopener noreferrer" className="text-xs text-primary hover:underline flex items-center gap-1">
                                     <Code className="h-3 w-3" /> Repo
                                   </a>
                                 )}
                                 {p.liveUrl && (
-                                  <a href={p.liveUrl} target="_blank" rel="noopener noreferrer" className="text-xs text-emerald-700 hover:underline flex items-center gap-1">
+                                  <a href={sanitizeUrl(p.liveUrl)} target="_blank" rel="noopener noreferrer" className="text-xs text-emerald-700 hover:underline flex items-center gap-1">
                                     <ExternalLink className="h-3 w-3" /> Live
                                   </a>
                                 )}

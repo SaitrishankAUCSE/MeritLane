@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { adminAuth, adminDb, adminStorage } from "@/lib/firebase/admin";
 import { extractPdfText, parseResumeEntities } from "@/lib/resume/parser";
+import { checkRateLimit, getClientIp } from "@/lib/security/rateLimit";
 
 export interface RecommendedRole {
   role: string;
@@ -283,6 +284,22 @@ export async function POST(req: NextRequest) {
     }
 
     const uid = decodedToken.uid;
+    const clientIp = getClientIp(req);
+
+    // Rate limiting: max 15 resume scans per 10 minutes per candidate UID
+    const rateLimit = checkRateLimit("ats-check", uid || clientIp, 15, 10 * 60 * 1000);
+    if (!rateLimit.success) {
+      return NextResponse.json(
+        { error: "Rate limit exceeded. Please wait a few minutes before scanning another resume." },
+        { 
+          status: 429,
+          headers: {
+            "Retry-After": Math.ceil((rateLimit.reset - Date.now()) / 1000).toString(),
+          }
+        }
+      );
+    }
+
     let resumeText = "";
     let skills: string[] = [];
     let uploadBuffer: Buffer | null = null;
@@ -316,6 +333,15 @@ export async function POST(req: NextRequest) {
 
       if (!file) {
         return NextResponse.json({ error: "No resume PDF file uploaded." }, { status: 400 });
+      }
+
+      // Enforce 8MB max file size to prevent buffer exhaustion and DoS
+      const MAX_FILE_SIZE = 8 * 1024 * 1024;
+      if (file.size > MAX_FILE_SIZE) {
+        return NextResponse.json(
+          { error: "Resume file exceeds maximum allowed size of 8MB." },
+          { status: 413 }
+        );
       }
 
       uploadedFileName = file.name;

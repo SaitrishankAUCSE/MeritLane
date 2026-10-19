@@ -131,7 +131,7 @@ export default function CandidateJobsPage() {
     <div className="w-full min-h-full bg-transparent pb-24">
       {/* ── Header Strip ── */}
       <div className="border-b border-border bg-white px-4 sm:px-6 lg:px-8 py-5">
-        <div className="w-full flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="max-w-7xl mx-auto w-full flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <div className="text-[10px] font-medium tracking-[0.2em] text-muted-foreground uppercase mb-1">
               Job Board · Meritlane
@@ -173,7 +173,7 @@ export default function CandidateJobsPage() {
       </div>
 
       {/* ── Main Container ── */}
-      <div className="w-full px-4 sm:px-6 lg:px-8 py-8 space-y-6">
+      <div className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 space-y-6">
         
         {/* ── Match Switch Segmented Control ── */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border pb-4">

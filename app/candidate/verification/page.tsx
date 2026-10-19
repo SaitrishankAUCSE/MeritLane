@@ -94,7 +94,7 @@ export default function CandidateVerificationPage() {
 
       {/* ── Header Strip ── */}
       <div className="border-b border-border bg-white px-4 sm:px-6 lg:px-8 py-5">
-        <div className="w-full flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="max-w-7xl mx-auto w-full flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <div className="text-[10px] font-medium tracking-[0.2em] text-muted-foreground uppercase mb-1">
               Skill Verification · Meritlane
@@ -102,6 +102,9 @@ export default function CandidateVerificationPage() {
             <h1 className="text-[26px] sm:text-[32px] text-foreground font-semibold tracking-tight leading-tight">
               Skill Tests &amp; Badges
             </h1>
+            <p className="text-[12px] text-muted-foreground mt-0.5">
+              Standardized, proctored assessments evaluating real executed code — earn verified credentials to unlock direct employer hiring without 0-2 year experience barriers.
+            </p>
           </div>
           <div className="flex items-center gap-6 shrink-0">
             <div className="text-right">
@@ -128,7 +131,7 @@ export default function CandidateVerificationPage() {
         </div>
       </div>
 
-      <div className="w-full px-4 sm:px-6 lg:px-8 py-8 grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
 
         {/* ── LEFT: Exam Index Table ── */}
         <div className="lg:col-span-2 space-y-6">
@@ -333,7 +336,7 @@ export default function CandidateVerificationPage() {
         </div>
 
         {/* ── RIGHT: Test Rules & Info ── */}
-        <div className="space-y-5">
+        <div className="space-y-5 lg:sticky lg:top-6 self-start">
 
           <div className="border border-border bg-white">
             <div className="border-b border-border bg-border px-5 py-3">

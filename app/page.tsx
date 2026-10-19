@@ -28,20 +28,20 @@ const staggerContainer = {
 
 const faqs = [
   {
-    question: "Why is MeritLane considered the gold standard for engineering hiring?",
-    answer: "MeritLane completely eliminates the noise of traditional hiring. By strictly evaluating cryptographically verified code and proctored technical ability, we guarantee that every candidate on our platform is a world-class engineer, saving companies hundreds of hours in wasted interviews."
+    question: "How does MeritLane help freshers and new graduates get hired?",
+    answer: "Most entry-level software postings mandate 1-3 years of prior commercial experience, creating a frustrating catch-22 for freshers. MeritLane replaces arbitrary experience requirements with standardized, proctored Proof of Work. When you score ≥ 75% on our assessments, employers see verifiable evidence that you write clean, production-ready code — allowing you to bypass automated resume filters and land interviews directly."
   },
   {
-    question: "What makes the MeritLane platform so incredibly fast and accurate?",
-    answer: "Our revolutionary Just-In-Time (JIT) Assessment Engine uses proprietary AI to instantly generate high-fidelity, edge-case heavy coding tasks for any skill imaginable. This allows us to assess and verify top-tier talent with unparalleled speed and precision."
+    question: "Does my college tier, degree branch, or GPA disqualify me?",
+    answer: "No. Traditional campus recruitment disproportionately favors elite Tier-1 institutions, silently ignoring exceptional engineers from Tier-2, Tier-3, or regional colleges. MeritLane is strictly meritocratic: our testing sandboxes evaluate only your actual code execution, algorithmic problem-solving, and system correctness. A verified badge from MeritLane holds equal weight regardless of your college pedigree."
   },
   {
-    question: "Is MeritLane free for developers?",
-    answer: "Yes, candidates can take assessments, verify their skills, and build their evidence dossier entirely for free. Employers pay to access the verified talent pool."
+    question: "Is MeritLane free for freshers and candidates?",
+    answer: "Yes, 100% free forever for candidates. You can create your profile, upload your resume, take proctored assessments, and earn verified credentials without paying any fees. Employers pay to discover and contact verified junior talent."
   },
   {
-    question: "What makes MeritLane different from traditional hiring?",
-    answer: "Instead of relying on self-reported resumes and keywords, MeritLane forces candidates to prove their ability via real code execution, verified GitHub history, and live projects."
+    question: "What happens after I verify my skills on MeritLane?",
+    answer: "Your profile is immediately unlocked in the MeritLane Verified Talent Directory. Employers filter candidates by proven skill scores, review your actual code execution logs, and extend direct interview invitations without putting you through redundant introductory phone screens."
   }
 ];
 
@@ -92,8 +92,8 @@ export default function HomePage() {
           className="mb-8 flex items-center justify-center gap-3"
         >
           <span className="h-px w-12 bg-foreground/20" />
-          <span className="text-[11px] font-medium tracking-[0.25em] uppercase text-muted-foreground">
-            Meritlane
+          <span className="text-[11px] font-medium tracking-[0.25em] uppercase text-muted-foreground" suppressHydrationWarning>
+            EQUAL OPPORTUNITY FOR FRESH GRADUATES &amp; EARLY TALENT
           </span>
           <span className="h-px w-12 bg-foreground/20" />
         </motion.div>
@@ -103,7 +103,7 @@ export default function HomePage() {
           className="w-full flex justify-center items-center mb-6 min-h-[2.2em] sm:min-h-[2.6em]"
         >
           <HandwritingText
-            words={["Real code.", "Verified skills.", "Proof of work.", "Meritlane."]}
+            words={["No '0-2 years' experience loops.", "No Tier-1 college bias.", "Pure proof of work.", "Meritlane."]}
             height="2.2em"
             duration={1.5}
             delay={0.1}
@@ -117,14 +117,14 @@ export default function HomePage() {
           initial="hidden" animate="visible" variants={fadeUp}
           className="text-[44px] sm:text-[58px] md:text-[70px] lg:text-[78px] font-serif text-[var(--color-foreground)] tracking-tight leading-[1.08] max-w-4xl mx-auto mb-6 font-normal"
         >
-          Hire Software Engineers Based on Actual Ability.
+          Break Into Tech on Pure Engineering Ability.
         </motion.h1>
 
         <motion.p 
           initial="hidden" animate="visible" variants={fadeUp}
           className="text-[16px] sm:text-[18px] text-muted-foreground max-w-2xl mx-auto leading-[1.7] mb-12 font-sans"
         >
-          The traditional hiring pipeline is broken. Resumes are padded, degrees are proxies, and keyword-matching filters out genuine talent. Meritlane replaces the noise with standardized, proctored assessments and verifiable proof of work.
+          Tired of sending hundreds of resumes into ATS black holes or being rejected for entry-level roles requiring 2+ years of experience? MeritLane levels the playing field for ambitious freshers through standardized, cheat-proof coding assessments — turning your actual ability into verified proof that lands real interviews.
         </motion.p>
 
         <motion.div 
@@ -132,13 +132,13 @@ export default function HomePage() {
           className="flex flex-col sm:flex-row items-center justify-center gap-4 w-full sm:w-auto mb-16"
         >
           <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} className="w-full sm:w-auto">
-            <Button href="/employer/dashboard" variant="primary" size="lg" className="px-8 w-full sm:w-auto">
-              Hire Verified Talent
+            <Button href="/signup" variant="primary" size="lg" className="px-8 w-full sm:w-auto">
+              Prove Your Skills — Free for Freshers →
             </Button>
           </motion.div>
           <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} className="w-full sm:w-auto">
-            <Button href="/signup" variant="outline" size="lg" className="px-8 w-full sm:w-auto">
-              Prove Your Skills
+            <Button href="/employer/dashboard" variant="outline" size="lg" className="px-8 w-full sm:w-auto">
+              For Companies: Hire Verified Freshers
             </Button>
           </motion.div>
         </motion.div>
@@ -157,10 +157,10 @@ export default function HomePage() {
           </div>
           <div className="text-left">
             <div className="flex items-center gap-2 text-[14px] font-semibold text-foreground">
-              <ShieldCheck className="w-4 h-4 text-green-600" />
-              Built for the Next Generation of Engineers
+              <ShieldCheck className="w-4 h-4 text-emerald-800" />
+              Built for Ambitious Freshers &amp; Early-Career Engineers
             </div>
-            <div className="text-[13px] text-muted-foreground mt-1">Evaluating talent based on cryptographically verified code.</div>
+            <div className="text-[13px] text-muted-foreground mt-1">Leveling the playing field for graduates from every college and background.</div>
           </div>
         </motion.div>
       </section>
@@ -173,26 +173,29 @@ export default function HomePage() {
             className="mb-16 text-center max-w-3xl mx-auto"
           >
             <div className="text-[11px] font-medium uppercase tracking-[0.25em] mb-4" style={{ color: "#E7E2DA" }}>
-              The Status Quo
+              The Entry-Level Hiring Crisis
             </div>
             <h2 className="text-3xl sm:text-4xl lg:text-5xl font-serif tracking-tight leading-snug" style={{ color: "#FFFFFF" }}>
-              Resumes don't compile.
+              The Entry-Level Hiring Paradox.
             </h2>
+            <p className="mt-4 text-sm max-w-2xl mx-auto text-neutral-300">
+              Why thousands of capable junior developers are trapped in application limbo — and how MeritLane solves it.
+            </p>
           </motion.div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {[
               {
-                title: "Noise over Signal",
-                description: "Recruiters are overwhelmed by thousands of applications. Parsing PDFs for keywords inevitably filters out unconventional, high-capability talent."
+                title: "The '0-2 Years' Trap",
+                description: "Entry-level job boards mandate 2+ years of prior commercial experience. Freshers are trapped in a systemic catch-22: you can't get experience without a job, and can't get a job without experience."
               },
               {
-                title: "Degrees != Skill",
-                description: "A prestigious university name on a resume does not guarantee an engineer can write clean, production-ready code."
+                title: "The College Pedigree Filter",
+                description: "Automated resume scrapers silently auto-reject exceptional problem solvers simply because they didn't graduate from an elite Tier-1 brand. Real engineering ability comes from everywhere."
               },
               {
-                title: "Wasted Engineering Hours",
-                description: "Senior engineers spend hundreds of hours conducting technical interviews for candidates who lack fundamental competencies."
+                title: "The 500-Application Black Hole",
+                description: "Applying on generic job portals feels like shouting into the void. Resumes get discarded by keyword filters before an actual engineering manager ever looks at your code."
               }
             ].map((problem, i) => (
               <motion.div 
@@ -220,10 +223,10 @@ export default function HomePage() {
               <Globe className="w-8 h-8 text-white" />
             </div>
             <h2 className="text-3xl sm:text-4xl lg:text-5xl font-serif text-foreground tracking-tight leading-snug max-w-4xl mx-auto mb-6">
-              The Unified Ground Truth for Technical Talent.
+              Your Direct Bridge From Campus to Career.
             </h2>
             <p className="text-[16px] sm:text-[18px] text-muted-foreground max-w-3xl mx-auto leading-[1.8] font-sans">
-              MeritLane is a dual-sided ecosystem designed to eliminate hiring friction. We provide candidates with an unforgeable, cryptographically secure <strong>Evidence Dossier</strong>, while providing employers with a zero-noise, pre-vetted talent pool where every profile is backed by executed code.
+              MeritLane was created to end the entry-level hiring gridlock. We provide aspiring software engineers with an unforgeable <strong>Evidence Dossier</strong> backed by live executed code, while giving tech employers a zero-noise directory of pre-vetted freshers ready to contribute on Day 1.
             </p>
           </motion.div>
         </div>
@@ -239,17 +242,17 @@ export default function HomePage() {
               initial={{ opacity: 0, x: -30 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ duration: 0.5 }}
               className="flex-1"
             >
-              <div className="text-[11px] font-medium uppercase tracking-[0.25em] text-emerald-600 mb-4 flex items-center gap-2">
-                <BrainCircuit className="w-4 h-4" /> Just-In-Time Generation
+              <div className="text-[11px] font-medium uppercase tracking-[0.25em] text-emerald-800 mb-4 flex items-center gap-2">
+                <BrainCircuit className="w-4 h-4" /> Proctored Engineering Evaluations
               </div>
-              <h3 className="text-3xl font-serif text-foreground mb-6 leading-tight">Infinite scale. Any skill. Instant exams.</h3>
+              <h3 className="text-3xl font-serif text-foreground mb-6 leading-tight">Prove True Capability in Real-World Compilers.</h3>
               <p className="text-[15px] text-muted-foreground leading-[1.8] mb-6">
-                Need to hire for an obscure framework? MeritLane's proprietary AI Assessment Engine generates high-fidelity, edge-case heavy coding tasks and deep multiple-choice questions for <strong>literally any technology</strong> on the fly.
+                Forget multiple-choice trivia and biased whiteboard quizzes. MeritLane's live coding environments run your solutions against production test suites, boundary conditions, and performance limits — letting your raw problem-solving capability speak directly to engineering managers.
               </p>
               <ul className="space-y-3 text-[14px] text-muted-foreground">
-                <li className="flex items-center gap-2"><CheckCircle className="w-4 h-4 text-emerald-600" /> 25 deep technical MCQs generated in seconds.</li>
-                <li className="flex items-center gap-2"><CheckCircle className="w-4 h-4 text-emerald-600" /> 2 Algorithmic coding tasks with 45 hidden test cases.</li>
-                <li className="flex items-center gap-2"><CheckCircle className="w-4 h-4 text-emerald-600" /> Tests for memory management, concurrency & edge cases.</li>
+                <li className="flex items-center gap-2"><CheckCircle className="w-4 h-4 text-emerald-800" /> 26+ programming tracks with real language compilers.</li>
+                <li className="flex items-center gap-2"><CheckCircle className="w-4 h-4 text-emerald-800" /> Algorithmic challenges with rigorous hidden test cases.</li>
+                <li className="flex items-center gap-2"><CheckCircle className="w-4 h-4 text-emerald-800" /> Anti-cheat proctoring guaranteeing trusted results for employers.</li>
               </ul>
             </motion.div>
             <motion.div 
@@ -260,13 +263,13 @@ export default function HomePage() {
               <div className="bg-foreground p-6 rounded shadow-xl border border-[#333] text-white font-mono text-[13px] leading-relaxed">
                 <div className="flex items-center gap-2 mb-4 border-b border-[#333] pb-2">
                   <Terminal className="w-4 h-4 text-[#10B981]" /> 
-                  <span className="text-muted-foreground/70">engine/generate.ts</span>
+                  <span className="text-muted-foreground/70">meritlane/proctor-eval.ts</span>
                 </div>
-                <p className="text-[#10B981]">➜ Requesting: "Rust Concurrency"</p>
-                <p className="text-border mt-2">[INFO] Initializing Gemini 2.5 Pro Model...</p>
-                <p className="text-border">[INFO] Synthesizing 25 distractors...</p>
-                <p className="text-border">[INFO] Building 45 hidden O(N) boundary tests...</p>
-                <p className="text-[#10B981] mt-2">✔ Assessment locked and ready.</p>
+                <p className="text-[#10B981]">➜ Candidate Assessment: "Data Structures &amp; Algorithms"</p>
+                <p className="text-border mt-2">[RUN] Initializing isolated compiler sandbox...</p>
+                <p className="text-border">[TEST] Passing hidden test suites: 10/10 passed</p>
+                <p className="text-border">[METRICS] Execution time: 1.2ms · Zero memory leaks</p>
+                <p className="text-[#10B981] mt-2">✔ Score: 94% · Official Verified Badge Awarded.</p>
               </div>
             </motion.div>
           </div>
@@ -278,22 +281,22 @@ export default function HomePage() {
               className="flex-1"
             >
               <div className="text-[11px] font-medium uppercase tracking-[0.25em] text-[#2563EB] mb-4 flex items-center gap-2">
-                <GitBranch className="w-4 h-4" /> 360° Candidate Dossier
+                <GitBranch className="w-4 h-4" /> The Early-Career Proof Dossier
               </div>
-              <h3 className="text-3xl font-serif text-foreground mb-6 leading-tight">Don't trust resumes. Trust data.</h3>
+              <h3 className="text-3xl font-serif text-foreground mb-6 leading-tight">Showcase What You Can Build, Not Who You Know.</h3>
               <p className="text-[15px] text-muted-foreground leading-[1.8] mb-6">
-                A test score isn't enough. MeritLane aggregates real-world evidence. We securely connect to GitHub to index commit history, parse ATS semantic data, and showcase live deployed projects.
+                When you don't have 3 years of corporate pedigree, you need undeniable proof. MeritLane aggregates your proctored assessment scores, GitHub commit telemetry, and live deployed projects into a single verified credential that top engineering teams trust.
               </p>
               <div className="grid grid-cols-2 gap-4">
                 <div className="p-4 bg-white border border-border rounded hover:border-[#2563EB]/40 transition-colors duration-300">
                   <Activity className="w-5 h-5 text-[#2563EB] mb-2" />
-                  <div className="font-semibold text-foreground text-[14px]">ATS Analysis</div>
-                  <div className="text-[12px] text-muted-foreground">Semantic resume scoring</div>
+                  <div className="font-semibold text-foreground text-[14px]">ATS Immunity</div>
+                  <div className="text-[12px] text-muted-foreground">Pre-verified skill scores</div>
                 </div>
                 <div className="p-4 bg-white border border-border rounded hover:border-[#2563EB]/40 transition-colors duration-300">
                   <Code className="w-5 h-5 text-[#2563EB] mb-2" />
                   <div className="font-semibold text-foreground text-[14px]">Git Telemetry</div>
-                  <div className="text-[12px] text-muted-foreground">Commit volume & stacks</div>
+                  <div className="text-[12px] text-muted-foreground">Authentic commit history</div>
                 </div>
               </div>
             </motion.div>
@@ -364,19 +367,19 @@ export default function HomePage() {
               >
                 <Code className="w-6 h-6 text-white" />
               </motion.div>
-              <h3 className="text-2xl font-serif mb-6" style={{ color: "#FFFFFF" }}>For Candidates</h3>
+              <h3 className="text-2xl font-serif mb-6" style={{ color: "#FFFFFF" }}>For Freshers &amp; Early Talent</h3>
               <div className="space-y-8">
                 <motion.div whileHover={{ x: 5 }} transition={{ duration: 0.2 }}>
-                  <h4 className="text-sm font-medium mb-2 uppercase tracking-wide" style={{ color: "#F3F4F6" }}>1. Take the Assessment</h4>
-                  <p className="text-[15px] leading-relaxed" style={{ color: "#D1D5DB" }}>Select your primary domain and complete our timed, proctored coding challenge.</p>
+                  <h4 className="text-sm font-medium mb-2 uppercase tracking-wide" style={{ color: "#F3F4F6" }}>1. Build Your Evidence Profile</h4>
+                  <p className="text-[15px] leading-relaxed" style={{ color: "#D1D5DB" }}>Upload your resume, connect your GitHub, and showcase the projects you built — no past corporate job title required.</p>
                 </motion.div>
                 <motion.div whileHover={{ x: 5 }} transition={{ duration: 0.2 }}>
-                  <h4 className="text-sm font-medium mb-2 uppercase tracking-wide" style={{ color: "#F3F4F6" }}>2. Build Your Profile</h4>
-                  <p className="text-[15px] leading-relaxed" style={{ color: "#D1D5DB" }}>Connect your GitHub, detail education, and showcase real-world deployed projects.</p>
+                  <h4 className="text-sm font-medium mb-2 uppercase tracking-wide" style={{ color: "#F3F4F6" }}>2. Take Proctored Coding Tests</h4>
+                  <p className="text-[15px] leading-relaxed" style={{ color: "#D1D5DB" }}>Prove your algorithmic depth and domain skills in our real-time browser sandbox. Score ≥ 75% to earn verified status.</p>
                 </motion.div>
                 <motion.div whileHover={{ x: 5 }} transition={{ duration: 0.2 }}>
-                  <h4 className="text-sm font-medium mb-2 uppercase tracking-wide" style={{ color: "#F3F4F6" }}>3. Get Discovered</h4>
-                  <p className="text-[15px] leading-relaxed" style={{ color: "#D1D5DB" }}>Once verified, your profile enters the talent pool. Employers search and reach out directly.</p>
+                  <h4 className="text-sm font-medium mb-2 uppercase tracking-wide" style={{ color: "#F3F4F6" }}>3. Skip Keyword Filters &amp; Get Hired</h4>
+                  <p className="text-[15px] leading-relaxed" style={{ color: "#D1D5DB" }}>Your verified profile is promoted directly to hiring teams actively looking for capable junior engineers.</p>
                 </motion.div>
               </div>
             </motion.div>
@@ -390,19 +393,19 @@ export default function HomePage() {
               >
                 <Database className="w-6 h-6 text-white" />
               </motion.div>
-              <h3 className="text-2xl font-serif mb-6" style={{ color: "#FFFFFF" }}>For Employers</h3>
+              <h3 className="text-2xl font-serif mb-6" style={{ color: "#FFFFFF" }}>For Tech Employers</h3>
               <div className="space-y-8">
                 <motion.div whileHover={{ x: 5 }} transition={{ duration: 0.2 }}>
-                  <h4 className="text-sm font-medium mb-2 uppercase tracking-wide" style={{ color: "#F3F4F6" }}>1. Search with Certainty</h4>
-                  <p className="text-[15px] leading-relaxed" style={{ color: "#D1D5DB" }}>Filter candidates not by keywords, but by actual verified skills. High signal, low noise.</p>
+                  <h4 className="text-sm font-medium mb-2 uppercase tracking-wide" style={{ color: "#F3F4F6" }}>1. Discover Pre-Vetted Junior Talent</h4>
+                  <p className="text-[15px] leading-relaxed" style={{ color: "#D1D5DB" }}>Filter by real code execution benchmarks instead of resume keywords or college brand names.</p>
                 </motion.div>
                 <motion.div whileHover={{ x: 5 }} transition={{ duration: 0.2 }}>
-                  <h4 className="text-sm font-medium mb-2 uppercase tracking-wide" style={{ color: "#F3F4F6" }}>2. Review the Evidence</h4>
-                  <p className="text-[15px] leading-relaxed" style={{ color: "#D1D5DB" }}>Examine assessment scores, GitHub telemetry, and live code implementations.</p>
+                  <h4 className="text-sm font-medium mb-2 uppercase tracking-wide" style={{ color: "#F3F4F6" }}>2. Inspect Real Telemetry</h4>
+                  <p className="text-[15px] leading-relaxed" style={{ color: "#D1D5DB" }}>Review hidden test case scores, code clarity, and commit history before the first interview.</p>
                 </motion.div>
                 <motion.div whileHover={{ x: 5 }} transition={{ duration: 0.2 }}>
-                  <h4 className="text-sm font-medium mb-2 uppercase tracking-wide" style={{ color: "#F3F4F6" }}>3. Connect Directly</h4>
-                  <p className="text-[15px] leading-relaxed" style={{ color: "#D1D5DB" }}>Message candidates directly. Skip the technical screen and go straight to system design.</p>
+                  <h4 className="text-sm font-medium mb-2 uppercase tracking-wide" style={{ color: "#F3F4F6" }}>3. Hire Day-1 Ready Engineers</h4>
+                  <p className="text-[15px] leading-relaxed" style={{ color: "#D1D5DB" }}>Skip introductory screening loops and conduct final architectural discussions directly with proven freshers.</p>
                 </motion.div>
               </div>
             </motion.div>
@@ -423,18 +426,18 @@ export default function HomePage() {
               The Mission
             </div>
             <h2 className="text-3xl sm:text-4xl lg:text-5xl font-serif text-foreground tracking-tight mb-10 max-w-3xl mx-auto">
-              Built by engineers, for engineers.
+              Democratizing Technical Hiring for Fresh Talent.
             </h2>
             
             <div className="max-w-2xl mx-auto text-left">
               <p className="text-[16px] text-muted-foreground leading-[1.8] mb-6">
-                The technical hiring loop is broken. We watched brilliant developers get auto-rejected by keyword-matching algorithms because they didn't have the right "pedigree", while companies wasted thousands of hours interviewing candidates who couldn't write a basic sorting algorithm.
+                The entry-level hiring loop is fundamentally broken. We watched brilliant freshers from non-elite colleges get automatically filtered out by keyword scanners, while job postings demanded impossible experience for entry-level roles. MeritLane exists to level the playing field: if you have the technical discipline to write working code, you deserve a genuine career opportunity.
               </p>
               
               <div className="bg-[#FAFAFA] border border-border p-6 rounded-lg my-10 relative">
                 <div className="absolute -top-3 -left-3 text-4xl text-border font-serif">"</div>
                 <p className="text-[18px] font-serif italic text-foreground leading-relaxed text-center px-4 relative z-10">
-                  MeritLane was built on a single, uncompromising belief: Code speaks louder than keywords. We evaluate candidates exactly how they build software in the real world.
+                  MeritLane was built on a single, uncompromising belief: Code speaks louder than pedigree. We evaluate freshers exactly how software is built in the real world — through executed proof of work.
                 </p>
               </div>
 
@@ -619,81 +622,32 @@ export default function HomePage() {
             className="text-3xl sm:text-4xl md:text-5xl font-serif tracking-tight mb-6 leading-tight"
             style={{ color: "#FFFFFF" }}
           >
-            Transition from filtering resumes to hiring engineers.
+            Stop sending resumes into the dark. Start proving what you can build.
           </motion.h2>
           <motion.p 
             initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.4, delay: 0.1 }}
             className="text-lg mb-10 max-w-xl mx-auto"
             style={{ color: "#D1D5DB" }}
           >
-            Whether you are building a team or looking for your next role, Meritlane provides the ground truth for engineering talent.
+            Join ambitious freshers and early-career engineers using MeritLane to bypass ATS keyword filters and get evaluated on verified proof of work.
           </motion.p>
           <motion.div 
             initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.4, delay: 0.2 }}
             className="flex flex-col sm:flex-row items-center justify-center gap-4"
           >
             <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-              <Button href="/employer/dashboard" variant="primary" size="lg" className="px-8 w-full sm:w-auto !bg-white !text-black hover:!bg-border !border-white">
-                Start Hiring
+              <Button href="/signup" variant="primary" size="lg" className="px-8 w-full sm:w-auto !bg-white !text-black hover:!bg-border !border-white">
+                Prove Your Skills — Free for Freshers →
               </Button>
             </motion.div>
             <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-              <Button href="/signup" variant="outline" size="lg" className="px-8 w-full sm:w-auto !border-white !text-white !bg-transparent hover:!bg-white hover:!text-black">
-                Apply as Developer
+              <Button href="/employer/dashboard" variant="outline" size="lg" className="px-8 w-full sm:w-auto !border-white !text-white !bg-transparent hover:!bg-white hover:!text-black">
+                For Companies: Hire Verified Freshers
               </Button>
             </motion.div>
           </motion.div>
         </div>
       </section>
-
-      {/* EXPANDED FOOTER */}
-      <footer className="py-16 border-t border-[var(--color-border)] bg-[var(--color-background)]">
-        <div className="max-w-6xl mx-auto px-6 grid grid-cols-1 md:grid-cols-4 gap-12 md:gap-8">
-          <div className="col-span-1 md:col-span-1 flex flex-col gap-4">
-            <span className="text-[14px] font-medium tracking-[0.25em] uppercase text-foreground flex items-center gap-2">
-              <Globe className="w-4 h-4" /> Meritlane
-            </span>
-            <p className="text-[13px] text-muted-foreground leading-relaxed max-w-xs">
-              Technical verification for the modern web. We replace noise with signal through rigorous code assessment.
-            </p>
-          </div>
-          
-          <div>
-            <h4 className="text-[11px] font-semibold tracking-wider uppercase text-foreground mb-4">Product</h4>
-            <ul className="space-y-3 text-[13px] text-muted-foreground">
-              <li><a href="#" className="hover:text-foreground transition-colors">For Employers</a></li>
-              <li><a href="#" className="hover:text-foreground transition-colors">For Candidates</a></li>
-              <li><a href="#" className="hover:text-foreground transition-colors">Assessment Engine</a></li>
-              <li><a href="#" className="hover:text-foreground transition-colors">Pricing</a></li>
-            </ul>
-          </div>
-
-          <div>
-            <h4 className="text-[11px] font-semibold tracking-wider uppercase text-foreground mb-4">Company</h4>
-            <ul className="space-y-3 text-[13px] text-muted-foreground">
-              <li><a href="#" className="hover:text-foreground transition-colors">About Us</a></li>
-              <li><a href="https://github.com/SaitrishankAUCSE" target="_blank" rel="noreferrer" className="hover:text-foreground transition-colors">Our Creator</a></li>
-              <li><a href="#" className="hover:text-foreground transition-colors">Privacy Policy</a></li>
-              <li><a href="#" className="hover:text-foreground transition-colors">Terms of Service</a></li>
-            </ul>
-          </div>
-
-          <div>
-            <h4 className="text-[11px] font-semibold tracking-wider uppercase text-foreground mb-4">Connect</h4>
-            <div className="flex gap-4">
-              <a href="https://github.com/SaitrishankAUCSE" target="_blank" rel="noreferrer" className="w-8 h-8 rounded-full bg-[#FAFAFA] border border-border flex items-center justify-center text-muted-foreground hover:text-foreground hover:border-foreground transition-colors" title="GitHub">
-                <Code className="w-4 h-4" />
-              </a>
-              <a href="mailto:saitrishankb9@gmail.com" className="w-8 h-8 rounded-full bg-[#FAFAFA] border border-border flex items-center justify-center text-muted-foreground hover:text-foreground hover:border-foreground transition-colors">
-                <User className="w-4 h-4" />
-              </a>
-            </div>
-            <div className="mt-6 text-[12px] text-muted-foreground/70">
-              © {new Date().getFullYear()} Meritlane. All rights reserved.
-            </div>
-          </div>
-        </div>
-      </footer>
     </div>
   );
 }

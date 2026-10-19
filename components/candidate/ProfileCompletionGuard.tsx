@@ -63,8 +63,19 @@ export function ProfileCompletionGuard({ children }: ProfileCompletionGuardProps
     }
   }, [user, role, router]);
 
+  const [isTourActive, setIsTourActive] = useState(false);
+  useEffect(() => {
+    const checkTour = () => {
+      const active = typeof window !== "undefined" && localStorage.getItem("meritlane_live_tour_active") === "true";
+      setIsTourActive(active);
+    };
+    checkTour();
+    window.addEventListener("meritlane-tour-state-change", checkTour);
+    return () => window.removeEventListener("meritlane-tour-state-change", checkTour);
+  }, []);
+
   const isProfilePage = pathname === "/candidate/profile";
-  const shouldBlur = !checking && isProfileComplete === false && !isProfilePage;
+  const shouldBlur = !checking && isProfileComplete === false && !isProfilePage && !isTourActive;
 
   // Reset navigating state once on profile page
   useEffect(() => {

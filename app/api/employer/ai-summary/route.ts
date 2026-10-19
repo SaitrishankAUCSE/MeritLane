@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { adminAuth, adminDb } from "@/lib/firebase/admin";
 import { CandidateProfile } from "@/lib/firebase/candidate";
 import { UserProfile } from "@/lib/firebase/users";
+import { checkRateLimit } from "@/lib/security/rateLimit";
 
 export async function POST(req: NextRequest) {
   try {
@@ -17,6 +18,14 @@ export async function POST(req: NextRequest) {
 
     const decodedToken = await adminAuth.verifyIdToken(token);
     const employerUid = decodedToken.uid;
+
+    const rateLimit = checkRateLimit("employer-ai-summary", employerUid, 20, 10 * 60 * 1000);
+    if (!rateLimit.success) {
+      return NextResponse.json(
+        { error: "Too many AI summary requests. Please wait a moment before requesting another summary." },
+        { status: 429 }
+      );
+    }
 
     const userDoc = await adminDb.collection("users").doc(employerUid).get();
     if (!userDoc.exists || userDoc.data()?.role !== "employer") {

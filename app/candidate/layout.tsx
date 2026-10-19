@@ -8,6 +8,7 @@ import { MobileNav } from "@/components/ui/MobileNav";
 import { ToastProvider } from "@/components/ui/Toast";
 import { CandidateMessageNotifier } from "@/components/candidate/CandidateMessageNotifier";
 import { ProfileCompletionGuard } from "@/components/candidate/ProfileCompletionGuard";
+import { ProtocolWelcomeExperience } from "@/components/onboarding/ProtocolWelcomeExperience";
 
 export default function CandidateLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -44,6 +45,8 @@ export default function CandidateLayout({ children }: { children: React.ReactNod
         </div>
         {/* Polls silently for new inbox messages and fires toast notifications */}
         <CandidateMessageNotifier />
+        {/* Protocol Induction Welcome Experience */}
+        <ProtocolWelcomeExperience />
       </ToastProvider>
     </ProtectedRoute>
   );

@@ -6,6 +6,7 @@ import { EmployerSidebar } from "@/components/employer/EmployerSidebar";
 import { MobileNav } from "@/components/ui/MobileNav";
 import { ToastProvider } from "@/components/ui/Toast";
 import { EmployerProfileCompletionGuard } from "@/components/employer/EmployerProfileCompletionGuard";
+import { ProtocolWelcomeExperience } from "@/components/onboarding/ProtocolWelcomeExperience";
 
 export default function EmployerLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -20,6 +21,8 @@ export default function EmployerLayout({ children }: { children: React.ReactNode
             </EmployerProfileCompletionGuard>
           </main>
         </div>
+        {/* Protocol Induction Welcome Experience */}
+        <ProtocolWelcomeExperience />
       </ToastProvider>
     </ProtectedRoute>
   );

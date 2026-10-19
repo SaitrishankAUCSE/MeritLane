@@ -51,9 +51,12 @@
   --color-info: var(--color-info);
 
   /* Single unified modern font style across the entire website */
-  --font-sans: var(--font-sans), "DM Sans", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  --font-serif: var(--font-serif), "Lora", "Playfair Display", Georgia, serif;
-  --font-signature: var(--font-serif);
+  /* Professional modern typography (Inter) used by Stripe, Vercel, Linear, GitHub */
+  --font-sans: var(--font-sans), "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+  /* To undo and restore old serif style, simply set --font-serif: var(--font-serif-original); */
+  --font-serif: var(--font-sans);
+  --font-serif-original: var(--font-serif), "Lora", Georgia, serif;
+  --font-signature: var(--font-sans);
   --font-mono: var(--font-mono), "JetBrains Mono", ui-monospace, monospace;
 }
 
@@ -78,10 +81,10 @@ body {
 
 /* Headings — Document of Authority */
 h1, h2, h3, h4, h5, h6 {
-  font-family: var(--font-serif);
-  letter-spacing: -0.01em;
+  font-family: var(--font-sans);
+  letter-spacing: -0.025em;
   line-height: 1.25;
-  font-weight: 500;
+  font-weight: 600;
   color: inherit;
 }
 [class*="bg-[#0A0A0A]"] :is(h1, h2, h3, h4),
@@ -92,7 +95,7 @@ h1, h2, h3, h4, h5, h6 {
 
 /* Dedicated block letter headings */
 .heading-block, .block-heading {
-  font-family: var(--font-serif);
+  font-family: var(--font-sans);
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -105,7 +108,7 @@ h1, h2, h3, h4, h5, h6 {
 
 /* Distinct cursive signature moniker — applied ONLY to candidate name */
 .font-signature, .name-cursive {
-  font-family: var(--font-serif) !important;
+  font-family: var(--font-sans) !important;
   font-weight: 600;
   letter-spacing: 0.02em;
 }

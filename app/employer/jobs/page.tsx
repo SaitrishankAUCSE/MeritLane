@@ -115,7 +115,7 @@ export default function EmployerJobsPage() {
     <div className="w-full min-h-screen bg-surface pb-24 text-foreground">
       {/* ── Command Header Strip ── */}
       <div className="border-b border-border bg-white px-6 sm:px-10 py-6">
-        <div className="w-full flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="max-w-7xl mx-auto w-full flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <div className="text-[10px] font-medium tracking-[0.2em] text-muted-foreground uppercase mb-1">
               Employer Hiring Operations · Meritlane Registry
@@ -141,7 +141,7 @@ export default function EmployerJobsPage() {
         </div>
       </div>
 
-      <div className="w-full px-6 sm:px-10 py-8 space-y-6">
+      <div className="max-w-7xl mx-auto w-full px-6 sm:px-10 py-8 space-y-6">
 
 
         {/* Action Error Banner */}

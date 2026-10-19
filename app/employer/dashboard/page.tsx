@@ -19,6 +19,7 @@ import {
   ShieldCheck,
   X,
   Trophy,
+  Sparkles,
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -230,7 +231,7 @@ export default function EmployerDashboardPage() {
   return (
     <div className="flex h-full w-full flex-col overflow-hidden bg-[#FAFAFA]">
       <div className="flex-1 px-4 sm:px-8 lg:px-10 py-6 sm:py-8 overflow-y-auto scrollbar-hide w-full">
-
+        <div className="max-w-7xl mx-auto w-full">
 
         {/* Hero Header & Institutional Telemetry */}
         <div className="w-full mb-8 sm:mb-10">
@@ -240,13 +241,23 @@ export default function EmployerDashboardPage() {
                 Employer Dashboard
               </span>
             </div>
-            <Link href="/employer/jobs">
-              <button className="flex items-center gap-2 px-4 py-2 border border-border bg-white hover:bg-surface text-[12px] font-mono font-semibold rounded text-foreground transition-colors shadow-2xs">
-                <Briefcase className="h-3.5 w-3.5 text-emerald-900" />
-                <span>MANAGE JOBS & APPLICANTS</span>
-                <ArrowRight className="h-3 w-3" />
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => window.dispatchEvent(new CustomEvent("open-meritlane-welcome"))}
+                className="flex items-center gap-1.5 px-3 py-2 border border-emerald-900/20 bg-emerald-900/[0.04] hover:bg-emerald-900/10 text-[12px] font-mono font-semibold rounded text-emerald-900 transition-colors cursor-pointer shadow-2xs"
+                title="Learn how MeritLane works"
+              >
+                <Sparkles className="h-3.5 w-3.5 text-emerald-900" />
+                <span>HOW IT WORKS</span>
               </button>
-            </Link>
+              <Link href="/employer/jobs">
+                <button className="flex items-center gap-2 px-4 py-2 border border-border bg-white hover:bg-surface text-[12px] font-mono font-semibold rounded text-foreground transition-colors shadow-2xs cursor-pointer">
+                  <Briefcase className="h-3.5 w-3.5 text-emerald-900" />
+                  <span>MANAGE JOBS &amp; APPLICANTS</span>
+                  <ArrowRight className="h-3 w-3" />
+                </button>
+              </Link>
+            </div>
           </div>
           <h1 className="text-[26px] sm:text-[34px] lg:text-[38px] font-bold uppercase tracking-[0.06em] text-foreground leading-tight mb-6">
             FIND PEOPLE WHOSE SKILLS ARE PROVEN.
@@ -798,6 +809,7 @@ export default function EmployerDashboardPage() {
               </div>
             </div>
           )}
+        </div>
         </div>
       </div>
 

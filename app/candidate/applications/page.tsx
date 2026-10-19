@@ -73,7 +73,7 @@ export default function CandidateApplicationsPage() {
     <div className="w-full min-h-screen bg-surface pb-24 text-foreground">
       {/* ── Header Strip ── */}
       <div className="border-b border-border bg-white px-4 sm:px-6 lg:px-8 py-6">
-        <div className="w-full flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="max-w-7xl mx-auto w-full flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <div className="text-[10px] font-medium tracking-[0.2em] text-muted-foreground uppercase mb-1">
               Applications · Meritlane
@@ -91,7 +91,7 @@ export default function CandidateApplicationsPage() {
         </div>
       </div>
 
-      <div className="w-full px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8">
         {loading ? (
           <div className="border border-border bg-white p-16 text-center rounded">
             <MeritlaneLoader level="section" text="Loading your applications…" />

@@ -111,12 +111,19 @@ export function AuthForm({ mode: initialMode }: AuthFormProps) {
           email: userCredential.user.email,
           role: selectedRole,
           createdAt: new Date().toISOString(),
+          isNewUser: true,
+          hasSeenWelcomeOnboarding: false,
         });
         posthog.capture("user_signed_up", { method: 'email', role: selectedRole });
         
         // Immediately sign out so user MUST log in again with credentials
         await signOut(auth);
         
+        if (typeof window !== "undefined") {
+          localStorage.setItem(`meritlane_new_signup_${userCredential.user.uid}`, "true");
+          sessionStorage.setItem("meritlane_just_signed_up_email", trimmedEmail);
+        }
+
         setSignupSuccess(true);
         setIsSigningUp(false);
         setLoadingAction(false);
@@ -128,8 +135,16 @@ export function AuthForm({ mode: initialMode }: AuthFormProps) {
       } else {
         // If coming from a successful signup, reset the signupSuccess state so login can proceed
         setSignupSuccess(false);
-        await signInWithEmailAndPassword(auth, trimmedEmail, password);
+        const cred = await signInWithEmailAndPassword(auth, trimmedEmail, password);
         posthog.capture("user_logged_in", { method: 'email' });
+        if (typeof window !== "undefined" && cred.user) {
+          const wasJustSignedUp =
+            localStorage.getItem(`meritlane_new_signup_${cred.user.uid}`) === "true" ||
+            sessionStorage.getItem("meritlane_just_signed_up_email") === trimmedEmail;
+          if (wasJustSignedUp) {
+            localStorage.setItem(`meritlane_show_welcome_${cred.user.uid}`, "true");
+          }
+        }
       }
     } catch (err: any) {
       console.error("Auth error details:", err);
@@ -201,7 +216,13 @@ export function AuthForm({ mode: initialMode }: AuthFormProps) {
             authProvider: "google",
             createdAt: new Date().toISOString(),
             lastLoginAt: new Date().toISOString(),
+            isNewUser: true,
+            hasSeenWelcomeOnboarding: false,
           }, { merge: true });
+
+          if (typeof window !== "undefined") {
+            localStorage.setItem(`meritlane_show_welcome_${currentUser.uid}`, "true");
+          }
 
           if (role === "candidate") {
             await setDoc(doc(db, "candidates", currentUser.uid), {

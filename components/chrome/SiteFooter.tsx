@@ -6,8 +6,8 @@ import { Footerdemo } from "@/components/ui/footer-section";
 export function SiteFooter() {
   const pathname = usePathname();
 
-  // The footer must ONLY be present on the homepage ("/")
-  if (pathname !== "/") return null;
+  const publicRoutes = ["/", "/about", "/how-verification-works", "/privacy", "/terms"];
+  if (!publicRoutes.includes(pathname || "")) return null;
 
   return (
     <div className="theme-public">

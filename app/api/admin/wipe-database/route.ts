@@ -11,13 +11,13 @@ export async function POST(request: Request) {
     return NextResponse.json({ 
       success: false, 
       error: "Firebase Admin not initialized. Ensure FIREBASE_SERVICE_ACCOUNT_KEY is set in Vercel environment variables." 
-    }, { status: 200 });
+    }, { status: 500 });
   }
 
   try {
     const authHeader = request.headers.get("Authorization");
     if (!authHeader?.startsWith("Bearer ")) {
-      return NextResponse.json({ success: false, error: "Unauthorized: Missing authorization header" }, { status: 200 });
+      return NextResponse.json({ success: false, error: "Unauthorized: Missing authorization header" }, { status: 401 });
     }
 
     const token = authHeader.split("Bearer ")[1];
@@ -25,14 +25,13 @@ export async function POST(request: Request) {
     try {
       decodedToken = await adminAuth.verifyIdToken(token);
     } catch (tokenErr: any) {
-      return NextResponse.json({ success: false, error: `Invalid authentication token: ${tokenErr.message}` }, { status: 200 });
+      return NextResponse.json({ success: false, error: `Invalid authentication token: ${tokenErr.message}` }, { status: 401 });
     }
     
     // Strict admin check
     const callerEmail = decodedToken.email?.toLowerCase() || "";
-    const ADMIN_EMAIL = "saitrishankb9@gmail.com";
     if (decodedToken.admin !== true && callerEmail !== ADMIN_EMAIL) {
-      return NextResponse.json({ success: false, error: `Forbidden: Administrative privilege required.` }, { status: 200 });
+      return NextResponse.json({ success: false, error: `Forbidden: Administrative privilege required.` }, { status: 403 });
     }
 
     let deletedAuthCount = 0;
@@ -132,6 +131,6 @@ export async function POST(request: Request) {
     return NextResponse.json({ 
       success: false, 
       error: error.message || "Unexpected server error during database wipe" 
-    }, { status: 200 });
+    }, { status: 500 });
   }
 }

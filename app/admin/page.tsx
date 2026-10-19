@@ -48,8 +48,8 @@ import {
 } from "lucide-react";
 import { MeritlaneLoader } from "@/components/ui/MeritlaneLoader";
 import { ReviewConsole } from "@/components/admin/ReviewConsole";
-
 import { InquiriesView, InquiryRecord } from "@/components/admin/InquiriesView";
+import { NewSkillsView, NewSkillRecord } from "@/components/admin/NewSkillsView";
 
 import { collection, onSnapshot, doc, updateDoc, serverTimestamp, getDocs, writeBatch } from "firebase/firestore";
 import { db, auth } from "@/lib/firebase/config";
@@ -106,10 +106,12 @@ export default function AdminDashboardPage() {
   const [error, setError] = useState<string | null>(null);
   const [selectedCandidate, setSelectedCandidate] = useState<CandidateAdminRecord | null>(null);
 
-  // Active Tab: queue, directory, analytics, audit, inquiries
-  const [activeTab, setActiveTab] = useState<"queue" | "directory" | "analytics" | "audit" | "inquiries">("queue");
+  // Active Tab: queue, directory, analytics, audit, inquiries, newSkills
+  const [activeTab, setActiveTab] = useState<"queue" | "directory" | "analytics" | "audit" | "inquiries" | "newSkills">("queue");
   const [inquiries, setInquiries] = useState<InquiryRecord[]>([]);
   const [inquiriesLoading, setInquiriesLoading] = useState(false);
+  const [newSkills, setNewSkills] = useState<NewSkillRecord[]>([]);
+  const [newSkillsLoading, setNewSkillsLoading] = useState(false);
 
   // Action dialog states
   const [actionType, setActionType] = useState<"verified" | "changes_required" | "rejected" | null>(null);
@@ -314,6 +316,130 @@ export default function AdminDashboardPage() {
       setSuccessToast("Inquiry deleted.");
     } catch (err) {
       console.error("Failed to delete inquiry:", err);
+    }
+  };
+
+  const fetchNewSkills = useCallback(async () => {
+    if (!user) return;
+    setNewSkillsLoading(true);
+    try {
+      const idToken = await user.getIdToken();
+      const res = await fetch("/api/admin/new-skills", {
+        headers: { Authorization: `Bearer ${idToken}` },
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (Array.isArray(data.newSkills)) {
+          setNewSkills(data.newSkills);
+        }
+      }
+    } catch (e) {
+      console.error("fetchNewSkills fallback error:", e);
+    } finally {
+      setNewSkillsLoading(false);
+    }
+  }, [user]);
+
+  // Real-time Firestore snapshot listener for custom and unlisted skills entered by candidates
+  useEffect(() => {
+    if (!user) return;
+    setNewSkillsLoading(true);
+
+    try {
+      const unsubscribeSkills = onSnapshot(
+        collection(db, "newSkillRequests"),
+        (snapshot) => {
+          const records: NewSkillRecord[] = [];
+          const safeDate = (val: any) => {
+            if (!val) return null;
+            if (typeof val.toDate === "function") return val.toDate().toISOString();
+            if (val instanceof Date) return val.toISOString();
+            if (typeof val === "string") return val;
+            if (typeof val === "number") return new Date(val).toISOString();
+            if (val._seconds) return new Date(val._seconds * 1000).toISOString();
+            return null;
+          };
+
+          snapshot.forEach((docSnap) => {
+            const d = docSnap.data();
+            records.push({
+              id: docSnap.id,
+              candidateUid: d.candidateUid || "",
+              candidateName: d.candidateName || "Anonymous Candidate",
+              candidateEmail: d.candidateEmail || "",
+              candidatePhone: d.candidatePhone || "",
+              candidateCollege: d.candidateCollege || "",
+              candidateBranch: d.candidateBranch || "",
+              candidateGradYear: d.candidateGradYear || "",
+              candidateGithubUrl: d.candidateGithubUrl || "",
+              candidateResumeUrl: d.candidateResumeUrl || "",
+              candidateBio: d.candidateBio || "",
+              candidateKey: d.candidateKey || "",
+              skill: d.skill || "",
+              allSkills: Array.isArray(d.allSkills) ? d.allSkills : [],
+              status: d.status || "pending",
+              createdAt: safeDate(d.createdAt),
+              updatedAt: safeDate(d.updatedAt),
+            });
+          });
+
+          records.sort((a, b) => {
+            const timeA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+            const timeB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+            return timeB - timeA;
+          });
+
+          setNewSkills(records);
+          setNewSkillsLoading(false);
+        },
+        (error) => {
+          console.warn("Firestore newSkillRequests onSnapshot error, using API fallback:", error);
+          fetchNewSkills();
+        }
+      );
+
+      return () => unsubscribeSkills();
+    } catch {
+      fetchNewSkills();
+    }
+  }, [user, fetchNewSkills]);
+
+  const handleUpdateNewSkillStatus = async (
+    id: string,
+    status: "pending" | "reviewed" | "track_created"
+  ) => {
+    if (!user) return;
+    try {
+      setNewSkills((prev) =>
+        prev.map((s) => (s.id === id ? { ...s, status } : s))
+      );
+      const idToken = await user.getIdToken();
+      await fetch("/api/admin/new-skills", {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${idToken}`,
+        },
+        body: JSON.stringify({ id, status }),
+      });
+      setSuccessToast(`Skill status marked as ${status.replace("_", " ")}.`);
+    } catch (err) {
+      console.error("Failed to update skill status:", err);
+    }
+  };
+
+  const handleDeleteNewSkill = async (id: string) => {
+    if (!user) return;
+    try {
+      setNewSkills((prev) => prev.filter((s) => s.id !== id));
+      const idToken = await user.getIdToken();
+      await fetch(`/api/admin/new-skills?id=${id}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${idToken}` },
+      });
+      setSuccessToast("New skill record deleted.");
+    } catch (err) {
+      console.error("Failed to delete new skill:", err);
     }
   };
 
@@ -528,6 +654,7 @@ export default function AdminDashboardPage() {
   const totalCount = candidates.length;
   const verifiedRate = totalCount > 0 ? Math.round((verifiedCount / totalCount) * 100) : 0;
   const unreadInquiriesCount = inquiries.filter((i) => !i.read).length;
+  const pendingNewSkillsCount = newSkills.filter((s) => s.status === "pending").length;
 
   // Filtered list
   const filteredCandidates = useMemo(() => {
@@ -826,6 +953,23 @@ export default function AdminDashboardPage() {
             {unreadInquiriesCount > 0 && (
               <span className="rounded-full bg-blue-600 px-2 py-0.5 text-[10px] font-bold text-white animate-pulse">
                 {unreadInquiriesCount} new
+              </span>
+            )}
+          </button>
+
+          <button
+            onClick={() => setActiveTab("newSkills")}
+            className={`flex items-center gap-2 border-b-2 pb-3 text-sm font-medium transition-colors ${
+              activeTab === "newSkills"
+                ? "border-foreground text-foreground font-semibold"
+                : "border-transparent text-muted-foreground hover:border-border hover:text-foreground"
+            }`}
+          >
+            <Sparkles className="h-4 w-4 text-amber-500" />
+            <span>New Skills ({newSkills.length})</span>
+            {pendingNewSkillsCount > 0 && (
+              <span className="rounded-full bg-amber-500 px-2 py-0.5 text-[10px] font-bold text-white animate-pulse">
+                {pendingNewSkillsCount} pending
               </span>
             )}
           </button>
@@ -1162,6 +1306,17 @@ export default function AdminDashboardPage() {
             onRefresh={fetchInquiries}
             onMarkRead={handleMarkInquiryRead}
             onDelete={handleDeleteInquiry}
+          />
+        )}
+
+        {/* TAB 6: NEW SKILLS DISCOVERY */}
+        {activeTab === "newSkills" && (
+          <NewSkillsView
+            newSkills={newSkills}
+            loading={newSkillsLoading}
+            onRefresh={fetchNewSkills}
+            onUpdateStatus={handleUpdateNewSkillStatus}
+            onDelete={handleDeleteNewSkill}
           />
         )}
       </div>

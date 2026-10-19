@@ -7,6 +7,7 @@ import { useAuth } from "@/lib/auth/AuthContext";
 import { ArrowLeft, Plus, X, Briefcase, Check, AlertCircle } from "lucide-react";
 import { COMMON_SKILLS } from "@/lib/constants";
 import { WorkMode, EmploymentType } from "@/lib/firebase/jobs";
+import { ALL_LOCATIONS } from "@/lib/locations";
 
 export default function NewJobPostingPage() {
   const { user, role } = useAuth();
@@ -202,11 +203,17 @@ export default function NewJobPostingPage() {
                 </label>
                 <input
                   type="text"
+                  list="locations-list"
                   value={location}
                   onChange={(e) => setLocation(e.target.value)}
-                  placeholder="e.g. Bengaluru / Remote"
+                  placeholder="e.g. Bengaluru, India / Remote"
                   className="w-full h-11 px-4 bg-surface border border-border rounded text-[14px] text-foreground focus:outline-none focus:ring-1 focus:ring-foreground"
                 />
+                <datalist id="locations-list">
+                  {ALL_LOCATIONS.map((loc) => (
+                    <option key={loc} value={loc} />
+                  ))}
+                </datalist>
               </div>
             </div>
 

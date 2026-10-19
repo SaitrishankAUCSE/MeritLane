@@ -5,6 +5,7 @@ import { X, ExternalLink, ShieldCheck, Cpu, Code2, Link as LinkIcon, CheckCircle
 import { Badge } from "@/components/ui/Badge";
 import { ProofSignal, EvidenceRail } from "@/components/ui/ProofSignal";
 import { ProofTrace } from "@/components/ui/ProofTrace";
+import { sanitizeUrl } from "@/lib/security/url";
 
 interface CandidateProofModalProps {
   candidate: any;
@@ -207,12 +208,12 @@ export function CandidateProofModal({ candidate, isOpen, onClose }: CandidatePro
                       
                       <div className="flex items-center gap-3">
                         {proj.repoUrl && (
-                          <a href={proj.repoUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 text-xs font-bold text-muted-foreground hover:text-foreground bg-surface-low px-3 py-1.5 rounded-sm transition-colors">
+                          <a href={sanitizeUrl(proj.repoUrl)} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 text-xs font-bold text-muted-foreground hover:text-foreground bg-surface-low px-3 py-1.5 rounded-sm transition-colors">
                             <Code2 className="h-3.5 w-3.5" /> Repository
                           </a>
                         )}
                         {proj.liveUrl && (
-                          <a href={proj.liveUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 text-xs font-bold text-accent hover:text-indigo-900 bg-transparent px-3 py-1.5 rounded-sm transition-colors">
+                          <a href={sanitizeUrl(proj.liveUrl)} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 text-xs font-bold text-accent hover:text-indigo-900 bg-transparent px-3 py-1.5 rounded-sm transition-colors">
                             <ExternalLink className="h-3.5 w-3.5" /> Live Demo
                           </a>
                         )}
