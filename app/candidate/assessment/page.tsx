@@ -47,11 +47,21 @@ import { AssessmentWatermark } from "@/components/candidate/AssessmentWatermark"
 import { COMMON_SUPPORTED_LANGUAGES, SupportedLanguage } from "@/lib/assessments/content";
 import CooldownTimer from "@/components/candidate/cooldown-timer";
 
+import { loader } from "@monaco-editor/react";
+
+if (typeof window !== "undefined") {
+  loader.config({
+    paths: {
+      vs: "https://cdn.jsdelivr.net/npm/monaco-editor@0.43.0/min/vs",
+    },
+  });
+}
+
 const MonacoEditor = dynamic(() => import("@monaco-editor/react"), {
   ssr: false,
   loading: () => (
-    <div className="flex-1 flex items-center justify-center bg-[#0D1117] text-[#8B949E] font-mono text-[13px]">
-      Loading Editor...
+    <div className="flex-1 min-h-[300px] w-full h-full flex flex-col items-center justify-center bg-[#0D1117] text-[#8B949E] font-mono text-[13px] gap-3">
+      <MeritlaneLoader level="section" text="Initializing Code Compiler…" />
     </div>
   ),
 });
@@ -601,6 +611,9 @@ function AssessmentContentWrapper() {
   const [draftSavedToast, setDraftSavedToast] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const editorRef = useRef<any>(null);
+  const [useFallbackEditor, setUseFallbackEditor] = useState<boolean>(false);
+  const [editorLoadTimeout, setEditorLoadTimeout] = useState<boolean>(false);
   const [cursorPos, setCursorPos] = useState({ line: 1, col: 1 });
   const [editorTheme, setEditorTheme] = useState<"dark" | "light">("dark");
   const [editorFontSize, setEditorFontSize] = useState<number>(13);
@@ -633,6 +646,16 @@ function AssessmentContentWrapper() {
     document.addEventListener("fullscreenchange", onFsChange);
     return () => document.removeEventListener("fullscreenchange", onFsChange);
   }, []);
+
+  // Auto-recovery timer for editor initialization
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (!editorRef.current && phase === "coding") {
+        setEditorLoadTimeout(true);
+      }
+    }, 4500);
+    return () => clearTimeout(timer);
+  }, [phase]);
 
   // ── Init assessment ─────────────────────────────────────────────────────────
 
@@ -1273,6 +1296,9 @@ function AssessmentContentWrapper() {
       targetCode = foundLang?.template || task?.initialCode || "";
     }
     setCode(targetCode);
+    if (editorRef.current) {
+      try { editorRef.current.setValue(targetCode); } catch {}
+    }
     setActiveCodingTaskIdx(targetIdx);
   };
 
@@ -1294,6 +1320,9 @@ function AssessmentContentWrapper() {
     if (!content?.coding && (!content?.codingTasks || content.codingTasks.length === 0)) return;
     const initialCode = content?.codingTasks?.[activeCodingTaskIdx]?.initialCode || content?.coding?.initialCode || "";
     handleCodeChange(initialCode);
+    if (editorRef.current) {
+      try { editorRef.current.setValue(initialCode); } catch {}
+    }
     setShowResetConfirm(false);
   };
 
@@ -1309,12 +1338,16 @@ function AssessmentContentWrapper() {
   };
 
   const handleFormatCode = () => {
-    setCode((prev) =>
-      prev
+    setCode((prev) => {
+      const formatted = prev
         .split("\n")
         .map((line) => line.replace(/\t/g, "    ").trimEnd())
-        .join("\n")
-    );
+        .join("\n");
+      if (editorRef.current) {
+        try { editorRef.current.setValue(formatted); } catch {}
+      }
+      return formatted;
+    });
     setDraftSavedToast(true);
     setTimeout(() => setDraftSavedToast(false), 2000);
   };
@@ -1324,6 +1357,16 @@ function AssessmentContentWrapper() {
   };
 
   const handleEditorMount = (editor: any, monaco: any) => {
+    editorRef.current = editor;
+    setEditorLoadTimeout(false);
+    setTimeout(() => {
+      try {
+        editor.layout();
+        editor.focus();
+      } catch (err) {
+        console.warn("Editor layout warning:", err);
+      }
+    }, 150);
     // Smart Indentation Rule on Enter:
     // Strictly preserves user's typed indentation, never touching or corrupting previous lines.
     // When entering an indented block (e.g. if condition, loops, functions, or lines ending in '{', ':', '(', '['),
@@ -4275,6 +4318,20 @@ function AssessmentContentWrapper() {
                       <RotateCcw className="h-3 w-3" /> Reset to starter code
                     </button>
 
+                    {/* Editor Engine Mode (Monaco vs Standard) */}
+                    <button
+                      onClick={() => setUseFallbackEditor(!useFallbackEditor)}
+                      className={`flex items-center gap-1 text-[11px] font-mono px-2 py-1 rounded border transition-colors ${
+                        editorTheme === "dark"
+                          ? "bg-[#21262D] border-[#30363D] text-[#58A6FF] hover:text-white"
+                          : "bg-white border-border text-emerald-900 hover:text-foreground"
+                      }`}
+                      title={useFallbackEditor ? "Switch to Monaco Editor" : "Switch to Simple Editor"}
+                    >
+                      <FileCode className="h-3 w-3" />
+                      <span className="hidden sm:inline">{useFallbackEditor ? "Monaco" : "Editor"}</span>
+                    </button>
+
                     {/* Editor Theme Switcher */}
                     <button
                       onClick={() => setEditorTheme(editorTheme === "dark" ? "light" : "dark")}
@@ -4362,26 +4419,54 @@ function AssessmentContentWrapper() {
                   </div>
                 </div>
 
-                {/* Monaco Editor (LeetCode 100% Experience) */}
-                <div className="flex-1 min-h-0 relative w-full h-full overflow-hidden bg-[#0D1117]">
-                  <MonacoEditor
-                    height="100%"
-                    path={`task-${activeCodingTaskIdx}-lang-${selectedLanguage}`}
-                    language={
-                      selectedLanguage === "go" ? "go" :
-                      selectedLanguage === "python" ? "python" :
-                      selectedLanguage === "javascript" ? "javascript" :
-                      selectedLanguage === "typescript" ? "typescript" :
-                      selectedLanguage === "java" ? "java" :
-                      selectedLanguage === "cpp" ? "cpp" :
-                      selectedLanguage === "csharp" ? "csharp" :
-                      selectedLanguage === "sql" ? "sql" :
-                      selectedLanguage === "rust" ? "rust" : "plaintext"
-                    }
-                    theme={editorTheme === "dark" ? "vs-dark" : "light"}
-                    defaultValue={code}
-                    onMount={handleEditorMount}
-                    onChange={(val) => handleCodeChange(val || "")}
+                {/* Monaco Editor (LeetCode 100% Experience) with Resilient Fallback */}
+                <div className="flex-1 min-h-0 relative w-full h-full overflow-hidden bg-[#0D1117] flex flex-col">
+                  {useFallbackEditor ? (
+                    <div className="flex-1 w-full h-full flex flex-col relative bg-[#0D1117]">
+                      <div className="flex items-center justify-between px-3 py-1 bg-[#161B22] border-b border-[#30363D] text-[11px] text-[#8B949E] font-mono">
+                        <span>Standard Code Editor (Typing Active)</span>
+                        <button
+                          onClick={() => setUseFallbackEditor(false)}
+                          className="text-[#58A6FF] hover:underline"
+                        >
+                          Switch to Monaco Editor
+                        </button>
+                      </div>
+                      <textarea
+                        ref={textareaRef}
+                        value={code}
+                        onChange={(e) => {
+                          handleCodeChange(e.target.value);
+                          updateCursorPosition();
+                        }}
+                        onKeyDown={handleEditorKeyDown}
+                        spellCheck={false}
+                        autoCapitalize="off"
+                        autoComplete="off"
+                        autoCorrect="off"
+                        placeholder="Write your Go solution here..."
+                        className="flex-1 w-full h-full p-4 bg-[#0D1117] text-[#E6EDF3] font-mono text-[13px] leading-relaxed resize-none outline-none border-none selection:bg-[#264F78]"
+                      />
+                    </div>
+                  ) : (
+                    <MonacoEditor
+                      height="100%"
+                      path={`task-${activeCodingTaskIdx}-lang-${selectedLanguage}`}
+                      language={
+                        selectedLanguage === "go" ? "go" :
+                        selectedLanguage === "python" ? "python" :
+                        selectedLanguage === "javascript" ? "javascript" :
+                        selectedLanguage === "typescript" ? "typescript" :
+                        selectedLanguage === "java" ? "java" :
+                        selectedLanguage === "cpp" ? "cpp" :
+                        selectedLanguage === "csharp" ? "csharp" :
+                        selectedLanguage === "sql" ? "sql" :
+                        selectedLanguage === "rust" ? "rust" : "plaintext"
+                      }
+                      theme={editorTheme === "dark" ? "vs-dark" : "light"}
+                      defaultValue={code}
+                      onMount={handleEditorMount}
+                      onChange={(val) => handleCodeChange(val || "")}
                     options={{
                       fontSize: editorFontSize,
                       fontFamily: "'Fira Code', 'Cascadia Code', Consolas, Monaco, monospace",
@@ -4437,6 +4522,7 @@ function AssessmentContentWrapper() {
                       padding: { top: 12, bottom: 12 },
                     }}
                   />
+                  )}
                 </div>
 
                 {/* Shortcuts & Editor Hints Bar */}
