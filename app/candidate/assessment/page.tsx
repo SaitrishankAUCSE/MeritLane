@@ -4444,7 +4444,7 @@ function AssessmentContentWrapper() {
                         autoCapitalize="off"
                         autoComplete="off"
                         autoCorrect="off"
-                        placeholder="Write your Go solution here..."
+                        placeholder={`Write your ${selectedLanguage.toUpperCase()} solution here...`}
                         className="flex-1 w-full h-full p-4 bg-[#0D1117] text-[#E6EDF3] font-mono text-[13px] leading-relaxed resize-none outline-none border-none selection:bg-[#264F78]"
                       />
                     </div>
@@ -4453,15 +4453,17 @@ function AssessmentContentWrapper() {
                       height="100%"
                       path={`task-${activeCodingTaskIdx}-lang-${selectedLanguage}`}
                       language={
-                        selectedLanguage === "go" ? "go" :
+                        SKILL_LOCKED_LANGUAGES[selectedLanguage]?.monacoLang ||
+                        (selectedLanguage === "go" ? "go" :
                         selectedLanguage === "python" ? "python" :
                         selectedLanguage === "javascript" ? "javascript" :
                         selectedLanguage === "typescript" ? "typescript" :
                         selectedLanguage === "java" ? "java" :
                         selectedLanguage === "cpp" ? "cpp" :
+                        selectedLanguage === "c" ? "c" :
                         selectedLanguage === "csharp" ? "csharp" :
                         selectedLanguage === "sql" ? "sql" :
-                        selectedLanguage === "rust" ? "rust" : "plaintext"
+                        selectedLanguage === "rust" ? "rust" : "plaintext")
                       }
                       theme={editorTheme === "dark" ? "vs-dark" : "light"}
                       defaultValue={code}
