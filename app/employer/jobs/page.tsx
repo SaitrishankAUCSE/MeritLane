@@ -117,24 +117,24 @@ export default function EmployerJobsPage() {
       <div className="border-b border-border bg-white px-6 sm:px-10 py-6">
         <div className="max-w-7xl mx-auto w-full flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <div className="text-[10px] font-medium tracking-[0.2em] text-muted-foreground uppercase mb-1">
+            <div className="text-[11px] font-grotesk font-semibold tracking-[0.22em] text-muted-foreground uppercase mb-1">
               Employer Hiring Operations · Meritlane Registry
             </div>
-            <h1 className="text-[26px] sm:text-[32px] font-bold uppercase tracking-[0.06em] text-foreground leading-tight">
-              JOBS MANAGEMENT HUB
+            <h1 className="text-[28px] sm:text-[34px] font-serif font-bold text-foreground tracking-tight leading-tight">
+              Jobs Management Hub
             </h1>
           </div>
 
           <div className="flex items-center gap-3">
             <Link href="/employer/dashboard">
-              <button className="px-4 py-2 border border-border bg-white hover:bg-surface text-[12px] font-mono font-semibold rounded transition-colors shadow-2xs">
-                CANDIDATE DISCOVERY
+              <button className="px-4 py-2 border border-border bg-white hover:bg-surface text-[12px] font-grotesk font-semibold uppercase tracking-wider rounded transition-colors shadow-2xs">
+                Candidate Discovery
               </button>
             </Link>
             <Link href="/employer/jobs/new">
-              <button className="flex items-center gap-2 px-5 py-2 bg-emerald-900 hover:bg-emerald-950 text-white text-[12px] font-sans font-semibold uppercase tracking-wide rounded transition-colors shadow-xs">
+              <button className="flex items-center gap-2 px-5 py-2 bg-emerald-900 hover:bg-emerald-950 text-white text-[12px] font-grotesk font-semibold uppercase tracking-wider rounded transition-colors shadow-xs">
                 <Plus className="h-4 w-4" />
-                POST A NEW JOB
+                Post A New Job
               </button>
             </Link>
           </div>
@@ -190,10 +190,10 @@ export default function EmployerJobsPage() {
         ) : (
           <div className="border border-border bg-white rounded shadow-xs overflow-hidden">
             <div className="border-b border-border bg-surface px-6 py-3.5 flex items-center justify-between">
-              <div className="text-[11px] font-medium tracking-[0.14em] text-muted-foreground uppercase font-semibold">
-                POSTED ROLES DIRECTORY ({jobs.length})
+              <div className="text-[11px] font-grotesk tracking-[0.16em] text-muted-foreground uppercase font-bold">
+                Posted Roles Directory ({jobs.length})
               </div>
-              <div className="text-[11px] font-mono text-muted-foreground">
+              <div className="text-[12px] font-serif italic text-muted-foreground">
                 Proof-Based Hiring
               </div>
             </div>
@@ -205,10 +205,10 @@ export default function EmployerJobsPage() {
                   <div key={job.id} className="p-6 flex flex-col lg:flex-row lg:items-center justify-between gap-6 hover:bg-surface/50 transition-colors">
                     <div className="space-y-2 flex-1">
                       <div className="flex items-center gap-2.5 flex-wrap">
-                        <span className={`text-[10px] font-medium font-semibold uppercase tracking-[0.14em] px-2.5 py-0.5 rounded border ${getStatusBadge(job.status)}`}>
+                        <span className={`text-[10px] font-grotesk font-bold uppercase tracking-[0.14em] px-2.5 py-0.5 rounded border ${getStatusBadge(job.status)}`}>
                           {job.status.toUpperCase()}
                         </span>
-                        <span className="text-[11px] font-medium text-muted-foreground uppercase">
+                        <span className="text-[11px] font-grotesk font-semibold text-muted-foreground uppercase tracking-wider">
                           {job.workMode} · {job.employmentType}
                         </span>
                         <span className="text-[11px] font-mono text-muted-foreground">
@@ -216,7 +216,7 @@ export default function EmployerJobsPage() {
                         </span>
                       </div>
 
-                      <h2 className="text-[18px] sm:text-[20px] font-bold text-foreground tracking-tight">
+                      <h2 className="text-[20px] sm:text-[22px] font-serif font-bold text-foreground tracking-tight capitalize group-hover:text-emerald-900 transition-colors">
                         {job.title}
                       </h2>
 
@@ -233,7 +233,7 @@ export default function EmployerJobsPage() {
                     <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 shrink-0">
                       {/* Applicants Button */}
                       <Link href={`/employer/jobs/${job.id}/applicants`}>
-                        <button className="flex items-center justify-center gap-2 px-4 py-2 border border-border bg-white hover:bg-surface text-[12px] font-mono font-semibold text-foreground rounded transition-colors shadow-2xs">
+                        <button className="flex items-center justify-center gap-2 px-4 py-2 border border-border bg-white hover:bg-surface text-[12px] font-grotesk font-bold uppercase tracking-wider text-foreground rounded transition-colors shadow-2xs">
                           <Users className="h-3.5 w-3.5 text-emerald-900" />
                           <span>APPLICANTS ({job.applicationCount || 0})</span>
                         </button>
@@ -241,7 +241,7 @@ export default function EmployerJobsPage() {
 
                       {/* Edit Button */}
                       <Link href={`/employer/jobs/${job.id}/edit`}>
-                        <button className="flex items-center justify-center gap-1.5 px-3.5 py-2 border border-border bg-white hover:bg-surface text-[12px] font-mono font-semibold text-foreground rounded transition-colors">
+                        <button className="flex items-center justify-center gap-1.5 px-3.5 py-2 border border-border bg-white hover:bg-surface text-[12px] font-grotesk font-semibold uppercase tracking-wider text-foreground rounded transition-colors">
                           <Edit3 className="h-3.5 w-3.5" />
                           <span>EDIT</span>
                         </button>
@@ -250,7 +250,7 @@ export default function EmployerJobsPage() {
                       {/* Public Preview Button (if published) */}
                       {job.status === "published" && (
                         <Link href={`/jobs/${job.id}`} target="_blank">
-                          <button className="flex items-center justify-center gap-1.5 px-3.5 py-2 border border-border bg-white hover:bg-surface text-[12px] font-mono font-semibold text-foreground rounded transition-colors">
+                          <button className="flex items-center justify-center gap-1.5 px-3.5 py-2 border border-border bg-white hover:bg-surface text-[12px] font-grotesk font-semibold uppercase tracking-wider text-foreground rounded transition-colors">
                             <Eye className="h-3.5 w-3.5" />
                             <span>VIEW LIVE</span>
                           </button>
@@ -262,7 +262,7 @@ export default function EmployerJobsPage() {
                         <button
                           onClick={() => handleStatusChange(job.id, "published")}
                           disabled={busy}
-                          className="px-4 py-2 bg-emerald-900 text-white text-[12px] font-sans font-semibold uppercase tracking-wide rounded hover:bg-emerald-950 transition-colors disabled:opacity-50"
+                          className="px-4 py-2 bg-emerald-900 text-white text-[12px] font-grotesk font-bold uppercase tracking-wider rounded hover:bg-emerald-950 transition-colors disabled:opacity-50"
                         >
                           PUBLISH NOW
                         </button>
@@ -272,7 +272,7 @@ export default function EmployerJobsPage() {
                         <button
                           onClick={() => handleStatusChange(job.id, "paused")}
                           disabled={busy}
-                          className="px-3.5 py-2 border border-amber-600/30 text-[#92400E] bg-[#FFFBEB] text-[11px] font-sans font-semibold uppercase tracking-wide rounded hover:bg-[#FEF3C7] transition-colors disabled:opacity-50"
+                          className="px-3.5 py-2 border border-amber-600/30 text-[#92400E] bg-[#FFFBEB] text-[11px] font-grotesk font-bold uppercase tracking-wider rounded hover:bg-[#FEF3C7] transition-colors disabled:opacity-50"
                         >
                           PAUSE
                         </button>
@@ -282,7 +282,7 @@ export default function EmployerJobsPage() {
                         <button
                           onClick={() => handleStatusChange(job.id, "published")}
                           disabled={busy}
-                          className="px-3.5 py-2 bg-emerald-900 text-white text-[11px] font-sans font-semibold uppercase tracking-wide rounded hover:bg-emerald-950 transition-colors disabled:opacity-50"
+                          className="px-3.5 py-2 bg-emerald-900 text-white text-[11px] font-grotesk font-bold uppercase tracking-wider rounded hover:bg-emerald-950 transition-colors disabled:opacity-50"
                         >
                           RESUME
                         </button>
@@ -296,7 +296,7 @@ export default function EmployerJobsPage() {
                             }
                           }}
                           disabled={busy}
-                          className="px-3.5 py-2 border border-danger/30 text-danger bg-danger/10 text-[11px] font-sans font-semibold uppercase tracking-wide rounded hover:bg-[#FEE2E2] transition-colors disabled:opacity-50"
+                          className="px-3.5 py-2 border border-danger/30 text-danger bg-danger/10 text-[11px] font-grotesk font-bold uppercase tracking-wider rounded hover:bg-[#FEE2E2] transition-colors disabled:opacity-50"
                         >
                           CLOSE
                         </button>

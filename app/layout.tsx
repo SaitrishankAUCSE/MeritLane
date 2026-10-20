@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter, JetBrains_Mono, Lora } from "next/font/google";
+import { Fraunces, Plus_Jakarta_Sans, Space_Grotesk, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
 import { SiteFooter } from "@/components/chrome/SiteFooter";
@@ -10,26 +10,30 @@ import { GlobalAuthModal } from "@/components/ui/AuthModal";
 import { PostHogProvider } from "@/providers/PostHogProvider";
 import NextTopLoader from "nextjs-toploader";
 
-// Primary professional font — Inter: clean, modern, and high-readability across all devices
-const inter = Inter({
+// Display & Headings — Fraunces: Award-winning bespoke editorial serif with optical sizing & rich character
+const fraunces = Fraunces({
   subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700", "800"],
-  variable: "--font-sans",
-  display: "swap",
-});
-
-// Fallback / legacy serif (retained so user can undo anytime in 1 line)
-const loraSerif = Lora({
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
   variable: "--font-serif",
   display: "swap",
 });
 
-// Code & technical data — assessment editor, hashes, timestamps
+// Primary Modern UI & Body — Plus Jakarta Sans: Contemporary, geometric, crisp readability
+const plusJakartaSans = Plus_Jakarta_Sans({
+  subsets: ["latin"],
+  variable: "--font-sans",
+  display: "swap",
+});
+
+// Technical Accents, Badges & Labels — Space Grotesk: Expressive, quirky geometric tech grotesque
+const spaceGrotesk = Space_Grotesk({
+  subsets: ["latin"],
+  variable: "--font-grotesk",
+  display: "swap",
+});
+
+// Code & Verified Ledger — JetBrains Mono: Assessment editor, test cases, proof hashes
 const jetbrainsMono = JetBrains_Mono({
   subsets: ["latin"],
-  weight: ["400", "500", "600"],
   variable: "--font-mono",
   display: "swap",
 });
@@ -70,7 +74,7 @@ export default function RootLayout({
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://merit-lane.vercel.app";
 
   return (
-    <html lang="en" suppressHydrationWarning className={`${inter.variable} ${jetbrainsMono.variable} ${loraSerif.variable} h-full antialiased`}>
+    <html lang="en" suppressHydrationWarning className={`${fraunces.variable} ${plusJakartaSans.variable} ${spaceGrotesk.variable} ${jetbrainsMono.variable} h-full antialiased`}>
       <body className="flex min-h-full flex-col bg-background font-sans text-foreground">
         <script
           type="application/ld+json"

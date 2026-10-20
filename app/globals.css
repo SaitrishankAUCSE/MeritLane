@@ -50,13 +50,12 @@
   --color-danger: var(--color-danger);
   --color-info: var(--color-info);
 
-  /* Single unified modern font style across the entire website */
-  /* Professional modern typography (Inter) used by Stripe, Vercel, Linear, GitHub */
-  --font-sans: var(--font-sans), "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
-  /* To undo and restore old serif style, simply set --font-serif: var(--font-serif-original); */
-  --font-serif: var(--font-sans);
-  --font-serif-original: var(--font-serif), "Lora", Georgia, serif;
-  --font-signature: var(--font-sans);
+  /* Creative, bespoke typography architecture */
+  --font-sans: var(--font-sans), "Plus Jakarta Sans", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-serif: var(--font-serif), "Fraunces", Georgia, serif;
+  --font-display: var(--font-serif);
+  --font-grotesk: var(--font-grotesk), "Space Grotesk", sans-serif;
+  --font-signature: var(--font-serif);
   --font-mono: var(--font-mono), "JetBrains Mono", ui-monospace, monospace;
 }
 
@@ -81,8 +80,8 @@ body {
 
 /* Headings — Document of Authority */
 h1, h2, h3, h4, h5, h6 {
-  font-family: var(--font-sans);
-  letter-spacing: -0.025em;
+  font-family: var(--font-serif);
+  letter-spacing: -0.02em;
   line-height: 1.25;
   font-weight: 600;
   color: inherit;
@@ -93,10 +92,10 @@ h1, h2, h3, h4, h5, h6 {
   color: #FFFFFF !important;
 }
 
-/* Dedicated block letter headings */
+/* Dedicated technical block letter headings */
 .heading-block, .block-heading {
-  font-family: var(--font-sans);
-  font-weight: 600;
+  font-family: var(--font-grotesk);
+  font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.05em;
   color: var(--color-foreground);
@@ -106,11 +105,16 @@ h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-serif) !important;
 }
 
-/* Distinct cursive signature moniker — applied ONLY to candidate name */
+.font-grotesk {
+  font-family: var(--font-grotesk) !important;
+}
+
+/* Distinct signature moniker — applied to candidate name */
 .font-signature, .name-cursive {
-  font-family: var(--font-sans) !important;
+  font-family: var(--font-serif) !important;
+  font-style: italic;
   font-weight: 600;
-  letter-spacing: 0.02em;
+  letter-spacing: -0.01em;
 }
 
 /* Public theme */
