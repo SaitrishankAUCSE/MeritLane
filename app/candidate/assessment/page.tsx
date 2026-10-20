@@ -3347,8 +3347,8 @@ function AssessmentContentWrapper() {
 
   if (initializing || loading || !content || !Array.isArray(content.mcqs)) {
     return (
-      <div className="flex h-full w-full items-center justify-center">
-        <MeritlaneLoader level="section" />
+      <div className="min-h-screen w-full flex items-center justify-center bg-background">
+        <MeritlaneLoader level="page" text={`Preparing ${displaySkill || "Skill"} Assessment…`} />
       </div>
     );
   }
@@ -5075,8 +5075,8 @@ export default function AssessmentPage() {
   return (
     <Suspense
       fallback={
-        <div className="flex h-full w-full items-center justify-center">
-          <MeritlaneLoader level="section" />
+        <div className="min-h-screen w-full flex items-center justify-center bg-background">
+          <MeritlaneLoader level="page" text="Loading Assessment Environment…" />
         </div>
       }
     >
