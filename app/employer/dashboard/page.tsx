@@ -195,15 +195,21 @@ export default function EmployerDashboardPage() {
   // Sorting
   const sortedCandidates = [...candidates].sort((a, b) => {
     if (sortBy === "skills") {
-      const aCount = Object.keys(a.verifiedSkills || {}).length;
-      const bCount = Object.keys(b.verifiedSkills || {}).length;
+      const aCount = a.qualifiedSkillsCount ?? Object.keys(a.verifiedSkills || {}).length;
+      const bCount = b.qualifiedSkillsCount ?? Object.keys(b.verifiedSkills || {}).length;
       return bCount - aCount;
     }
     if (sortBy === "projects") {
       return (b.projects?.length || 0) - (a.projects?.length || 0);
     }
-    // Default: match count
-    return (b.matchedRequiredSkillCount || 0) - (a.matchedRequiredSkillCount || 0);
+    // Default: match count, then verified skills, then total skills
+    if ((b.matchedRequiredSkillCount || 0) !== (a.matchedRequiredSkillCount || 0)) {
+      return (b.matchedRequiredSkillCount || 0) - (a.matchedRequiredSkillCount || 0);
+    }
+    if ((b.qualifiedSkillsCount || 0) !== (a.qualifiedSkillsCount || 0)) {
+      return (b.qualifiedSkillsCount || 0) - (a.qualifiedSkillsCount || 0);
+    }
+    return (b.skills?.length || 0) - (a.skills?.length || 0);
   });
   
   const paginatedCandidates = React.useMemo(() => {
@@ -505,7 +511,7 @@ export default function EmployerDashboardPage() {
             {/* Sort & Count Row */}
             <div className="flex items-center justify-between pt-3 border-t border-border text-[13px] text-muted-foreground">
               <div>
-                Showing <span className="font-semibold text-foreground">{sortedCandidates.length}</span> verified candidate{sortedCandidates.length === 1 ? "" : "s"}
+                Showing <span className="font-semibold text-foreground">{sortedCandidates.length}</span> candidate{sortedCandidates.length === 1 ? "" : "s"}
                 {selectedSkills.length > 0 && (
                   <span className="text-muted-foreground ml-1">
                     matching {selectedSkills.join(", ")}
@@ -538,7 +544,7 @@ export default function EmployerDashboardPage() {
             </div>
           ) : sortedCandidates.length === 0 ? (
             <div className="border border-black/[0.08] border-dashed rounded-2xl bg-white p-16 text-center shadow-xs">
-              <h2 className="text-[20px] font-bold tracking-tight text-[#101010] mb-3">No verified candidates found</h2>
+              <h2 className="text-[20px] font-bold tracking-tight text-[#101010] mb-3">No candidates found</h2>
               <p className="text-[14px] text-[#737373] mb-6 max-w-md mx-auto">
                 No candidates match your current search query or skill filters. Try broadening your criteria or reset all filters.
               </p>
