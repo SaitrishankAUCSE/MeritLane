@@ -143,6 +143,24 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ candidates: [] }, { status: 200 });
     }
 
+    // Precompute skills that are verified by at least one candidate on the platform
+    const platformVerifiedSkills = new Set<string>();
+    for (const { data, id: uid } of candidateDocs) {
+      const prefetchedUser = usersBatchMap.get(uid) || {};
+      const verified = { ...(prefetchedUser.verifiedSkills || {}), ...(data.verifiedSkills || {}) };
+      const scores = { ...(prefetchedUser.assessmentScores || {}), ...((data as any).assessmentScores || {}) };
+      for (const [k, v] of Object.entries(verified)) {
+        if ((v as any)?.status === "verified") {
+          platformVerifiedSkills.add(canonicalizeSkill(k));
+        }
+      }
+      for (const [k, score] of Object.entries(scores)) {
+        if (typeof score === "number" && score >= 75) {
+          platformVerifiedSkills.add(canonicalizeSkill(k));
+        }
+      }
+    }
+
     const sanitizedCandidates = [];
 
     for (const { id: uid, data } of candidateDocs) {
@@ -314,6 +332,7 @@ export async function POST(req: NextRequest) {
 
         let matched = false;
 
+        // 1. Is this skill verified in candidate's verifiedSkills?
         const isVerified = Object.keys(verifiedSkillsObj).some(
           (k) => canonicalizeSkill(k) === canonicalReq && (verifiedSkillsObj[k] as any)?.status === "verified"
         );
@@ -323,29 +342,35 @@ export async function POST(req: NextRequest) {
           matched = true;
         }
 
-        if (!matched && Object.keys(assessmentScores).some((k) => canonicalizeSkill(k) === canonicalReq)) {
+        // 2. Is this skill backed by completed assessment >= 75%?
+        if (!matched && Object.keys(assessmentScores).some((k) => {
+          const score = assessmentScores[k];
+          return canonicalizeSkill(k) === canonicalReq && (typeof score === "number" ? score >= 75 : true);
+        })) {
           matchReasons.push(reqSkill.trim() + " - assessment completed");
           matched = true;
         }
 
-        if (!matched && candidateSkills.some((s) => canonicalizeSkill(s) === canonicalReq)) {
-          matchReasons.push(reqSkill.trim() + " - core skill");
-          matched = true;
-        }
+        // 3. Fallback: ONLY if NO candidate on the entire platform has verified this skill yet
+        const isSkillVerifiedOnPlatform = platformVerifiedSkills.has(canonicalReq);
 
-        if (
-          !matched &&
-          projects.some((p: any) => {
-            const regex = new RegExp("(^|\\W)" + escapeRegExp(canonicalReq) + "($|\\W)", "i");
-            return (
-              (p.title && regex.test(p.title)) ||
-              (p.description && regex.test(p.description)) ||
-              (p.skillsUsed && p.skillsUsed.some((s: string) => canonicalizeSkill(s) === canonicalReq))
-            );
-          })
-        ) {
-          matchReasons.push(reqSkill.trim() + " - demonstrated in project");
-          matched = true;
+        if (!matched && !isSkillVerifiedOnPlatform) {
+          if (candidateSkills.some((s) => canonicalizeSkill(s) === canonicalReq)) {
+            matchReasons.push(reqSkill.trim() + " - claimed skill");
+            matched = true;
+          } else if (
+            projects.some((p: any) => {
+              const regex = new RegExp("(^|\\W)" + escapeRegExp(canonicalReq) + "($|\\W)", "i");
+              return (
+                (p.title && regex.test(p.title)) ||
+                (p.description && regex.test(p.description)) ||
+                (p.skillsUsed && p.skillsUsed.some((s: string) => canonicalizeSkill(s) === canonicalReq))
+              );
+            })
+          ) {
+            matchReasons.push(reqSkill.trim() + " - demonstrated in project");
+            matched = true;
+          }
         }
 
         if (matched) {

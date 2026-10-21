@@ -66,7 +66,7 @@ export default function EmployerDashboardPage() {
 
   const fetchCandidates = useCallback(async () => {
     if (!user) return;
-    setFetching((prev) => candidates.length === 0);
+    setFetching(true);
     try {
       const token = await user.getIdToken();
       
@@ -128,7 +128,6 @@ export default function EmployerDashboardPage() {
     minCommits,
     matchMode,
     gradYearFilter,
-    candidates.length
   ]);
 
   useEffect(() => {
@@ -646,48 +645,83 @@ export default function EmployerDashboardPage() {
                             </p>
                           )}
 
-                          {/* Verified Skills Badges */}
-                          {verifiedSkillsList.length > 0 ? (
-                            <div className="flex flex-wrap gap-2 mt-3">
-                              {verifiedSkillsList.map((skill, idx) => {
-                                const skillObj = c.verifiedSkills[skill];
-                                const isGold = skillObj?.badge === "gold_honors" || skillObj?.track === "advanced";
-                                return (
-                                  <div
-                                    key={idx}
-                                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded border text-[12px] font-medium ${
-                                      isGold
-                                        ? "border-amber-300 bg-amber-50 text-amber-800"
-                                        : "border-[#15803D]/20 bg-[#15803D]/5 text-[#15803D]"
-                                    }`}
-                                  >
-                                    {isGold ? (
-                                      <Trophy className="h-3.5 w-3.5 text-amber-700" />
-                                    ) : (
-                                      <CheckCircle2 className="h-3.5 w-3.5" />
-                                    )}
-                                    {skill}
-                                    {isGold && (
-                                      <span className="text-[9px] uppercase tracking-wider font-bold bg-amber-200/60 text-amber-900 px-1 rounded">
-                                        Gold
+                          {/* Skills Display */}
+                          <div className="mt-3 space-y-2">
+                            {/* Verified Skills Badges */}
+                            {verifiedSkillsList.length > 0 && (
+                              <div className="flex flex-wrap gap-2">
+                                {verifiedSkillsList.map((skill, idx) => {
+                                  const skillObj = c.verifiedSkills[skill];
+                                  const isGold = skillObj?.badge === "gold_honors" || skillObj?.track === "advanced";
+                                  return (
+                                    <div
+                                      key={idx}
+                                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded border text-[12px] font-medium ${
+                                        isGold
+                                          ? "border-amber-300 bg-amber-50 text-amber-800"
+                                          : "border-[#15803D]/20 bg-[#15803D]/5 text-[#15803D]"
+                                      }`}
+                                    >
+                                      {isGold ? (
+                                        <Trophy className="h-3.5 w-3.5 text-amber-700" />
+                                      ) : (
+                                        <CheckCircle2 className="h-3.5 w-3.5" />
+                                      )}
+                                      {skill}
+                                      {isGold && (
+                                        <span className="text-[9px] uppercase tracking-wider font-bold bg-amber-200/60 text-amber-900 px-1 rounded">
+                                          Gold
+                                        </span>
+                                      )}
+                                      {skillObj?.score && (
+                                        <span className={`text-[10px] font-mono bg-white px-1.5 py-0.2 rounded font-bold border ${
+                                          isGold ? "text-amber-800 border-amber-300" : "text-[#15803D] border-[#15803D]/30"
+                                        }`}>
+                                          {skillObj.score}%
+                                        </span>
+                                      )}
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                            )}
+
+                            {/* Other Profile Skills */}
+                            {c.skills && c.skills.length > 0 && (
+                              <div className="flex flex-wrap items-center gap-1.5 pt-0.5">
+                                <span className="text-[11px] font-mono text-[#737373] mr-0.5">Skills:</span>
+                                {c.skills
+                                  .filter((s: string) => !verifiedSkillsList.some((vs: string) => vs.toLowerCase() === s.toLowerCase()))
+                                  .slice(0, 8)
+                                  .map((skill: string, idx: number) => {
+                                    const isMatched = selectedSkills.some((sel) => sel.toLowerCase() === skill.toLowerCase());
+                                    return (
+                                      <span
+                                        key={idx}
+                                        className={`px-2 py-0.5 rounded text-[11px] font-mono border ${
+                                          isMatched
+                                            ? "bg-black text-white border-black font-semibold shadow-xs"
+                                            : "bg-black/[0.03] border-black/[0.08] text-[#555]"
+                                        }`}
+                                      >
+                                        {skill}
                                       </span>
-                                    )}
-                                    {skillObj?.score && (
-                                      <span className={`text-[10px] font-mono bg-white px-1.5 py-0.2 rounded font-bold border ${
-                                        isGold ? "text-amber-800 border-amber-300" : "text-[#15803D] border-[#15803D]/30"
-                                      }`}>
-                                        {skillObj.score}%
-                                      </span>
-                                    )}
-                                  </div>
-                                );
-                              })}
-                            </div>
-                          ) : (
-                            <div className="mt-3 text-[13px] text-muted-foreground italic">
-                              Claimed skills under assessment verification.
-                            </div>
-                          )}
+                                    );
+                                  })}
+                                {c.skills.filter((s: string) => !verifiedSkillsList.some((vs: string) => vs.toLowerCase() === s.toLowerCase())).length > 8 && (
+                                  <span className="text-[10px] text-[#737373] font-mono">
+                                    +{c.skills.filter((s: string) => !verifiedSkillsList.some((vs: string) => vs.toLowerCase() === s.toLowerCase())).length - 8} more
+                                  </span>
+                                )}
+                              </div>
+                            )}
+
+                            {verifiedSkillsList.length === 0 && (!c.skills || c.skills.length === 0) && (
+                              <div className="text-[13px] text-muted-foreground italic">
+                                Skills under assessment verification.
+                              </div>
+                            )}
+                          </div>
 
                           {/* Evidence Strip: GitHub & ATS signals */}
                           <div className="flex flex-wrap items-center gap-2.5 mt-3 text-[11px] font-mono text-muted-foreground">
