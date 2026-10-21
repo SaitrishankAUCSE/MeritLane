@@ -229,49 +229,50 @@ export default function EmployerDashboardPage() {
   }
 
   return (
-    <div className="flex h-full w-full flex-col overflow-hidden bg-[#FAFAFA]">
+    <div className="flex h-full w-full flex-col overflow-hidden bg-transparent text-[#101010] font-sans">
       <div className="flex-1 px-4 sm:px-8 lg:px-10 py-6 sm:py-8 overflow-y-auto scrollbar-hide w-full">
         <div className="max-w-7xl mx-auto w-full">
 
-        {/* Hero Header & Institutional Telemetry */}
+        {/* Hero Header */}
         <div className="w-full mb-8 sm:mb-10">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-3">
             <div className="flex items-center gap-2 flex-wrap">
-              <span className="text-[11px] font-medium font-bold uppercase tracking-[0.1em] text-emerald-900 bg-emerald-900/10 px-2.5 py-1 rounded">
-                Employer Dashboard
+              <span className="text-[11px] font-medium tracking-wider text-[#71717A] uppercase">
+                Employer Discovery
               </span>
             </div>
             <div className="flex items-center gap-2">
               <button
                 onClick={() => window.dispatchEvent(new CustomEvent("open-meritlane-welcome"))}
-                className="flex items-center gap-1.5 px-3 py-2 border border-emerald-900/20 bg-emerald-900/[0.04] hover:bg-emerald-900/10 text-[12px] font-mono font-semibold rounded text-emerald-900 transition-colors cursor-pointer shadow-2xs"
+                className="flex items-center gap-1.5 px-3.5 py-1.5 border border-black/[0.12] bg-white hover:bg-[#F4F4F2] text-xs font-medium rounded-full text-[#101010] transition-colors cursor-pointer shadow-xs active:scale-[0.98]"
                 title="Learn how MeritLane works"
               >
-                <Sparkles className="h-3.5 w-3.5 text-emerald-900" />
-                <span>HOW IT WORKS</span>
+                <Sparkles className="h-3.5 w-3.5 text-[#71717A]" />
+                <span>How it works</span>
               </button>
               <Link href="/employer/jobs">
-                <button className="flex items-center gap-2 px-4 py-2 border border-border bg-white hover:bg-surface text-[12px] font-mono font-semibold rounded text-foreground transition-colors shadow-2xs cursor-pointer">
-                  <Briefcase className="h-3.5 w-3.5 text-emerald-900" />
-                  <span>MANAGE JOBS &amp; APPLICANTS</span>
+                <button className="flex items-center gap-2 px-4 py-1.5 border border-black/[0.12] bg-white hover:bg-[#F4F4F2] text-xs font-medium rounded-full text-[#101010] transition-colors shadow-xs cursor-pointer active:scale-[0.98]">
+                  <Briefcase className="h-3.5 w-3.5 text-[#71717A]" />
+                  <span>Manage Jobs &amp; Applicants</span>
                   <ArrowRight className="h-3 w-3" />
                 </button>
               </Link>
             </div>
           </div>
-          <h1 className="text-[26px] sm:text-[34px] lg:text-[38px] font-bold uppercase tracking-[0.06em] text-foreground leading-tight mb-6">
-            FIND PEOPLE WHOSE SKILLS ARE PROVEN.
+          <h1 className="text-[28px] sm:text-[36px] font-semibold tracking-[-0.035em] text-[#101010] leading-tight mb-2">
+            Find engineers with verified proof of work.
           </h1>
-
-
+          <p className="text-[14px] text-[#71717A]">
+            Discover technical candidates who passed objective, monitored code evaluations.
+          </p>
         </div>
 
         {/* Search & Filter Controls */}
         <div className="w-full">
-          <div className="mb-8 bg-white border border-border p-4 sm:p-6 rounded shadow-[0_2px_10px_rgba(0,0,0,0.02)] space-y-4 sm:space-y-5">
+          <div className="mb-8 bg-white border border-black/[0.08] p-5 sm:p-6 rounded-2xl shadow-xs space-y-4 sm:space-y-5">
             {/* Search Bar */}
             <div className="relative flex items-center">
-              <Search className="absolute left-4 h-4 w-4 text-muted-foreground pointer-events-none" />
+              <Search className="absolute left-4 h-4 w-4 text-[#71717A] pointer-events-none" />
               <input
                 type="text"
                 placeholder="Search candidates by name, skills, role, or Candidate ID (e.g. ML-73977F0B)..."
@@ -280,13 +281,13 @@ export default function EmployerDashboardPage() {
                 onKeyDown={(e) => {
                   if (e.key === "Enter") fetchCandidates();
                 }}
-                className="w-full h-12 pl-11 pr-10 bg-surface border border-border focus:border-emerald-900 focus:bg-white text-[14px] font-sans text-foreground placeholder:text-muted-foreground/70 rounded transition-all outline-none"
+                className="w-full h-11 pl-11 pr-10 bg-[#FAFAF9] focus:bg-white border border-black/[0.12] focus:border-[#101010] text-[13px] text-[#101010] placeholder:text-[#A1A1AA] rounded-xl transition-all outline-none"
               />
               {searchQuery && (
                 <button
                   type="button"
                   onClick={() => setSearchQuery("")}
-                  className="absolute right-3.5 text-muted-foreground hover:text-foreground p-1 rounded transition-colors"
+                  className="absolute right-3.5 text-[#71717A] hover:text-[#101010] p-1 rounded-md transition-colors"
                   title="Clear search"
                 >
                   <X className="h-4 w-4" />
@@ -529,16 +530,16 @@ export default function EmployerDashboardPage() {
 
           {/* Results List */}
           {fetching ? (
-            <div className="py-20 flex flex-col items-center justify-center space-y-3 bg-white border border-border rounded shadow-2xs">
-              <div className="h-7 w-7 border-2 border-border border-t-[#064E3B] rounded-full animate-spin" />
-              <div className="text-[12px] font-mono text-muted-foreground uppercase tracking-[0.16em]">
+            <div className="py-20 flex flex-col items-center justify-center space-y-3 bg-white border border-black/[0.08] rounded-2xl shadow-xs">
+              <div className="h-7 w-7 border-2 border-black/[0.08] border-t-[#101010] rounded-full animate-spin" />
+              <div className="text-[12px] font-mono text-[#737373] uppercase tracking-[0.16em]">
                 Querying verified practitioner ledger…
               </div>
             </div>
           ) : sortedCandidates.length === 0 ? (
-            <div className="border border-border border-dashed rounded bg-white p-16 text-center shadow-sm">
-              <h2 className="text-[20px] font-serif text-foreground mb-3">No verified candidates found</h2>
-              <p className="text-[14px] text-muted-foreground mb-6 max-w-md mx-auto">
+            <div className="border border-black/[0.08] border-dashed rounded-2xl bg-white p-16 text-center shadow-xs">
+              <h2 className="text-[20px] font-bold tracking-tight text-[#101010] mb-3">No verified candidates found</h2>
+              <p className="text-[14px] text-[#737373] mb-6 max-w-md mx-auto">
                 No candidates match your current search query or skill filters. Try broadening your criteria or reset all filters.
               </p>
               <Button
@@ -580,7 +581,7 @@ export default function EmployerDashboardPage() {
                       whileHover={{ y: -4, scale: 1.005, boxShadow: "0 12px 40px -10px rgba(0,0,0,0.08)" }}
                       transition={{ duration: 0.15, ease: "easeOut" }}
                       key={c.uid}
-                      className="group border border-border rounded bg-white p-4 sm:p-6 md:p-8 transition-colors duration-150 hover:border-foreground/20"
+                      className="group border border-black/[0.08] rounded-2xl bg-white p-6 sm:p-7 transition-all duration-150 hover:border-black/[0.2] shadow-xs"
                     >
                     <div className="flex flex-col md:flex-row md:items-start justify-between gap-5 sm:gap-6">
                       {/* Candidate Identity & Evidence */}
@@ -595,19 +596,19 @@ export default function EmployerDashboardPage() {
                         />
                         <div>
                           <div className="flex items-center gap-2.5 flex-wrap">
-                            <h3 className="font-serif text-[26px] text-foreground leading-tight">
+                            <h3 className="text-[20px] font-semibold text-[#101010] tracking-tight leading-tight">
                               {c.name || "Anonymous Candidate"}
                             </h3>
-                            <span className="text-[11px] font-mono font-semibold text-emerald-900 bg-emerald-900/10 px-2.5 py-0.5 rounded border border-emerald-900/20">
+                            <span className="text-xs font-mono font-medium text-[#101010] bg-black/[0.04] px-2.5 py-0.5 rounded-full border border-black/[0.08]">
                               {c.candidateKey || (c.id ? `ML-${c.id.slice(0, 8).toUpperCase()}` : "CANDIDATE")}
                             </span>
-                            <span className="text-[11px] font-medium font-bold uppercase tracking-[0.1em] text-[#15803D] bg-[#15803D]/10 px-2 py-0.5 rounded-sm">
+                            <span className="text-xs font-medium text-[#101010] bg-black/[0.04] px-2.5 py-0.5 rounded-full border border-black/[0.08]">
                               Verified Practitioner
                             </span>
-                            <div className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-sm bg-[#ECFDF5] border border-[#A7F3D0] text-[#065F46] text-[11px] font-semibold">
+                            <div className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-black/[0.04] border border-black/[0.08] text-[#101010] text-xs font-medium">
                               <ShieldCheck className="h-3.5 w-3.5 text-emerald-600" />
-                              <span>{verificationPct}% Skills Verified</span>
-                              <span className="text-[#047857] font-normal text-[10px]">
+                              <span>{verificationPct}% Verified</span>
+                              <span className="text-[#737373] font-normal text-[11px]">
                                 ({verifiedCount}/{totalSkills} passed ≥75%)
                               </span>
                             </div>
@@ -615,23 +616,23 @@ export default function EmployerDashboardPage() {
 
                           {/* Target Roles & Location preview if available */}
                           {((c.targetRoles && c.targetRoles.length > 0) || c.workPreference) && (
-                            <div className="flex items-center gap-2 flex-wrap mt-1 text-[11px] font-mono text-emerald-900">
+                            <div className="flex items-center gap-2 flex-wrap mt-1 text-[11px] font-mono text-[#737373]">
                               {c.targetRoles?.slice(0, 2).map((role: string) => (
-                                <span key={role} className="bg-surface border border-border px-2 py-0.5 rounded text-foreground">
+                                <span key={role} className="bg-black/[0.04] border border-black/[0.08] px-2 py-0.5 rounded-full text-[#101010]">
                                   {role}
                                 </span>
                               ))}
                               {c.workPreference && (
-                                <span className="text-muted-foreground">· {c.workPreference}</span>
+                                <span className="text-[#737373]">· {c.workPreference}</span>
                               )}
                               {c.availability && (
-                                <span className="text-emerald-600">· {c.availability}</span>
+                                <span className="text-[#101010]">· {c.availability}</span>
                               )}
                             </div>
                           )}
 
                           {(c.college || c.branch) && (
-                            <p className="text-[14px] text-muted-foreground mt-1 mb-4 flex items-center gap-1.5">
+                            <p className="text-[14px] text-[#737373] mt-1 mb-4 flex items-center gap-1.5">
                               <GraduationCap className="h-4 w-4 opacity-70" />
                               {c.branch}
                               {c.branch && c.college ? " · " : ""}
@@ -718,20 +719,20 @@ export default function EmployerDashboardPage() {
                       <div className="flex flex-col items-start md:items-end gap-3 shrink-0">
                         <div className="text-left md:text-right mb-1">
                           <div className="flex items-center md:justify-end gap-1.5">
-                            <span className="text-[11px] font-bold text-[#065F46] bg-[#ECFDF5] border border-[#A7F3D0] px-2 py-0.5 rounded">
+                            <span className="text-[11px] font-mono font-bold text-[#101010] bg-black/[0.04] border border-black/[0.08] px-2.5 py-0.5 rounded-full">
                               {verificationPct}% Verified
                             </span>
-                            <span className="text-[13px] text-foreground font-medium">
+                            <span className="text-[13px] text-[#101010] font-medium">
                               {verifiedCount}/{totalSkills} skills (≥75%)
                             </span>
                           </div>
-                          <div className="w-32 bg-border h-1.5 rounded-full overflow-hidden mt-1.5 md:ml-auto">
+                          <div className="w-32 bg-black/[0.08] h-1.5 rounded-full overflow-hidden mt-1.5 md:ml-auto">
                             <div
-                              className="bg-emerald-600 h-full rounded-full transition-all duration-150"
+                              className="bg-[#101010] h-full rounded-full transition-all duration-150"
                               style={{ width: `${Math.min(100, Math.max(5, verificationPct))}%` }}
                             />
                           </div>
-                          <div className="text-[12px] text-muted-foreground mt-1">
+                          <div className="text-[12px] text-[#737373] mt-1">
                             {c.projects?.length || 0} evidence project{c.projects?.length === 1 ? "" : "s"}
                           </div>
                         </div>

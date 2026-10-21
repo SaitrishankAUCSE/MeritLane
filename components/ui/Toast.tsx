@@ -77,9 +77,8 @@ function ToastCard({ toast, onDismiss }: { toast: Toast; onDismiss: (id: string)
       exit={{    opacity: 0, y: 16, scale: 0.97  }}
       transition={{ duration: 0.22, ease: [0.4, 0, 0.2, 1] }}
       className={`
-        flex items-start gap-3 w-full max-w-[340px] bg-surface-bright
-        border border-border border-l-4 ${ACCENT[toast.type]}
-        rounded shadow-lg px-4 py-3.5 pointer-events-auto
+        flex items-start gap-3 w-full max-w-[340px] bg-white
+        border border-black/[0.12] rounded-xl shadow-lg px-4 py-3.5 pointer-events-auto
       `}
     >
       <div className="shrink-0 mt-0.5">{ICONS[toast.type]}</div>

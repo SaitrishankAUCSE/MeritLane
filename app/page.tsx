@@ -16,7 +16,7 @@ import { MeritlaneLoader } from "@/components/ui/MeritlaneLoader";
 const faqs = [
   {
     question: "How does MeritLane help freshers and new graduates get hired?",
-    answer: "Most entry-level software postings mandate 1-3 years of prior commercial experience, creating a frustrating catch-22 for freshers. MeritLane replaces arbitrary experience requirements with standardized, proctored Proof of Work. When you score ≥ 75% on our assessments, employers see verifiable evidence that you write clean, production-ready code — allowing you to bypass automated resume filters and land interviews directly."
+    answer: "Most entry-level software postings mandate 1-3 years of prior commercial experience, creating a frustrating catch-22 for freshers. MeritLane replaces arbitrary experience requirements with standardized, proctored Proof of Work. When you score ≥ 75% on our assessments, employers see verifiable evidence that you write clean, production-ready code, allowing you to bypass automated resume filters and land interviews directly."
   },
   {
     question: "Does my college tier, degree branch, or GPA disqualify me?",
@@ -90,7 +90,7 @@ export default function HomePage() {
         <div className="flex justify-start sm:justify-center mb-8">
           <Link 
             href="/how-verification-works"
-            className="group inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-black/[0.08] bg-white text-[13px] text-[#71717A] hover:text-[#101010] hover:border-black/[0.16] transition-all shadow-xs"
+            className="group inline-flex items-center gap-2 px-3.5 py-1.5 rounded-lg border border-black/[0.08] bg-white text-[13px] text-[#71717A] hover:text-[#101010] hover:border-black/[0.16] transition-all shadow-xs"
           >
             <span className="font-medium text-[#101010]">MeritLane 2.0</span>
             <span className="w-1 h-1 rounded-full bg-black/[0.2]" />
@@ -102,23 +102,23 @@ export default function HomePage() {
         {/* Hero Headlines */}
         <div className="max-w-4xl mx-auto sm:text-center space-y-6">
           <h1 className="text-[44px] sm:text-[62px] lg:text-[76px] font-semibold tracking-[-0.035em] leading-[1.04] text-[#101010]">
-            Meet MeritLane, your team&apos;s verified technical hiring platform
+            Skip the ATS resume filter. Prove your code in real compilers.
           </h1>
           <p className="text-[18px] sm:text-[20px] text-[#71717A] max-w-2xl sm:mx-auto leading-[1.48] font-normal">
-            MeritLane evaluates engineering talent in isolated compiler sandboxes, runs 10/10 test cases in real runtime environments, and delivers tamper-proof skill proofs that skip ATS black holes straight to direct interviews.
+            MeritLane evaluates engineering talent in isolated compiler sandboxes, runs 10/10 test cases in real runtime environments, and delivers tamper-proof skill proofs directly to hiring teams.
           </p>
 
-          {/* Devin.ai Action Pills */}
+          {/* Action Buttons (Standard Rectangular Rounded-LG - No Pill Buttons) */}
           <div className="pt-2 flex flex-col sm:flex-row items-stretch sm:items-center sm:justify-center gap-3">
             <Link 
               href="/signup" 
-              className="h-[44px] px-6 rounded-full bg-[#101010] text-white hover:opacity-85 text-[15px] font-medium transition-all shadow-xs inline-flex items-center justify-center gap-2 select-none"
+              className="h-[44px] px-6 rounded-lg bg-[#101010] text-white hover:opacity-85 text-[15px] font-medium transition-all shadow-xs inline-flex items-center justify-center gap-2 select-none"
             >
-              Get started — Free for Freshers
+              Get started - Free for Freshers
             </Link>
             <Link 
               href="/employer/dashboard" 
-              className="h-[44px] px-6 rounded-full border border-black/[0.14] text-[#101010] bg-transparent hover:bg-black/[0.04] text-[15px] font-medium transition-all inline-flex items-center justify-center gap-2 select-none"
+              className="h-[44px] px-6 rounded-lg border border-black/[0.14] text-[#101010] bg-transparent hover:bg-black/[0.04] text-[15px] font-medium transition-all inline-flex items-center justify-center gap-2 select-none"
             >
               For Companies: Hire Verified
             </Link>
@@ -143,7 +143,7 @@ export default function HomePage() {
               </div>
               <div className="flex items-center gap-3">
                 <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-[#22C55E]/10 text-[#00A558]">
-                  <span className="w-1.5 h-1.5 rounded-full bg-[#00A558] animate-pulse" />
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#00A558]" />
                   Live Proctor Active
                 </span>
                 <span className="hidden md:inline-flex items-center gap-1 text-[11px] font-mono text-[#71717A] bg-black/[0.04] px-2 py-0.5 rounded">
@@ -162,7 +162,7 @@ export default function HomePage() {
                   <div className="mb-5">
                     <Link
                       href="/signup"
-                      className="w-full h-9 rounded-full bg-white border border-black/[0.08] hover:border-black/[0.16] hover:bg-[#F4F4F2] text-[#101010] text-[13px] font-medium flex items-center justify-center gap-2 transition-all shadow-xs"
+                      className="w-full h-9 rounded-lg bg-white border border-black/[0.08] hover:border-black/[0.16] hover:bg-[#F4F4F2] text-[#101010] text-[13px] font-medium flex items-center justify-center gap-2 transition-all shadow-xs"
                     >
                       <span>+ New Assessment Session</span>
                     </Link>
@@ -207,10 +207,10 @@ export default function HomePage() {
                   </div>
                 </div>
 
-                {/* Candidate Verified Profile Pill */}
+                {/* Candidate Verified Profile Card */}
                 <div className="mt-6 pt-4 border-t border-black/[0.06] flex items-center justify-between text-[12px]">
                   <div className="flex items-center gap-2.5">
-                    <div className="w-7 h-7 rounded-full bg-[#101010] text-white flex items-center justify-center text-[11px] font-semibold">
+                    <div className="w-7 h-7 rounded-md bg-[#101010] text-white flex items-center justify-center text-[11px] font-semibold">
                       SB
                     </div>
                     <div>
@@ -239,7 +239,7 @@ export default function HomePage() {
                       <button
                         key={tab.id}
                         onClick={() => setActiveTab(tab.id as any)}
-                        className={`h-8 px-3 rounded-full text-[12.5px] font-medium inline-flex items-center gap-1.5 transition-all cursor-pointer ${
+                        className={`h-8 px-3 rounded-lg text-[12.5px] font-medium inline-flex items-center gap-1.5 transition-all cursor-pointer ${
                           isActive 
                             ? "bg-white text-[#101010] border border-black/[0.08] shadow-xs" 
                             : "text-[#71717A] hover:text-[#101010] hover:bg-black/[0.03]"
@@ -320,7 +320,7 @@ export default function HomePage() {
                           <ShieldCheck className="w-5 h-5 text-[#00A558]" />
                           <span className="text-[14px] font-semibold text-[#101010]">MeritLane Proof of Work Ledger</span>
                         </div>
-                        <span className="text-[11px] font-mono text-[#71717A] bg-black/[0.05] px-2.5 py-1 rounded-full">
+                        <span className="text-[11px] font-mono text-[#71717A] bg-black/[0.05] px-2.5 py-1 rounded-md">
                           Proof #ML-VF-8921
                         </span>
                       </div>
@@ -364,17 +364,17 @@ export default function HomePage() {
                     </div>
                   )}
 
-                  {/* Devin-style Interactive Input / Prompt Bar at bottom */}
+                  {/* Interactive Input / Prompt Bar at bottom */}
                   <div className="mt-6 pt-4 border-t border-black/[0.06] flex items-center justify-between gap-3">
-                    <div className="flex-1 h-10 px-4 rounded-full border border-black/[0.08] bg-[#FBFBFA] text-[13px] text-[#71717A] flex items-center justify-between">
+                    <div className="flex-1 h-10 px-4 rounded-lg border border-black/[0.08] bg-[#FBFBFA] text-[13px] text-[#71717A] flex items-center justify-between">
                       <span className="truncate">Evaluate SQL query optimizations, test edge cases, or verify talent...</span>
-                      <span className="px-2 py-0.5 rounded-full text-[11px] bg-black/[0.06] text-[#101010] font-medium shrink-0 ml-2">
+                      <span className="px-2 py-0.5 rounded-md text-[11px] bg-black/[0.06] text-[#101010] font-medium shrink-0 ml-2">
                         JIT-Runner v2
                       </span>
                     </div>
                     <Link
                       href="/signup"
-                      className="h-10 px-5 rounded-full bg-[#101010] text-white hover:opacity-85 text-[13px] font-medium flex items-center justify-center gap-1.5 transition-all shadow-xs shrink-0"
+                      className="h-10 px-5 rounded-lg bg-[#101010] text-white hover:opacity-85 text-[13px] font-medium flex items-center justify-center gap-1.5 transition-all shadow-xs shrink-0"
                     >
                       <span>Run Test</span>
                       <ArrowRight className="w-3.5 h-3.5" />
@@ -385,22 +385,6 @@ export default function HomePage() {
               </div>
 
             </div>
-          </div>
-        </div>
-
-        {/* ─────────────────────────────────────────────────────────────
-            3. LOGO MARQUEE (Grayscale Company Badges from Devin.ai)
-            ───────────────────────────────────────────────────────────── */}
-        <div className="mt-20 pt-12 border-t border-black/[0.06] max-w-6xl mx-auto">
-          <div className="text-center text-[12px] font-medium uppercase tracking-[0.2em] text-[#71717A] mb-8">
-            Engineering Teams Discovering Proven Talent on MeritLane
-          </div>
-          <div className="flex flex-wrap items-center justify-center gap-8 sm:gap-14 opacity-60 grayscale hover:grayscale-0 transition-all">
-            {["Modal", "Gamma", "Citi", "Reducto", "Mercor", "Mercedes-Benz", "Vercel", "Stripe"].map((company) => (
-              <span key={company} className="text-[16px] sm:text-[18px] font-semibold tracking-tight text-[#101010]">
-                {company}
-              </span>
-            ))}
           </div>
         </div>
 
@@ -602,7 +586,7 @@ export default function HomePage() {
         <div className="rounded-3xl border border-black/[0.08] bg-white p-8 sm:p-12 shadow-[0_4px_24px_rgba(0,0,0,0.03)] space-y-8">
           
           <div className="space-y-3">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-black/[0.04] text-[12px] font-medium text-[#101010]">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-md bg-black/[0.04] text-[12px] font-medium text-[#101010]">
               <Sparkles className="w-3.5 h-3.5 text-[#3080FF]" />
               <span>The MeritLane Mission</span>
             </div>
@@ -617,7 +601,7 @@ export default function HomePage() {
 
           <div className="pt-4 border-t border-black/[0.06] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-[#101010] text-white flex items-center justify-center font-bold text-[14px]">
+              <div className="w-10 h-10 rounded-md bg-[#101010] text-white flex items-center justify-center font-bold text-[14px]">
                 SB
               </div>
               <div>
@@ -631,14 +615,14 @@ export default function HomePage() {
                 href="https://github.com/SaitrishankAUCSE" 
                 target="_blank" 
                 rel="noreferrer"
-                className="h-9 px-4 rounded-full border border-black/[0.12] text-[#101010] hover:bg-black/[0.04] text-[13px] font-medium inline-flex items-center gap-1.5 transition-all"
+                className="h-9 px-4 rounded-lg border border-black/[0.12] text-[#101010] hover:bg-black/[0.04] text-[13px] font-medium inline-flex items-center gap-1.5 transition-all"
               >
                 <Code className="w-3.5 h-3.5" />
                 <span>GitHub</span>
               </a>
               <a 
                 href="mailto:saitrishankb9@gmail.com"
-                className="h-9 px-4 rounded-full bg-[#101010] text-white hover:opacity-85 text-[13px] font-medium inline-flex items-center gap-1.5 transition-all shadow-xs"
+                className="h-9 px-4 rounded-lg bg-[#101010] text-white hover:opacity-85 text-[13px] font-medium inline-flex items-center gap-1.5 transition-all shadow-xs"
               >
                 <Mail className="w-3.5 h-3.5" />
                 <span>Email</span>
@@ -773,7 +757,7 @@ export default function HomePage() {
               <button
                 type="submit"
                 disabled={contactStatus === "loading"}
-                className="h-11 px-6 rounded-full bg-[#101010] text-white hover:opacity-85 text-[14px] font-medium transition-all shadow-xs disabled:opacity-50 cursor-pointer"
+                className="h-11 px-6 rounded-lg bg-[#101010] text-white hover:opacity-85 text-[14px] font-medium transition-all shadow-xs disabled:opacity-50 cursor-pointer"
               >
                 {contactStatus === "loading" ? "Delivering..." : "Send Message"}
               </button>
@@ -792,18 +776,18 @@ export default function HomePage() {
             Stop sending resumes into the dark. Start proving what you can build.
           </h2>
           <p className="text-[17px] sm:text-[19px] text-[#71717A] max-w-xl mx-auto leading-relaxed">
-            Join thousands of ambitious freshers and early engineers using MeritLane to bypass ATS keyword filters and get evaluated on pure proof of work.
+            Join ambitious freshers and early engineers using MeritLane to bypass ATS keyword filters and get evaluated on pure proof of work.
           </p>
           <div className="pt-4 flex flex-col sm:flex-row items-center justify-center gap-3">
             <Link
               href="/signup"
-              className="h-[44px] px-7 rounded-full bg-[#101010] text-white hover:opacity-85 text-[15px] font-medium transition-all shadow-xs inline-flex items-center justify-center gap-2 select-none"
+              className="h-[44px] px-7 rounded-lg bg-[#101010] text-white hover:opacity-85 text-[15px] font-medium transition-all shadow-xs inline-flex items-center justify-center gap-2 select-none"
             >
-              Prove your skills — Free for Freshers
+              Prove your skills - Free for Freshers
             </Link>
             <Link
               href="/employer/dashboard"
-              className="h-[44px] px-7 rounded-full border border-black/[0.14] text-[#101010] bg-transparent hover:bg-black/[0.04] text-[15px] font-medium transition-all inline-flex items-center justify-center gap-2 select-none"
+              className="h-[44px] px-7 rounded-lg border border-black/[0.14] text-[#101010] bg-transparent hover:bg-black/[0.04] text-[15px] font-medium transition-all inline-flex items-center justify-center gap-2 select-none"
             >
               For Companies: Hire Verified
             </Link>

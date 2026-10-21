@@ -500,10 +500,10 @@ export default function CandidateInboxPage() {
             <div className="flex items-center gap-1.5">
               <button
                 onClick={() => setFilterTab("all")}
-                className={`flex-1 text-[11px] font-mono py-1 px-2 rounded-md border text-center transition-all ${
+                className={`flex-1 text-[11px] font-mono py-1.5 px-3 rounded-full border text-center transition-all cursor-pointer ${
                   filterTab === "all"
-                    ? "bg-foreground text-white border-foreground font-semibold shadow-2xs"
-                    : "bg-white text-muted-foreground border-border hover:bg-surface hover:text-foreground"
+                    ? "bg-[#101010] text-white border-black font-semibold shadow-xs"
+                    : "bg-white text-neutral-500 border-black/[0.08] hover:bg-neutral-50 hover:text-[#101010]"
                 }`}
               >
                 All ({activeNonArchivedThreads.length})
@@ -511,10 +511,10 @@ export default function CandidateInboxPage() {
 
               <button
                 onClick={() => setFilterTab("unread")}
-                className={`flex-1 text-[11px] font-mono py-1 px-2 rounded-md border text-center transition-all ${
+                className={`flex-1 text-[11px] font-mono py-1.5 px-3 rounded-full border text-center transition-all cursor-pointer ${
                   filterTab === "unread"
-                    ? "bg-emerald-900 text-white border-emerald-900 font-semibold shadow-2xs"
-                    : "bg-white text-muted-foreground border-border hover:bg-surface hover:text-foreground"
+                    ? "bg-[#101010] text-white border-black font-semibold shadow-xs"
+                    : "bg-white text-neutral-500 border-black/[0.08] hover:bg-neutral-50 hover:text-[#101010]"
                 }`}
               >
                 Unread ({unreadNonArchivedCount})
@@ -522,10 +522,10 @@ export default function CandidateInboxPage() {
 
               <button
                 onClick={() => setFilterTab("archived")}
-                className={`flex-1 text-[11px] font-mono py-1 px-2 rounded-md border flex items-center justify-center gap-1 transition-all ${
+                className={`flex-1 text-[11px] font-mono py-1.5 px-3 rounded-full border flex items-center justify-center gap-1 transition-all cursor-pointer ${
                   filterTab === "archived"
-                    ? "bg-[#44403C] text-white border-[#44403C] font-semibold shadow-2xs"
-                    : "bg-white text-muted-foreground border-border hover:bg-surface hover:text-foreground"
+                    ? "bg-[#101010] text-white border-black font-semibold shadow-xs"
+                    : "bg-white text-neutral-500 border-black/[0.08] hover:bg-neutral-50 hover:text-[#101010]"
                 }`}
               >
                 <Archive className="h-3 w-3" />
@@ -584,19 +584,19 @@ export default function CandidateInboxPage() {
                     onClick={() => handleSelectThread(thread.partnerId)}
                     className={`group w-full p-3.5 transition-all cursor-pointer flex items-start gap-3 relative select-none ${
                       isSelected
-                        ? "bg-border border-l-4 border-l-[#064E3B]"
+                        ? "bg-[#F1F1EF] text-[#101010]"
                         : hasUnread
-                        ? "bg-white hover:bg-surface"
-                        : "bg-white/80 hover:bg-surface"
+                        ? "bg-white hover:bg-[#FAFAF8]"
+                        : "bg-white/80 hover:bg-[#FAFAF8]"
                     }`}
                   >
                     {/* Employer Monogram Avatar */}
                     <div className="relative shrink-0">
-                      <div className="h-9.5 w-9.5 rounded-lg bg-foreground text-white flex items-center justify-center text-[12px] font-mono font-bold shadow-2xs border border-border">
+                      <div className="h-9.5 w-9.5 rounded-full bg-[#101010] text-white flex items-center justify-center text-[12px] font-mono font-bold shadow-xs">
                         {getInitials(thread.partnerName)}
                       </div>
-                      <span className="absolute -bottom-0.5 -right-0.5 h-3.5 w-3.5 rounded-full bg-white flex items-center justify-center">
-                        <ShieldCheck className="h-3 w-3 text-emerald-900" />
+                      <span className="absolute -bottom-0.5 -right-0.5 h-3.5 w-3.5 rounded-full bg-white flex items-center justify-center shadow-xs">
+                        <ShieldCheck className="h-3 w-3 text-[#101010]" />
                       </span>
                     </div>
 
@@ -605,22 +605,22 @@ export default function CandidateInboxPage() {
                       <div className="flex items-center justify-between gap-1 mb-0.5">
                         <span
                           className={`text-[13px] truncate ${
-                            hasUnread ? "font-bold text-foreground" : "font-semibold text-stone-800"
+                            hasUnread ? "font-bold text-[#101010]" : "font-semibold text-neutral-800"
                           }`}
                         >
                           {thread.partnerName}
                         </span>
-                        <span className="text-[10.5px] font-mono text-muted-foreground shrink-0">
+                        <span className="text-[10.5px] font-mono text-neutral-500 shrink-0">
                           {formatListTime(thread.lastMessage.timestamp)}
                         </span>
                       </div>
 
                       <div className="flex items-center gap-1.5 mb-1">
-                        <span className="text-[10px] font-sans font-semibold uppercase tracking-wider text-emerald-900 bg-emerald-900/10 px-1.5 py-0.2 rounded">
+                        <span className="text-[10px] font-mono font-medium uppercase tracking-wider text-[#101010] bg-neutral-100 border border-black/[0.08] px-2 py-0.5 rounded-full">
                           Interview Invite
                         </span>
                         {isArchived && (
-                          <span className="text-[10px] font-sans uppercase font-medium text-muted-foreground bg-border px-1.5 py-0.2 rounded">
+                          <span className="text-[10px] font-mono uppercase font-medium text-neutral-500 bg-neutral-100 px-2 py-0.5 rounded-full">
                             Archived
                           </span>
                         )}
@@ -628,7 +628,7 @@ export default function CandidateInboxPage() {
 
                       <p
                         className={`text-[12px] line-clamp-1 leading-snug ${
-                          hasUnread ? "text-foreground font-medium" : "text-muted-foreground"
+                          hasUnread ? "text-[#101010] font-medium" : "text-neutral-500"
                         }`}
                       >
                         {thread.lastMessage.content || "(Attachment sent)"}
@@ -638,7 +638,7 @@ export default function CandidateInboxPage() {
                     {/* Right Action Tray: Unread Badge & Archive Button */}
                     <div className="flex flex-col items-end gap-1.5 shrink-0 self-center">
                       {hasUnread && (
-                        <span className="h-4.5 min-w-[18px] px-1 rounded-full bg-emerald-900 text-white text-[10px] font-mono font-bold flex items-center justify-center">
+                        <span className="h-4.5 min-w-[18px] px-1.5 rounded-full bg-[#101010] text-white text-[10px] font-mono font-bold flex items-center justify-center shadow-xs">
                           {unreadCountInThread}
                         </span>
                       )}
@@ -647,10 +647,10 @@ export default function CandidateInboxPage() {
                       <button
                         type="button"
                         onClick={(e) => toggleArchive(thread.partnerId, e)}
-                        className={`p-1.5 rounded-md border border-transparent transition-all ${
+                        className={`p-1.5 rounded-full border border-transparent transition-all cursor-pointer ${
                           isArchived
-                            ? "text-emerald-900 hover:bg-border hover:border-border opacity-100"
-                            : "text-muted-foreground/70 hover:text-foreground hover:bg-surface hover:border-border opacity-0 group-hover:opacity-100"
+                            ? "text-[#101010] hover:bg-neutral-200/60 opacity-100"
+                            : "text-neutral-400 hover:text-[#101010] hover:bg-neutral-100 opacity-0 group-hover:opacity-100"
                         }`}
                         title={isArchived ? "Unarchive conversation" : "Archive conversation"}
                       >
@@ -670,40 +670,40 @@ export default function CandidateInboxPage() {
 
         {/* ── RIGHT PANE: Modern Chat Thread Workspace ── */}
         <section
-          className={`flex-1 min-h-0 flex flex-col bg-surface h-full ${
+          className={`flex-1 min-h-0 flex flex-col bg-[#F8F8F6] h-full ${
             !selectedPartnerId ? "hidden lg:flex" : "flex"
           }`}
         >
           {activeThread ? (
             <>
               {/* Active Conversation Sticky Header (Fixed, No Scroll) */}
-              <div className="px-4 sm:px-6 py-3 bg-white border-b border-border flex items-center justify-between gap-3 shrink-0 shadow-2xs z-10">
+              <div className="px-4 sm:px-6 py-3.5 bg-white border-b border-black/[0.08] flex items-center justify-between gap-3 shrink-0 shadow-xs z-10">
                 <div className="flex items-center gap-3 min-w-0">
                   <button
                     onClick={() => setSelectedPartnerId(null)}
-                    className="lg:hidden p-1.5 -ml-1 text-muted-foreground hover:text-foreground hover:bg-surface rounded-md transition-colors"
+                    className="lg:hidden p-1.5 -ml-1 text-neutral-500 hover:text-[#101010] hover:bg-neutral-100 rounded-full transition-colors cursor-pointer"
                     title="Back to conversation list"
                   >
                     ←
                   </button>
 
-                  <div className="h-9 w-9 rounded-lg bg-foreground text-white flex items-center justify-center text-[12px] font-mono font-bold shrink-0">
+                  <div className="h-9 w-9 rounded-full bg-[#101010] text-white flex items-center justify-center text-[12px] font-mono font-bold shrink-0 shadow-xs">
                     {getInitials(activeThread.partnerName)}
                   </div>
 
                   <div className="min-w-0">
                     <div className="flex items-center gap-2">
-                      <h2 className="text-[15px] font-bold text-foreground truncate">
+                      <h2 className="text-[15px] font-bold text-[#101010] truncate tracking-tight">
                         {activeThread.partnerName}
                       </h2>
-                      <span className="hidden sm:inline-flex items-center gap-1 text-[10px] font-medium font-semibold uppercase text-emerald-900 bg-emerald-900/10 border border-emerald-900/20 px-2 py-0.5 rounded">
+                      <span className="hidden sm:inline-flex items-center gap-1 text-[10px] font-mono font-medium uppercase text-[#101010] bg-neutral-100 border border-black/[0.08] px-2.5 py-0.5 rounded-full">
                         <ShieldCheck className="h-3 w-3" />
                         Verified Employer
                       </span>
                     </div>
-                    <div className="flex items-center gap-2 text-[11.5px] text-muted-foreground font-sans truncate">
-                      <Building2 className="h-3 w-3 text-muted-foreground shrink-0" />
-                      <span className="truncate">Technical Hiring & Engineering Talent Acquisition</span>
+                    <div className="flex items-center gap-2 text-[11.5px] text-neutral-500 truncate">
+                      <Building2 className="h-3 w-3 text-neutral-400 shrink-0" />
+                      <span className="truncate">Technical Hiring &amp; Engineering Talent Acquisition</span>
                     </div>
                   </div>
                 </div>
@@ -712,16 +712,16 @@ export default function CandidateInboxPage() {
                 <div className="flex items-center gap-2 shrink-0">
                   <button
                     onClick={() => toggleArchive(activeThread.partnerId)}
-                    className={`flex items-center gap-1.5 px-3 py-1.5 border rounded-lg text-[11px] font-mono font-medium transition-all ${
+                    className={`flex items-center gap-1.5 px-3.5 py-1.5 border rounded-full text-[11px] font-mono font-medium transition-all cursor-pointer ${
                       isSelectedArchived
-                        ? "bg-emerald-900/10 border-emerald-900/30 text-emerald-900 hover:bg-emerald-900/20"
-                        : "bg-white border-border text-muted-foreground hover:text-foreground hover:bg-surface"
+                        ? "bg-neutral-100 border-black/[0.12] text-[#101010] hover:bg-neutral-200"
+                        : "bg-white border-black/[0.08] text-neutral-600 hover:text-[#101010] hover:bg-neutral-50 shadow-xs"
                     }`}
                     title={isSelectedArchived ? "Unarchive conversation" : "Archive conversation"}
                   >
                     {isSelectedArchived ? (
                       <>
-                        <ArchiveRestore className="h-3.5 w-3.5 text-emerald-900" />
+                        <ArchiveRestore className="h-3.5 w-3.5 text-[#101010]" />
                         <span>Unarchive</span>
                       </>
                     ) : (
@@ -733,21 +733,21 @@ export default function CandidateInboxPage() {
                   </button>
 
                   <Link href="/candidate/jobs" target="_blank">
-                    <button className="hidden md:flex items-center gap-1.5 px-3 py-1.5 border border-border bg-surface hover:bg-white text-[11px] font-mono font-semibold text-foreground rounded-lg transition-colors shadow-2xs">
-                      <span>EXPLORE JOBS</span>
-                      <ExternalLink className="h-3 w-3" />
+                    <button className="hidden md:flex items-center gap-1.5 px-3.5 py-1.5 border border-black/[0.08] bg-white hover:bg-neutral-50 text-[11px] font-mono font-medium text-[#101010] rounded-full transition-colors shadow-xs cursor-pointer">
+                      <span>Explore Jobs</span>
+                      <ExternalLink className="h-3 w-3 text-neutral-400" />
                     </button>
                   </Link>
                 </div>
               </div>
 
               {/* Verified Topic Protocol Ribbon */}
-              <div className="px-4 sm:px-6 py-1.5 bg-border border-b border-border flex items-center justify-between text-[10.5px] font-mono text-muted-foreground uppercase tracking-wider shrink-0">
+              <div className="px-4 sm:px-6 py-2 bg-neutral-100 border-b border-black/[0.08] flex items-center justify-between text-[10.5px] font-mono text-neutral-500 uppercase tracking-wider shrink-0">
                 <div className="flex items-center gap-1.5">
-                  <Lock className="h-3 w-3 text-emerald-900" />
-                  <span>Secured Protocol · Interview & Evaluation Wire</span>
+                  <Lock className="h-3 w-3 text-[#101010]" />
+                  <span>Secured Protocol · Interview &amp; Evaluation Wire</span>
                 </div>
-                <span className="hidden sm:inline">MeritLane Verified Direct Messaging</span>
+                <span className="hidden sm:inline">Meritlane Verified Direct Messaging</span>
               </div>
 
               {/* Message Feed Stream (ONLY THIS SCROLLS) */}
@@ -756,7 +756,7 @@ export default function CandidateInboxPage() {
                   <div key={groupIdx} className="space-y-4">
                     {/* Sleek Day Divider */}
                     <div className="flex items-center justify-center my-3">
-                      <span className="px-3 py-1 rounded-full bg-white border border-border text-[11px] font-mono text-muted-foreground shadow-2xs">
+                      <span className="px-3.5 py-1 rounded-full bg-white border border-black/[0.08] text-[11px] font-mono text-neutral-500 shadow-xs">
                         {group.dateLabel}
                       </span>
                     </div>
@@ -770,16 +770,16 @@ export default function CandidateInboxPage() {
                           className={`flex flex-col ${isSentByMe ? "items-end" : "items-start"}`}
                         >
                           <div
-                            className={`max-w-[85%] sm:max-w-[75%] rounded-2xl p-4 sm:p-5 shadow-2xs transition-all ${
+                            className={`max-w-[85%] sm:max-w-[75%] rounded-2xl p-4 sm:p-5 shadow-xs transition-all ${
                               isSentByMe
-                                ? "bg-emerald-900 text-white rounded-br-xs border border-emerald-900"
-                                : "bg-white text-foreground rounded-tl-xs border border-border"
+                                ? "bg-[#101010] text-white rounded-br-xs border border-black"
+                                : "bg-white text-[#101010] rounded-tl-xs border border-black/[0.08]"
                             }`}
                           >
                             {/* Message Header info inside bubble */}
                             <div
                               className={`flex items-center gap-2 mb-1.5 text-[10.5px] font-mono ${
-                                isSentByMe ? "text-emerald-200" : "text-muted-foreground"
+                                isSentByMe ? "text-neutral-400" : "text-neutral-500"
                               }`}
                             >
                               <span className="font-semibold">
@@ -804,9 +804,9 @@ export default function CandidateInboxPage() {
 
                             {/* Message footer status for outgoing */}
                             {isSentByMe && (
-                              <div className="flex items-center justify-end gap-1 mt-1.5 text-emerald-200 text-[10px] font-mono">
+                              <div className="flex items-center justify-end gap-1 mt-1.5 text-neutral-400 text-[10px] font-mono">
                                 <span>Delivered</span>
-                                <CheckCheck className="h-3 w-3" />
+                                <CheckCheck className="h-3 w-3 text-neutral-300" />
                               </div>
                             )}
                           </div>
@@ -820,7 +820,7 @@ export default function CandidateInboxPage() {
               </div>
 
               {/* ── Modern Bottom Composer Bar (Fixed, No Scroll) ── */}
-              <div className="p-3 sm:p-4 bg-white border-t border-border shrink-0 z-10">
+              <div className="p-3 sm:p-4 bg-white border-t border-black/[0.08] shrink-0 z-10">
                 <form onSubmit={handleSendReply} className="space-y-2.5">
                   {attachmentError && (
                     <div className="p-2.5 bg-danger/10 border border-danger/20 rounded-lg text-[12px] text-danger flex items-center justify-between">

@@ -358,18 +358,47 @@ export default function CandidateProfilePage() {
   if (isEditing) {
     return (
       <motion.div
-        initial={{ opacity: 0, y: 8 }}
-        animate={{ opacity: 1, y: 0 }}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
-        className="w-full px-4 sm:px-6 lg:px-8 py-6 sm:py-8 mx-auto h-full overflow-y-auto scrollbar-hide"
+        transition={{ duration: 0.2 }}
+        className="w-full min-h-full bg-transparent pb-24 text-[#101010]"
       >
-        <ProfileForm
-          initialData={profile}
-          onSave={handleSave}
-          onCancel={profile?.name ? () => setIsEditing(false) : undefined}
-          isNew={!profile?.name}
-        />
+        {/* ── Flush Header Strip ── */}
+        <div className="border-b border-black/[0.08] bg-white px-4 sm:px-6 lg:px-8 py-5">
+          <div className="max-w-4xl mx-auto w-full flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <div className="text-[10px] font-medium tracking-[0.16em] text-[#737373] uppercase mb-1">
+                Candidate Profile · Meritlane
+              </div>
+              <h1 className="text-[24px] sm:text-[30px] font-semibold text-[#101010] tracking-[-0.03em] leading-tight">
+                {profile?.name ? "Edit Your Profile" : "Create Your Profile"}
+              </h1>
+              <p className="text-[13px] text-[#737373] font-sans mt-0.5">
+                Upload your resume to automatically fill your technical background, or update your information below.
+              </p>
+            </div>
+            {profile?.name && (
+              <button
+                type="button"
+                onClick={() => setIsEditing(false)}
+                className="rounded-full border border-black/[0.12] bg-white hover:bg-black/[0.04] text-[#101010] text-xs font-medium px-4 py-2 transition-all flex items-center gap-1.5 self-start sm:self-auto cursor-pointer"
+              >
+                <X className="h-3.5 w-3.5" />
+                <span>Cancel</span>
+              </button>
+            )}
+          </div>
+        </div>
+
+        <div className="max-w-4xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8">
+          <ProfileForm
+            initialData={profile}
+            onSave={handleSave}
+            onCancel={profile?.name ? () => setIsEditing(false) : undefined}
+            isNew={!profile?.name}
+          />
+        </div>
       </motion.div>
     );
   }
@@ -403,7 +432,7 @@ export default function CandidateProfilePage() {
     >
 
       {/* ── Registry Command Header ── */}
-      <div className="border-b border-border bg-white px-4 sm:px-6 lg:px-8 py-6">
+      <div className="border-b border-black/[0.08] bg-white px-4 sm:px-6 lg:px-8 py-6">
         <div className="w-full flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-5 sm:gap-6">
             <CandidateAvatar
@@ -415,27 +444,27 @@ export default function CandidateProfilePage() {
               showBadge={true}
             />
             <div>
-              <div className="flex items-center gap-3 mb-1">
-                <span className="text-[10px] font-medium tracking-[0.2em] text-muted-foreground uppercase">
+              <div className="flex items-center gap-2.5 mb-1.5">
+                <span className="text-[10px] font-medium tracking-[0.16em] text-[#737373] uppercase">
                   Candidate Profile · Meritlane
                 </span>
-                <span className="inline-flex items-center gap-1 text-[11px] font-mono font-semibold text-emerald-900 bg-emerald-900/10 px-2.5 py-0.5 rounded border border-emerald-900/20">
-                  Candidate ID: {candidateKey}
+                <span className="inline-flex items-center gap-1 text-[11px] font-mono font-medium text-[#101010] bg-black/[0.04] px-2.5 py-0.5 rounded-full border border-black/[0.08]">
+                  ID: {candidateKey}
                 </span>
               </div>
-              <h1 className="font-serif text-[32px] sm:text-[38px] text-foreground font-bold tracking-tight leading-tight py-0.5">
+              <h1 className="text-[32px] sm:text-[38px] text-[#101010] font-semibold tracking-[-0.035em] leading-tight py-0.5">
                 {name}
               </h1>
-              <div className="mt-1.5 flex items-center gap-2 flex-wrap text-[13px] text-[#57534E] font-sans">
+              <div className="mt-1 flex items-center gap-2 flex-wrap text-[13px] text-[#737373] font-sans">
                 {profile?.degree && <span>{profile.degree}</span>}
-                {profile?.degree && profile?.branch && <span className="text-[#C8BFB0]">·</span>}
+                {profile?.degree && profile?.branch && <span className="text-black/20">·</span>}
                 {profile?.branch && <span>{profile.branch}</span>}
-                {(profile?.degree || profile?.branch) && profile?.college && <span className="text-[#C8BFB0]">·</span>}
+                {(profile?.degree || profile?.branch) && profile?.college && <span className="text-black/20">·</span>}
                 {profile?.college && <span>{profile.college}</span>}
                 {profile?.gradYear && (
                   <>
-                    <span className="text-[#C8BFB0]">·</span>
-                    <span className="font-mono text-[12px] text-muted-foreground">Class of {profile.gradYear}</span>
+                    <span className="text-black/20">·</span>
+                    <span className="font-mono text-[12px] text-[#737373]">Class of {profile.gradYear}</span>
                   </>
                 )}
               </div>
@@ -443,10 +472,10 @@ export default function CandidateProfilePage() {
           </div>
           <button
             onClick={() => setIsEditing(true)}
-            className="flex items-center gap-2 px-4 py-2 border border-border bg-white hover:bg-border text-foreground text-[11px] font-mono font-semibold transition-colors shrink-0 tracking-[0.06em] rounded shadow-2xs"
+            className="rounded-full bg-[#101010] hover:bg-black/90 text-white text-xs font-medium px-5 py-2.5 transition-all shadow-xs flex items-center gap-2 shrink-0 cursor-pointer"
           >
-            <PenTool className="h-3 w-3" />
-            EDIT PROFILE
+            <PenTool className="h-3.5 w-3.5" />
+            Edit Profile
           </button>
         </div>
       </div>
@@ -475,47 +504,47 @@ export default function CandidateProfilePage() {
           {/* ── Top-of-Profile Resume Card (Active Resume vs Upload Dropzone) ── */}
           {profile?.resumeFileName || profile?.resumeText || (profile?.skills && profile.skills.length > 0) ? (
             /* Active Resume on Record Card */
-            <div className="border border-border bg-white rounded p-6 shadow-2xs">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-border">
+            <div className="rounded-2xl border border-black/[0.08] bg-white p-6 shadow-[0_2px_8px_rgba(0,0,0,0.02)]">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-black/[0.06]">
                 <div className="flex items-center gap-3.5">
-                  <div className="w-11 h-11 rounded bg-emerald-900/10 border border-emerald-900/30 flex items-center justify-center text-emerald-900 shrink-0">
-                    <FileText className="h-5 w-5 text-emerald-900" />
+                  <div className="w-11 h-11 rounded-xl bg-black/[0.04] border border-black/[0.08] flex items-center justify-center text-[#101010] shrink-0">
+                    <FileText className="h-5 w-5 text-[#101010]" />
                   </div>
                   <div>
                     <div className="flex items-center gap-2 flex-wrap">
-                      <span className="text-[10px] font-mono font-semibold tracking-[0.16em] uppercase text-emerald-900 bg-emerald-900/10 px-2 py-0.5 rounded border border-emerald-900/20">
+                      <span className="text-[10px] font-mono font-medium tracking-[0.14em] uppercase text-[#101010] bg-black/[0.04] px-2.5 py-0.5 rounded-full border border-black/[0.08]">
                         Current Resume
                       </span>
-                      <span className="text-[11px] font-mono text-muted-foreground">
+                      <span className="text-[11px] font-mono text-[#737373]">
                         {profile?.resumeUploadedAt
                           ? `Updated on ${new Date(profile.resumeUploadedAt).toLocaleDateString()}`
                           : "Uploaded"}
                       </span>
                     </div>
-                    <h2 className="font-serif text-[18px] sm:text-[20px] text-foreground font-semibold mt-1">
+                    <h2 className="text-[18px] sm:text-[20px] text-[#101010] font-semibold tracking-[-0.02em] mt-1">
                       {profile?.resumeFileName || resumeFileName || "Candidate_Resume.pdf"}
                     </h2>
                   </div>
                 </div>
 
-                <div className="flex items-center gap-2 shrink-0">
+                <div className="flex items-center gap-2.5 shrink-0">
                   {(profile?.resumePdfDataUrl || (profile?.resumeUrl && profile.resumeUrl.toLowerCase().includes(".pdf"))) && (
                     <a
                       href={profile.resumePdfDataUrl || profile.resumeUrl}
                       download={profile?.resumeFileName || resumeFileName || "Candidate_Resume.pdf"}
                       target="_blank"
                       rel="noreferrer"
-                      className="inline-flex items-center gap-1.5 px-3 py-2 bg-white hover:bg-surface text-foreground border border-border text-[12px] font-mono font-semibold rounded transition-colors shadow-2xs cursor-pointer"
+                      className="rounded-full border border-black/[0.12] bg-white hover:bg-black/[0.04] text-[#101010] text-xs font-medium px-4 py-2 transition-all flex items-center gap-1.5 cursor-pointer"
                       title="Download Current Resume"
                     >
-                      <Download className="h-3.5 w-3.5 text-emerald-900" />
+                      <Download className="h-3.5 w-3.5 text-[#101010]" />
                       <span>Download</span>
                     </a>
                   )}
                   <button
                     onClick={() => resumeInputRef.current?.click()}
                     disabled={uploadingResume}
-                    className="inline-flex items-center gap-2 px-4 py-2 bg-foreground hover:bg-emerald-900 text-white text-[12px] font-mono font-semibold rounded transition-colors shadow-2xs cursor-pointer"
+                    className="rounded-full bg-[#101010] hover:bg-black/90 text-white text-xs font-medium px-4 py-2 transition-all shadow-xs flex items-center gap-2 cursor-pointer"
                   >
                     <RefreshCw className={`h-3.5 w-3.5 ${uploadingResume ? "animate-spin" : ""}`} />
                     <span>Update Resume</span>
@@ -525,21 +554,21 @@ export default function CandidateProfilePage() {
 
               {/* Status summary banner */}
               <div className="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-3">
-                <div className="p-3 bg-surface border border-border rounded">
-                  <div className="text-[10px] font-mono text-muted-foreground uppercase">Total Skills</div>
-                  <div className="text-[14px] font-mono font-semibold text-foreground mt-0.5">
+                <div className="p-3.5 bg-[#FAFAF9] border border-black/[0.06] rounded-xl">
+                  <div className="text-[10px] font-mono text-[#737373] uppercase tracking-wider">Total Skills</div>
+                  <div className="text-[14px] font-mono font-semibold text-[#101010] mt-0.5">
                     {skills.length} Skills Added
                   </div>
                 </div>
-                <div className="p-3 bg-surface border border-border rounded">
-                  <div className="text-[10px] font-mono text-muted-foreground uppercase">Resume Score</div>
-                  <div className="text-[14px] font-mono font-semibold text-emerald-900 mt-0.5">
+                <div className="p-3.5 bg-[#FAFAF9] border border-black/[0.06] rounded-xl">
+                  <div className="text-[10px] font-mono text-[#737373] uppercase tracking-wider">Resume Score</div>
+                  <div className="text-[14px] font-mono font-semibold text-[#101010] mt-0.5">
                     {profile?.atsScore ? `${profile.atsScore}/100 · ${profile.atsRating || "Evaluated"}` : "Score: Pending"}
                   </div>
                 </div>
-                <div className="p-3 bg-surface border border-border rounded">
-                  <div className="text-[10px] font-mono text-muted-foreground uppercase">Skill Tests</div>
-                  <div className="text-[14px] font-mono font-semibold text-foreground mt-0.5">
+                <div className="p-3.5 bg-[#FAFAF9] border border-black/[0.06] rounded-xl">
+                  <div className="text-[10px] font-mono text-[#737373] uppercase tracking-wider">Skill Tests</div>
+                  <div className="text-[14px] font-mono font-semibold text-[#101010] mt-0.5">
                     {verifiedCount > 0 ? `${verifiedCount}/${skills.length} Tests Passed` : "No Tests Taken Yet"}
                   </div>
                 </div>
@@ -559,27 +588,27 @@ export default function CandidateProfilePage() {
             </div>
           ) : (
             /* First-Time Upload Dropzone */
-            <div className="border border-border bg-white rounded p-6 shadow-2xs">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-border">
+            <div className="rounded-2xl border border-black/[0.08] bg-white p-6 shadow-[0_2px_8px_rgba(0,0,0,0.02)]">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-black/[0.06]">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded bg-surface border border-border flex items-center justify-center text-foreground shrink-0">
+                  <div className="w-10 h-10 rounded-xl bg-black/[0.04] border border-black/[0.08] flex items-center justify-center text-[#101010] shrink-0">
                     <FileText className="h-5 w-5" />
                   </div>
                   <div>
-                    <div className="text-[10px] font-medium tracking-[0.16em] uppercase text-muted-foreground">
+                    <div className="text-[10px] font-medium tracking-[0.16em] uppercase text-[#737373]">
                       Quick Setup
                     </div>
-                    <h2 className="font-serif text-[18px] text-foreground font-semibold">
+                    <h2 className="text-[18px] text-[#101010] font-semibold tracking-[-0.02em]">
                       Add Details from Resume
                     </h2>
                   </div>
                 </div>
-                <span className="text-[11px] font-mono text-muted-foreground bg-surface border border-border px-2.5 py-1 rounded w-fit">
+                <span className="text-[11px] font-mono text-[#737373] bg-[#FAFAF9] border border-black/[0.06] px-3 py-1 rounded-full w-fit">
                   PDF format · Up to 12MB
                 </span>
               </div>
 
-              <p className="text-[13px] font-sans text-muted-foreground mt-3 mb-4 leading-relaxed">
+              <p className="text-[13px] font-sans text-[#737373] mt-3 mb-4 leading-relaxed">
                 Upload your resume to automatically add your education, skills, and projects to your profile. You can edit any details anytime and take quick skill tests to verify them.
               </p>
 
@@ -591,7 +620,7 @@ export default function CandidateProfilePage() {
                   if (file) handleResumeUpload(file);
                 }}
                 onClick={() => resumeInputRef.current?.click()}
-                className="border-2 border-dashed border-border hover:border-emerald-900 bg-surface hover:bg-border rounded-lg p-6 text-center transition-colors cursor-pointer"
+                className="border-2 border-dashed border-black/[0.12] hover:border-black/30 bg-[#FAFAF9] hover:bg-black/[0.02] rounded-xl p-6 text-center transition-all cursor-pointer"
               >
                 <input
                   type="file"
@@ -603,11 +632,11 @@ export default function CandidateProfilePage() {
                   accept=".pdf,application/pdf"
                   className="hidden"
                 />
-                <UploadCloud className="h-7 w-7 text-muted-foreground mx-auto mb-2" />
-                <div className="text-[13px] font-medium text-foreground">
+                <UploadCloud className="h-7 w-7 text-[#737373] mx-auto mb-2" />
+                <div className="text-[13px] font-medium text-[#101010]">
                   Click to choose a file or drag your resume PDF here
                 </div>
-                <div className="text-[11px] font-mono text-muted-foreground/70 mt-1">
+                <div className="text-[11px] font-mono text-[#737373] mt-1">
                   Automatically fills your name, college, degree, graduation year, and skills
                 </div>
               </div>
@@ -615,24 +644,24 @@ export default function CandidateProfilePage() {
           )}
 
           {/* ── Targeted Roles & Work Preferences Card ── */}
-          <div className="border border-border bg-white rounded p-5 sm:p-6 shadow-2xs">
-            <div className="flex items-center justify-between pb-3.5 border-b border-border">
+          <div className="rounded-2xl border border-black/[0.08] bg-white p-5 sm:p-6 shadow-[0_2px_8px_rgba(0,0,0,0.02)]">
+            <div className="flex items-center justify-between pb-3.5 border-b border-black/[0.06]">
               <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded bg-surface border border-border flex items-center justify-center text-foreground shrink-0">
-                  <Briefcase className="h-4 w-4 text-foreground" />
+                <div className="w-8 h-8 rounded-lg bg-black/[0.04] border border-black/[0.08] flex items-center justify-center text-[#101010] shrink-0">
+                  <Briefcase className="h-4 w-4 text-[#101010]" />
                 </div>
                 <div>
-                  <h3 className="font-serif text-[16px] sm:text-[18px] text-foreground font-semibold">
+                  <h3 className="text-[16px] sm:text-[18px] text-[#101010] font-semibold tracking-[-0.02em]">
                     Targeted Roles &amp; Work Preferences
                   </h3>
-                  <p className="text-[11px] text-muted-foreground font-sans">
+                  <p className="text-[11px] text-[#737373] font-sans">
                     Visible to employers discovering verified candidates on Meritlane
                   </p>
                 </div>
               </div>
               <button
                 onClick={() => setIsEditing(true)}
-                className="text-[11px] font-mono font-semibold text-foreground hover:text-emerald-900 border border-border hover:border-foreground bg-surface px-3 py-1.5 rounded transition-colors shrink-0 cursor-pointer"
+                className="rounded-full border border-black/[0.12] bg-white hover:bg-black/[0.04] text-[#101010] text-xs font-medium px-3.5 py-1.5 transition-all shrink-0 cursor-pointer"
               >
                 Edit Preferences
               </button>
@@ -641,14 +670,14 @@ export default function CandidateProfilePage() {
             <div className="mt-4 space-y-4">
               {/* Bio / Headline */}
               {profile?.bio && (
-                <div className="p-3 bg-surface border border-border rounded text-[13px] text-foreground font-sans leading-relaxed">
+                <div className="p-3.5 bg-[#FAFAF9] border border-black/[0.06] rounded-xl text-[13px] text-[#101010] font-sans leading-relaxed">
                   &ldquo;{profile.bio}&rdquo;
                 </div>
               )}
 
               {/* Target Roles */}
               <div>
-                <span className="text-[10px] font-mono font-semibold uppercase tracking-wider text-muted-foreground block mb-1.5">
+                <span className="text-[10px] font-mono font-medium uppercase tracking-wider text-[#737373] block mb-1.5">
                   Targeted Engineering Roles
                 </span>
                 {profile?.targetRoles && profile.targetRoles.length > 0 ? (
@@ -656,19 +685,19 @@ export default function CandidateProfilePage() {
                     {profile.targetRoles.map((role) => (
                       <span
                         key={role}
-                        className="inline-flex items-center gap-1.5 text-[11px] font-mono font-medium bg-surface border border-border text-foreground px-2.5 py-1 rounded"
+                        className="inline-flex items-center gap-1.5 text-[11px] font-mono font-medium bg-[#FAFAF9] border border-black/[0.08] text-[#101010] px-3 py-1 rounded-full"
                       >
-                        <Briefcase className="h-3 w-3 text-muted-foreground" />
+                        <Briefcase className="h-3 w-3 text-[#737373]" />
                         {role}
                       </span>
                     ))}
                   </div>
                 ) : (
-                  <div className="text-[12px] font-sans text-muted-foreground flex items-center gap-2">
+                  <div className="text-[12px] font-sans text-[#737373] flex items-center gap-2">
                     <span>No target roles specified yet.</span>
                     <button
                       onClick={() => setIsEditing(true)}
-                      className="text-emerald-900 font-mono font-semibold text-[11px] hover:underline"
+                      className="text-[#101010] font-medium text-[11px] hover:underline"
                     >
                       + Add Target Roles
                     </button>
@@ -677,39 +706,39 @@ export default function CandidateProfilePage() {
               </div>
 
               {/* Preferred Locations, Working Model, and Notice */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-3 border-t border-border">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-3 border-t border-black/[0.06]">
                 <div>
-                  <span className="text-[10px] font-mono font-semibold uppercase tracking-wider text-muted-foreground block mb-1">
+                  <span className="text-[10px] font-mono font-medium uppercase tracking-wider text-[#737373] block mb-1">
                     Preferred Locations
                   </span>
                   {profile?.preferredLocations && profile.preferredLocations.length > 0 ? (
                     <div className="flex flex-wrap gap-1">
                       {profile.preferredLocations.map((loc) => (
-                        <span key={loc} className="inline-flex items-center gap-1 text-[11px] font-mono bg-surface border border-border text-foreground px-2 py-0.5 rounded">
-                          <MapPin className="h-2.5 w-2.5 text-muted-foreground" />
+                        <span key={loc} className="inline-flex items-center gap-1 text-[11px] font-mono bg-[#FAFAF9] border border-black/[0.08] text-[#101010] px-2.5 py-0.5 rounded-full">
+                          <MapPin className="h-2.5 w-2.5 text-[#737373]" />
                           {loc}
                         </span>
                       ))}
                     </div>
                   ) : (
-                    <span className="text-[12px] font-mono text-muted-foreground">Flexible / Open</span>
+                    <span className="text-[12px] font-mono text-[#737373]">Flexible / Open</span>
                   )}
                 </div>
 
                 <div>
-                  <span className="text-[10px] font-mono font-semibold uppercase tracking-wider text-muted-foreground block mb-1">
+                  <span className="text-[10px] font-mono font-medium uppercase tracking-wider text-[#737373] block mb-1">
                     Working Model
                   </span>
-                  <span className="text-[12px] font-mono font-semibold text-foreground block">
+                  <span className="text-[12px] font-mono font-semibold text-[#101010] block">
                     {profile?.workPreference || "Remote / Flexible"}
                   </span>
                 </div>
 
                 <div>
-                  <span className="text-[10px] font-mono font-semibold uppercase tracking-wider text-muted-foreground block mb-1">
+                  <span className="text-[10px] font-mono font-medium uppercase tracking-wider text-[#737373] block mb-1">
                     Notice / Availability
                   </span>
-                  <span className="text-[12px] font-mono font-semibold text-emerald-900 block">
+                  <span className="text-[12px] font-mono font-semibold text-emerald-700 block">
                     {profile?.availability || "Immediate"}
                   </span>
                 </div>
@@ -718,37 +747,35 @@ export default function CandidateProfilePage() {
           </div>
 
           {/* Skills Ledger Table */}
-          <div className="border border-border bg-white">
-            <div className="border-b border-border bg-border px-5 py-3 flex items-center justify-between">
-              <div className="text-[9px] font-medium tracking-[0.18em] text-muted-foreground uppercase">
+          <div className="rounded-2xl border border-black/[0.08] bg-white overflow-hidden shadow-[0_2px_8px_rgba(0,0,0,0.02)]">
+            <div className="border-b border-black/[0.06] bg-[#FAFAF9] px-6 py-3.5 flex items-center justify-between">
+              <div className="text-[10px] font-medium tracking-[0.16em] text-[#737373] uppercase">
                 Technical Skills
               </div>
-              <div className="text-[9px] font-mono text-muted-foreground">
+              <div className="text-[10px] font-mono text-[#737373]">
                 {skills.length} {skills.length === 1 ? "skill" : "skills"}
               </div>
             </div>
 
-
-
             {skills.length === 0 ? (
               <div className="p-10 text-center">
-                <div className="text-[15px] font-serif text-foreground mb-2">No skills added yet</div>
-                <p className="text-[12px] font-sans text-muted-foreground mb-5">
+                <div className="text-[16px] text-[#101010] font-semibold mb-2">No skills added yet</div>
+                <p className="text-[13px] font-sans text-[#737373] mb-5">
                   Upload your resume above or add your skills to start testing and getting verified.
                 </p>
                 <button
                   onClick={() => setIsEditing(true)}
-                  className="text-[11px] font-mono font-semibold px-4 py-2 bg-foreground hover:bg-emerald-900 text-white transition-colors rounded"
+                  className="rounded-full bg-[#101010] hover:bg-black/90 text-white text-xs font-medium px-5 py-2 transition-all shadow-xs"
                 >
-                  ADD SKILLS
+                  Add Skills
                 </button>
               </div>
             ) : (
               <>
                 {/* Table head */}
-                <div className="hidden sm:grid sm:grid-cols-[2rem_1fr_8rem_8rem_9rem] border-b border-border bg-surface px-5 py-2.5">
+                <div className="hidden sm:grid sm:grid-cols-[2.5rem_1fr_8rem_7rem_8rem] border-b border-black/[0.06] bg-[#FAFAF9] px-6 py-2.5">
                   {["#", "Skill", "Status", "Score", "Action"].map((h) => (
-                    <div key={h} className={`text-[9px] font-medium text-muted-foreground uppercase tracking-[0.18em] ${h === "Action" ? "text-right" : ""}`}>
+                    <div key={h} className={`text-[10px] font-medium text-[#737373] uppercase tracking-[0.14em] ${h === "Action" ? "text-right" : ""}`}>
                       {h}
                     </div>
                   ))}
@@ -762,18 +789,18 @@ export default function CandidateProfilePage() {
                   return (
                     <div
                       key={skill}
-                      className={`sm:grid sm:grid-cols-[2rem_1fr_8rem_8rem_9rem] flex flex-col gap-1 sm:gap-0 items-start sm:items-center px-5 py-4 border-b border-border last:border-b-0 transition-colors ${
-                        isVerified ? "bg-emerald-900/[0.02]" : "bg-white hover:bg-surface"
+                      className={`sm:grid sm:grid-cols-[2.5rem_1fr_8rem_7rem_8rem] flex flex-col gap-1 sm:gap-0 items-start sm:items-center px-6 py-4 border-b border-black/[0.06] last:border-b-0 transition-colors ${
+                        isVerified ? "bg-emerald-500/[0.02]" : "bg-white hover:bg-black/[0.01]"
                       }`}
                     >
-                      <div className="hidden sm:block text-[11px] font-mono text-[#C8BFB0]">
+                      <div className="hidden sm:block text-[11px] font-mono text-[#A3A3A3]">
                         {String(idx + 1).padStart(2, "0")}
                       </div>
                       <div>
-                        <div className="text-[14px] font-serif text-foreground">{skill}</div>
+                        <div className="text-[14px] font-medium text-[#101010]">{skill}</div>
                         {isVerified && (
-                          <div className="text-[10px] font-mono text-emerald-900 mt-0.5 flex items-center gap-1">
-                            <ShieldCheck className="h-2.5 w-2.5" />Verified on public profile
+                          <div className="text-[11px] font-mono text-emerald-700 mt-0.5 flex items-center gap-1">
+                            <ShieldCheck className="h-3 w-3" />Verified on public record
                           </div>
                         )}
                         {inCooldown && (
@@ -794,31 +821,31 @@ export default function CandidateProfilePage() {
                         )}
                       </div>
                       <div>
-                        <span className={`inline-block text-[9px] font-medium font-semibold tracking-[0.16em] px-2 py-[3px] uppercase border ${
+                        <span className={`inline-block text-[10px] font-medium px-2.5 py-0.5 rounded-full border ${
                           isVerified
-                            ? "text-emerald-900 bg-emerald-900/[0.08] border-emerald-900/30"
+                            ? "text-emerald-800 bg-emerald-500/10 border-emerald-500/20"
                             : inCooldown
-                            ? "text-[#92400E] bg-[#FEF3C7] border-[#FDE68A]"
-                            : "text-muted-foreground bg-border border-[#C8BFB0]"
+                            ? "text-amber-800 bg-amber-500/10 border-amber-500/20"
+                            : "text-[#737373] bg-black/[0.04] border-black/[0.08]"
                         }`}>
-                          {isVerified ? "VERIFIED" : inCooldown ? "COOLDOWN" : "NOT TESTED"}
+                          {isVerified ? "Verified" : inCooldown ? "Cooldown" : "Not Tested"}
                         </span>
                       </div>
-                      <div className="text-[13px] font-mono text-foreground">
+                      <div className="text-[13px] font-mono text-[#101010]">
                         {isVerified && v?.score ? (
                           `${v.score}%`
                         ) : inCooldown ? (
-                          <span className="text-danger font-semibold">{cdInfo.score !== undefined ? `${cdInfo.score}% (Failed)` : "0% (Failed)"}</span>
+                          <span className="text-red-600 font-medium">{cdInfo.score !== undefined ? `${cdInfo.score}% (Failed)` : "0% (Failed)"}</span>
                         ) : (
                           "—"
                         )}
                       </div>
                       <div className="sm:flex sm:justify-end">
                         {isVerified ? (
-                          <span className="text-[10px] font-mono text-emerald-900 font-semibold">✓ Passed</span>
+                          <span className="text-[11px] font-mono text-emerald-700 font-medium">✓ Passed</span>
                         ) : inCooldown ? (
                           <span
-                            className="inline-flex items-center gap-1 text-[10px] font-mono font-semibold bg-[#FEF3C7] border border-[#FDE68A] text-[#92400E] px-2.5 py-1 rounded cursor-not-allowed select-none tabular-nums"
+                            className="inline-flex items-center gap-1 text-[10px] font-mono font-medium bg-amber-500/10 border border-amber-500/20 text-amber-800 px-2.5 py-1 rounded-full cursor-not-allowed select-none tabular-nums"
                             title="Assessment locked in mandatory cooldown"
                           >
                             <CooldownTimer
@@ -838,17 +865,17 @@ export default function CandidateProfilePage() {
                           isSkillSupported(skill) ? (
                             <button
                               onClick={() => router.push(`/candidate/assessment?skill=${encodeURIComponent(skill)}`)}
-                              className="text-[10px] font-mono font-semibold text-white bg-foreground hover:bg-emerald-900 px-3 py-1.5 transition-colors rounded shadow-2xs cursor-pointer"
+                              className="rounded-full bg-[#101010] hover:bg-black/90 text-white text-xs font-medium px-4 py-1.5 transition-all shadow-xs cursor-pointer"
                               title={`Take test to verify ${skill}`}
                             >
-                              TAKE TEST →
+                              Take Test →
                             </button>
                           ) : (
                             <span
                               title="Assessment currently in development"
-                              className="inline-flex items-center gap-1 text-[10px] font-mono font-semibold bg-[#F2EFE9] border border-border text-muted-foreground px-2.5 py-1 rounded cursor-not-allowed select-none tabular-nums"
+                              className="inline-flex items-center gap-1 text-[10px] font-mono font-medium bg-black/[0.04] border border-black/[0.08] text-[#737373] px-2.5 py-1 rounded-full cursor-not-allowed select-none tabular-nums"
                             >
-                              IN DEVELOPMENT
+                              In Development
                             </span>
                           )
                         )}
@@ -861,38 +888,38 @@ export default function CandidateProfilePage() {
           </div>
 
           {/* Education Record */}
-          <div className="border border-border bg-white">
-            <div className="border-b border-border bg-border px-5 py-3">
-              <div className="text-[9px] font-medium tracking-[0.18em] text-muted-foreground uppercase">
+          <div className="rounded-2xl border border-black/[0.08] bg-white overflow-hidden shadow-[0_2px_8px_rgba(0,0,0,0.02)]">
+            <div className="border-b border-black/[0.06] bg-[#FAFAF9] px-6 py-3.5">
+              <div className="text-[10px] font-medium tracking-[0.16em] text-[#737373] uppercase">
                 Education
               </div>
             </div>
-            <div className="p-5">
+            <div className="p-6">
               {profile?.college ? (
-                <div className="flex gap-5 items-start">
-                  <div className="h-10 w-10 border border-border bg-border flex items-center justify-center shrink-0">
-                    <BookOpen className="h-4 w-4 text-muted-foreground" />
+                <div className="flex gap-4 items-start">
+                  <div className="h-10 w-10 rounded-xl border border-black/[0.08] bg-black/[0.04] flex items-center justify-center shrink-0">
+                    <BookOpen className="h-4 w-4 text-[#101010]" />
                   </div>
                   <div>
-                    <div className="text-[16px] font-serif text-foreground mb-1">{profile.college}</div>
-                    <div className="text-[12px] font-sans text-muted-foreground">
+                    <div className="text-[16px] font-semibold text-[#101010] tracking-[-0.01em] mb-1">{profile.college}</div>
+                    <div className="text-[13px] font-sans text-[#737373]">
                       {profile.degree && `${profile.degree} · `}{profile.branch || "Computer Science"}
                     </div>
-                    <div className="text-[10px] font-medium text-muted-foreground uppercase tracking-[0.12em] mt-1.5">
+                    <div className="text-[11px] font-mono text-[#737373] mt-1.5">
                       Class of {profile.gradYear || "—"}
                     </div>
                   </div>
                 </div>
               ) : (
                 <div className="text-center py-6">
-                  <p className="text-[13px] font-sans text-muted-foreground mb-4">
+                  <p className="text-[13px] font-sans text-[#737373] mb-4">
                     No education details added yet.
                   </p>
                   <button
                     onClick={() => setIsEditing(true)}
-                    className="text-[11px] font-mono text-foreground border border-border px-4 py-2 hover:bg-border transition-colors rounded"
+                    className="rounded-full border border-black/[0.12] bg-white hover:bg-black/[0.04] text-[#101010] px-4 py-2 text-xs font-medium transition-all"
                   >
-                    ADD EDUCATION
+                    Add Education
                   </button>
                 </div>
               )}
@@ -901,17 +928,17 @@ export default function CandidateProfilePage() {
 
           {/* Projects */}
           {profile?.projects && profile.projects.length > 0 && (
-            <div className="border border-border bg-white">
-              <div className="border-b border-border bg-border px-5 py-3">
-                <div className="text-[9px] font-medium tracking-[0.18em] text-muted-foreground uppercase">
+            <div className="rounded-2xl border border-black/[0.08] bg-white overflow-hidden shadow-[0_2px_8px_rgba(0,0,0,0.02)]">
+              <div className="border-b border-black/[0.06] bg-[#FAFAF9] px-6 py-3.5">
+                <div className="text-[10px] font-medium tracking-[0.16em] text-[#737373] uppercase">
                   Projects
                 </div>
               </div>
-              <div className="divide-y divide-[#F0EDE8]">
+              <div className="divide-y divide-black/[0.06]">
                 {profile.projects.map((proj, idx) => (
-                  <div key={idx} className="p-5">
-                    <div className="text-[14px] font-serif text-foreground mb-1">{proj.title}</div>
-                    <div className="text-[12px] font-sans text-muted-foreground leading-relaxed">{proj.description}</div>
+                  <div key={idx} className="p-6">
+                    <div className="text-[15px] font-semibold text-[#101010] mb-1">{proj.title}</div>
+                    <div className="text-[13px] font-sans text-[#737373] leading-relaxed">{proj.description}</div>
                   </div>
                 ))}
               </div>
@@ -920,20 +947,20 @@ export default function CandidateProfilePage() {
         </div>
 
         {/* ── RIGHT: Record Status Panel ── */}
-        <div className="space-y-5">
+        <div className="space-y-6">
           {/* Record Status */}
-          <div className="border border-border bg-white">
-            <div className="border-b border-border bg-border px-5 py-3 flex items-center justify-between">
-              <div className="text-[9px] font-medium tracking-[0.18em] text-muted-foreground uppercase">
+          <div className="rounded-2xl border border-black/[0.08] bg-white overflow-hidden shadow-[0_2px_8px_rgba(0,0,0,0.02)]">
+            <div className="border-b border-black/[0.06] bg-[#FAFAF9] px-6 py-3.5 flex items-center justify-between">
+              <div className="text-[10px] font-medium tracking-[0.16em] text-[#737373] uppercase">
                 Profile Overview
               </div>
               {isEligibleForJob && (
-                <span className="text-[9px] font-mono text-emerald-900 font-semibold uppercase tracking-wider bg-emerald-900/10 px-2 py-0.5 rounded border border-emerald-900/20">
+                <span className="text-[10px] font-mono text-emerald-800 font-medium bg-emerald-500/10 px-2.5 py-0.5 rounded-full border border-emerald-500/20">
                   Career Badge Active
                 </span>
               )}
             </div>
-            <div className="divide-y divide-[#F0EDE8]">
+            <div className="divide-y divide-black/[0.06]">
               {[
                 {
                   label: "Candidate ID",
@@ -961,9 +988,9 @@ export default function CandidateProfilePage() {
                   accent: githubSynced,
                 },
               ].map(({ label, value, accent }) => (
-                <div key={label} className="flex items-center justify-between px-5 py-3">
-                  <span className="text-[11px] font-mono text-muted-foreground">{label}</span>
-                  <span className={`text-[12px] font-mono font-semibold ${accent ? "text-emerald-900" : "text-foreground"}`}>
+                <div key={label} className="flex items-center justify-between px-6 py-3.5">
+                  <span className="text-[12px] font-sans text-[#737373]">{label}</span>
+                  <span className={`text-[12px] font-mono font-medium ${accent ? "text-[#101010]" : "text-[#737373]"}`}>
                     {value}
                   </span>
                 </div>
@@ -971,12 +998,12 @@ export default function CandidateProfilePage() {
             </div>
 
             {skills.length > 0 && (
-              <div className="p-4 bg-surface border-t border-border space-y-1">
+              <div className="p-4 bg-[#FAFAF9] border-t border-black/[0.06] space-y-1">
                 <div className="flex items-center justify-between text-[11px] font-mono">
-                  <span className="text-muted-foreground uppercase">Skills Verification</span>
-                  <span className="font-semibold text-emerald-900">{verifiedCount} / {skills.length} Verified</span>
+                  <span className="text-[#737373] uppercase">Skills Verification</span>
+                  <span className="font-semibold text-[#101010]">{verifiedCount} / {skills.length} Verified</span>
                 </div>
-                <p className="text-[11px] text-muted-foreground leading-relaxed font-sans">
+                <p className="text-[11px] text-[#737373] leading-relaxed font-sans">
                   Career badge is awarded automatically once all skills assessments are verified (≥75% score).
                 </p>
               </div>
@@ -984,8 +1011,8 @@ export default function CandidateProfilePage() {
           </div>
 
           {/* External Links */}
-          <div className="border border-border bg-white p-5">
-            <div className="text-[9px] font-medium tracking-[0.18em] text-muted-foreground uppercase mb-3">
+          <div className="rounded-2xl border border-black/[0.08] bg-white p-6 shadow-[0_2px_8px_rgba(0,0,0,0.02)]">
+            <div className="text-[10px] font-medium tracking-[0.16em] text-[#737373] uppercase mb-3.5">
               Links
             </div>
             <div className="space-y-3">
@@ -993,22 +1020,22 @@ export default function CandidateProfilePage() {
                 href={profile?.githubUrl || "#"}
                 target="_blank"
                 rel="noreferrer"
-                className={`flex items-center gap-3 text-[12px] font-mono text-foreground hover:text-emerald-900 transition-colors ${!profile?.githubUrl ? "opacity-40 pointer-events-none" : ""}`}
+                className={`flex items-center gap-3 text-[13px] font-medium text-[#101010] hover:text-black/70 transition-colors ${!profile?.githubUrl ? "opacity-40 pointer-events-none" : ""}`}
               >
-                <GitBranch className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+                <GitBranch className="h-4 w-4 shrink-0 text-[#737373]" />
                 GitHub Profile
-                <ExternalLink className="h-2.5 w-2.5 ml-auto text-[#C8BFB0]" />
+                <ExternalLink className="h-3 w-3 ml-auto text-black/30" />
               </a>
               {(profile?.portfolioUrl || (profile?.resumeUrl && (profile.resumeUrl.includes("portfolio") || profile.resumeUrl.includes("vercel.app")))) && (
                 <a
                   href={profile?.portfolioUrl || profile?.resumeUrl || "#"}
                   target="_blank"
                   rel="noreferrer"
-                  className="flex items-center gap-3 text-[12px] font-mono text-foreground hover:text-emerald-900 transition-colors"
+                  className="flex items-center gap-3 text-[13px] font-medium text-[#101010] hover:text-black/70 transition-colors"
                 >
-                  <Globe className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+                  <Globe className="h-4 w-4 shrink-0 text-[#737373]" />
                   Portfolio Website
-                  <ExternalLink className="h-2.5 w-2.5 ml-auto text-[#C8BFB0]" />
+                  <ExternalLink className="h-3 w-3 ml-auto text-black/30" />
                 </a>
               )}
               {profile?.resumeUrl && (!profile.resumeUrl.includes("portfolio") && !profile.resumeUrl.includes("vercel.app")) && (
@@ -1016,51 +1043,51 @@ export default function CandidateProfilePage() {
                   href={profile.resumeUrl}
                   target="_blank"
                   rel="noreferrer"
-                  className="flex items-center gap-3 text-[12px] font-mono text-foreground hover:text-emerald-900 transition-colors"
+                  className="flex items-center gap-3 text-[13px] font-medium text-[#101010] hover:text-black/70 transition-colors"
                 >
-                  <FileText className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+                  <FileText className="h-4 w-4 shrink-0 text-[#737373]" />
                   Resume Document
-                  <ExternalLink className="h-2.5 w-2.5 ml-auto text-[#C8BFB0]" />
+                  <ExternalLink className="h-3 w-3 ml-auto text-black/30" />
                 </a>
               )}
             </div>
           </div>
 
           {/* GitHub Archive Panel */}
-          <div className="border border-border bg-white">
-            <div className="border-b border-border bg-border px-5 py-3 flex items-center justify-between">
-              <div className="text-[9px] font-medium tracking-[0.18em] text-muted-foreground uppercase">
+          <div className="rounded-2xl border border-black/[0.08] bg-white overflow-hidden shadow-[0_2px_8px_rgba(0,0,0,0.02)]">
+            <div className="border-b border-black/[0.06] bg-[#FAFAF9] px-6 py-3.5 flex items-center justify-between">
+              <div className="text-[10px] font-medium tracking-[0.16em] text-[#737373] uppercase">
                 GitHub Archive
               </div>
               {githubSynced && (
-                <div className="flex items-center gap-1 text-[9px] font-mono text-emerald-900">
-                  <ShieldCheck className="h-2.5 w-2.5" />SYNCED
+                <div className="flex items-center gap-1 text-[10px] font-mono text-emerald-800 font-medium">
+                  <ShieldCheck className="h-3 w-3" />SYNCED
                 </div>
               )}
             </div>
-            <div className="p-5">
+            <div className="p-6">
               {githubSynced ? (
                 <div className="space-y-4">
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <div className="text-[9px] font-medium text-muted-foreground uppercase tracking-wider mb-1">Repositories</div>
-                      <div className="text-[20px] font-serif text-foreground">{profile!.githubEvidence!.repoCount}</div>
+                      <div className="text-[10px] font-medium text-[#737373] uppercase tracking-wider mb-1">Repositories</div>
+                      <div className="text-[22px] font-semibold text-[#101010] tracking-tight">{profile!.githubEvidence!.repoCount}</div>
                     </div>
                     <div>
-                      <div className="text-[9px] font-medium text-muted-foreground uppercase tracking-wider mb-1">Commits</div>
-                      <div className="text-[20px] font-serif text-foreground">~{profile!.githubEvidence!.totalCommits}</div>
+                      <div className="text-[10px] font-medium text-[#737373] uppercase tracking-wider mb-1">Commits</div>
+                      <div className="text-[22px] font-semibold text-[#101010] tracking-tight">~{profile!.githubEvidence!.totalCommits}</div>
                     </div>
                   </div>
                   {profile!.githubEvidence!.topLanguages?.length > 0 && (
                     <div>
-                      <div className="text-[9px] font-medium text-muted-foreground uppercase tracking-wider mb-2">
+                      <div className="text-[10px] font-medium text-[#737373] uppercase tracking-wider mb-2">
                         Primary Languages
                       </div>
                       <div className="flex gap-1.5 flex-wrap">
                         {profile!.githubEvidence!.topLanguages.slice(0, 4).map((lang) => (
                           <span
                             key={lang}
-                            className="text-[10px] font-mono bg-border border border-border text-foreground px-2 py-0.5"
+                            className="text-[11px] font-mono bg-[#FAFAF9] border border-black/[0.08] text-[#101010] px-2.5 py-0.5 rounded-full"
                           >
                             {lang}
                           </span>
@@ -1071,31 +1098,31 @@ export default function CandidateProfilePage() {
                   <button
                     onClick={openGithubModal}
                     disabled={isSyncingGithub}
-                    className="w-full flex items-center justify-center gap-2 py-2 border border-border text-[11px] font-mono text-foreground hover:bg-border transition-colors disabled:opacity-50 cursor-pointer"
+                    className="w-full flex items-center justify-center gap-2 py-2.5 rounded-full border border-black/[0.12] bg-white hover:bg-black/[0.04] text-xs font-medium text-[#101010] transition-all disabled:opacity-50 cursor-pointer"
                   >
                     <RefreshCw className={`h-3 w-3 ${isSyncingGithub ? "animate-spin" : ""}`} />
-                    {isSyncingGithub ? "SYNCING…" : "RESYNC NOW"}
+                    {isSyncingGithub ? "Syncing…" : "Resync Now"}
                   </button>
                 </div>
               ) : (
                 <div className="space-y-3">
-                  <p className="text-[12px] font-sans text-muted-foreground leading-relaxed">
+                  <p className="text-[13px] font-sans text-[#737373] leading-relaxed">
                     Connect your GitHub account to automatically import repository metrics and languages into your record.
                   </p>
                   {syncError && (
-                    <p className="text-[11px] font-sans text-red-600 bg-red-50 border border-red-100 p-2">{syncError}</p>
+                    <p className="text-[12px] font-sans text-red-600 bg-red-50 border border-red-100 p-2.5 rounded-xl">{syncError}</p>
                   )}
                   <button
                     onClick={openGithubModal}
                     disabled={isSyncingGithub}
-                    className="w-full flex items-center justify-center gap-2 py-2.5 bg-foreground hover:bg-emerald-900 text-white text-[11px] font-mono font-semibold transition-colors disabled:opacity-50 cursor-pointer"
+                    className="w-full rounded-full bg-[#101010] hover:bg-black/90 text-white text-xs font-medium py-2.5 px-4 transition-all shadow-xs flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
                   >
                     {isSyncingGithub ? (
-                      <RefreshCw className="h-3 w-3 animate-spin" />
+                      <RefreshCw className="h-3.5 w-3.5 animate-spin" />
                     ) : (
-                      <GitBranch className="h-3 w-3" />
+                      <GitBranch className="h-3.5 w-3.5" />
                     )}
-                    {isSyncingGithub ? "SYNCING…" : "SYNC GITHUB ACCOUNT"}
+                    {isSyncingGithub ? "Syncing…" : "Sync GitHub Account"}
                   </button>
                 </div>
               )}
@@ -1111,33 +1138,33 @@ export default function CandidateProfilePage() {
           aria-modal="true"
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-150"
         >
-          <div className="w-full max-w-md bg-white border border-border rounded-lg shadow-2xl overflow-hidden animate-in zoom-in-95 duration-150 flex flex-col">
-            <div className="p-5 border-b border-border bg-surface flex items-center justify-between">
-              <div className="flex items-center gap-2.5">
-                <div className="h-8 w-8 rounded-full bg-foreground text-white flex items-center justify-center">
+          <div className="w-full max-w-md bg-white border border-black/[0.08] rounded-2xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-150 flex flex-col">
+            <div className="p-6 border-b border-black/[0.06] bg-[#FAFAF9] flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="h-9 w-9 rounded-full bg-[#101010] text-white flex items-center justify-center">
                   <GitBranch className="h-4 w-4" />
                 </div>
                 <div>
-                  <h3 className="text-[15px] font-semibold text-foreground">Connect GitHub Account</h3>
-                  <p className="text-[11px] font-mono text-muted-foreground">MeritLane Provenance &amp; Code Audit</p>
+                  <h3 className="text-[15px] font-semibold text-[#101010] tracking-[-0.01em]">Connect GitHub Account</h3>
+                  <p className="text-[11px] font-mono text-[#737373]">MeritLane Provenance &amp; Code Audit</p>
                 </div>
               </div>
               <button
                 type="button"
                 onClick={() => setIsGithubModalOpen(false)}
-                className="h-8 w-8 flex items-center justify-center text-muted-foreground hover:text-foreground rounded hover:bg-border/50 transition-colors cursor-pointer"
+                className="h-8 w-8 flex items-center justify-center text-[#737373] hover:text-[#101010] rounded-full hover:bg-black/[0.04] transition-colors cursor-pointer"
               >
                 <X className="h-4 w-4" />
               </button>
             </div>
 
-            <form onSubmit={handleConfirmGithubSync} className="p-5 space-y-4">
-              <p className="text-[13px] text-[#44403C] leading-relaxed">
+            <form onSubmit={handleConfirmGithubSync} className="p-6 space-y-4">
+              <p className="text-[13px] text-[#737373] leading-relaxed">
                 Connect your GitHub profile to import your repositories, top programming languages, and verified commit metrics into your candidate record.
               </p>
 
               <div>
-                <label className="block text-[12px] font-mono font-semibold uppercase tracking-wider text-foreground mb-1.5">
+                <label className="block text-[11px] font-mono font-medium uppercase tracking-wider text-[#101010] mb-1.5">
                   GitHub Username or Profile URL *
                 </label>
                 <input
@@ -1146,51 +1173,51 @@ export default function CandidateProfilePage() {
                   value={githubInput}
                   onChange={(e) => setGithubInput(e.target.value)}
                   placeholder="e.g. SaitrishankAUCSE or https://github.com/SaitrishankAUCSE"
-                  className="w-full h-11 px-3.5 bg-white border border-border rounded text-[13px] font-mono text-foreground focus:outline-none focus:border-foreground focus:ring-1 focus:ring-foreground transition-all"
+                  className="w-full h-11 px-3.5 bg-[#FAFAF9] border border-black/[0.1] rounded-xl text-[13px] font-mono text-[#101010] focus:outline-none focus:bg-white focus:border-[#101010] focus:ring-1 focus:ring-[#101010] transition-all"
                 />
-                <p className="text-[11px] text-muted-foreground mt-1 font-mono">
+                <p className="text-[11px] text-[#737373] mt-1 font-mono">
                   We verify your public repositories and contributions in real-time.
                 </p>
               </div>
 
-              <div className="bg-surface border border-border rounded p-3 space-y-2 text-[12px] text-[#44403C]">
-                <div className="text-[11px] font-semibold uppercase tracking-wider text-foreground">
+              <div className="bg-[#FAFAF9] border border-black/[0.06] rounded-xl p-3.5 space-y-2 text-[12px] text-[#525252]">
+                <div className="text-[11px] font-semibold uppercase tracking-wider text-[#101010]">
                   What will be synced:
                 </div>
-                <div className="flex items-center gap-2 text-emerald-900">
-                  <CheckCircle2 className="h-3.5 w-3.5 text-emerald-900 shrink-0" />
+                <div className="flex items-center gap-2 text-emerald-800">
+                  <CheckCircle2 className="h-3.5 w-3.5 text-emerald-700 shrink-0" />
                   <span>Public repositories &amp; commit frequency</span>
                 </div>
-                <div className="flex items-center gap-2 text-emerald-900">
-                  <CheckCircle2 className="h-3.5 w-3.5 text-emerald-900 shrink-0" />
+                <div className="flex items-center gap-2 text-emerald-800">
+                  <CheckCircle2 className="h-3.5 w-3.5 text-emerald-700 shrink-0" />
                   <span>Language distribution breakdown</span>
                 </div>
-                <div className="flex items-center gap-2 text-emerald-900">
-                  <CheckCircle2 className="h-3.5 w-3.5 text-emerald-900 shrink-0" />
+                <div className="flex items-center gap-2 text-emerald-800">
+                  <CheckCircle2 className="h-3.5 w-3.5 text-emerald-700 shrink-0" />
                   <span>Verified GitHub badge on public record</span>
                 </div>
               </div>
 
               {syncError && (
-                <div className="p-3 bg-danger/10 border border-[#FECACA] rounded text-[12px] text-danger flex items-start gap-2">
+                <div className="p-3 bg-red-50 border border-red-200 rounded-xl text-[12px] text-red-600 flex items-start gap-2">
                   <AlertCircle className="h-4 w-4 shrink-0 mt-0.5" />
                   <span>{syncError}</span>
                 </div>
               )}
 
-              <div className="pt-2 flex items-center justify-end gap-3 border-t border-border">
+              <div className="pt-2 flex items-center justify-end gap-2.5 border-t border-black/[0.06]">
                 <button
                   type="button"
                   onClick={() => setIsGithubModalOpen(false)}
                   disabled={isSyncingGithub}
-                  className="px-4 py-2 border border-border hover:bg-border text-foreground text-[12px] font-mono font-medium rounded transition-colors cursor-pointer"
+                  className="rounded-full border border-black/[0.12] bg-white hover:bg-black/[0.04] text-[#101010] text-xs font-medium px-4 py-2 transition-all cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={isSyncingGithub}
-                  className="px-5 py-2 bg-foreground hover:bg-emerald-900 text-white text-[12px] font-mono font-semibold rounded transition-colors flex items-center gap-2 shadow-xs disabled:opacity-50 cursor-pointer"
+                  className="rounded-full bg-[#101010] hover:bg-black/90 text-white text-xs font-medium px-5 py-2.5 transition-all flex items-center gap-2 shadow-xs disabled:opacity-50 cursor-pointer"
                 >
                   {isSyncingGithub ? (
                     <>

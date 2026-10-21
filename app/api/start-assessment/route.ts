@@ -210,9 +210,9 @@ export async function POST(req: NextRequest) {
           let mediumQ: any = undefined;
 
           if (typeof userData.assessmentEasyQuestionId === "string" && userData.assessmentEasyQuestionId.startsWith("leetcode_")) {
-            easyQ = await getInterviewQuestionById(userData.assessmentEasyQuestionId);
+            easyQ = await getInterviewQuestionById(userData.assessmentEasyQuestionId, skill);
             if (userData.assessmentMediumQuestionId) {
-              mediumQ = await getInterviewQuestionById(userData.assessmentMediumQuestionId);
+              mediumQ = await getInterviewQuestionById(userData.assessmentMediumQuestionId, skill);
             }
           }
 

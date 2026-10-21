@@ -611,11 +611,82 @@ function AssessmentContentWrapper() {
   const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const editorRef = useRef<any>(null);
+  const codeRef = useRef<string>(code);
+  useEffect(() => {
+    codeRef.current = code;
+  }, [code]);
   const [useFallbackEditor, setUseFallbackEditor] = useState<boolean>(false);
   const [editorLoadTimeout, setEditorLoadTimeout] = useState<boolean>(false);
   const [cursorPos, setCursorPos] = useState({ line: 1, col: 1 });
   const [editorTheme, setEditorTheme] = useState<"dark" | "light">("dark");
   const [editorFontSize, setEditorFontSize] = useState<number>(13);
+
+  // Performance-optimized Monaco options: instant caret, 0ms input lag, zero heavy AST re-tokenization on keystroke
+  const monacoOptions = useMemo(() => ({
+    fontSize: editorFontSize,
+    fontFamily: "Consolas, 'Cascadia Code', 'Fira Code', Monaco, monospace",
+    fontLigatures: false, // Disables complex font ligature kerning on keydown
+    minimap: { enabled: false },
+    scrollBeyondLastLine: false,
+    lineNumbers: "on" as const,
+    lineNumbersMinChars: 3,
+    glyphMargin: false,
+    folding: false, // Disables background folding range calculations
+    lineDecorationsWidth: 10,
+    roundedSelection: false,
+    automaticLayout: true,
+    tabSize: 4,
+    insertSpaces: true,
+    detectIndentation: false,
+    autoIndent: "brackets" as const, // Prevents heavy multi-pass AST parsing on keystrokes
+    matchBrackets: "near" as const,
+    autoClosingBrackets: "always" as const,
+    autoClosingQuotes: "always" as const,
+    formatOnPaste: false,
+    formatOnType: false,
+    trimAutoWhitespace: false,
+    wordWrap: "on" as const,
+    cursorBlinking: "blink" as const, // Standard hardware blink (disables continuous CSS animation loops)
+    cursorSmoothCaretAnimation: "off" as const, // CRITICAL: turns off caret gliding animation that causes typing lag
+    smoothScrolling: false,
+    fastScrollSensitivity: 7,
+    renderLineHighlight: "line" as const,
+    renderValidationDecorations: "off" as const,
+    occurrencesHighlight: "off" as const,
+    selectionHighlight: false,
+    links: false,
+    colorDecorators: false,
+    codeLens: false,
+    stopRenderingLineAfter: 500,
+    quickSuggestions: false,
+    suggestOnTriggerCharacters: false,
+    snippetSuggestions: "none" as const,
+    wordBasedSuggestions: "off" as const,
+    parameterHints: { enabled: false },
+    suggest: {
+      showKeywords: false,
+      showSnippets: false,
+      showWords: false,
+      showFunctions: false,
+      showVariables: false,
+      showClasses: false,
+      showModules: false,
+      showProperties: false,
+      showInterfaces: false,
+      showReferences: false,
+      showConstants: false,
+      showConstructors: false,
+      showFields: false,
+      showEvents: false,
+      showOperators: false,
+      showUnits: false,
+      showValues: false,
+      showStructs: false,
+      showTypeParameters: false,
+    },
+    padding: { top: 12, bottom: 12 },
+  }), [editorFontSize]);
+
   const [copiedCodeToast, setCopiedCodeToast] = useState<boolean>(false);
   const [copiedInputIdx, setCopiedInputIdx] = useState<number | null>(null);
   const [submittingModal, setSubmittingModal] = useState<boolean>(false);
@@ -1091,6 +1162,7 @@ function AssessmentContentWrapper() {
     };
 
     const handleFullscreenChange = () => {
+      if (process.env.NODE_ENV === "development") return;
       if (!document.fullscreenElement && !isRestoringFullscreenRef.current) {
         triggerInfraction("exited_fullscreen", "You exited fullscreen mode.");
       }
@@ -1202,7 +1274,7 @@ function AssessmentContentWrapper() {
       setTimeout(() => { isRestoringFullscreenRef.current = false; }, 300);
     }
 
-    if (!fullscreenOk && !document.fullscreenElement) {
+    if (!fullscreenOk && !document.fullscreenElement && process.env.NODE_ENV !== "development") {
       // If browser blocked or rejected fullscreen activation, prompt user to enter fullscreen cleanly
       setFullscreenUnsupported(true);
       return;
@@ -1226,7 +1298,7 @@ function AssessmentContentWrapper() {
   const handleRetryFullscreen = async () => {
     setFullscreenUnsupported(false);
     const ok = await requestFullscreenSafe();
-    if (!ok && !document.fullscreenElement) {
+    if (!ok && !document.fullscreenElement && process.env.NODE_ENV !== "development") {
       setFullscreenUnsupported(true);
     } else {
       window.history.pushState(null, "", window.location.href);
@@ -1270,6 +1342,7 @@ function AssessmentContentWrapper() {
   const codeUpdateTimeout = useRef<any>(null);
 
   const handleCodeChange = (newVal: string) => {
+    codeRef.current = newVal;
     if (codeUpdateTimeout.current) clearTimeout(codeUpdateTimeout.current);
     codeUpdateTimeout.current = setTimeout(() => {
       setCode(newVal);
@@ -1278,15 +1351,16 @@ function AssessmentContentWrapper() {
       } else {
         setCodeMedium(newVal);
       }
-    }, 400); // 400ms debounce
+    }, 300);
   };
 
   const handleSwitchCodingTask = (targetIdx: 0 | 1) => {
     if (targetIdx === activeCodingTaskIdx) return;
+    const currentCode = editorRef.current ? editorRef.current.getValue() : (codeRef.current || code);
     if (activeCodingTaskIdx === 0) {
-      setCodeEasy(code);
+      setCodeEasy(currentCode);
     } else {
-      setCodeMedium(code);
+      setCodeMedium(currentCode);
     }
     let targetCode = targetIdx === 0 ? codeEasy : codeMedium;
     if (!targetCode) {
@@ -1294,6 +1368,7 @@ function AssessmentContentWrapper() {
       const foundLang = task?.supportedLanguages?.find((l) => l.id === selectedLanguage);
       targetCode = foundLang?.template || task?.initialCode || "";
     }
+    codeRef.current = targetCode;
     setCode(targetCode);
     if (editorRef.current) {
       try { editorRef.current.setValue(targetCode); } catch {}
@@ -1318,6 +1393,7 @@ function AssessmentContentWrapper() {
   const handleResetCode = () => {
     if (!content?.coding && (!content?.codingTasks || content.codingTasks.length === 0)) return;
     const initialCode = content?.codingTasks?.[activeCodingTaskIdx]?.initialCode || content?.coding?.initialCode || "";
+    codeRef.current = initialCode;
     handleCodeChange(initialCode);
     if (editorRef.current) {
       try { editorRef.current.setValue(initialCode); } catch {}
@@ -1342,6 +1418,7 @@ function AssessmentContentWrapper() {
         .split("\n")
         .map((line) => line.replace(/\t/g, "    ").trimEnd())
         .join("\n");
+      codeRef.current = formatted;
       if (editorRef.current) {
         try { editorRef.current.setValue(formatted); } catch {}
       }
@@ -1358,6 +1435,25 @@ function AssessmentContentWrapper() {
   const handleEditorMount = (editor: any, monaco: any) => {
     editorRef.current = editor;
     setEditorLoadTimeout(false);
+
+    // Disable heavy background language worker diagnostics that freeze the main thread on keystrokes
+    try {
+      if (monaco?.languages?.typescript) {
+        monaco.languages.typescript.javascriptDefaults.setDiagnosticsOptions({
+          noSemanticValidation: true,
+          noSyntaxValidation: true,
+          noSuggestionDiagnostics: true,
+        });
+        monaco.languages.typescript.typescriptDefaults.setDiagnosticsOptions({
+          noSemanticValidation: true,
+          noSyntaxValidation: true,
+          noSuggestionDiagnostics: true,
+        });
+        monaco.languages.typescript.javascriptDefaults.setEagerModelSync(true);
+        monaco.languages.typescript.typescriptDefaults.setEagerModelSync(true);
+      }
+    } catch {}
+
     setTimeout(() => {
       try {
         editor.layout();
@@ -1546,7 +1642,7 @@ function AssessmentContentWrapper() {
       const token = user ? await user.getIdToken(true) : "";
       const isDualTask = !!(content?.codingTasks && content.codingTasks.length >= 2);
       // Ensure the currently active code in editor is sent
-      const activeCode = code;
+      const activeCode = editorRef.current ? editorRef.current.getValue() : (codeRef.current || code);
       const activeQuestion = isDualTask
         ? content!.codingTasks![activeCodingTaskIdx]
         : content?.coding;
@@ -1650,6 +1746,7 @@ function AssessmentContentWrapper() {
     try {
       const token = user ? await user.getIdToken(true) : "";
       const isDualTask = !!(content?.codingTasks && content.codingTasks.length >= 2);
+      const liveCode = editorRef.current ? editorRef.current.getValue() : (codeRef.current || code);
       const res = await fetch("/api/verify", {
         method: "POST",
         headers: {
@@ -1660,12 +1757,12 @@ function AssessmentContentWrapper() {
           skill: skillParam,
           answers: mcqAnswers,
           // Dual-task: send easy + medium separately, ensuring current editor code is used for active task
-          easyCode: isDualTask ? (activeCodingTaskIdx === 0 ? code : (codeEasy || code)) : undefined,
-          mediumCode: isDualTask ? (activeCodingTaskIdx === 1 ? code : (codeMedium || code)) : undefined,
+          easyCode: isDualTask ? (activeCodingTaskIdx === 0 ? liveCode : (codeEasy || liveCode)) : undefined,
+          mediumCode: isDualTask ? (activeCodingTaskIdx === 1 ? liveCode : (codeMedium || liveCode)) : undefined,
           easyQuestionId: isDualTask ? content?.codingTasks?.[0]?.id : (content?.coding?.id || undefined),
           mediumQuestionId: isDualTask ? content?.codingTasks?.[1]?.id : undefined,
           // Legacy fallback
-          code: code,
+          code: liveCode,
           language: selectedLanguage,
           isPublicTest: false,
         }),
@@ -2036,6 +2133,7 @@ function AssessmentContentWrapper() {
   const submittedCodeMedium = assessmentResult?.submittedCode?.medium || codeMedium || code;
 
   // ── Unified Full-Screen Assessment Report Modal ──
+  // ── Unified Full-Screen Assessment Report Modal ──
   const renderFullReportModal = () => {
     if (!showFullReportModal) return null;
     return (
@@ -2045,26 +2143,26 @@ function AssessmentContentWrapper() {
         aria-label="Full Assessment Report"
         className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 sm:p-6"
       >
-        <div className="w-full max-w-4xl max-h-[90vh] bg-white rounded-xl shadow-2xl border border-border flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+        <div className="w-full max-w-4xl max-h-[90vh] bg-white rounded-2xl shadow-2xl border border-black/[0.08] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-150">
           
           {/* Modal Header */}
-          <div className="flex items-center justify-between px-6 py-4 border-b border-border bg-[#F8F6F3]">
+          <div className="flex items-center justify-between px-6 py-4 border-b border-black/[0.08] bg-[#F8F8F6]">
             <div className="flex items-center gap-3">
-              <div className="h-9 w-9 rounded-lg bg-emerald-900 text-white flex items-center justify-center">
-                <FileCode className="h-5 w-5" />
+              <div className="h-9 w-9 rounded-full bg-black/[0.04] text-[#101010] border border-black/[0.08] flex items-center justify-center">
+                <FileCode className="h-4 w-4" />
               </div>
               <div>
-                <h2 className="text-[17px] font-bold text-foreground">
+                <h2 className="text-[16px] font-semibold text-[#101010] tracking-tight">
                   Full Assessment Report: {displaySkill}
                 </h2>
-                <p className="text-[12px] text-muted-foreground">
-                  Comprehensive audit record of all responses, code implementations, and session diagnostics.
+                <p className="text-[12px] text-[#737373]">
+                  Authoritative record of question responses, code AST, and session diagnostics.
                 </p>
               </div>
             </div>
             <button
               onClick={() => setShowFullReportModal(false)}
-              className="h-8 w-8 rounded-lg border border-border bg-white text-muted-foreground hover:text-foreground hover:bg-[#F2EFE9] flex items-center justify-center transition-colors cursor-pointer"
+              className="h-8 w-8 rounded-full border border-black/[0.08] bg-white text-[#737373] hover:text-[#101010] hover:bg-black/[0.02] flex items-center justify-center transition-colors cursor-pointer"
               title="Close report modal"
             >
               <X className="h-4 w-4" />
@@ -2072,33 +2170,33 @@ function AssessmentContentWrapper() {
           </div>
 
           {/* Modal Tabs */}
-          <div className="flex items-center gap-1 px-6 pt-3 border-b border-border bg-white shrink-0">
+          <div className="flex items-center gap-1 px-6 pt-3 border-b border-black/[0.08] bg-white shrink-0">
             <button
               onClick={() => setReportActiveTab("mcq")}
-              className={`px-4 py-2 text-[13px] font-semibold border-b-2 transition-colors cursor-pointer ${
+              className={`px-4 py-2 text-[13px] font-medium border-b-2 transition-colors cursor-pointer ${
                 reportActiveTab === "mcq"
-                  ? "border-emerald-900 text-emerald-900"
-                  : "border-transparent text-muted-foreground hover:text-foreground"
+                  ? "border-[#101010] text-[#101010]"
+                  : "border-transparent text-[#737373] hover:text-[#101010]"
               }`}
             >
               MCQ Responses ({mcqItems.length})
             </button>
             <button
               onClick={() => setReportActiveTab("code")}
-              className={`px-4 py-2 text-[13px] font-semibold border-b-2 transition-colors cursor-pointer ${
+              className={`px-4 py-2 text-[13px] font-medium border-b-2 transition-colors cursor-pointer ${
                 reportActiveTab === "code"
-                  ? "border-emerald-900 text-emerald-900"
-                  : "border-transparent text-muted-foreground hover:text-foreground"
+                  ? "border-[#101010] text-[#101010]"
+                  : "border-transparent text-[#737373] hover:text-[#101010]"
               }`}
             >
               Submitted Code &amp; Tasks
             </button>
             <button
               onClick={() => setReportActiveTab("review")}
-              className={`px-4 py-2 text-[13px] font-semibold border-b-2 transition-colors cursor-pointer ${
+              className={`px-4 py-2 text-[13px] font-medium border-b-2 transition-colors cursor-pointer ${
                 reportActiveTab === "review"
-                  ? "border-emerald-900 text-emerald-900"
-                  : "border-transparent text-muted-foreground hover:text-foreground"
+                  ? "border-[#101010] text-[#101010]"
+                  : "border-transparent text-[#737373] hover:text-[#101010]"
               }`}
             >
               AI Feedback &amp; Trace
@@ -2111,66 +2209,76 @@ function AssessmentContentWrapper() {
             {/* TAB 1: MCQ Responses */}
             {reportActiveTab === "mcq" && (
               <div className="flex flex-col gap-5">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-[#F8F6F3] p-4 rounded-lg border border-border">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-[#F8F8F6] p-4 rounded-xl border border-black/[0.08]">
                   <div>
-                    <div className="text-[13px] font-semibold text-foreground">Knowledge Section Audit</div>
-                    <div className="text-[12px] text-muted-foreground mt-0.5">
-                      Answered: {mcqAnswers.filter((a) => a !== undefined).length} of {mcqItems.length} questions · Answer keys withheld for test security
+                    <div className="text-[13px] font-semibold text-[#101010]">Knowledge Section Audit</div>
+                    <div className="text-[12px] text-[#737373] mt-0.5">
+                      Answered: {mcqAnswers.filter((a) => a !== undefined).length} of {mcqItems.length} questions · Answer keys withheld for exam integrity
                     </div>
                   </div>
-                  <div className="text-left sm:text-right">
-                    <div className="text-[11px] font-mono uppercase text-muted-foreground">Section Score</div>
-                    <div className="text-[18px] font-mono font-bold text-foreground">
+                  <div className="flex items-center gap-2">
+                    <span className="text-[13px] font-mono font-bold text-[#101010]">
                       {assessmentResult?.assessmentScores?.mcq ?? (assessmentResult?.score || 0)}%
-                    </div>
+                    </span>
+                    <span className={`text-[10px] font-mono font-semibold uppercase tracking-wider px-2.5 py-0.5 rounded-full border ${
+                      assessmentResult?.assessmentScores?.mcqPassed ? "bg-emerald-50 text-emerald-800 border-emerald-200/60" : "bg-red-50 text-red-700 border-red-200"
+                    }`}>
+                      {assessmentResult?.assessmentScores?.mcqPassed ? "PASSED" : "BELOW 75%"}
+                    </span>
                   </div>
                 </div>
 
                 <div className="space-y-4">
                   {mcqItems.map((item: any, idx: number) => {
-                    const hasAnswered = item.userAnswer !== undefined;
+                    const hasAnswered = item.userAnswer !== undefined && item.userAnswer !== null;
                     const isCorrect = item.isCorrect ?? (item.answerIndex !== undefined && item.userAnswer === item.answerIndex);
                     const userSelectedText = hasAnswered && item.options ? item.options[item.userAnswer] : null;
 
                     return (
                       <div
                         key={idx}
-                        className={`p-4 rounded-xl border transition-colors ${
-                          !hasAnswered
-                            ? "bg-surface border-border"
-                            : isCorrect
-                            ? "bg-white border-[#BBF7D0]"
-                            : "bg-white border-[#FECACA]"
-                        }`}
+                        className="p-4 rounded-xl border border-black/[0.08] bg-white transition-colors"
                       >
                         <div className="flex items-center justify-between gap-3 mb-2.5">
-                          <span className="text-[12px] font-mono font-bold text-muted-foreground">
-                            Question {idx + 1}
-                          </span>
+                          <div className="flex items-center gap-2">
+                            <span className="text-[12px] font-mono font-semibold text-[#101010]">
+                              Question {idx + 1}
+                            </span>
+                            {item.topic && (
+                              <span className="text-[10px] font-mono uppercase bg-[#F8F8F6] border border-black/[0.06] px-2 py-0.5 rounded-full text-[#737373]">
+                                {item.topic}
+                              </span>
+                            )}
+                            {item.difficulty && (
+                              <span className="text-[10px] font-mono uppercase px-2 py-0.5 rounded-full bg-black/[0.04] text-[#555] border border-black/[0.06]">
+                                {item.difficulty}
+                              </span>
+                            )}
+                          </div>
                           <span
-                            className={`text-[11px] font-mono font-bold uppercase px-2.5 py-0.5 rounded border ${
+                            className={`text-[10px] font-mono font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full border ${
                               !hasAnswered
-                                ? "bg-surface text-muted-foreground border-border"
+                                ? "bg-black/[0.04] text-[#737373] border-black/[0.08]"
                                 : isCorrect
-                                ? "bg-[#DCFCE7] text-[#166534] border-[#86EFAC]"
-                                : "bg-danger/10 text-danger border-[#FECACA]"
+                                ? "bg-emerald-50 text-emerald-800 border-emerald-200/60"
+                                : "bg-red-50 text-red-700 border-red-200"
                             }`}
                           >
-                            {!hasAnswered ? "Skipped" : isCorrect ? "✓ Correct" : "✗ Incorrect"}
+                            {!hasAnswered ? "Skipped" : isCorrect ? "Passed" : "Needs Review"}
                           </span>
                         </div>
 
-                        <div className="text-[14px] font-medium text-foreground mb-3 leading-relaxed">
+                        <div className="text-[14px] font-medium text-[#101010] mb-3 leading-relaxed">
                           {item.question}
                         </div>
 
-                        {/* Candidate Selected Response (No answers or answer key revealed) */}
-                        <div className="p-3 rounded-lg border bg-surface border-border flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                        {/* Candidate Selected Response */}
+                        <div className="p-3 rounded-xl border bg-[#FAFAF9] border-black/[0.06] flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                           <div className="flex items-center gap-2">
-                            <span className="text-[11px] font-mono uppercase text-muted-foreground">
+                            <span className="text-[11px] font-mono uppercase text-[#737373]">
                               Your Selection:
                             </span>
-                            <span className="text-[13px] font-medium text-foreground">
+                            <span className="text-[13px] font-medium text-[#101010]">
                               {hasAnswered ? (
                                 <>
                                   <span className="font-mono font-bold mr-1">
@@ -2179,15 +2287,15 @@ function AssessmentContentWrapper() {
                                   {userSelectedText}
                                 </>
                               ) : (
-                                <span className="text-muted-foreground italic">No answer submitted</span>
+                                <span className="text-[#737373] italic">No answer submitted</span>
                               )}
                             </span>
                           </div>
 
-                          <span className={`text-[12px] font-mono font-semibold shrink-0 ${
-                            !hasAnswered ? "text-muted-foreground" : isCorrect ? "text-[#166534]" : "text-danger"
+                          <span className={`text-[11px] font-mono font-semibold shrink-0 ${
+                            !hasAnswered ? "text-[#737373]" : isCorrect ? "text-emerald-700" : "text-red-600"
                           }`}>
-                            {!hasAnswered ? "Not Attempted" : isCorrect ? "Correct" : "Incorrect"}
+                            {!hasAnswered ? "Not Attempted" : isCorrect ? "Evaluated Correct" : "Evaluated Incorrect"}
                           </span>
                         </div>
                       </div>
@@ -2201,8 +2309,8 @@ function AssessmentContentWrapper() {
             {reportActiveTab === "code" && (
               <div className="flex flex-col gap-6">
                 {codingItems.length === 0 ? (
-                  <div className="p-8 text-center text-muted-foreground">
-                    No coding challenge data recorded for this session.
+                  <div className="p-8 text-center text-[#737373] font-mono text-[13px]">
+                    No coding challenge buffers recorded for this session.
                   </div>
                 ) : (
                   codingItems.map((challenge: any, cIdx: number) => {
@@ -2210,29 +2318,44 @@ function AssessmentContentWrapper() {
                     const taskLabel = cIdx === 0 ? "EASY Task" : "MEDIUM Task";
 
                     return (
-                      <div key={cIdx} className="border border-border rounded-xl overflow-hidden bg-white shadow-xs">
-                        <div className="p-5 border-b border-border bg-[#F8F6F3]">
+                      <div key={cIdx} className="border border-black/[0.08] rounded-2xl overflow-hidden bg-white shadow-xs">
+                        <div className="p-5 border-b border-black/[0.08] bg-[#F8F8F6]">
                           <div className="flex items-center justify-between mb-1.5">
                             <div className="flex items-center gap-2">
-                              <span className="text-[11px] font-bold uppercase tracking-wider bg-emerald-900 text-white px-2 py-0.5 rounded">
+                              <span className="text-[10px] font-mono font-semibold uppercase tracking-wider bg-[#101010] text-white px-2 py-0.5 rounded-full">
                                 {taskLabel}
                               </span>
-                              <span className="text-[16px] font-bold text-foreground">
+                              <span className="text-[15px] font-semibold text-[#101010]">
                                 {challenge.title}
                               </span>
                             </div>
-                            <span className="text-[11px] font-mono bg-white border border-border px-2.5 py-1 rounded text-muted-foreground">
-                              {selectedLanguage.toUpperCase()}
+                            <span className="text-[11px] font-mono bg-white border border-black/[0.08] px-2.5 py-0.5 rounded-full text-[#737373]">
+                              {assessmentResult?.submittedLanguage === "javascript" ? "JavaScript (ES6)" : (selectedLanguage.toUpperCase() || "JS")}
                             </span>
                           </div>
-                          <p className="text-[13px] text-[#57534E] leading-relaxed whitespace-pre-line mt-2 bg-white p-3 rounded-lg border border-border">
+                          <p className="text-[13px] text-[#555] leading-relaxed whitespace-pre-line mt-2 bg-white p-3.5 rounded-xl border border-black/[0.06]">
                             {challenge.instructions}
                           </p>
                         </div>
 
-                        <div className="p-4 bg-[#0D1117] text-[#E6EDF3] font-mono text-[12px] overflow-x-auto max-h-[350px]">
-                          <pre className="whitespace-pre">
-                            {challengeCode?.trim() || "// No code was written for this challenge."}
+                        <div className="bg-[#0D1117] p-4 text-[#E6EDF3] font-mono text-[13px] relative group">
+                          <div className="flex items-center justify-between border-b border-[#30363D] pb-2 mb-3 text-[11px] text-[#8B949E]">
+                            <span>Submitted Solution Buffer</span>
+                            <button
+                              onClick={() => {
+                                if (typeof navigator !== "undefined" && navigator.clipboard) {
+                                  navigator.clipboard.writeText(challengeCode);
+                                }
+                              }}
+                              className="flex items-center gap-1 px-2.5 py-1 rounded bg-[#21262D] border border-[#30363D] text-[#C9D1D9] hover:text-white transition-colors cursor-pointer"
+                              title="Copy code to clipboard"
+                            >
+                              <Copy className="h-3 w-3" />
+                              <span>Copy</span>
+                            </button>
+                          </div>
+                          <pre className="overflow-x-auto whitespace-pre leading-relaxed font-mono">
+                            {challengeCode?.trim() || "// No code submitted."}
                           </pre>
                         </div>
                       </div>
@@ -2245,46 +2368,72 @@ function AssessmentContentWrapper() {
             {/* TAB 3: AI Review & Trace */}
             {reportActiveTab === "review" && (
               <div className="flex flex-col gap-5">
-                <div className="p-4 rounded-xl border border-border bg-[#F8F6F3]">
-                  <h3 className="text-[14px] font-bold text-foreground mb-3">Authoritative Score Metrics</h3>
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                    <div className="p-3 bg-white rounded-lg border border-border">
-                      <div className="text-[11px] text-muted-foreground font-semibold uppercase">EASY Task</div>
+                <div className="p-4 rounded-xl border border-black/[0.08] bg-[#F8F8F6]">
+                  <div className="flex items-center justify-between mb-3">
+                    <h3 className="text-[14px] font-semibold text-[#101010]">Authoritative Score Metrics (Proportional Scoring)</h3>
+                    <span className="text-[10px] font-mono text-emerald-800 bg-emerald-50 border border-emerald-200/60 px-2 py-0.5 rounded-full font-semibold">
+                      Threshold: ≥ 75%
+                    </span>
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
+                    <div className="p-3 bg-white rounded-xl border border-black/[0.08]">
+                      <div className="text-[10px] text-[#737373] font-mono uppercase font-semibold">EASY Task (35%)</div>
                       <div className={`text-[20px] font-mono font-bold mt-0.5 ${
-                        assessmentResult?.assessmentScores?.easyPassed ? "text-[#16A34A]" : "text-danger"
+                        (assessmentResult?.assessmentScores?.easy ?? 0) >= 75 ? "text-[#101010]" : "text-red-600"
                       }`}>
                         {assessmentResult?.assessmentScores?.easy ?? 0}%
                       </div>
-                      <div className="text-[10px] text-muted-foreground">Required: 100%</div>
+                      <div className="text-[10px] text-[#737373] font-mono">
+                        {assessmentResult?.assessmentScores?.easyPassedTests !== undefined 
+                          ? `${assessmentResult.assessmentScores.easyPassedTests}/${assessmentResult.assessmentScores.easyTotalTests || 50} tests`
+                          : "Proportional test score"}
+                      </div>
                     </div>
-                    <div className="p-3 bg-white rounded-lg border border-border">
-                      <div className="text-[11px] text-muted-foreground font-semibold uppercase">MEDIUM Task</div>
+                    <div className="p-3 bg-white rounded-xl border border-black/[0.08]">
+                      <div className="text-[10px] text-[#737373] font-mono uppercase font-semibold">MEDIUM Task (35%)</div>
                       <div className={`text-[20px] font-mono font-bold mt-0.5 ${
-                        assessmentResult?.assessmentScores?.mediumPassed ? "text-[#16A34A]" : "text-danger"
+                        (assessmentResult?.assessmentScores?.medium ?? 0) >= 75 ? "text-[#101010]" : "text-red-600"
                       }`}>
                         {assessmentResult?.assessmentScores?.medium ?? 0}%
                       </div>
-                      <div className="text-[10px] text-muted-foreground">Required: ≥ 75%</div>
+                      <div className="text-[10px] text-[#737373] font-mono">
+                        {assessmentResult?.assessmentScores?.mediumPassedTests !== undefined 
+                          ? `${assessmentResult.assessmentScores.mediumPassedTests}/${assessmentResult.assessmentScores.mediumTotalTests || 50} tests`
+                          : "Proportional test score"}
+                      </div>
                     </div>
-                    <div className="p-3 bg-white rounded-lg border border-border">
-                      <div className="text-[11px] text-muted-foreground font-semibold uppercase">MCQ Section</div>
+                    <div className="p-3 bg-white rounded-xl border border-black/[0.08]">
+                      <div className="text-[10px] text-[#737373] font-mono uppercase font-semibold">MCQ Section (30%)</div>
                       <div className={`text-[20px] font-mono font-bold mt-0.5 ${
-                        assessmentResult?.assessmentScores?.mcqPassed ? "text-[#16A34A]" : "text-danger"
+                        (assessmentResult?.assessmentScores?.mcq ?? (assessmentResult?.score || 0)) >= 75 ? "text-[#101010]" : "text-red-600"
                       }`}>
                         {assessmentResult?.assessmentScores?.mcq ?? (assessmentResult?.score || 0)}%
                       </div>
-                      <div className="text-[10px] text-muted-foreground">Required: ≥ 75%</div>
+                      <div className="text-[10px] text-[#737373] font-mono">Knowledge accuracy</div>
+                    </div>
+                    <div className="p-3 bg-white rounded-xl border border-black/[0.08]">
+                      <div className="text-[10px] text-[#737373] font-mono uppercase font-semibold">Aggregate Result</div>
+                      <div className={`text-[20px] font-mono font-bold mt-0.5 ${
+                        (assessmentResult?.score ?? 0) >= 75 ? "text-[#101010]" : "text-red-600"
+                      }`}>
+                        {assessmentResult?.score ?? 0}%
+                      </div>
+                      <div className={`text-[10px] font-mono font-semibold ${
+                        (assessmentResult?.score ?? 0) >= 75 ? "text-emerald-700" : "text-red-600"
+                      }`}>
+                        {(assessmentResult?.score ?? 0) >= 75 ? "PASSED (≥75%)" : "FAILED (<75%)"}
+                      </div>
                     </div>
                   </div>
                 </div>
 
                 {assessmentResult?.aiFeedback && (
-                  <div className="p-5 rounded-xl border border-border bg-white">
+                  <div className="p-5 rounded-xl border border-black/[0.08] bg-white">
                     <div className="flex items-center gap-2 mb-3">
-                      <Sparkles className="h-4 w-4 text-amber-600" />
-                      <h3 className="text-[15px] font-bold text-foreground">Session Audit &amp; Trace</h3>
+                      <Sparkles className="h-4 w-4 text-[#101010]" />
+                      <h3 className="text-[14px] font-semibold text-[#101010]">AI Code Review &amp; Invariant Analysis</h3>
                     </div>
-                    <div className="text-[13px] text-[#44403C] leading-relaxed whitespace-pre-line p-4 rounded-lg bg-[#F8F6F3] border border-border">
+                    <div className="text-[13px] text-[#333] leading-relaxed whitespace-pre-line p-4 rounded-xl bg-[#FAFAF9] border border-black/[0.06] font-sans">
                       {assessmentResult.aiFeedback}
                     </div>
                   </div>
@@ -2295,13 +2444,13 @@ function AssessmentContentWrapper() {
           </div>
 
           {/* Modal Footer */}
-          <div className="px-6 py-3.5 border-t border-border bg-[#F8F6F3] flex items-center justify-between">
-            <span className="text-[12px] text-muted-foreground">
-              Assessment Type: <span className="font-mono">ML-EVAL-{skillParam.toUpperCase().slice(0, 4)}</span>
+          <div className="px-6 py-3.5 border-t border-black/[0.08] bg-[#F8F8F6] flex items-center justify-between">
+            <span className="text-[11px] font-mono text-[#737373]">
+              Assessment Identifier: <span className="text-[#101010] font-semibold">ML-EVAL-{skillParam.toUpperCase().slice(0, 4)}</span>
             </span>
             <button
               onClick={() => setShowFullReportModal(false)}
-              className="px-5 h-9 rounded-lg border border-border bg-white text-foreground font-semibold text-[13px] hover:border-foreground transition-colors cursor-pointer"
+              className="px-4 h-8 rounded-full border border-black/[0.12] bg-white text-[#101010] font-medium text-[12px] hover:bg-black/[0.04] transition-colors cursor-pointer"
             >
               Close Report
             </button>
@@ -2319,56 +2468,57 @@ function AssessmentContentWrapper() {
     const hasCode = !!(code || codeEasy || codeMedium)?.trim();
 
     return (
-      <div className="min-h-screen w-full bg-surface text-foreground font-sans flex flex-col justify-start">
+      <div className="min-h-screen w-full bg-[#F8F8F6] text-[#101010] font-sans flex flex-col justify-start">
         {/* Top Header */}
-        <header className="border-b border-border bg-white px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-2.5 text-[13px] text-muted-foreground">
-            <span className="font-semibold text-foreground tracking-tight">MERITLANE</span>
+        <header className="border-b border-black/[0.08] bg-white px-6 py-4 flex items-center justify-between">
+          <div className="flex items-center gap-2.5 text-[13px] text-[#737373]">
+            <span className="font-semibold text-[#101010] tracking-tight">MERITLANE</span>
             <span>/</span>
             <span>Technical Verification</span>
             <span>/</span>
-            <span className="text-foreground font-medium">{displaySkill}</span>
+            <span className="text-[#101010] font-medium">{displaySkill}</span>
           </div>
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-danger/10 border border-[#FCA5A5] text-danger text-[11px] font-mono font-semibold rounded">
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-red-50 border border-red-200 text-red-700 text-[10px] font-mono font-semibold rounded-full uppercase tracking-wider">
             <XCircle className="h-3.5 w-3.5" />
-            TERMINATED
+            SESSION TERMINATED
           </span>
         </header>
 
         {/* Full-width container */}
-        <div className="w-full flex-1 px-4 sm:px-6 lg:px-8 py-8 flex flex-col gap-6">
+        <div className="w-full flex-1 px-4 sm:px-6 lg:px-8 py-8 flex flex-col gap-6 max-w-7xl mx-auto">
           {/* Hero termination card */}
-          <div className="w-full rounded-xl border border-danger/30 bg-gradient-to-r from-danger/10 to-white p-6 sm:p-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 shadow-xs">
-            <div className="flex items-start gap-4">
-              <div className="h-14 w-14 rounded-xl bg-[#FEE2E2] border border-danger/30 text-danger flex items-center justify-center shrink-0">
-                <ShieldAlert className="h-8 w-8" />
+          <div className="w-full rounded-2xl border border-black/[0.08] bg-white p-6 sm:p-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 shadow-[0_1px_3px_rgba(0,0,0,0.02)]">
+            <div className="flex items-start gap-4 sm:gap-5">
+              <div className="h-12 w-12 rounded-xl bg-red-50 border border-red-200 text-red-600 flex items-center justify-center shrink-0">
+                <ShieldAlert className="h-6 w-6" />
               </div>
               <div>
-                <div className="flex items-center gap-2 mb-1">
-                  <span className="text-[11px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-danger text-white">
+                <div className="flex items-center gap-2 mb-1.5">
+                  <span className="text-[10px] font-mono font-semibold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-red-100 text-red-800 border border-red-200">
                     Integrity Policy Termination
                   </span>
-                  <span className="text-[12px] text-muted-foreground font-mono">
+                  <span className="text-[11px] text-[#737373] font-mono">
                     {new Date().toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })}
                   </span>
                 </div>
-                <h1 className="text-[24px] sm:text-[30px] font-bold text-foreground tracking-tight">
+                <h1 className="text-[24px] sm:text-[30px] font-semibold text-[#101010] tracking-tight">
                   {displaySkill} Assessment Terminated
                 </h1>
-                <p className="text-[14px] text-muted-foreground mt-1 max-w-2xl leading-relaxed">
+                <p className="text-[13px] text-[#737373] mt-1 max-w-2xl leading-relaxed">
                   This examination was concluded due to navigation exit or security requirements. Your answers, code buffers, and attempt diagnostics are preserved in your official record.
                 </p>
               </div>
             </div>
 
-            <div className="flex flex-col items-center md:items-end justify-center shrink-0 p-4 rounded-lg border bg-white border-danger/20 min-w-[160px]">
-              <div className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mb-0.5">
+            <div className="flex flex-col items-start md:items-end justify-center shrink-0 p-5 rounded-xl border border-black/[0.08] bg-[#F8F8F6] min-w-[170px]">
+              <div className="text-[10px] font-mono uppercase tracking-wider text-[#737373] font-semibold mb-1">
                 Result Status
               </div>
-              <div className="text-[38px] font-mono font-bold leading-none text-danger">
+              <div className="text-[40px] font-mono font-bold leading-none tracking-tight text-[#101010]">
                 0%
               </div>
-              <div className="text-[11px] text-danger mt-1 font-medium">
+              <div className="text-[11px] font-mono text-red-600 mt-2 font-medium flex items-center gap-1.5">
+                <span className="h-1.5 w-1.5 rounded-full bg-red-500 inline-block" />
                 Terminated / Unverified
               </div>
             </div>
@@ -2381,42 +2531,42 @@ function AssessmentContentWrapper() {
             <div className="lg:col-span-7 flex flex-col gap-6">
               
               {/* Primary Report Card */}
-              <div className="bg-white border border-border rounded-xl p-6 shadow-xs flex flex-col gap-4">
-                <div className="flex items-center gap-2 border-b border-border pb-3">
-                  <FileCode className="h-5 w-5 text-emerald-900" />
-                  <h2 className="text-[16px] font-bold text-foreground">Full Exam Audit Report</h2>
+              <div className="bg-white border border-black/[0.08] rounded-2xl p-6 shadow-[0_1px_3px_rgba(0,0,0,0.02)] flex flex-col gap-4">
+                <div className="flex items-center gap-2 border-b border-black/[0.08] pb-3">
+                  <FileCode className="h-4 w-4 text-[#101010]" />
+                  <h2 className="text-[15px] font-semibold text-[#101010] tracking-tight">Full Exam Audit Report</h2>
                 </div>
-                <p className="text-[13px] text-muted-foreground leading-relaxed">
+                <p className="text-[13px] text-[#737373] leading-relaxed">
                   Inspect every question presented during the examination, your selected choices, your saved code buffer in {selectedLanguage.toUpperCase()}, and complete proctoring diagnostics.
                 </p>
                 <button
                   onClick={() => setShowFullReportModal(true)}
-                  className="w-full h-12 bg-emerald-900 text-white font-semibold text-[14px] rounded-lg hover:bg-emerald-950 transition-all flex items-center justify-center gap-2 shadow-xs cursor-pointer focus:outline-none focus:ring-2 focus:ring-emerald-900 focus:ring-offset-2"
+                  className="w-full h-11 bg-[#101010] text-white font-medium text-[13px] rounded-full hover:bg-black transition-all flex items-center justify-center gap-2 shadow-xs cursor-pointer"
                 >
                   <FileCode className="h-4 w-4" />
-                  <span>See Full Exam Report →</span>
+                  <span>See Full Exam Report</span>
                 </button>
               </div>
 
               {/* Progress Summary */}
-              <div className="bg-white border border-border rounded-xl p-6 shadow-xs">
-                <h3 className="text-[14px] font-bold text-foreground mb-4">Attempt Summary</h3>
+              <div className="bg-white border border-black/[0.08] rounded-2xl p-6 shadow-[0_1px_3px_rgba(0,0,0,0.02)]">
+                <h3 className="text-[15px] font-semibold text-[#101010] tracking-tight mb-4">Attempt Summary</h3>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                  <div className="bg-surface border border-border rounded p-3 text-center">
-                    <div className="text-[10px] font-mono uppercase text-muted-foreground">MCQ Progress</div>
-                    <div className="text-[18px] font-mono font-bold text-foreground mt-0.5">
+                  <div className="bg-[#FAFAF9] border border-black/[0.06] rounded-xl p-3.5 text-center">
+                    <div className="text-[10px] font-mono uppercase text-[#737373]">MCQ Progress</div>
+                    <div className="text-[18px] font-mono font-bold text-[#101010] mt-0.5">
                       {mcqAnsweredCount} / {totalMcqs}
                     </div>
                   </div>
-                  <div className="bg-surface border border-border rounded p-3 text-center">
-                    <div className="text-[10px] font-mono uppercase text-muted-foreground">Code Buffer</div>
-                    <div className="text-[18px] font-mono font-bold text-foreground mt-0.5">
+                  <div className="bg-[#FAFAF9] border border-black/[0.06] rounded-xl p-3.5 text-center">
+                    <div className="text-[10px] font-mono uppercase text-[#737373]">Code Buffer</div>
+                    <div className="text-[18px] font-mono font-bold text-[#101010] mt-0.5">
                       {hasCode ? "Preserved" : "None"}
                     </div>
                   </div>
-                  <div className="bg-surface border border-border rounded p-3 text-center">
-                    <div className="text-[10px] font-mono uppercase text-muted-foreground">Infractions</div>
-                    <div className="text-[18px] font-mono font-bold text-danger mt-0.5">
+                  <div className="bg-[#FAFAF9] border border-black/[0.06] rounded-xl p-3.5 text-center">
+                    <div className="text-[10px] font-mono uppercase text-[#737373]">Infractions</div>
+                    <div className="text-[18px] font-mono font-bold text-red-600 mt-0.5">
                       {MAX_VIOLATIONS} of {MAX_VIOLATIONS}
                     </div>
                   </div>
@@ -2428,12 +2578,12 @@ function AssessmentContentWrapper() {
             <div className="lg:col-span-5 flex flex-col gap-6">
               
               {/* Cooldown Timer */}
-              <div className="bg-white border border-border rounded-xl p-6 shadow-xs">
-                <div className="flex items-center gap-2 border-b border-border pb-3 mb-4">
-                  <Clock className="h-4 w-4 text-amber-600" />
-                  <h3 className="text-[15px] font-bold text-foreground">Mandatory Retake Cooldown</h3>
+              <div className="bg-white border border-black/[0.08] rounded-2xl p-6 shadow-[0_1px_3px_rgba(0,0,0,0.02)]">
+                <div className="flex items-center gap-2 border-b border-black/[0.08] pb-3 mb-4">
+                  <Clock className="h-4 w-4 text-[#101010]" />
+                  <h3 className="text-[15px] font-semibold text-[#101010] tracking-tight">Mandatory Retake Cooldown</h3>
                 </div>
-                <p className="text-[12px] text-muted-foreground mb-4">
+                <p className="text-[12px] text-[#737373] mb-4">
                   In accordance with testing standards, a mandatory 14-day study period is enforced before retaking this skill test.
                 </p>
                 <CooldownTimer
@@ -2444,17 +2594,17 @@ function AssessmentContentWrapper() {
               </div>
 
               {/* Navigation Actions */}
-              <div className="bg-white border border-border rounded-xl p-6 shadow-xs flex flex-col gap-3">
+              <div className="bg-white border border-black/[0.08] rounded-2xl p-6 shadow-[0_1px_3px_rgba(0,0,0,0.02)] flex flex-col gap-2.5">
                 <button
                   onClick={() => handleReturn("/candidate/verification")}
-                  className="w-full h-11 border border-foreground bg-foreground text-white font-semibold text-[13px] rounded-lg hover:bg-stone-800 transition-colors flex items-center justify-center gap-2 cursor-pointer"
+                  className="w-full h-10 bg-[#101010] text-white font-medium text-[12px] rounded-full hover:bg-black transition-colors flex items-center justify-center gap-2 cursor-pointer"
                 >
-                  <ShieldCheck className="h-4 w-4" />
+                  <ShieldCheck className="h-3.5 w-3.5" />
                   <span>Verification Records</span>
                 </button>
                 <button
                   onClick={() => handleReturn("/candidate/dashboard")}
-                  className="w-full h-11 border border-border bg-white text-foreground font-semibold text-[13px] rounded-lg hover:border-foreground hover:bg-[#F2EFE9] transition-colors flex items-center justify-center gap-2 cursor-pointer"
+                  className="w-full h-10 border border-black/[0.12] bg-white text-[#101010] font-medium text-[12px] rounded-full hover:bg-black/[0.04] transition-colors flex items-center justify-center gap-2 cursor-pointer"
                 >
                   Dashboard
                 </button>
@@ -2487,108 +2637,89 @@ function AssessmentContentWrapper() {
           year: "numeric",
         });
 
-    const mcqItems = assessmentResult.mcqs || (content?.mcqs || []).map((m, idx) => ({
-      ...m,
-      userAnswer: mcqAnswers[idx],
-      isCorrect: m.answerIndex !== undefined ? mcqAnswers[idx] === m.answerIndex : undefined,
-    }));
-
-    const codingItems = assessmentResult.codingChallenges && assessmentResult.codingChallenges.length > 0
-      ? assessmentResult.codingChallenges
-      : (content?.codingTasks && content.codingTasks.length > 0
-          ? content.codingTasks
-          : (content?.coding ? [content.coding] : []));
-
-    const submittedCodeEasy = assessmentResult.submittedCode?.easy || codeEasy || code;
-    const submittedCodeMedium = assessmentResult.submittedCode?.medium || codeMedium || code;
-
     return (
-      <div className="min-h-screen w-full bg-[#F8F6F3] text-foreground font-sans py-6 px-4 sm:px-6 lg:px-8 flex flex-col items-center justify-start overflow-y-auto">
-        <div className="w-full flex flex-col gap-6 animate-in fade-in duration-200">
-          
-          {/* Top Bar / Breadcrumb */}
-          <div className="flex items-center justify-between border-b border-border pb-4">
-            <div className="flex items-center gap-2 text-[13px] text-muted-foreground">
-              <span className="font-semibold text-foreground tracking-tight">MERITLANE</span>
-              <span>/</span>
-              <span>Technical Verification</span>
-              <span>/</span>
-              <span className="text-foreground font-medium">{displaySkill}</span>
-            </div>
-            <div className="flex items-center gap-3">
-              <span className="text-[12px] font-mono text-muted-foreground bg-white px-2.5 py-1 rounded border border-border">
-                {assessmentResult.submittedLanguage === "javascript" ? "JavaScript (ES6)" : (assessmentResult.submittedLanguage || "Verified Sandbox")}
-              </span>
-            </div>
+      <div className="min-h-screen w-full bg-[#F8F8F6] text-[#101010] font-sans flex flex-col justify-start">
+        
+        {/* Top Flush Navigation Header */}
+        <header className="border-b border-black/[0.08] bg-white px-6 py-4 flex items-center justify-between">
+          <div className="flex items-center gap-2.5 text-[13px] text-[#737373]">
+            <span className="font-semibold text-[#101010] tracking-tight">MERITLANE</span>
+            <span>/</span>
+            <span>Technical Verification</span>
+            <span>/</span>
+            <span className="text-[#101010] font-medium">{displaySkill}</span>
           </div>
+          <div className="flex items-center gap-2">
+            <span className="text-[11px] font-mono text-[#737373] bg-[#F8F8F6] px-2.5 py-1 rounded-full border border-black/[0.08]">
+              {assessmentResult.submittedLanguage === "javascript" ? "JavaScript (ES6)" : (assessmentResult.submittedLanguage || "Verified Sandbox")}
+            </span>
+          </div>
+        </header>
 
-          {/* Hero Banner (Full Width) */}
-          <div className={`w-full rounded-xl border p-6 sm:p-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 shadow-xs ${
-            isPassed
-              ? "bg-gradient-to-r from-[#F0FDF4] to-white border-[#16A34A]/30 text-emerald-900"
-              : "bg-gradient-to-r from-danger/10 to-white border-danger/25 text-[#7F1D1D]"
-          }`}>
-            <div className="flex items-start gap-4">
-              <div className={`h-14 w-14 rounded-xl flex items-center justify-center shrink-0 border ${
+        {/* Content Container */}
+        <div className="w-full flex-1 px-4 sm:px-6 lg:px-8 py-8 flex flex-col gap-6 max-w-7xl mx-auto">
+          
+          {/* Hero Bento Dossier Card */}
+          <div className="w-full rounded-2xl border border-black/[0.08] bg-white p-6 sm:p-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 shadow-[0_1px_3px_rgba(0,0,0,0.02)]">
+            <div className="flex items-start gap-4 sm:gap-5">
+              <div className={`h-12 w-12 rounded-xl flex items-center justify-center shrink-0 border ${
                 isPassed
-                  ? "bg-[#DCFCE7] border-[#16A34A]/30 text-[#16A34A]"
-                  : "bg-[#FEE2E2] border-danger/30 text-danger"
+                  ? "bg-[#101010] border-[#101010] text-white"
+                  : "bg-red-50 border-red-200 text-red-600"
               }`}>
-                {isPassed ? <CheckCircle2 className="h-8 w-8" /> : <AlertTriangle className="h-8 w-8" />}
+                {isPassed ? <ShieldCheck className="h-6 w-6" /> : <AlertTriangle className="h-6 w-6" />}
               </div>
               <div>
-                <div className="flex items-center gap-2 mb-1">
-                  <span className={`text-[11px] font-bold uppercase tracking-wider px-2 py-0.5 rounded ${
-                    isPassed ? "bg-[#16A34A] text-white" : "bg-danger text-white"
+                <div className="flex flex-wrap items-center gap-2 mb-1.5">
+                  <span className={`text-[10px] font-mono font-semibold uppercase tracking-wider px-2.5 py-0.5 rounded-full ${
+                    isPassed ? "bg-[#101010] text-white" : "bg-red-100 text-red-800 border border-red-200"
                   }`}>
                     {isPassed ? "Assessment Verified" : "Assessment Not Passed"}
                   </span>
                   {isPassed && assessmentResult.badge && (
-                    <span className={`inline-flex items-center gap-1 text-[11px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded ${
-                      assessmentResult.badge === "gold_honors"
-                        ? "bg-amber-100 text-amber-800 border border-amber-300"
-                        : "bg-emerald-900/10 text-emerald-900 border border-emerald-900/20"
-                    }`}>
+                    <span className="inline-flex items-center gap-1 text-[10px] font-mono font-semibold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-amber-500/10 text-amber-900 border border-amber-500/20">
                       {assessmentResult.badge === "gold_honors" ? (
-                        <><Trophy className="h-3 w-3" /> Gold Honors</>
+                        <><Award className="h-3 w-3" /> Gold Honors Credential</>
                       ) : (
-                        <><Award className="h-3 w-3" /> Verified Professional</>
+                        <><ShieldCheck className="h-3 w-3" /> Verified Professional</>
                       )}
                     </span>
                   )}
-                  <span className="text-[12px] text-muted-foreground font-mono">
+                  <span className="text-[11px] text-[#737373] font-mono">
                     {new Date(assessmentResult.submittedAt || Date.now()).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })}
                   </span>
                 </div>
-                <h1 className="text-[26px] sm:text-[32px] font-bold text-foreground tracking-tight">
+                <h1 className="text-[24px] sm:text-[30px] font-semibold text-[#101010] tracking-tight">
                   {displaySkill} Technical Assessment
                 </h1>
-                <p className="text-[14px] text-muted-foreground mt-1 max-w-2xl leading-relaxed">
+                <p className="text-[13px] text-[#737373] mt-1 max-w-2xl leading-relaxed">
                   {isPassed
-                    ? "Congratulations! Your technical competency has been authoritatively verified. Your proof trace is recorded and visible to hiring teams."
-                    : "Passing all component thresholds is required to verify this technical skill. Review your detailed score trace and full audit report below."}
+                    ? "Cryptographically evaluated technical competence verification. Runtime execution traces and component test assertions have been authored to candidate identity ledger."
+                    : "Passing all component thresholds is required to verify this technical skill. Review detailed execution diagnostics and evaluation rubric below."}
                 </p>
               </div>
             </div>
 
             {/* Score Callout */}
-            <div className={`flex flex-col items-center md:items-end justify-center shrink-0 p-4 rounded-lg border min-w-[150px] ${
-              isPassed ? "bg-white border-[#16A34A]/20" : "bg-white border-danger/20"
-            }`}>
-              <div className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mb-0.5">
-                Overall Score
+            <div className="flex flex-col items-start md:items-end justify-center shrink-0 p-4 sm:p-5 rounded-xl border border-black/[0.08] bg-[#F8F8F6] min-w-[170px]">
+              <div className="text-[10px] font-mono uppercase tracking-wider text-[#737373] font-semibold mb-1">
+                Aggregate Score
               </div>
-              <div className={`text-[44px] font-mono font-bold leading-none ${
-                isPassed ? "text-[#16A34A]" : "text-danger"
-              }`}>
+              <div className="text-[40px] font-mono font-bold leading-none tracking-tight text-[#101010]">
                 {assessmentResult.score}%
               </div>
-              <div className="text-[11px] text-muted-foreground mt-1 font-medium">
-                {isPassed
-                  ? assessmentResult.badge === "gold_honors"
-                    ? "★ Gold Honors Credential"
-                    : "✓ Verified Professional"
-                  : "Required Threshold: 75%+"}
+              <div className="text-[11px] font-mono mt-2 font-medium flex items-center gap-1.5">
+                {isPassed ? (
+                  <span className="text-emerald-700 flex items-center gap-1">
+                    <span className="h-1.5 w-1.5 rounded-full bg-emerald-600 inline-block" />
+                    Passed (≥ 75% Min)
+                  </span>
+                ) : (
+                  <span className="text-red-600 flex items-center gap-1">
+                    <span className="h-1.5 w-1.5 rounded-full bg-red-500 inline-block" />
+                    Below 75% Requirement
+                  </span>
+                )}
               </div>
             </div>
           </div>
@@ -2600,37 +2731,42 @@ function AssessmentContentWrapper() {
             <div className="lg:col-span-7 flex flex-col gap-6">
               
               {/* Proof Trace Breakdown */}
-              <div className="bg-white border border-border rounded-xl p-6 shadow-xs">
-                <div className="flex items-center justify-between border-b border-border pb-3 mb-4">
+              <div className="bg-white border border-black/[0.08] rounded-2xl p-6 sm:p-7 shadow-[0_1px_3px_rgba(0,0,0,0.02)]">
+                <div className="flex items-center justify-between border-b border-black/[0.08] pb-3 mb-5">
                   <div className="flex items-center gap-2">
-                    <ShieldCheck className="h-5 w-5 text-emerald-900" />
-                    <h2 className="text-[16px] font-bold text-foreground">Proof Trace & Component Breakdown</h2>
+                    <ShieldCheck className="h-4 w-4 text-[#101010]" />
+                    <h2 className="text-[15px] font-semibold text-[#101010] tracking-tight">Proof Trace &amp; Component Breakdown</h2>
                   </div>
-                  <span className="text-[11px] font-mono text-muted-foreground bg-[#F8F6F3] px-2 py-0.5 rounded border border-border">
+                  <span className="text-[10px] font-mono text-[#737373] bg-[#F8F8F6] px-2.5 py-0.5 rounded-full border border-black/[0.08]">
                     Authoritative Sandbox
                   </span>
                 </div>
 
-                <div className="flex flex-col gap-4">
+                <div className="flex flex-col gap-3.5">
                   {/* Easy Task */}
-                  <div className="p-3.5 rounded-lg border border-border bg-[#FAFAF9]">
-                    <div className="flex items-center justify-between mb-1.5">
+                  <div className="p-4 rounded-xl border border-black/[0.06] bg-[#FAFAF9]/80">
+                    <div className="flex items-center justify-between mb-2">
                       <div className="flex items-center gap-2">
-                        <span className="text-[13px] font-semibold text-foreground">EASY Task</span>
-                        <span className="text-[11px] text-muted-foreground font-mono">(Must be 100%)</span>
+                        <span className="text-[12px] font-mono font-semibold uppercase tracking-wide text-[#101010]">EASY Task</span>
+                        <span className="text-[11px] text-[#737373] font-mono">(Must be 100% · 35% Weight)</span>
                       </div>
-                      <span className={`text-[13px] font-mono font-bold ${
-                        assessmentResult.assessmentScores?.easyPassed ? "text-[#16A34A]" : "text-danger"
-                      }`}>
-                        {assessmentResult.assessmentScores?.easyPassed
-                          ? "✓ 100% Passed"
-                          : `✗ ${assessmentResult.assessmentScores?.easy ?? 0}%`}
-                      </span>
+                      <div className="flex items-center gap-2">
+                        <span className="text-[13px] font-mono font-bold text-[#101010]">
+                          {assessmentResult.assessmentScores?.easy ?? 0}%
+                        </span>
+                        <span className={`text-[10px] font-mono uppercase tracking-wider px-2 py-0.5 rounded-full font-semibold ${
+                          assessmentResult.assessmentScores?.easyPassed
+                            ? "bg-emerald-50 text-emerald-800 border border-emerald-200/60"
+                            : "bg-red-50 text-red-700 border border-red-200"
+                        }`}>
+                          {assessmentResult.assessmentScores?.easyPassed ? "PASSED" : "FAILED"}
+                        </span>
+                      </div>
                     </div>
-                    <div className="w-full bg-border h-2 rounded-full overflow-hidden">
+                    <div className="w-full bg-black/[0.06] h-1.5 rounded-full overflow-hidden">
                       <div
                         className={`h-full rounded-full transition-all duration-500 ${
-                          assessmentResult.assessmentScores?.easyPassed ? "bg-[#16A34A]" : "bg-danger"
+                          assessmentResult.assessmentScores?.easyPassed ? "bg-[#101010]" : "bg-red-600"
                         }`}
                         style={{ width: `${assessmentResult.assessmentScores?.easy ?? 0}%` }}
                       />
@@ -2638,24 +2774,29 @@ function AssessmentContentWrapper() {
                   </div>
 
                   {/* Medium Task */}
-                  <div className="p-3.5 rounded-lg border border-border bg-[#FAFAF9]">
-                    <div className="flex items-center justify-between mb-1.5">
+                  <div className="p-4 rounded-xl border border-black/[0.06] bg-[#FAFAF9]/80">
+                    <div className="flex items-center justify-between mb-2">
                       <div className="flex items-center gap-2">
-                        <span className="text-[13px] font-semibold text-foreground">MEDIUM Task</span>
-                        <span className="text-[11px] text-muted-foreground font-mono">(Threshold ≥ 75%)</span>
+                        <span className="text-[12px] font-mono font-semibold uppercase tracking-wide text-[#101010]">MEDIUM Task</span>
+                        <span className="text-[11px] text-[#737373] font-mono">(Threshold ≥ 75% · 35% Weight)</span>
                       </div>
-                      <span className={`text-[13px] font-mono font-bold ${
-                        assessmentResult.assessmentScores?.mediumPassed ? "text-[#16A34A]" : "text-danger"
-                      }`}>
-                        {assessmentResult.assessmentScores?.mediumPassed
-                          ? `✓ ${assessmentResult.assessmentScores?.medium ?? 0}% Passed`
-                          : `✗ ${assessmentResult.assessmentScores?.medium ?? 0}%`}
-                      </span>
+                      <div className="flex items-center gap-2">
+                        <span className="text-[13px] font-mono font-bold text-[#101010]">
+                          {assessmentResult.assessmentScores?.medium ?? 0}%
+                        </span>
+                        <span className={`text-[10px] font-mono uppercase tracking-wider px-2 py-0.5 rounded-full font-semibold ${
+                          assessmentResult.assessmentScores?.mediumPassed
+                            ? "bg-emerald-50 text-emerald-800 border border-emerald-200/60"
+                            : "bg-red-50 text-red-700 border border-red-200"
+                        }`}>
+                          {assessmentResult.assessmentScores?.mediumPassed ? "PASSED" : "BELOW THRESHOLD"}
+                        </span>
+                      </div>
                     </div>
-                    <div className="w-full bg-border h-2 rounded-full overflow-hidden">
+                    <div className="w-full bg-black/[0.06] h-1.5 rounded-full overflow-hidden">
                       <div
                         className={`h-full rounded-full transition-all duration-500 ${
-                          assessmentResult.assessmentScores?.mediumPassed ? "bg-[#16A34A]" : "bg-danger"
+                          assessmentResult.assessmentScores?.mediumPassed ? "bg-[#101010]" : "bg-red-600"
                         }`}
                         style={{ width: `${assessmentResult.assessmentScores?.medium ?? 0}%` }}
                       />
@@ -2663,24 +2804,29 @@ function AssessmentContentWrapper() {
                   </div>
 
                   {/* MCQ */}
-                  <div className="p-3.5 rounded-lg border border-border bg-[#FAFAF9]">
-                    <div className="flex items-center justify-between mb-1.5">
+                  <div className="p-4 rounded-xl border border-black/[0.06] bg-[#FAFAF9]/80">
+                    <div className="flex items-center justify-between mb-2">
                       <div className="flex items-center gap-2">
-                        <span className="text-[13px] font-semibold text-foreground">MCQ Knowledge Section</span>
-                        <span className="text-[11px] text-muted-foreground font-mono">(Threshold ≥ 75%)</span>
+                        <span className="text-[12px] font-mono font-semibold uppercase tracking-wide text-[#101010]">MCQ Knowledge Section</span>
+                        <span className="text-[11px] text-[#737373] font-mono">(Threshold ≥ 75% · 30% Weight)</span>
                       </div>
-                      <span className={`text-[13px] font-mono font-bold ${
-                        assessmentResult.assessmentScores?.mcqPassed ? "text-[#16A34A]" : "text-danger"
-                      }`}>
-                        {assessmentResult.assessmentScores?.mcqPassed
-                          ? `✓ ${assessmentResult.assessmentScores?.mcq ?? 0}% Passed`
-                          : `✗ ${assessmentResult.assessmentScores?.mcq ?? 0}%`}
-                      </span>
+                      <div className="flex items-center gap-2">
+                        <span className="text-[13px] font-mono font-bold text-[#101010]">
+                          {assessmentResult.assessmentScores?.mcq ?? 0}%
+                        </span>
+                        <span className={`text-[10px] font-mono uppercase tracking-wider px-2 py-0.5 rounded-full font-semibold ${
+                          assessmentResult.assessmentScores?.mcqPassed
+                            ? "bg-emerald-50 text-emerald-800 border border-emerald-200/60"
+                            : "bg-red-50 text-red-700 border border-red-200"
+                        }`}>
+                          {assessmentResult.assessmentScores?.mcqPassed ? "PASSED" : "BELOW THRESHOLD"}
+                        </span>
+                      </div>
                     </div>
-                    <div className="w-full bg-border h-2 rounded-full overflow-hidden">
+                    <div className="w-full bg-black/[0.06] h-1.5 rounded-full overflow-hidden">
                       <div
                         className={`h-full rounded-full transition-all duration-500 ${
-                          assessmentResult.assessmentScores?.mcqPassed ? "bg-[#16A34A]" : "bg-danger"
+                          assessmentResult.assessmentScores?.mcqPassed ? "bg-[#101010]" : "bg-red-600"
                         }`}
                         style={{ width: `${assessmentResult.assessmentScores?.mcq ?? 0}%` }}
                       />
@@ -2690,12 +2836,12 @@ function AssessmentContentWrapper() {
 
                 {/* Cooldown Information if Failed */}
                 {!isPassed && (
-                  <div className="mt-5 p-4 rounded-lg border border-border bg-[#F8F6F3] flex items-center justify-between">
+                  <div className="mt-5 p-4 rounded-xl border border-black/[0.08] bg-[#F8F8F6] flex items-center justify-between">
                     <div>
-                      <div className="text-[12px] font-medium text-muted-foreground">Next eligible attempt</div>
-                      <div className="text-[15px] font-bold text-foreground">{retryDateStr}</div>
+                      <div className="text-[11px] font-mono text-[#737373] uppercase tracking-wider">Next eligible retake</div>
+                      <div className="text-[14px] font-semibold text-[#101010] mt-0.5">{retryDateStr}</div>
                     </div>
-                    <span className="text-[11px] text-muted-foreground bg-white px-2.5 py-1 rounded border border-border">
+                    <span className="text-[10px] font-mono text-[#737373] bg-white px-2.5 py-1 rounded-full border border-black/[0.08]">
                       14-day practice cooldown
                     </span>
                   </div>
@@ -2703,42 +2849,42 @@ function AssessmentContentWrapper() {
               </div>
 
               {/* Action Buttons & See Full Report CTA */}
-              <div className="bg-white border border-border rounded-xl p-6 shadow-xs flex flex-col gap-4">
+              <div className="bg-white border border-black/[0.08] rounded-2xl p-6 shadow-[0_1px_3px_rgba(0,0,0,0.02)] flex flex-col gap-4">
                 <div>
-                  <h3 className="text-[15px] font-bold text-foreground">Assessment Audit & Report</h3>
-                  <p className="text-[13px] text-muted-foreground mt-0.5">
-                    Review every question asked, your selected answers, submitted code, and compiler test assertions.
+                  <h3 className="text-[15px] font-semibold text-[#101010] tracking-tight">Assessment Audit &amp; Record Dossier</h3>
+                  <p className="text-[13px] text-[#737373] mt-0.5">
+                    Review each question presented, selected choices, compiler test outputs, and complete submission AST.
                   </p>
                 </div>
 
                 {/* Primary Button: View Full Assessment Report */}
                 <button
                   onClick={() => setShowFullReportModal(true)}
-                  className="w-full h-12 bg-emerald-900 text-white font-semibold text-[14px] rounded-lg hover:bg-emerald-950 transition-all flex items-center justify-center gap-2 shadow-xs cursor-pointer focus:outline-none focus:ring-2 focus:ring-emerald-900 focus:ring-offset-2"
+                  className="w-full h-11 bg-[#101010] text-white font-medium text-[13px] rounded-full hover:bg-black transition-all flex items-center justify-center gap-2 shadow-xs cursor-pointer"
                 >
                   <FileCode className="h-4 w-4" />
                   <span>See Full Assessment Report</span>
                 </button>
 
-                <div className="flex flex-col sm:flex-row gap-3 pt-2 border-t border-border">
+                <div className="flex flex-col sm:flex-row gap-2.5 pt-2 border-t border-black/[0.08]">
                   <button
                     onClick={() => handleReturn("/candidate/verification")}
-                    className="flex-1 h-11 border border-foreground bg-foreground text-white font-semibold text-[13px] rounded-lg hover:bg-stone-800 transition-colors flex items-center justify-center gap-2 cursor-pointer"
+                    className="flex-1 h-10 bg-[#101010] text-white font-medium text-[12px] rounded-full hover:bg-black transition-colors flex items-center justify-center gap-2 cursor-pointer"
                   >
-                    <ShieldCheck className="h-4 w-4" />
-                    <span>Verification Results</span>
+                    <ShieldCheck className="h-3.5 w-3.5" />
+                    <span>Verification Records</span>
                   </button>
                   <button
                     onClick={() => handleReturn("/candidate/dashboard")}
-                    className="flex-1 h-11 border border-border bg-white text-foreground font-semibold text-[13px] rounded-lg hover:border-foreground hover:bg-[#F2EFE9] transition-colors flex items-center justify-center gap-2 cursor-pointer"
+                    className="flex-1 h-10 border border-black/[0.12] bg-white text-[#101010] font-medium text-[12px] rounded-full hover:bg-black/[0.04] transition-colors flex items-center justify-center gap-2 cursor-pointer"
                   >
                     <span>Dashboard</span>
                   </button>
                   <button
                     onClick={() => handleReturn("/candidate/provenance")}
-                    className="flex-1 h-11 border border-border bg-white text-muted-foreground font-semibold text-[13px] rounded-lg hover:border-foreground hover:text-foreground transition-colors flex items-center justify-center gap-2 cursor-pointer"
+                    className="flex-1 h-10 border border-black/[0.12] bg-white text-[#101010] font-medium text-[12px] rounded-full hover:bg-black/[0.04] transition-colors flex items-center justify-center gap-2 cursor-pointer"
                   >
-                    <ExternalLink className="h-4 w-4" />
+                    <ExternalLink className="h-3.5 w-3.5" />
                     <span>Provenance</span>
                   </button>
                 </div>
@@ -2751,43 +2897,53 @@ function AssessmentContentWrapper() {
               
               {/* Code Review Card */}
               {assessmentResult.aiFeedback && (
-                <div className="bg-white border border-border rounded-xl p-6 shadow-xs">
-                  <div className="flex items-center gap-2 border-b border-border pb-3 mb-4">
-                    <Sparkles className="h-4 w-4 text-amber-600" />
-                    <h3 className="text-[15px] font-bold text-foreground">Code Review & Analysis</h3>
+                <div className="bg-white border border-black/[0.08] rounded-2xl p-6 shadow-[0_1px_3px_rgba(0,0,0,0.02)]">
+                  <div className="flex items-center justify-between border-b border-black/[0.08] pb-3 mb-4">
+                    <div className="flex items-center gap-2">
+                      <Sparkles className="h-4 w-4 text-[#101010]" />
+                      <h3 className="text-[15px] font-semibold text-[#101010] tracking-tight">Code Review &amp; Analysis</h3>
+                    </div>
+                    <span className="text-[10px] font-mono text-[#737373] bg-[#F8F8F6] px-2 py-0.5 rounded-full border border-black/[0.08]">
+                      AI EVALUATOR
+                    </span>
                   </div>
-                  <div className="text-[13px] text-[#44403C] leading-relaxed whitespace-pre-line bg-[#F8F6F3] p-4 rounded-lg border border-border">
+                  <div className="text-[13px] text-[#444] leading-relaxed whitespace-pre-line bg-[#FAFAF9] p-4 rounded-xl border border-black/[0.06] font-sans">
                     {assessmentResult.aiFeedback}
                   </div>
                 </div>
               )}
 
               {/* Assessment Integrity & Proctoring Summary */}
-              <div className="bg-white border border-border rounded-xl p-6 shadow-xs">
-                <div className="flex items-center gap-2 border-b border-border pb-3 mb-4">
-                  <Monitor className="h-4 w-4 text-emerald-900" />
-                  <h3 className="text-[15px] font-bold text-foreground">Integrity & Proctoring Audit</h3>
+              <div className="bg-white border border-black/[0.08] rounded-2xl p-6 shadow-[0_1px_3px_rgba(0,0,0,0.02)]">
+                <div className="flex items-center justify-between border-b border-black/[0.08] pb-3 mb-4">
+                  <div className="flex items-center gap-2">
+                    <Monitor className="h-4 w-4 text-[#101010]" />
+                    <h3 className="text-[15px] font-semibold text-[#101010] tracking-tight">Integrity &amp; Proctoring Audit</h3>
+                  </div>
+                  <span className="text-[10px] font-mono text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200/60 font-semibold">
+                    COMPLIANT
+                  </span>
                 </div>
-                <div className="flex flex-col gap-3">
-                  <div className="flex items-center justify-between text-[13px]">
-                    <span className="text-muted-foreground">Fullscreen Violations:</span>
-                    <span className="font-mono font-medium text-[#16A34A]">
-                      {assessmentResult.infractionCount || 0} / 2 (Verified)
+                <div className="flex flex-col divide-y divide-black/[0.06]">
+                  <div className="flex items-center justify-between py-2.5 text-[13px]">
+                    <span className="text-[#737373]">Fullscreen Violations:</span>
+                    <span className="font-mono text-[12px] font-semibold text-[#101010]">
+                      {assessmentResult.infractionCount || 0} / 2 recorded (Verified)
                     </span>
                   </div>
-                  <div className="flex items-center justify-between text-[13px]">
-                    <span className="text-muted-foreground">Language Locked:</span>
-                    <span className="font-mono text-foreground">
+                  <div className="flex items-center justify-between py-2.5 text-[13px]">
+                    <span className="text-[#737373]">Language Locked:</span>
+                    <span className="font-mono text-[12px] text-[#101010]">
                       {assessmentResult.submittedLanguage === "javascript" ? "JavaScript (ES6)" : (assessmentResult.submittedLanguage || "Verified")}
                     </span>
                   </div>
-                  <div className="flex items-center justify-between text-[13px]">
-                    <span className="text-muted-foreground">Execution Environment:</span>
-                    <span className="font-mono text-foreground">Isolated Sandboxed Node.js</span>
+                  <div className="flex items-center justify-between py-2.5 text-[13px]">
+                    <span className="text-[#737373]">Execution Environment:</span>
+                    <span className="font-mono text-[12px] text-[#101010]">Isolated Sandboxed Node.js</span>
                   </div>
-                  <div className="flex items-center justify-between text-[13px]">
-                    <span className="text-muted-foreground">Session Status:</span>
-                    <span className="font-mono text-[#16A34A]">Authoritatively Evaluated</span>
+                  <div className="flex items-center justify-between py-2.5 text-[13px]">
+                    <span className="text-[#737373]">Session Status:</span>
+                    <span className="font-mono text-[12px] text-emerald-800 font-semibold">Authoritatively Evaluated</span>
                   </div>
                 </div>
               </div>
@@ -2797,345 +2953,7 @@ function AssessmentContentWrapper() {
         </div>
 
         {/* ── Full Assessment Report Modal ── */}
-        {showFullReportModal && (
-          <div
-            role="dialog"
-            aria-modal="true"
-            aria-label="Full Assessment Report"
-            className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 sm:p-6"
-          >
-            <div className="w-full max-w-4xl max-h-[90vh] bg-white rounded-xl shadow-2xl border border-border flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-150">
-              
-              {/* Modal Header */}
-              <div className="flex items-center justify-between px-6 py-4 border-b border-border bg-[#F8F6F3]">
-                <div className="flex items-center gap-3">
-                  <div className="h-9 w-9 rounded-lg bg-emerald-900 text-white flex items-center justify-center">
-                    <FileCode className="h-5 w-5" />
-                  </div>
-                  <div>
-                    <h2 className="text-[17px] font-bold text-foreground">
-                      Full Assessment Report: {displaySkill}
-                    </h2>
-                    <p className="text-[12px] text-muted-foreground">
-                      Comprehensive audit record of all responses, code implementations, and test results.
-                    </p>
-                  </div>
-                </div>
-                <button
-                  onClick={() => setShowFullReportModal(false)}
-                  className="h-8 w-8 rounded-lg border border-border bg-white text-muted-foreground hover:text-foreground hover:bg-[#F2EFE9] flex items-center justify-center transition-colors cursor-pointer"
-                  title="Close report modal"
-                >
-                  <X className="h-4 w-4" />
-                </button>
-              </div>
-
-              {/* Modal Tabs */}
-              <div className="flex items-center gap-1 px-6 pt-3 border-b border-border bg-white shrink-0">
-                <button
-                  onClick={() => setReportActiveTab("mcq")}
-                  className={`px-4 py-2 text-[13px] font-semibold border-b-2 transition-colors cursor-pointer ${
-                    reportActiveTab === "mcq"
-                      ? "border-emerald-900 text-emerald-900"
-                      : "border-transparent text-muted-foreground hover:text-foreground"
-                  }`}
-                >
-                  MCQ Responses ({mcqItems.length})
-                </button>
-                <button
-                  onClick={() => setReportActiveTab("code")}
-                  className={`px-4 py-2 text-[13px] font-semibold border-b-2 transition-colors cursor-pointer ${
-                    reportActiveTab === "code"
-                      ? "border-emerald-900 text-emerald-900"
-                      : "border-transparent text-muted-foreground hover:text-foreground"
-                  }`}
-                >
-                  Submitted Code & Tasks
-                </button>
-                <button
-                  onClick={() => setReportActiveTab("review")}
-                  className={`px-4 py-2 text-[13px] font-semibold border-b-2 transition-colors cursor-pointer ${
-                    reportActiveTab === "review"
-                      ? "border-emerald-900 text-emerald-900"
-                      : "border-transparent text-muted-foreground hover:text-foreground"
-                  }`}
-                >
-                  AI Feedback & Trace
-                </button>
-              </div>
-
-              {/* Modal Scrollable Body */}
-              <div className="flex-1 overflow-y-auto p-6 bg-white space-y-6">
-                
-                {/* TAB 1: MCQ Responses */}
-                {reportActiveTab === "mcq" && (
-                  <div className="flex flex-col gap-5">
-                    <div className="flex items-center justify-between bg-[#F8F6F3] p-4 rounded-lg border border-border">
-                      <div>
-                        <div className="text-[13px] font-semibold text-foreground">Knowledge Section Summary</div>
-                        <div className="text-[12px] text-muted-foreground">
-                          Passing threshold: 70% • Candidate score: {assessmentResult.assessmentScores?.mcq ?? assessmentResult.score}%
-                        </div>
-                      </div>
-                      <span className={`text-[12px] font-mono font-bold px-2.5 py-1 rounded border ${
-                        assessmentResult.assessmentScores?.mcqPassed ? "bg-[#DCFCE7] text-[#16A34A] border-[#BBF7D0]" : "bg-[#FEE2E2] text-danger border-[#FECACA]"
-                      }`}>
-                        {assessmentResult.assessmentScores?.mcqPassed ? "✓ Section Passed" : "✗ Below 70% Threshold"}
-                      </span>
-                    </div>
-
-                    <div className="flex flex-col gap-4">
-                      {mcqItems.map((q: any, idx: number) => {
-                        const isAnswered = q.userAnswer !== undefined && q.userAnswer !== null;
-                        const isCorrect = q.answerIndex !== undefined && q.userAnswer === q.answerIndex;
-
-                        return (
-                          <div
-                            key={idx}
-                            className={`p-4 rounded-xl border transition-all ${
-                              !isAnswered
-                                ? "border-border bg-[#FAFAF9]"
-                                : isCorrect
-                                ? "border-[#16A34A]/30 bg-[#F0FDF4]/40"
-                                : "border-danger/25 bg-danger/10/40"
-                            }`}
-                          >
-                            <div className="flex items-center justify-between gap-2 mb-2">
-                              <div className="flex items-center gap-2">
-                                <span className="text-[12px] font-bold text-foreground">
-                                  Question {idx + 1}
-                                </span>
-                                {q.topic && (
-                                  <span className="text-[10px] font-mono uppercase bg-white border border-border px-2 py-0.5 rounded text-muted-foreground">
-                                    {q.topic}
-                                  </span>
-                                )}
-                                {q.difficulty && (
-                                  <span className={`text-[10px] font-mono uppercase px-2 py-0.5 rounded ${
-                                    q.difficulty === "easy" ? "bg-emerald-50 text-emerald-700" : q.difficulty === "hard" ? "bg-amber-50 text-amber-700" : "bg-sky-50 text-sky-700"
-                                  }`}>
-                                    {q.difficulty}
-                                  </span>
-                                )}
-                              </div>
-                              <span className={`text-[12px] font-mono font-bold flex items-center gap-1 ${
-                                !isAnswered ? "text-muted-foreground" : isCorrect ? "text-[#16A34A]" : "text-danger"
-                              }`}>
-                                {!isAnswered ? "Unanswered" : isCorrect ? "✓ Correct" : "✗ Incorrect"}
-                              </span>
-                            </div>
-
-                            <p className="text-[14px] font-medium text-foreground mb-3 leading-relaxed">
-                              {q.question}
-                            </p>
-
-                            {/* Options List */}
-                            <div className="flex flex-col gap-1.5">
-                              {q.options.map((opt: string, optIdx: number) => {
-                                const isUserPick = q.userAnswer === optIdx;
-
-                                let optClass = "border-border bg-white text-[#44403C]";
-                                if (isUserPick && isCorrect) {
-                                  optClass = "border-[#16A34A] bg-[#DCFCE7] text-emerald-900 font-semibold";
-                                } else if (isUserPick && !isCorrect) {
-                                  optClass = "border-danger bg-[#FEE2E2] text-[#991B1B] font-semibold";
-                                }
-
-                                return (
-                                  <div
-                                    key={optIdx}
-                                    className={`px-3.5 py-2 rounded-lg border text-[13px] flex items-center justify-between ${optClass}`}
-                                  >
-                                    <div className="flex items-center gap-2">
-                                      <span className="font-mono text-[11px] text-muted-foreground w-5">
-                                        {String.fromCharCode(65 + optIdx)}.
-                                      </span>
-                                      <span>{opt}</span>
-                                    </div>
-                                    <div className="flex items-center gap-2">
-                                      {isUserPick && (
-                                        <span className={`text-[11px] font-mono px-2 py-0.5 rounded border ${
-                                          isCorrect ? "bg-[#16A34A] text-white border-[#16A34A]" : "bg-danger text-white border-danger"
-                                        }`}>
-                                          Your Selection ({isCorrect ? "Correct" : "Incorrect"})
-                                        </span>
-                                      )}
-                                    </div>
-                                  </div>
-                                );
-                              })}
-                            </div>
-
-                            {/* Security Notice: Answer keys withheld */}
-                            <div className="mt-2 text-[11px] font-mono text-muted-foreground flex items-center justify-between px-1">
-                              <span>Status: {isCorrect ? "✓ Passed" : "✗ Needs Review"}</span>
-                              <span className="italic text-muted-foreground/70">Correct answer keys withheld for exam integrity</span>
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-                )}
-
-                {/* TAB 2: Submitted Code */}
-                {reportActiveTab === "code" && (
-                  <div className="flex flex-col gap-6">
-                    {codingItems.length === 0 ? (
-                      <div className="p-8 text-center text-muted-foreground">
-                        No coding challenge data recorded for this session.
-                      </div>
-                    ) : (
-                      codingItems.map((challenge: any, cIdx: number) => {
-                        const challengeCode = cIdx === 0 ? submittedCodeEasy : submittedCodeMedium;
-                        const taskLabel = cIdx === 0 ? "EASY Task" : "MEDIUM Task";
-
-                        return (
-                          <div key={cIdx} className="border border-border rounded-xl overflow-hidden bg-white shadow-xs">
-                            {/* Challenge Header */}
-                            <div className="p-5 border-b border-border bg-[#F8F6F3]">
-                              <div className="flex items-center justify-between mb-1.5">
-                                <div className="flex items-center gap-2">
-                                  <span className="text-[11px] font-bold uppercase tracking-wider bg-emerald-900 text-white px-2 py-0.5 rounded">
-                                    {taskLabel}
-                                  </span>
-                                  <span className="text-[16px] font-bold text-foreground">
-                                    {challenge.title}
-                                  </span>
-                                </div>
-                                <span className="text-[11px] font-mono bg-white border border-border px-2.5 py-1 rounded text-muted-foreground">
-                                  {assessmentResult.submittedLanguage === "javascript" ? "JavaScript (ES6)" : (assessmentResult.submittedLanguage || "JavaScript")}
-                                </span>
-                              </div>
-                              <p className="text-[13px] text-[#57534E] leading-relaxed whitespace-pre-line mt-2 bg-white p-3 rounded-lg border border-border">
-                                {challenge.instructions}
-                              </p>
-                            </div>
-
-                            {/* Submitted Code Block */}
-                            <div className="bg-[#0D1117] p-4 text-[#E6EDF3] font-mono text-[13px] relative group">
-                              <div className="flex items-center justify-between border-b border-[#30363D] pb-2 mb-3 text-[11px] text-[#8B949E]">
-                                <span>Submitted Solution Buffer</span>
-                                <button
-                                  onClick={() => {
-                                    if (typeof navigator !== "undefined" && navigator.clipboard) {
-                                      navigator.clipboard.writeText(challengeCode);
-                                    }
-                                  }}
-                                  className="flex items-center gap-1 px-2.5 py-1 rounded bg-[#21262D] border border-[#30363D] text-[#C9D1D9] hover:text-white transition-colors cursor-pointer"
-                                  title="Copy code to clipboard"
-                                >
-                                  <Copy className="h-3 w-3" />
-                                  <span>Copy</span>
-                                </button>
-                              </div>
-                              <pre className="overflow-x-auto whitespace-pre leading-relaxed font-mono">
-                                {challengeCode || challenge.initialCode || "// No code submitted."}
-                              </pre>
-                            </div>
-                          </div>
-                        );
-                      })
-                    )}
-                  </div>
-                )}
-
-                {/* TAB 3: AI Review & Trace */}
-                {reportActiveTab === "review" && (
-                  <div className="flex flex-col gap-5">
-                    {/* Component Scores */}
-                    <div className="p-4 rounded-xl border border-border bg-[#F8F6F3]">
-                      <div className="flex items-center justify-between mb-3">
-                        <h3 className="text-[14px] font-bold text-foreground">Authoritative Score Metrics (Proportional Scoring)</h3>
-                        <span className="text-[11px] font-mono text-[#065F46] bg-[#ECFDF5] border border-[#A7F3D0] px-2 py-0.5 rounded font-semibold">
-                          Passing Threshold: ≥ 75%
-                        </span>
-                      </div>
-                      <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
-                        <div className="p-3 bg-white rounded-lg border border-border">
-                          <div className="text-[11px] text-muted-foreground font-semibold uppercase">EASY Task (35%)</div>
-                          <div className={`text-[20px] font-mono font-bold mt-0.5 ${
-                            (assessmentResult.assessmentScores?.easy ?? 0) >= 75 ? "text-[#16A34A]" : "text-danger"
-                          }`}>
-                            {assessmentResult.assessmentScores?.easy ?? 0}%
-                          </div>
-                          <div className="text-[10px] text-muted-foreground">
-                            {assessmentResult.assessmentScores?.easyPassedTests !== undefined 
-                              ? `${assessmentResult.assessmentScores.easyPassedTests}/${assessmentResult.assessmentScores.easyTotalTests || 50} test cases`
-                              : "Proportional test-case score"}
-                          </div>
-                        </div>
-                        <div className="p-3 bg-white rounded-lg border border-border">
-                          <div className="text-[11px] text-muted-foreground font-semibold uppercase">MEDIUM Task (35%)</div>
-                          <div className={`text-[20px] font-mono font-bold mt-0.5 ${
-                            (assessmentResult.assessmentScores?.medium ?? 0) >= 75 ? "text-[#16A34A]" : "text-danger"
-                          }`}>
-                            {assessmentResult.assessmentScores?.medium ?? 0}%
-                          </div>
-                          <div className="text-[10px] text-muted-foreground">
-                            {assessmentResult.assessmentScores?.mediumPassedTests !== undefined 
-                              ? `${assessmentResult.assessmentScores.mediumPassedTests}/${assessmentResult.assessmentScores.mediumTotalTests || 50} test cases`
-                              : "Proportional test-case score"}
-                          </div>
-                        </div>
-                        <div className="p-3 bg-white rounded-lg border border-border">
-                          <div className="text-[11px] text-muted-foreground font-semibold uppercase">MCQ Section (30%)</div>
-                          <div className={`text-[20px] font-mono font-bold mt-0.5 ${
-                            (assessmentResult.assessmentScores?.mcq ?? 0) >= 75 ? "text-[#16A34A]" : "text-danger"
-                          }`}>
-                            {assessmentResult.assessmentScores?.mcq ?? 0}%
-                          </div>
-                          <div className="text-[10px] text-muted-foreground">Knowledge accuracy</div>
-                        </div>
-                        <div className="p-3 bg-white rounded-lg border border-border">
-                          <div className="text-[11px] text-muted-foreground font-semibold uppercase">Overall Result</div>
-                          <div className={`text-[20px] font-mono font-bold mt-0.5 ${
-                            (assessmentResult.score ?? 0) >= 75 ? "text-[#16A34A]" : "text-danger"
-                          }`}>
-                            {assessmentResult.score ?? 0}%
-                          </div>
-                          <div className={`text-[10px] font-bold ${
-                            (assessmentResult.score ?? 0) >= 75 ? "text-[#16A34A]" : "text-danger"
-                          }`}>
-                            {(assessmentResult.score ?? 0) >= 75 ? "✓ PASSED (≥75%)" : "✗ FAILED (<75%)"}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* AI Code Review */}
-                    {assessmentResult.aiFeedback && (
-                      <div className="p-5 rounded-xl border border-border bg-white">
-                        <div className="flex items-center gap-2 mb-3">
-                          <Sparkles className="h-4 w-4 text-amber-600" />
-                          <h3 className="text-[15px] font-bold text-foreground">AI Code Review & Invariant Analysis</h3>
-                        </div>
-                        <div className="text-[13px] text-[#44403C] leading-relaxed whitespace-pre-line p-4 rounded-lg bg-[#F8F6F3] border border-border">
-                          {assessmentResult.aiFeedback}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                )}
-
-              </div>
-
-              {/* Modal Footer */}
-              <div className="px-6 py-3.5 border-t border-border bg-[#F8F6F3] flex items-center justify-between">
-                <span className="text-[12px] text-muted-foreground">
-                  Assessment Type: <span className="font-mono">ML-EVAL-{skillParam.toUpperCase().slice(0, 4)}</span>
-                </span>
-                <button
-                  onClick={() => setShowFullReportModal(false)}
-                  className="px-5 h-9 rounded-lg border border-border bg-white text-foreground font-semibold text-[13px] hover:border-foreground transition-colors cursor-pointer"
-                >
-                  Close Report
-                </button>
-              </div>
-
-            </div>
-          </div>
-        )}
+        {renderFullReportModal()}
 
       </div>
     );
@@ -3403,27 +3221,27 @@ function AssessmentContentWrapper() {
         {fullscreenUnsupported && (
           <FullscreenUnsupportedOverlay onRetry={handleRetryFullscreen} />
         )}
-        <div className="min-h-[100dvh] w-full bg-[#F8F6F3] text-foreground font-sans p-4 sm:px-6 lg:px-8 py-6 overflow-y-auto">
+        <div className="min-h-[100dvh] w-full bg-[#F8F8F6] text-[#101010] font-sans p-4 sm:px-6 lg:px-8 py-6 overflow-y-auto">
           <div className="max-w-7xl mx-auto w-full flex flex-col gap-8">
             {/* Header Banner */}
-            <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 pb-6 border-b border-border">
+            <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 pb-6 border-b border-black/[0.08]">
               <div>
-                <div className="inline-flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-emerald-900 bg-emerald-900/10 border border-emerald-900/20 px-3 py-1 rounded mb-3">
-                  <ShieldCheck className="h-3.5 w-3.5 text-emerald-900" />
+                <div className="inline-flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-[#101010] bg-black/[0.04] border border-black/[0.08] px-3.5 py-1 rounded-full mb-3">
+                  <ShieldCheck className="h-3.5 w-3.5 text-[#101010]" />
                   {displaySkill.toUpperCase()} · Technical Assessment & Verification
                 </div>
-                <h1 className="text-[30px] sm:text-[36px] font-serif font-bold text-foreground leading-tight">
+                <h1 className="text-[28px] sm:text-[34px] font-bold text-[#101010] tracking-tight leading-tight">
                   Assessment Verification Protocol
                 </h1>
-                <p className="text-[14px] text-muted-foreground mt-1 max-w-2xl leading-relaxed">
+                <p className="text-[14px] text-[#737373] mt-1 max-w-2xl leading-relaxed">
                   Review the assessment rules, select your challenge track, and verify system readiness. The proctored timer begins immediately upon entering fullscreen.
                 </p>
               </div>
               <div className="flex items-center gap-3 shrink-0">
-                <div className="bg-white border border-border px-4 py-2.5 rounded text-right shadow-xs">
-                  <div className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold font-mono">Session Protocol</div>
-                  <div className="text-[13px] font-semibold text-foreground flex items-center gap-1.5 font-mono">
-                    <Maximize2 className="h-3.5 w-3.5 text-emerald-900" /> STRICT FULLSCREEN
+                <div className="bg-white border border-black/[0.08] px-4 py-2.5 rounded-2xl text-right shadow-xs">
+                  <div className="text-[10px] uppercase tracking-wider text-[#737373] font-semibold font-mono">Session Protocol</div>
+                  <div className="text-[13px] font-semibold text-[#101010] flex items-center gap-1.5 font-mono">
+                    <Maximize2 className="h-3.5 w-3.5 text-[#101010]" /> STRICT FULLSCREEN
                   </div>
                 </div>
               </div>
@@ -3436,18 +3254,18 @@ function AssessmentContentWrapper() {
 
                 {/* ── Step 1: Track Selection Card (when coding challenges exist) ── */}
                 {content.hasCoding && (
-                  <div className="border border-border bg-white rounded overflow-hidden shadow-xs">
-                    <div className="px-6 py-4 border-b border-border bg-surface flex items-center justify-between">
-                      <div className="flex items-center gap-2 text-[12px] font-semibold text-foreground uppercase tracking-[0.08em]">
-                        <Layers className="h-4 w-4 text-emerald-900" />
+                  <div className="border border-black/[0.08] bg-white rounded-2xl overflow-hidden shadow-xs">
+                    <div className="px-6 py-4 border-b border-black/[0.08] bg-black/[0.02] flex items-center justify-between">
+                      <div className="flex items-center gap-2 text-[12px] font-semibold text-[#101010] uppercase tracking-[0.08em]">
+                        <Layers className="h-4 w-4 text-[#101010]" />
                         Step 1 · Choose Your Assessment Track
                       </div>
-                      <span className={`text-[10px] font-mono font-bold uppercase tracking-wider px-2.5 py-0.5 rounded border transition-colors ${
+                      <span className={`text-[10px] font-mono font-bold uppercase tracking-wider px-3 py-1 rounded-full border transition-colors ${
                         switchingTrack
                           ? "bg-stone-100 text-stone-600 border-stone-300 animate-pulse"
                           : selectedTrack === "advanced"
                           ? "bg-amber-100 text-amber-800 border-amber-300"
-                          : "bg-emerald-900/10 text-emerald-900 border-emerald-900/20"
+                          : "bg-black/[0.04] text-[#101010] border-black/[0.08]"
                       }`}>
                         {switchingTrack
                           ? "Switching Track..."
@@ -3458,7 +3276,7 @@ function AssessmentContentWrapper() {
                     </div>
 
                     <div className="p-6">
-                      <p className="text-[13px] text-muted-foreground leading-relaxed mb-4">
+                      <p className="text-[13px] text-[#737373] leading-relaxed mb-4">
                         Choose your assessment difficulty level. Both tracks feature the same comprehensive MCQ section. The credential and honor badge awarded upon scoring ≥ 75% depends on the track you choose.
                       </p>
 
@@ -3468,40 +3286,40 @@ function AssessmentContentWrapper() {
                           type="button"
                           disabled={switchingTrack}
                           onClick={() => handleTrackSelect("standard")}
-                          className={`relative text-left p-5 rounded-lg border-2 transition-all cursor-pointer flex flex-col justify-between ${
+                          className={`relative text-left p-5 rounded-2xl border transition-all cursor-pointer flex flex-col justify-between ${
                             selectedTrack === "standard"
-                              ? "border-emerald-700 bg-emerald-900/[0.04] ring-1 ring-emerald-700/30 shadow-xs"
-                              : "border-border bg-surface hover:border-[#C8BFB0] hover:bg-white"
+                              ? "border-[#101010] bg-black/[0.02] ring-1 ring-[#101010] shadow-xs"
+                              : "border-black/[0.08] bg-white hover:border-black/20 hover:bg-black/[0.01]"
                           } ${switchingTrack ? "opacity-75 cursor-wait" : ""}`}
                         >
                           <div>
                             <div className="flex items-center justify-between mb-3">
                               <div className="flex items-center gap-2.5">
-                                <div className="h-10 w-10 rounded-lg bg-emerald-900/10 border border-emerald-900/20 flex items-center justify-center shrink-0">
-                                  <ShieldCheck className="h-5 w-5 text-emerald-900" />
+                                <div className="h-10 w-10 rounded-full bg-black/[0.04] border border-black/[0.08] flex items-center justify-center shrink-0">
+                                  <ShieldCheck className="h-5 w-5 text-[#101010]" />
                                 </div>
                                 <div>
-                                  <div className="text-[15px] font-bold text-foreground">Standard Track</div>
-                                  <div className="text-[11px] text-muted-foreground">Recommended for most engineers</div>
+                                  <div className="text-[15px] font-bold text-[#101010]">Standard Track</div>
+                                  <div className="text-[11px] text-[#737373]">Recommended for most engineers</div>
                                 </div>
                               </div>
                               <div className={`h-5 w-5 rounded-full border flex items-center justify-center ${
                                 selectedTrack === "standard"
-                                  ? "bg-emerald-700 border-emerald-700 text-white"
-                                  : "border-[#C8BFB0] bg-white"
+                                  ? "bg-[#101010] border-[#101010] text-white"
+                                  : "border-black/20 bg-white"
                               }`}>
                                 {selectedTrack === "standard" && <Check className="h-3 w-3" />}
                               </div>
                             </div>
-                            <p className="text-[12.5px] text-muted-foreground leading-relaxed mb-3">
-                              Solve <strong className="text-foreground">1 Easy</strong> + <strong className="text-foreground">1 Medium</strong> coding challenge from the core technical question bank.
+                            <p className="text-[12.5px] text-[#737373] leading-relaxed mb-3">
+                              Solve <strong className="text-[#101010]">1 Easy</strong> + <strong className="text-[#101010]">1 Medium</strong> coding challenge from the core technical question bank.
                             </p>
                           </div>
-                          <div className="pt-3 border-t border-border/60 flex items-center justify-between">
-                            <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-emerald-900 bg-emerald-900/10 border border-emerald-900/20 px-2 py-0.5 rounded">
-                              <Award className="h-3 w-3" /> Verified Professional
+                          <div className="pt-3 border-t border-black/[0.06] flex items-center justify-between">
+                            <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-[#101010] bg-black/[0.04] border border-black/[0.08] px-2.5 py-0.5 rounded-full">
+                              <Award className="h-3 w-3 text-[#101010]" /> Verified Professional
                             </span>
-                            <span className="text-[11px] font-mono text-muted-foreground">Tier 1</span>
+                            <span className="text-[11px] font-mono text-[#737373]">Tier 1</span>
                           </div>
                         </button>
 
@@ -3510,10 +3328,10 @@ function AssessmentContentWrapper() {
                           type="button"
                           disabled={switchingTrack}
                           onClick={() => handleTrackSelect("advanced")}
-                          className={`relative text-left p-5 rounded-lg border-2 transition-all cursor-pointer flex flex-col justify-between ${
+                          className={`relative text-left p-5 rounded-2xl border transition-all cursor-pointer flex flex-col justify-between ${
                             selectedTrack === "advanced"
                               ? "border-amber-600 bg-amber-50/50 ring-1 ring-amber-500/30 shadow-xs"
-                              : "border-border bg-surface hover:border-[#C8BFB0] hover:bg-white"
+                              : "border-black/[0.08] bg-white hover:border-black/20 hover:bg-black/[0.01]"
                           } ${switchingTrack ? "opacity-75 cursor-wait" : ""}`}
                         >
                           <div>
@@ -3539,8 +3357,8 @@ function AssessmentContentWrapper() {
                               Solve <strong className="text-foreground">1 Hard</strong> challenge designed to test algorithmic depth and performance optimization under pressure.
                             </p>
                           </div>
-                          <div className="pt-3 border-t border-border/60 flex items-center justify-between">
-                            <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-amber-800 bg-amber-100 border border-amber-300 px-2 py-0.5 rounded">
+                          <div className="pt-3 border-t border-black/[0.06] flex items-center justify-between">
+                            <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-amber-800 bg-amber-100 border border-amber-300 px-2.5 py-0.5 rounded-full">
                               <Trophy className="h-3 w-3" /> Gold Honors
                             </span>
                             <span className="text-[11px] font-mono text-amber-800 font-semibold">Honors Distinction</span>
@@ -3552,65 +3370,65 @@ function AssessmentContentWrapper() {
                 )}
 
                 {/* ── Step 2: Assessment Integrity & Proctoring Requirements ── */}
-                <div className="border border-border bg-white rounded overflow-hidden shadow-xs">
-                  <div className="px-6 py-4 border-b border-border bg-surface flex items-center justify-between">
-                    <div className="flex items-center gap-2 text-[12px] font-semibold text-foreground uppercase tracking-[0.08em]">
-                      <ShieldAlert className="h-4 w-4 text-danger" />
+                <div className="border border-black/[0.08] bg-white rounded-2xl overflow-hidden shadow-xs">
+                  <div className="px-6 py-4 border-b border-black/[0.08] bg-black/[0.02] flex items-center justify-between">
+                    <div className="flex items-center gap-2 text-[12px] font-semibold text-[#101010] uppercase tracking-[0.08em]">
+                      <ShieldAlert className="h-4 w-4 text-[#101010]" />
                       {content.hasCoding ? "Step 2 · Integrity & Proctoring Requirements" : "Assessment Integrity & Proctoring Requirements"}
                     </div>
-                    <span className="text-[11px] font-sans font-semibold text-muted-foreground bg-white border border-border px-2 py-0.5 rounded">
+                    <span className="text-[11px] font-mono font-semibold text-[#101010] bg-black/[0.04] border border-black/[0.08] px-2.5 py-0.5 rounded-full">
                       Enforced
                     </span>
                   </div>
-                  <div className="p-6 divide-y divide-[#E7E2DA]/60">
+                  <div className="p-6 divide-y divide-black/[0.06]">
                     {[
                       {
-                        icon: <Clock className="h-4 w-4 text-muted-foreground" />,
+                        icon: <Clock className="h-4 w-4 text-[#737373]" />,
                         label: "Duration & Timer",
                         value: "60 minutes allocated. The countdown runs continuously once started.",
                       },
                       {
-                        icon: <CheckCircle2 className="h-4 w-4 text-muted-foreground" />,
+                        icon: <CheckCircle2 className="h-4 w-4 text-[#737373]" />,
                         label: "Evaluation model",
                         value: content.hasCoding
                           ? "Strict 40% MCQs (15 questions) + 60% Practical Coding Challenge with automated test cases."
                           : "100% Comprehensive Technical Evaluation covering fundamental and advanced topics.",
                       },
                       {
-                        icon: <CheckCircle2 className="h-4 w-4 text-muted-foreground" />,
+                        icon: <CheckCircle2 className="h-4 w-4 text-[#737373]" />,
                         label: "Passing threshold",
                         value: "Component thresholds must be met individually to earn the verified skill credential.",
                       },
                       {
-                        icon: <Maximize2 className="h-4 w-4 text-muted-foreground" />,
+                        icon: <Maximize2 className="h-4 w-4 text-[#737373]" />,
                         label: "Fullscreen required",
                         value: "The assessment runs strictly in fullscreen mode. Exiting or minimizing fullscreen records an integrity violation.",
                       },
                       {
-                        icon: <Monitor className="h-4 w-4 text-muted-foreground" />,
+                        icon: <Monitor className="h-4 w-4 text-[#737373]" />,
                         label: "Window & Tab Monitoring",
                         value: "Switching browser tabs, opening windows, or navigating away is actively monitored and recorded.",
                       },
                       {
-                        icon: <AlertTriangle className="h-4 w-4 text-danger" />,
+                        icon: <AlertTriangle className="h-4 w-4 text-amber-600" />,
                         label: "3-Violation Limit",
                         value: "Accumulating 3 integrity infractions triggers immediate automatic exam termination with a 21-day lockout.",
                       },
                       {
-                        icon: <XCircle className="h-4 w-4 text-muted-foreground" />,
+                        icon: <XCircle className="h-4 w-4 text-[#737373]" />,
                         label: "Retake Policy",
                         value: "Standard retakes apply a 14-day cooldown. Terminations due to proctoring infractions incur a 21-day cooldown.",
                       },
                     ].map((rule, i) => (
                       <div key={i} className={`flex items-start gap-3.5 ${i === 0 ? "pb-3.5" : "py-3.5"}`}>
-                        <div className="shrink-0 mt-0.5 p-1 rounded bg-surface border border-border">
+                        <div className="shrink-0 mt-0.5 p-1.5 rounded-full bg-black/[0.04] border border-black/[0.08]">
                           {rule.icon}
                         </div>
                         <div className="flex-1">
-                          <span className="text-[13px] font-semibold text-foreground block sm:inline">
+                          <span className="text-[13px] font-semibold text-[#101010] block sm:inline">
                             {rule.label}:{" "}
                           </span>
-                          <span className="text-[13px] text-muted-foreground leading-relaxed">
+                          <span className="text-[13px] text-[#737373] leading-relaxed">
                             {rule.value}
                           </span>
                         </div>
@@ -3620,41 +3438,41 @@ function AssessmentContentWrapper() {
                 </div>
 
                 {/* ── Step 3: Candidate Checklist & Session Guardrails ── */}
-                <div className="border border-border bg-white rounded p-5 shadow-xs">
-                  <div className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mb-3 flex items-center gap-2">
-                    <Lock className="h-3.5 w-3.5 text-foreground" />
+                <div className="border border-black/[0.08] bg-white rounded-2xl p-6 shadow-xs">
+                  <div className="text-[11px] font-semibold uppercase tracking-wider text-[#737373] mb-4 flex items-center gap-2">
+                    <Lock className="h-3.5 w-3.5 text-[#101010]" />
                     Active Session Security Guardrails
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3.5">
-                    <div className="p-3.5 bg-surface border border-border rounded">
-                      <div className="text-[11px] font-semibold uppercase tracking-wider text-foreground mb-1 flex items-center gap-1.5">
-                        <Monitor className="h-3.5 w-3.5 text-emerald-900" /> Focus Guard
+                    <div className="p-4 bg-black/[0.02] border border-black/[0.08] rounded-xl">
+                      <div className="text-[11px] font-semibold uppercase tracking-wider text-[#101010] mb-1 flex items-center gap-1.5">
+                        <Monitor className="h-3.5 w-3.5 text-[#101010]" /> Focus Guard
                       </div>
-                      <div className="text-[11.5px] text-muted-foreground leading-normal">
+                      <div className="text-[12px] text-[#737373] leading-normal">
                         Single-window fullscreen focus strictly enforced.
                       </div>
                     </div>
-                    <div className="p-3.5 bg-surface border border-border rounded">
-                      <div className="text-[11px] font-semibold uppercase tracking-wider text-foreground mb-1 flex items-center gap-1.5">
+                    <div className="p-4 bg-black/[0.02] border border-black/[0.08] rounded-xl">
+                      <div className="text-[11px] font-semibold uppercase tracking-wider text-[#101010] mb-1 flex items-center gap-1.5">
                         <ShieldAlert className="h-3.5 w-3.5 text-danger" /> Anti-Tamper
                       </div>
-                      <div className="text-[11.5px] text-muted-foreground leading-normal">
+                      <div className="text-[12px] text-[#737373] leading-normal">
                         Right-click, dev shortcuts, and copy-paste locked.
                       </div>
                     </div>
-                    <div className="p-3.5 bg-surface border border-border rounded">
-                      <div className="text-[11px] font-semibold uppercase tracking-wider text-foreground mb-1 flex items-center gap-1.5">
-                        <CheckCircle2 className="h-3.5 w-3.5 text-emerald-900" /> Auto-Save
+                    <div className="p-4 bg-black/[0.02] border border-black/[0.08] rounded-xl">
+                      <div className="text-[11px] font-semibold uppercase tracking-wider text-[#101010] mb-1 flex items-center gap-1.5">
+                        <CheckCircle2 className="h-3.5 w-3.5 text-[#101010]" /> Auto-Save
                       </div>
-                      <div className="text-[11.5px] text-muted-foreground leading-normal">
+                      <div className="text-[12px] text-[#737373] leading-normal">
                         MCQ answers and code drafts persist in real-time.
                       </div>
                     </div>
-                    <div className="p-3.5 bg-surface border border-border rounded">
-                      <div className="text-[11px] font-semibold uppercase tracking-wider text-foreground mb-1 flex items-center gap-1.5">
+                    <div className="p-4 bg-black/[0.02] border border-black/[0.08] rounded-xl">
+                      <div className="text-[11px] font-semibold uppercase tracking-wider text-[#101010] mb-1 flex items-center gap-1.5">
                         <Cpu className="h-3.5 w-3.5 text-amber-700" /> Live Ledger
                       </div>
-                      <div className="text-[11.5px] text-muted-foreground leading-normal">
+                      <div className="text-[12px] text-[#737373] leading-normal">
                         Results cryptographically signed upon submission.
                       </div>
                     </div>
@@ -3664,36 +3482,36 @@ function AssessmentContentWrapper() {
 
               {/* Right Column: Sticky Assessment Overview, Verification Details & Action (4-5 cols) */}
               <div className="lg:col-span-5 xl:col-span-4 space-y-6 lg:sticky lg:top-6 self-start">
-                <div className="border border-border bg-white rounded p-6 shadow-xs space-y-5">
-                  <div className="flex items-center justify-between pb-3 border-b border-border">
-                    <div className="text-[12px] font-semibold uppercase tracking-wider text-foreground">
+                <div className="border border-black/[0.08] bg-white rounded-2xl p-6 shadow-xs space-y-5">
+                  <div className="flex items-center justify-between pb-3 border-b border-black/[0.08]">
+                    <div className="text-[12px] font-semibold uppercase tracking-wider text-[#101010]">
                       Assessment Overview
                     </div>
-                    <span className="text-[10px] font-mono text-muted-foreground">SESSION PRE-FLIGHT</span>
+                    <span className="text-[10px] font-mono text-[#737373]">SESSION PRE-FLIGHT</span>
                   </div>
 
                   {/* Active Track Status Banner */}
                   {content.hasCoding && (
-                    <div className={`p-3 rounded border flex items-center justify-between ${
+                    <div className={`p-4 rounded-xl border flex items-center justify-between ${
                       selectedTrack === "advanced"
                         ? "bg-amber-50/70 border-amber-300"
-                        : "bg-emerald-900/[0.04] border-emerald-900/20"
+                        : "bg-black/[0.02] border-black/[0.08]"
                     }`}>
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2.5">
                         {selectedTrack === "advanced" ? (
                           <Trophy className="h-4 w-4 text-amber-700" />
                         ) : (
-                          <Award className="h-4 w-4 text-emerald-900" />
+                          <Award className="h-4 w-4 text-[#101010]" />
                         )}
                         <div>
-                          <div className="text-[11px] font-mono uppercase text-muted-foreground">Active Track</div>
-                          <div className="text-[13px] font-bold text-foreground">
+                          <div className="text-[10px] font-mono uppercase text-[#737373]">Active Track</div>
+                          <div className="text-[13px] font-bold text-[#101010]">
                             {selectedTrack === "advanced" ? "Advanced Track" : "Standard Track"}
                           </div>
                         </div>
                       </div>
-                      <span className={`text-[10px] font-mono font-bold uppercase px-2 py-0.5 rounded ${
-                        selectedTrack === "advanced" ? "bg-amber-200/60 text-amber-900" : "bg-emerald-900/10 text-emerald-900"
+                      <span className={`text-[10px] font-mono font-bold uppercase px-2.5 py-0.5 rounded-full ${
+                        selectedTrack === "advanced" ? "bg-amber-200/60 text-amber-900" : "bg-black/[0.04] text-[#101010] border border-black/[0.08]"
                       }`}>
                         {selectedTrack === "advanced" ? "Gold Honors" : "Professional"}
                       </span>
@@ -3702,15 +3520,15 @@ function AssessmentContentWrapper() {
                   
                   {/* Assessment Metric Boxes */}
                   <div className="grid grid-cols-2 gap-3">
-                    <div className="border border-border bg-surface p-3.5 rounded">
-                      <div className="text-[11px] text-muted-foreground mb-1">Duration</div>
-                      <div className="text-[15px] font-semibold text-foreground flex items-center gap-1.5 font-mono">
-                        <Clock className="h-4 w-4 text-muted-foreground" /> 60 mins
+                    <div className="border border-black/[0.08] bg-black/[0.02] p-3.5 rounded-xl">
+                      <div className="text-[11px] text-[#737373] mb-1">Duration</div>
+                      <div className="text-[15px] font-semibold text-[#101010] flex items-center gap-1.5 font-mono">
+                        <Clock className="h-4 w-4 text-[#737373]" /> 60 mins
                       </div>
                     </div>
-                    <div className="border border-border bg-surface p-3.5 rounded">
-                      <div className="text-[11px] text-muted-foreground mb-1">Coding Challenge</div>
-                      <div className="text-[13px] font-semibold text-foreground truncate font-mono">
+                    <div className="border border-black/[0.08] bg-black/[0.02] p-3.5 rounded-xl">
+                      <div className="text-[11px] text-[#737373] mb-1">Coding Challenge</div>
+                      <div className="text-[13px] font-semibold text-[#101010] truncate font-mono">
                         {content.hasCoding
                           ? selectedTrack === "advanced"
                             ? "1 Hard Task"
@@ -3718,47 +3536,47 @@ function AssessmentContentWrapper() {
                           : "No Coding"}
                       </div>
                     </div>
-                    <div className="border border-border bg-surface p-3.5 rounded">
-                      <div className="text-[11px] text-muted-foreground mb-1">Technical MCQs</div>
-                      <div className="text-[15px] font-semibold text-foreground font-mono">
+                    <div className="border border-black/[0.08] bg-black/[0.02] p-3.5 rounded-xl">
+                      <div className="text-[11px] text-[#737373] mb-1">Technical MCQs</div>
+                      <div className="text-[15px] font-semibold text-[#101010] font-mono">
                         {content.mcqs?.length || 15} Questions
                       </div>
                     </div>
-                    <div className="border border-border bg-surface p-3.5 rounded">
-                      <div className="text-[11px] text-muted-foreground mb-1">Passing Mark</div>
-                      <div className="text-[15px] font-semibold text-emerald-900 font-mono">
+                    <div className="border border-black/[0.08] bg-black/[0.02] p-3.5 rounded-xl">
+                      <div className="text-[11px] text-[#737373] mb-1">Passing Mark</div>
+                      <div className="text-[15px] font-semibold text-[#101010] font-mono">
                         ≥ 75% Overall
                       </div>
                     </div>
                   </div>
 
                   {/* Credential Earned Card */}
-                  <div className="border border-border bg-surface p-3.5 rounded">
-                    <div className="text-[11px] text-muted-foreground mb-1">Credential Earned On Pass</div>
-                    <div className="text-[13px] font-semibold text-foreground flex items-center gap-1.5">
+                  <div className="border border-black/[0.08] bg-black/[0.02] p-3.5 rounded-xl">
+                    <div className="text-[11px] text-[#737373] mb-1">Credential Earned On Pass</div>
+                    <div className="text-[13px] font-semibold text-[#101010] flex items-center gap-1.5">
                       {content.hasCoding && selectedTrack === "advanced" ? (
                         <><Trophy className="h-3.5 w-3.5 text-amber-700" /> Gold Honors Credential</>
                       ) : (
-                        <><Award className="h-3.5 w-3.5 text-emerald-900" /> Verified Professional Credential</>
+                        <><Award className="h-3.5 w-3.5 text-[#101010]" /> Verified Professional Credential</>
                       )}
                     </div>
-                    <div className="text-[11px] text-muted-foreground mt-0.5 leading-relaxed">
+                    <div className="text-[11px] text-[#737373] mt-0.5 leading-relaxed">
                       Publishes directly to your public record and unlocks direct recruiter discovery.
                     </div>
                   </div>
 
                   {/* Readiness Status Checklist */}
-                  <div className="p-3 bg-surface border border-border rounded space-y-1.5 text-[11px] text-muted-foreground font-mono">
-                    <div className="flex items-center gap-2 text-foreground font-semibold">
-                      <CheckCircle2 className="h-3.5 w-3.5 text-emerald-900" />
+                  <div className="p-3 bg-black/[0.02] border border-black/[0.08] rounded-xl space-y-1.5 text-[11px] text-[#737373] font-mono">
+                    <div className="flex items-center gap-2 text-[#101010] font-semibold">
+                      <CheckCircle2 className="h-3.5 w-3.5 text-[#101010]" />
                       <span>Fullscreen display mode armed</span>
                     </div>
-                    <div className="flex items-center gap-2 text-foreground font-semibold">
-                      <CheckCircle2 className="h-3.5 w-3.5 text-emerald-900" />
+                    <div className="flex items-center gap-2 text-[#101010] font-semibold">
+                      <CheckCircle2 className="h-3.5 w-3.5 text-[#101010]" />
                       <span>Tab &amp; focus tamper tracker armed</span>
                     </div>
-                    <div className="flex items-center gap-2 text-foreground font-semibold">
-                      <CheckCircle2 className="h-3.5 w-3.5 text-emerald-900" />
+                    <div className="flex items-center gap-2 text-[#101010] font-semibold">
+                      <CheckCircle2 className="h-3.5 w-3.5 text-[#101010]" />
                       <span>Cryptographic verification ready</span>
                     </div>
                   </div>
@@ -3767,22 +3585,25 @@ function AssessmentContentWrapper() {
                   <div className="pt-2 space-y-3">
                     <button
                       onClick={handleStart}
-                      className="w-full h-12 bg-foreground text-white font-semibold text-[14px] rounded hover:bg-stone-800 transition-colors flex items-center justify-center gap-2 shadow-xs cursor-pointer"
+                      className="w-full h-12 bg-[#101010] text-white font-medium text-[14px] rounded-lg hover:bg-black transition-all flex items-center justify-center gap-2 shadow-xs cursor-pointer"
                     >
                       <Play className="h-4 w-4" />
-                      I understand — Start Assessment
+                      I understand - Start Assessment
                     </button>
                     <button
                       onClick={() => router.push("/candidate/verification")}
-                      className="w-full h-11 border border-border bg-white text-muted-foreground font-semibold text-[14px] rounded hover:border-foreground hover:text-foreground transition-colors cursor-pointer"
+                      className="w-full h-11 border border-black/[0.12] bg-white text-[#737373] hover:text-[#101010] hover:border-black/30 font-medium text-[14px] rounded-lg transition-all cursor-pointer"
                     >
                       Cancel / Return to Dashboard
                     </button>
                   </div>
 
                   {/* Important Integrity Alert */}
-                  <div className="p-3.5 bg-[#FFFBEB] border border-[#FDE68A] rounded text-[11px] text-[#92400E] leading-relaxed">
-                    <span className="font-semibold block mb-0.5">⚠️ Important Integrity Rule:</span>
+                  <div className="p-3.5 bg-amber-50/60 border border-amber-200/80 rounded-xl text-[11px] text-amber-900 leading-relaxed">
+                    <span className="font-semibold inline-flex items-center gap-1 block mb-0.5">
+                      <AlertTriangle className="h-3.5 w-3.5 text-amber-600 shrink-0" />
+                      Important Integrity Rule:
+                    </span>
                     Do not click browser Back or switch tabs after starting. Forcefully navigating away will terminate your exam and register a 0% score with a 21-day lockout.
                   </div>
                 </div>
@@ -3905,27 +3726,27 @@ function AssessmentContentWrapper() {
         skill={skillParam}
       />
 
-      <div className="fixed inset-0 z-40 flex h-screen w-screen flex-col bg-[#F8F6F3] overflow-hidden">
-        <header className="flex items-center justify-between border-b border-border px-4 sm:px-6 py-2.5 shrink-0 bg-white/95 backdrop-blur-xs">
+      <div className="fixed inset-0 z-40 flex h-screen w-screen flex-col bg-[#F8F8F6] overflow-hidden">
+        <header className="flex items-center justify-between border-b border-black/[0.08] px-4 sm:px-6 py-2.5 shrink-0 bg-white/95 backdrop-blur-xs">
           <div className="flex items-center gap-2.5 sm:gap-3 truncate mr-4">
-            <span className="font-medium text-[11px] font-bold tracking-[0.2em] uppercase text-foreground shrink-0">
+            <span className="text-[12px] font-bold tracking-[0.16em] uppercase text-[#101010] shrink-0 font-sans">
               MERITLANE
             </span>
-            <span className="text-[#D4CFCB] shrink-0">/</span>
-            <span className="inline-flex items-center gap-1.5 font-medium text-[11px] font-semibold tracking-wider uppercase text-emerald-900 bg-emerald-900/10 border border-emerald-900/20 px-2.5 py-0.5 rounded shrink-0">
-              <ShieldAlert className="h-3 w-3 text-emerald-900" />
+            <span className="text-black/20 shrink-0">/</span>
+            <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold tracking-wider uppercase text-[#101010] bg-black/[0.04] border border-black/[0.08] px-3 py-0.5 rounded-full shrink-0">
+              <ShieldAlert className="h-3 w-3 text-[#101010]" />
               {displaySkill} Verification
             </span>
             <button
               onClick={toggleFullscreen}
-              className={`inline-flex items-center gap-1.5 text-[11px] font-sans font-medium px-2.5 py-0.5 rounded border transition-colors cursor-pointer ${
+              className={`inline-flex items-center gap-1.5 text-[11px] font-sans font-medium px-3 py-0.5 rounded-full border transition-colors cursor-pointer ${
                 isFullscreen
-                  ? "bg-emerald-900 text-white border-emerald-900"
-                  : "bg-surface text-muted-foreground hover:text-foreground border-border"
+                  ? "bg-[#101010] text-white border-[#101010]"
+                  : "bg-black/[0.02] text-[#737373] hover:text-[#101010] border-black/[0.08]"
               }`}
               title={isFullscreen ? "Exit Fullscreen" : "Enter Fullscreen Mode"}
             >
-              {isFullscreen ? <Minimize2 className="h-3 w-3" /> : <Maximize2 className="h-3 w-3 text-emerald-900" />}
+              {isFullscreen ? <Minimize2 className="h-3 w-3" /> : <Maximize2 className="h-3 w-3 text-[#101010]" />}
               <span className="hidden md:inline">{isFullscreen ? "Exit Fullscreen" : "Fullscreen"}</span>
             </button>
             <button
@@ -3933,7 +3754,7 @@ function AssessmentContentWrapper() {
                 window.history.pushState(null, "", window.location.href);
                 setShowExitWarning(true);
               }}
-              className="inline-flex items-center gap-1.5 text-[11px] font-sans font-medium px-2.5 py-0.5 rounded border border-[#FECACA] bg-danger/10 text-danger hover:bg-[#FEE2E2] transition-colors cursor-pointer"
+              className="inline-flex items-center gap-1.5 text-[11px] font-sans font-medium px-3 py-0.5 rounded-full border border-red-200 bg-red-50 text-red-700 hover:bg-red-100 transition-colors cursor-pointer"
               title="Leaving the assessment will result in termination"
             >
               <ArrowLeft className="h-3 w-3" />
@@ -3942,14 +3763,14 @@ function AssessmentContentWrapper() {
           </div>
           <div className="flex items-center gap-3">
             {/* Progress counter */}
-            <div className="hidden sm:flex items-center gap-1.5 text-[11px] font-mono text-muted-foreground bg-surface border border-border px-2.5 py-1 rounded">
+            <div className="hidden sm:flex items-center gap-1.5 text-[11px] font-mono text-[#737373] bg-black/[0.02] border border-black/[0.08] px-3 py-1 rounded-full">
               <span>MCQs:</span>
-              <strong className="text-foreground">{mcqAnswers.filter((a) => a !== undefined).length}/{content.mcqs?.length || 0}</strong>
+              <strong className="text-[#101010]">{mcqAnswers.filter((a) => a !== undefined).length}/{content.mcqs?.length || 0}</strong>
             </div>
 
             {/* Violation counter */}
             {infractionCount > 0 && (
-              <div className="flex items-center gap-1.5 text-[11px] font-mono text-amber-600 border border-[#FDE68A] bg-[#FFFBEB] px-2.5 py-1 rounded animate-in fade-in">
+              <div className="flex items-center gap-1.5 text-[11px] font-mono text-amber-600 border border-amber-300 bg-amber-50 px-3 py-1 rounded-full animate-in fade-in">
                 <AlertTriangle className="h-3 w-3" />
                 {infractionCount}/{MAX_VIOLATIONS} warnings
               </div>
@@ -3957,12 +3778,12 @@ function AssessmentContentWrapper() {
 
             {/* High-visibility Timer Badge */}
             <div
-              className={`flex items-center gap-1.5 font-mono text-[13px] font-bold tracking-wider px-3 py-1 rounded border transition-colors ${
+              className={`flex items-center gap-1.5 font-mono text-[13px] font-bold tracking-wider px-3.5 py-1 rounded-full border transition-colors ${
                 timeLeft < 300
-                  ? "bg-danger/10 border-[#FECACA] text-danger animate-pulse"
+                  ? "bg-danger/10 border-red-200 text-danger animate-pulse"
                   : timeLeft < 900
-                  ? "bg-[#FFFBEB] border-[#FDE68A] text-[#92400E]"
-                  : "bg-surface border-border text-foreground"
+                  ? "bg-amber-50 border-amber-300 text-amber-900"
+                  : "bg-black/[0.02] border-black/[0.08] text-[#101010]"
               }`}
               title="Assessment time remaining"
             >
@@ -3974,7 +3795,7 @@ function AssessmentContentWrapper() {
             <button
               onClick={() => setShowSubmitModal(true)}
               disabled={evaluating}
-              className="inline-flex items-center gap-1.5 text-[12px] font-sans font-semibold px-3.5 py-1.5 rounded bg-emerald-900 text-white hover:bg-emerald-950 active:scale-95 transition-all shadow-xs cursor-pointer disabled:opacity-50"
+              className="inline-flex items-center gap-1.5 text-[12px] font-sans font-medium px-4 py-1.5 rounded-full bg-[#101010] text-white hover:bg-black active:scale-95 transition-all shadow-xs cursor-pointer disabled:opacity-50"
               title="Submit entire assessment (MCQs + Coding Tasks) for final grading"
             >
               <CheckCircle2 className="h-3.5 w-3.5" />
@@ -3987,9 +3808,9 @@ function AssessmentContentWrapper() {
           <div className="flex-1 flex flex-col p-4 sm:p-6 lg:p-8 overflow-y-auto w-full">
             <div className="w-full space-y-6">
               {/* Question Navigator Ribbon */}
-              <div className="bg-white border border-border rounded p-4 shadow-xs">
-                <div className="flex items-center justify-between mb-3 text-[11px] font-sans font-semibold uppercase tracking-wide text-muted-foreground">
-                  <span className="font-semibold text-foreground">
+              <div className="bg-white border border-black/[0.08] rounded-2xl p-5 shadow-xs">
+                <div className="flex items-center justify-between mb-3 text-[11px] font-sans font-semibold uppercase tracking-wide text-[#737373]">
+                  <span className="font-semibold text-[#101010]">
                     Multiple Choice Questions
                   </span>
                   <div className="flex items-center gap-3">
@@ -3999,7 +3820,7 @@ function AssessmentContentWrapper() {
                       </span>
                     )}
                     <span>
-                      Answered: <strong className="text-foreground">{mcqAnswers.filter((a) => a !== undefined).length}</strong> / {content.mcqs?.length || 0}
+                      Answered: <strong className="text-[#101010]">{mcqAnswers.filter((a) => a !== undefined).length}</strong> / {content.mcqs?.length || 0}
                     </span>
                   </div>
                 </div>
@@ -4012,12 +3833,12 @@ function AssessmentContentWrapper() {
                       <button
                         key={i}
                         onClick={() => setMcqIndex(i)}
-                        className={`relative w-8 h-8 rounded text-[12px] font-mono font-semibold transition-all flex items-center justify-center ${
+                        className={`relative w-8 h-8 rounded-full text-[12px] font-mono font-semibold transition-all flex items-center justify-center ${
                           isCurrent
-                            ? "bg-foreground text-white ring-2 ring-foreground ring-offset-1"
+                            ? "bg-[#101010] text-white ring-2 ring-[#101010] ring-offset-1"
                             : isAnswered
-                            ? "bg-emerald-900 text-white"
-                            : "bg-surface text-muted-foreground border border-border hover:border-foreground hover:text-foreground"
+                            ? "bg-black/[0.08] text-[#101010] font-bold"
+                            : "bg-white text-[#737373] border border-black/[0.08] hover:border-black/30 hover:text-[#101010]"
                         } ${isFlagged ? "ring-2 ring-amber-600" : ""}`}
                         title={`Question ${i + 1}${isAnswered ? " (Answered)" : " (Unanswered)"}${isFlagged ? " [Flagged for Review]" : ""}`}
                       >
@@ -4032,37 +3853,37 @@ function AssessmentContentWrapper() {
               </div>
 
               {/* Question Card */}
-              <div className="bg-white border border-border rounded p-6 sm:p-8 shadow-xs">
-                <div className="flex flex-wrap items-center justify-between gap-2 pb-4 mb-4 border-b border-border">
+              <div className="bg-white border border-black/[0.08] rounded-2xl p-6 sm:p-8 shadow-xs">
+                <div className="flex flex-wrap items-center justify-between gap-2 pb-4 mb-4 border-b border-black/[0.08]">
                   <div className="flex items-center gap-2">
-                    <span className="text-[11px] font-medium uppercase font-bold tracking-wider px-2 py-0.5 rounded bg-surface border border-border text-foreground">
+                    <span className="text-[11px] font-mono uppercase font-semibold tracking-wider px-2.5 py-0.5 rounded-full bg-black/[0.04] border border-black/[0.08] text-[#101010]">
                       Question {mcqIndex + 1} of {content.mcqs?.length || 0}
                     </span>
                     {content.mcqs[mcqIndex]?.difficulty && (
                       <span
-                        className={`text-[10px] font-medium uppercase font-bold tracking-wider px-2 py-0.5 rounded ${
+                        className={`text-[10px] font-mono uppercase font-semibold tracking-wider px-2.5 py-0.5 rounded-full ${
                           content.mcqs[mcqIndex].difficulty === "hard"
-                            ? "bg-danger/10 text-[#991B1B] border border-[#FECACA]"
+                            ? "bg-danger/10 text-[#991B1B] border border-red-200"
                             : content.mcqs[mcqIndex].difficulty === "medium"
-                            ? "bg-[#FFFBEB] text-[#92400E] border border-[#FDE68A]"
-                            : "bg-[#F0FDF4] text-[#166534] border border-[#BBF7D0]"
+                            ? "bg-amber-50 text-amber-900 border border-amber-200"
+                            : "bg-emerald-50 text-emerald-800 border border-emerald-200"
                         }`}
                       >
                         {content.mcqs[mcqIndex].difficulty}
                       </span>
                     )}
                     {content.mcqs[mcqIndex]?.topic && (
-                      <span className="text-[11px] font-mono text-muted-foreground bg-surface px-2 py-0.5 rounded border border-border">
+                      <span className="text-[11px] font-mono text-[#737373] bg-black/[0.02] px-2.5 py-0.5 rounded-full border border-black/[0.08]">
                         {content.mcqs[mcqIndex].topic}
                       </span>
                     )}
                   </div>
                   <button
                     onClick={() => toggleFlagQuestion(mcqIndex)}
-                    className={`flex items-center gap-1.5 text-[11px] font-sans font-semibold uppercase tracking-wide px-2.5 py-1 rounded transition-colors border ${
+                    className={`flex items-center gap-1.5 text-[11px] font-sans font-medium uppercase tracking-wide px-3 py-1 rounded-full transition-colors border ${
                       flaggedQuestions[mcqIndex]
-                        ? "bg-[#FFFBEB] text-amber-600 border-[#FDE68A] font-semibold"
-                        : "bg-white text-muted-foreground border-border hover:border-foreground hover:text-foreground"
+                        ? "bg-amber-50 text-amber-800 border-amber-300 font-semibold"
+                        : "bg-white text-[#737373] border-black/[0.08] hover:border-black/30 hover:text-[#101010]"
                     }`}
                   >
                     <Flag className={`h-3 w-3 ${flaggedQuestions[mcqIndex] ? "fill-amber-600 text-amber-600" : ""}`} />
@@ -4070,7 +3891,7 @@ function AssessmentContentWrapper() {
                   </button>
                 </div>
 
-                <h3 className="text-[17px] sm:text-[19px] font-medium text-foreground mb-6 leading-relaxed whitespace-pre-wrap font-sans">
+                <h3 className="text-[17px] sm:text-[19px] font-medium text-[#101010] mb-6 leading-relaxed whitespace-pre-wrap font-sans">
                   {content.mcqs[mcqIndex]?.question}
                 </h3>
 
@@ -4081,22 +3902,22 @@ function AssessmentContentWrapper() {
                       <button
                         key={idx}
                         onClick={() => handleSelectMcq(idx)}
-                        className={`w-full text-left p-4 rounded border transition-all flex items-start gap-3.5 ${
+                        className={`w-full text-left p-4 rounded-xl border transition-all flex items-start gap-3.5 cursor-pointer ${
                           isSelected
-                            ? "border-foreground bg-surface ring-1 ring-foreground shadow-xs"
-                            : "border-border bg-white hover:border-foreground/50 hover:bg-[#FAFAF9]"
+                            ? "border-[#101010] bg-black/[0.02] ring-1 ring-[#101010] shadow-xs"
+                            : "border-black/[0.08] bg-white hover:border-black/20 hover:bg-black/[0.01]"
                         }`}
                       >
                         <div
                           className={`w-5 h-5 rounded-full shrink-0 mt-0.5 flex items-center justify-center text-[11px] font-mono font-bold transition-colors ${
                             isSelected
-                              ? "bg-foreground text-white"
-                              : "border border-[#D4CFCB] text-muted-foreground bg-white"
+                              ? "bg-[#101010] text-white"
+                              : "border border-black/20 text-[#737373] bg-white"
                           }`}
                         >
                           {isSelected ? <Check className="h-3 w-3" /> : String.fromCharCode(65 + idx)}
                         </div>
-                        <span className={`text-[14px] leading-relaxed font-sans ${isSelected ? "text-foreground font-medium" : "text-[#44403C]"}`}>
+                        <span className={`text-[14px] leading-relaxed font-sans ${isSelected ? "text-[#101010] font-medium" : "text-[#404040]"}`}>
                           {opt}
                         </span>
                       </button>
@@ -4111,14 +3932,14 @@ function AssessmentContentWrapper() {
                   <button
                     onClick={() => setMcqIndex((prev) => Math.max(0, prev - 1))}
                     disabled={mcqIndex === 0}
-                    className="flex-1 sm:flex-none px-4 py-2 text-[13px] font-semibold border border-border bg-white text-foreground rounded hover:border-foreground disabled:opacity-40 disabled:hover:border-border transition-colors flex items-center justify-center gap-1.5"
+                    className="flex-1 sm:flex-none px-5 py-2 text-[13px] font-medium border border-black/[0.12] bg-white text-[#101010] rounded-full hover:bg-black/[0.04] disabled:opacity-40 disabled:hover:bg-white transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
                   >
                     <ChevronLeft className="h-4 w-4" /> Previous
                   </button>
                   <button
                     onClick={() => setMcqIndex((prev) => Math.min(content.mcqs.length - 1, prev + 1))}
                     disabled={mcqIndex === content.mcqs.length - 1}
-                    className="flex-1 sm:flex-none px-4 py-2 text-[13px] font-semibold border border-border bg-white text-foreground rounded hover:border-foreground disabled:opacity-40 disabled:hover:border-border transition-colors flex items-center justify-center gap-1.5"
+                    className="flex-1 sm:flex-none px-5 py-2 text-[13px] font-medium border border-black/[0.12] bg-white text-[#101010] rounded-full hover:bg-black/[0.04] disabled:opacity-40 disabled:hover:bg-white transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
                   >
                     Next <ChevronRight className="h-4 w-4" />
                   </button>
@@ -4128,7 +3949,7 @@ function AssessmentContentWrapper() {
                   {content.hasCoding ? (
                     <button
                       onClick={() => setPhase("coding")}
-                      className="w-full sm:w-auto px-5 py-2 text-[13px] font-semibold bg-emerald-900 text-white rounded hover:bg-emerald-950 transition-colors flex items-center justify-center gap-2 shadow-2xs"
+                      className="w-full sm:w-auto px-6 py-2.5 text-[13px] font-medium bg-[#101010] text-white rounded-full hover:bg-black transition-all flex items-center justify-center gap-2 shadow-xs cursor-pointer"
                     >
                       <span>Proceed to Coding Challenge</span>
                       <ArrowRight className="h-4 w-4" />
@@ -4136,7 +3957,7 @@ function AssessmentContentWrapper() {
                   ) : (
                     <button
                       onClick={() => setShowSubmitModal(true)}
-                      className="w-full sm:w-auto px-5 py-2 text-[13px] font-semibold bg-emerald-900 text-white rounded hover:bg-emerald-950 transition-colors flex items-center justify-center gap-2 shadow-2xs"
+                      className="w-full sm:w-auto px-6 py-2.5 text-[13px] font-medium bg-[#101010] text-white rounded-full hover:bg-black transition-all flex items-center justify-center gap-2 shadow-xs cursor-pointer"
                     >
                       <span>Review &amp; Submit</span>
                       <ArrowRight className="h-4 w-4" />
@@ -4149,26 +3970,26 @@ function AssessmentContentWrapper() {
         )}
 
         {phase === "coding" && (content.coding || (content.codingTasks && content.codingTasks.length > 0)) && (
-          <div className="flex flex-col lg:flex-row flex-1 overflow-hidden p-3 gap-3 bg-[#F4F1EA] min-h-0">
+          <div className="flex flex-col lg:flex-row flex-1 overflow-hidden p-3 gap-3 bg-[#F8F8F6] min-h-0">
             {/* Left Pane: Problem Description & Guidelines */}
-            <div className="w-full lg:w-[42%] lg:max-w-[560px] bg-white border border-border rounded flex flex-col h-[38vh] lg:h-full shrink-0 overflow-hidden shadow-xs min-h-0">
+            <div className="w-full lg:w-[42%] lg:max-w-[560px] bg-white border border-black/[0.08] rounded-2xl flex flex-col h-[38vh] lg:h-full shrink-0 overflow-hidden shadow-xs min-h-0">
               {/* Problem Tab Header */}
-              <div className="flex items-center justify-between border-b border-border bg-surface px-4 py-2 shrink-0">
+              <div className="flex items-center justify-between border-b border-black/[0.08] bg-black/[0.02] px-4 py-2 shrink-0">
                 <div className="flex items-center gap-2 truncate mr-2">
                   <button
                     onClick={() => setPhase("mcq")}
-                    className="flex items-center gap-1 text-[11px] font-sans font-semibold uppercase tracking-wide text-muted-foreground bg-white hover:text-foreground hover:border-foreground border border-border px-2 py-0.5 rounded transition-colors"
+                    className="flex items-center gap-1 text-[11px] font-sans font-medium uppercase tracking-wide text-[#737373] bg-white hover:text-[#101010] hover:border-black/30 border border-black/[0.08] px-3 py-1 rounded-full transition-colors cursor-pointer"
                   >
                     <ChevronLeft className="h-3 w-3" /> MCQs ({mcqAnswers.filter((a) => a !== undefined).length}/{content.mcqs.length})
                   </button>
                   {content.codingTasks && content.codingTasks.length >= 2 ? (
-                    <div className="flex items-center gap-1 bg-[#EFECE6] p-0.5 rounded border border-border">
+                    <div className="flex items-center gap-1 bg-black/[0.04] p-0.5 rounded-full border border-black/[0.08]">
                       <button
                         onClick={() => handleSwitchCodingTask(0)}
-                        className={`px-2.5 py-0.5 text-[11px] font-mono font-semibold rounded transition-colors cursor-pointer ${
+                        className={`px-3 py-0.5 text-[11px] font-mono font-semibold rounded-full transition-colors cursor-pointer ${
                           activeCodingTaskIdx === 0
-                            ? "bg-white text-foreground shadow-xs"
-                            : "text-muted-foreground hover:text-foreground"
+                            ? "bg-white text-[#101010] shadow-xs"
+                            : "text-[#737373] hover:text-[#101010]"
                         }`}
                       >
                         {content.codingTasks[0]?.difficulty === "hard"
@@ -4179,10 +4000,10 @@ function AssessmentContentWrapper() {
                       </button>
                       <button
                         onClick={() => handleSwitchCodingTask(1)}
-                        className={`px-2.5 py-0.5 text-[11px] font-mono font-semibold rounded transition-colors cursor-pointer ${
+                        className={`px-3 py-0.5 text-[11px] font-mono font-semibold rounded-full transition-colors cursor-pointer ${
                           activeCodingTaskIdx === 1
-                            ? "bg-white text-foreground shadow-xs"
-                            : "text-muted-foreground hover:text-foreground"
+                            ? "bg-white text-[#101010] shadow-xs"
+                            : "text-[#737373] hover:text-[#101010]"
                         }`}
                       >
                         {content.codingTasks[1]?.difficulty === "hard"
@@ -4193,12 +4014,12 @@ function AssessmentContentWrapper() {
                       </button>
                     </div>
                   ) : (
-                    <span className={`text-[11px] font-sans font-semibold uppercase tracking-wide px-2 py-0.5 rounded shrink-0 ${
+                    <span className={`text-[11px] font-sans font-semibold uppercase tracking-wide px-2.5 py-0.5 rounded-full shrink-0 ${
                       content.codingTasks?.[0]?.difficulty === "hard"
                         ? "text-rose-900 bg-rose-100/80 border border-rose-300 font-bold"
                         : content.codingTasks?.[0]?.difficulty === "medium"
                         ? "text-amber-900 bg-amber-100/80 border border-amber-300 font-bold"
-                        : "text-emerald-900 bg-emerald-900/10 font-bold"
+                        : "text-[#101010] bg-black/[0.04] border border-black/[0.08] font-bold"
                     }`}>
                       {content.codingTasks?.[0]?.difficulty === "hard"
                         ? "Task 1 (Hard Challenge)"
@@ -4207,11 +4028,11 @@ function AssessmentContentWrapper() {
                         : "Task 1 (Easy Challenge)"}
                     </span>
                   )}
-                  <span className="text-[13px] font-sans font-semibold text-foreground truncate">
+                  <span className="text-[13px] font-sans font-semibold text-[#101010] truncate">
                     {(content.codingTasks?.[activeCodingTaskIdx] || content.coding)?.title}
                   </span>
                 </div>
-                <span className="text-[11px] font-mono text-muted-foreground bg-white border border-border px-2 py-0.5 rounded shrink-0">
+                <span className="text-[11px] font-mono text-[#737373] bg-white border border-black/[0.08] px-2.5 py-0.5 rounded-full shrink-0">
                   {selectedLanguage.toUpperCase()}
                 </span>
               </div>
@@ -4219,21 +4040,21 @@ function AssessmentContentWrapper() {
               {/* Problem Content */}
               <div className="flex-1 overflow-y-auto p-5 sm:p-6 space-y-6 min-h-0">
                 <div>
-                  <h3 className="text-[11px] font-sans font-semibold text-muted-foreground uppercase tracking-wider mb-3">
+                  <h3 className="text-[11px] font-sans font-semibold text-[#737373] uppercase tracking-wider mb-3">
                     Problem Description
                   </h3>
-                  <div className="bg-surface/50 p-4 sm:p-5 rounded-lg border border-border">
+                  <div className="bg-black/[0.01] p-4 sm:p-5 rounded-xl border border-black/[0.08]">
                     <LeetCodeProblemDescription
                       instructions={(content.codingTasks?.[activeCodingTaskIdx] || content.coding)?.instructions || ""}
                     />
                   </div>
                 </div>
 
-                <div className="border border-border rounded p-4 bg-white">
-                  <h4 className="text-[12px] font-sans font-semibold uppercase tracking-wide text-emerald-900 mb-1.5 flex items-center gap-1.5">
+                <div className="border border-black/[0.08] rounded-xl p-4 bg-white">
+                  <h4 className="text-[12px] font-sans font-semibold uppercase tracking-wide text-[#101010] mb-1.5 flex items-center gap-1.5">
                     <ShieldAlert className="h-3.5 w-3.5" /> Examination Rule
                   </h4>
-                  <p className="text-[12px] leading-relaxed text-muted-foreground">
+                  <p className="text-[12px] leading-relaxed text-[#737373]">
                     Complete the solution implementation in the required language and compile against public test cases before submitting for authoritative evaluation.
                   </p>
                 </div>
@@ -4243,8 +4064,8 @@ function AssessmentContentWrapper() {
             {/* Right Pane: Code Editor + Test Console */}
             <div className="flex flex-1 flex-col gap-3 min-h-0 overflow-hidden">
               {/* Top Section: Code Editor Pane */}
-              <div className={`flex-1 min-h-0 rounded flex flex-col overflow-hidden shadow-xs border transition-colors ${
-                editorTheme === "dark" ? "bg-[#0D1117] border-[#30363D]" : "bg-white border-border"
+              <div className={`flex-1 min-h-0 rounded-2xl flex flex-col overflow-hidden shadow-xs border transition-colors ${
+                editorTheme === "dark" ? "bg-[#0D1117] border-[#30363D]" : "bg-white border-black/[0.08]"
               }`}>
                 {/* Editor Header Bar */}
                 <div className={`flex flex-wrap items-center justify-between px-4 py-2 shrink-0 border-b gap-2 ${
@@ -4435,7 +4256,14 @@ function AssessmentContentWrapper() {
                         ref={textareaRef}
                         value={code}
                         onChange={(e) => {
-                          handleCodeChange(e.target.value);
+                          const val = e.target.value;
+                          codeRef.current = val;
+                          setCode(val);
+                          if (activeCodingTaskIdx === 0) {
+                            setCodeEasy(val);
+                          } else {
+                            setCodeMedium(val);
+                          }
                           updateCursorPosition();
                         }}
                         onKeyDown={handleEditorKeyDown}
@@ -4468,61 +4296,8 @@ function AssessmentContentWrapper() {
                       defaultValue={code}
                       onMount={handleEditorMount}
                       onChange={(val) => handleCodeChange(val || "")}
-                    options={{
-                      fontSize: editorFontSize,
-                      fontFamily: "'Fira Code', 'Cascadia Code', Consolas, Monaco, monospace",
-                      fontLigatures: true,
-                      minimap: { enabled: false },
-                      scrollBeyondLastLine: false,
-                      lineNumbers: "on",
-                      lineNumbersMinChars: 3,
-                      glyphMargin: false,
-                      folding: true,
-                      lineDecorationsWidth: 10,
-                      roundedSelection: true,
-                      automaticLayout: true,
-                      tabSize: 4,
-                      insertSpaces: true,
-                      detectIndentation: false,
-                      autoIndent: "advanced",
-                      matchBrackets: "always",
-                      autoClosingBrackets: "always",
-                      autoClosingQuotes: "always",
-                      formatOnPaste: false,
-                      formatOnType: false,
-                      trimAutoWhitespace: false,
-                      wordWrap: "on",
-                      cursorBlinking: "smooth",
-                      cursorSmoothCaretAnimation: "on",
-                      quickSuggestions: false,
-                      suggestOnTriggerCharacters: false,
-                      snippetSuggestions: "none",
-                      wordBasedSuggestions: "off",
-                      parameterHints: { enabled: false },
-                      suggest: {
-                        showKeywords: false,
-                        showSnippets: false,
-                        showWords: false,
-                        showFunctions: false,
-                        showVariables: false,
-                        showClasses: false,
-                        showModules: false,
-                        showProperties: false,
-                        showInterfaces: false,
-                        showReferences: false,
-                        showConstants: false,
-                        showConstructors: false,
-                        showFields: false,
-                        showEvents: false,
-                        showOperators: false,
-                        showUnits: false,
-                        showValues: false,
-                        showStructs: false,
-                        showTypeParameters: false,
-                      },
-                      padding: { top: 12, bottom: 12 },
-                    }}
-                  />
+                      options={monacoOptions}
+                    />
                   )}
                 </div>
 
@@ -4562,31 +4337,31 @@ function AssessmentContentWrapper() {
               </div>
 
               {/* Bottom Section: Testcase Console & Action Buttons */}
-              <div className={`rounded-lg flex flex-col overflow-hidden shadow-sm shrink-0 border transition-all duration-300 ease-in-out ${
+              <div className={`rounded-2xl flex flex-col overflow-hidden shadow-xs shrink-0 border transition-all duration-300 ease-in-out ${
                 isConsoleExpanded ? "h-[460px] lg:h-[500px]" : "h-[240px] lg:h-[265px]"
               } ${
-                editorTheme === "dark" ? "bg-[#0B111A]/95 backdrop-blur-md border-[#30363D]" : "bg-white/95 backdrop-blur-md border-border"
+                editorTheme === "dark" ? "bg-[#0B111A]/95 backdrop-blur-md border-[#30363D]" : "bg-white/95 backdrop-blur-md border-black/[0.08]"
               }`}>
                 {/* Console Tab Header */}
-                <div className={`flex flex-wrap items-center justify-between px-3.5 py-2 shrink-0 border-b gap-2 ${
-                  editorTheme === "dark" ? "bg-[#161B22]/90 border-[#30363D]" : "bg-surface/90 border-border"
+                <div className={`flex flex-wrap items-center justify-between px-4 py-2 shrink-0 border-b gap-2 ${
+                  editorTheme === "dark" ? "bg-[#161B22]/90 border-[#30363D]" : "bg-black/[0.02] border-black/[0.08]"
                 }`}>
                   <div className="flex items-center gap-3">
                     <button
                       onClick={() => setActiveConsoleTab("testcases")}
                       className={`text-[12px] font-sans font-semibold pb-1 border-b-2 transition-colors flex items-center gap-1.5 cursor-pointer ${
                         activeConsoleTab === "testcases"
-                          ? editorTheme === "dark" ? "border-[#58A6FF] text-[#58A6FF]" : "border-emerald-900 text-emerald-900"
-                          : editorTheme === "dark" ? "border-transparent text-[#8B949E] hover:text-[#E6EDF3]" : "border-transparent text-muted-foreground hover:text-foreground"
+                          ? editorTheme === "dark" ? "border-[#58A6FF] text-[#58A6FF]" : "border-[#101010] text-[#101010]"
+                          : editorTheme === "dark" ? "border-transparent text-[#8B949E] hover:text-[#E6EDF3]" : "border-transparent text-[#737373] hover:text-[#101010]"
                       }`}
                     >
                       <span>Test Cases (5 Cases)</span>
                       {testRunStats && (
                         <span
-                          className={`text-[10px] font-mono px-1.5 py-0.5 rounded font-bold ${
+                          className={`text-[10px] font-mono px-2 py-0.5 rounded-full font-bold ${
                             testRunStats.passed === testRunStats.total
-                              ? "bg-[#10B981]/20 text-[#34D399] border border-[#10B981]/30"
-                              : "bg-[#EF4444]/20 text-[#F87171] border border-[#EF4444]/30"
+                              ? "bg-emerald-500/10 text-emerald-600 border border-emerald-500/20"
+                              : "bg-red-500/10 text-red-600 border border-red-500/20"
                           }`}
                         >
                           {testRunStats.passed}/{testRunStats.total}
@@ -4597,8 +4372,8 @@ function AssessmentContentWrapper() {
                       onClick={() => setActiveConsoleTab("console")}
                       className={`text-[12px] font-sans font-semibold pb-1 border-b-2 transition-colors flex items-center gap-1.5 cursor-pointer ${
                         activeConsoleTab === "console"
-                          ? editorTheme === "dark" ? "border-[#58A6FF] text-[#58A6FF]" : "border-emerald-900 text-emerald-900"
-                          : editorTheme === "dark" ? "border-transparent text-[#8B949E] hover:text-[#E6EDF3]" : "border-transparent text-muted-foreground hover:text-foreground"
+                          ? editorTheme === "dark" ? "border-[#58A6FF] text-[#58A6FF]" : "border-[#101010] text-[#101010]"
+                          : editorTheme === "dark" ? "border-transparent text-[#8B949E] hover:text-[#E6EDF3]" : "border-transparent text-[#737373] hover:text-[#101010]"
                       }`}
                     >
                       <span>Console Output</span>
@@ -4612,10 +4387,10 @@ function AssessmentContentWrapper() {
                     {activeConsoleTab === "console" && output && (
                       <button
                         onClick={handleClearOutput}
-                        className={`text-[11px] font-mono px-2 py-1.5 rounded border transition-colors cursor-pointer ${
+                        className={`text-[11px] font-mono px-3 py-1 rounded-full border transition-colors cursor-pointer ${
                           editorTheme === "dark"
                             ? "bg-[#21262D] border-[#30363D] text-[#8B949E] hover:text-white"
-                            : "bg-white border-border text-muted-foreground hover:text-foreground"
+                            : "bg-white border-black/[0.08] text-[#737373] hover:text-[#101010]"
                         }`}
                         title="Clear console output"
                       >
@@ -4625,16 +4400,16 @@ function AssessmentContentWrapper() {
                     <button
                       onClick={() => handleTest(false)}
                       disabled={evaluating || timeLeft <= 0}
-                      className={`text-[12px] font-sans font-semibold border px-3.5 py-1.5 rounded transition-all shadow-2xs flex items-center gap-1.5 cursor-pointer ${
+                      className={`text-[12px] font-sans font-medium border px-4 py-1.5 rounded-full transition-all shadow-xs flex items-center gap-1.5 cursor-pointer ${
                         editorTheme === "dark"
                           ? "bg-[#21262D] border-[#30363D] text-[#E6EDF3] hover:bg-[#30363D]"
-                          : "bg-white border-border text-foreground hover:bg-surface"
+                          : "bg-white border-black/[0.12] text-[#101010] hover:bg-black/[0.04]"
                       } disabled:opacity-50`}
                       title="Run code against the 5 public test cases"
                     >
                       {evaluating ? (
                         <>
-                          <span className="h-2 w-2 rounded-full bg-[#10B981] animate-ping" />
+                          <span className="h-2 w-2 rounded-full bg-emerald-500 animate-ping" />
                           <span>Running 5 Cases...</span>
                         </>
                       ) : (
@@ -4644,7 +4419,7 @@ function AssessmentContentWrapper() {
                     <button
                       onClick={() => handleTest(true)}
                       disabled={evaluating || timeLeft <= 0}
-                      className="text-[12px] font-sans font-semibold bg-emerald-900 hover:bg-emerald-950 text-white px-4 py-1.5 disabled:opacity-50 rounded transition-all shadow-xs flex items-center gap-1.5 cursor-pointer"
+                      className="text-[12px] font-sans font-medium bg-[#101010] hover:bg-black text-white px-4 py-1.5 disabled:opacity-50 rounded-full transition-all shadow-xs flex items-center gap-1.5 cursor-pointer"
                       title="Run all 50 evaluation test suites for this task"
                     >
                       <span>Evaluate Task (50 Tests)</span>
@@ -4902,29 +4677,29 @@ function AssessmentContentWrapper() {
       {/* Reset Confirmation Modal */}
       {showResetConfirm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-xs animate-in fade-in duration-150">
-          <div className="max-w-md w-full bg-white rounded border border-border shadow-xl p-6">
-            <div className="flex items-center gap-3 mb-4 pb-3 border-b border-border">
-              <div className="flex h-10 w-10 items-center justify-center rounded bg-danger/10 text-danger border border-[#FECACA]">
+          <div className="max-w-md w-full bg-white rounded-2xl border border-black/[0.08] shadow-2xl p-6">
+            <div className="flex items-center gap-3 mb-4 pb-3 border-b border-black/[0.08]">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-red-50 text-red-600 border border-red-200">
                 <RotateCcw className="h-5 w-5" />
               </div>
               <div>
-                <h3 className="text-[16px] font-semibold text-foreground">Reset Code to Template</h3>
-                <p className="text-[12px] text-muted-foreground">Restore starting solution code</p>
+                <h3 className="text-[16px] font-bold text-[#101010]">Reset Code to Template</h3>
+                <p className="text-[12px] text-[#737373]">Restore starting solution code</p>
               </div>
             </div>
-            <p className="text-[13px] text-muted-foreground leading-relaxed mb-6">
+            <p className="text-[13px] text-[#737373] leading-relaxed mb-6">
               Are you sure you want to reset your code to the starter template? All uncommitted edits in this editor will be replaced.
             </p>
             <div className="flex items-center gap-3">
               <button
                 onClick={() => setShowResetConfirm(false)}
-                className="flex-1 h-10 border border-border text-muted-foreground font-semibold text-[13px] rounded hover:border-foreground hover:text-foreground transition-colors"
+                className="flex-1 h-10 border border-black/[0.12] text-[#737373] font-medium text-[13px] rounded-full hover:border-black/30 hover:text-[#101010] transition-colors cursor-pointer"
               >
                 Cancel
               </button>
               <button
                 onClick={handleResetCode}
-                className="flex-1 h-10 bg-danger text-white font-semibold text-[13px] rounded hover:bg-[#991B1B] transition-colors"
+                className="flex-1 h-10 bg-red-600 text-white font-medium text-[13px] rounded-full hover:bg-red-700 transition-colors cursor-pointer"
               >
                 Reset Code
               </button>
@@ -4936,27 +4711,27 @@ function AssessmentContentWrapper() {
       {/* Submit Confirmation Modal */}
       {showSubmitModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-xs animate-in fade-in duration-150">
-          <div className="max-w-md w-full bg-white rounded border border-border shadow-xl p-6 sm:p-7">
-            <div className="flex items-center gap-3 mb-4 pb-3 border-b border-border">
-              <div className="flex h-10 w-10 items-center justify-center rounded bg-surface text-foreground border border-border">
+          <div className="max-w-md w-full bg-white rounded-2xl border border-black/[0.08] shadow-2xl p-6 sm:p-7">
+            <div className="flex items-center gap-3 mb-4 pb-3 border-b border-black/[0.08]">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-black/[0.04] text-[#101010] border border-black/[0.08]">
                 <ShieldAlert className="h-5 w-5" />
               </div>
               <div>
-                <h3 className="text-[16px] font-semibold text-foreground">Confirm Final Submission</h3>
-                <p className="text-[12px] text-muted-foreground">MeritLane Technical Assessment</p>
+                <h3 className="text-[16px] font-bold text-[#101010]">Confirm Final Submission</h3>
+                <p className="text-[12px] text-[#737373]">MeritLane Technical Assessment</p>
               </div>
             </div>
 
             <div className="space-y-3 mb-6">
-              <div className="border border-border bg-surface p-3 rounded flex items-center justify-between text-[13px]">
-                <span className="text-muted-foreground">Multiple Choice:</span>
-                <span className="font-semibold text-foreground">
+              <div className="border border-black/[0.08] bg-black/[0.02] p-3 rounded-xl flex items-center justify-between text-[13px]">
+                <span className="text-[#737373]">Multiple Choice:</span>
+                <span className="font-semibold text-[#101010]">
                   {mcqAnswers.filter((a) => a !== undefined).length} of {content.mcqs.length} answered
                 </span>
               </div>
 
               {flaggedQuestions.filter(Boolean).length > 0 && (
-                <div className="border border-[#FDE68A] bg-[#FFFBEB] p-3 rounded flex items-start gap-2 text-[12px] text-[#92400E]">
+                <div className="border border-amber-200 bg-amber-50 p-3 rounded-xl flex items-start gap-2 text-[12px] text-amber-900">
                   <Flag className="h-4 w-4 shrink-0 mt-0.5 fill-amber-600 text-amber-600" />
                   <span>
                     You have <strong>{flaggedQuestions.filter(Boolean).length}</strong> question(s) flagged for review.
@@ -4965,7 +4740,7 @@ function AssessmentContentWrapper() {
               )}
 
               {mcqAnswers.filter((a) => a !== undefined).length < content.mcqs.length && (
-                <div className="border border-[#FDE68A] bg-[#FFFBEB] p-3 rounded flex items-start gap-2 text-[12px] text-[#92400E]">
+                <div className="border border-amber-200 bg-amber-50 p-3 rounded-xl flex items-start gap-2 text-[12px] text-amber-900">
                   <AlertTriangle className="h-4 w-4 shrink-0 mt-0.5" />
                   <span>
                     You have {content.mcqs.length - mcqAnswers.filter((a) => a !== undefined).length} unanswered questions. Unanswered questions receive 0 points.
@@ -4974,20 +4749,20 @@ function AssessmentContentWrapper() {
               )}
 
               {content.hasCoding && (
-                <div className="border border-border bg-surface p-3 rounded flex items-center justify-between text-[13px]">
-                  <span className="text-muted-foreground">Coding ({selectedLanguage.toUpperCase()}):</span>
-                  <span className="font-semibold text-foreground">
+                <div className="border border-black/[0.08] bg-black/[0.02] p-3 rounded-xl flex items-center justify-between text-[13px]">
+                  <span className="text-[#737373]">Coding ({selectedLanguage.toUpperCase()}):</span>
+                  <span className="font-semibold text-[#101010]">
                     {testRunStats ? `${testRunStats.passed}/${testRunStats.total} public tests passed` : "Solution ready"}
                   </span>
                 </div>
               )}
 
-              <div className="border border-border bg-surface p-3 rounded flex items-center justify-between text-[13px]">
-                <span className="text-muted-foreground">Time Remaining:</span>
-                <span className="font-mono font-semibold text-foreground">{formatTime(timeLeft)}</span>
+              <div className="border border-black/[0.08] bg-black/[0.02] p-3 rounded-xl flex items-center justify-between text-[13px]">
+                <span className="text-[#737373]">Time Remaining:</span>
+                <span className="font-mono font-semibold text-[#101010]">{formatTime(timeLeft)}</span>
               </div>
 
-              <p className="text-[12px] text-muted-foreground leading-relaxed pt-1">
+              <p className="text-[12px] text-[#737373] leading-relaxed pt-1">
                 Once submitted, your answers and code will be authoritatively graded against hidden test suites. This action cannot be undone.
               </p>
             </div>
@@ -4996,14 +4771,14 @@ function AssessmentContentWrapper() {
               <button
                 onClick={() => setShowSubmitModal(false)}
                 disabled={evaluating}
-                className="flex-1 h-10 border border-border text-muted-foreground font-semibold text-[13px] rounded hover:border-foreground hover:text-foreground transition-colors"
+                className="flex-1 h-10 border border-black/[0.12] text-[#737373] font-medium text-[13px] rounded-full hover:border-black/30 hover:text-[#101010] transition-colors cursor-pointer"
               >
                 Return to Test
               </button>
               <button
                 onClick={handleFinalSubmit}
                 disabled={evaluating}
-                className="flex-1 h-10 bg-emerald-900 text-white font-semibold text-[13px] rounded hover:bg-emerald-950 transition-colors disabled:opacity-50 flex items-center justify-center gap-1.5"
+                className="flex-1 h-10 bg-[#101010] text-white font-medium text-[13px] rounded-full hover:bg-black transition-colors disabled:opacity-50 flex items-center justify-center gap-1.5 cursor-pointer"
               >
                 {evaluating ? "Evaluating..." : "Confirm & Submit"}
               </button>
@@ -5015,16 +4790,16 @@ function AssessmentContentWrapper() {
       {/* 50-Test-Case Submission & Grading Progress Modal */}
       {submittingModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-xs p-4 animate-in fade-in duration-200">
-          <div className="max-w-lg w-full bg-white text-foreground rounded-2xl border border-border shadow-2xl p-6 sm:p-8 space-y-6">
-            <div className="flex items-center gap-3.5 border-b border-border pb-4">
-              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-emerald-900/10 text-emerald-900 border border-emerald-900/20 shrink-0">
+          <div className="max-w-lg w-full bg-white text-[#101010] rounded-2xl border border-black/[0.08] shadow-2xl p-6 sm:p-8 space-y-6">
+            <div className="flex items-center gap-3.5 border-b border-black/[0.08] pb-4">
+              <div className="flex h-11 w-11 items-center justify-center rounded-full bg-black/[0.04] text-[#101010] border border-black/[0.08] shrink-0">
                 <Cpu className="h-5 w-5" />
               </div>
               <div>
-                <h3 className="text-[17px] font-bold text-foreground tracking-tight">
+                <h3 className="text-[17px] font-bold text-[#101010] tracking-tight">
                   Authoritative Evaluation &amp; Grading
                 </h3>
-                <p className="text-[12px] text-muted-foreground font-mono">
+                <p className="text-[12px] text-[#737373] font-mono">
                   MeritLane Sandbox Compiler · 50-Case Test Suite
                 </p>
               </div>
@@ -5033,122 +4808,122 @@ function AssessmentContentWrapper() {
             {/* Progress Bar & Numerical Counter */}
             <div className="space-y-2">
               <div className="flex items-center justify-between text-[12px] font-mono">
-                <span className="text-muted-foreground">
+                <span className="text-[#737373]">
                   Test Suites Executed:
                 </span>
-                <span className="text-emerald-900 font-bold">
+                <span className="text-[#101010] font-bold">
                   {Math.min(50, Math.floor((submissionProgress / 100) * 50))} / 50 Cases ({submissionProgress}%)
                 </span>
               </div>
-              <div className="w-full bg-surface h-2.5 rounded-full overflow-hidden p-0.5 border border-border">
+              <div className="w-full bg-black/[0.04] h-2 rounded-full overflow-hidden p-0.5 border border-black/[0.08]">
                 <div
-                  className="h-full bg-emerald-900 rounded-full transition-all duration-300 ease-out"
+                  className="h-full bg-[#101010] rounded-full transition-all duration-300 ease-out"
                   style={{ width: `${Math.max(4, submissionProgress)}%` }}
                 />
               </div>
             </div>
 
             {/* Dynamic Stage Checklist */}
-            <div className="space-y-2.5 font-mono text-[11.5px] bg-surface p-4 rounded-xl border border-border">
+            <div className="space-y-2.5 font-mono text-[11.5px] bg-black/[0.02] p-4 rounded-xl border border-black/[0.08]">
               <div className="flex items-center justify-between">
-                <span className={`flex items-center gap-2 ${submissionProgress >= 20 ? "text-foreground font-medium" : "text-muted-foreground"}`}>
+                <span className={`flex items-center gap-2 ${submissionProgress >= 20 ? "text-[#101010] font-medium" : "text-[#737373]"}`}>
                   {submissionProgress >= 20 ? (
-                    <CheckCircle2 className="h-3.5 w-3.5 text-emerald-900 shrink-0" />
+                    <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600 shrink-0" />
                   ) : (
                     <img src="/logo-m.png" alt="Loading" className="h-3.5 w-3.5 object-contain animate-[spin_1.5s_linear_infinite] shrink-0" />
                   )}
                   <span>Suites 1–10: Baseline Functionality &amp; Types</span>
                 </span>
                 {submissionProgress >= 20 ? (
-                  <span className="text-[10px] uppercase font-bold text-emerald-900">Passed</span>
+                  <span className="text-[10px] uppercase font-bold text-emerald-600">Passed</span>
                 ) : (
-                  <span className="text-[10px] uppercase font-bold text-muted-foreground">Running</span>
+                  <span className="text-[10px] uppercase font-bold text-[#737373]">Running</span>
                 )}
               </div>
 
               <div className="flex items-center justify-between">
-                <span className={`flex items-center gap-2 ${submissionProgress >= 50 ? "text-foreground font-medium" : submissionProgress >= 20 ? "text-emerald-900 font-semibold" : "text-muted-foreground/70"}`}>
+                <span className={`flex items-center gap-2 ${submissionProgress >= 50 ? "text-[#101010] font-medium" : submissionProgress >= 20 ? "text-[#101010] font-semibold" : "text-[#737373]/70"}`}>
                   {submissionProgress >= 50 ? (
-                    <CheckCircle2 className="h-3.5 w-3.5 text-emerald-900 shrink-0" />
+                    <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600 shrink-0" />
                   ) : submissionProgress >= 20 ? (
                     <img src="/logo-m.png" alt="Loading" className="h-3.5 w-3.5 object-contain animate-[spin_1.5s_linear_infinite] shrink-0" />
                   ) : (
-                    <span className="h-3.5 w-3.5 rounded-full border border-border shrink-0" />
+                    <span className="h-3.5 w-3.5 rounded-full border border-black/[0.12] shrink-0" />
                   )}
                   <span>Suites 11–25: Boundary &amp; Corner Cases</span>
                 </span>
                 {submissionProgress >= 50 ? (
-                  <span className="text-[10px] uppercase font-bold text-emerald-900">Passed</span>
+                  <span className="text-[10px] uppercase font-bold text-emerald-600">Passed</span>
                 ) : submissionProgress >= 20 ? (
-                  <span className="text-[10px] uppercase font-bold text-emerald-900">Running</span>
+                  <span className="text-[10px] uppercase font-bold text-[#101010]">Running</span>
                 ) : (
-                  <span className="text-[10px] uppercase text-muted-foreground/70">Queued</span>
+                  <span className="text-[10px] uppercase text-[#737373]/70">Queued</span>
                 )}
               </div>
 
               <div className="flex items-center justify-between">
-                <span className={`flex items-center gap-2 ${submissionProgress >= 80 ? "text-foreground font-medium" : submissionProgress >= 50 ? "text-emerald-900 font-semibold" : "text-muted-foreground/70"}`}>
+                <span className={`flex items-center gap-2 ${submissionProgress >= 80 ? "text-[#101010] font-medium" : submissionProgress >= 50 ? "text-[#101010] font-semibold" : "text-[#737373]/70"}`}>
                   {submissionProgress >= 80 ? (
-                    <CheckCircle2 className="h-3.5 w-3.5 text-emerald-900 shrink-0" />
+                    <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600 shrink-0" />
                   ) : submissionProgress >= 50 ? (
                     <img src="/logo-m.png" alt="Loading" className="h-3.5 w-3.5 object-contain animate-[spin_1.5s_linear_infinite] shrink-0" />
                   ) : (
-                    <span className="h-3.5 w-3.5 rounded-full border border-border shrink-0" />
+                    <span className="h-3.5 w-3.5 rounded-full border border-black/[0.12] shrink-0" />
                   )}
                   <span>Suites 26–40: Computational Scale</span>
                 </span>
                 {submissionProgress >= 80 ? (
-                  <span className="text-[10px] uppercase font-bold text-emerald-900">Passed</span>
+                  <span className="text-[10px] uppercase font-bold text-emerald-600">Passed</span>
                 ) : submissionProgress >= 50 ? (
-                  <span className="text-[10px] uppercase font-bold text-emerald-900">Running</span>
+                  <span className="text-[10px] uppercase font-bold text-[#101010]">Running</span>
                 ) : (
-                  <span className="text-[10px] uppercase text-muted-foreground/70">Queued</span>
+                  <span className="text-[10px] uppercase text-[#737373]/70">Queued</span>
                 )}
               </div>
 
               <div className="flex items-center justify-between">
-                <span className={`flex items-center gap-2 ${submissionProgress >= 95 ? "text-foreground font-medium" : submissionProgress >= 80 ? "text-emerald-900 font-semibold" : "text-muted-foreground/70"}`}>
+                <span className={`flex items-center gap-2 ${submissionProgress >= 95 ? "text-[#101010] font-medium" : submissionProgress >= 80 ? "text-[#101010] font-semibold" : "text-[#737373]/70"}`}>
                   {submissionProgress >= 95 ? (
-                    <CheckCircle2 className="h-3.5 w-3.5 text-emerald-900 shrink-0" />
+                    <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600 shrink-0" />
                   ) : submissionProgress >= 80 ? (
                     <img src="/logo-m.png" alt="Loading" className="h-3.5 w-3.5 object-contain animate-[spin_1.5s_linear_infinite] shrink-0" />
                   ) : (
-                    <span className="h-3.5 w-3.5 rounded-full border border-border shrink-0" />
+                    <span className="h-3.5 w-3.5 rounded-full border border-black/[0.12] shrink-0" />
                   )}
                   <span>Suites 41–50: Memory &amp; Concurrency</span>
                 </span>
                 {submissionProgress >= 95 ? (
-                  <span className="text-[10px] uppercase font-bold text-emerald-900">Passed</span>
+                  <span className="text-[10px] uppercase font-bold text-emerald-600">Passed</span>
                 ) : submissionProgress >= 80 ? (
-                  <span className="text-[10px] uppercase font-bold text-emerald-900">Running</span>
+                  <span className="text-[10px] uppercase font-bold text-[#101010]">Running</span>
                 ) : (
-                  <span className="text-[10px] uppercase text-muted-foreground/70">Queued</span>
+                  <span className="text-[10px] uppercase text-[#737373]/70">Queued</span>
                 )}
               </div>
 
               <div className="flex items-center justify-between">
-                <span className={`flex items-center gap-2 ${submissionProgress >= 100 ? "text-foreground font-medium" : submissionProgress >= 95 ? "text-emerald-900 font-semibold" : "text-muted-foreground/70"}`}>
+                <span className={`flex items-center gap-2 ${submissionProgress >= 100 ? "text-[#101010] font-medium" : submissionProgress >= 95 ? "text-[#101010] font-semibold" : "text-[#737373]/70"}`}>
                   {submissionProgress >= 100 ? (
-                    <CheckCircle2 className="h-3.5 w-3.5 text-emerald-900 shrink-0" />
+                    <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600 shrink-0" />
                   ) : submissionProgress >= 95 ? (
                     <img src="/logo-m.png" alt="Loading" className="h-3.5 w-3.5 object-contain animate-[spin_1.5s_linear_infinite] shrink-0" />
                   ) : (
-                    <span className="h-3.5 w-3.5 rounded-full border border-border shrink-0" />
+                    <span className="h-3.5 w-3.5 rounded-full border border-black/[0.12] shrink-0" />
                   )}
                   <span>Ledger Sync &amp; Assessment Scorecard</span>
                 </span>
                 {submissionProgress >= 100 ? (
-                  <span className="text-[10px] uppercase font-bold text-emerald-900">Synced</span>
+                  <span className="text-[10px] uppercase font-bold text-emerald-600">Synced</span>
                 ) : submissionProgress >= 95 ? (
-                  <span className="text-[10px] uppercase font-bold text-emerald-900">Syncing</span>
+                  <span className="text-[10px] uppercase font-bold text-[#101010]">Syncing</span>
                 ) : (
-                  <span className="text-[10px] uppercase text-muted-foreground/70">Pending</span>
+                  <span className="text-[10px] uppercase text-[#737373]/70">Pending</span>
                 )}
               </div>
             </div>
 
-            <div className="flex items-center justify-center gap-2 text-[12px] text-muted-foreground font-sans">
-              <Lock className="h-3.5 w-3.5 text-emerald-900" />
+            <div className="flex items-center justify-center gap-2 text-[12px] text-[#737373] font-sans">
+              <Lock className="h-3.5 w-3.5 text-[#101010]" />
               <span>Please keep this window open while the sandbox grades your solution.</span>
             </div>
           </div>

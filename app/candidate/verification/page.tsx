@@ -12,13 +12,13 @@ import CooldownTimer from "@/components/candidate/cooldown-timer";
 
 function StatusStamp({ status }: { status: "VERIFIED" | "ELIGIBLE" | "COOLDOWN" }) {
   const map = {
-    VERIFIED: "text-emerald-900 bg-emerald-900/[0.08] border border-emerald-900/30",
-    ELIGIBLE: "text-foreground bg-border border border-[#C8BFB0]",
-    COOLDOWN: "text-[#92400E] bg-[#FEF3C7] border border-amber-600/30",
+    VERIFIED: "text-emerald-700 bg-emerald-50 border border-emerald-200",
+    ELIGIBLE: "text-[#101010] bg-black/[0.04] border border-black/[0.08]",
+    COOLDOWN: "text-amber-800 bg-amber-50 border border-amber-200 font-mono",
   };
   return (
-    <span className={`inline-block text-[9px] font-medium font-semibold tracking-[0.18em] px-2 py-[3px] uppercase ${map[status]}`}>
-      {status}
+    <span className={`inline-block text-xs font-medium px-2.5 py-0.5 rounded-full ${map[status]}`}>
+      {status === "VERIFIED" ? "✓ Verified" : status === "COOLDOWN" ? "Cooldown" : "Eligible"}
     </span>
   );
 }
@@ -90,41 +90,37 @@ export default function CandidateVerificationPage() {
   };
 
   return (
-    <div className="w-full min-h-full bg-transparent pb-24">
+    <div className="w-full min-h-full bg-transparent pb-24 text-[#101010] font-sans">
 
       {/* ── Header Strip ── */}
-      <div className="border-b border-border bg-white px-4 sm:px-6 lg:px-8 py-5">
+      <div className="border-b border-black/[0.08] bg-white px-4 sm:px-6 lg:px-8 py-5">
         <div className="max-w-7xl mx-auto w-full flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <div className="text-[10px] font-medium tracking-[0.2em] text-muted-foreground uppercase mb-1">
+            <div className="text-[11px] font-medium tracking-wider text-[#71717A] uppercase mb-1">
               Skill Verification · Meritlane
             </div>
-            <h1 className="text-[26px] sm:text-[32px] text-foreground font-semibold tracking-tight leading-tight">
-              Skill Tests &amp; Badges
+            <h1 className="text-[26px] sm:text-[32px] text-[#101010] font-semibold tracking-[-0.035em] leading-tight">
+              Skill Assessments
             </h1>
-            <p className="text-[12px] text-muted-foreground mt-0.5">
-              Standardized, proctored assessments evaluating real executed code — earn verified credentials to unlock direct employer hiring without 0-2 year experience barriers.
+            <p className="text-[13px] text-[#71717A] mt-1">
+              Take timed technical evaluations to earn verified proof badges on your profile.
             </p>
           </div>
+
           <div className="flex items-center gap-6 shrink-0">
             <div className="text-right">
-              <div className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider mb-0.5">Verified (≥75%)</div>
-              <div className="text-[24px] font-semibold text-emerald-900">{verifiedCount}</div>
+              <div className="text-[10px] font-medium text-[#71717A] uppercase tracking-wider mb-0.5">Verified Badges</div>
+              <div className="text-[24px] font-semibold text-emerald-700">{verifiedCount}</div>
             </div>
-            <div className="w-px h-10 bg-border" />
+            <div className="w-px h-10 bg-black/[0.08]" />
             <div className="text-right">
-              <div className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider mb-0.5">Total Skills</div>
-              <div className="text-[24px] font-semibold text-foreground">{skills.length}</div>
-            </div>
-            <div className="w-px h-10 bg-border" />
-            <div className="text-right">
-              <div className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider mb-0.5">Employer Discovery</div>
-              <div className={`text-[12px] font-mono font-bold mt-1.5 px-2.5 py-0.5 rounded ${
+              <div className="text-[10px] font-medium text-[#71717A] uppercase tracking-wider mb-0.5">Employer Discovery</div>
+              <div className={`text-xs font-mono font-medium mt-1.5 px-3 py-1 rounded-full border ${
                 isEmployerPortalUnlocked
-                  ? "bg-[#DCFCE7] text-[#166534] border border-[#86EFAC]"
-                  : "bg-[#FEF3C7] text-[#92400E] border border-[#FDE68A]"
+                  ? "bg-emerald-50 text-emerald-700 border-emerald-200"
+                  : "bg-amber-50 text-amber-800 border-amber-200"
               }`}>
-                {isEmployerPortalUnlocked ? "✓ UNLOCKED" : `${verifiedCount}/${requiredForEmployerPortal} (50%)`}
+                {isEmployerPortalUnlocked ? "✓ Unlocked" : `${verifiedCount}/${requiredForEmployerPortal} (50%)`}
               </div>
             </div>
           </div>
@@ -138,40 +134,40 @@ export default function CandidateVerificationPage() {
 
           <div className="flex items-center justify-between">
             <div>
-              <div className="text-[9px] font-medium tracking-[0.18em] text-muted-foreground uppercase mb-0.5">Your Skills</div>
-              <h2 className="text-[12px] font-medium font-semibold text-foreground uppercase tracking-[0.08em]">
-                Available Skill Tests
+              <div className="text-[11px] font-medium text-[#71717A] uppercase tracking-wider mb-0.5">Available Tests</div>
+              <h2 className="text-base font-semibold text-[#101010] tracking-tight">
+                Skill Test Index
               </h2>
             </div>
-            <div className="text-[10px] font-mono text-muted-foreground">
+            <div className="text-xs font-mono text-[#71717A]">
               {skills.length} {skills.length === 1 ? "skill" : "skills"}
             </div>
           </div>
 
           {isFetching ? (
-            <div className="border border-border bg-white p-12 text-center">
-              <div className="h-5 w-5 border-2 border-border border-t-[#1C1917] rounded-full animate-spin mx-auto mb-3" />
-              <p className="text-[12px] font-mono text-muted-foreground">Loading your skill tests…</p>
+            <div className="border border-black/[0.08] bg-white rounded-2xl p-12 text-center shadow-xs">
+              <div className="h-5 w-5 border-2 border-black/[0.1] border-t-[#101010] rounded-full animate-spin mx-auto mb-3" />
+              <p className="text-xs text-[#71717A]">Loading your skill tests…</p>
             </div>
           ) : skills.length === 0 ? (
-            <div className="border border-dashed border-[#C8BFB0] bg-white p-14 text-center">
-              <BookOpen className="h-8 w-8 text-[#C8BFB0] mx-auto mb-4" />
-              <div className="text-[16px] font-serif text-foreground mb-2">No skills added yet</div>
-              <p className="text-[13px] text-muted-foreground font-sans mb-6 max-w-sm mx-auto leading-relaxed">
+            <div className="border border-dashed border-black/[0.12] bg-white rounded-2xl p-14 text-center shadow-xs">
+              <BookOpen className="h-8 w-8 text-[#A1A1AA] mx-auto mb-4" />
+              <div className="text-lg font-semibold text-[#101010] mb-2 tracking-tight">No skills added yet</div>
+              <p className="text-[13px] text-[#71717A] mb-6 max-w-sm mx-auto leading-relaxed">
                 Add skills in your profile to take tests and earn verified badges for recruiters to see.
               </p>
               <Link href="/candidate/profile">
-                <button className="text-[11px] font-mono font-semibold px-5 py-2.5 bg-foreground hover:bg-emerald-900 text-white transition-colors tracking-[0.06em] rounded">
-                  GO TO PROFILE
+                <button className="text-xs font-medium px-5 py-2.5 bg-[#101010] hover:bg-[#252525] text-white transition-all rounded-full shadow-xs">
+                  Go to Profile
                 </button>
               </Link>
             </div>
           ) : (
-            <div className="border border-border bg-white overflow-hidden">
+            <div className="border border-black/[0.08] bg-white rounded-2xl shadow-xs overflow-hidden">
               {/* Table head */}
-              <div className="hidden sm:grid sm:grid-cols-[2rem_1fr_7rem_5rem_7rem_8rem] border-b border-border bg-border px-4 py-2.5">
+              <div className="hidden sm:grid sm:grid-cols-[2rem_1fr_7rem_5rem_7rem_8rem] border-b border-black/[0.08] bg-[#FAFAF9] px-5 py-3">
                 {["#", "Skill", "Status", "Score", "Test Date", "Action"].map((h) => (
-                  <div key={h} className={`text-[9px] font-medium text-muted-foreground uppercase tracking-[0.18em] ${h === "Action" ? "text-right" : ""}`}>
+                  <div key={h} className={`text-[11px] font-medium text-[#71717A] uppercase tracking-wider ${h === "Action" ? "text-right" : ""}`}>
                     {h}
                   </div>
                 ))}
@@ -188,39 +184,36 @@ export default function CandidateVerificationPage() {
                       day: "2-digit", month: "short", year: "numeric",
                     })
                   : null;
-                const daysLeft = cooldowns[skill]
-                  ? Math.max(1, Math.ceil((cooldowns[skill] + 14 * 24 * 60 * 60 * 1000 - Date.now()) / 86400000))
-                  : null;
                 const rowStatus: "VERIFIED" | "ELIGIBLE" | "COOLDOWN" = isVerified
                   ? "VERIFIED" : inCooldown ? "COOLDOWN" : "ELIGIBLE";
 
                 return (
                   <div
                     key={skill}
-                    className={`sm:grid sm:grid-cols-[2rem_1fr_7rem_5rem_7rem_8rem] flex flex-col gap-2 sm:gap-0 items-start sm:items-center px-4 py-4 border-b border-border last:border-b-0 transition-colors ${
-                      isVerified ? "bg-emerald-900/[0.02]" : "bg-white hover:bg-surface"
+                    className={`sm:grid sm:grid-cols-[2rem_1fr_7rem_5rem_7rem_8rem] flex flex-col gap-2 sm:gap-0 items-start sm:items-center px-5 py-4 border-b border-black/[0.06] last:border-b-0 transition-colors ${
+                      isVerified ? "bg-emerald-50/20" : "bg-white hover:bg-[#FAFAF9]"
                     }`}
                   >
-                    <div className="hidden sm:block text-[11px] font-mono text-[#C8BFB0]">
+                    <div className="hidden sm:block text-xs font-mono text-[#A1A1AA]">
                       {String(idx + 1).padStart(2, "0")}
                     </div>
 
                     <div>
                       <div className="flex items-center gap-2">
-                        <span className="text-[14px] font-serif text-foreground">{skill}</span>
+                        <span className="text-[14px] font-medium text-[#101010]">{skill}</span>
                         {isVerified && (verifiedObj?.badge === "gold_honors" || verifiedObj?.track === "advanced" ? (
-                          <span className="inline-flex items-center gap-0.5 text-[9px] font-mono font-bold uppercase tracking-wider text-amber-800 bg-amber-50 border border-amber-300 px-1.5 py-0.5 rounded">
-                            <Trophy className="h-2.5 w-2.5 text-amber-700" /> Gold Honors
+                          <span className="inline-flex items-center gap-1 text-[11px] font-medium text-amber-800 bg-amber-50 border border-amber-300 px-2 py-0.5 rounded-full">
+                            <Trophy className="h-3 w-3 text-amber-700" /> Gold Honors
                           </span>
                         ) : (
-                          <span className="inline-flex items-center gap-0.5 text-[9px] font-mono font-bold uppercase tracking-wider text-emerald-900 bg-emerald-900/10 border border-emerald-900/20 px-1.5 py-0.5 rounded">
-                            <Award className="h-2.5 w-2.5 text-emerald-900" /> Professional
+                          <span className="inline-flex items-center gap-1 text-[11px] font-medium text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full">
+                            <Award className="h-3 w-3 text-emerald-600" /> Professional
                           </span>
                         ))}
                       </div>
                       {isVerified && (
-                        <div className="text-[10px] font-mono text-emerald-900 mt-0.5 flex items-center gap-1">
-                          <ShieldCheck className="h-2.5 w-2.5" />Active on public profile
+                        <div className="text-[11px] font-mono text-emerald-700 mt-0.5 flex items-center gap-1">
+                          <ShieldCheck className="h-3 w-3" />Active on public profile
                         </div>
                       )}
                       {inCooldown && (
@@ -243,11 +236,11 @@ export default function CandidateVerificationPage() {
 
                     <div><StatusStamp status={rowStatus} /></div>
 
-                    <div className="text-[13px] font-mono text-foreground">
+                    <div className="text-[13px] font-mono text-[#101010]">
                       {score ? `${score}%` : "—"}
                     </div>
 
-                    <div className="text-[11px] font-mono text-muted-foreground">
+                    <div className="text-xs font-mono text-[#71717A]">
                       {verifiedAt || "—"}
                     </div>
 
@@ -255,13 +248,13 @@ export default function CandidateVerificationPage() {
                       {isVerified ? (
                         user && (
                           <Link href={`/p/${user.uid}`} target="_blank">
-                            <button className="flex items-center gap-1 text-[10px] font-mono text-emerald-900 border border-emerald-900/30 px-3 py-1 hover:bg-emerald-900/5 transition-colors rounded">
-                              VIEW <ExternalLink className="h-2.5 w-2.5" />
+                            <button className="flex items-center gap-1 text-xs font-medium text-emerald-700 border border-emerald-200 px-3 py-1 hover:bg-emerald-50 transition-colors rounded-full cursor-pointer">
+                              View <ExternalLink className="h-3 w-3" />
                             </button>
                           </Link>
                         )
                       ) : inCooldown ? (
-                        <span className="inline-flex items-center gap-1 text-[10px] font-mono font-semibold bg-[#FEF3C7] border border-[#FDE68A] text-[#92400E] px-2.5 py-1 rounded cursor-not-allowed select-none tabular-nums">
+                        <span className="inline-flex items-center gap-1 text-xs font-mono font-medium bg-amber-50 border border-amber-200 text-amber-800 px-3 py-1 rounded-full cursor-not-allowed select-none tabular-nums">
                           <CooldownTimer
                             timestamp={cooldownTs}
                             durationDays={14}
@@ -278,16 +271,16 @@ export default function CandidateVerificationPage() {
                       ) : (
                         isSkillSupported(skill) ? (
                           <Link href={`/candidate/assessment?skill=${encodeURIComponent(skill)}`}>
-                            <button className="flex items-center gap-1 text-[10px] font-mono font-semibold bg-foreground hover:bg-emerald-900 text-white px-3.5 py-1 transition-colors rounded">
-                              TAKE TEST <ArrowRight className="h-2.5 w-2.5" />
+                            <button className="flex items-center gap-1.5 text-xs font-medium bg-[#101010] hover:bg-[#252525] text-white px-4 py-1.5 transition-all rounded-full shadow-xs cursor-pointer active:scale-[0.98]">
+                              Take Test <ArrowRight className="h-3 w-3" />
                             </button>
                           </Link>
                         ) : (
                           <span
                             title="Assessment currently in development"
-                            className="inline-flex items-center gap-1 text-[10px] font-mono font-semibold bg-[#F2EFE9] border border-border text-muted-foreground px-3.5 py-1 rounded cursor-not-allowed select-none tabular-nums"
+                            className="inline-flex items-center gap-1 text-xs font-medium bg-[#F4F4F2] border border-black/[0.08] text-[#71717A] px-3.5 py-1 rounded-full cursor-not-allowed select-none"
                           >
-                            IN DEVELOPMENT
+                            In Development
                           </span>
                         )
                       )}
@@ -300,13 +293,13 @@ export default function CandidateVerificationPage() {
 
           {/* Test History */}
           {verifiedCount > 0 && (
-            <div className="border border-border bg-white">
-              <div className="border-b border-border bg-border px-5 py-3">
-                <div className="text-[9px] font-medium tracking-[0.18em] text-muted-foreground uppercase">
+            <div className="border border-black/[0.08] bg-white rounded-2xl shadow-xs overflow-hidden">
+              <div className="border-b border-black/[0.08] bg-[#FAFAF9] px-6 py-4">
+                <div className="text-xs font-medium text-[#71717A] uppercase tracking-wider">
                   Test History &amp; Verified Badges
                 </div>
               </div>
-              <div className="p-5 space-y-0 divide-y divide-[#F0EDE8]">
+              <div className="p-6 space-y-0 divide-y divide-black/[0.06]">
                 {skills
                   .filter((s) => profile?.verifiedSkills?.[s]?.status === "verified")
                   .map((s) => {
@@ -317,14 +310,14 @@ export default function CandidateVerificationPage() {
                         })
                       : "Unknown date";
                     return (
-                      <div key={s} className="flex items-center gap-4 py-3 first:pt-0 last:pb-0">
-                        <div className="h-1.5 w-1.5 rounded bg-emerald-900 shrink-0" />
-                        <div className="flex-1 text-[12px] font-sans text-foreground">
+                      <div key={s} className="flex items-center gap-4 py-3.5 first:pt-0 last:pb-0">
+                        <div className="h-2 w-2 rounded-full bg-emerald-600 shrink-0" />
+                        <div className="flex-1 text-[13px] text-[#101010]">
                           <span className="font-medium">{s}</span>
-                          <span className="text-muted-foreground"> — test passed</span>
+                          <span className="text-[#71717A]"> — evaluation passed</span>
                         </div>
-                        <div className="text-[11px] font-mono text-muted-foreground shrink-0">{dt}</div>
-                        <div className="text-[10px] font-mono font-semibold text-emerald-900 shrink-0">
+                        <div className="text-xs font-mono text-[#71717A] shrink-0">{dt}</div>
+                        <div className="text-xs font-mono font-semibold text-emerald-700 shrink-0">
                           {v.score ? `${v.score}%` : "Passed"}
                         </div>
                       </div>
@@ -338,32 +331,32 @@ export default function CandidateVerificationPage() {
         {/* ── RIGHT: Test Rules & Info ── */}
         <div className="space-y-5 lg:sticky lg:top-6 self-start">
 
-          <div className="border border-border bg-white">
-            <div className="border-b border-border bg-border px-5 py-3">
-              <div className="text-[9px] font-medium tracking-[0.18em] text-muted-foreground uppercase">
+          <div className="border border-black/[0.08] bg-white rounded-2xl shadow-xs overflow-hidden">
+            <div className="border-b border-black/[0.08] bg-[#FAFAF9] px-5 py-3.5">
+              <div className="text-xs font-medium text-[#71717A] uppercase tracking-wider">
                 Test Details
               </div>
             </div>
-            <div className="divide-y divide-[#F0EDE8]">
+            <div className="divide-y divide-black/[0.06]">
               {[
                 { label: "Passing Score", value: "75% (All Components)" },
                 { label: "Employer Portal", value: "Pass 50% of Skills" },
                 { label: "Time Limit", value: "45 Minutes" },
-                { label: "Mode", value: "Fullscreen Window" },
+                { label: "Mode", value: "Fullscreen Monitored" },
                 { label: "Retry Wait Time", value: "14 Days" },
                 { label: "Badge Visibility", value: "Public Profile" },
                 { label: "Retakes", value: "Allowed After Wait Time" },
               ].map(({ label, value }) => (
                 <div key={label} className="flex items-center justify-between px-5 py-3">
-                  <span className="text-[11px] font-mono text-muted-foreground">{label}</span>
-                  <span className="text-[12px] font-mono font-semibold text-foreground">{value}</span>
+                  <span className="text-xs text-[#71717A]">{label}</span>
+                  <span className="text-xs font-mono font-medium text-[#101010]">{value}</span>
                 </div>
               ))}
             </div>
           </div>
 
-          <div className="border border-border bg-white p-5">
-            <div className="text-[9px] font-medium tracking-[0.18em] text-muted-foreground uppercase mb-3">
+          <div className="border border-black/[0.08] bg-white rounded-2xl p-5 shadow-xs">
+            <div className="text-xs font-medium text-[#71717A] uppercase tracking-wider mb-3">
               Requirements
             </div>
             <div className="space-y-3">
@@ -375,24 +368,24 @@ export default function CandidateVerificationPage() {
                 "Verify at least 50% of your listed skills to unlock visibility in the Employer Portal.",
               ].map((rule, i) => (
                 <div key={i} className="flex gap-3">
-                  <div className="text-[9px] font-mono text-[#C8BFB0] pt-0.5 shrink-0">
+                  <div className="text-xs font-mono text-[#A1A1AA] pt-0.5 shrink-0">
                     {String(i + 1).padStart(2, "0")}
                   </div>
-                  <div className="text-[12px] font-sans text-muted-foreground leading-relaxed">{rule}</div>
+                  <div className="text-xs text-[#71717A] leading-relaxed">{rule}</div>
                 </div>
               ))}
             </div>
           </div>
 
-          <div className="border border-border bg-white p-5">
-            <div className="text-[9px] font-medium tracking-[0.18em] text-muted-foreground uppercase mb-3">
+          <div className="border border-black/[0.08] bg-white rounded-2xl p-5 shadow-xs">
+            <div className="text-xs font-medium text-[#71717A] uppercase tracking-wider mb-3">
               Status Explanations
             </div>
             <div className="space-y-3">
               {(["VERIFIED", "ELIGIBLE", "COOLDOWN"] as const).map((s) => (
                 <div key={s} className="flex items-start gap-3">
                   <div className="pt-0.5"><StatusStamp status={s} /></div>
-                  <span className="text-[11px] font-sans text-muted-foreground leading-relaxed">
+                  <span className="text-xs text-[#71717A] leading-relaxed">
                     {s === "VERIFIED"
                       ? "Skill test passed and badge active"
                       : s === "ELIGIBLE"
@@ -404,18 +397,18 @@ export default function CandidateVerificationPage() {
             </div>
           </div>
 
-          <div className="border border-border bg-white p-5">
-            <div className="text-[9px] font-medium tracking-[0.18em] text-muted-foreground uppercase mb-3">
+          <div className="border border-black/[0.08] bg-white rounded-2xl p-5 shadow-xs">
+            <div className="text-xs font-medium text-[#71717A] uppercase tracking-wider mb-2">
               Why Verification Matters
             </div>
-            <p className="text-[12px] font-sans text-muted-foreground leading-relaxed mb-4">
+            <p className="text-xs text-[#71717A] leading-relaxed mb-3.5">
               Tests verify your practical coding abilities. Once you pass, verified badges appear on your public profile for tech recruiters to see.
             </p>
             <Link
               href="/how-verification-works"
-              className="flex items-center gap-1.5 text-[11px] font-mono font-semibold text-foreground hover:text-emerald-900 transition-colors"
+              className="inline-flex items-center gap-1.5 text-xs font-medium text-[#101010] hover:text-[#71717A] transition-colors"
             >
-              LEARN HOW VERIFICATION WORKS <ArrowRight className="h-2.5 w-2.5" />
+              Learn how verification works <ArrowRight className="h-3 w-3" />
             </Link>
           </div>
         </div>
@@ -423,4 +416,3 @@ export default function CandidateVerificationPage() {
     </div>
   );
 }
-

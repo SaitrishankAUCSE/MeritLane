@@ -228,38 +228,38 @@ export default function CandidateDashboardPage() {
   }
 
   return (
-    <div className="w-full min-h-full bg-surface pb-24 text-foreground font-sans">
+    <div className="w-full min-h-full bg-transparent pb-24 text-[#101010] font-sans">
       
       {/* ── Registry Command Header (Full Width Strip) ── */}
-      <div className="border-b border-border bg-white px-4 sm:px-6 lg:px-8 py-6">
+      <div className="border-b border-black/[0.08] bg-white px-4 sm:px-6 lg:px-8 py-6">
         <div className="max-w-7xl mx-auto w-full flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div>
-            <div className="flex items-center gap-2.5 flex-wrap mb-1">
-              <span className="text-[10px] font-medium tracking-[0.2em] text-muted-foreground uppercase">
-                Projects &amp; Evidence · Meritlane
+            <div className="flex items-center gap-2.5 flex-wrap mb-1.5">
+              <span className="text-[11px] font-medium tracking-wider text-[#71717A] uppercase">
+                Candidate Dashboard
               </span>
-              <span className="text-[11px] font-mono font-semibold text-emerald-900 bg-emerald-900/10 px-2.5 py-0.5 rounded border border-emerald-900/20">
-                Candidate ID: {profile?.candidateKey || (user?.uid ? `ML-${user.uid.slice(0, 8).toUpperCase()}` : "—")}
+              <span className="text-xs font-mono font-medium text-[#101010] bg-black/[0.04] px-2.5 py-0.5 rounded-full border border-black/[0.08]">
+                ID: {profile?.candidateKey || (user?.uid ? `ML-${user.uid.slice(0, 8).toUpperCase()}` : "—")}
               </span>
-              <span className="text-[11px] text-muted-foreground font-mono">
+              <span className="text-xs text-[#71717A]">
                 · Employer Discovery: {isEmployerPortalUnlocked ? "Unlocked" : `${verifiedSkillsCount}/${requiredForEmployerPortal} (50% needed)`}
               </span>
             </div>
 
-            <h1 className="font-serif text-[32px] sm:text-[38px] text-foreground font-bold tracking-tight leading-tight py-0.5">
+            <h1 className="text-[28px] sm:text-[34px] text-[#101010] font-semibold tracking-[-0.035em] leading-tight">
               {profile?.name || "Candidate Profile"}
             </h1>
 
             {(profile?.college || profile?.branch) && (
-              <div className="mt-1.5 flex items-center gap-2 flex-wrap text-[13px] text-[#57534E] font-sans">
-                <GraduationCap className="h-4 w-4 text-emerald-900" />
-                {profile.branch && <span className="font-medium text-foreground">{profile.branch}</span>}
-                {profile.branch && profile.college ? <span className="text-[#C8BFB0]">·</span> : null}
+              <div className="mt-1.5 flex items-center gap-2 flex-wrap text-[13px] text-[#71717A]">
+                <GraduationCap className="h-4 w-4 text-[#101010]" />
+                {profile.branch && <span className="font-medium text-[#101010]">{profile.branch}</span>}
+                {profile.branch && profile.college ? <span className="text-black/20">·</span> : null}
                 {profile.college && <span>{profile.college}</span>}
                 {profile.gradYear ? (
                   <>
-                    <span className="text-[#C8BFB0]">·</span>
-                    <span className="font-mono text-[12px] text-muted-foreground">Class of {profile.gradYear}</span>
+                    <span className="text-black/20">·</span>
+                    <span className="font-mono text-xs text-[#71717A]">Class of {profile.gradYear}</span>
                   </>
                 ) : null}
               </div>
@@ -267,44 +267,40 @@ export default function CandidateDashboardPage() {
           </div>
 
           {/* Quick Actions & Public Dossier Copy */}
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 shrink-0">
-            <motion.button
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 shrink-0">
+            <button
               onClick={handleCopyPublicLink}
-              className="flex items-center justify-center gap-2 px-4 h-9 border border-[#D5CBBA] bg-gradient-to-b from-white via-[#FAF6ED] to-[#F1EAE0] hover:border-[#1F3D2B] hover:text-[#1F3D2B] text-foreground rounded-[4px_16px_4px_16px] hover:rounded-[16px_4px_16px_4px] text-[13px] font-medium transition-all duration-300 shadow-[0_1px_3px_rgba(28,25,23,0.08),inset_0_1px_0_#FFFFFF] cursor-pointer"
+              className="flex items-center justify-center gap-2 px-4 h-9 border border-black/[0.12] bg-white hover:bg-[#F4F4F2] text-[#101010] rounded-full text-xs font-medium transition-all shadow-xs cursor-pointer active:scale-[0.98]"
             >
               {copiedLink ? (
                 <>
-                  <Check className="h-4 w-4 text-emerald-900" />
-                  <span>Public Link Copied</span>
+                  <Check className="h-3.5 w-3.5 text-emerald-600" />
+                  <span>Link Copied</span>
                 </>
               ) : (
                 <>
-                  <Copy className="h-4 w-4 text-muted-foreground" />
-                  <span>Copy Public Profile Link</span>
+                  <Copy className="h-3.5 w-3.5 text-[#71717A]" />
+                  <span>Copy Profile Link</span>
                 </>
               )}
-            </motion.button>
+            </button>
 
             <button
               onClick={() => window.dispatchEvent(new CustomEvent("open-meritlane-welcome"))}
-              className="flex items-center justify-center gap-1.5 px-3.5 h-9 border border-emerald-900/25 bg-emerald-900/[0.05] hover:bg-emerald-900/10 text-emerald-900 rounded-[12px_3px_12px_3px] hover:rounded-[3px_12px_3px_12px] text-[13px] font-medium transition-all duration-300 cursor-pointer active:scale-[0.98]"
+              className="flex items-center justify-center gap-1.5 px-3.5 h-9 border border-black/[0.12] bg-white hover:bg-[#F4F4F2] text-[#101010] rounded-full text-xs font-medium transition-all shadow-xs cursor-pointer active:scale-[0.98]"
               title="Learn how MeritLane works"
             >
-              <Sparkles className="h-3.5 w-3.5 text-emerald-900" />
+              <Sparkles className="h-3.5 w-3.5 text-[#71717A]" />
               <span>Protocol Tour</span>
             </button>
 
-            <motion.button 
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
+            <button 
               type="button"
               onClick={() => setIsModalOpen(true)}
-              className="flex items-center justify-center gap-2 px-5 h-9 bg-gradient-to-b from-[#244A33] via-[#1B3A28] to-[#132A1D] border border-[#0F2217] text-white hover:from-[#2B543B] hover:to-[#173523] rounded-[16px_4px_16px_4px] hover:rounded-[4px_16px_4px_16px] text-[13px] font-medium transition-all duration-300 shadow-[0_2px_5px_rgba(19,42,29,0.35),inset_0_1px_0_rgba(255,255,255,0.22)] hover:shadow-[0_6px_16px_-2px_rgba(19,42,29,0.45)] cursor-pointer"
+              className="flex items-center justify-center gap-2 px-5 h-9 bg-[#101010] text-white hover:bg-[#252525] rounded-full text-xs font-medium transition-all shadow-xs cursor-pointer active:scale-[0.98]"
             >
               <span>+</span> Add Project
-            </motion.button>
+            </button>
           </div>
         </div>
       </div>
@@ -314,61 +310,61 @@ export default function CandidateDashboardPage() {
 
 
 
-      {/* Navigation Tabs */}
-      <div className="flex items-center gap-2 border-b border-border mb-8 pb-px">
+      {/* Navigation Tabs (Devin Minimalist) */}
+      <div className="flex items-center gap-2 border-b border-black/[0.08] mb-8 pb-px">
         <button
           onClick={() => setActiveTab("matrix")}
-          className={`pb-3.5 px-4 text-[13px] font-medium transition-all relative ${
+          className={`pb-3.5 px-4 text-xs font-medium transition-all relative ${
             activeTab === "matrix"
-              ? "text-emerald-900 font-semibold"
-              : "text-muted-foreground hover:text-foreground"
+              ? "text-[#101010] font-semibold"
+              : "text-[#71717A] hover:text-[#101010]"
           }`}
         >
           <span>Skills</span>
-          <span className="ml-2 px-1.5 py-0.5 rounded text-[11px] font-mono bg-surface border border-border">
+          <span className="ml-2 px-2 py-0.5 rounded-full text-[11px] font-mono bg-black/[0.04] text-[#101010]">
             {skills.length}
           </span>
           {activeTab === "matrix" && (
             <motion.div
               layoutId="activeTabUnderline"
-              className="absolute bottom-0 left-0 right-0 h-0.5 bg-emerald-900"
+              className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#101010]"
             />
           )}
         </button>
 
         <button
           onClick={() => setActiveTab("artifacts")}
-          className={`pb-3.5 px-4 text-[13px] font-medium transition-all relative ${
+          className={`pb-3.5 px-4 text-xs font-medium transition-all relative ${
             activeTab === "artifacts"
-              ? "text-emerald-900 font-semibold"
-              : "text-muted-foreground hover:text-foreground"
+              ? "text-[#101010] font-semibold"
+              : "text-[#71717A] hover:text-[#101010]"
           }`}
         >
           <span>Projects</span>
-          <span className="ml-2 px-1.5 py-0.5 rounded text-[11px] font-mono bg-surface border border-border">
+          <span className="ml-2 px-2 py-0.5 rounded-full text-[11px] font-mono bg-black/[0.04] text-[#101010]">
             {projects.length}
           </span>
           {activeTab === "artifacts" && (
             <motion.div
               layoutId="activeTabUnderline"
-              className="absolute bottom-0 left-0 right-0 h-0.5 bg-emerald-900"
+              className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#101010]"
             />
           )}
         </button>
 
         <button
           onClick={() => setActiveTab("provenance")}
-          className={`pb-3.5 px-4 text-[13px] font-medium transition-all relative ${
+          className={`pb-3.5 px-4 text-xs font-medium transition-all relative ${
             activeTab === "provenance"
-              ? "text-emerald-900 font-semibold"
-              : "text-muted-foreground hover:text-foreground"
+              ? "text-[#101010] font-semibold"
+              : "text-[#71717A] hover:text-[#101010]"
           }`}
         >
           <span>GitHub Activity</span>
           {activeTab === "provenance" && (
             <motion.div
               layoutId="activeTabUnderline"
-              className="absolute bottom-0 left-0 right-0 h-0.5 bg-emerald-900"
+              className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#101010]"
             />
           )}
         </button>
@@ -377,12 +373,15 @@ export default function CandidateDashboardPage() {
       {/* Tab 1: Competency Matrix */}
       {activeTab === "matrix" && (
         <div className="space-y-6">
-          <div className="bg-white border border-border rounded shadow-xs overflow-hidden">
-            <div className="p-5 sm:p-6 border-b border-border flex items-center justify-between">
+          <div className="bg-white border border-black/[0.08] rounded-2xl shadow-xs overflow-hidden">
+            <div className="p-5 sm:p-6 border-b border-black/[0.08] flex items-center justify-between">
               <div>
-                <h2 className="text-[17px] font-serif text-foreground font-normal">
+                <h2 className="text-[18px] font-semibold text-[#101010] tracking-tight">
                   Skills &amp; Test Results
                 </h2>
+                <p className="text-xs text-[#71717A] mt-0.5">
+                  Complete technical assessments to achieve skill verification badges
+                </p>
               </div>
             </div>
 
@@ -428,54 +427,54 @@ export default function CandidateDashboardPage() {
                         </td>
                         <td className="py-4 px-6">
                           <span
-                            className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded text-[11px] font-mono font-semibold border transition-all duration-300 ${
+                            className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium border transition-all ${
                               isVerified
-                                ? "bg-[#DCFCE7] text-[#166534] border-[#BBF7D0] shadow-[0_0_8px_rgba(22,101,52,0.15)] animate-pulse"
+                                ? "bg-emerald-50 text-emerald-700 border-emerald-200"
                                 : inCooldown
-                                ? "bg-[#FEF3C7] text-[#92400E] border-[#FDE68A]"
+                                ? "bg-amber-50 text-amber-800 border-amber-200 font-mono"
                                 : itemsCount > 0
-                                ? "bg-[#EFF6FF] text-[#1E40AF] border-[#BFDBFE]"
-                                : "bg-surface text-muted-foreground border-border"
+                                ? "bg-blue-50 text-blue-700 border-blue-200"
+                                : "bg-black/[0.04] text-[#71717A] border-black/[0.08]"
                             }`}
                           >
                             {isVerified
-                              ? "✓ VERIFIED"
+                              ? "✓ Verified"
                               : inCooldown
-                              ? "COOLDOWN"
+                              ? "Cooldown"
                               : itemsCount > 0
-                              ? "PROJECT LINKED"
-                              : "NOT TESTED"}
+                              ? "Project Linked"
+                              : "Not Tested"}
                           </span>
                         </td>
-                        <td className="py-4 px-6 font-mono text-[13px]">
+                        <td className="py-4 px-6 font-mono text-xs text-[#101010]">
                           {isVerified && skillVer?.score ? (
-                            <span className="font-bold text-[#166534]">{skillVer.score}%</span>
+                            <span className="font-semibold text-emerald-700">{skillVer.score}%</span>
                           ) : inCooldown ? (
                             <div>
-                              <span className="font-semibold text-danger">{cdInfo.score !== undefined ? `${cdInfo.score}%` : "0%"}</span>
-                              <span className="text-[10px] text-muted-foreground block">Failed</span>
+                              <span className="font-semibold text-red-600">{cdInfo.score !== undefined ? `${cdInfo.score}%` : "0%"}</span>
+                              <span className="text-[10px] text-[#71717A] block">Failed</span>
                             </div>
                           ) : (
-                            <span className="text-muted-foreground">—</span>
+                            <span className="text-[#A1A1AA]">—</span>
                           )}
                         </td>
-                        <td className="py-4 px-6 text-muted-foreground">
+                        <td className="py-4 px-6 text-xs text-[#71717A]">
                           {itemsCount > 0 ? (
-                            <span className="font-mono text-foreground font-medium">
+                            <span className="text-[#101010] font-medium">
                               {itemsCount} project{itemsCount > 1 ? "s" : ""}
                             </span>
                           ) : (
-                            <span>No project added</span>
+                            <span className="text-[#A1A1AA]">No project added</span>
                           )}
                         </td>
                         <td className="py-4 px-6 text-right">
                           {isVerified ? (
-                            <span className="text-[12px] font-mono text-[#166534] font-medium">
+                            <span className="text-xs font-mono text-emerald-700 font-medium">
                               Verified
                             </span>
                           ) : inCooldown ? (
                             <div
-                              className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#FEF3C7] border border-[#FDE68A] text-[#92400E] text-[12px] font-mono font-semibold rounded-[12px_3px_12px_3px] cursor-not-allowed select-none tabular-nums shadow-2xs"
+                              className="inline-flex items-center gap-1.5 px-3 py-1 bg-amber-50 border border-amber-200 text-amber-800 text-xs font-mono font-medium rounded-full cursor-not-allowed select-none tabular-nums"
                               title="Locked in study cooldown"
                             >
                               <CooldownTimer
@@ -496,7 +495,7 @@ export default function CandidateDashboardPage() {
                               <Link
                                 href={`/candidate/assessment?skill=${encodeURIComponent(skill)}`}
                                 prefetch={true}
-                                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-gradient-to-b from-[#244A33] via-[#1B3A28] to-[#132A1D] border border-[#0F2217] hover:from-[#2B543B] hover:to-[#173523] text-[#F7F3E9] text-[12px] font-medium rounded-[12px_3px_12px_3px] hover:rounded-[3px_12px_3px_12px] transition-all duration-300 shadow-[0_2px_4px_rgba(19,42,29,0.3),inset_0_1px_0_rgba(255,255,255,0.2)] hover:shadow-[0_4px_10px_-1px_rgba(19,42,29,0.4)] active:scale-[0.98]"
+                                className="inline-flex items-center gap-1.5 px-4 py-1.5 bg-[#101010] text-white hover:bg-[#252525] text-xs font-medium rounded-full transition-all shadow-xs active:scale-[0.98]"
                               >
                                 <Clock className="h-3 w-3" />
                                 <span>Take Test</span>
@@ -505,7 +504,7 @@ export default function CandidateDashboardPage() {
                             ) : (
                               <span
                                 title="Assessment currently in development"
-                                className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#F2EFE9] text-muted-foreground text-[12px] font-medium rounded-[10px_3px_10px_3px] cursor-not-allowed border border-border select-none"
+                                className="inline-flex items-center gap-1.5 px-3 py-1 bg-[#F4F4F2] text-[#71717A] text-xs font-medium rounded-full border border-black/[0.08] cursor-not-allowed select-none"
                               >
                                 In Development
                               </span>

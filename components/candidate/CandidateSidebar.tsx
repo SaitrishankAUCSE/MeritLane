@@ -164,39 +164,24 @@ export function CandidateSidebar() {
         animate={{ width: isCollapsed ? 72 : 228 }}
         transition={{ duration: 0.28, ease: [0.4, 0, 0.2, 1] }}
         className="scrollbar-hide hidden lg:flex shrink-0 flex-col h-[100dvh] overflow-hidden
-                   bg-[#FEFCF9] border-r border-border"
+                   bg-[#F8F8F6] border-r border-black/[0.08]"
       >
         {/* ── Brand ── */}
         <div className="flex h-[64px] items-center shrink-0 relative overflow-hidden px-4">
-          <AnimatePresence initial={false} mode="wait">
-            {isCollapsed ? (
-              <motion.img
-                key="logo-m"
-                src="/logo-m.png"
-                alt="M"
-                className="h-7 w-auto mx-auto"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.18 }}
-              />
-            ) : (
-              <motion.img
-                key="logo-full"
-                src="/logo-full.png"
-                alt="Meritlane"
-                className="h-7 w-auto"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.18 }}
-              />
+          <Link href="/" className="flex items-center gap-2.5">
+            <div className="w-6 h-6 rounded-md bg-[#101010] flex items-center justify-center text-white font-bold text-[13px] tracking-tight">
+              M
+            </div>
+            {!isCollapsed && (
+              <span className="font-sans font-semibold text-[16px] tracking-[-0.025em] text-[#101010]">
+                MeritLane
+              </span>
             )}
-          </AnimatePresence>
+          </Link>
         </div>
 
         {/* ── Navigation ── */}
-        <nav aria-label="Candidate Navigation" className="flex-1 px-3 py-2 space-y-0.5">
+        <nav aria-label="Candidate Navigation" className="flex-1 px-3 py-2 space-y-1">
           {navItems.map((item) => {
             const isActive = pathname === item.href;
             const Icon = item.icon;
@@ -208,18 +193,17 @@ export function CandidateSidebar() {
                 aria-current={isActive ? "page" : undefined}
                 title={isCollapsed ? item.name : undefined}
                 className={`
-                  relative flex items-center h-9 rounded text-[13.5px] font-medium
-                  transition-all duration-150 group overflow-hidden
+                  relative flex items-center h-9 text-[13.5px] font-sans transition-all duration-150 group overflow-hidden
                   ${isActive
-                    ? "bg-[#F0EDE8] text-foreground font-semibold border-l-2 border-emerald-900"
-                    : "text-muted-foreground hover:text-foreground hover:bg-[#F2EFE9]"
+                    ? "bg-[#101010] text-[#FFFFFF] font-medium rounded-full shadow-xs"
+                    : "text-[#666666] hover:text-[#101010] hover:bg-[#F0F0ED] rounded-full font-normal"
                   }
                 `}
               >
                 <div className={`flex justify-center shrink-0 ${isCollapsed ? "w-full" : "w-10"}`}>
                   <Icon
-                    className={`h-[17px] w-[17px] transition-colors ${
-                      isActive ? "text-[#FAFAF9]" : "text-muted-foreground/70 group-hover:text-foreground"
+                    className={`h-[16px] w-[16px] transition-colors ${
+                      isActive ? "text-[#FFFFFF]" : "text-[#71717A] group-hover:text-[#101010]"
                     }`}
                     aria-hidden="true"
                   />

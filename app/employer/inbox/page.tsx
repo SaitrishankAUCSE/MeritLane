@@ -24,6 +24,7 @@ import {
   processFileForAttachment,
 } from "@/components/ui/MessageAttachments";
 import { MeritlaneLoader } from "@/components/ui/MeritlaneLoader";
+import { Button } from "@/components/ui/Button";
 
 interface Message {
   id: string;
@@ -99,28 +100,23 @@ export default function EmployerInboxPage() {
       const newAttachments: MessageAttachment[] = [];
 
       for (const file of filesToProcess) {
-        const att = await processFileForAttachment(file);
-        newAttachments.push(att);
+        const attachment = await processFileForAttachment(file);
+        newAttachments.push(attachment);
       }
 
       setReplyAttachments((prev) => [...prev, ...newAttachments]);
     } catch (err: any) {
-      setAttachmentError(err.message || "Failed to process attached file.");
+      setAttachmentError(err.message || "Failed to process file.");
     } finally {
       setUploadingAttachment(false);
-      if (e.target) e.target.value = "";
+      if (fileInputRef.current) fileInputRef.current.value = "";
+      if (imageInputRef.current) imageInputRef.current.value = "";
     }
   };
 
-  const handleRemoveAttachment = (id: string) => {
-    setReplyAttachments((prev) => prev.filter((a) => a.id !== id));
+  const handleRemoveAttachment = (attachmentId: string) => {
+    setReplyAttachments((prev) => prev.filter((a) => a.id !== attachmentId));
   };
-
-  useEffect(() => {
-    if (!authLoading && (!user || role !== "employer")) {
-      router.replace("/");
-    }
-  }, [user, role, authLoading, router]);
 
   const fetchMessages = async () => {
     if (!user) return;
@@ -135,6 +131,7 @@ export default function EmployerInboxPage() {
       const data = await res.json();
       setMessages(data.messages || []);
     } catch (err: any) {
+      console.error(err);
       setError(err.message || "Failed to load messages.");
     } finally {
       setLoading(false);
@@ -142,58 +139,79 @@ export default function EmployerInboxPage() {
   };
 
   useEffect(() => {
+    if (!authLoading && (!user || role !== "employer")) {
+      router.replace("/");
+      return;
+    }
     if (user && role === "employer") {
       fetchMessages();
     }
-  }, [user, role]);
+  }, [user, role, authLoading, router]);
 
-  const threadsMap = new Map<string, { partnerId: string; partnerName: string; messages: Message[]; lastMessage: Message }>();
+  const conversationsByPartner = React.useMemo(() => {
+    if (!user) return {};
+    const grouped: Record<string, { partnerId: string; partnerName: string; messages: Message[]; lastMessage: Message }> = {};
 
-  messages.forEach((msg) => {
-    const isSentByMe = msg.senderUid === user?.uid;
-    const partnerId = isSentByMe ? msg.recipientUid : msg.senderUid;
-    let partnerName = isSentByMe ? "Candidate" : msg.senderName;
+    messages.forEach((m) => {
+      const partnerId = m.senderUid === user.uid ? m.recipientUid : m.senderUid;
+      const partnerName = m.senderUid === user.uid ? "Candidate" : m.senderName;
 
-    if (!threadsMap.has(partnerId)) {
-      threadsMap.set(partnerId, {
-        partnerId,
-        partnerName,
-        messages: [],
-        lastMessage: msg,
-      });
-    } else {
-      if (!isSentByMe) {
-        threadsMap.get(partnerId)!.partnerName = msg.senderName;
+      if (!grouped[partnerId]) {
+        grouped[partnerId] = {
+          partnerId,
+          partnerName,
+          messages: [],
+          lastMessage: m,
+        };
       }
+      grouped[partnerId].messages.push(m);
+      if (m.timestamp > grouped[partnerId].lastMessage.timestamp) {
+        grouped[partnerId].lastMessage = m;
+        if (m.senderUid !== user.uid) {
+          grouped[partnerId].partnerName = m.senderName;
+        }
+      }
+    });
+
+    Object.values(grouped).forEach((conv) => {
+      conv.messages.sort((a, b) => a.timestamp - b.timestamp);
+    });
+
+    return grouped;
+  }, [messages, user]);
+
+  const sortedThreads = React.useMemo(() => {
+    return Object.values(conversationsByPartner).sort(
+      (a, b) => b.lastMessage.timestamp - a.lastMessage.timestamp
+    );
+  }, [conversationsByPartner]);
+
+  const filteredThreads = React.useMemo(() => {
+    if (!searchTerm.trim()) return sortedThreads;
+    const term = searchTerm.toLowerCase();
+    return sortedThreads.filter(
+      (t) =>
+        t.partnerName.toLowerCase().includes(term) ||
+        t.lastMessage.content.toLowerCase().includes(term)
+    );
+  }, [sortedThreads, searchTerm]);
+
+  useEffect(() => {
+    if (!selectedPartnerId && sortedThreads.length > 0) {
+      setSelectedPartnerId(sortedThreads[0].partnerId);
     }
-    const thread = threadsMap.get(partnerId)!;
-    thread.messages.push(msg);
-    if (msg.timestamp > thread.lastMessage.timestamp) {
-      thread.lastMessage = msg;
-    }
-  });
+  }, [sortedThreads, selectedPartnerId]);
 
-  const threads = Array.from(threadsMap.values());
-  threads.sort((a, b) => b.lastMessage.timestamp - a.lastMessage.timestamp);
-
-  const filteredThreads = threads.filter((t) =>
-    t.partnerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    t.messages.some((m) => m.content.toLowerCase().includes(searchTerm.toLowerCase()))
-  );
-
-  const activeThread = selectedPartnerId ? threadsMap.get(selectedPartnerId) : null;
-  const activeConversationMessages = activeThread ? [...activeThread.messages].sort((a, b) => a.timestamp - b.timestamp) : [];
+  const activeThread = selectedPartnerId ? conversationsByPartner[selectedPartnerId] : null;
+  const activeConversationMessages = activeThread ? activeThread.messages : [];
 
   const unreadCount = messages.filter(
-    (m) => m.recipientUid === user?.uid && !readIds.has(m.id) && !m.read
+    (m) => m.recipientUid === user?.uid && !m.read && !readIds.has(m.id)
   ).length;
 
   const handleSelectThread = async (partnerId: string) => {
     setSelectedPartnerId(partnerId);
-    setSendError("");
-    setReply("");
-
-    const thread = threadsMap.get(partnerId);
+    const thread = conversationsByPartner[partnerId];
     if (thread) {
       thread.messages.forEach((m) => {
         if (m.recipientUid === user?.uid && !m.read) {
@@ -203,7 +221,7 @@ export default function EmployerInboxPage() {
       try {
         const token = await user?.getIdToken();
         if (token) {
-          const unreadMsgs = thread.messages.filter(m => m.recipientUid === user?.uid && !m.read);
+          const unreadMsgs = thread.messages.filter((m) => m.recipientUid === user?.uid && !m.read);
           for (let u of unreadMsgs) {
             fetch("/api/messages", {
               method: "PATCH",
@@ -255,166 +273,193 @@ export default function EmployerInboxPage() {
   };
 
   return (
-    <div className="w-full min-h-screen bg-surface text-foreground">
-      <div className="border-b border-border bg-white px-6 sm:px-10 py-6">
-        <div className="w-full flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <div className="w-full min-h-screen bg-[#F8F8F6] text-[#101010] font-sans pb-16">
+      {/* ── Top Header Strip ── */}
+      <div className="border-b border-black/[0.08] bg-white px-6 sm:px-10 py-5">
+        <div className="max-w-7xl mx-auto w-full flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <div className="text-[10px] font-medium tracking-[0.2em] text-muted-foreground uppercase mb-1">
-              Employer Communication Centre · Meritlane
+            <div className="text-xs font-medium text-black/50 mb-1">
+              Employer Communication Center · MeritLane
             </div>
-            <h1 className="text-[26px] sm:text-[32px] font-bold uppercase tracking-[0.06em] text-foreground leading-tight flex items-center gap-3">
-              INBOX
+            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-[#101010] flex items-center gap-2.5">
+              <span>Candidate Messages</span>
               {unreadCount > 0 && (
-                <span className="text-[13px] font-mono font-semibold bg-emerald-900 text-white px-2 py-0.5 rounded">
-                  {unreadCount} NEW
+                <span className="text-xs font-mono font-medium bg-[#101010] text-white px-2.5 py-0.5 rounded-full">
+                  {unreadCount} new
                 </span>
               )}
             </h1>
           </div>
-          <button
+          <Button
+            variant="outline"
             onClick={fetchMessages}
-            className="flex items-center gap-2 px-4 py-2 border border-border bg-white hover:bg-surface text-[12px] font-mono font-semibold rounded transition-colors"
+            className="flex items-center gap-1.5 px-4 py-2 text-xs rounded-full border-black/[0.12] bg-white text-[#101010] hover:bg-black/[0.04] shadow-xs"
           >
             <RefreshCw className="h-3.5 w-3.5" />
-            REFRESH
-          </button>
+            <span>Refresh</span>
+          </Button>
         </div>
       </div>
 
-      <div className="w-full px-6 sm:px-10 py-8">
+      <div className="max-w-7xl mx-auto w-full px-4 sm:px-8 py-6">
         {loading ? (
-          <div className="border border-border bg-white p-16 text-center rounded">
+          <div className="rounded-2xl border border-black/[0.08] bg-white p-16 text-center shadow-xs">
             <MeritlaneLoader level="section" text="Loading messages…" />
           </div>
         ) : error ? (
-          <div className="border border-danger/20 bg-danger/10 p-8 text-center rounded">
-            <p className="text-[14px] text-danger mb-4">{error}</p>
-            <button
+          <div className="rounded-2xl border border-red-500/20 bg-red-500/10 p-8 text-center">
+            <p className="text-sm text-red-700 mb-4">{error}</p>
+            <Button
               onClick={fetchMessages}
-              className="px-4 py-2 bg-foreground text-white text-[12px] font-mono font-semibold rounded"
+              className="rounded-full bg-[#101010] text-white text-xs px-4 py-2 shadow-xs"
             >
-              RETRY
-            </button>
+              Retry
+            </Button>
           </div>
         ) : (
-          <div className="flex gap-6 h-[calc(100vh-220px)] min-h-[500px]">
-            <div className="w-full max-w-[360px] shrink-0 flex flex-col border border-border bg-white rounded overflow-hidden shadow-xs">
-              <div className="border-b border-border p-3">
+          <div className="flex flex-col lg:flex-row gap-5 h-[calc(100vh-220px)] min-h-[550px]">
+            {/* Conversations Sidebar */}
+            <div className="w-full lg:w-[360px] shrink-0 flex flex-col rounded-2xl border border-black/[0.08] bg-white overflow-hidden shadow-xs">
+              <div className="border-b border-black/[0.08] p-3.5">
                 <div className="relative">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground/70" />
+                  <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-black/40" />
                   <input
                     type="text"
-                    placeholder="Search conversations..."
+                    placeholder="Search candidate conversations..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full pl-9 pr-3 py-2 text-[13px] font-sans border border-border rounded bg-surface focus:outline-none focus:border-foreground placeholder:text-muted-foreground/70"
+                    className="w-full pl-10 pr-4 py-2 text-xs font-sans rounded-full border border-black/[0.12] bg-[#F8F8F6] text-[#101010] focus:outline-none focus:border-black placeholder:text-black/40"
                   />
                 </div>
               </div>
 
-              <div className="flex-1 overflow-y-auto divide-y divide-[#E7E2DA]">
+              <div className="flex-1 overflow-y-auto divide-y divide-black/[0.06]">
                 {filteredThreads.length === 0 ? (
                   <div className="p-10 text-center">
-                    <Inbox className="h-10 w-10 text-[#C8BFB0] mx-auto mb-3" />
-                    <div className="text-[13px] text-muted-foreground font-sans">No conversations yet</div>
-                    <div className="text-[11px] text-muted-foreground/70 mt-1">
-                      Messages with candidates will appear here
+                    <Inbox className="h-8 w-8 text-black/30 mx-auto mb-3" />
+                    <div className="text-xs font-semibold text-[#101010]">No conversations yet</div>
+                    <div className="text-[11px] text-black/50 mt-1">
+                      Messages with verified candidates will appear here
                     </div>
                   </div>
                 ) : (
                   filteredThreads.map((thread) => {
-                    const hasUnread = thread.messages.some(m => m.recipientUid === user?.uid && !m.read && !readIds.has(m.id));
+                    const hasUnread = thread.messages.some(
+                      (m) => m.recipientUid === user?.uid && !m.read && !readIds.has(m.id)
+                    );
+                    const isSelected = selectedPartnerId === thread.partnerId;
+
                     return (
                       <button
                         key={thread.partnerId}
                         onClick={() => handleSelectThread(thread.partnerId)}
-                        className={`w-full text-left p-4 hover:bg-surface transition-colors ${
-                          selectedPartnerId === thread.partnerId ? "bg-border" : ""
+                        className={`w-full text-left p-4 hover:bg-black/[0.02] transition-colors relative ${
+                          isSelected ? "bg-black/[0.04]" : ""
                         }`}
                       >
+                        {isSelected && (
+                          <div className="absolute left-0 top-0 bottom-0 w-1 bg-[#101010]" />
+                        )}
                         <div className="flex items-start gap-3">
-                          <div className="h-9 w-9 shrink-0 rounded bg-foreground flex items-center justify-center text-white text-[11px] font-mono font-semibold">
+                          <div className="h-9 w-9 shrink-0 rounded-full bg-black/[0.05] border border-black/[0.08] flex items-center justify-center text-[#101010] text-xs font-semibold">
                             {getInitials(thread.partnerName)}
                           </div>
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center justify-between gap-2">
-                              <span className={`text-[13px] font-semibold truncate ${hasUnread ? "text-foreground" : "text-muted-foreground"}`}>
+                              <span
+                                className={`text-xs truncate ${
+                                  hasUnread ? "font-bold text-[#101010]" : "font-medium text-black/80"
+                                }`}
+                              >
                                 {thread.partnerName}
                               </span>
-                              <span className="text-[10px] font-mono text-muted-foreground/70 shrink-0">
+                              <span className="text-[10px] text-black/40 shrink-0 font-mono">
                                 {formatTimestamp(thread.lastMessage.timestamp)}
                               </span>
                             </div>
                             <div className="flex items-center gap-1.5 mt-0.5">
                               {hasUnread && (
-                                <div className="h-1.5 w-1.5 rounded-full bg-emerald-900 shrink-0" />
+                                <div className="h-1.5 w-1.5 rounded-full bg-[#101010] shrink-0" />
                               )}
-                              <p className={`text-[12px] truncate ${hasUnread ? "text-foreground" : "text-muted-foreground/70"}`}>
+                              <p
+                                className={`text-xs truncate ${
+                                  hasUnread ? "text-[#101010] font-medium" : "text-black/50"
+                                }`}
+                              >
                                 {thread.lastMessage.content}
                               </p>
                             </div>
                           </div>
                         </div>
                       </button>
-                    )
+                    );
                   })
                 )}
               </div>
             </div>
 
-            <div className="flex-1 border border-border bg-white rounded overflow-hidden shadow-xs flex flex-col">
+            {/* Main Chat Area */}
+            <div className="flex-1 rounded-2xl border border-black/[0.08] bg-white overflow-hidden shadow-xs flex flex-col">
               {!activeThread ? (
                 <div className="flex-1 flex flex-col items-center justify-center text-center p-10">
-                  <MessageSquare className="h-12 w-12 text-[#C8BFB0] mb-4" />
-                  <div className="text-[16px] font-semibold text-foreground mb-1">
+                  <div className="h-12 w-12 rounded-full bg-black/[0.04] border border-black/[0.08] flex items-center justify-center text-black/40 mb-3">
+                    <MessageSquare className="h-6 w-6" />
+                  </div>
+                  <div className="text-sm font-semibold text-[#101010] mb-1">
                     Select a conversation
                   </div>
-                  <p className="text-[13px] text-muted-foreground max-w-xs">
-                    Choose a conversation from the left to view its contents and reply.
+                  <p className="text-xs text-black/50 max-w-xs">
+                    Choose a candidate thread from the left to view messages and schedule interviews.
                   </p>
                 </div>
               ) : (
                 <>
-                  <div className="border-b border-border px-6 py-4 flex items-center justify-between bg-surface">
+                  <div className="border-b border-black/[0.08] px-6 py-4 flex items-center justify-between bg-[#F8F8F6]">
                     <div className="flex items-center gap-3">
-                      <div className="h-9 w-9 rounded bg-foreground flex items-center justify-center text-white text-[11px] font-mono font-semibold">
+                      <div className="h-9 w-9 rounded-full bg-black/[0.05] border border-black/[0.08] flex items-center justify-center text-[#101010] text-xs font-bold">
                         {getInitials(activeThread.partnerName)}
                       </div>
                       <div>
-                        <div className="text-[14px] font-semibold text-foreground">{activeThread.partnerName}</div>
-                        <div className="text-[11px] font-mono text-muted-foreground">
-                          {formatTimestamp(activeThread.lastMessage.timestamp)}
+                        <div className="text-sm font-bold text-[#101010]">{activeThread.partnerName}</div>
+                        <div className="text-[11px] text-black/50">
+                          Active thread · {formatTimestamp(activeThread.lastMessage.timestamp)}
                         </div>
                       </div>
                     </div>
-                    <span className="text-[10px] font-medium font-semibold px-2 py-0.5 rounded border border-border text-muted-foreground uppercase tracking-wider">
-                      CANDIDATE
+                    <span className="text-[10px] font-medium px-2.5 py-0.5 rounded-full border border-black/[0.08] bg-black/[0.04] text-black/70">
+                      Candidate
                     </span>
                   </div>
 
-                  <div className="flex-1 overflow-y-auto p-6 space-y-5">
+                  <div className="flex-1 overflow-y-auto p-6 space-y-4">
                     {activeConversationMessages.map((m) => {
                       const isFromMe = m.senderUid === user?.uid;
                       return (
                         <div
                           key={m.id}
-                          className={`flex gap-3 ${isFromMe ? "flex-row-reverse" : ""}`}
+                          className={`flex gap-2.5 ${isFromMe ? "flex-row-reverse" : ""}`}
                         >
-                          <div className={`h-8 w-8 shrink-0 rounded flex items-center justify-center text-[10px] font-mono font-semibold ${
-                            isFromMe ? "bg-emerald-900 text-white" : "bg-foreground text-white"
-                          }`}>
-                            {isFromMe ? "ME" : getInitials(m.senderName)}
-                          </div>
-                          <div className={`max-w-[70%] ${isFromMe ? "items-end" : "items-start"} flex flex-col gap-1`}>
-                            <div className={`px-4 py-3 rounded text-[14px] font-sans leading-relaxed border ${
+                          <div
+                            className={`h-7 w-7 shrink-0 rounded-full flex items-center justify-center text-[10px] font-semibold ${
                               isFromMe
-                                ? "bg-emerald-900 text-white border-emerald-900/30"
-                                : "bg-border text-foreground border-border"
-                            }`}>
+                                ? "bg-[#101010] text-white"
+                                : "bg-black/[0.05] border border-black/[0.08] text-[#101010]"
+                            }`}
+                          >
+                            {isFromMe ? "You" : getInitials(m.senderName)}
+                          </div>
+                          <div className={`max-w-[75%] ${isFromMe ? "items-end" : "items-start"} flex flex-col gap-1`}>
+                            <div
+                              className={`px-4 py-3 text-xs leading-relaxed ${
+                                isFromMe
+                                  ? "bg-[#101010] text-white rounded-2xl rounded-br-xs shadow-xs"
+                                  : "bg-[#F8F8F6] border border-black/[0.08] text-[#101010] rounded-2xl rounded-bl-xs shadow-2xs"
+                              }`}
+                            >
                               {m.content && <div>{m.content}</div>}
                               <MessageAttachmentsList attachments={m.attachments} isSentByMe={isFromMe} />
                             </div>
-                            <span className="text-[10px] font-mono text-muted-foreground/70">
+                            <span className="text-[10px] font-mono text-black/40">
                               {formatTimestamp(m.timestamp)}
                             </span>
                           </div>
@@ -424,16 +469,16 @@ export default function EmployerInboxPage() {
                     <div ref={bottomRef} />
                   </div>
 
-                  <div className="border-t border-border p-4 bg-surface">
+                  <div className="border-t border-black/[0.08] p-4 bg-[#F8F8F6]">
                     {sendError && (
-                      <p className="text-[12px] text-danger mb-2">{sendError}</p>
+                      <p className="text-xs text-red-600 mb-2">{sendError}</p>
                     )}
                     {attachmentError && (
-                      <p className="text-[12px] text-danger mb-2">{attachmentError}</p>
+                      <p className="text-xs text-red-600 mb-2">{attachmentError}</p>
                     )}
 
                     <div className="flex flex-col gap-2">
-                      <div className="border border-border rounded bg-white focus-within:border-foreground transition-all">
+                      <div className="border border-black/[0.12] rounded-2xl bg-white focus-within:border-black transition-all shadow-xs overflow-hidden">
                         <textarea
                           value={reply}
                           onChange={(e) => setReply(e.target.value)}
@@ -442,9 +487,9 @@ export default function EmployerInboxPage() {
                               handleSendReply();
                             }
                           }}
-                          placeholder="Type your reply... (Ctrl+Enter to send)"
+                          placeholder="Type your response to the candidate… (Ctrl+Enter to send)"
                           rows={3}
-                          className="w-full px-3 py-2.5 text-[13px] font-sans bg-transparent focus:outline-none resize-none placeholder:text-muted-foreground/70"
+                          className="w-full px-4 py-3 text-xs font-sans bg-transparent focus:outline-none resize-none placeholder:text-black/40"
                         />
 
                         {replyAttachments.length > 0 && (
@@ -457,7 +502,7 @@ export default function EmployerInboxPage() {
                         )}
                       </div>
 
-                      <div className="flex items-center justify-between gap-3 flex-wrap">
+                      <div className="flex items-center justify-between gap-3 flex-wrap pt-1">
                         {/* Hidden file inputs & attach buttons */}
                         <div className="flex items-center gap-1.5">
                           <input
@@ -480,10 +525,10 @@ export default function EmployerInboxPage() {
                             type="button"
                             onClick={() => fileInputRef.current?.click()}
                             disabled={uploadingAttachment || replyAttachments.length >= 5}
-                            className="flex items-center gap-1.5 px-3 py-1.5 bg-white hover:bg-surface border border-border rounded text-[12px] font-mono text-foreground hover:border-foreground transition-colors disabled:opacity-50"
+                            className="flex items-center gap-1.5 px-3 py-1.5 bg-white hover:bg-black/[0.04] border border-black/[0.12] rounded-full text-xs font-medium text-[#101010] transition-colors disabled:opacity-50 shadow-2xs"
                             title="Attach files (PDF, job descriptions, contracts, etc.)"
                           >
-                            <Paperclip className="h-3.5 w-3.5 text-muted-foreground" />
+                            <Paperclip className="h-3.5 w-3.5 text-black/60" />
                             <span>Attach File</span>
                           </button>
 
@@ -491,39 +536,39 @@ export default function EmployerInboxPage() {
                             type="button"
                             onClick={() => imageInputRef.current?.click()}
                             disabled={uploadingAttachment || replyAttachments.length >= 5}
-                            className="flex items-center gap-1.5 px-3 py-1.5 bg-white hover:bg-surface border border-border rounded text-[12px] font-mono text-foreground hover:border-foreground transition-colors disabled:opacity-50"
+                            className="flex items-center gap-1.5 px-3 py-1.5 bg-white hover:bg-black/[0.04] border border-black/[0.12] rounded-full text-xs font-medium text-[#101010] transition-colors disabled:opacity-50 shadow-2xs"
                             title="Attach images (diagrams, photos, screenshots)"
                           >
-                            <ImageIcon className="h-3.5 w-3.5 text-muted-foreground" />
+                            <ImageIcon className="h-3.5 w-3.5 text-black/60" />
                             <span>Attach Image</span>
                           </button>
 
                           {uploadingAttachment && (
-                            <div className="flex items-center gap-1.5 text-[11px] font-mono text-muted-foreground">
-                              <div className="h-3 w-3 border-2 border-foreground border-t-transparent rounded-full animate-spin" />
-                              <span>Processing…</span>
+                            <div className="flex items-center gap-1.5 text-xs text-black/50">
+                              <div className="h-3 w-3 border-2 border-black border-t-transparent rounded-full animate-spin" />
+                              <span>Uploading…</span>
                             </div>
                           )}
                         </div>
 
                         <div className="flex items-center gap-3 ml-auto">
-                          <button
+                          <Button
                             onClick={handleSendReply}
                             disabled={sending || uploadingAttachment || (!reply.trim() && replyAttachments.length === 0)}
-                            className="px-4 py-2 bg-emerald-900 hover:bg-emerald-950 text-white text-[12px] font-mono font-semibold rounded transition-colors disabled:opacity-50 flex items-center gap-2"
+                            className="px-5 py-2 bg-[#101010] hover:bg-black text-white text-xs font-medium rounded-full shadow-xs transition-colors disabled:opacity-50 flex items-center gap-2"
                           >
                             {sending ? (
                               <div className="h-3.5 w-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                             ) : (
                               <Send className="h-3.5 w-3.5" />
                             )}
-                            SEND
-                          </button>
+                            <span>Send</span>
+                          </Button>
                         </div>
                       </div>
                     </div>
-                    <p className="text-[10px] font-mono text-muted-foreground/70 mt-2">
-                      Ctrl+Enter to send · Replies are private between you and the candidate
+                    <p className="text-[11px] text-black/40 mt-1">
+                      Ctrl+Enter to send · Messages are encrypted and archived for verification audits
                     </p>
                   </div>
                 </>

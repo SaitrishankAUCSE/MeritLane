@@ -77,15 +77,22 @@ export function EmployerSidebar() {
     <>
       <aside
         className="hidden lg:flex lg:flex-col sticky top-0 h-[100dvh] w-[228px] shrink-0
-                   bg-[#FEFCF9] border-r border-border overflow-hidden z-40"
+                   bg-[#F8F8F6] border-r border-black/[0.08] overflow-hidden z-40"
       >
         {/* ── Brand ── */}
         <div className="flex h-[64px] items-center px-5 shrink-0">
-          <img src="/logo-full.png" alt="Meritlane" className="h-7 w-auto" />
+          <Link href="/" className="flex items-center gap-2.5">
+            <div className="w-6 h-6 rounded-md bg-[#101010] flex items-center justify-center text-white font-bold text-[13px] tracking-tight">
+              M
+            </div>
+            <span className="font-sans font-semibold text-[16px] tracking-[-0.025em] text-[#101010]">
+              MeritLane
+            </span>
+          </Link>
         </div>
 
         {/* ── Navigation ── */}
-        <nav aria-label="Employer Navigation" className="flex-1 px-3 py-2 space-y-0.5">
+        <nav aria-label="Employer Navigation" className="flex-1 px-3 py-2 space-y-1">
           {navItems.map((item) => {
             const isActive = pathname === item.href;
             const Icon = item.icon;
@@ -96,22 +103,21 @@ export function EmployerSidebar() {
                 href={item.href}
                 aria-current={isActive ? "page" : undefined}
                 className={`
-                  relative flex items-center gap-3 h-9 px-3 rounded
-                  text-[13.5px] font-medium tracking-[-0.01em]
-                  transition-all duration-150 group
+                  relative flex items-center gap-3 h-9 px-3.5 text-[13.5px] font-sans
+                  transition-all duration-150 group overflow-hidden
                   ${isActive
-                    ? "bg-foreground text-[#FAFAF9] shadow-sm"
-                    : "text-muted-foreground hover:text-foreground hover:bg-[#F2EFE9]"
+                    ? "bg-[#101010] text-[#FFFFFF] font-medium rounded-full shadow-xs"
+                    : "text-[#666666] hover:text-[#101010] hover:bg-[#F0F0ED] rounded-full font-normal"
                   }
                 `}
               >
                 <Icon
-                  className={`h-[17px] w-[17px] shrink-0 transition-colors ${
-                    isActive ? "text-[#FAFAF9]" : "text-muted-foreground/70 group-hover:text-foreground"
+                  className={`h-[16px] w-[16px] shrink-0 transition-colors ${
+                    isActive ? "text-[#FFFFFF]" : "text-[#71717A] group-hover:text-[#101010]"
                   }`}
                   aria-hidden="true"
                 />
-                <span className="whitespace-nowrap">{item.name}</span>
+                <span className="whitespace-nowrap tracking-[-0.01em]">{item.name}</span>
               </Link>
             );
           })}

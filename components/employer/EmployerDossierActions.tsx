@@ -8,11 +8,11 @@ import { useRouter } from "next/navigation";
 import { MessageModal } from "@/components/employer/MessageModal";
 
 const PIPELINE_STAGES = [
-  { id: "shortlisted", label: "Shortlisted", color: "bg-surface text-foreground border-border" },
-  { id: "interviewing", label: "Interviewing", color: "bg-amber-50/80 text-amber-900 border-amber-200" },
-  { id: "offer", label: "Offer Extended", color: "bg-emerald-50 text-emerald-900 border-emerald-200" },
-  { id: "hired", label: "Hired", color: "bg-foreground text-white border-foreground" },
-  { id: "rejected", label: "Archived / Rejected", color: "bg-surface text-muted-foreground border-border" },
+  { id: "shortlisted", label: "Shortlisted", color: "bg-black/[0.04] text-[#101010] border-black/[0.08]" },
+  { id: "interviewing", label: "Interviewing", color: "bg-amber-500/10 text-amber-900 border-amber-500/20" },
+  { id: "offer", label: "Offer Extended", color: "bg-emerald-500/10 text-emerald-900 border-emerald-500/20" },
+  { id: "hired", label: "Hired", color: "bg-[#101010] text-white border-[#101010]" },
+  { id: "rejected", label: "Archived / Rejected", color: "bg-black/[0.02] text-black/40 border-black/[0.06]" },
 ];
 
 interface EmployerDossierActionsProps {
@@ -102,25 +102,24 @@ export function EmployerDossierActions({ candidateId, candidateName = "Candidate
 
   return (
     <>
-      <div className="fixed top-16 lg:top-0 left-0 lg:left-[240px] right-0 h-16 bg-surface/95 backdrop-blur-md border-b border-border z-[40] flex items-center justify-between px-6 lg:px-12 transition-all duration-300">
+      <div className="fixed top-16 lg:top-0 left-0 lg:left-[240px] right-0 h-16 bg-[#F8F8F6]/90 backdrop-blur-md border-b border-black/[0.08] z-[40] flex items-center justify-between px-6 lg:px-12 transition-all duration-300">
         <button 
           onClick={() => router.back()} 
-          className="flex items-center gap-2 text-[13px] font-sans font-medium text-muted-foreground hover:text-foreground transition-colors"
+          className="flex items-center gap-1.5 text-xs font-medium text-black/60 hover:text-[#101010] transition-colors"
         >
           <ArrowLeft className="h-4 w-4" />
           Back
         </button>
 
-        <div className="flex items-center gap-3">
-
+        <div className="flex items-center gap-2.5">
           {/* Direct Message Button */}
           <Button
             variant="outline"
             size="sm"
             onClick={() => setIsMessageModalOpen(true)}
-            className="gap-1.5 text-[12px] border-border text-foreground hover:bg-surface"
+            className="gap-1.5 text-xs rounded-full border-black/[0.12] bg-white text-[#101010] hover:bg-black/[0.04] shadow-xs"
           >
-            <MessageSquare className="h-3.5 w-3.5 text-muted-foreground" />
+            <MessageSquare className="h-3.5 w-3.5 text-black/60" />
             Message
           </Button>
 
@@ -130,7 +129,7 @@ export function EmployerDossierActions({ candidateId, candidateName = "Candidate
               <select
                 value={pipelineStage}
                 onChange={(e) => handleStageChange(e.target.value)}
-                className="text-[12px] font-medium bg-white border border-border rounded px-3 py-1.5 text-foreground outline-none cursor-pointer hover:border-foreground transition-colors"
+                className="text-xs font-medium bg-white border border-black/[0.12] rounded-full px-3.5 py-1.5 text-[#101010] outline-none cursor-pointer hover:border-black transition-colors shadow-xs"
               >
                 {PIPELINE_STAGES.map((s) => (
                   <option key={s.id} value={s.id}>
@@ -147,12 +146,16 @@ export function EmployerDossierActions({ candidateId, candidateName = "Candidate
               variant="outline" 
               size="sm"
               onClick={toggleShortlist}
-              className={`gap-1.5 text-[12px] ${isShortlisted ? "bg-white border-border text-emerald-900 font-semibold" : "border-border text-foreground hover:bg-white"}`}
+              className={`gap-1.5 text-xs rounded-full border-black/[0.12] shadow-xs ${
+                isShortlisted 
+                  ? "bg-white text-emerald-900 font-semibold" 
+                  : "bg-white text-[#101010] hover:bg-black/[0.04]"
+              }`}
             >
               {isShortlisted ? (
-                <><BookmarkCheck className="h-3.5 w-3.5 text-emerald-900" /> Shortlisted</>
+                <><BookmarkCheck className="h-3.5 w-3.5 text-emerald-600" /> Shortlisted</>
               ) : (
-                <><Bookmark className="h-3.5 w-3.5 text-muted-foreground" /> Shortlist</>
+                <><Bookmark className="h-3.5 w-3.5 text-black/60" /> Shortlist</>
               )}
             </Button>
           )}

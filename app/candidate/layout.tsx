@@ -19,7 +19,7 @@ export default function CandidateLayout({ children }: { children: React.ReactNod
     return (
       <ProtectedRoute allowedRoles={["candidate"]}>
         <ToastProvider>
-          <div className="h-[100dvh] w-screen bg-[#F8F6F3] text-foreground font-sans overflow-hidden fixed inset-0 flex flex-col">
+          <div className="h-[100dvh] w-screen bg-[#F8F8F6] text-foreground font-sans overflow-hidden fixed inset-0 flex flex-col">
             <main className="flex-1 h-full w-full overflow-hidden flex flex-col min-h-0">
               <ProfileCompletionGuard>
                 {children}
@@ -34,10 +34,10 @@ export default function CandidateLayout({ children }: { children: React.ReactNod
   return (
     <ProtectedRoute allowedRoles={["candidate"]}>
       <ToastProvider>
-        <div className="flex flex-col lg:flex-row h-[100dvh] w-full bg-[#F8F6F3] text-foreground font-sans overflow-hidden">
+        <div className="flex flex-col lg:flex-row h-[100dvh] w-full bg-[#F8F8F6] text-foreground font-sans overflow-hidden">
           <MobileNav role="candidate" />
           <CandidateSidebar />
-          <main className={`flex-1 bg-[#F8F6F3] min-h-0 h-full ${isInbox ? "overflow-hidden flex flex-col" : "overflow-y-auto"}`}>
+          <main className={`flex-1 bg-[#F8F8F6] min-h-0 h-full ${isInbox ? "overflow-hidden flex flex-col" : "overflow-y-auto"}`}>
             <ProfileCompletionGuard>
               {children}
             </ProfileCompletionGuard>

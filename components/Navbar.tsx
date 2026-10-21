@@ -98,13 +98,13 @@ export default function Navbar() {
             </Link>
             <button 
               onClick={() => openAuthModal("login")} 
-              className="h-[32px] px-4 text-[13.5px] rounded-full border border-black/[0.12] text-[#101010] bg-transparent hover:bg-black/[0.04] transition-all font-normal flex items-center justify-center cursor-pointer"
+              className="h-[32px] px-4 text-[13.5px] rounded-lg border border-black/[0.12] text-[#101010] bg-transparent hover:bg-black/[0.04] transition-all font-normal flex items-center justify-center cursor-pointer"
             >
               Log in
             </button>
             <button 
               onClick={() => openAuthModal("signup", undefined, "candidate")} 
-              className="h-[32px] px-4 text-[13.5px] rounded-full bg-[#101010] text-white hover:opacity-85 transition-all font-normal shadow-xs flex items-center justify-center cursor-pointer"
+              className="h-[32px] px-4 text-[13.5px] rounded-lg bg-[#101010] text-white hover:opacity-85 transition-all font-normal shadow-xs flex items-center justify-center cursor-pointer"
             >
               Get started
             </button>
@@ -112,7 +112,7 @@ export default function Navbar() {
 
           {/* Mobile menu toggle */}
           <button
-            className="flex h-9 w-9 items-center justify-center text-[#101010] hover:text-[#666] lg:hidden rounded-full hover:bg-black/[0.04] transition"
+            className="flex h-9 w-9 items-center justify-center text-[#101010] hover:text-[#666] lg:hidden rounded-lg hover:bg-black/[0.04] transition"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             aria-label="Toggle navigation menu"
           >
@@ -163,15 +163,15 @@ export default function Navbar() {
             <div className="pt-3 border-t border-black/[0.08] flex flex-col gap-2.5">
               <button 
                 onClick={() => { setMobileMenuOpen(false); openAuthModal("login"); }}
-                className="w-full h-10 rounded-full border border-black/[0.12] text-[#101010] font-normal text-[14px] flex items-center justify-center hover:bg-black/[0.04]"
+                className="w-full h-10 rounded-lg border border-black/[0.12] text-[#101010] font-normal text-[14px] flex items-center justify-center hover:bg-black/[0.04]"
               >
                 Log in
               </button>
               <button 
                 onClick={() => { setMobileMenuOpen(false); openAuthModal("signup", undefined, "candidate"); }}
-                className="w-full h-10 rounded-full bg-[#101010] text-white font-normal text-[14px] flex items-center justify-center hover:opacity-85 shadow-xs"
+                className="w-full h-10 rounded-lg bg-[#101010] text-white font-normal text-[14px] flex items-center justify-center hover:opacity-85 shadow-xs"
               >
-                Get started — Free
+                Get started - Free
               </button>
             </div>
           </div>

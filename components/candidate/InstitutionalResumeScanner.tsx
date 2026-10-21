@@ -93,27 +93,27 @@ export function InstitutionalResumeScanner({
   const skillsList = parsedData?.skills || [];
 
   const modalContent = (
-    <div className="fixed inset-0 z-[99999] flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-[99999] flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm animate-in fade-in duration-200">
       <div
-        className="w-full max-w-lg bg-white border border-border shadow-2xl rounded-lg overflow-hidden text-foreground relative animate-in zoom-in-95 duration-200 flex flex-col max-h-[90vh]"
+        className="w-full max-w-lg bg-white border border-black/[0.08] shadow-[0_20px_50px_rgba(0,0,0,0.12)] rounded-2xl overflow-hidden text-[#101010] relative animate-in zoom-in-95 duration-200 flex flex-col max-h-[90vh]"
         role="dialog"
         aria-modal="true"
       >
         {/* Header */}
-        <div className="bg-surface border-b border-border px-5 py-3.5 flex items-center justify-between">
-          <div className="flex items-center gap-2.5 min-w-0">
-            <div className="w-8 h-8 rounded bg-white border border-border flex items-center justify-center text-foreground shrink-0">
-              <FileText className="h-4 w-4 text-emerald-900" />
+        <div className="bg-[#F8F8F6] border-b border-black/[0.08] px-6 py-4 flex items-center justify-between">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="w-9 h-9 rounded-full bg-white border border-black/[0.08] flex items-center justify-center text-[#101010] shrink-0 shadow-xs">
+              <FileText className="h-4 w-4 text-[#101010]" />
             </div>
             <div className="min-w-0">
-              <h2 className="text-[15px] font-semibold text-foreground leading-tight">
+              <h2 className="text-[15px] font-semibold text-[#101010] leading-tight tracking-tight">
                 {error
                   ? "Couldn't read resume"
                   : completed
-                  ? "Resume Read Successfully"
-                  : "Checking Resume"}
+                  ? "Resume Parsed Successfully"
+                  : "Scanning Resume"}
               </h2>
-              <p className="text-[11px] font-mono text-muted-foreground truncate mt-0.5">
+              <p className="text-[11px] font-mono text-neutral-500 truncate mt-0.5">
                 {fileName}
               </p>
             </div>
@@ -122,7 +122,7 @@ export function InstitutionalResumeScanner({
           {onClose && (
             <button
               onClick={onClose}
-              className="text-muted-foreground hover:text-foreground p-1.5 rounded hover:bg-white transition-colors"
+              className="text-neutral-400 hover:text-[#101010] p-1.5 rounded-full hover:bg-neutral-200/60 transition-colors"
               title="Close"
             >
               <X className="h-4 w-4" />
@@ -133,69 +133,69 @@ export function InstitutionalResumeScanner({
         {/* Content Body */}
         <div className="p-6 overflow-y-auto">
           {error ? (
-            <div className="bg-red-50 border border-red-200 text-[#C0392B] p-4 rounded text-[13px] flex items-start gap-3">
-              <AlertTriangle className="h-5 w-5 shrink-0 mt-0.5" />
+            <div className="bg-red-50/70 border border-red-200 text-red-900 p-4 rounded-xl text-[13px] flex items-start gap-3">
+              <AlertTriangle className="h-5 w-5 shrink-0 mt-0.5 text-red-600" />
               <div>
-                <div className="font-semibold mb-1">Couldn't read this resume</div>
+                <div className="font-semibold mb-1 text-red-950">Couldn't read this resume</div>
                 <div className="text-[12px] text-red-700">{error}</div>
               </div>
             </div>
           ) : !completed ? (
-            /* Very Simple Loading & Parsing Animation */
+            /* Simple Loading & Parsing Animation */
             <div className="py-6 flex flex-col items-center justify-center text-center">
               <div className="relative mb-5">
-                <div className="w-14 h-14 rounded-full border-[3px] border-border border-t-[#064E3B] animate-spin" />
+                <div className="w-14 h-14 rounded-full border-[3px] border-black/10 border-t-[#101010] animate-spin" />
                 <div className="absolute inset-0 flex items-center justify-center">
-                  <FileText className="w-5 h-5 text-emerald-900" />
+                  <FileText className="w-5 h-5 text-[#101010]" />
                 </div>
               </div>
 
-              <h3 className="text-[16px] font-semibold text-foreground mb-1">
+              <h3 className="text-[16px] font-semibold text-[#101010] mb-1 tracking-tight">
                 Reading Your Resume
               </h3>
-              <p className="text-[13px] text-muted-foreground max-w-xs mb-5">
+              <p className="text-[13px] text-neutral-500 max-w-xs mb-5">
                 {progress < 40
-                  ? "Reading document..."
+                  ? "Reading document structure..."
                   : progress < 75
-                  ? "Finding your skills and education..."
-                  : "Almost done..."}
+                  ? "Extracting skills and academic credentials..."
+                  : "Finalizing data models..."}
               </p>
 
               {/* Progress bar */}
-              <div className="w-full max-w-xs bg-surface border border-border h-2 rounded-full overflow-hidden">
+              <div className="w-full max-w-xs bg-neutral-100 border border-black/[0.08] h-1.5 rounded-full overflow-hidden">
                 <div
-                  className="bg-emerald-900 h-full transition-all duration-200 rounded-full"
+                  className="bg-[#101010] h-full transition-all duration-200 rounded-full"
                   style={{ width: `${progress}%` }}
                 />
               </div>
-              <span className="text-[11px] font-mono text-muted-foreground mt-2">
+              <span className="text-[11px] font-mono text-neutral-500 mt-2 font-medium">
                 {progress}%
               </span>
             </div>
           ) : (
-            /* Simple Extracted Data Review */
+            /* Extracted Data Review */
             <div className="space-y-4">
-              <div className="flex items-center gap-2 text-emerald-900 bg-emerald-900/10 border border-emerald-900/20 p-2.5 rounded text-[12px] font-medium">
-                <CheckCircle2 className="h-4 w-4 shrink-0" />
-                <span>Found your details. Ready to update your profile?</span>
+              <div className="flex items-center gap-2 text-[#101010] bg-neutral-100 border border-black/[0.08] p-3 rounded-xl text-[12px] font-medium">
+                <CheckCircle2 className="h-4 w-4 text-[#101010] shrink-0" />
+                <span>Extracted profile attributes. Ready to sync with your records?</span>
               </div>
 
-              <div className="border border-border rounded p-4 space-y-3 bg-surface">
+              <div className="border border-black/[0.08] rounded-2xl p-5 space-y-4 bg-[#F8F8F6]">
                 {/* Candidate Name */}
                 <div>
-                  <span className="text-[10px] font-mono text-muted-foreground uppercase block mb-0.5">
+                  <span className="text-[10px] font-mono text-neutral-500 uppercase tracking-wider block mb-1">
                     Full Name
                   </span>
-                  <div className="text-[14px] font-semibold text-foreground flex items-center gap-1.5">
-                    <User className="h-3.5 w-3.5 text-muted-foreground" />
+                  <div className="text-[14px] font-semibold text-[#101010] flex items-center gap-2">
+                    <User className="h-3.5 w-3.5 text-neutral-500" />
                     <span>
                       {parsedData?.name && parsedData.name !== "Candidate"
                         ? parsedData.name
                         : currentProfileName || "Candidate"}
                     </span>
                     {!parsedData?.name && currentProfileName && (
-                      <span className="text-[10px] font-mono text-muted-foreground bg-white border border-border px-1.5 py-0.2 rounded">
-                        From your profile
+                      <span className="text-[10px] font-mono text-neutral-500 bg-white border border-black/[0.08] px-2 py-0.5 rounded-full">
+                        From profile
                       </span>
                     )}
                   </div>
@@ -213,11 +213,11 @@ export function InstitutionalResumeScanner({
                   if (!academicText) return null;
                   return (
                     <div>
-                      <span className="text-[10px] font-mono text-muted-foreground uppercase block mb-0.5">
+                      <span className="text-[10px] font-mono text-neutral-500 uppercase tracking-wider block mb-1">
                         Education
                       </span>
-                      <div className="text-[13px] text-foreground flex items-center gap-1.5">
-                        <GraduationCap className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+                      <div className="text-[13px] text-[#101010] flex items-center gap-2">
+                        <GraduationCap className="h-3.5 w-3.5 text-neutral-500 shrink-0" />
                         <span className="truncate">{academicText}</span>
                       </div>
                     </div>
@@ -226,24 +226,24 @@ export function InstitutionalResumeScanner({
 
                 {/* Skills Identified */}
                 <div>
-                  <div className="flex items-center justify-between mb-1.5">
-                    <span className="text-[10px] font-mono text-muted-foreground uppercase">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-[10px] font-mono text-neutral-500 uppercase tracking-wider">
                       Skills Found ({skillsList.length})
                     </span>
                   </div>
-                  <div className="flex flex-wrap gap-1.5 max-h-36 overflow-y-auto p-1.5 bg-white border border-border rounded">
+                  <div className="flex flex-wrap gap-1.5 max-h-36 overflow-y-auto p-2 bg-white border border-black/[0.08] rounded-xl">
                     {skillsList.length > 0 ? (
                       skillsList.map((skill) => (
                         <span
                           key={skill}
-                          className="inline-flex items-center gap-1 text-[11px] font-mono px-2 py-0.5 rounded bg-surface border border-border text-foreground"
+                          className="inline-flex items-center gap-1.5 text-[11px] font-mono px-2.5 py-1 rounded-full bg-[#F8F8F6] border border-black/[0.08] text-[#101010]"
                         >
-                          <Code2 className="h-2.5 w-2.5 text-emerald-900" />
+                          <Code2 className="h-2.5 w-2.5 text-neutral-500" />
                           {skill}
                         </span>
                       ))
                     ) : (
-                      <span className="text-[12px] text-muted-foreground italic p-1">
+                      <span className="text-[12px] text-neutral-400 italic p-1">
                         No skills found in resume text.
                       </span>
                     )}
@@ -255,11 +255,11 @@ export function InstitutionalResumeScanner({
         </div>
 
         {/* Footer */}
-        <div className="bg-surface border-t border-border px-5 py-3.5 flex items-center justify-end gap-3">
+        <div className="bg-[#F8F8F6] border-t border-black/[0.08] px-6 py-4 flex items-center justify-end gap-3">
           {onClose && (
             <button
               onClick={onClose}
-              className="text-[12px] font-medium text-muted-foreground hover:text-foreground px-3 py-1.5 rounded transition-colors"
+              className="text-[12px] font-medium text-neutral-600 hover:text-[#101010] px-4 py-2 rounded-full hover:bg-neutral-200/50 transition-colors"
             >
               Cancel
             </button>
@@ -268,11 +268,7 @@ export function InstitutionalResumeScanner({
           <button
             onClick={onComplete}
             disabled={!parsedData && !error}
-            className={`inline-flex items-center gap-1.5 text-[12px] font-semibold px-4 py-2 rounded transition-colors cursor-pointer ${
-              completed
-                ? "bg-emerald-900 hover:bg-emerald-950 text-white"
-                : "bg-foreground hover:bg-[#2C2927] text-white disabled:opacity-40 disabled:cursor-not-allowed"
-            }`}
+            className="inline-flex items-center gap-1.5 text-[13px] font-semibold px-5 py-2.5 rounded-full transition-all cursor-pointer bg-[#101010] hover:bg-black text-white shadow-xs disabled:opacity-40 disabled:cursor-not-allowed"
           >
             <span>{error ? "Close" : "Save to Profile"}</span>
             <ArrowRight className="h-3.5 w-3.5" />

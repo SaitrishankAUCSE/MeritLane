@@ -8,6 +8,7 @@ import { ArrowLeft, Plus, X, Briefcase, Check, AlertCircle } from "lucide-react"
 import { COMMON_SKILLS } from "@/lib/constants";
 import { WorkMode, EmploymentType } from "@/lib/firebase/jobs";
 import { ALL_LOCATIONS } from "@/lib/locations";
+import { Button } from "@/components/ui/Button";
 
 export default function NewJobPostingPage() {
   const { user, role } = useAuth();
@@ -96,39 +97,40 @@ export default function NewJobPostingPage() {
   };
 
   return (
-    <div className="w-full min-h-screen bg-surface pb-24 text-foreground">
+    <div className="w-full min-h-screen bg-[#F8F8F6] pb-24 text-[#101010] font-sans">
       {/* ── Top Header Strip ── */}
-      <div className="border-b border-border bg-white px-6 sm:px-10 py-5">
-        <div className="w-full flex items-center justify-between">
+      <div className="border-b border-black/[0.08] bg-white px-6 sm:px-10 py-5">
+        <div className="max-w-4xl mx-auto w-full flex items-center justify-between">
           <Link
             href="/employer/jobs"
-            className="inline-flex items-center gap-2 text-[12px] font-mono font-semibold text-muted-foreground hover:text-foreground transition-colors"
+            className="inline-flex items-center gap-2 text-xs font-medium text-black/60 hover:text-[#101010] transition-colors"
           >
             <ArrowLeft className="h-3.5 w-3.5" />
-            BACK TO POSTED ROLES
+            Back to posted roles
           </Link>
-          <span className="text-[11px] font-sans font-semibold uppercase tracking-wide text-muted-foreground">
-            New Job Specification
+          <span className="text-xs font-medium text-black/40">
+            Employer Portal · Job Creation
           </span>
         </div>
       </div>
 
-      <div className="w-full px-6 sm:px-10 py-8">
-        <div className="border border-border bg-white p-7 sm:p-10 rounded shadow-xs space-y-8">
+      <div className="max-w-4xl mx-auto w-full px-6 sm:px-10 py-8">
+        <div className="rounded-2xl border border-black/[0.08] bg-white p-7 sm:p-10 shadow-xs space-y-8">
           <div>
-            <div className="text-[10px] font-medium tracking-[0.2em] text-muted-foreground uppercase mb-1">
-              Job Intake Formulation
+            <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-black/[0.04] border border-black/[0.08] text-[11px] font-medium text-black/70 mb-3">
+              <Briefcase className="h-3.5 w-3.5" />
+              <span>Role Intake Form</span>
             </div>
-            <h1 className="text-[24px] sm:text-[30px] font-bold uppercase tracking-[0.06em] text-foreground">
-              POST AN ENGINEERING ROLE
+            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-[#101010]">
+              Post an Engineering Role
             </h1>
-            <p className="text-[13px] text-muted-foreground mt-1">
-              Create an audited opportunity. Candidates with 100% profile completion and matching capabilities will be able to submit their technical dossiers directly.
+            <p className="text-sm text-black/60 mt-1 leading-relaxed">
+              Create an audited opportunity. Candidates with verified capability profiles will be able to review and submit their technical dossiers directly.
             </p>
           </div>
 
           {error && (
-            <div className="p-4 bg-danger/10 border border-danger/20 rounded text-[13px] text-danger flex items-center gap-2 font-sans">
+            <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-xl text-xs text-red-700 flex items-center gap-2 font-sans">
               <AlertCircle className="h-4 w-4 shrink-0" />
               <span>{error}</span>
             </div>
@@ -138,20 +140,20 @@ export default function NewJobPostingPage() {
             {/* Title & Department */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
               <div>
-                <label className="block text-[12px] font-sans font-semibold uppercase tracking-wide text-foreground mb-2">
-                  Job Title <span className="text-danger">*</span>
+                <label className="block text-xs font-semibold text-[#101010] mb-2">
+                  Job Title <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="text"
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
                   placeholder="e.g. Senior Frontend Engineer"
-                  className="w-full h-11 px-4 bg-surface border border-border rounded text-[14px] text-foreground focus:outline-none focus:ring-1 focus:ring-foreground"
+                  className="w-full h-11 px-4 bg-[#F8F8F6] border border-black/[0.12] rounded-xl text-sm text-[#101010] focus:outline-none focus:border-black transition-colors"
                 />
               </div>
 
               <div>
-                <label className="block text-[12px] font-sans font-semibold uppercase tracking-wide text-foreground mb-2">
+                <label className="block text-xs font-semibold text-[#101010] mb-2">
                   Department / Squad
                 </label>
                 <input
@@ -159,7 +161,7 @@ export default function NewJobPostingPage() {
                   value={department}
                   onChange={(e) => setDepartment(e.target.value)}
                   placeholder="e.g. Core Infrastructure"
-                  className="w-full h-11 px-4 bg-surface border border-border rounded text-[14px] text-foreground focus:outline-none focus:ring-1 focus:ring-foreground"
+                  className="w-full h-11 px-4 bg-[#F8F8F6] border border-black/[0.12] rounded-xl text-sm text-[#101010] focus:outline-none focus:border-black transition-colors"
                 />
               </div>
             </div>
@@ -167,13 +169,13 @@ export default function NewJobPostingPage() {
             {/* Work Mode, Employment Type, Location */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
               <div>
-                <label className="block text-[12px] font-sans font-semibold uppercase tracking-wide text-foreground mb-2">
-                  Work Mode <span className="text-danger">*</span>
+                <label className="block text-xs font-semibold text-[#101010] mb-2">
+                  Work Mode <span className="text-red-500">*</span>
                 </label>
                 <select
                   value={workMode}
                   onChange={(e) => setWorkMode(e.target.value as WorkMode)}
-                  className="w-full h-11 px-4 bg-surface border border-border rounded text-[13px] text-foreground focus:outline-none focus:ring-1 focus:ring-foreground"
+                  className="w-full h-11 px-4 bg-[#F8F8F6] border border-black/[0.12] rounded-xl text-sm text-[#101010] focus:outline-none focus:border-black transition-colors"
                 >
                   <option value="remote">Remote</option>
                   <option value="hybrid">Hybrid</option>
@@ -182,13 +184,13 @@ export default function NewJobPostingPage() {
               </div>
 
               <div>
-                <label className="block text-[12px] font-sans font-semibold uppercase tracking-wide text-foreground mb-2">
-                  Role Type <span className="text-danger">*</span>
+                <label className="block text-xs font-semibold text-[#101010] mb-2">
+                  Role Type <span className="text-red-500">*</span>
                 </label>
                 <select
                   value={employmentType}
                   onChange={(e) => setEmploymentType(e.target.value as EmploymentType)}
-                  className="w-full h-11 px-4 bg-surface border border-border rounded text-[13px] text-foreground focus:outline-none focus:ring-1 focus:ring-foreground"
+                  className="w-full h-11 px-4 bg-[#F8F8F6] border border-black/[0.12] rounded-xl text-sm text-[#101010] focus:outline-none focus:border-black transition-colors"
                 >
                   <option value="full-time">Full-Time</option>
                   <option value="part-time">Part-Time</option>
@@ -198,8 +200,8 @@ export default function NewJobPostingPage() {
               </div>
 
               <div>
-                <label className="block text-[12px] font-sans font-semibold uppercase tracking-wide text-foreground mb-2">
-                  Location <span className="text-danger">*</span>
+                <label className="block text-xs font-semibold text-[#101010] mb-2">
+                  Location <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="text"
@@ -207,7 +209,7 @@ export default function NewJobPostingPage() {
                   value={location}
                   onChange={(e) => setLocation(e.target.value)}
                   placeholder="e.g. Bengaluru, India / Remote"
-                  className="w-full h-11 px-4 bg-surface border border-border rounded text-[14px] text-foreground focus:outline-none focus:ring-1 focus:ring-foreground"
+                  className="w-full h-11 px-4 bg-[#F8F8F6] border border-black/[0.12] rounded-xl text-sm text-[#101010] focus:outline-none focus:border-black transition-colors"
                 />
                 <datalist id="locations-list">
                   {ALL_LOCATIONS.map((loc) => (
@@ -219,7 +221,7 @@ export default function NewJobPostingPage() {
 
             {/* Compensation Range */}
             <div>
-              <label className="block text-[12px] font-sans font-semibold uppercase tracking-wide text-foreground mb-2">
+              <label className="block text-xs font-semibold text-[#101010] mb-2">
                 Annual Compensation / Range (Optional)
               </label>
               <input
@@ -227,33 +229,33 @@ export default function NewJobPostingPage() {
                 value={salaryRange}
                 onChange={(e) => setSalaryRange(e.target.value)}
                 placeholder="e.g. ₹14,00,000 - ₹22,00,000 PA"
-                className="w-full h-11 px-4 bg-surface border border-border rounded text-[14px] text-foreground focus:outline-none focus:ring-1 focus:ring-foreground"
+                className="w-full h-11 px-4 bg-[#F8F8F6] border border-black/[0.12] rounded-xl text-sm text-[#101010] focus:outline-none focus:border-black transition-colors"
               />
             </div>
 
             {/* Required Skills Picker */}
             <div className="space-y-3">
-              <label className="block text-[12px] font-sans font-semibold uppercase tracking-wide text-foreground">
-                Required Technical Capabilities <span className="text-danger">*</span>
+              <label className="block text-xs font-semibold text-[#101010]">
+                Required Technical Capabilities <span className="text-red-500">*</span>
               </label>
 
               {/* Active Pills */}
-              <div className="flex items-center gap-2 flex-wrap min-h-[40px] p-2 bg-surface border border-border rounded">
+              <div className="flex items-center gap-2 flex-wrap min-h-[44px] p-2 bg-[#F8F8F6] border border-black/[0.12] rounded-xl">
                 {skills.length === 0 ? (
-                  <span className="text-[12px] text-muted-foreground/70 px-2 font-mono">
-                    No capabilities added yet. Choose from below or type custom.
+                  <span className="text-xs text-black/40 px-2">
+                    No capabilities added yet. Choose suggestions below or type custom.
                   </span>
                 ) : (
                   skills.map((skill) => (
                     <span
                       key={skill}
-                      className="inline-flex items-center gap-1.5 px-3 py-1 bg-white border border-border rounded text-[12px] font-mono text-foreground shadow-2xs"
+                      className="inline-flex items-center gap-1.5 px-3 py-1 bg-white border border-black/[0.08] rounded-full text-xs font-medium text-[#101010] shadow-2xs"
                     >
                       <span>{skill}</span>
                       <button
                         type="button"
                         onClick={() => handleRemoveSkill(skill)}
-                        className="text-muted-foreground hover:text-danger"
+                        className="text-black/40 hover:text-red-600"
                       >
                         <X className="h-3 w-3" />
                       </button>
@@ -275,26 +277,27 @@ export default function NewJobPostingPage() {
                     }
                   }}
                   placeholder="Type a capability and press Add…"
-                  className="flex-1 h-10 px-3.5 bg-white border border-border rounded text-[13px] text-foreground focus:outline-none focus:ring-1 focus:ring-foreground"
+                  className="flex-1 h-10 px-4 bg-white border border-black/[0.12] rounded-full text-xs text-[#101010] focus:outline-none focus:border-black transition-colors"
                 />
-                <button
+                <Button
                   type="button"
+                  variant="outline"
                   onClick={() => handleAddSkill(skillInput)}
-                  className="px-4 h-10 border border-border bg-white hover:bg-surface text-[12px] font-mono font-semibold rounded"
+                  className="px-5 h-10 rounded-full border-black/[0.12] bg-white text-xs font-medium text-[#101010] hover:bg-black/[0.04]"
                 >
-                  ADD
-                </button>
+                  Add
+                </Button>
               </div>
 
               {/* Suggested Skills */}
               <div className="flex items-center gap-1.5 flex-wrap pt-1">
-                <span className="text-[10px] font-medium uppercase text-muted-foreground mr-1">Suggestions:</span>
+                <span className="text-[11px] font-medium text-black/50 mr-1">Suggestions:</span>
                 {COMMON_SKILLS.slice(0, 10).map((s) => (
                   <button
                     key={s}
                     type="button"
                     onClick={() => handleAddSkill(s)}
-                    className="text-[10px] font-mono px-2.5 py-0.5 border border-border bg-white hover:border-foreground rounded text-muted-foreground hover:text-foreground"
+                    className="text-xs px-3 py-1 border border-black/[0.08] bg-white hover:border-black rounded-full text-black/70 hover:text-[#101010] transition-colors"
                   >
                     + {s}
                   </button>
@@ -304,45 +307,46 @@ export default function NewJobPostingPage() {
 
             {/* Description */}
             <div>
-              <label className="block text-[12px] font-sans font-semibold uppercase tracking-wide text-foreground mb-2">
-                Full Role Specification & Responsibilities <span className="text-danger">*</span>
+              <label className="block text-xs font-semibold text-[#101010] mb-2">
+                Full Role Specification & Responsibilities <span className="text-red-500">*</span>
               </label>
               <textarea
                 rows={8}
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 placeholder="Detail the technical responsibilities, engineering expectations, project domain, and team structure…"
-                className="w-full p-4 bg-surface border border-border rounded text-[14px] text-foreground focus:outline-none focus:ring-1 focus:ring-foreground font-sans leading-relaxed"
+                className="w-full p-4 bg-[#F8F8F6] border border-black/[0.12] rounded-xl text-sm text-[#101010] focus:outline-none focus:border-black font-sans leading-relaxed transition-colors"
               />
             </div>
           </div>
 
           {/* Action Bar */}
-          <div className="pt-6 border-t border-border flex flex-col sm:flex-row items-center justify-end gap-3">
-            <button
+          <div className="pt-6 border-t border-black/[0.08] flex flex-col sm:flex-row items-center justify-end gap-3">
+            <Button
               type="button"
+              variant="outline"
               disabled={saving}
               onClick={() => handleSubmit("draft")}
-              className="w-full sm:w-auto px-6 h-11 border border-border bg-white hover:bg-surface text-[12px] font-sans font-semibold uppercase tracking-wide rounded transition-colors disabled:opacity-50 shadow-2xs"
+              className="w-full sm:w-auto px-6 h-10 rounded-full border-black/[0.12] bg-white text-xs font-medium text-[#101010] hover:bg-black/[0.04] transition-colors disabled:opacity-50"
             >
-              SAVE AS DRAFT
-            </button>
+              Save as Draft
+            </Button>
 
-            <button
+            <Button
               type="button"
               disabled={saving}
               onClick={() => handleSubmit("published")}
-              className="w-full sm:w-auto px-7 h-11 bg-emerald-900 hover:bg-emerald-950 text-white text-[12px] font-sans font-semibold uppercase tracking-wide rounded transition-colors shadow-xs disabled:opacity-50 flex items-center justify-center gap-2"
+              className="w-full sm:w-auto px-7 h-10 bg-[#101010] hover:bg-black text-white text-xs font-medium rounded-full transition-colors shadow-xs disabled:opacity-50 flex items-center justify-center gap-2"
             >
               {saving ? (
                 <>
-                  <div className="h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                  <span>PROCESSING…</span>
+                  <div className="h-3.5 w-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  <span>Processing…</span>
                 </>
               ) : (
-                <span>PUBLISH OPPORTUNITY NOW</span>
+                <span>Publish Opportunity Now</span>
               )}
-            </button>
+            </Button>
           </div>
         </div>
       </div>

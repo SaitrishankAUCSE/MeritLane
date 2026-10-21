@@ -530,18 +530,18 @@ export function ProfileForm({ initialData, onSave, onCancel, isNew = false }: Pr
           aria-modal="true"
           className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/40 backdrop-blur-xs p-6"
         >
-          <div className="w-full max-w-sm bg-[var(--color-background)] border border-[var(--color-border)] shadow-2xl p-7">
-            <h2 className="text-[18px] font-serif font-semibold text-[var(--color-foreground)] mb-2 leading-tight">
+          <div className="w-full max-w-sm bg-white border border-black/[0.08] rounded-2xl shadow-2xl p-7">
+            <h2 className="text-[18px] font-semibold text-[#101010] mb-2 leading-tight tracking-[-0.01em]">
               Unsaved Changes
             </h2>
-            <p className="text-[14px] text-[var(--color-muted-foreground)] leading-relaxed mb-6 font-sans">
+            <p className="text-[13px] text-[#737373] leading-relaxed mb-6 font-sans">
               You have unsaved changes. Do you want to discard them?
             </p>
             <div className="flex flex-col gap-2.5">
               <button
                 type="button"
                 onClick={() => setShowCancelConfirm(false)}
-                className="w-full h-11 bg-[var(--color-primary)] text-white text-[13px] font-sans font-semibold uppercase tracking-wide font-semibold hover:bg-[var(--color-primary-hover)] transition-colors"
+                className="w-full h-11 rounded-full bg-[#101010] hover:bg-black/90 text-white text-xs font-medium transition-all shadow-xs"
               >
                 Continue Editing
               </button>
@@ -551,7 +551,7 @@ export function ProfileForm({ initialData, onSave, onCancel, isNew = false }: Pr
                   setShowCancelConfirm(false);
                   if (onCancel) onCancel();
                 }}
-                className="w-full h-11 border border-[var(--color-border)] text-[var(--color-muted-foreground)] text-[13px] font-sans font-semibold uppercase tracking-wide font-semibold hover:border-[#7A3B2E] hover:text-[#7A3B2E] transition-colors"
+                className="w-full h-11 rounded-full border border-black/[0.12] bg-white text-[#101010] hover:bg-black/[0.04] text-xs font-medium transition-all"
               >
                 Discard &amp; Exit
               </button>
@@ -560,36 +560,24 @@ export function ProfileForm({ initialData, onSave, onCancel, isNew = false }: Pr
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="border border-[var(--color-border)] bg-[var(--color-surface-low)] p-6 sm:p-10 space-y-8 shadow-xs">
-        {/* Page Header */}
-        <div className="border-b border-[var(--color-border)] pb-5">
-          <div className="text-[10px] font-medium tracking-[0.2em] text-[#7A3B2E] uppercase font-semibold mb-1">
-            Profile Setup
-          </div>
-          <h2 className="font-serif text-[24px] sm:text-[30px] font-semibold text-[var(--color-foreground)] leading-tight">
-            {isNew ? "Create Your Profile" : "Edit Your Profile"}
-          </h2>
-          <p className="text-[14px] text-[var(--color-muted-foreground)] font-sans mt-1">
-            Upload your resume to automatically fill in your education, skills, and details. You can review and edit everything before saving.
-          </p>
-        </div>
+      <form onSubmit={handleSubmit} className="space-y-6">
 
         {/* Welcome Callout for New Users */}
         {isNew && (
-          <div className="bg-[#FAF7F0] border border-emerald-900/30 rounded-xl p-4 sm:p-5 flex items-start gap-4 shadow-xs animate-in fade-in duration-200">
-            <div className="h-10 w-10 rounded-lg bg-emerald-900 text-white flex items-center justify-center shrink-0 mt-0.5">
+          <div className="bg-[#FAFAF9] border border-black/[0.08] rounded-2xl p-5 flex items-start gap-4 shadow-xs animate-in fade-in duration-200">
+            <div className="h-10 w-10 rounded-xl bg-[#101010] text-white flex items-center justify-center shrink-0 mt-0.5">
               <Sparkles className="h-5 w-5" />
             </div>
             <div className="space-y-1">
               <div className="flex items-center gap-2 flex-wrap">
-                <span className="text-[14px] font-bold text-emerald-950 font-sans">
+                <span className="text-[14px] font-semibold text-[#101010] font-sans">
                   Step 1 of 4: Activate Your Candidate Dossier
                 </span>
-                <span className="text-[10px] font-bold uppercase tracking-wider bg-emerald-900/10 text-emerald-900 border border-emerald-900/20 px-2 py-0.5 rounded-full">
+                <span className="text-[10px] font-medium uppercase tracking-wider bg-black/[0.04] text-[#101010] border border-black/[0.08] px-2.5 py-0.5 rounded-full">
                   Zero Experience Bias
                 </span>
               </div>
-              <p className="text-[13px] text-[#78716C] leading-relaxed font-sans">
+              <p className="text-[13px] text-[#737373] leading-relaxed font-sans">
                 MeritLane is built to help freshers and aspiring developers bypass the 0-2 year experience paradox. Upload your resume PDF below or fill in your details to activate your profile, unlock proctored skill tests, and let your actual code land interviews.
               </p>
             </div>
@@ -597,42 +585,42 @@ export function ProfileForm({ initialData, onSave, onCancel, isNew = false }: Pr
         )}
 
         {error && (
-          <div className="bg-[#FAF5F4] border border-[#E8D8D5] p-4.5 rounded-lg flex items-start gap-3.5 text-[#5A251C] shadow-xs animate-in fade-in duration-150">
-            <AlertCircle className="h-5 w-5 text-[#8B3525] shrink-0 mt-0.5" />
+          <div className="bg-red-50 border border-red-200 p-4.5 rounded-xl flex items-start gap-3.5 text-red-700 shadow-xs animate-in fade-in duration-150">
+            <AlertCircle className="h-5 w-5 text-red-600 shrink-0 mt-0.5" />
             <div className="text-[13px] font-sans leading-relaxed">
-              <p className="font-semibold text-[#3D140D] mb-0.5">Profile Update Notice</p>
-              <p className="text-[#6E2B1E] font-normal">{error}</p>
+              <p className="font-semibold text-red-800 mb-0.5">Profile Update Notice</p>
+              <p className="text-red-700 font-normal">{error}</p>
             </div>
           </div>
         )}
 
         {/* ── TOP SECTION: RESUME UPLOAD FOR AUTO-FILL ── */}
-        <div className="border border-[var(--color-border)] bg-[var(--color-background)] p-6 shadow-xs">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-[var(--color-border)]">
+        <div className="rounded-2xl border border-black/[0.08] bg-white p-6 shadow-sm">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-black/[0.06]">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-[var(--color-primary)] text-white flex items-center justify-center shrink-0">
+              <div className="w-10 h-10 rounded-xl bg-black/[0.04] border border-black/[0.08] text-[#101010] flex items-center justify-center shrink-0">
                 <FileText className="h-5 w-5" />
               </div>
               <div>
                 <div className="flex items-center gap-2">
-                  <span className="text-[10px] font-medium tracking-[0.18em] uppercase text-[var(--color-muted-foreground)]">
+                  <span className="text-[10px] font-medium tracking-[0.16em] uppercase text-[#737373]">
                     Step 1 · Resume
                   </span>
-                  <span className="text-[9px] font-medium font-semibold tracking-wider uppercase px-2 py-0.5 bg-[#7A3B2E]/15 text-[#7A3B2E] border border-[#7A3B2E]/30">
+                  <span className="text-[9px] font-medium font-semibold tracking-wider uppercase px-2 py-0.5 rounded-full bg-black/[0.04] text-[#101010] border border-black/[0.08]">
                     Required
                   </span>
                 </div>
-                <h3 className="font-serif text-[18px] text-[var(--color-foreground)] font-semibold mt-0.5">
+                <h3 className="text-[18px] text-[#101010] font-semibold tracking-[-0.01em] mt-0.5">
                   Upload Your Resume
                 </h3>
               </div>
             </div>
-            <span className="text-[11px] font-mono text-[var(--color-muted-foreground)] bg-[var(--color-surface-low)] border border-[var(--color-border)] px-3 py-1 self-start sm:self-auto">
+            <span className="text-[11px] font-mono text-[#737373] bg-[#FAFAF9] border border-black/[0.06] px-3 py-1 rounded-full self-start sm:self-auto">
               PDF Format · Max 12MB
             </span>
           </div>
 
-          <p className="text-[13px] text-[var(--color-muted-foreground)] mt-3 mb-4 leading-relaxed font-sans">
+          <p className="text-[13px] text-[#737373] mt-3 mb-4 leading-relaxed font-sans">
             We automatically read your resume to fill in your name, college, degree, graduation year, and skills below. You can change any field anytime.
           </p>
 
@@ -651,22 +639,22 @@ export function ProfileForm({ initialData, onSave, onCancel, isNew = false }: Pr
               onDragLeave={() => setIsDragging(false)}
               onDrop={handleFileDrop}
               onClick={() => fileInputRef.current?.click()}
-              className={`border-2 border-dashed p-8 text-center cursor-pointer transition-all ${
+              className={`border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-all ${
                 isDragging
-                  ? "border-[var(--color-primary)] bg-[var(--color-primary)]/5"
-                  : "border-[var(--color-border)] bg-[var(--color-surface-low)] hover:border-[var(--color-primary)] hover:bg-[var(--color-surface-mid)]/30"
+                  ? "border-[#101010] bg-black/[0.02]"
+                  : "border-black/[0.12] bg-[#FAFAF9] hover:border-black/30 hover:bg-black/[0.02]"
               }`}
             >
-              <div className="mx-auto mb-3 h-12 w-12 bg-[var(--color-background)] border border-[var(--color-border)] flex items-center justify-center">
-                <UploadCloud className="h-6 w-6 text-[var(--color-primary)]" />
+              <div className="mx-auto mb-3 h-12 w-12 rounded-xl bg-white border border-black/[0.08] flex items-center justify-center">
+                <UploadCloud className="h-6 w-6 text-[#101010]" />
               </div>
-              <div className="font-serif text-[16px] text-[var(--color-foreground)] font-semibold mb-1">
+              <div className="text-[16px] text-[#101010] font-semibold mb-1">
                 Click to upload or drag and drop your resume PDF here
               </div>
-              <p className="text-[12px] text-[var(--color-muted-foreground)] font-mono max-w-md mx-auto">
+              <p className="text-[12px] text-[#737373] font-mono max-w-md mx-auto">
                 Automatically finds your name, university, degree, year, and skills
               </p>
-              <div className="mt-3.5 inline-flex items-center gap-1.5 text-[10px] font-sans font-semibold uppercase tracking-wide text-[var(--color-primary)] bg-[var(--color-primary)]/10 px-3 py-1 border border-[var(--color-primary)]/25">
+              <div className="mt-3.5 inline-flex items-center gap-1.5 text-[10px] font-sans font-semibold uppercase tracking-wide text-[#101010] bg-black/[0.04] px-3 py-1 rounded-full border border-black/[0.08]">
                 <Sparkles className="h-3 w-3" />
                 <span>Auto-fill from resume is ready</span>
               </div>
@@ -674,21 +662,21 @@ export function ProfileForm({ initialData, onSave, onCancel, isNew = false }: Pr
           ) : (
             /* Resume Successfully Ingested Card */
             <div className="space-y-4">
-              <div className="border border-[var(--color-border)] bg-[var(--color-surface-low)] p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div className="rounded-2xl border border-black/[0.08] bg-[#FAFAF9] p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div className="flex items-center gap-3">
-                  <div className="h-10 w-10 bg-[var(--color-primary)]/10 border border-[var(--color-primary)]/30 flex items-center justify-center shrink-0">
-                    <CheckCircle2 className="h-5 w-5 text-[var(--color-primary)]" />
+                  <div className="h-10 w-10 rounded-xl bg-black/[0.04] border border-black/[0.08] flex items-center justify-center shrink-0">
+                    <CheckCircle2 className="h-5 w-5 text-emerald-700" />
                   </div>
                   <div>
                     <div className="flex items-center gap-2">
-                      <span className="text-[14px] font-mono font-semibold text-[var(--color-foreground)] truncate max-w-xs sm:max-w-md">
+                      <span className="text-[14px] font-mono font-semibold text-[#101010] truncate max-w-xs sm:max-w-md">
                         {resumeFileName || "Uploaded Resume.pdf"}
                       </span>
-                      <span className="text-[9px] font-sans font-semibold uppercase tracking-wide bg-[var(--color-primary)]/15 text-[var(--color-primary)] border border-[var(--color-primary)]/30 px-2 py-0.5 shrink-0">
+                      <span className="text-[10px] font-mono font-medium uppercase tracking-wide bg-emerald-500/10 text-emerald-800 border border-emerald-500/20 px-2.5 py-0.5 rounded-full shrink-0">
                         Uploaded
                       </span>
                     </div>
-                    <div className="text-[11px] font-mono text-[var(--color-muted-foreground)] mt-0.5">
+                    <div className="text-[11px] font-mono text-[#737373] mt-0.5">
                       {resumeFile ? `${(resumeFile.size / 1024).toFixed(1)} KB · ` : ""}
                       {formData.skills.length} skills &amp; details filled below
                     </div>
@@ -700,7 +688,7 @@ export function ProfileForm({ initialData, onSave, onCancel, isNew = false }: Pr
                     type="button"
                     onClick={() => fileInputRef.current?.click()}
                     disabled={analyzingAts}
-                    className="text-[11px] font-mono font-semibold text-[var(--color-foreground)] hover:text-[var(--color-primary)] px-3 py-1.5 border border-[var(--color-border)] bg-[var(--color-background)] hover:bg-[var(--color-surface-mid)] transition-colors flex items-center gap-1.5"
+                    className="rounded-full border border-black/[0.12] bg-white hover:bg-black/[0.04] text-[#101010] text-xs font-medium px-4 py-2 transition-all flex items-center gap-1.5 cursor-pointer"
                   >
                     <RefreshCw className={`h-3 w-3 ${analyzingAts ? "animate-spin" : ""}`} />
                     {analyzingAts ? "Reading..." : "Replace Resume"}
@@ -709,7 +697,7 @@ export function ProfileForm({ initialData, onSave, onCancel, isNew = false }: Pr
                     type="button"
                     onClick={handleClearPdf}
                     disabled={analyzingAts}
-                    className="text-[11px] font-mono text-[#7A3B2E] hover:text-[#52251D] px-2.5 py-1.5 border border-[#7A3B2E]/30 hover:bg-[#7A3B2E]/10 transition-colors flex items-center gap-1"
+                    className="rounded-full border border-red-200 bg-red-50 hover:bg-red-100 text-red-600 text-xs font-medium px-3.5 py-2 transition-all flex items-center gap-1 cursor-pointer"
                   >
                     <Trash2 className="h-3 w-3" />
                     Remove
@@ -718,27 +706,27 @@ export function ProfileForm({ initialData, onSave, onCancel, isNew = false }: Pr
               </div>
 
               {/* Informative Banner */}
-              <div className="bg-[var(--color-surface-mid)]/40 border-l-2 border-[var(--color-primary)] p-3 text-[12px] font-mono text-[var(--color-foreground)] flex items-center justify-between">
+              <div className="bg-[#FAFAF9] border border-black/[0.06] rounded-xl p-3.5 text-[12px] font-mono text-[#525252] flex items-center justify-between">
                 <span>✓ Details have been filled in below. Please check and adjust anything if needed before saving.</span>
               </div>
 
               {/* ATS Results Snapshot (if available) */}
               {atsResult && (
-                <div className="border border-[var(--color-border)] bg-[var(--color-background)] p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div className="rounded-2xl border border-black/[0.08] bg-white p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-sm">
                   <div className="flex items-center gap-3">
-                    <div className="text-[26px] font-mono font-bold text-[var(--color-foreground)]">
-                      {atsResult.score}<span className="text-[12px] text-[var(--color-muted-foreground)] font-normal">/100</span>
+                    <div className="text-[26px] font-mono font-bold text-[#101010]">
+                      {atsResult.score}<span className="text-[12px] text-[#737373] font-normal">/100</span>
                     </div>
                     <div>
-                      <div className="text-[9px] font-medium uppercase tracking-[0.16em] text-[var(--color-muted-foreground)]">
+                      <div className="text-[10px] font-medium uppercase tracking-[0.14em] text-[#737373]">
                         Resume Score
                       </div>
-                      <span className="text-[10px] font-medium font-semibold tracking-wider uppercase text-[var(--color-primary)] bg-[var(--color-primary)]/10 px-2 py-0.5 border border-[var(--color-primary)]/20">
+                      <span className="text-[10px] font-medium uppercase text-emerald-800 bg-emerald-500/10 px-2.5 py-0.5 rounded-full border border-emerald-500/20">
                         {atsResult.rating}
                       </span>
                     </div>
                   </div>
-                  <div className="text-[11px] font-mono text-[var(--color-muted-foreground)] max-w-sm">
+                  <div className="text-[11px] font-mono text-[#737373] max-w-sm">
                     {atsResult.summary}
                   </div>
                 </div>
@@ -747,23 +735,23 @@ export function ProfileForm({ initialData, onSave, onCancel, isNew = false }: Pr
           )}
         </div>
 
-        {/* ── STEP 2: REVIEW & COMPLETE EXTRACTED PROFILE DETAILS ── */}
-        <div className="pt-2 border-t border-[var(--color-border)]">
-          <div className="mb-6">
-            <span className="text-[10px] font-medium tracking-[0.18em] uppercase text-[var(--color-muted-foreground)] font-semibold">
-              Step 2 · Your Details
+        {/* ── STEP 2: BASIC INFORMATION & PHOTO ── */}
+        <div className="rounded-2xl border border-black/[0.08] bg-white p-6 sm:p-8 shadow-xs space-y-6">
+          <div className="pb-4 border-b border-black/[0.06]">
+            <span className="text-[10px] font-medium tracking-[0.16em] uppercase text-[#737373] font-semibold">
+              Step 2 · Candidate Identity
             </span>
-            <h3 className="font-serif text-[18px] sm:text-[20px] text-[var(--color-foreground)] font-semibold mt-0.5">
-              Review Your Information
+            <h3 className="text-[18px] sm:text-[20px] text-[#101010] font-semibold tracking-[-0.02em] mt-0.5">
+              Basic Information
             </h3>
-            <p className="text-[13px] text-[var(--color-muted-foreground)] font-sans">
-              Check your profile details below. You can change any information anytime.
+            <p className="text-[13px] text-[#737373] font-sans">
+              Your technical identity as displayed to recruiters and on your public verified profile.
             </p>
           </div>
 
           <div className="space-y-6">
             {/* ── Instagram-Style Profile Photo Section ── */}
-            <div className="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6 p-4 sm:p-5 bg-white border border-border rounded-xl shadow-2xs">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6 p-5 bg-[#FAFAF9] border border-black/[0.08] rounded-2xl shadow-sm">
               <div
                 className="relative group cursor-pointer shrink-0 self-start sm:self-center"
                 onClick={() => {
@@ -788,11 +776,11 @@ export function ProfileForm({ initialData, onSave, onCancel, isNew = false }: Pr
 
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 mb-0.5">
-                  <span className="text-[15px] sm:text-[16px] font-bold text-foreground truncate">
+                  <span className="text-[15px] sm:text-[16px] font-semibold text-[#101010] truncate tracking-[-0.01em]">
                     {formData.name || "Candidate Portrait"}
                   </span>
                 </div>
-                <p className="text-[12px] text-muted-foreground mb-3 font-sans">
+                <p className="text-[12px] text-[#737373] mb-3.5 font-sans">
                   Profile photo visible to employers and on your public technical record.
                 </p>
 
@@ -801,7 +789,7 @@ export function ProfileForm({ initialData, onSave, onCancel, isNew = false }: Pr
                     type="button"
                     onClick={() => avatarInputRef.current?.click()}
                     disabled={isProcessingAvatar}
-                    className="text-[11px] font-mono font-semibold px-3.5 py-1.5 bg-foreground hover:bg-emerald-900 text-white rounded transition-colors shadow-2xs flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+                    className="rounded-full bg-[#101010] hover:bg-black/90 text-white text-xs font-medium px-4 py-2 transition-all shadow-xs flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
                   >
                     <UploadCloud className="h-3.5 w-3.5" />
                     <span>{formData.avatarUrl ? "Update Photo" : "Upload Photo"}</span>
@@ -812,7 +800,7 @@ export function ProfileForm({ initialData, onSave, onCancel, isNew = false }: Pr
                       type="button"
                       onClick={handleRemoveAvatar}
                       disabled={isProcessingAvatar}
-                      className="text-[11px] font-mono font-semibold px-3 py-1.5 border border-border hover:border-danger hover:bg-danger/10 text-danger rounded transition-colors flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+                      className="rounded-full border border-red-200 bg-red-50 hover:bg-red-100 text-red-600 text-xs font-medium px-4 py-2 transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
                     >
                       <Trash2 className="h-3.5 w-3.5" />
                       <span>Remove</span>
@@ -833,15 +821,15 @@ export function ProfileForm({ initialData, onSave, onCancel, isNew = false }: Pr
             {/* Instagram-style Photo Action Sheet Modal */}
             {showPhotoActionSheet && (
               <div
-                className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-xs p-4"
+                className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-xs p-4"
                 onClick={() => setShowPhotoActionSheet(false)}
               >
                 <div
-                  className="w-full max-w-xs bg-white rounded-2xl border border-border shadow-2xl overflow-hidden text-center divide-y divide-[#F5F1EB] animate-in zoom-in-95 duration-150"
+                  className="w-full max-w-xs bg-white rounded-2xl border border-black/[0.08] shadow-2xl overflow-hidden text-center divide-y divide-black/[0.06] animate-in zoom-in-95 duration-150"
                   onClick={(e) => e.stopPropagation()}
                 >
-                  <div className="py-4 px-6 bg-surface">
-                    <h3 className="text-[15px] font-bold text-foreground">Change Profile Photo</h3>
+                  <div className="py-4 px-6 bg-[#FAFAF9]">
+                    <h3 className="text-[15px] font-semibold text-[#101010]">Change Profile Photo</h3>
                   </div>
                   <button
                     type="button"
@@ -849,21 +837,21 @@ export function ProfileForm({ initialData, onSave, onCancel, isNew = false }: Pr
                       setShowPhotoActionSheet(false);
                       avatarInputRef.current?.click();
                     }}
-                    className="w-full py-3.5 text-[13px] font-semibold text-emerald-900 hover:bg-surface transition-colors cursor-pointer"
+                    className="w-full py-3.5 text-[13px] font-medium text-[#101010] hover:bg-black/[0.03] transition-colors cursor-pointer"
                   >
                     Upload New Photo
                   </button>
                   <button
                     type="button"
                     onClick={handleRemoveAvatar}
-                    className="w-full py-3.5 text-[13px] font-semibold text-danger hover:bg-danger/10 transition-colors cursor-pointer"
+                    className="w-full py-3.5 text-[13px] font-medium text-red-600 hover:bg-red-50 transition-colors cursor-pointer"
                   >
                     Remove Current Photo
                   </button>
                   <button
                     type="button"
                     onClick={() => setShowPhotoActionSheet(false)}
-                    className="w-full py-3 text-[13px] font-medium text-muted-foreground hover:bg-surface transition-colors cursor-pointer"
+                    className="w-full py-3 text-[13px] font-medium text-[#737373] hover:bg-black/[0.03] transition-colors cursor-pointer"
                   >
                     Cancel
                   </button>
@@ -928,217 +916,231 @@ export function ProfileForm({ initialData, onSave, onCancel, isNew = false }: Pr
                 manualEntryLabel="Custom Branch"
                 manualEntryPlaceholder="e.g. Computer Science"
               />
-              <div className="flex flex-col justify-center bg-[var(--color-background)] border border-[var(--color-border)] p-4">
-                <span className="text-[10px] font-sans font-semibold uppercase tracking-wide text-[var(--color-muted-foreground)] mb-1">
+              <div className="flex flex-col justify-center bg-[#FAFAF9] border border-black/[0.06] rounded-xl p-4">
+                <span className="text-[10px] font-sans font-semibold uppercase tracking-wide text-[#737373] mb-1">
                   Public Profile Note
                 </span>
-                <p className="text-[12px] text-[var(--color-foreground)] leading-relaxed font-sans">
-                  Your university, degree, and branch will appear on your public profile for recruiters to see.
+                <p className="text-[12px] text-[#101010] leading-relaxed font-sans">
+                  Your university, degree, and branch will appear on your public profile for recruiters to verify.
                 </p>
-              </div>
-            </div>
-
-            {/* Skills */}
-            <div className="pt-3 border-t border-[var(--color-border)]">
-              <div className="flex items-center justify-between mb-1">
-                <h4 className="font-serif text-[16px] text-[var(--color-foreground)] font-semibold">
-                  Technical Skills
-                </h4>
-                <span className="text-[10px] font-mono text-[var(--color-muted-foreground)]">
-                  {formData.skills.length} skills added
-                </span>
-              </div>
-              <p className="text-[12px] text-[var(--color-muted-foreground)] mb-4 font-sans">
-                These skills were found from your resume. You can take short tests to earn verified badges on them.
-              </p>
-              <div className="mb-6">
-                <TagInput
-                  label="Skills"
-                  tags={formData.skills}
-                  onChange={handleSkillsChange}
-                  placeholder="React, Python, Systems Design..."
-                  helperText="The first skill listed will be your primary focus. Separate with commas or press Enter."
-                  options={COMMON_SKILLS}
-                  splitOnComma={true}
-                  mode="skills"
-                />
-              </div>
-            </div>
-
-            {/* Targeted Roles & Career Preferences */}
-            <div className="pt-3 border-t border-[var(--color-border)]">
-              <div className="flex items-center gap-2 mb-1">
-                <Briefcase className="h-4 w-4 text-[var(--color-primary)]" />
-                <h4 className="font-serif text-[16px] text-[var(--color-foreground)] font-semibold">
-                  Targeted Roles &amp; Career Preferences
-                </h4>
-              </div>
-              <p className="text-[12px] text-[var(--color-muted-foreground)] mb-4 font-sans">
-                Tell prospective employers the exact engineering roles, locations, and working models you are targeting.
-              </p>
-
-              <div className="space-y-5">
-                {/* Targeted Roles */}
-                <div>
-                  <TagInput
-                    label="Targeted Job Roles"
-                    tags={formData.targetRoles}
-                    onChange={(tags) => setFormData((prev) => ({ ...prev, targetRoles: tags }))}
-                    placeholder="e.g. Full-Stack Developer, Backend Engineer, DevOps..."
-                    helperText="Specify the roles you are best suited for. Select from suggestions or press Enter."
-                    options={TARGET_ROLE_SUGGESTIONS}
-                    splitOnComma={false}
-                    mode="text"
-                  />
-                </div>
-
-                {/* Preferred Locations */}
-                <div>
-                  <TagInput
-                    label="Preferred Work Locations"
-                    tags={formData.preferredLocations}
-                    onChange={(tags) => setFormData((prev) => ({ ...prev, preferredLocations: tags }))}
-                    placeholder="e.g. Remote, Hyderabad, India, Bangalore, India..."
-                    helperText="Where are you willing or eager to work? (Type 'City, Country' and press Enter, or choose from suggestions)"
-                    options={PREFERRED_LOCATION_SUGGESTIONS}
-                    splitOnComma={false}
-                    mode="text"
-                  />
-                </div>
-
-                {/* Work Preference, Availability, and Expected Compensation */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-                  <div>
-                    <label className="block text-[11px] font-sans font-semibold uppercase tracking-wider text-[var(--color-muted-foreground)] mb-1.5">
-                      Work Preference
-                    </label>
-                    <select
-                      name="workPreference"
-                      value={formData.workPreference}
-                      onChange={(e) => setFormData((prev) => ({ ...prev, workPreference: e.target.value as any }))}
-                      className="w-full h-10 px-3 border border-[var(--color-border)] bg-[var(--color-background)] text-[13px] text-[var(--color-foreground)] rounded focus:outline-none focus:ring-1 focus:ring-[var(--color-foreground)]"
-                    >
-                      <option value="Remote">Remote Only</option>
-                      <option value="Hybrid">Hybrid (Flexible)</option>
-                      <option value="On-site">On-site (Office)</option>
-                      <option value="Flexible">Flexible / Open to All</option>
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className="block text-[11px] font-sans font-semibold uppercase tracking-wider text-[var(--color-muted-foreground)] mb-1.5">
-                      Notice / Availability
-                    </label>
-                    <select
-                      name="availability"
-                      value={formData.availability}
-                      onChange={(e) => setFormData((prev) => ({ ...prev, availability: e.target.value }))}
-                      className="w-full h-10 px-3 border border-[var(--color-border)] bg-[var(--color-background)] text-[13px] text-[var(--color-foreground)] rounded focus:outline-none focus:ring-1 focus:ring-[var(--color-foreground)]"
-                    >
-                      <option value="Immediate (Ready to Join)">Immediate (Ready to Join)</option>
-                      <option value="15 Days Notice">15 Days Notice</option>
-                      <option value="30 Days (1 Month)">30 Days (1 Month)</option>
-                      <option value="60 Days (2 Months)">60 Days (2 Months)</option>
-                      <option value="Summer Internship">Summer Internship</option>
-                      <option value="Graduating Senior (Class of 2026)">Graduating Senior (Class of 2026)</option>
-                    </select>
-                  </div>
-
-                  <div>
-                    <Input
-                      label="Expected Compensation (Optional)"
-                      name="expectedSalary"
-                      value={formData.expectedSalary}
-                      onChange={handleChange}
-                      placeholder="e.g. ₹8 - 12 LPA or $90k/yr"
-                    />
-                  </div>
-                </div>
-
-                {/* Professional Bio */}
-                <div>
-                  <label className="block text-[11px] font-sans font-semibold uppercase tracking-wider text-[var(--color-muted-foreground)] mb-1.5">
-                    Professional Headline / Engineering Focus
-                  </label>
-                  <textarea
-                    name="bio"
-                    value={formData.bio}
-                    onChange={handleChange}
-                    rows={2}
-                    placeholder="Brief 1-2 sentence engineering focus e.g. Full-Stack TypeScript & Go engineer passionate about scalable backend systems and high-performance web applications."
-                    className="w-full px-3 py-2 border border-[var(--color-border)] bg-[var(--color-background)] text-[13px] text-[var(--color-foreground)] rounded focus:outline-none focus:ring-1 focus:ring-[var(--color-foreground)] leading-relaxed"
-                  />
-                </div>
-              </div>
-            </div>
-
-            {/* External Links */}
-            <div className="pt-3 border-t border-[var(--color-border)]">
-              <div className="flex items-center justify-between mb-1">
-                <h4 className="font-serif text-[16px] text-[var(--color-foreground)] font-semibold">
-                  Links &amp; Portfolio
-                </h4>
-                <span className="text-[11px] font-sans font-medium text-[var(--color-muted-foreground)]">
-                  All fields optional
-                </span>
-              </div>
-              <p className="text-[12px] text-[var(--color-muted-foreground)] mb-4 font-sans">
-                Add links to your code repository, professional network, and personal portfolio.
-              </p>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <Input
-                  label="GitHub URL (Optional)"
-                  name="githubUrl"
-                  value={formData.githubUrl}
-                  onChange={handleChange}
-                  placeholder="https://github.com/SaitrishankAUCSE"
-                  type="url"
-                  helperText="Link to your code repository or open-source profile"
-                />
-                <Input
-                  label="LinkedIn URL (Optional)"
-                  name="linkedinUrl"
-                  value={formData.linkedinUrl}
-                  onChange={handleChange}
-                  placeholder="https://www.linkedin.com/in/saitrishank/"
-                  type="url"
-                  helperText="Link to your professional profile"
-                />
-                <Input
-                  label="Portfolio / Personal Website URL (Optional)"
-                  name="portfolioUrl"
-                  value={formData.portfolioUrl}
-                  onChange={handleChange}
-                  placeholder="https://saitrishank-portfolio.vercel.app/"
-                  type="url"
-                  helperText="Link to your personal website or portfolio"
-                />
-                <Input
-                  label="Resume Document / PDF Link (Optional)"
-                  name="resumeUrl"
-                  value={formData.resumeUrl}
-                  onChange={handleChange}
-                  placeholder="https://drive.google.com/... or direct PDF link"
-                  type="url"
-                  helperText="Direct URL to your hosted resume or Google Drive document"
-                />
               </div>
             </div>
           </div>
         </div>
 
-        {/* Action Buttons */}
-        <div className="flex flex-col-reverse sm:flex-row sm:items-center justify-between gap-4 pt-6 border-t border-[var(--color-border)]">
-          <div className="text-[11px] font-mono text-[var(--color-muted-foreground)]">
+        {/* ── STEP 3: TECHNICAL SKILLS ── */}
+        <div className="rounded-2xl border border-black/[0.08] bg-white p-6 sm:p-8 shadow-xs space-y-4">
+          <div className="pb-4 border-b border-black/[0.06] flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+            <div>
+              <span className="text-[10px] font-medium tracking-[0.16em] uppercase text-[#737373] font-semibold">
+                Step 3 · Verified Capabilities
+              </span>
+              <h3 className="text-[18px] sm:text-[20px] text-[#101010] font-semibold tracking-[-0.02em] mt-0.5">
+                Technical Skills
+              </h3>
+              <p className="text-[13px] text-[#737373] font-sans mt-0.5">
+                These skills were parsed from your resume. Take timed assessments to earn verified proof badges.
+              </p>
+            </div>
+            <span className="text-[11px] font-mono text-[#737373] bg-[#FAFAF9] border border-black/[0.06] px-3 py-1 rounded-full w-fit">
+              {formData.skills.length} skills added
+            </span>
+          </div>
+
+          <div>
+            <TagInput
+              label="Declared Skills"
+              tags={formData.skills}
+              onChange={handleSkillsChange}
+              placeholder="React, Python, Systems Design..."
+              helperText="The first skill listed will be your primary focus. Separate with commas or press Enter."
+              options={COMMON_SKILLS}
+              splitOnComma={true}
+              mode="skills"
+            />
+          </div>
+        </div>
+
+        {/* ── STEP 4: TARGETED ROLES & PREFERENCES ── */}
+        <div className="rounded-2xl border border-black/[0.08] bg-white p-6 sm:p-8 shadow-xs space-y-5">
+          <div className="pb-4 border-b border-black/[0.06]">
+            <span className="text-[10px] font-medium tracking-[0.16em] uppercase text-[#737373] font-semibold">
+              Step 4 · Career Focus
+            </span>
+            <h3 className="text-[18px] sm:text-[20px] text-[#101010] font-semibold tracking-[-0.02em] mt-0.5">
+              Targeted Roles &amp; Career Preferences
+            </h3>
+            <p className="text-[13px] text-[#737373] font-sans">
+              Tell prospective employers the exact engineering roles, locations, and working models you want.
+            </p>
+          </div>
+
+          <div className="space-y-5">
+            {/* Targeted Roles */}
+            <div>
+              <TagInput
+                label="Targeted Job Roles"
+                tags={formData.targetRoles}
+                onChange={(tags) => setFormData((prev) => ({ ...prev, targetRoles: tags }))}
+                placeholder="e.g. Full-Stack Developer, Backend Engineer, DevOps..."
+                helperText="Specify the roles you are best suited for. Select from suggestions or press Enter."
+                options={TARGET_ROLE_SUGGESTIONS}
+                splitOnComma={false}
+                mode="text"
+              />
+            </div>
+
+            {/* Preferred Locations */}
+            <div>
+              <TagInput
+                label="Preferred Work Locations"
+                tags={formData.preferredLocations}
+                onChange={(tags) => setFormData((prev) => ({ ...prev, preferredLocations: tags }))}
+                placeholder="e.g. Remote, Hyderabad, India, Bangalore, India..."
+                helperText="Where are you willing or eager to work? (Type 'City, Country' and press Enter, or choose from suggestions)"
+                options={PREFERRED_LOCATION_SUGGESTIONS}
+                splitOnComma={false}
+                mode="text"
+              />
+            </div>
+
+            {/* Work Preference, Availability, and Expected Compensation */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+              <div>
+                <label className="block text-[11px] font-sans font-semibold uppercase tracking-wider text-[#737373] mb-1.5">
+                  Work Preference
+                </label>
+                <select
+                  name="workPreference"
+                  value={formData.workPreference}
+                  onChange={(e) => setFormData((prev) => ({ ...prev, workPreference: e.target.value as any }))}
+                  className="w-full h-10 px-3 border border-black/[0.12] bg-[#FAFAF9] text-[13px] text-[#101010] rounded-xl focus:outline-none focus:ring-1 focus:ring-[#101010]"
+                >
+                  <option value="Remote">Remote Only</option>
+                  <option value="Hybrid">Hybrid (Flexible)</option>
+                  <option value="On-site">On-site (Office)</option>
+                  <option value="Flexible">Flexible / Open to All</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-sans font-semibold uppercase tracking-wider text-[#737373] mb-1.5">
+                  Notice / Availability
+                </label>
+                <select
+                  name="availability"
+                  value={formData.availability}
+                  onChange={(e) => setFormData((prev) => ({ ...prev, availability: e.target.value }))}
+                  className="w-full h-10 px-3 border border-black/[0.12] bg-[#FAFAF9] text-[13px] text-[#101010] rounded-xl focus:outline-none focus:ring-1 focus:ring-[#101010]"
+                >
+                  <option value="Immediate (Ready to Join)">Immediate (Ready to Join)</option>
+                  <option value="15 Days Notice">15 Days Notice</option>
+                  <option value="30 Days (1 Month)">30 Days (1 Month)</option>
+                  <option value="60 Days (2 Months)">60 Days (2 Months)</option>
+                  <option value="Summer Internship">Summer Internship</option>
+                  <option value="Graduating Senior (Class of 2026)">Graduating Senior (Class of 2026)</option>
+                </select>
+              </div>
+
+              <div>
+                <Input
+                  label="Expected Compensation (Optional)"
+                  name="expectedSalary"
+                  value={formData.expectedSalary}
+                  onChange={handleChange}
+                  placeholder="e.g. ₹8 - 12 LPA or $90k/yr"
+                />
+              </div>
+            </div>
+
+            {/* Professional Bio */}
+            <div>
+              <label className="block text-[11px] font-sans font-semibold uppercase tracking-wider text-[#737373] mb-1.5">
+                Professional Headline / Engineering Focus
+              </label>
+              <textarea
+                name="bio"
+                value={formData.bio}
+                onChange={handleChange}
+                rows={2}
+                placeholder="Brief 1-2 sentence engineering focus e.g. Full-Stack TypeScript & Go engineer passionate about scalable backend systems and high-performance web applications."
+                className="w-full px-3 py-2 border border-black/[0.12] bg-[#FAFAF9] text-[13px] text-[#101010] rounded-xl focus:outline-none focus:ring-1 focus:ring-[#101010] leading-relaxed"
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* ── STEP 5: LINKS & PORTFOLIO ── */}
+        <div className="rounded-2xl border border-black/[0.08] bg-white p-6 sm:p-8 shadow-xs space-y-5">
+          <div className="pb-4 border-b border-black/[0.06] flex items-center justify-between">
+            <div>
+              <span className="text-[10px] font-medium tracking-[0.16em] uppercase text-[#737373] font-semibold">
+                Step 5 · Evidence &amp; Links
+              </span>
+              <h3 className="text-[18px] sm:text-[20px] text-[#101010] font-semibold tracking-[-0.02em] mt-0.5">
+                Links &amp; Portfolio
+              </h3>
+              <p className="text-[13px] text-[#737373] font-sans mt-0.5">
+                Add links to your code repository, professional network, and personal portfolio.
+              </p>
+            </div>
+            <span className="text-[11px] font-mono text-[#737373] bg-[#FAFAF9] border border-black/[0.06] px-3 py-1 rounded-full">
+              Optional
+            </span>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <Input
+              label="GitHub URL (Optional)"
+              name="githubUrl"
+              value={formData.githubUrl}
+              onChange={handleChange}
+              placeholder="https://github.com/SaitrishankAUCSE"
+              type="url"
+              helperText="Link to your code repository or open-source profile"
+            />
+            <Input
+              label="LinkedIn URL (Optional)"
+              name="linkedinUrl"
+              value={formData.linkedinUrl}
+              onChange={handleChange}
+              placeholder="https://www.linkedin.com/in/saitrishank/"
+              type="url"
+              helperText="Link to your professional profile"
+            />
+            <Input
+              label="Portfolio / Personal Website URL (Optional)"
+              name="portfolioUrl"
+              value={formData.portfolioUrl}
+              onChange={handleChange}
+              placeholder="https://saitrishank-portfolio.vercel.app/"
+              type="url"
+              helperText="Link to your personal website or portfolio"
+            />
+            <Input
+              label="Resume Document / PDF Link (Optional)"
+              name="resumeUrl"
+              value={formData.resumeUrl}
+              onChange={handleChange}
+              placeholder="https://drive.google.com/... or direct PDF link"
+              type="url"
+              helperText="Direct URL to your hosted resume or Google Drive document"
+            />
+          </div>
+        </div>
+
+        {/* ── SAVE ACTION BAR ── */}
+        <div className="rounded-2xl border border-black/[0.08] bg-white p-5 flex flex-col-reverse sm:flex-row sm:items-center justify-between gap-4 shadow-xs">
+          <div className="text-[12px] font-mono text-[#737373]">
             {!hasResume ? (
-              <span className="text-[#7A3B2E] flex items-center gap-1.5 font-semibold">
-                <AlertCircle className="h-3.5 w-3.5" />
-                Please upload your resume in Step 1 to continue.
+              <span className="text-amber-800 flex items-center gap-1.5 font-medium">
+                <AlertCircle className="h-4 w-4" />
+                Please upload your resume in Step 1 to save profile.
               </span>
             ) : (
-              <span className="text-[var(--color-primary)] flex items-center gap-1.5">
-                <ShieldCheck className="h-3.5 w-3.5" />
-                Resume uploaded · Ready to save profile.
+              <span className="text-emerald-700 flex items-center gap-1.5 font-medium">
+                <ShieldCheck className="h-4 w-4" />
+                Resume on file · Ready to save.
               </span>
             )}
           </div>

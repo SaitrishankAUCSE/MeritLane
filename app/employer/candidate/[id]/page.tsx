@@ -4,7 +4,8 @@ import { notFound, redirect } from "next/navigation";
 import { PublicProofRecord } from "@/components/public-record/PublicProofRecord";
 import { EmployerDossierActions } from "@/components/employer/EmployerDossierActions";
 import { cookies, headers } from "next/headers";
-
+import Link from "next/link";
+import { Button } from "@/components/ui/Button";
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -31,19 +32,18 @@ export default async function EmployerCandidateDossierPage({ params }: Props) {
 
   if (!candidateDoc?.exists && !userDoc?.exists) {
     return (
-      <div className="min-h-screen bg-surface flex flex-col items-center justify-center p-6 text-center">
-        <div className="border border-border bg-white p-10 rounded-2xl max-w-md shadow-xs space-y-4">
-          <h2 className="text-[20px] font-serif font-bold text-foreground">Candidate Dossier Not Found</h2>
-          <p className="text-[13px] text-muted-foreground leading-relaxed font-sans">
+      <div className="min-h-screen bg-[#F8F8F6] flex flex-col items-center justify-center p-6 text-center">
+        <div className="rounded-2xl border border-black/[0.08] bg-white p-10 max-w-md shadow-xs space-y-4">
+          <h2 className="text-xl font-bold tracking-tight text-[#101010]">Candidate Dossier Not Found</h2>
+          <p className="text-xs text-black/60 leading-relaxed font-sans">
             The requested candidate record could not be located in the verification registry.
           </p>
           <div className="pt-2">
-            <a
-              href="/employer/dashboard"
-              className="inline-flex items-center gap-2 px-5 py-2.5 bg-foreground text-white text-[12px] font-medium font-semibold rounded uppercase tracking-wider hover:bg-emerald-900 transition-colors"
-            >
-              Back to Talent Discovery
-            </a>
+            <Link href="/employer/dashboard">
+              <Button className="rounded-full bg-[#101010] text-white hover:bg-black text-xs px-5 py-2.5">
+                Back to Talent Discovery
+              </Button>
+            </Link>
           </div>
         </div>
       </div>
@@ -113,16 +113,14 @@ export default async function EmployerCandidateDossierPage({ params }: Props) {
   };
 
   return (
-    <div className="relative min-h-screen bg-surface flex flex-col">
+    <div className="relative min-h-screen bg-[#F8F8F6] flex flex-col">
       {/* Client Component for floating shortlist button, message, AI summary, and navigation */}
       <EmployerDossierActions candidateId={id} candidateName={candidate.name} />
 
       {/* Candidate Public Proof Layout */}
       <div className="flex-1 mt-16 pb-24">
-
         <PublicProofRecord id={id} candidate={candidate} user={user} hideHeader={true} />
       </div>
     </div>
   );
 }
-

@@ -98,6 +98,50 @@ function shuffleWithRng<T>(array: T[], rng: () => number): T[] {
   return arr;
 }
 
+function getStarterCodeForSkill(q: TopInterviewQuestion, skill: string): { initialCode: string; language: string } {
+  const norm = skill.toLowerCase().trim();
+  let lang = norm;
+  let code = "";
+
+  if (norm === "python" || norm === "py") {
+    lang = "python";
+    code = q.starterCode?.python || "";
+  } else if (norm === "javascript" || norm === "js") {
+    lang = "javascript";
+    code = q.starterCode?.javascript || "";
+  } else if (norm === "typescript" || norm === "ts") {
+    lang = "typescript";
+    code = q.starterCode?.typescript || q.starterCode?.javascript || "";
+  } else if (norm === "sql" || norm === "mysql" || norm === "postgresql") {
+    lang = "sql";
+    code = (q.starterCode as any)?.sql || q.initialCode || "";
+  } else if (norm === "java") {
+    lang = "java";
+    code = q.starterCode?.java || "";
+  } else if (norm === "c++" || norm === "cpp") {
+    lang = "cpp";
+    code = q.starterCode?.cpp || "";
+  } else if (norm === "c") {
+    lang = "c";
+    code = q.starterCode?.c || "";
+  } else if (norm === "c#" || norm === "csharp") {
+    lang = "csharp";
+    code = q.starterCode?.csharp || "";
+  } else if (norm === "golang" || norm === "go") {
+    lang = "golang";
+    code = q.starterCode?.golang || "";
+  } else if (norm === "rust") {
+    lang = "rust";
+    code = q.starterCode?.rust || "";
+  }
+
+  if (!code) {
+    code = q.starterCode?.python || q.starterCode?.javascript || q.initialCode;
+  }
+
+  return { initialCode: code, language: lang };
+}
+
 export interface SelectedInterviewCodingAssignment {
   format: 'dual_easy_medium' | 'single_hard';
   track: 'standard' | 'advanced';
@@ -123,24 +167,38 @@ export async function selectRandomInterviewQuestions(
   const all = await getAllInterviewQuestions();
   if (!all || all.length === 0) return null;
 
+  const normalizedSkill = skill.toLowerCase().trim();
+  const isSql = normalizedSkill === "sql" || normalizedSkill === "mysql" || normalizedSkill === "postgresql";
+
+  // Filter out Database/SQL-only questions for algorithmic programming languages
+  const poolSource = all.filter(q => {
+    if (isSql) {
+      return q.category === "Database" || (q.starterCode && (q.starterCode as any).sql);
+    }
+    return q.category !== "Database";
+  });
+
+  const availableAll = poolSource.length > 0 ? poolSource : all;
+
   const seedNum = sessionSeed ? deriveSeedNum(sessionSeed) : deriveSeedNum(`${uid}::${skill}::${Date.now()}`);
   const rng = mulberry32(seedNum);
 
   const seenSet = new Set(seenCodingIds);
 
-  const easyPool = all.filter(q => q.difficulty === 'easy');
-  const mediumPool = all.filter(q => q.difficulty === 'medium');
-  const hardPool = all.filter(q => q.difficulty === 'hard');
+  const easyPool = availableAll.filter(q => q.difficulty === 'easy');
+  const mediumPool = availableAll.filter(q => q.difficulty === 'medium');
+  const hardPool = availableAll.filter(q => q.difficulty === 'hard');
 
   const isDualTask = track === 'standard';
 
   const toChallenge = (q: TopInterviewQuestion, label: string): CodingChallenge => {
+    const { initialCode, language } = getStarterCodeForSkill(q, skill);
     return {
       id: q.id,
       title: q.title,
       instructions: q.instructions,
-      initialCode: q.initialCode,
-      language: 'javascript',
+      initialCode,
+      language,
       supportedLanguages: q.supportedLanguages,
       difficulty: q.difficulty,
     };
@@ -185,16 +243,17 @@ export async function selectRandomInterviewQuestions(
   }
 }
 
-export async function getInterviewQuestionById(id: string): Promise<CodingChallenge | null> {
+export async function getInterviewQuestionById(id: string, skill: string = "python"): Promise<CodingChallenge | null> {
   const all = await getAllInterviewQuestions();
   const q = all.find(item => item.id === id);
   if (!q) return null;
+  const { initialCode, language } = getStarterCodeForSkill(q, skill);
   return {
     id: q.id,
     title: q.title,
     instructions: q.instructions,
-    initialCode: q.initialCode,
-    language: 'javascript',
+    initialCode,
+    language,
     supportedLanguages: q.supportedLanguages,
     difficulty: q.difficulty,
   };

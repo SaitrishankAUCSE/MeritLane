@@ -150,7 +150,7 @@ export function ProtocolWelcomeExperience() {
   const [copiedLink, setCopiedLink] = useState(false);
   const [isCompleted, setIsCompleted] = useState(false);
 
-  // Check if user is a genuinely NEW user
+  // Check if user is a genuinely NEW user who JUST registered
   useEffect(() => {
     if (loading || !user) return;
 
@@ -164,24 +164,37 @@ export function ProtocolWelcomeExperience() {
       return;
     }
 
-    // New user signals
-    const wasJustSignedUp =
+    // STRICT USER RULE: Only trigger celebration animation when a brand-new user signs up, NEVER on regular logins
+    const isBrandNewSignup =
       typeof window !== "undefined" &&
-      (localStorage.getItem(`meritlane_show_welcome_${user.uid}`) === "true" ||
-        localStorage.getItem(`meritlane_new_signup_${user.uid}`) === "true");
+      sessionStorage.getItem("meritlane_trigger_signup_welcome") === user.uid;
 
-    const isProfileNew = (userProfile as any)?.isNewUser === true;
-    const isFirstTimeSession =
-      typeof window !== "undefined" &&
-      !localStorage.getItem(`meritlane_seen_session_${user.uid}`) &&
-      !userProfile?.hasSeenWelcomeOnboarding;
+    if (isBrandNewSignup) {
+      // Consume the one-time trigger immediately so refreshes/logins will never show it again
+      sessionStorage.removeItem("meritlane_trigger_signup_welcome");
+      localStorage.setItem(completedKey, "true");
+      localStorage.setItem(`meritlane_seen_session_${user.uid}`, "true");
 
-    if (wasJustSignedUp || isProfileNew || isFirstTimeSession) {
+      if (db) {
+        updateDoc(doc(db, "users", user.uid), {
+          hasSeenWelcomeOnboarding: true,
+          isNewUser: false,
+        }).catch(() => {});
+      }
+
       setCurrentStep(-1);
       const timer = setTimeout(() => {
         setIsOpen(true);
       }, 500);
       return () => clearTimeout(timer);
+    } else {
+      // Normal login — ensure user is marked as having seen onboarding so it never interrupts their workflow
+      if (typeof window !== "undefined") {
+        localStorage.setItem(completedKey, "true");
+        localStorage.setItem(`meritlane_seen_session_${user.uid}`, "true");
+        localStorage.removeItem(`meritlane_show_welcome_${user.uid}`);
+        localStorage.removeItem(`meritlane_new_signup_${user.uid}`);
+      }
     }
   }, [user, userProfile, loading]);
 
@@ -266,7 +279,7 @@ export function ProtocolWelcomeExperience() {
       setSimulatedRunOutput((prev) => [
         ...prev,
         "> All 5 test cases passed successfully!",
-        "★ Passed with 94% score — Official Verified Badge Awarded!",
+        "[PASSED] 94% score: Official Verified Badge Awarded",
       ]);
       setIsRunningSim(false);
     }, 1600);
@@ -750,7 +763,7 @@ export function ProtocolWelcomeExperience() {
                     className="relative flex items-center justify-center"
                   >
                     <div className="h-20 w-20 rounded-2xl bg-gradient-to-tr from-emerald-950 via-emerald-800 to-emerald-600 text-white flex items-center justify-center shadow-xl shadow-emerald-950/20 ring-4 ring-emerald-500/20">
-                      <Rocket className="h-10 w-10 text-white animate-bounce" />
+                      <Rocket className="h-10 w-10 text-white" />
                     </div>
                     <motion.div
                       initial={{ scale: 0 }}
@@ -769,8 +782,8 @@ export function ProtocolWelcomeExperience() {
                     transition={{ delay: 0.2, duration: 0.4 }}
                     className="space-y-2 max-w-xl"
                   >
-                    <div className="inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-emerald-900 bg-emerald-900/10 border border-emerald-900/20 px-3 py-1 rounded-full">
-                      🎉 Account Created Successfully!
+                    <div className="inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-emerald-900 bg-emerald-900/10 border border-emerald-900/20 px-3 py-1 rounded-md">
+                      Account Created Successfully
                     </div>
                     <h1 className="text-[26px] sm:text-[32px] font-bold text-[#1C1917] tracking-tight leading-tight">
                       Welcome to MeritLane, {displayName}!
@@ -778,7 +791,7 @@ export function ProtocolWelcomeExperience() {
                     <p className="text-[14px] text-[#78716C] leading-relaxed">
                       {isEmployer
                         ? "Before you can post jobs or search candidates, set up your company profile. Let's take a quick 60-second look at how MeritLane works and what unlocking the platform looks like."
-                        : "Welcome to MeritLane — the proof-of-work platform built for ambitious freshers and early-career engineers. Complete your profile to unlock proctored skill tests, earn verified credentials, and get discovered by tech companies without getting trapped in 0-2 year experience loops."}
+                        : "Welcome to MeritLane: the proof-of-work platform built for ambitious freshers and early-career engineers. Complete your profile to unlock proctored skill tests, earn verified credentials, and get discovered by tech companies without getting trapped in 0-2 year experience loops."}
                     </p>
                   </motion.div>
 
