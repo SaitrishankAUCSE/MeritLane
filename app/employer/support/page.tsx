@@ -133,7 +133,7 @@ export default function EmployerSupportPage() {
                 />
               </div>
               <div className="flex justify-end pt-2">
-                <Button type="submit" className="rounded-full bg-[#101010] text-white hover:bg-black text-xs px-6 py-2.5 shadow-xs">
+                <Button type="submit" className="rounded-lg bg-[#101010] text-white hover:bg-black text-xs px-6 py-2.5 shadow-xs">
                   <Send className="h-3.5 w-3.5 mr-1.5" />
                   Submit Inquiry
                 </Button>

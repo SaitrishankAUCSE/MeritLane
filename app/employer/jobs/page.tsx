@@ -127,12 +127,12 @@ export default function EmployerJobsPage() {
 
           <div className="flex items-center gap-3">
             <Link href="/employer/dashboard">
-              <button className="px-4 py-2 border border-black/[0.12] bg-white hover:bg-[#F4F4F2] text-xs font-medium rounded-full text-[#101010] transition-colors shadow-xs cursor-pointer">
+              <button className="px-4 py-2 border border-black/[0.12] bg-white hover:bg-[#F4F4F2] text-xs font-medium rounded-lg text-[#101010] transition-colors shadow-xs cursor-pointer">
                 Candidate Discovery
               </button>
             </Link>
             <Link href="/employer/jobs/new">
-              <button className="flex items-center gap-2 px-5 py-2 bg-[#101010] hover:bg-[#252525] text-white text-xs font-medium rounded-full transition-all shadow-xs cursor-pointer active:scale-[0.98]">
+              <button className="flex items-center gap-2 px-5 py-2 bg-[#101010] hover:bg-[#252525] text-white text-xs font-medium rounded-lg transition-all shadow-xs cursor-pointer active:scale-[0.98]">
                 <Plus className="h-4 w-4" />
                 Post a Job
               </button>
@@ -180,7 +180,7 @@ export default function EmployerJobsPage() {
               Create your first engineering job posting to start receiving verified candidate dossiers directly into your hiring pipeline.
             </p>
             <Link href="/employer/jobs/new">
-              <button className="px-6 py-2.5 bg-[#101010] hover:bg-[#252525] text-white text-xs font-medium rounded-full transition-all shadow-xs cursor-pointer">
+              <button className="px-6 py-2.5 bg-[#101010] hover:bg-[#252525] text-white text-xs font-medium rounded-lg transition-all shadow-xs cursor-pointer">
                 + Post Your First Job
               </button>
             </Link>
@@ -231,7 +231,7 @@ export default function EmployerJobsPage() {
                     <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 shrink-0">
                       {/* Applicants Button */}
                       <Link href={`/employer/jobs/${job.id}/applicants`}>
-                        <button className="flex items-center justify-center gap-2 px-4 py-1.5 border border-black/[0.12] bg-white hover:bg-[#F4F4F2] text-xs font-medium text-[#101010] rounded-full transition-colors shadow-xs cursor-pointer">
+                        <button className="flex items-center justify-center gap-2 px-4 py-1.5 border border-black/[0.12] bg-white hover:bg-[#F4F4F2] text-xs font-medium text-[#101010] rounded-lg transition-colors shadow-xs cursor-pointer">
                           <Users className="h-3.5 w-3.5 text-[#71717A]" />
                           <span>Applicants ({job.applicationCount || 0})</span>
                         </button>
@@ -239,7 +239,7 @@ export default function EmployerJobsPage() {
 
                       {/* Edit Button */}
                       <Link href={`/employer/jobs/${job.id}/edit`}>
-                        <button className="flex items-center justify-center gap-1.5 px-3.5 py-1.5 border border-black/[0.12] bg-white hover:bg-[#F4F4F2] text-xs font-medium text-[#101010] rounded-full transition-colors cursor-pointer">
+                        <button className="flex items-center justify-center gap-1.5 px-3.5 py-1.5 border border-black/[0.12] bg-white hover:bg-[#F4F4F2] text-xs font-medium text-[#101010] rounded-lg transition-colors cursor-pointer">
                           <Edit3 className="h-3.5 w-3.5 text-[#71717A]" />
                           <span>Edit</span>
                         </button>
@@ -248,7 +248,7 @@ export default function EmployerJobsPage() {
                       {/* Public Preview Button (if published) */}
                       {job.status === "published" && (
                         <Link href={`/jobs/${job.id}`} target="_blank">
-                          <button className="flex items-center justify-center gap-1.5 px-3.5 py-1.5 border border-black/[0.12] bg-white hover:bg-[#F4F4F2] text-xs font-medium text-[#101010] rounded-full transition-colors cursor-pointer">
+                          <button className="flex items-center justify-center gap-1.5 px-3.5 py-1.5 border border-black/[0.12] bg-white hover:bg-[#F4F4F2] text-xs font-medium text-[#101010] rounded-lg transition-colors cursor-pointer">
                             <Eye className="h-3.5 w-3.5 text-[#71717A]" />
                             <span>Preview ↗</span>
                           </button>
@@ -260,7 +260,7 @@ export default function EmployerJobsPage() {
                         <button
                           onClick={() => handleStatusChange(job.id, "published")}
                           disabled={busy}
-                          className="px-4 py-1.5 bg-[#101010] hover:bg-[#252525] text-white text-xs font-medium rounded-full shadow-xs transition-colors disabled:opacity-50 cursor-pointer"
+                          className="px-4 py-1.5 bg-[#101010] hover:bg-[#252525] text-white text-xs font-medium rounded-lg shadow-xs transition-colors disabled:opacity-50 cursor-pointer"
                         >
                           Publish Now
                         </button>
@@ -270,7 +270,7 @@ export default function EmployerJobsPage() {
                         <button
                           onClick={() => handleStatusChange(job.id, "paused")}
                           disabled={busy}
-                          className="px-3.5 py-1.5 border border-amber-300 text-amber-800 bg-amber-50 hover:bg-amber-100 text-xs font-medium rounded-full transition-colors disabled:opacity-50 cursor-pointer"
+                          className="px-3.5 py-1.5 border border-amber-300 text-amber-800 bg-amber-50 hover:bg-amber-100 text-xs font-medium rounded-lg transition-colors disabled:opacity-50 cursor-pointer"
                         >
                           Pause
                         </button>
@@ -280,7 +280,7 @@ export default function EmployerJobsPage() {
                         <button
                           onClick={() => handleStatusChange(job.id, "published")}
                           disabled={busy}
-                          className="px-3.5 py-1.5 bg-[#101010] hover:bg-[#252525] text-white text-xs font-medium rounded-full shadow-xs transition-colors disabled:opacity-50 cursor-pointer"
+                          className="px-3.5 py-1.5 bg-[#101010] hover:bg-[#252525] text-white text-xs font-medium rounded-lg shadow-xs transition-colors disabled:opacity-50 cursor-pointer"
                         >
                           Resume
                         </button>
@@ -294,7 +294,7 @@ export default function EmployerJobsPage() {
                             }
                           }}
                           disabled={busy}
-                          className="px-3.5 py-1.5 border border-red-200 text-red-600 bg-red-50 hover:bg-red-100 text-xs font-medium rounded-full transition-colors disabled:opacity-50 cursor-pointer"
+                          className="px-3.5 py-1.5 border border-red-200 text-red-600 bg-red-50 hover:bg-red-100 text-xs font-medium rounded-lg transition-colors disabled:opacity-50 cursor-pointer"
                         >
                           Close
                         </button>
@@ -315,14 +315,14 @@ export default function EmployerJobsPage() {
                   <button
                     disabled={currentPage === 1}
                     onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-                    className="px-3 py-1 border border-black/[0.12] bg-white text-[#101010] text-xs rounded-full hover:bg-[#F4F4F2] disabled:opacity-50 cursor-pointer"
+                    className="px-3 py-1 border border-black/[0.12] bg-white text-[#101010] text-xs rounded-lg hover:bg-[#F4F4F2] disabled:opacity-50 cursor-pointer"
                   >
                     Previous
                   </button>
                   <button
                     disabled={currentPage * ITEMS_PER_PAGE >= jobs.length}
                     onClick={() => setCurrentPage(p => p + 1)}
-                    className="px-3 py-1 border border-black/[0.12] bg-white text-[#101010] text-xs rounded-full hover:bg-[#F4F4F2] disabled:opacity-50 cursor-pointer"
+                    className="px-3 py-1 border border-black/[0.12] bg-white text-[#101010] text-xs rounded-lg hover:bg-[#F4F4F2] disabled:opacity-50 cursor-pointer"
                   >
                     Next
                   </button>

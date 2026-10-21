@@ -277,13 +277,13 @@ export default function NewJobPostingPage() {
                     }
                   }}
                   placeholder="Type a capability and press Add…"
-                  className="flex-1 h-10 px-4 bg-white border border-black/[0.12] rounded-full text-xs text-[#101010] focus:outline-none focus:border-black transition-colors"
+                  className="flex-1 h-10 px-4 bg-white border border-black/[0.12] rounded-lg text-xs text-[#101010] focus:outline-none focus:border-black transition-colors"
                 />
                 <Button
                   type="button"
                   variant="outline"
                   onClick={() => handleAddSkill(skillInput)}
-                  className="px-5 h-10 rounded-full border-black/[0.12] bg-white text-xs font-medium text-[#101010] hover:bg-black/[0.04]"
+                  className="px-5 h-10 rounded-lg border-black/[0.12] bg-white text-xs font-medium text-[#101010] hover:bg-black/[0.04]"
                 >
                   Add
                 </Button>
@@ -327,7 +327,7 @@ export default function NewJobPostingPage() {
               variant="outline"
               disabled={saving}
               onClick={() => handleSubmit("draft")}
-              className="w-full sm:w-auto px-6 h-10 rounded-full border-black/[0.12] bg-white text-xs font-medium text-[#101010] hover:bg-black/[0.04] transition-colors disabled:opacity-50"
+              className="w-full sm:w-auto px-6 h-10 rounded-lg border-black/[0.12] bg-white text-xs font-medium text-[#101010] hover:bg-black/[0.04] transition-colors disabled:opacity-50"
             >
               Save as Draft
             </Button>
@@ -336,7 +336,7 @@ export default function NewJobPostingPage() {
               type="button"
               disabled={saving}
               onClick={() => handleSubmit("published")}
-              className="w-full sm:w-auto px-7 h-10 bg-[#101010] hover:bg-black text-white text-xs font-medium rounded-full transition-colors shadow-xs disabled:opacity-50 flex items-center justify-center gap-2"
+              className="w-full sm:w-auto px-7 h-10 bg-[#101010] hover:bg-black text-white text-xs font-medium rounded-lg transition-colors shadow-xs disabled:opacity-50 flex items-center justify-center gap-2"
             >
               {saving ? (
                 <>

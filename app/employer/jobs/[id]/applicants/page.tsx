@@ -146,7 +146,7 @@ export default function JobApplicantsPage() {
 
           <div className="flex items-center gap-3">
             <Link href={`/jobs/${id}`} target="_blank">
-              <Button variant="outline" className="text-xs rounded-full border-black/[0.12] bg-white text-[#101010] hover:bg-black/[0.04] shadow-xs px-4 py-2">
+              <Button variant="outline" className="text-xs rounded-lg border-black/[0.12] bg-white text-[#101010] hover:bg-black/[0.04] shadow-xs px-4 py-2">
                 View Public Posting ↗
               </Button>
             </Link>
@@ -158,7 +158,7 @@ export default function JobApplicantsPage() {
         {error ? (
           <div className="border border-red-500/20 bg-red-500/10 p-8 text-center rounded-2xl">
             <p className="text-sm text-red-700 mb-4">{error}</p>
-            <Button onClick={loadApplicants} className="rounded-full bg-[#101010] text-white hover:bg-black text-xs px-4 py-2">
+            <Button onClick={loadApplicants} className="rounded-lg bg-[#101010] text-white hover:bg-black text-xs px-4 py-2">
               Retry
             </Button>
           </div>
@@ -266,7 +266,7 @@ export default function JobApplicantsPage() {
 
                       {/* Open Full Dossier */}
                       <Link href={`/employer/candidate/${app.candidateId}`} target="_blank">
-                        <Button size="sm" className="gap-1.5 text-xs rounded-full bg-[#101010] hover:bg-black text-white shadow-xs">
+                        <Button size="sm" className="gap-1.5 text-xs rounded-lg bg-[#101010] hover:bg-black text-white shadow-xs">
                           <span>Open Dossier</span>
                           <ExternalLink className="h-3 w-3" />
                         </Button>
@@ -282,7 +282,7 @@ export default function JobApplicantsPage() {
                             name: app.candidateName,
                           })
                         }
-                        className="gap-1.5 text-xs rounded-full border-black/[0.12] bg-white text-[#101010] hover:bg-black/[0.04] shadow-xs"
+                        className="gap-1.5 text-xs rounded-lg border-black/[0.12] bg-white text-[#101010] hover:bg-black/[0.04] shadow-xs"
                       >
                         <MessageSquare className="h-3.5 w-3.5 text-black/60" />
                         <span>Message</span>
@@ -303,14 +303,14 @@ export default function JobApplicantsPage() {
                   <button
                     disabled={currentPage === 1}
                     onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                    className="px-3 py-1 border border-black/[0.12] bg-white text-[#101010] text-xs rounded-full hover:bg-black/[0.04] disabled:opacity-50"
+                    className="px-3 py-1 border border-black/[0.12] bg-white text-[#101010] text-xs rounded-lg hover:bg-black/[0.04] disabled:opacity-50"
                   >
                     Previous
                   </button>
                   <button
                     disabled={currentPage * ITEMS_PER_PAGE >= applicants.length}
                     onClick={() => setCurrentPage((p) => p + 1)}
-                    className="px-3 py-1 border border-black/[0.12] bg-white text-[#101010] text-xs rounded-full hover:bg-black/[0.04] disabled:opacity-50"
+                    className="px-3 py-1 border border-black/[0.12] bg-white text-[#101010] text-xs rounded-lg hover:bg-black/[0.04] disabled:opacity-50"
                   >
                     Next
                   </button>

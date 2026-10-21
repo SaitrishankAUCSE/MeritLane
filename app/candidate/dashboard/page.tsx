@@ -270,7 +270,7 @@ export default function CandidateDashboardPage() {
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 shrink-0">
             <button
               onClick={handleCopyPublicLink}
-              className="flex items-center justify-center gap-2 px-4 h-9 border border-black/[0.12] bg-white hover:bg-[#F4F4F2] text-[#101010] rounded-full text-xs font-medium transition-all shadow-xs cursor-pointer active:scale-[0.98]"
+              className="flex items-center justify-center gap-2 px-4 h-9 border border-black/[0.12] bg-white hover:bg-[#F4F4F2] text-[#101010] rounded-lg text-xs font-medium transition-all shadow-xs cursor-pointer active:scale-[0.98]"
             >
               {copiedLink ? (
                 <>
@@ -287,7 +287,7 @@ export default function CandidateDashboardPage() {
 
             <button
               onClick={() => window.dispatchEvent(new CustomEvent("open-meritlane-welcome"))}
-              className="flex items-center justify-center gap-1.5 px-3.5 h-9 border border-black/[0.12] bg-white hover:bg-[#F4F4F2] text-[#101010] rounded-full text-xs font-medium transition-all shadow-xs cursor-pointer active:scale-[0.98]"
+              className="flex items-center justify-center gap-1.5 px-3.5 h-9 border border-black/[0.12] bg-white hover:bg-[#F4F4F2] text-[#101010] rounded-lg text-xs font-medium transition-all shadow-xs cursor-pointer active:scale-[0.98]"
               title="Learn how MeritLane works"
             >
               <Sparkles className="h-3.5 w-3.5 text-[#71717A]" />
@@ -297,7 +297,7 @@ export default function CandidateDashboardPage() {
             <button 
               type="button"
               onClick={() => setIsModalOpen(true)}
-              className="flex items-center justify-center gap-2 px-5 h-9 bg-[#101010] text-white hover:bg-[#252525] rounded-full text-xs font-medium transition-all shadow-xs cursor-pointer active:scale-[0.98]"
+              className="flex items-center justify-center gap-2 px-5 h-9 bg-[#101010] text-white hover:bg-[#252525] rounded-lg text-xs font-medium transition-all shadow-xs cursor-pointer active:scale-[0.98]"
             >
               <span>+</span> Add Project
             </button>

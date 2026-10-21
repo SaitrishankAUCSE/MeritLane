@@ -195,8 +195,8 @@ export function CandidateSidebar() {
                 className={`
                   relative flex items-center h-9 text-[13.5px] font-sans transition-all duration-150 group overflow-hidden
                   ${isActive
-                    ? "bg-[#101010] text-[#FFFFFF] font-medium rounded-full shadow-xs"
-                    : "text-[#666666] hover:text-[#101010] hover:bg-[#F0F0ED] rounded-full font-normal"
+                    ? "bg-[#101010] text-[#FFFFFF] font-medium rounded-lg shadow-xs"
+                    : "text-[#666666] hover:text-[#101010] hover:bg-[#F0F0ED] rounded-lg font-normal"
                   }
                 `}
               >
