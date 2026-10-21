@@ -179,7 +179,7 @@ export default function JobApplicantsPage() {
               {paginatedApplicants.map((app) => {
                 const isBusy = updatingStage[app.candidateId] || false;
                 const requiredSkills = job?.requiredSkills || [];
-                const verifiedSkillsMap = app.candidateVerifiedSkills || {};
+                const verifiedSkillsMap: Record<string, any> = app.candidateVerifiedSkills || {};
 
                 return (
                   <div

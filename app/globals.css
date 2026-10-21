@@ -117,28 +117,103 @@ h1, h2, h3, h4, h5, h6 {
   letter-spacing: -0.01em;
 }
 
-/* Public theme */
+/* Public theme — strictly Devin.ai design system */
 .theme-public {
-  --color-void: #F7F3E9;
-  --color-background: #F7F3E9;
-  --color-surface: #F2EFE5;
-  --color-surface-low: #EBE5D8;
-  --color-surface-mid: #E2DBCB;
-  --color-surface-high: #D9D0BD;
-  --color-foreground: #1C1917;
-  --color-muted: #EBE5D8;
-  --color-muted-foreground: #78716C;
-  --color-border: #D8D2C5;
-  --color-outline: #C3BAA8;
-  --color-primary: #1F3D2B; /* Hunter Green */
-  --color-primary-foreground: #F7F3E9;
-  --color-accent: #7A3B2E; /* Oxblood */
-  --color-success: #1F3D2B;
-  --color-warning: #B45309;
-  --color-danger: #7A3B2E;
+  --color-void: #F8F8F6;
+  --color-background: #F8F8F6;
+  --color-surface: #FFFFFF;
+  --color-surface-dim: #F4F4F2;
+  --color-surface-bright: #FFFFFF;
+  --color-surface-container-lowest: #FFFFFF;
+  --color-surface-container-low: #F8F8F6;
+  --color-surface-container: #F1F1EF;
+  --color-surface-container-high: #EAEAE7;
+  --color-surface-container-highest: #E2E2DF;
+  --color-foreground: #101010;
+  --color-muted: #F1F1EF;
+  --color-muted-foreground: #71717A;
+  --color-border: rgba(0, 0, 0, 0.08);
+  --color-outline: rgba(0, 0, 0, 0.12);
+  --color-primary: #101010;
+  --color-primary-foreground: #FFFFFF;
+  --color-accent: #3080FF;
+  --color-success: #00A558;
+  --color-warning: #F58E3A;
+  --color-danger: #FB2C36;
+  --color-info: #3080FF;
 
   background: var(--color-background);
+  background-image: none !important;
   color: var(--color-foreground);
+}
+
+.theme-public h1,
+.theme-public h2,
+.theme-public h3,
+.theme-public h4,
+.theme-public h5,
+.theme-public h6 {
+  font-family: var(--font-sans) !important;
+  letter-spacing: -0.035em !important;
+  font-weight: 500;
+  color: var(--color-foreground);
+}
+
+.theme-public .font-serif {
+  font-family: var(--font-sans) !important;
+  letter-spacing: -0.035em !important;
+}
+
+/* Devin-style pill button & card tokens */
+.devin-pill {
+  border-radius: 9999px !important;
+  font-family: var(--font-sans);
+  letter-spacing: -0.01em;
+}
+
+.devin-btn-primary {
+  background-color: #101010 !important;
+  color: #FFFFFF !important;
+  border-radius: 9999px !important;
+  border: 1px solid transparent !important;
+  font-family: var(--font-sans);
+  font-weight: 500;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+.devin-btn-primary:hover {
+  opacity: 0.88;
+  transform: translateY(-0.5px);
+}
+
+.devin-btn-secondary {
+  background-color: rgba(255, 255, 255, 0.9) !important;
+  color: #101010 !important;
+  border-radius: 9999px !important;
+  border: 1px solid rgba(0, 0, 0, 0.12) !important;
+  font-family: var(--font-sans);
+  font-weight: 500;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+}
+.devin-btn-secondary:hover {
+  background-color: #FFFFFF !important;
+  border-color: rgba(0, 0, 0, 0.2) !important;
+  transform: translateY(-0.5px);
+}
+
+.devin-card {
+  background: #FFFFFF;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 20px;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.03);
+}
+
+.devin-card-dark {
+  background: #141414;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 20px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
 }
 
 *:focus-visible {
