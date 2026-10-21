@@ -1,0 +1,10 @@
+.next
+node_modules
+test-results
+playwright-report
+blob-report
+.git
+.agents
+.gemini
+scripts
+tests
