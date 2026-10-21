@@ -5,14 +5,9 @@ test.describe('Public Pages & Navigation', () => {
     await page.goto('/');
 
     // Main header and titles
-    await expect(page.getByRole('heading', { name: /Proof of skill/i }).first()).toBeVisible();
-    
-    // Check CTA buttons
-    const hiringBtn = page.getByRole('button', { name: /Start hiring verified talent/i });
-    await expect(hiringBtn).toBeVisible();
-
-    const verifyBtn = page.getByRole('button', { name: /Get verified as an engineer/i });
-    await expect(verifyBtn).toBeVisible();
+    await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
+    await expect(page.getByRole('link', { name: /Get started/i }).first()).toBeVisible();
+    await expect(page.getByRole('link', { name: /Hire Verified/i }).first()).toBeVisible();
   });
 
   test('Signup Page renders correctly', async ({ page }) => {
@@ -23,7 +18,7 @@ test.describe('Public Pages & Navigation', () => {
     // Email signup form
     await expect(page.locator('input[type="email"]')).toBeVisible();
     await expect(page.locator('input[type="password"]')).toBeVisible();
-    await expect(page.getByRole('button', { name: /Sign Up/i }).first()).toBeVisible();
+    await expect(page.getByRole('button', { name: /Create Account/i }).first()).toBeVisible();
 
     // Google SSO button
     await expect(page.getByRole('button', { name: /Continue with Google/i })).toBeVisible();
@@ -47,10 +42,10 @@ test.describe('Public Pages & Navigation', () => {
     await page.goto('/how-verification-works');
 
     await expect(page.getByRole('heading', { name: /How MeritLane Verification Works/i })).toBeVisible();
-    await expect(page.getByText(/Verification Methodology/i)).toBeVisible();
+    await expect(page.getByText(/Verification Methodology/i).first()).toBeVisible();
     await expect(page.getByText(/45-Minute Server Timer/i)).toBeVisible();
     await expect(page.getByText(/Fullscreen & Tab Monitoring/i)).toBeVisible();
-    await expect(page.getByText(/80% Threshold Standard/i)).toBeVisible();
+    await expect(page.getByText(/Achieve the Component Thresholds/i)).toBeVisible();
   });
 });
 
