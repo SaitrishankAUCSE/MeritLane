@@ -865,7 +865,7 @@ export default function CandidateProfilePage() {
                           isSkillSupported(skill) ? (
                             <button
                               onClick={() => router.push(`/candidate/assessment?skill=${encodeURIComponent(skill)}`)}
-                              className="rounded-full bg-[#101010] hover:bg-black/90 text-white text-xs font-medium px-4 py-1.5 transition-all shadow-xs cursor-pointer"
+                              className="rounded-lg bg-[#101010] hover:bg-black/90 text-white text-xs font-medium px-4 py-1.5 transition-all shadow-xs cursor-pointer"
                               title={`Take test to verify ${skill}`}
                             >
                               Take Test →
@@ -873,7 +873,7 @@ export default function CandidateProfilePage() {
                           ) : (
                             <span
                               title="Assessment currently in development"
-                              className="inline-flex items-center gap-1 text-[10px] font-mono font-medium bg-black/[0.04] border border-black/[0.08] text-[#737373] px-2.5 py-1 rounded-full cursor-not-allowed select-none tabular-nums"
+                              className="inline-flex items-center gap-1 text-[10px] font-mono font-medium bg-black/[0.04] border border-black/[0.08] text-[#737373] px-2.5 py-1 rounded-lg cursor-not-allowed select-none tabular-nums"
                             >
                               In Development
                             </span>

@@ -495,7 +495,7 @@ export default function CandidateDashboardPage() {
                               <Link
                                 href={`/candidate/assessment?skill=${encodeURIComponent(skill)}`}
                                 prefetch={true}
-                                className="inline-flex items-center gap-1.5 px-4 py-1.5 bg-[#101010] text-white hover:bg-[#252525] text-xs font-medium rounded-full transition-all shadow-xs active:scale-[0.98]"
+                                className="inline-flex items-center gap-1.5 px-4 py-1.5 bg-[#101010] text-white hover:bg-[#252525] text-xs font-medium rounded-lg transition-all shadow-xs active:scale-[0.98]"
                               >
                                 <Clock className="h-3 w-3" />
                                 <span>Take Test</span>
@@ -504,7 +504,7 @@ export default function CandidateDashboardPage() {
                             ) : (
                               <span
                                 title="Assessment currently in development"
-                                className="inline-flex items-center gap-1.5 px-3 py-1 bg-[#F4F4F2] text-[#71717A] text-xs font-medium rounded-full border border-black/[0.08] cursor-not-allowed select-none"
+                                className="inline-flex items-center gap-1.5 px-3 py-1 bg-[#F4F4F2] text-[#71717A] text-xs font-medium rounded-lg border border-black/[0.08] cursor-not-allowed select-none"
                               >
                                 In Development
                               </span>

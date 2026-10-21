@@ -271,14 +271,14 @@ export default function CandidateVerificationPage() {
                       ) : (
                         isSkillSupported(skill) ? (
                           <Link href={`/candidate/assessment?skill=${encodeURIComponent(skill)}`}>
-                            <button className="flex items-center gap-1.5 text-xs font-medium bg-[#101010] hover:bg-[#252525] text-white px-4 py-1.5 transition-all rounded-full shadow-xs cursor-pointer active:scale-[0.98]">
+                            <button className="flex items-center gap-1.5 text-xs font-medium bg-[#101010] hover:bg-[#252525] text-white px-4 py-1.5 transition-all rounded-lg shadow-xs cursor-pointer active:scale-[0.98]">
                               Take Test <ArrowRight className="h-3 w-3" />
                             </button>
                           </Link>
                         ) : (
                           <span
                             title="Assessment currently in development"
-                            className="inline-flex items-center gap-1 text-xs font-medium bg-[#F4F4F2] border border-black/[0.08] text-[#71717A] px-3.5 py-1 rounded-full cursor-not-allowed select-none"
+                            className="inline-flex items-center gap-1 text-xs font-medium bg-[#F4F4F2] border border-black/[0.08] text-[#71717A] px-3.5 py-1 rounded-lg cursor-not-allowed select-none"
                           >
                             In Development
                           </span>
