@@ -9,7 +9,7 @@ import { getIdToken } from "firebase/auth";
 import {
   Sparkles, Brain, CheckCircle2, XCircle, AlertTriangle,
   ChevronDown, ChevronRight, Code2, FileQuestion,
-  Play, ShieldCheck, ShieldX, RefreshCw, Loader2,
+  Play, ShieldCheck, ShieldX, RefreshCw,
   Check, X, Eye, EyeOff, ArrowRight, Terminal,
   BookOpen, Cpu, Layers, Star, Trophy, Info,
   Lock, Unlock, FlaskConical, ClipboardList,
@@ -92,7 +92,7 @@ function StatusBadge({ status }: { status: DraftStatus }) {
   );
   if (status === "verifying") return (
     <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-blue-50 text-blue-700 border border-blue-200">
-      <Loader2 className="h-3 w-3 animate-spin" /> Verifying
+      <img src="/logo-m.png" alt="" className="h-3 w-3 object-contain animate-[spin_1.5s_linear_infinite]" /> Verifying
     </span>
   );
   return (
@@ -482,7 +482,7 @@ function CodingDraftCard({
                   disabled={running || !referenceCode || !wrongCode}
                   className="flex items-center gap-2 h-9 px-4 rounded-lg bg-stone-900 hover:bg-stone-800 text-white text-[13px] font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {running ? <Loader2 className="h-4 w-4 animate-spin" /> : <Play className="h-4 w-4" />}
+                  {running ? <img src="/logo-m.png" alt="" className="h-4 w-4 object-contain animate-[spin_1.5s_linear_infinite]" /> : <Play className="h-4 w-4" />}
                   {running ? "Running..." : "Run Verification"}
                 </button>
 
@@ -629,6 +629,16 @@ export default function QuestionDraftsPage() {
     setCodingDrafts(prev => prev.map(d => d.id === id ? { ...d, ...updates } : d));
   }, []);
 
+  const paginatedMcqDrafts = React.useMemo(() => {
+    const start = (mcqPage - 1) * ITEMS_PER_PAGE;
+    return mcqDrafts.slice(start, start + ITEMS_PER_PAGE);
+  }, [mcqDrafts, mcqPage]);
+
+  const paginatedCodingDrafts = React.useMemo(() => {
+    const start = (codingPage - 1) * ITEMS_PER_PAGE;
+    return codingDrafts.slice(start, start + ITEMS_PER_PAGE);
+  }, [codingDrafts, codingPage]);
+
   if (loading) return <MeritlaneLoader level="page" text="Loading" />;
   if (!isUserAdmin) return (
     <div className="flex items-center justify-center h-full p-6">
@@ -642,16 +652,6 @@ export default function QuestionDraftsPage() {
   const approvedMCQs = mcqDrafts.filter(q => q.status === "approved").length;
   const pendingMCQs = mcqDrafts.filter(q => q.status === "pending").length;
   const approvedCoding = codingDrafts.filter(q => q.status === "approved").length;
-
-  const paginatedMcqDrafts = React.useMemo(() => {
-    const start = (mcqPage - 1) * ITEMS_PER_PAGE;
-    return mcqDrafts.slice(start, start + ITEMS_PER_PAGE);
-  }, [mcqDrafts, mcqPage]);
-
-  const paginatedCodingDrafts = React.useMemo(() => {
-    const start = (codingPage - 1) * ITEMS_PER_PAGE;
-    return codingDrafts.slice(start, start + ITEMS_PER_PAGE);
-  }, [codingDrafts, codingPage]);
 
   return (
     <div className="min-h-full bg-[#F8F6F3]">
@@ -719,7 +719,7 @@ export default function QuestionDraftsPage() {
                 disabled={generating}
                 className="flex items-center gap-2 h-10 px-5 rounded-lg bg-stone-900 hover:bg-stone-800 text-white text-[13px] font-semibold transition-colors disabled:opacity-50"
               >
-                {generating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
+                {generating ? <img src="/logo-m.png" alt="" className="h-4 w-4 object-contain animate-[spin_1.5s_linear_infinite]" /> : <Sparkles className="h-4 w-4" />}
                 {generating ? "Generating..." : `Generate ${selectedSkill} Drafts`}
               </button>
             </div>
@@ -798,7 +798,7 @@ export default function QuestionDraftsPage() {
               disabled={generating}
               className="inline-flex items-center gap-2 h-10 px-6 rounded-lg bg-stone-900 hover:bg-stone-800 text-white text-[13px] font-semibold transition-colors disabled:opacity-50"
             >
-              {generating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
+              {generating ? <img src="/logo-m.png" alt="" className="h-4 w-4 object-contain animate-[spin_1.5s_linear_infinite]" /> : <Sparkles className="h-4 w-4" />}
               Generate {selectedSkill} Drafts
             </button>
           </div>
@@ -806,7 +806,7 @@ export default function QuestionDraftsPage() {
 
         {loadingDrafts && (
           <div className="flex items-center justify-center py-20">
-            <Loader2 className="h-6 w-6 animate-spin text-stone-500" />
+            <MeritlaneLoader level="section" text="Loading Drafts..." />
           </div>
         )}
 

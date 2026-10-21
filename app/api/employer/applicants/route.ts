@@ -23,7 +23,7 @@ export async function GET(req: NextRequest) {
     }
 
     // Fetch all applications where employerId is employerUid
-    let appsSnap = await adminDb
+    const appsSnap = await adminDb
       .collection("jobApplications")
       .where("employerId", "==", employerUid)
       .get();

@@ -24,8 +24,6 @@ export async function executeStructuralConfig(
     .map((l) => l.trim())
     .filter((l) => l.length > 0 && !l.startsWith("#"));
 
-  const normalizedCode = lines.join("\n").toLowerCase();
-
   // ─────────────────────────────────────────────────────────────────────────────
   // DOCKER / DOCKER-COMPOSE STRUCTURAL VALIDATION
   // ─────────────────────────────────────────────────────────────────────────────
@@ -106,8 +104,6 @@ export async function executeStructuralConfig(
       stderr = "Structural Syntax Error: Dockerfile must begin with a FROM instruction.";
     }
 
-    const testSuite = isPublicTest ? tests.slice(0, 5) : tests;
-    
     // Explicit, comprehensive list of 50 Docker structural checks
     const dockerCheckDefs: Array<{ name: string; expected: string; test: (c: string, l: string[]) => { passed: boolean; actual: string } }> = [
       {

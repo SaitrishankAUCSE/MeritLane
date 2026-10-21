@@ -272,7 +272,7 @@ export default function CandidateDashboardPage() {
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               onClick={handleCopyPublicLink}
-              className="flex items-center justify-center gap-2 px-4 h-9 border border-border bg-white hover:bg-surface text-foreground rounded text-[13px] font-medium transition-colors shadow-2xs"
+              className="flex items-center justify-center gap-2 px-4 h-9 border border-[#D5CBBA] bg-gradient-to-b from-white via-[#FAF6ED] to-[#F1EAE0] hover:border-[#1F3D2B] hover:text-[#1F3D2B] text-foreground rounded-[4px_16px_4px_16px] hover:rounded-[16px_4px_16px_4px] text-[13px] font-medium transition-all duration-300 shadow-[0_1px_3px_rgba(28,25,23,0.08),inset_0_1px_0_#FFFFFF] cursor-pointer"
             >
               {copiedLink ? (
                 <>
@@ -289,7 +289,7 @@ export default function CandidateDashboardPage() {
 
             <button
               onClick={() => window.dispatchEvent(new CustomEvent("open-meritlane-welcome"))}
-              className="flex items-center justify-center gap-1.5 px-3.5 h-9 border border-emerald-900/20 bg-emerald-900/[0.04] hover:bg-emerald-900/10 text-emerald-900 rounded text-[13px] font-medium transition-colors cursor-pointer"
+              className="flex items-center justify-center gap-1.5 px-3.5 h-9 border border-emerald-900/25 bg-emerald-900/[0.05] hover:bg-emerald-900/10 text-emerald-900 rounded-[12px_3px_12px_3px] hover:rounded-[3px_12px_3px_12px] text-[13px] font-medium transition-all duration-300 cursor-pointer active:scale-[0.98]"
               title="Learn how MeritLane works"
             >
               <Sparkles className="h-3.5 w-3.5 text-emerald-900" />
@@ -301,7 +301,7 @@ export default function CandidateDashboardPage() {
               whileTap={{ scale: 0.98 }}
               type="button"
               onClick={() => setIsModalOpen(true)}
-              className="flex items-center justify-center gap-2 px-5 h-9 bg-emerald-900 text-white hover:bg-emerald-950 rounded text-[13px] font-medium transition-colors shadow-2xs"
+              className="flex items-center justify-center gap-2 px-5 h-9 bg-gradient-to-b from-[#244A33] via-[#1B3A28] to-[#132A1D] border border-[#0F2217] text-white hover:from-[#2B543B] hover:to-[#173523] rounded-[16px_4px_16px_4px] hover:rounded-[4px_16px_4px_16px] text-[13px] font-medium transition-all duration-300 shadow-[0_2px_5px_rgba(19,42,29,0.35),inset_0_1px_0_rgba(255,255,255,0.22)] hover:shadow-[0_6px_16px_-2px_rgba(19,42,29,0.45)] cursor-pointer"
             >
               <span>+</span> Add Project
             </motion.button>
@@ -475,7 +475,7 @@ export default function CandidateDashboardPage() {
                             </span>
                           ) : inCooldown ? (
                             <div
-                              className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#FEF3C7] border border-[#FDE68A] text-[#92400E] text-[12px] font-mono font-semibold rounded cursor-not-allowed select-none tabular-nums"
+                              className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#FEF3C7] border border-[#FDE68A] text-[#92400E] text-[12px] font-mono font-semibold rounded-[12px_3px_12px_3px] cursor-not-allowed select-none tabular-nums shadow-2xs"
                               title="Locked in study cooldown"
                             >
                               <CooldownTimer
@@ -496,7 +496,7 @@ export default function CandidateDashboardPage() {
                               <Link
                                 href={`/candidate/assessment?skill=${encodeURIComponent(skill)}`}
                                 prefetch={true}
-                                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-foreground hover:bg-emerald-900 text-white text-[12px] font-medium rounded transition-colors"
+                                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-gradient-to-b from-[#244A33] via-[#1B3A28] to-[#132A1D] border border-[#0F2217] hover:from-[#2B543B] hover:to-[#173523] text-[#F7F3E9] text-[12px] font-medium rounded-[12px_3px_12px_3px] hover:rounded-[3px_12px_3px_12px] transition-all duration-300 shadow-[0_2px_4px_rgba(19,42,29,0.3),inset_0_1px_0_rgba(255,255,255,0.2)] hover:shadow-[0_4px_10px_-1px_rgba(19,42,29,0.4)] active:scale-[0.98]"
                               >
                                 <Clock className="h-3 w-3" />
                                 <span>Take Test</span>
@@ -505,7 +505,7 @@ export default function CandidateDashboardPage() {
                             ) : (
                               <span
                                 title="Assessment currently in development"
-                                className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#F2EFE9] text-muted-foreground text-[12px] font-medium rounded cursor-not-allowed border border-border select-none"
+                                className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#F2EFE9] text-muted-foreground text-[12px] font-medium rounded-[10px_3px_10px_3px] cursor-not-allowed border border-border select-none"
                               >
                                 In Development
                               </span>

@@ -53,7 +53,7 @@ export function canonicalizeSkill(val: string): string {
  * Handles commas, newlines, and intelligent vocabulary-based space splitting.
  */
 export function parseSkillInput(input: string): string[] {
-  let text = input.trim();
+  const text = input.trim();
   if (!text) return [];
 
   if (text.includes(',') || text.includes('\n')) {

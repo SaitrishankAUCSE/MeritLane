@@ -109,7 +109,7 @@ export function LogoutConfirmModal({ isOpen, onConfirm, onCancel }: LogoutConfir
                 type="button"
                 onClick={onCancel}
                 disabled={isLoggingOut}
-                className="w-full h-11 px-4 rounded border border-border bg-white text-foreground font-sans font-semibold text-[14px] hover:bg-surface active:scale-[0.98] transition-all disabled:opacity-50"
+                className="w-full h-11 px-4 rounded-[4px_16px_4px_16px] hover:rounded-[16px_4px_16px_4px] border border-[#D5CBBA] bg-gradient-to-b from-white via-[#FAF6ED] to-[#F1EAE0] text-foreground font-sans font-semibold text-[14px] hover:bg-[#EFE9DC] active:scale-[0.98] transition-all duration-300 shadow-[0_1px_3px_rgba(28,25,23,0.08),inset_0_1px_0_#FFFFFF] disabled:opacity-50 cursor-pointer"
               >
                 Cancel
               </button>
@@ -118,7 +118,7 @@ export function LogoutConfirmModal({ isOpen, onConfirm, onCancel }: LogoutConfir
                 type="button"
                 onClick={handleConfirm}
                 disabled={isLoggingOut}
-                className="w-full h-11 px-4 rounded bg-danger hover:bg-danger/90 text-white font-sans font-semibold text-[14px] shadow-sm active:scale-[0.98] transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+                className="w-full h-11 px-4 rounded-[16px_4px_16px_4px] hover:rounded-[4px_16px_4px_16px] bg-gradient-to-b from-[#8F4435] via-[#7B382B] to-[#632B21] border border-[#4D2018] text-white font-sans font-semibold text-[14px] shadow-[0_2px_5px_rgba(99,43,33,0.4),inset_0_1px_0_rgba(255,255,255,0.22)] hover:shadow-[0_6px_16px_-2px_rgba(99,43,33,0.5)] active:scale-[0.98] transition-all duration-300 flex items-center justify-center gap-2 disabled:opacity-50 cursor-pointer"
               >
                 {isLoggingOut ? (
                   <>

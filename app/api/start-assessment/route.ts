@@ -44,10 +44,11 @@ export async function POST(req: NextRequest) {
     const candidateRef = adminDb.collection("candidates").doc(uid);
 
     // Fetch user and candidate docs in parallel
-    let [userDoc, candidateDoc] = await Promise.all([
+    const [userDoc, initialCandidateDoc] = await Promise.all([
       userRef.get(),
       candidateRef.get(),
     ]);
+    let candidateDoc = initialCandidateDoc;
 
     if (!userDoc.exists) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });

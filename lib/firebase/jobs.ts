@@ -1,4 +1,4 @@
-import { doc, getDoc, setDoc, collection, query, where, getDocs, orderBy, updateDoc, increment } from "firebase/firestore";
+import { doc, getDoc, collection, query, where, getDocs } from "firebase/firestore";
 import { db } from "./config";
 
 export type JobStatus = "draft" | "published" | "paused" | "closed";
@@ -37,7 +37,7 @@ export interface JobApplication {
   candidateBranch?: string;
   candidateGradYear?: string;
   candidateSkills: string[];
-  candidateVerifiedSkills: Record<string, any>;
+  candidateVerifiedSkills: Record<string, unknown>;
   status: ApplicationStage;
   appliedAt: number;
   updatedAt: number;

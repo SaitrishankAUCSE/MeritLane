@@ -76,22 +76,9 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning className={`${fraunces.variable} ${plusJakartaSans.variable} ${spaceGrotesk.variable} ${jetbrainsMono.variable} h-full antialiased`}>
       <body className="flex min-h-full flex-col bg-background font-sans text-foreground">
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{
-            __html: JSON.stringify({
-              "@context": "https://schema.org",
-              "@type": "Organization",
-              "name": "Meritlane",
-              "url": siteUrl,
-              "description": "A verified, project-based hiring platform for engineering talent.",
-              "logo": `${siteUrl}/icon.png`
-            })
-          }}
-        />
         <PostHogProvider>
           <AuthProvider>
-            <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+            <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false}>
               <Navbar />
               <NextTopLoader color="#1C1917" height={3} showSpinner={false} />
               <main className="flex-1 flex flex-col">

@@ -34,7 +34,6 @@ import {
   ExternalLink,
   X,
   Lock,
-  Loader2,
   Trophy,
   Award,
   Star,
@@ -5056,7 +5055,7 @@ function AssessmentContentWrapper() {
                   {submissionProgress >= 20 ? (
                     <CheckCircle2 className="h-3.5 w-3.5 text-emerald-900 shrink-0" />
                   ) : (
-                    <Loader2 className="h-3.5 w-3.5 text-emerald-900 animate-spin shrink-0" />
+                    <img src="/logo-m.png" alt="Loading" className="h-3.5 w-3.5 object-contain animate-[spin_1.5s_linear_infinite] shrink-0" />
                   )}
                   <span>Suites 1–10: Baseline Functionality &amp; Types</span>
                 </span>
@@ -5072,7 +5071,7 @@ function AssessmentContentWrapper() {
                   {submissionProgress >= 50 ? (
                     <CheckCircle2 className="h-3.5 w-3.5 text-emerald-900 shrink-0" />
                   ) : submissionProgress >= 20 ? (
-                    <Loader2 className="h-3.5 w-3.5 text-emerald-900 animate-spin shrink-0" />
+                    <img src="/logo-m.png" alt="Loading" className="h-3.5 w-3.5 object-contain animate-[spin_1.5s_linear_infinite] shrink-0" />
                   ) : (
                     <span className="h-3.5 w-3.5 rounded-full border border-border shrink-0" />
                   )}
@@ -5092,7 +5091,7 @@ function AssessmentContentWrapper() {
                   {submissionProgress >= 80 ? (
                     <CheckCircle2 className="h-3.5 w-3.5 text-emerald-900 shrink-0" />
                   ) : submissionProgress >= 50 ? (
-                    <Loader2 className="h-3.5 w-3.5 text-emerald-900 animate-spin shrink-0" />
+                    <img src="/logo-m.png" alt="Loading" className="h-3.5 w-3.5 object-contain animate-[spin_1.5s_linear_infinite] shrink-0" />
                   ) : (
                     <span className="h-3.5 w-3.5 rounded-full border border-border shrink-0" />
                   )}
@@ -5112,7 +5111,7 @@ function AssessmentContentWrapper() {
                   {submissionProgress >= 95 ? (
                     <CheckCircle2 className="h-3.5 w-3.5 text-emerald-900 shrink-0" />
                   ) : submissionProgress >= 80 ? (
-                    <Loader2 className="h-3.5 w-3.5 text-emerald-900 animate-spin shrink-0" />
+                    <img src="/logo-m.png" alt="Loading" className="h-3.5 w-3.5 object-contain animate-[spin_1.5s_linear_infinite] shrink-0" />
                   ) : (
                     <span className="h-3.5 w-3.5 rounded-full border border-border shrink-0" />
                   )}
@@ -5132,7 +5131,7 @@ function AssessmentContentWrapper() {
                   {submissionProgress >= 100 ? (
                     <CheckCircle2 className="h-3.5 w-3.5 text-emerald-900 shrink-0" />
                   ) : submissionProgress >= 95 ? (
-                    <Loader2 className="h-3.5 w-3.5 text-emerald-900 animate-spin shrink-0" />
+                    <img src="/logo-m.png" alt="Loading" className="h-3.5 w-3.5 object-contain animate-[spin_1.5s_linear_infinite] shrink-0" />
                   ) : (
                     <span className="h-3.5 w-3.5 rounded-full border border-border shrink-0" />
                   )}

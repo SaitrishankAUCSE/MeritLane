@@ -260,7 +260,7 @@ export default function CandidateInboxPage() {
       setFetching(false);
       setRefreshing(false);
     }
-  }, [user?.uid, selectedPartnerId, messages.length]);
+  }, [user, selectedPartnerId, messages.length]);
 
   useEffect(() => {
     if (!loading) {

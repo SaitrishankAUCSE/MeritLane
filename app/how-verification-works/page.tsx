@@ -187,7 +187,7 @@ export default function HowVerificationWorksPage() {
         <div className="mt-16 text-center">
           <Link
             href="/signup"
-            className="inline-flex items-center gap-2 px-8 h-12 bg-foreground text-background text-[14px] font-semibold rounded-lg hover:opacity-90 transition-opacity shadow-sm"
+            className="inline-flex items-center gap-2 px-8 h-12 bg-gradient-to-b from-[#244A33] via-[#1B3A28] to-[#132A1D] border border-[#0F2217] text-[#F7F3E9] text-[15px] font-semibold rounded-[20px_5px_20px_5px] hover:rounded-[5px_20px_5px_20px] transition-all duration-300 shadow-[0_2px_5px_rgba(19,42,29,0.35),inset_0_1px_0_rgba(255,255,255,0.22)] hover:shadow-[0_8px_22px_-2px_rgba(19,42,29,0.45)] hover:-translate-y-[1px] active:translate-y-0 active:scale-[0.98]"
           >
             Start Your Verification — Free
             <ArrowRight className="h-4 w-4" />
